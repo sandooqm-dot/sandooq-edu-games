@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>صندوق التعليم التفاعلي</title>
+  <meta name="description" content="صندوق التعليم التفاعلي: اختر لعبة محفوظة، أنشئ لعبة جديدة، واستورد أو صدّر ألعابك التعليمية بسهولة." />
+
+  <style>
+    :root {
+      --blue: #2a4495;
+      --yellow: #f7b213;
+      --pink: #ee5382;
+      --sky: #38b6ff;
+      --white: #f8f8f8;
+      --black: #050505;
+      --text-white: #ffffff;
+      --text-dark: #222222;
+      --shadow-dark: rgba(0, 0, 0, 0.9);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--blue);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--blue);
+      color: var(--text-white);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    button,
+    select,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .app {
+      min-height: 100vh;
+      width: min(100%, 980px);
+      margin: 0 auto;
+      background: var(--blue);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding:
+        clamp(44px, 7vh, 118px)
+        clamp(28px, 7vw, 96px)
+        calc(32px + var(--safe-bottom));
+    }
+
+    .home-screen,
+    .screen {
+      width: 100%;
+    }
+
+    .home-screen {
+      display: flex;
+      min-height: calc(100vh - 80px - var(--safe-bottom));
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo {
+      display: block;
+      width: clamp(168px, 30vw, 285px);
+      height: auto;
+      object-fit: contain;
+      margin: 0 auto clamp(120px, 17vh, 215px);
+    }
+
+    .title {
+      margin: 0 0 clamp(44px, 7vh, 74px);
+      color: rgba(255, 255, 255, 0.88);
+      text-align: center;
+      font-size: clamp(34px, 6vw, 70px);
+      line-height: 1.2;
+      font-weight: 1000;
+      letter-spacing: -1px;
+    }
+
+    .choose-area {
+      width: min(660px, 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .choose-label {
+      margin: 0 0 20px;
+      color: #ffffff;
+      text-align: center;
+      font-size: clamp(22px, 3.9vw, 40px);
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .select-wrap {
+      position: relative;
+      width: min(500px, 100%);
+    }
+
+    select {
+      width: 100%;
+      height: clamp(58px, 7vh, 72px);
+      border: 0;
+      outline: 0;
+      border-radius: 999px;
+      background: var(--white);
+      color: #4c4c4c;
+      appearance: none;
+      padding: 0 60px 0 26px;
+      text-align: center;
+      text-align-last: center;
+      font-size: clamp(17px, 3vw, 25px);
+      font-weight: 900;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+    }
+
+    .select-wrap::after {
+      content: "";
+      position: absolute;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 18px solid #5a5a5a;
+      border-right: 14px solid transparent;
+      border-left: 14px solid transparent;
+      pointer-events: none;
+    }
+
+    .start-btn {
+      width: min(320px, 80%);
+      height: clamp(64px, 7.5vh, 78px);
+      margin-top: clamp(36px, 5.5vh, 58px);
+      border: 0;
+      border-radius: 999px;
+      background: var(--yellow);
+      color: #000;
+      font-size: clamp(25px, 4.5vw, 42px);
+      line-height: 1;
+      font-weight: 1000;
+      box-shadow: 0 7px 0 var(--black);
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
+
+    .start-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 2px 0 var(--black);
+    }
+
+    .start-btn:disabled {
+      opacity: .65;
+      cursor: not-allowed;
+      filter: grayscale(.12);
+    }
+
+    .main-actions {
+      width: min(690px, 100%);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(18px, 4vw, 44px);
+      margin-top: clamp(72px, 10vh, 110px);
+    }
+
+    .small-tools {
+      width: min(620px, 100%);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(12px, 2.5vw, 22px);
+      margin-top: clamp(58px, 8vh, 88px);
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      min-height: clamp(58px, 7vh, 78px);
+      padding: 11px clamp(14px, 3vw, 24px);
+      font-size: clamp(17px, 3.1vw, 30px);
+      line-height: 1.05;
+      font-weight: 1000;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 13px;
+      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 rgba(0,0,0,.2);
+    }
+
+    .btn-pink {
+      background: var(--pink);
+      box-shadow: 0 7px 0 #d64672;
+    }
+
+    .btn-sky {
+      background: var(--sky);
+      box-shadow: 0 5px 0 rgba(255,255,255,.85);
+      font-size: clamp(15px, 2.9vw, 27px);
+      min-height: clamp(52px, 6vh, 66px);
+    }
+
+    .btn-icon {
+      width: 30px;
+      height: 30px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .btn-icon svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 3.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .home-btn {
+      width: min(340px, 80%);
+      height: clamp(70px, 8vh, 86px);
+      margin-top: auto;
+      border: 0;
+      border-radius: 999px;
+      background: var(--yellow);
+      color: #000;
+      font-size: clamp(28px, 5vw, 48px);
+      line-height: 1;
+      font-weight: 1000;
+      box-shadow: 0 8px 0 var(--black);
+    }
+
+    .footer {
+      margin-top: clamp(54px, 7vh, 90px);
+      color: rgba(255,255,255,.92);
+      text-align: center;
+      font-size: clamp(14px, 2.6vw, 22px);
+      line-height: 1.5;
+      font-weight: 850;
+    }
+
+    .screen {
+      display: none;
+      min-height: calc(100vh - 80px - var(--safe-bottom));
+      padding-top: clamp(30px, 5vh, 70px);
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen-card {
+      width: min(650px, 100%);
+      margin: 0 auto;
+      background: #fff;
+      color: #1d1d1d;
+      border-radius: 30px;
+      padding: clamp(22px, 4vw, 36px);
+      box-shadow: 0 24px 50px rgba(0,0,0,.2);
+    }
+
+    .screen-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .screen-title {
+      margin: 0;
+      color: var(--blue);
+      font-size: clamp(26px, 5vw, 42px);
+      line-height: 1.2;
+      font-weight: 1000;
+    }
+
+    .back-btn {
+      border: 0;
+      border-radius: 999px;
+      background: var(--yellow);
+      color: #000;
+      padding: 11px 18px;
+      font-size: 15px;
+      font-weight: 1000;
+      box-shadow: 0 5px 0 #111;
+      white-space: nowrap;
+    }
+
+    .screen-note {
+      margin: 0 0 20px;
+      color: #5f6677;
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.8;
+      font-weight: 750;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 13px;
+    }
+
+    .template-card {
+      border: 0;
+      border-radius: 22px;
+      background: #eef4ff;
+      color: #1d1d1d;
+      padding: 16px 18px;
+      text-align: right;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 15px;
+      min-height: 78px;
+      box-shadow: inset 0 -3px 0 rgba(42,68,149,.12);
+    }
+
+    .template-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      background: var(--blue);
+      color: #fff;
+      font-size: 23px;
+      font-weight: 1000;
+    }
+
+    .template-card h3 {
+      margin: 0 0 4px;
+      color: var(--blue);
+      font-size: 19px;
+      font-weight: 1000;
+    }
+
+    .template-card p {
+      margin: 0;
+      color: #606b80;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 750;
+    }
+
+    .info-box,
+    .saved-list {
+      border-radius: 24px;
+      background: #f1f6ff;
+      padding: 22px;
+      text-align: center;
+      color: #5c6678;
+      font-size: 16px;
+      line-height: 1.8;
+      font-weight: 850;
+    }
+
+    .saved-item {
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 12px;
+      text-align: right;
+      box-shadow: 0 9px 22px rgba(42,68,149,.1);
+    }
+
+    .saved-item strong {
+      display: block;
+      color: #171717;
+      font-size: 18px;
+      font-weight: 1000;
+      margin-bottom: 4px;
+    }
+
+    .saved-item span {
+      color: var(--blue);
+      font-weight: 950;
+    }
+
+    .mini-example {
+      border: 0;
+      background: transparent;
+      color: #fff;
+      opacity: .86;
+      font-size: 14px;
+      font-weight: 1000;
+      text-decoration: underline;
+      padding: 8px;
+      margin-top: 7px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(18px + var(--safe-bottom));
+      transform: translateX(-50%) translateY(120px);
+      width: min(460px, calc(100% - 28px));
+      background: #111827;
+      color: #fff;
+      border-radius: 18px;
+      padding: 14px 16px;
+      text-align: center;
+      font-weight: 950;
+      line-height: 1.55;
+      box-shadow: 0 16px 32px rgba(0,0,0,.24);
+      z-index: 50;
+      opacity: 0;
+      transition: .24s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (min-width: 900px) {
+      .app {
+        width: 100%;
+        max-width: none;
+        padding-inline: clamp(70px, 12vw, 160px);
+      }
+
+      .home-screen {
+        max-width: 980px;
+        margin: 0 auto;
+      }
+
+      .logo {
+        margin-bottom: clamp(72px, 12vh, 140px);
+      }
+
+      .title {
+        margin-bottom: clamp(34px, 6vh, 56px);
+      }
+
+      .main-actions {
+        max-width: 720px;
+      }
+
+      .small-tools {
+        max-width: 660px;
+      }
+    }
+
+    @media (orientation: landscape) and (max-height: 620px) {
+      .app {
+        padding-top: 24px;
+        padding-bottom: 24px;
+      }
+
+      .home-screen {
+        min-height: auto;
+      }
+
+      .logo {
+        width: 170px;
+        margin-bottom: 36px;
+      }
+
+      .title {
+        font-size: clamp(28px, 5vw, 46px);
+        margin-bottom: 24px;
+      }
+
+      .choose-label {
+        margin-bottom: 12px;
+      }
+
+      .start-btn {
+        margin-top: 18px;
+      }
+
+      .main-actions {
+        margin-top: 34px;
+      }
+
+      .small-tools {
+        margin-top: 28px;
+      }
+
+      .home-btn {
+        margin-top: 38px;
+      }
+
+      .footer {
+        margin-top: 28px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        padding-inline: 24px;
+      }
+
+      .main-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .small-tools {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        width: 100%;
+      }
+
+      .btn {
+        padding-inline: 10px;
+      }
+
+      .btn-icon {
+        width: 23px;
+        height: 23px;
+      }
+
+      .screen-head {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .back-btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .small-tools {
+        gap: 8px;
+      }
+
+      .btn-sky {
+        font-size: 14px;
+        min-height: 52px;
+        padding-inline: 8px;
+      }
+
+      .main-actions {
+        gap: 12px;
+      }
+
+      .btn-pink {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <section class="home-screen" id="homeScreen">
+      <img class="logo" src="logo.PNG" alt="صندوق المسابقات" />
+
+      <h1 class="title">صندوق الألعاب التعليمية</h1>
+
+      <section class="choose-area">
+        <h2 class="choose-label">يرجى اختيار لعبة</h2>
+
+        <div class="select-wrap">
+          <select id="savedGameSelect">
+            <option value="">لا توجد ألعاب محفوظة حتى الآن</option>
+          </select>
+        </div>
+
+        <button class="start-btn" id="startGameBtn" disabled>ابدأ اللعبة</button>
+      </section>
+
+      <div class="main-actions">
+        <button class="btn btn-pink" data-open-screen="savedScreen">
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M5 6h6v6H5zM5 20h6v6H5zM20 6h6v6h-6zM20 20h6v6h-6z"/></svg>
+          </span>
+          <span>الألعاب المحفوظة</span>
+        </button>
+
+        <button class="btn btn-pink" data-open-screen="createScreen">
+          <span class="btn-icon" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M6 24l2 2 7-2 11-11-7-7L8 17z"/><path d="M18 7l7 7"/></svg>
+          </span>
+          <span>إنشاء لعبة</span>
+        </button>
+      </div>
+
+      <div class="small-tools">
+        <button class="btn btn-sky" data-open-screen="helpScreen">التعليمات</button>
+        <button class="btn btn-sky" data-open-screen="backupScreen">استيراد لعبة</button>
+        <button class="btn btn-sky" data-open-screen="backupScreen">تصدير لعبة</button>
+      </div>
+
+      <button class="home-btn" type="button">الرئيسية</button>
+
+      <div id="savedSummary" style="margin-top:24px;color:rgba(255,255,255,.82);font-weight:850;line-height:1.8;text-align:center;">
+        لا توجد ألعاب محفوظة حتى الآن.
+        <br />
+        <button class="mini-example" id="demoDataBtn">إضافة مثال للتجربة</button>
+      </div>
+
+      <footer class="footer">جميع الحقوق محفوظة © صندوق المسابقات 2026</footer>
+    </section>
+
+    <section class="screen" id="createScreen">
+      <div class="screen-card">
+        <div class="screen-head">
+          <h2 class="screen-title">إنشاء لعبة</h2>
+          <button class="back-btn" data-back-home>الرجوع للرئيسية</button>
+        </div>
+
+        <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
+
+        <div class="template-grid">
+          <button class="template-card" data-template="العجلة الدوارة">
+            <div class="template-icon">◉</div>
+            <div>
+              <h3>العجلة الدوارة</h3>
+              <p>أضف نصوصًا أو صورًا داخل عجلة.</p>
+            </div>
+          </button>
+
+          <button class="template-card" data-template="افتح الصندوق">
+            <div class="template-icon">□</div>
+            <div>
+              <h3>افتح الصندوق</h3>
+              <p>صناديق تكشف الأسئلة أو الصور.</p>
+            </div>
+          </button>
+
+          <button class="template-card" data-template="اختيارات">
+            <div class="template-icon">✓</div>
+            <div>
+              <h3>اختيارات</h3>
+              <p>سؤال مع عدة خيارات وإجابة صحيحة.</p>
+            </div>
+          </button>
+
+          <button class="template-card" data-template="صح أو خطأ">
+            <div class="template-icon">×</div>
+            <div>
+              <h3>صح أو خطأ</h3>
+              <p>عبارات سريعة بإجابة صح أو خطأ.</p>
+            </div>
+          </button>
+
+          <button class="template-card" data-template="المطابقة">
+            <div class="template-icon">⇄</div>
+            <div>
+              <h3>المطابقة</h3>
+              <p>مطابقة كلمة بصورة أو سؤال بجواب.</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="savedScreen">
+      <div class="screen-card">
+        <div class="screen-head">
+          <h2 class="screen-title">الألعاب المحفوظة</h2>
+          <button class="back-btn" data-back-home>الرجوع للرئيسية</button>
+        </div>
+
+        <div class="saved-list" id="savedList">لا توجد ألعاب محفوظة حتى الآن.</div>
+      </div>
+    </section>
+
+    <section class="screen" id="backupScreen">
+      <div class="screen-card">
+        <div class="screen-head">
+          <h2 class="screen-title">استيراد وتصدير</h2>
+          <button class="back-btn" data-back-home>الرجوع للرئيسية</button>
+        </div>
+
+        <div class="info-box">
+          هذه الصفحة سنبنيها بعد نظام الحفظ. منها يستطيع المعلم نقل ألعابه بين الأجهزة.
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="helpScreen">
+      <div class="screen-card">
+        <div class="screen-head">
+          <h2 class="screen-title">التعليمات</h2>
+          <button class="back-btn" data-back-home>الرجوع للرئيسية</button>
+        </div>
+
+        <div class="info-box">
+          أنشئ لعبة جديدة، أضف الأسئلة أو الصور، احفظها باسم، ثم اخترها من الرئيسية واضغط ابدأ.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = "sandooq_edu_saved_games_v6";
+
+    const screens = ["homeScreen", "createScreen", "savedScreen", "backupScreen", "helpScreen"];
+    const toast = document.getElementById("toast");
+    const savedGameSelect = document.getElementById("savedGameSelect");
+    const startGameBtn = document.getElementById("startGameBtn");
+    const savedSummary = document.getElementById("savedSummary");
+    const savedList = document.getElementById("savedList");
+
+    function getSavedGames() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function setSavedGames(games) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2400);
+    }
+
+    function openScreen(screenId) {
+      screens.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if (id === "homeScreen") {
+          el.style.display = screenId === "homeScreen" ? "flex" : "none";
+        } else {
+          el.classList.toggle("active", id === screenId);
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderSavedGames() {
+      const games = getSavedGames();
+      savedGameSelect.innerHTML = "";
+
+      if (!games.length) {
+        const option = document.createElement("option");
+        option.value = "";
+        option.textContent = "لا توجد ألعاب محفوظة حتى الآن";
+        savedGameSelect.appendChild(option);
+
+        startGameBtn.disabled = true;
+        savedSummary.innerHTML = `
+          لا توجد ألعاب محفوظة حتى الآن.
+          <br />
+          <button class="mini-example" id="demoDataBtn">إضافة مثال للتجربة</button>
+        `;
+        savedList.innerHTML = "لا توجد ألعاب محفوظة حتى الآن.";
+        bindDemoButton();
+        return;
+      }
+
+      const defaultOption = document.createElement("option");
+      defaultOption.value = "";
+      defaultOption.textContent = "يرجى اختيار لعبة";
+      savedGameSelect.appendChild(defaultOption);
+
+      games.forEach((game) => {
+        const option = document.createElement("option");
+        option.value = game.id;
+        option.textContent = `${game.name} / ${game.typeName}`;
+        savedGameSelect.appendChild(option);
+      });
+
+      startGameBtn.disabled = true;
+      savedSummary.innerHTML = `لديك ${games.length} لعبة محفوظة. اختر واحدة من القائمة ثم اضغط ابدأ.`;
+
+      savedList.innerHTML = games.map((game) => {
+        return `
+          <div class="saved-item">
+            <strong>${escapeHtml(game.name)}</strong>
+            <span>${escapeHtml(game.typeName)}</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function bindDemoButton() {
+      const demoButton = document.getElementById("demoDataBtn");
+      if (!demoButton) return;
+
+      demoButton.addEventListener("click", () => {
+        const games = [
+          {
+            id: "demo-wheel",
+            name: "درس العلوم",
+            type: "wheel",
+            typeName: "العجلة الدوارة",
+            createdAt: new Date().toISOString()
+          }
+        ];
+
+        setSavedGames(games);
+        renderSavedGames();
+        showToast("تمت إضافة مثال مؤقت للتجربة.");
+      });
+    }
+
+    document.querySelectorAll("[data-open-screen]").forEach((button) => {
+      button.addEventListener("click", () => {
+        openScreen(button.getAttribute("data-open-screen"));
+      });
+    });
+
+    document.querySelectorAll("[data-back-home]").forEach((button) => {
+      button.addEventListener("click", () => {
+        openScreen("homeScreen");
+      });
+    });
+
+    document.querySelectorAll("[data-template]").forEach((button) => {
+      button.addEventListener("click", () => {
+        showToast(`الخطوة القادمة: صفحة إدخال ${button.dataset.template}.`);
+      });
+    });
+
+    savedGameSelect.addEventListener("change", () => {
+      startGameBtn.disabled = !savedGameSelect.value;
+    });
+
+    startGameBtn.addEventListener("click", () => {
+      const gameId = savedGameSelect.value;
+
+      if (!gameId) {
+        showToast("اختر لعبة محفوظة أولًا.");
+        return;
+      }
+
+      const game = getSavedGames().find((item) => item.id === gameId);
+
+      if (!game) {
+        showToast("لم يتم العثور على اللعبة.");
+        return;
+      }
+
+      showToast(`سيتم تشغيل: ${game.name}`);
+    });
+
+    renderSavedGames();
+  </script>
+</body>
+</html>
