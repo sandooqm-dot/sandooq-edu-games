@@ -8,15 +8,12 @@
 
   <style>
     :root {
-      --blue: #2a4495;
-      --yellow: #f7b213;
-      --pink: #ee5382;
-      --sky: #38b6ff;
-      --white: #f8f8f8;
+      --blue: #2a4596;
+      --yellow: #f6b916;
+      --pink: #f05283;
+      --sky: #38b6f2;
+      --white: #f7f7f7;
       --black: #050505;
-      --text-white: #ffffff;
-      --text-dark: #222222;
-      --shadow-dark: rgba(0, 0, 0, 0.9);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
@@ -25,134 +22,148 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    html {
-      min-height: 100%;
-      background: var(--blue);
-    }
-
+    html,
     body {
       margin: 0;
-      min-height: 100vh;
+      width: 100%;
+      min-height: 100%;
       background: var(--blue);
-      color: var(--text-white);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+      color: #fff;
       overflow-x: hidden;
     }
 
+    body {
+      min-height: 100svh;
+    }
+
     button,
-    select,
-    input {
+    select {
       font: inherit;
     }
 
     button {
       cursor: pointer;
+      border: 0;
       user-select: none;
     }
 
     .app {
-      min-height: 100vh;
-      width: min(100%, 980px);
+      width: min(100%, 768px);
+      height: 100svh;
+      min-height: 680px;
+      max-height: 1180px;
       margin: 0 auto;
       background: var(--blue);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding:
-        clamp(44px, 7vh, 118px)
-        clamp(28px, 7vw, 96px)
-        calc(32px + var(--safe-bottom));
+      position: relative;
+      overflow: hidden;
+      padding: 0 clamp(26px, 7vw, 78px);
     }
 
     .home-screen,
     .screen {
       width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
     }
 
     .home-screen {
-      display: flex;
-      min-height: calc(100vh - 80px - var(--safe-bottom));
-      flex-direction: column;
+      display: grid;
+      grid-template-rows:
+        17.5%
+        16.5%
+        6.5%
+        7.5%
+        8%
+        12.5%
+        14.5%
+        1fr
+        8%
+        5.2%;
       align-items: center;
+      justify-items: center;
     }
 
     .logo {
-      display: block;
-      width: clamp(168px, 30vw, 285px);
+      grid-row: 1;
+      width: clamp(175px, 39vw, 285px);
       height: auto;
       object-fit: contain;
-      margin: 0 auto clamp(120px, 17vh, 215px);
+      align-self: end;
+      margin-bottom: 0;
     }
 
     .title {
-      margin: 0 0 clamp(44px, 7vh, 74px);
-      color: rgba(255, 255, 255, 0.88);
+      grid-row: 2;
+      margin: 0;
+      align-self: end;
+      color: rgba(255,255,255,.82);
       text-align: center;
-      font-size: clamp(34px, 6vw, 70px);
-      line-height: 1.2;
+      font-size: clamp(39px, 8.2vw, 68px);
+      line-height: 1.14;
       font-weight: 1000;
       letter-spacing: -1px;
-    }
-
-    .choose-area {
-      width: min(660px, 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      white-space: nowrap;
     }
 
     .choose-label {
-      margin: 0 0 20px;
-      color: #ffffff;
+      grid-row: 3;
+      margin: 0;
+      align-self: end;
+      color: #fff;
       text-align: center;
-      font-size: clamp(22px, 3.9vw, 40px);
-      line-height: 1.2;
+      font-size: clamp(24px, 5vw, 38px);
+      line-height: 1.1;
       font-weight: 900;
+      white-space: nowrap;
     }
 
     .select-wrap {
+      grid-row: 4;
       position: relative;
       width: min(500px, 100%);
+      align-self: center;
     }
 
     select {
       width: 100%;
-      height: clamp(58px, 7vh, 72px);
+      height: clamp(55px, 6svh, 66px);
       border: 0;
       outline: 0;
       border-radius: 999px;
       background: var(--white);
-      color: #4c4c4c;
+      color: #4a4a4a;
       appearance: none;
-      padding: 0 60px 0 26px;
+      padding: 0 58px 0 26px;
       text-align: center;
       text-align-last: center;
-      font-size: clamp(17px, 3vw, 25px);
+      font-size: clamp(17px, 3.4vw, 25px);
       font-weight: 900;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,.08);
     }
 
     .select-wrap::after {
       content: "";
       position: absolute;
-      right: 24px;
+      right: 25px;
       top: 50%;
-      transform: translateY(-50%);
-      border-top: 18px solid #5a5a5a;
+      transform: translateY(-45%);
+      border-top: 18px solid #555;
       border-right: 14px solid transparent;
       border-left: 14px solid transparent;
       pointer-events: none;
     }
 
     .start-btn {
-      width: min(320px, 80%);
-      height: clamp(64px, 7.5vh, 78px);
-      margin-top: clamp(36px, 5.5vh, 58px);
-      border: 0;
+      grid-row: 5;
+      width: min(300px, 72%);
+      height: clamp(60px, 6.7svh, 74px);
+      align-self: center;
       border-radius: 999px;
       background: var(--yellow);
       color: #000;
-      font-size: clamp(25px, 4.5vw, 42px);
+      font-size: clamp(27px, 5.3vw, 40px);
       line-height: 1;
       font-weight: 1000;
       box-shadow: 0 7px 0 var(--black);
@@ -167,62 +178,62 @@
     .start-btn:disabled {
       opacity: .65;
       cursor: not-allowed;
-      filter: grayscale(.12);
+      filter: grayscale(.1);
     }
 
     .main-actions {
-      width: min(690px, 100%);
+      grid-row: 6;
+      width: 100%;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(18px, 4vw, 44px);
-      margin-top: clamp(72px, 10vh, 110px);
+      gap: clamp(18px, 5vw, 44px);
+      align-self: center;
     }
 
     .small-tools {
+      grid-row: 7;
       width: min(620px, 100%);
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(12px, 2.5vw, 22px);
-      margin-top: clamp(58px, 8vh, 88px);
+      gap: clamp(10px, 2.7vw, 22px);
+      align-self: center;
     }
 
     .btn {
-      border: 0;
+      min-height: clamp(54px, 6svh, 72px);
       border-radius: 999px;
       color: #fff;
-      min-height: clamp(58px, 7vh, 78px);
-      padding: 11px clamp(14px, 3vw, 24px);
-      font-size: clamp(17px, 3.1vw, 30px);
-      line-height: 1.05;
+      padding: 10px clamp(9px, 3vw, 22px);
+      font-size: clamp(15px, 3.1vw, 28px);
+      line-height: 1.1;
       font-weight: 1000;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 13px;
-      transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+      gap: 12px;
       white-space: nowrap;
+      transition: transform .12s ease, box-shadow .12s ease;
     }
 
     .btn:active {
       transform: translateY(4px);
-      box-shadow: 0 2px 0 rgba(0,0,0,.2);
     }
 
     .btn-pink {
       background: var(--pink);
-      box-shadow: 0 7px 0 #d64672;
+      box-shadow: 0 7px 0 #d84672;
     }
 
     .btn-sky {
+      min-height: clamp(50px, 5.7svh, 64px);
       background: var(--sky);
       box-shadow: 0 5px 0 rgba(255,255,255,.85);
-      font-size: clamp(15px, 2.9vw, 27px);
-      min-height: clamp(52px, 6vh, 66px);
+      font-size: clamp(14px, 2.8vw, 25px);
     }
 
     .btn-icon {
-      width: 30px;
-      height: 30px;
+      width: clamp(22px, 3.9vw, 30px);
+      height: clamp(22px, 3.9vw, 30px);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -241,32 +252,39 @@
     }
 
     .home-btn {
-      width: min(340px, 80%);
-      height: clamp(70px, 8vh, 86px);
-      margin-top: auto;
-      border: 0;
+      grid-row: 9;
+      width: min(340px, 76%);
+      height: clamp(66px, 7.2svh, 84px);
+      align-self: center;
       border-radius: 999px;
       background: var(--yellow);
       color: #000;
-      font-size: clamp(28px, 5vw, 48px);
+      font-size: clamp(31px, 6vw, 46px);
       line-height: 1;
       font-weight: 1000;
       box-shadow: 0 8px 0 var(--black);
     }
 
     .footer {
-      margin-top: clamp(54px, 7vh, 90px);
-      color: rgba(255,255,255,.92);
+      grid-row: 10;
+      margin: 0;
+      align-self: end;
+      padding-bottom: 0;
+      color: rgba(255,255,255,.93);
       text-align: center;
-      font-size: clamp(14px, 2.6vw, 22px);
-      line-height: 1.5;
+      font-size: clamp(14px, 2.7vw, 22px);
+      line-height: 1.35;
       font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .demo-line {
+      display: none;
     }
 
     .screen {
       display: none;
-      min-height: calc(100vh - 80px - var(--safe-bottom));
-      padding-top: clamp(30px, 5vh, 70px);
+      padding-top: clamp(28px, 5svh, 70px);
     }
 
     .screen.active {
@@ -300,7 +318,6 @@
     }
 
     .back-btn {
-      border: 0;
       border-radius: 999px;
       background: var(--yellow);
       color: #000;
@@ -327,7 +344,6 @@
     }
 
     .template-card {
-      border: 0;
       border-radius: 22px;
       background: #eef4ff;
       color: #1d1d1d;
@@ -402,18 +418,6 @@
       font-weight: 950;
     }
 
-    .mini-example {
-      border: 0;
-      background: transparent;
-      color: #fff;
-      opacity: .86;
-      font-size: 14px;
-      font-weight: 1000;
-      text-decoration: underline;
-      padding: 8px;
-      margin-top: 7px;
-    }
-
     .toast {
       position: fixed;
       left: 50%;
@@ -442,73 +446,86 @@
       .app {
         width: 100%;
         max-width: none;
-        padding-inline: clamp(70px, 12vw, 160px);
+        padding-inline: clamp(90px, 15vw, 190px);
       }
 
       .home-screen {
-        max-width: 980px;
+        max-width: 900px;
         margin: 0 auto;
       }
 
       .logo {
-        margin-bottom: clamp(72px, 12vh, 140px);
+        width: clamp(210px, 22vw, 315px);
       }
 
       .title {
-        margin-bottom: clamp(34px, 6vh, 56px);
+        font-size: clamp(48px, 5vw, 78px);
       }
 
       .main-actions {
-        max-width: 720px;
+        max-width: 690px;
       }
 
       .small-tools {
-        max-width: 660px;
+        max-width: 650px;
       }
     }
 
-    @media (orientation: landscape) and (max-height: 620px) {
+    @media (orientation: landscape) and (max-height: 640px) {
       .app {
-        padding-top: 24px;
-        padding-bottom: 24px;
+        min-height: 100svh;
+        max-height: none;
+        height: auto;
+        overflow: auto;
+        padding-top: 22px;
+        padding-bottom: 22px;
       }
 
       .home-screen {
         min-height: auto;
+        display: flex;
+        flex-direction: column;
       }
 
       .logo {
         width: 170px;
-        margin-bottom: 36px;
+        margin: 0 auto 26px;
       }
 
       .title {
-        font-size: clamp(28px, 5vw, 46px);
-        margin-bottom: 24px;
+        font-size: clamp(30px, 5vw, 48px);
+        margin: 0 0 22px;
       }
 
       .choose-label {
+        font-size: clamp(22px, 4vw, 32px);
         margin-bottom: 12px;
       }
 
+      .select-wrap {
+        margin-bottom: 16px;
+      }
+
       .start-btn {
-        margin-top: 18px;
+        margin: 0 auto 26px;
       }
 
       .main-actions {
-        margin-top: 34px;
+        margin-top: 0;
+        margin-bottom: 18px;
       }
 
       .small-tools {
-        margin-top: 28px;
+        margin-top: 0;
+        margin-bottom: 26px;
       }
 
       .home-btn {
-        margin-top: 38px;
+        margin: 0 auto 18px;
       }
 
       .footer {
-        margin-top: 28px;
+        margin: 0;
       }
     }
 
@@ -517,19 +534,49 @@
         padding-inline: 24px;
       }
 
+      .home-screen {
+        grid-template-rows:
+          13.5%
+          19.5%
+          6.5%
+          7%
+          8.5%
+          11.5%
+          11.5%
+          1fr
+          8%
+          5.5%;
+      }
+
+      .logo {
+        width: clamp(150px, 46vw, 210px);
+      }
+
+      .title {
+        font-size: clamp(36px, 10vw, 50px);
+      }
+
+      .choose-label {
+        font-size: clamp(23px, 6vw, 31px);
+      }
+
       .main-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
+        gap: 14px;
+      }
+
+      .btn-pink {
+        font-size: clamp(15px, 4.2vw, 20px);
       }
 
       .small-tools {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
         width: 100%;
+        gap: 10px;
       }
 
-      .btn {
-        padding-inline: 10px;
+      .btn-sky {
+        min-height: 52px;
+        font-size: clamp(13px, 3.7vw, 16px);
+        padding-inline: 8px;
       }
 
       .btn-icon {
@@ -547,23 +594,48 @@
       }
     }
 
-    @media (max-width: 420px) {
-      .small-tools {
-        gap: 8px;
+    @media (max-height: 760px) and (orientation: portrait) {
+      .home-screen {
+        grid-template-rows:
+          12%
+          17%
+          6.5%
+          7%
+          8%
+          11.5%
+          11%
+          1fr
+          7.8%
+          5%;
+      }
+
+      .logo {
+        width: clamp(132px, 41vw, 180px);
+      }
+
+      .title {
+        font-size: clamp(31px, 8.5vw, 44px);
+      }
+
+      .start-btn {
+        height: 58px;
+      }
+
+      .btn {
+        min-height: 50px;
       }
 
       .btn-sky {
-        font-size: 14px;
-        min-height: 52px;
-        padding-inline: 8px;
+        min-height: 46px;
       }
 
-      .main-actions {
-        gap: 12px;
+      .home-btn {
+        height: 58px;
+        font-size: clamp(26px, 6vw, 34px);
       }
 
-      .btn-pink {
-        font-size: 15px;
+      .footer {
+        font-size: clamp(12px, 2.5vw, 15px);
       }
     }
   </style>
@@ -576,17 +648,15 @@
 
       <h1 class="title">صندوق الألعاب التعليمية</h1>
 
-      <section class="choose-area">
-        <h2 class="choose-label">يرجى اختيار لعبة</h2>
+      <h2 class="choose-label">يرجى اختيار لعبة</h2>
 
-        <div class="select-wrap">
-          <select id="savedGameSelect">
-            <option value="">لا توجد ألعاب محفوظة حتى الآن</option>
-          </select>
-        </div>
+      <div class="select-wrap">
+        <select id="savedGameSelect">
+          <option value="">لا توجد ألعاب محفوظة حتى الآن</option>
+        </select>
+      </div>
 
-        <button class="start-btn" id="startGameBtn" disabled>ابدأ اللعبة</button>
-      </section>
+      <button class="start-btn" id="startGameBtn" disabled>ابدأ اللعبة</button>
 
       <div class="main-actions">
         <button class="btn btn-pink" data-open-screen="savedScreen">
@@ -612,13 +682,11 @@
 
       <button class="home-btn" type="button">الرئيسية</button>
 
-      <div id="savedSummary" style="margin-top:24px;color:rgba(255,255,255,.82);font-weight:850;line-height:1.8;text-align:center;">
-        لا توجد ألعاب محفوظة حتى الآن.
-        <br />
-        <button class="mini-example" id="demoDataBtn">إضافة مثال للتجربة</button>
-      </div>
-
       <footer class="footer">جميع الحقوق محفوظة © صندوق المسابقات 2026</footer>
+
+      <div class="demo-line" id="savedSummary">
+        <button id="demoDataBtn">إضافة مثال للتجربة</button>
+      </div>
     </section>
 
     <section class="screen" id="createScreen">
@@ -715,13 +783,12 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = "sandooq_edu_saved_games_v6";
+    const STORAGE_KEY = "sandooq_edu_saved_games_v7";
 
     const screens = ["homeScreen", "createScreen", "savedScreen", "backupScreen", "helpScreen"];
     const toast = document.getElementById("toast");
     const savedGameSelect = document.getElementById("savedGameSelect");
     const startGameBtn = document.getElementById("startGameBtn");
-    const savedSummary = document.getElementById("savedSummary");
     const savedList = document.getElementById("savedList");
 
     function getSavedGames() {
@@ -751,7 +818,7 @@
         if (!el) return;
 
         if (id === "homeScreen") {
-          el.style.display = screenId === "homeScreen" ? "flex" : "none";
+          el.style.display = screenId === "homeScreen" ? "grid" : "none";
         } else {
           el.classList.toggle("active", id === screenId);
         }
@@ -780,13 +847,7 @@
         savedGameSelect.appendChild(option);
 
         startGameBtn.disabled = true;
-        savedSummary.innerHTML = `
-          لا توجد ألعاب محفوظة حتى الآن.
-          <br />
-          <button class="mini-example" id="demoDataBtn">إضافة مثال للتجربة</button>
-        `;
         savedList.innerHTML = "لا توجد ألعاب محفوظة حتى الآن.";
-        bindDemoButton();
         return;
       }
 
@@ -803,7 +864,6 @@
       });
 
       startGameBtn.disabled = true;
-      savedSummary.innerHTML = `لديك ${games.length} لعبة محفوظة. اختر واحدة من القائمة ثم اضغط ابدأ.`;
 
       savedList.innerHTML = games.map((game) => {
         return `
@@ -813,27 +873,6 @@
           </div>
         `;
       }).join("");
-    }
-
-    function bindDemoButton() {
-      const demoButton = document.getElementById("demoDataBtn");
-      if (!demoButton) return;
-
-      demoButton.addEventListener("click", () => {
-        const games = [
-          {
-            id: "demo-wheel",
-            name: "درس العلوم",
-            type: "wheel",
-            typeName: "العجلة الدوارة",
-            createdAt: new Date().toISOString()
-          }
-        ];
-
-        setSavedGames(games);
-        renderSavedGames();
-        showToast("تمت إضافة مثال مؤقت للتجربة.");
-      });
     }
 
     document.querySelectorAll("[data-open-screen]").forEach((button) => {
