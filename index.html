@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>صندوق الألعاب التعليمية التفاعلية</title>
+  <meta name="description" content="قوالب ألعاب تعليمية تفاعلية جاهزة يضيف فيها المعلم أسئلته وصوره ويحفظ أنشطته لتشغيلها في الفصل." />
+
+  <style>
+    :root {
+      --blue: #087ca8;
+      --blue-dark: #065f82;
+      --gold: #f7b638;
+      --bg: #f3fbff;
+      --card: #ffffff;
+      --text: #123044;
+      --muted: #6f8493;
+      --border: rgba(8, 124, 168, 0.18);
+      --shadow: 0 18px 45px rgba(4, 72, 104, 0.14);
+      --radius-lg: 28px;
+      --radius-md: 20px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(247, 182, 56, 0.18), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(8, 124, 168, 0.15), transparent 36%),
+        linear-gradient(180deg, #f7fcff 0%, #edf8ff 100%);
+      overflow-x: hidden;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 22px clamp(16px, 4vw, 34px) 34px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--blue), #0a9ccc);
+      box-shadow: 0 10px 22px rgba(8, 124, 168, 0.28);
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 900;
+      letter-spacing: -1px;
+      flex: 0 0 auto;
+    }
+
+    .brand-text {
+      min-width: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(17px, 3vw, 23px);
+      font-weight: 900;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-subtitle {
+      margin: 3px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .status-pill {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.76);
+      color: var(--blue-dark);
+      border-radius: 999px;
+      padding: 9px 13px;
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px rgba(8,124,168,0.08);
+    }
+
+    .hero {
+      position: relative;
+      border: 1px solid var(--border);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.96), rgba(255,255,255,0.78)),
+        radial-gradient(circle at 20% 20%, rgba(247,182,56,0.22), transparent 28%),
+        radial-gradient(circle at 85% 70%, rgba(8,124,168,0.15), transparent 30%);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: clamp(22px, 5vw, 46px);
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 999px;
+      background: rgba(8, 124, 168, 0.08);
+      left: -110px;
+      top: -120px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: clamp(20px, 5vw, 44px);
+      align-items: center;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(30px, 6vw, 58px);
+      line-height: 1.12;
+      letter-spacing: -1px;
+      font-weight: 950;
+      color: var(--text);
+    }
+
+    .hero .highlight {
+      color: var(--blue);
+      display: inline-block;
+    }
+
+    .hero p {
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2.3vw, 20px);
+      line-height: 1.85;
+      max-width: 650px;
+      font-weight: 600;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 18px;
+      padding: 15px 20px;
+      cursor: pointer;
+      font-weight: 900;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      min-height: 54px;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      color: #fff;
+      background: linear-gradient(145deg, var(--blue), #0aa0cf);
+      box-shadow: 0 14px 28px rgba(8, 124, 168, 0.25);
+    }
+
+    .btn-secondary {
+      color: #143346;
+      background: linear-gradient(145deg, #ffd879, var(--gold));
+      box-shadow: 0 14px 28px rgba(247, 182, 56, 0.22);
+    }
+
+    .btn-light {
+      color: var(--blue-dark);
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 22px rgba(8, 124, 168, 0.08);
+    }
+
+    .hero-visual {
+      display: grid;
+      place-items: center;
+    }
+
+    .activity-preview {
+      width: min(360px, 100%);
+      aspect-ratio: 1 / 1;
+      border-radius: 32px;
+      background:
+        radial-gradient(circle at 50% 50%, #fff 0 18%, transparent 19%),
+        conic-gradient(from 0deg, #0aa0cf 0 14%, #f7b638 14% 28%, #ff6d8a 28% 42%, #58c88d 42% 56%, #7a6ff0 56% 70%, #ff9f43 70% 84%, #0aa0cf 84% 100%);
+      box-shadow: inset 0 0 0 14px rgba(255,255,255,0.9), 0 22px 45px rgba(8, 124, 168, 0.18);
+      position: relative;
+      animation: floaty 4s ease-in-out infinite;
+    }
+
+    .activity-preview::before {
+      content: "";
+      position: absolute;
+      inset: 34px;
+      border-radius: 50%;
+      border: 4px dashed rgba(255,255,255,0.9);
+    }
+
+    .activity-preview::after {
+      content: "ابدأ";
+      position: absolute;
+      inset: 38% 38%;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      color: var(--blue);
+      font-weight: 950;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .section {
+      margin-top: 26px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: clamp(20px, 4vw, 30px);
+      font-weight: 950;
+    }
+
+    .section-note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .game-card {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      min-height: 154px;
+      box-shadow: 0 12px 28px rgba(8, 124, 168, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .game-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: rgba(8, 124, 168, 0.10);
+      color: var(--blue);
+      display: grid;
+      place-items: center;
+      font-weight: 950;
+      font-size: 20px;
+      flex: 0 0 auto;
+    }
+
+    .game-card h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 950;
+      line-height: 1.25;
+    }
+
+    .game-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      font-weight: 650;
+    }
+
+    .saved-panel {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: 0 12px 30px rgba(8, 124, 168, 0.08);
+    }
+
+    .empty-state {
+      border: 1px dashed rgba(8, 124, 168, 0.28);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      text-align: center;
+      background: rgba(8, 124, 168, 0.04);
+    }
+
+    .empty-state h3 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--muted);
+      font-weight: 700;
+      line-height: 1.7;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .step {
+      background: rgba(255,255,255,0.88);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: 0 10px 24px rgba(8, 124, 168, 0.07);
+    }
+
+    .step-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 950;
+      margin-bottom: 10px;
+    }
+
+    .step h3 {
+      margin: 0 0 6px;
+      font-weight: 950;
+      font-size: 17px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-weight: 650;
+      font-size: 13px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(120px);
+      background: #123044;
+      color: #fff;
+      padding: 13px 16px;
+      border-radius: 16px;
+      font-weight: 850;
+      box-shadow: 0 14px 28px rgba(0,0,0,0.18);
+      z-index: 50;
+      opacity: 0;
+      transition: .25s ease;
+      width: min(440px, calc(100% - 32px));
+      text-align: center;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .footer {
+      padding: 30px 0 10px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 920px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-visual {
+        order: -1;
+      }
+
+      .activity-preview {
+        width: min(280px, 75vw);
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        padding-top: 16px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+      }
+
+      .status-pill {
+        display: none;
+      }
+
+      .hero {
+        padding: 20px;
+      }
+
+      .hero-actions {
+        display: grid;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .game-card {
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">ص</div>
+        <div class="brand-text">
+          <h1 class="brand-title">صندوق الألعاب التعليمية</h1>
+          <p class="brand-subtitle">قوالب تفاعلية يملؤها المعلم بمحتواه</p>
+        </div>
+      </div>
+
+      <div class="status-pill">نسخة تأسيسية</div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div>
+          <h2>
+            أنشئ نشاطك التعليمي
+            <span class="highlight">وشغّله في الفصل مباشرة</span>
+          </h2>
+          <p>
+            اختر اللعبة، اختر الشكل، أضف الأسئلة أو الصور، ثم احفظ النشاط باسمك وشغّله وقت ما تحتاج.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-action="new">إنشاء نشاط جديد</button>
+            <button class="btn btn-secondary" data-action="start">ابدأ نشاط محفوظ</button>
+            <button class="btn btn-light" data-action="import">استيراد نشاط</button>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="activity-preview" aria-label="معاينة لعبة تعليمية"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">الألعاب الأولى</h2>
+          <p class="section-note">نبدأ بالقوالب الأكثر وضوحًا وطلبًا للمعلمين.</p>
+        </div>
+      </div>
+
+      <div class="cards">
+        <article class="game-card">
+          <div class="game-icon">1</div>
+          <h3>العجلة الدوارة</h3>
+          <p>أضف نصوصًا أو صورًا داخل عجلة، ثم دوّر واختر عنصرًا عشوائيًا.</p>
+        </article>
+
+        <article class="game-card">
+          <div class="game-icon">2</div>
+          <h3>افتح الصندوق</h3>
+          <p>صناديق مرقمة يفتحها الطالب لتظهر الأسئلة أو الصور.</p>
+        </article>
+
+        <article class="game-card">
+          <div class="game-icon">3</div>
+          <h3>اختيارات</h3>
+          <p>سؤال مع عدة خيارات، مناسب للمراجعة والاختبارات السريعة.</p>
+        </article>
+
+        <article class="game-card">
+          <div class="game-icon">4</div>
+          <h3>صح أو خطأ</h3>
+          <p>عبارات قصيرة بإجابة صح أو خطأ مع مؤثرات تفاعلية.</p>
+        </article>
+
+        <article class="game-card">
+          <div class="game-icon">5</div>
+          <h3>المطابقة</h3>
+          <p>طابق كلمة بصورة، أو سؤالًا بجواب، أو مصطلحًا بتعريفه.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="saved-panel">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title">أنشطتي المحفوظة</h2>
+            <p class="section-note">هنا ستظهر الأنشطة التي ينشئها المعلم ويحفظها على جهازه.</p>
+          </div>
+        </div>
+
+        <div class="empty-state">
+          <h3>لا توجد أنشطة محفوظة حتى الآن</h3>
+          <p>ابدأ بإنشاء أول نشاط، وبعد الحفظ سيظهر هنا للتشغيل أو التعديل.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2 class="section-title">طريقة الاستخدام</h2>
+          <p class="section-note">المسار الأساسي الذي سنبني عليه المنتج.</p>
+        </div>
+      </div>
+
+      <div class="steps">
+        <article class="step">
+          <div class="step-number">1</div>
+          <h3>اختر اللعبة</h3>
+          <p>العجلة، الصندوق، الاختيارات، صح أو خطأ، أو المطابقة.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-number">2</div>
+          <h3>اختر الشكل</h3>
+          <p>ثيمات جاهزة بألوان وخلفيات مناسبة للفصل والطلاب.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-number">3</div>
+          <h3>أضف المحتوى</h3>
+          <p>اكتب النصوص والأسئلة، وأضف الصور عند الحاجة.</p>
+        </article>
+
+        <article class="step">
+          <div class="step-number">4</div>
+          <h3>احفظ وابدأ</h3>
+          <p>يحفظ النشاط على الجهاز، ثم يمكن تشغيله مباشرة.</p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      صندوق الألعاب التعليمية التفاعلية - نسخة البداية
+    </footer>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const toast = document.getElementById("toast");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2300);
+    }
+
+    document.querySelectorAll("[data-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.getAttribute("data-action");
+
+        if (action === "new") {
+          showToast("الخطوة القادمة: سنبني صفحة إنشاء نشاط جديد.");
+        }
+
+        if (action === "start") {
+          showToast("لا توجد أنشطة محفوظة حتى الآن.");
+        }
+
+        if (action === "import") {
+          showToast("الاستيراد سيتم إضافته بعد نظام الحفظ.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
