@@ -8,18 +8,20 @@
   <style>
     :root{
       --bg:#ece9cf;
-      --blue:#4f89e6;
-      --title-yellow:#f4d33c;
-      --panel-orange:#ff6d3a;
+      --blue:#4e88e8;
+      --title-yellow:#f3d33d;
+      --panel-orange:#ff6e3a;
+      --panel-blue:#3557a3;
       --panel-gray:#e9e9e9;
       --btn-orange:#ff6c35;
-      --btn-orange-dark:#ed5e2a;
-      --home-red:#ff565a;
-      --home-red-dark:#f0494d;
+      --btn-orange-dark:#ef5d2b;
+      --btn-red:#ff5559;
+      --btn-red-dark:#f14a4e;
       --text:#111111;
-      --outline:#131313;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --outline:#111111;
+      --dot:rgba(70,70,70,.075);
+      --app-h:100dvh;
+      --safe-bottom:env(safe-area-inset-bottom, 0px);
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -29,84 +31,143 @@
       height:100%;
       min-height:100%;
       overflow:hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
     }
 
     button,select{font:inherit}
-    button{border:0;cursor:pointer}
+    button{
+      border:0;
+      cursor:pointer;
+      user-select:none;
+      -webkit-user-select:none;
+    }
 
     .app{
       position:fixed;
       inset:0;
-      display:grid;
-      place-items:center;
-      background: var(--bg);
-      overflow:hidden;
-    }
-
-    .stage{
-      position:relative;
-      width:min(100vw, calc(100dvh * 1366 / 768));
-      aspect-ratio:1366/768;
+      width:100vw;
+      height:var(--app-h);
       background:var(--bg);
       overflow:hidden;
     }
 
-    .title-pill{
+    .landscape-lock{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:18px;
+      text-align:center;
+      background:var(--bg);
+      color:var(--text);
+      z-index:200;
+      padding:24px;
+    }
+
+    .rotate-icon{
+      width:92px;
+      height:92px;
+      border:3px solid var(--outline);
+      border-radius:20px;
+      position:relative;
+      background:#fff;
+    }
+    .rotate-icon::before{
+      content:"";
       position:absolute;
-      top:3.65%;
       left:50%;
+      top:50%;
+      width:52px;
+      height:32px;
+      transform:translate(-50%,-50%) rotate(90deg);
+      border:3px solid var(--outline);
+      border-radius:10px;
+      background:#f3f3f3;
+    }
+    .rotate-text{
+      font-size:24px;
+      line-height:1.6;
+      font-weight:700;
+    }
+
+    .surface{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:1366px;
+      height:768px;
+      transform:translate(-50%, -50%) scale(var(--scale,1));
+      transform-origin:center center;
+      background:var(--bg);
+      overflow:hidden;
+    }
+
+    .home-screen,
+    .screen{
+      position:absolute;
+      inset:0;
+      width:1366px;
+      height:768px;
+      background:var(--bg);
+    }
+
+    .page-title{
+      position:absolute;
+      left:50%;
+      top:20px;
+      width:593px;
+      height:104px;
       transform:translateX(-50%);
-      width:43.7%;
-      height:12.45%;
-      background:var(--title-yellow);
       border:2.5px solid var(--outline);
-      border-radius:22px;
+      border-radius:24px;
+      background:var(--title-yellow);
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      font-size:clamp(22px, 3.35vw, 34px);
-      font-weight:500;
+      font-size:52px;
       line-height:1;
-      letter-spacing:0;
+      font-weight:500;
+      letter-spacing:-0.5px;
     }
 
     .play-shell{
       position:absolute;
-      top:24.35%;
-      left:25.0%;
-      width:51.35%;
-      height:28.95%;
+      left:342px;
+      top:187px;
+      width:703px;
+      height:223px;
+      border:3px solid var(--outline);
+      border-radius:26px;
       background:var(--panel-orange);
-      border:2.5px solid var(--outline);
-      border-radius:24px;
-      padding:8px;
+      padding:9px;
     }
 
     .play-card{
       width:100%;
       height:100%;
+      border:3px solid var(--outline);
+      border-radius:22px;
       background:var(--panel-gray);
-      border:2.5px solid var(--outline);
-      border-radius:20px;
-      padding:3.6% 4.2%;
       text-align:center;
+      padding:16px 26px 10px;
     }
 
     .play-title{
-      margin:0 0 4.5%;
-      font-size:clamp(20px, 2.8vw, 34px);
-      font-weight:500;
+      margin:6px 0 16px;
+      font-size:54px;
       line-height:1.15;
+      font-weight:500;
     }
 
     .select-wrap{
       position:relative;
-      width:71.5%;
-      height:29.5%;
+      width:462px;
+      height:61px;
       margin:0 auto;
     }
 
@@ -115,14 +176,14 @@
       height:100%;
       appearance:none;
       outline:none;
-      border:2.5px solid var(--outline);
+      border:3px solid var(--outline);
       border-radius:22px;
       background:#ffffff;
       color:#555555;
       text-align:center;
       text-align-last:center;
-      padding:0 50px;
-      font-size:clamp(16px, 2.15vw, 24px);
+      padding:0 56px;
+      font-size:25px;
       font-weight:500;
       line-height:1;
     }
@@ -130,55 +191,56 @@
     .select-wrap::after{
       content:"";
       position:absolute;
-      left:4.3%;
+      left:22px;
       top:50%;
       transform:translateY(-42%);
       width:0;height:0;
-      border-left:15px solid transparent;
-      border-right:15px solid transparent;
-      border-top:24px solid #666666;
+      border-left:14px solid transparent;
+      border-right:14px solid transparent;
+      border-top:22px solid #666666;
       pointer-events:none;
     }
 
     .start-btn{
-      margin-top:4.8%;
-      width:30.8%;
-      height:25.7%;
-      border-radius:22px;
-      background:linear-gradient(180deg,var(--btn-orange) 0%, var(--btn-orange-dark) 100%);
+      width:180px;
+      height:49px;
+      margin-top:17px;
+      border-radius:18px;
       border:2px solid var(--outline);
+      background:linear-gradient(180deg,var(--btn-orange) 0%, var(--btn-orange-dark) 100%);
       color:#ffffff;
-      font-size:clamp(18px, 2.25vw, 28px);
-      font-weight:500;
+      font-size:32px;
       line-height:1;
+      font-weight:500;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,.08);
+      text-shadow:0 1px 0 rgba(0,0,0,.12);
     }
 
-    .cards-grid{
+    .grid{
       position:absolute;
-      left:24.2%;
-      top:61.3%;
-      width:54.15%;
-      height:26.6%;
+      left:330px;
+      top:470px;
+      width:740px;
       display:grid;
-      grid-template-columns:repeat(2, 1fr);
-      gap:7.2% 5.2%;
-      align-content:start;
+      grid-template-columns:353px 353px;
+      gap:28px 36px;
     }
 
     .card-btn{
-      border:2.5px solid var(--outline);
-      border-radius:18px;
+      height:72px;
+      border:3px solid var(--outline);
+      border-radius:20px;
       background:#ffffff;
       color:var(--text);
-      font-size:clamp(22px, 2.8vw, 34px);
-      font-weight:500;
-      line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
       padding:0 18px;
-      min-height:0;
+      font-size:32px;
+      line-height:1.1;
+      font-weight:500;
+      white-space:nowrap;
     }
 
     .footer-bar{
@@ -186,89 +248,57 @@
       left:0;
       right:0;
       bottom:0;
-      height:8.9%;
+      height:71px;
       background:var(--blue);
       border-top:2.5px solid var(--outline);
     }
 
     .home-btn{
       position:absolute;
-      left:0.7%;
-      top:50%;
-      transform:translateY(-50%);
-      width:10.8%;
-      height:67.5%;
+      left:9px;
+      top:12px;
+      width:148px;
+      height:48px;
       border-radius:22px;
-      background:linear-gradient(180deg,var(--home-red) 0%, var(--home-red-dark) 100%);
       border:2px solid var(--outline);
+      background:linear-gradient(180deg,var(--btn-red) 0%, var(--btn-red-dark) 100%);
       color:#ffffff;
-      font-size:clamp(18px, 2.15vw, 24px);
-      font-weight:500;
-      line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      box-shadow:none;
+      font-size:30px;
+      line-height:1;
+      font-weight:500;
     }
 
     .decor{
       position:absolute;
       pointer-events:none;
     }
+    .coil{left:62px; top:20px; width:83px; height:auto}
+    .stars{right:49px; top:22px; width:106px; height:auto}
+    .flower{left:142px; top:277px; width:57px; height:auto}
+    .squiggle{left:-24px; top:472px; width:183px; height:auto}
+    .splash{right:47px; top:514px; width:124px; height:auto}
 
-    .coil{
-      left:4.1%;
-      top:3.2%;
-      width:8.1%;
-      height:auto;
-    }
-
-    .stars{
-      right:4.1%;
-      top:2.6%;
-      width:10.0%;
-      height:auto;
-    }
-
-    .flower{
-      left:10.4%;
-      top:36.4%;
-      width:4.9%;
-      height:auto;
-    }
-
-    .squiggle{
-      left:-3.2%;
-      top:62.3%;
-      width:15.1%;
-      height:auto;
-    }
-
-    .splash{
-      right:4.6%;
-      top:66.2%;
-      width:8.2%;
-      height:auto;
-    }
-
-    .screen{
-      display:none;
-      position:absolute;
-      inset:0;
-      background:var(--bg);
-      overflow:auto;
-      padding:3.5% 5% 5%;
-    }
-
+    .screen{display:none}
     .screen.active{display:block}
 
+    .screen-inner{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:760px;
+      max-width:90%;
+    }
+
     .screen-card{
-      width:min(60%, 820px);
-      margin:0 auto;
+      width:100%;
+      border:3px solid var(--outline);
+      border-radius:26px;
       background:#ffffff;
-      border:2.5px solid var(--outline);
-      border-radius:24px;
       padding:28px;
     }
 
@@ -276,23 +306,25 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
+      gap:18px;
       margin-bottom:18px;
     }
 
     .screen-title{
       margin:0;
-      font-size:clamp(28px, 3vw, 42px);
+      font-size:44px;
+      line-height:1.2;
       font-weight:500;
     }
 
     .back-btn{
+      min-width:148px;
+      min-height:52px;
       border:2px solid var(--outline);
       border-radius:18px;
       background:var(--title-yellow);
       color:var(--text);
-      padding:12px 18px;
-      font-size:18px;
+      font-size:24px;
       font-weight:500;
     }
 
@@ -300,8 +332,9 @@
       margin:0 0 18px;
       color:#555;
       text-align:center;
-      font-size:18px;
+      font-size:22px;
       line-height:1.8;
+      font-weight:500;
     }
 
     .menu-list{
@@ -310,77 +343,36 @@
     }
 
     .menu-item{
-      min-height:70px;
-      border:2.5px solid var(--outline);
-      border-radius:18px;
+      min-height:76px;
+      border:3px solid var(--outline);
+      border-radius:20px;
       background:#ffffff;
-      font-size:24px;
+      font-size:30px;
       font-weight:500;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-    }
-
-    .rotate-lock{
-      position:fixed;
-      inset:0;
-      display:none;
-      background:var(--bg);
-      color:var(--text);
-      z-index:100;
-      padding:28px;
-      text-align:center;
-      align-items:center;
-      justify-content:center;
-      flex-direction:column;
-      gap:18px;
-    }
-
-    .rotate-icon{
-      width:94px;
-      height:94px;
-      border:3px solid var(--outline);
-      border-radius:22px;
-      position:relative;
-      background:#fff;
-    }
-
-    .rotate-icon::before{
-      content:"";
-      position:absolute;
-      width:54px;
-      height:32px;
-      border:3px solid var(--outline);
-      border-radius:10px;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%) rotate(90deg);
-      background:var(--panel-gray);
-    }
-
-    .rotate-text{
-      font-size:24px;
-      font-weight:600;
-      line-height:1.6;
+      padding:0 16px;
     }
 
     .toast{
       position:fixed;
       left:50%;
-      bottom:calc(18px + var(--safe-bottom));
+      bottom:calc(16px + var(--safe-bottom));
       transform:translateX(-50%) translateY(120px);
-      width:min(420px, calc(100% - 28px));
+      width:min(420px, calc(100% - 24px));
       background:#111;
       color:#fff;
       border-radius:18px;
       padding:14px 16px;
       text-align:center;
+      font-size:18px;
+      line-height:1.5;
       font-weight:700;
-      line-height:1.55;
       opacity:0;
       transition:.24s ease;
-      z-index:60;
+      z-index:80;
     }
 
     .toast.show{
@@ -388,25 +380,20 @@
       transform:translateX(-50%) translateY(0);
     }
 
-    @media (max-width: 980px){
-      .screen-card{width:min(88%, 700px)}
-    }
-
     @media (orientation: portrait){
       .app{display:none}
-      .rotate-lock{display:flex}
-      html,body{overflow:hidden}
+      .landscape-lock{display:flex}
     }
   </style>
 </head>
 <body>
-  <div class="rotate-lock">
+  <div class="landscape-lock">
     <div class="rotate-icon"></div>
     <div class="rotate-text">هذه الواجهة تعمل بالوضع الأفقي فقط<br>لف الجهاز إلى الوضع الأفقي</div>
   </div>
 
   <main class="app">
-    <section class="stage">
+    <div class="surface">
       <svg class="decor coil" viewBox="0 0 120 130" aria-hidden="true">
         <g fill="none" stroke="#1f2b21" stroke-width="2.4" stroke-linecap="round">
           <ellipse cx="30" cy="46" rx="18" ry="38" stroke="#1f2b21"/>
@@ -480,60 +467,79 @@
       </section>
 
       <section class="screen" id="createScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">إنشاء لعبة جديدة</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
-          </div>
-          <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
-          <div class="menu-list">
-            <button class="menu-item">العجلة الدوارة</button>
-            <button class="menu-item">افتح الصندوق</button>
-            <button class="menu-item">اختيارات</button>
-            <button class="menu-item">صح أو خطأ</button>
-            <button class="menu-item">المطابقة</button>
+        <div class="screen-inner">
+          <div class="screen-card">
+            <div class="screen-head">
+              <h2 class="screen-title">إنشاء لعبة جديدة</h2>
+              <button class="back-btn" data-back-home>الرئيسية</button>
+            </div>
+            <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
+            <div class="menu-list">
+              <button class="menu-item">العجلة الدوارة</button>
+              <button class="menu-item">افتح الصندوق</button>
+              <button class="menu-item">اختيارات</button>
+              <button class="menu-item">صح أو خطأ</button>
+              <button class="menu-item">المطابقة</button>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="screen" id="savedScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">العابك المحفوظة</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
+        <div class="screen-inner">
+          <div class="screen-card">
+            <div class="screen-head">
+              <h2 class="screen-title">العابي المحفوظة</h2>
+              <button class="back-btn" data-back-home>الرئيسية</button>
+            </div>
+            <p class="screen-note">ستظهر هنا الألعاب التي تحفظها داخل جهازك.</p>
           </div>
-          <div class="info-box">ستظهر هنا الألعاب التي تحفظها داخل جهازك.</div>
         </div>
       </section>
 
       <section class="screen" id="backupScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">التصدير والاستيراد</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
+        <div class="screen-inner">
+          <div class="screen-card">
+            <div class="screen-head">
+              <h2 class="screen-title">التصدير والاستيراد</h2>
+              <button class="back-btn" data-back-home>الرئيسية</button>
+            </div>
+            <p class="screen-note">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها بين الأجهزة.</p>
           </div>
-          <div class="info-box">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها بين الأجهزة.</div>
         </div>
       </section>
 
       <section class="screen" id="settingsScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">الإعدادات</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
+        <div class="screen-inner">
+          <div class="screen-card">
+            <div class="screen-head">
+              <h2 class="screen-title">الإعدادات</h2>
+              <button class="back-btn" data-back-home>الرئيسية</button>
+            </div>
+            <p class="screen-note">هذه الصفحة سنبنيها لاحقًا. والواجهة تعمل بالوضع الأفقي فقط.</p>
           </div>
-          <div class="info-box">هذه الصفحة سنبنيها لاحقًا. والواجهة تعمل بالوضع الأفقي فقط.</div>
         </div>
       </section>
-    </section>
+    </div>
   </main>
 
   <div class="toast" id="toast"></div>
 
   <script>
+    const DESIGN_W = 1366;
+    const DESIGN_H = 768;
+    const app = document.querySelector('.app');
     const screens = ["homeScreen","createScreen","savedScreen","backupScreen","settingsScreen"];
     const toast = document.getElementById("toast");
     const startGameBtn = document.getElementById("startGameBtn");
+
+    function fitSurface(){
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      document.documentElement.style.setProperty('--app-h', h + 'px');
+      const scale = Math.min(w / DESIGN_W, h / DESIGN_H);
+      document.documentElement.style.setProperty('--scale', scale.toString());
+    }
 
     function showToast(message){
       toast.textContent = message;
@@ -565,6 +571,10 @@
     startGameBtn.addEventListener("click", () => {
       showToast("سيتم تشغيل: درس العلوم / العجلة الدوارة");
     });
+
+    window.addEventListener('resize', fitSurface, {passive:true});
+    window.addEventListener('orientationchange', () => setTimeout(fitSurface, 120), {passive:true});
+    fitSurface();
   </script>
 </body>
 </html>
