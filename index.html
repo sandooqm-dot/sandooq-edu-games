@@ -4,389 +4,487 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>صندوق الالعاب التعليمية</title>
-  <meta name="description" content="واجهة صندوق الالعاب التعليمية." />
+  <meta name="description" content="واجهة صندوق الالعاب التعليمية - تعمل بالوضع الأفقي فقط." />
   <style>
-    :root {
-      --side-blue: #294894;
-      --title-blue: #4f6192;
-      --main-blue: #3657a0;
-      --ink: #111111;
-      --white: #ffffff;
-      --green: #11c760;
-      --green-dark: #07ae50;
-      --red: #ff4f55;
-      --dot: rgba(40, 54, 85, 0.055);
+    :root{
+      --bg:#ece9cf;
+      --blue:#4f89e6;
+      --title-yellow:#f4d33c;
+      --panel-orange:#ff6d3a;
+      --panel-gray:#e9e9e9;
+      --btn-orange:#ff6c35;
+      --btn-orange-dark:#ed5e2a;
+      --home-red:#ff565a;
+      --home-red-dark:#f0494d;
+      --text:#111111;
+      --outline:#131313;
+      --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-    html, body {
-      margin: 0;
-      width: 100%;
-      min-height: 100%;
-      background: var(--side-blue);
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      min-height:100%;
+      overflow:hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
-      color: var(--ink);
-      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    body { min-height: 100svh; }
+    button,select{font:inherit}
+    button{border:0;cursor:pointer}
 
-    button, select { font: inherit; }
-    button { border: 0; cursor: pointer; user-select: none; }
-
-    .stage {
-      width: min(100vw, 768px);
-      height: 100svh;
-      min-height: 650px;
-      margin: 0 auto;
-      position: relative;
-      overflow: hidden;
-      background:
-        radial-gradient(circle at center, var(--dot) 0 10px, transparent 11px) 0 0 / 43px 43px,
-        linear-gradient(180deg, #ffffff 0%, #fdfdfd 100%);
-      box-shadow: inset 43px 0 0 var(--side-blue), inset -43px 0 0 var(--side-blue);
+    .app{
+      position:fixed;
+      inset:0;
+      display:grid;
+      place-items:center;
+      background: var(--bg);
+      overflow:hidden;
     }
 
-    .home-screen, .screen {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+    .stage{
+      position:relative;
+      width:min(100vw, calc(100dvh * 1366 / 768));
+      aspect-ratio:1366/768;
+      background:var(--bg);
+      overflow:hidden;
     }
 
-    .home-screen { display: block; }
-
-    .hero-title {
-      position: absolute;
-      top: 6.45%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 130px);
-      margin: 0;
-      text-align: center;
-      color: var(--title-blue);
-      font-size: clamp(42px, 8.4vw, 72px);
-      line-height: 1.13;
-      font-weight: 1000;
-      letter-spacing: -1.4px;
-      text-shadow: 5px 5px 0 rgba(0,0,0,.10);
+    .title-pill{
+      position:absolute;
+      top:3.65%;
+      left:50%;
+      transform:translateX(-50%);
+      width:43.7%;
+      height:12.45%;
+      background:var(--title-yellow);
+      border:2.5px solid var(--outline);
+      border-radius:22px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:clamp(22px, 3.35vw, 34px);
+      font-weight:500;
+      line-height:1;
+      letter-spacing:0;
     }
 
-    .hero-title span { display: block; }
-
-    .mark {
-      position: absolute;
-      top: 7.1%;
-      width: 52px;
-      height: 52px;
+    .play-shell{
+      position:absolute;
+      top:24.35%;
+      left:25.0%;
+      width:51.35%;
+      height:28.95%;
+      background:var(--panel-orange);
+      border:2.5px solid var(--outline);
+      border-radius:24px;
+      padding:8px;
     }
 
-    .mark-left { left: clamp(78px, 14vw, 132px); transform: rotate(-18deg); }
-    .mark-right { right: clamp(78px, 14vw, 132px); transform: scaleX(-1) rotate(-18deg); }
-
-    .ray {
-      position: absolute;
-      width: 4px;
-      height: 24px;
-      border-radius: 999px;
-      background: #111;
-      transform-origin: center bottom;
+    .play-card{
+      width:100%;
+      height:100%;
+      background:var(--panel-gray);
+      border:2.5px solid var(--outline);
+      border-radius:20px;
+      padding:3.6% 4.2%;
+      text-align:center;
     }
 
-    .ray.r1 { left: 6px; top: 18px; transform: rotate(-58deg); }
-    .ray.r2 { left: 17px; top: 10px; transform: rotate(-34deg); }
-    .ray.r3 { left: 30px; top: 5px; transform: rotate(-8deg); }
-    .ray.r4 { left: 43px; top: 10px; transform: rotate(22deg); }
-
-    .main-panel {
-      position: absolute;
-      top: 26.75%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(70.7%, 560px);
-      height: 22.48%;
-      min-height: 164px;
-      background: var(--main-blue);
-      border: 5px solid var(--ink);
-      border-radius: 20px;
-      padding: 4.6% 5.5% 4%;
-      text-align: center;
+    .play-title{
+      margin:0 0 4.5%;
+      font-size:clamp(20px, 2.8vw, 34px);
+      font-weight:500;
+      line-height:1.15;
     }
 
-    .panel-title {
-      margin: 0 0 7.6%;
-      color: var(--white);
-      font-size: clamp(25px, 4.5vw, 40px);
-      line-height: 1.18;
-      font-weight: 1000;
-      white-space: nowrap;
+    .select-wrap{
+      position:relative;
+      width:71.5%;
+      height:29.5%;
+      margin:0 auto;
     }
 
-    .select-wrap {
-      position: relative;
-      width: 100%;
-      height: 26%;
-      margin: 0 auto;
+    .select-wrap select{
+      width:100%;
+      height:100%;
+      appearance:none;
+      outline:none;
+      border:2.5px solid var(--outline);
+      border-radius:22px;
+      background:#ffffff;
+      color:#555555;
+      text-align:center;
+      text-align-last:center;
+      padding:0 50px;
+      font-size:clamp(16px, 2.15vw, 24px);
+      font-weight:500;
+      line-height:1;
     }
 
-    select {
-      width: 100%;
-      height: 100%;
-      border: 5px solid var(--ink);
-      border-radius: 18px;
-      outline: none;
-      appearance: none;
-      background: var(--white);
-      color: #4a4a4a;
-      padding: 0 56px 0 22px;
-      text-align: center;
-      text-align-last: center;
-      font-size: clamp(16px, 2.7vw, 27px);
-      line-height: 1;
-      font-weight: 850;
+    .select-wrap::after{
+      content:"";
+      position:absolute;
+      left:4.3%;
+      top:50%;
+      transform:translateY(-42%);
+      width:0;height:0;
+      border-left:15px solid transparent;
+      border-right:15px solid transparent;
+      border-top:24px solid #666666;
+      pointer-events:none;
     }
 
-    .select-wrap::after {
-      content: "";
-      position: absolute;
-      left: 23px;
-      top: 50%;
-      transform: translateY(-42%);
-      border-top: 22px solid #4b4b4b;
-      border-right: 15px solid transparent;
-      border-left: 15px solid transparent;
-      pointer-events: none;
+    .start-btn{
+      margin-top:4.8%;
+      width:30.8%;
+      height:25.7%;
+      border-radius:22px;
+      background:linear-gradient(180deg,var(--btn-orange) 0%, var(--btn-orange-dark) 100%);
+      border:2px solid var(--outline);
+      color:#ffffff;
+      font-size:clamp(18px, 2.25vw, 28px);
+      font-weight:500;
+      line-height:1;
     }
 
-    .start-btn {
-      width: min(45.4%, 235px);
-      height: clamp(54px, 6.4svh, 66px);
-      margin-top: 7.1%;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--green) 0%, var(--green-dark) 100%);
-      color: #fff;
-      font-size: clamp(23px, 4.4vw, 36px);
-      line-height: 1;
-      font-weight: 1000;
-      box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.08);
+    .cards-grid{
+      position:absolute;
+      left:24.2%;
+      top:61.3%;
+      width:54.15%;
+      height:26.6%;
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:7.2% 5.2%;
+      align-content:start;
     }
 
-    .action-stack {
-      position: absolute;
-      top: 53.1%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(70.7%, 560px);
-      display: grid;
-      gap: clamp(26px, 4.9svh, 40px);
+    .card-btn{
+      border:2.5px solid var(--outline);
+      border-radius:18px;
+      background:#ffffff;
+      color:var(--text);
+      font-size:clamp(22px, 2.8vw, 34px);
+      font-weight:500;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:0 18px;
+      min-height:0;
     }
 
-    .outline-btn {
-      width: 100%;
-      height: clamp(66px, 8.25svh, 86px);
-      border: 5px solid var(--ink);
-      border-radius: 15px;
-      background: var(--white);
-      color: var(--ink);
-      font-size: clamp(28px, 5.55vw, 46px);
-      line-height: 1;
-      font-weight: 1000;
-      display: grid;
-      place-items: center;
-      transition: transform 0.12s ease, background 0.12s ease;
+    .footer-bar{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:8.9%;
+      background:var(--blue);
+      border-top:2.5px solid var(--outline);
     }
 
-    .outline-btn:active {
-      transform: scale(0.985);
-      background: #f2f2f2;
+    .home-btn{
+      position:absolute;
+      left:0.7%;
+      top:50%;
+      transform:translateY(-50%);
+      width:10.8%;
+      height:67.5%;
+      border-radius:22px;
+      background:linear-gradient(180deg,var(--home-red) 0%, var(--home-red-dark) 100%);
+      border:2px solid var(--outline);
+      color:#ffffff;
+      font-size:clamp(18px, 2.15vw, 24px);
+      font-weight:500;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      box-shadow:none;
     }
 
-    .home-slot {
-      position: absolute;
-      left: 14.95%;
-      bottom: calc(5.85% + var(--safe-bottom));
-      width: 70.34%;
-      height: 7.58%;
-      border: 5px solid var(--ink);
-      border-radius: 18px;
-      background: var(--white);
+    .decor{
+      position:absolute;
+      pointer-events:none;
     }
 
-    .home-btn {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: min(49.4%, 320px);
-      height: 68%;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--red) 0%, #f34b50 100%);
-      color: #fff;
-      font-size: clamp(25px, 5vw, 40px);
-      line-height: 1;
-      font-weight: 1000;
-      box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.08);
+    .coil{
+      left:4.1%;
+      top:3.2%;
+      width:8.1%;
+      height:auto;
     }
 
-    .screen {
-      display: none;
-      overflow: auto;
-      padding: clamp(34px, 6svh, 64px) 58px;
-      background:
-        radial-gradient(circle at center, var(--dot) 0 10px, transparent 11px) 0 0 / 43px 43px,
-        linear-gradient(180deg, #ffffff 0%, #fdfdfd 100%);
-      box-shadow: inset 43px 0 0 var(--side-blue), inset -43px 0 0 var(--side-blue);
+    .stars{
+      right:4.1%;
+      top:2.6%;
+      width:10.0%;
+      height:auto;
     }
 
-    .screen.active { display: block; }
-
-    .screen-inner {
-      width: 100%;
-      min-height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 18px;
-      padding-top: 18px;
-      padding-bottom: 24px;
+    .flower{
+      left:10.4%;
+      top:36.4%;
+      width:4.9%;
+      height:auto;
     }
 
-    .screen-title {
-      margin: 0;
-      text-align: center;
-      color: var(--title-blue);
-      font-size: clamp(30px, 5vw, 52px);
-      line-height: 1.15;
-      font-weight: 1000;
-      text-shadow: 4px 4px 0 rgba(0,0,0,.08);
+    .squiggle{
+      left:-3.2%;
+      top:62.3%;
+      width:15.1%;
+      height:auto;
     }
 
-    .screen-box {
-      width: min(100%, 560px);
-      background: #fff;
-      border: 5px solid var(--ink);
-      border-radius: 20px;
-      padding: 24px;
+    .splash{
+      right:4.6%;
+      top:66.2%;
+      width:8.2%;
+      height:auto;
     }
 
-    .screen-note {
-      margin: 0 0 18px;
-      text-align: center;
-      color: #555;
-      font-size: 16px;
-      line-height: 1.8;
-      font-weight: 750;
+    .screen{
+      display:none;
+      position:absolute;
+      inset:0;
+      background:var(--bg);
+      overflow:auto;
+      padding:3.5% 5% 5%;
     }
 
-    .menu-list {
-      display: grid;
-      gap: 12px;
+    .screen.active{display:block}
+
+    .screen-card{
+      width:min(60%, 820px);
+      margin:0 auto;
+      background:#ffffff;
+      border:2.5px solid var(--outline);
+      border-radius:24px;
+      padding:28px;
     }
 
-    .menu-item {
-      width: 100%;
-      min-height: 70px;
-      border: 4px solid var(--ink);
-      border-radius: 16px;
-      background: #fff;
-      color: var(--ink);
-      font-size: 22px;
-      font-weight: 1000;
-      line-height: 1.2;
-      display: grid;
-      place-items: center;
-      text-align: center;
+    .screen-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:18px;
     }
 
-    .screen-back {
-      width: min(52%, 280px);
-      min-height: 62px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, var(--red) 0%, #f34b50 100%);
-      color: #fff;
-      font-size: 26px;
-      font-weight: 1000;
-      line-height: 1;
-      box-shadow: inset 0 -5px 0 rgba(0,0,0,.08);
+    .screen-title{
+      margin:0;
+      font-size:clamp(28px, 3vw, 42px);
+      font-weight:500;
     }
 
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: calc(18px + var(--safe-bottom));
-      transform: translateX(-50%) translateY(120px);
-      width: min(460px, calc(100% - 28px));
-      background: #111;
-      color: #fff;
-      border-radius: 18px;
-      padding: 14px 16px;
-      text-align: center;
-      font-weight: 950;
-      line-height: 1.55;
-      box-shadow: 0 16px 32px rgba(0,0,0,.24);
-      z-index: 50;
-      opacity: 0;
-      transition: .24s ease;
+    .back-btn{
+      border:2px solid var(--outline);
+      border-radius:18px;
+      background:var(--title-yellow);
+      color:var(--text);
+      padding:12px 18px;
+      font-size:18px;
+      font-weight:500;
     }
 
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    @media (max-width: 520px) {
-      .stage { box-shadow: inset 24px 0 0 var(--side-blue), inset -24px 0 0 var(--side-blue); }
-      .hero-title { width: calc(100% - 88px); font-size: clamp(38px, 10vw, 52px); }
-      .mark { display: none; }
-      .main-panel, .action-stack, .home-slot { left: 13.6%; width: 72.8%; }
-      .screen { padding-inline: 28px; box-shadow: inset 24px 0 0 var(--side-blue), inset -24px 0 0 var(--side-blue); }
+    .screen-note{
+      margin:0 0 18px;
+      color:#555;
+      text-align:center;
+      font-size:18px;
+      line-height:1.8;
     }
 
-    @media (max-height: 760px) and (orientation: portrait) {
-      .hero-title { top: 6.05%; }
-      .main-panel { top: 26.1%; }
-      .action-stack { top: 52.3%; gap: 18px; }
-      .outline-btn { height: 60px; }
-      .home-slot { bottom: calc(5.3% + var(--safe-bottom)); height: 7.1%; }
+    .menu-list{
+      display:grid;
+      gap:14px;
+    }
+
+    .menu-item{
+      min-height:70px;
+      border:2.5px solid var(--outline);
+      border-radius:18px;
+      background:#ffffff;
+      font-size:24px;
+      font-weight:500;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+
+    .rotate-lock{
+      position:fixed;
+      inset:0;
+      display:none;
+      background:var(--bg);
+      color:var(--text);
+      z-index:100;
+      padding:28px;
+      text-align:center;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .rotate-icon{
+      width:94px;
+      height:94px;
+      border:3px solid var(--outline);
+      border-radius:22px;
+      position:relative;
+      background:#fff;
+    }
+
+    .rotate-icon::before{
+      content:"";
+      position:absolute;
+      width:54px;
+      height:32px;
+      border:3px solid var(--outline);
+      border-radius:10px;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) rotate(90deg);
+      background:var(--panel-gray);
+    }
+
+    .rotate-text{
+      font-size:24px;
+      font-weight:600;
+      line-height:1.6;
+    }
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:calc(18px + var(--safe-bottom));
+      transform:translateX(-50%) translateY(120px);
+      width:min(420px, calc(100% - 28px));
+      background:#111;
+      color:#fff;
+      border-radius:18px;
+      padding:14px 16px;
+      text-align:center;
+      font-weight:700;
+      line-height:1.55;
+      opacity:0;
+      transition:.24s ease;
+      z-index:60;
+    }
+
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 980px){
+      .screen-card{width:min(88%, 700px)}
+    }
+
+    @media (orientation: portrait){
+      .app{display:none}
+      .rotate-lock{display:flex}
+      html,body{overflow:hidden}
     }
   </style>
 </head>
 <body>
-  <main class="stage">
-    <section class="home-screen" id="homeScreen">
-      <h1 class="hero-title">
-        <span>صندوق الالعاب</span>
-        <span>التعليمية</span>
-      </h1>
+  <div class="rotate-lock">
+    <div class="rotate-icon"></div>
+    <div class="rotate-text">هذه الواجهة تعمل بالوضع الأفقي فقط<br>لف الجهاز إلى الوضع الأفقي</div>
+  </div>
 
-      <div class="mark mark-left"><span class="ray r1"></span><span class="ray r2"></span><span class="ray r3"></span><span class="ray r4"></span></div>
-      <div class="mark mark-right"><span class="ray r1"></span><span class="ray r2"></span><span class="ray r3"></span><span class="ray r4"></span></div>
+  <main class="app">
+    <section class="stage">
+      <svg class="decor coil" viewBox="0 0 120 130" aria-hidden="true">
+        <g fill="none" stroke="#1f2b21" stroke-width="2.4" stroke-linecap="round">
+          <ellipse cx="30" cy="46" rx="18" ry="38" stroke="#1f2b21"/>
+          <ellipse cx="36" cy="50" rx="18" ry="38" stroke="#2c9a65"/>
+          <ellipse cx="46" cy="54" rx="18" ry="38" stroke="#1f2b21"/>
+          <ellipse cx="56" cy="58" rx="18" ry="38" stroke="#2c9a65"/>
+          <ellipse cx="66" cy="62" rx="18" ry="38" stroke="#1f2b21"/>
+          <ellipse cx="76" cy="66" rx="18" ry="38" stroke="#2c9a65"/>
+        </g>
+      </svg>
 
-      <section class="main-panel">
-        <h2 class="panel-title">اختر اللعبة التي تريد عرضها</h2>
-        <div class="select-wrap">
-          <select id="savedGameSelect">
-            <option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
-          </select>
+      <svg class="decor stars" viewBox="0 0 160 120" aria-hidden="true">
+        <g fill="#ff7b3c" stroke="#111" stroke-width="2.3">
+          <path d="M28 62 Q52 52 56 20 Q60 52 86 62 Q60 70 56 104 Q50 70 28 62Z"/>
+          <path d="M94 40 Q116 30 120 2 Q124 30 148 40 Q124 48 120 84 Q114 48 94 40Z"/>
+        </g>
+      </svg>
+
+      <svg class="decor flower" viewBox="0 0 90 90" aria-hidden="true">
+        <g fill="#f5cd42" stroke="#111" stroke-width="2.2">
+          <ellipse cx="45" cy="18" rx="10" ry="22"/>
+          <ellipse cx="45" cy="72" rx="10" ry="22"/>
+          <ellipse cx="18" cy="45" rx="22" ry="10"/>
+          <ellipse cx="72" cy="45" rx="22" ry="10"/>
+          <ellipse cx="25" cy="25" rx="10" ry="22" transform="rotate(-45 25 25)"/>
+          <ellipse cx="65" cy="65" rx="10" ry="22" transform="rotate(-45 65 65)"/>
+          <ellipse cx="65" cy="25" rx="10" ry="22" transform="rotate(45 65 25)"/>
+          <ellipse cx="25" cy="65" rx="10" ry="22" transform="rotate(45 25 65)"/>
+        </g>
+      </svg>
+
+      <svg class="decor squiggle" viewBox="0 0 220 120" aria-hidden="true">
+        <path d="M-8 75 C28 28, 68 118, 102 74 S170 28, 214 92" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round"/>
+        <path d="M-8 71 C28 24, 68 114, 102 70 S170 24, 214 88" fill="none" stroke="#36b36b" stroke-width="18" stroke-linecap="round"/>
+        <circle cx="214" cy="88" r="9" fill="#111"/>
+      </svg>
+
+      <svg class="decor splash" viewBox="0 0 140 140" aria-hidden="true">
+        <g fill="#ef4f91" stroke="#111" stroke-width="2.4">
+          <path d="M70 10 C78 24 80 40 88 48 C98 44 110 40 124 44 C118 54 108 62 106 72 C116 78 126 88 130 100 C118 100 106 98 96 102 C96 114 94 124 86 132 C78 122 72 112 64 108 C56 118 50 126 38 132 C36 120 38 110 34 100 C22 102 12 100 4 94 C14 86 26 80 32 72 C22 64 12 54 10 42 C24 40 36 42 46 38 C48 26 54 16 62 10 C66 18 68 24 70 10Z"/>
+        </g>
+      </svg>
+
+      <section class="home-screen" id="homeScreen">
+        <div class="title-pill">صندوق الالعاب التعليمية</div>
+
+        <div class="play-shell">
+          <div class="play-card">
+            <h2 class="play-title">اختر اللعبة لعرضها</h2>
+
+            <div class="select-wrap">
+              <select id="savedGameSelect">
+                <option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
+              </select>
+            </div>
+
+            <button class="start-btn" id="startGameBtn">إبدأ اللعبة</button>
+          </div>
         </div>
-        <button class="start-btn" id="startGameBtn">إبدأ اللعبة</button>
+
+        <div class="cards-grid">
+          <button class="card-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
+          <button class="card-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
+          <button class="card-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
+          <button class="card-btn" data-open-screen="settingsScreen">الإعدادات</button>
+        </div>
+
+        <div class="footer-bar">
+          <button class="home-btn" type="button">الرئيسية</button>
+        </div>
       </section>
 
-      <section class="action-stack">
-        <button class="outline-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
-        <button class="outline-btn" data-open-screen="backupScreen">تصدير الالعاب</button>
-        <button class="outline-btn" data-open-screen="backupScreen">استيراد الالعاب</button>
-        <button class="outline-btn" data-open-screen="helpScreen">التعليمات</button>
-      </section>
-
-      <div class="home-slot">
-        <button class="home-btn" type="button">الرئيسية</button>
-      </div>
-    </section>
-
-    <section class="screen" id="createScreen">
-      <div class="screen-inner">
-        <h2 class="screen-title">إنشاء لعبة</h2>
-        <div class="screen-box">
+      <section class="screen" id="createScreen">
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">إنشاء لعبة جديدة</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
+          </div>
           <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
           <div class="menu-list">
             <button class="menu-item">العجلة الدوارة</button>
@@ -396,56 +494,64 @@
             <button class="menu-item">المطابقة</button>
           </div>
         </div>
-        <button class="screen-back" data-back-home>الرئيسية</button>
-      </div>
-    </section>
+      </section>
 
-    <section class="screen" id="backupScreen">
-      <div class="screen-inner">
-        <h2 class="screen-title">استيراد وتصدير</h2>
-        <div class="screen-box">
-          <p class="screen-note">هذه الصفحة سنبنيها بعد نظام الحفظ. منها يستطيع المعلم نقل ألعابه بين الأجهزة.</p>
+      <section class="screen" id="savedScreen">
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">العابك المحفوظة</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
+          </div>
+          <div class="info-box">ستظهر هنا الألعاب التي تحفظها داخل جهازك.</div>
         </div>
-        <button class="screen-back" data-back-home>الرئيسية</button>
-      </div>
-    </section>
+      </section>
 
-    <section class="screen" id="helpScreen">
-      <div class="screen-inner">
-        <h2 class="screen-title">التعليمات</h2>
-        <div class="screen-box">
-          <p class="screen-note">أنشئ لعبة جديدة، أضف الأسئلة أو الصور، احفظها باسم، ثم اخترها من الرئيسية واضغط إبدأ اللعبة.</p>
+      <section class="screen" id="backupScreen">
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">التصدير والاستيراد</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
+          </div>
+          <div class="info-box">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها بين الأجهزة.</div>
         </div>
-        <button class="screen-back" data-back-home>الرئيسية</button>
-      </div>
+      </section>
+
+      <section class="screen" id="settingsScreen">
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">الإعدادات</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
+          </div>
+          <div class="info-box">هذه الصفحة سنبنيها لاحقًا. والواجهة تعمل بالوضع الأفقي فقط.</div>
+        </div>
+      </section>
     </section>
   </main>
 
   <div class="toast" id="toast"></div>
 
   <script>
-    const screens = ["homeScreen", "createScreen", "backupScreen", "helpScreen"];
+    const screens = ["homeScreen","createScreen","savedScreen","backupScreen","settingsScreen"];
     const toast = document.getElementById("toast");
     const startGameBtn = document.getElementById("startGameBtn");
 
-    function showToast(message) {
+    function showToast(message){
       toast.textContent = message;
       toast.classList.add("show");
       clearTimeout(showToast.timer);
       showToast.timer = setTimeout(() => toast.classList.remove("show"), 2400);
     }
 
-    function openScreen(screenId) {
+    function openScreen(screenId){
       screens.forEach((id) => {
         const el = document.getElementById(id);
-        if (!el) return;
-        if (id === "homeScreen") {
+        if(!el) return;
+        if(id === "homeScreen"){
           el.style.display = screenId === "homeScreen" ? "block" : "none";
         } else {
           el.classList.toggle("active", id === screenId);
         }
       });
-      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     document.querySelectorAll("[data-open-screen]").forEach((button) => {
