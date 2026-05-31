@@ -3,37 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>صندوق الالعاب التعليمية</title>
-  <meta name="description" content="واجهة صندوق الالعاب التعليمية - تعمل بالوضع الأفقي فقط." />
+  <title>صندوق الألعاب التعليمية</title>
+  <meta name="description" content="صندوق الألعاب التعليمية - تعمل بالوضع الأفقي فقط." />
+
   <style>
     :root{
       --bg:#ece9cf;
-      --blue:#4e88e8;
-      --title-yellow:#f3d33d;
-      --panel-orange:#ff6e3a;
-      --panel-blue:#3557a3;
+      --blue:#4f89e6;
+      --title-yellow:#f4d33c;
+      --panel-orange:#ff6d3a;
       --panel-gray:#e9e9e9;
       --btn-orange:#ff6c35;
-      --btn-orange-dark:#ef5d2b;
-      --btn-red:#ff5559;
-      --btn-red-dark:#f14a4e;
+      --btn-orange-dark:#ed5e2a;
+      --home-red:#ff565a;
+      --home-red-dark:#f0494d;
       --text:#111111;
-      --outline:#111111;
-      --dot:rgba(70,70,70,.075);
-      --app-h:100dvh;
-      --safe-bottom:env(safe-area-inset-bottom, 0px);
+      --outline:#131313;
+
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+      /* iOS Safari stable height (set by JS) */
+      --app-h: 100dvh;
     }
 
-    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
     html,body{
       margin:0;
       width:100%;
       height:100%;
-      min-height:100%;
-      overflow:hidden;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
       background:var(--bg);
       color:var(--text);
+      overflow:hidden;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
+      -webkit-text-size-adjust: 100%;
     }
 
     button,select{font:inherit}
@@ -44,16 +51,8 @@
       -webkit-user-select:none;
     }
 
-    .app{
-      position:fixed;
-      inset:0;
-      width:100vw;
-      height:var(--app-h);
-      background:var(--bg);
-      overflow:hidden;
-    }
-
-    .landscape-lock{
+    /* Lock portrait */
+    .rotate-lock{
       position:fixed;
       inset:0;
       display:none;
@@ -64,110 +63,125 @@
       text-align:center;
       background:var(--bg);
       color:var(--text);
-      z-index:200;
-      padding:24px;
+      z-index:999;
+      padding:28px;
     }
 
     .rotate-icon{
-      width:92px;
-      height:92px;
+      width:94px;
+      height:94px;
       border:3px solid var(--outline);
-      border-radius:20px;
+      border-radius:22px;
       position:relative;
       background:#fff;
     }
     .rotate-icon::before{
       content:"";
       position:absolute;
-      left:50%;
-      top:50%;
-      width:52px;
+      width:54px;
       height:32px;
-      transform:translate(-50%,-50%) rotate(90deg);
       border:3px solid var(--outline);
       border-radius:10px;
-      background:#f3f3f3;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%) rotate(90deg);
+      background:var(--panel-gray);
     }
     .rotate-text{
       font-size:24px;
-      line-height:1.6;
       font-weight:700;
+      line-height:1.6;
     }
 
-    .surface{
+    /* Full-bleed app (NO side gaps) */
+    .app{
+      position:fixed;
+      inset:0;
+      width:100vw;
+      height:var(--app-h);
+      background:var(--bg);
+      overflow:hidden;
+      padding: var(--safe-top) 0 var(--safe-bottom);
+      overscroll-behavior: none;
+      touch-action: manipulation;
+    }
+
+    /* Stage fills the whole screen, scales naturally (no 16:9 letterbox) */
+    .stage{
       position:absolute;
-      left:50%;
-      top:50%;
-      width:1366px;
-      height:768px;
-      transform:translate(-50%, -50%) scale(var(--scale,1));
-      transform-origin:center center;
+      inset:0;
+      width:100%;
+      height:100%;
       background:var(--bg);
       overflow:hidden;
     }
 
-    .home-screen,
-    .screen{
-      position:absolute;
-      inset:0;
-      width:1366px;
-      height:768px;
-      background:var(--bg);
-    }
+    /* Decorative items */
+    .decor{ position:absolute; pointer-events:none; }
+    .coil{ left:4.1%; top:3.2%; width:7.4%; height:auto; }
+    .stars{ right:4.1%; top:2.6%; width:8.8%; height:auto; }
+    .flower{ left:10.2%; top:36.4%; width:4.8%; height:auto; }
+    .squiggle{ left:-3.2%; top:62.3%; width:14.8%; height:auto; }
+    .splash{ right:4.6%; top:66.2%; width:8.0%; height:auto; }
 
-    .page-title{
+    /* Title pill */
+    .title-pill{
       position:absolute;
+      top:3.65%;
       left:50%;
-      top:20px;
-      width:593px;
-      height:104px;
       transform:translateX(-50%);
-      border:2.5px solid var(--outline);
-      border-radius:24px;
+      width:min(62%, 760px);
+      height:12.45%;
       background:var(--title-yellow);
+      border:2.5px solid var(--outline);
+      border-radius:22px;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      font-size:52px;
-      line-height:1;
+      padding:0 18px;
+      font-size:clamp(20px, 3.2vw, 36px);
       font-weight:500;
-      letter-spacing:-0.5px;
+      line-height:1;
+      white-space:nowrap;
     }
 
+    /* Main play panel */
     .play-shell{
       position:absolute;
-      left:342px;
-      top:187px;
-      width:703px;
-      height:223px;
-      border:3px solid var(--outline);
-      border-radius:26px;
+      top:24.35%;
+      left:50%;
+      transform:translateX(-50%);
+      width:min(74%, 980px);
+      height:28.95%;
       background:var(--panel-orange);
-      padding:9px;
+      border:2.5px solid var(--outline);
+      border-radius:24px;
+      padding:8px;
     }
 
     .play-card{
       width:100%;
       height:100%;
-      border:3px solid var(--outline);
-      border-radius:22px;
       background:var(--panel-gray);
+      border:2.5px solid var(--outline);
+      border-radius:20px;
+      padding:3.6% 4.2%;
       text-align:center;
-      padding:16px 26px 10px;
     }
 
     .play-title{
-      margin:6px 0 16px;
-      font-size:54px;
-      line-height:1.15;
+      margin:0 0 4.5%;
+      font-size:clamp(18px, 2.6vw, 34px);
       font-weight:500;
+      line-height:1.15;
+      white-space:nowrap;
     }
 
     .select-wrap{
       position:relative;
-      width:462px;
-      height:61px;
+      width:min(78%, 520px);
+      height:29.5%;
       margin:0 auto;
     }
 
@@ -176,129 +190,127 @@
       height:100%;
       appearance:none;
       outline:none;
-      border:3px solid var(--outline);
+      border:2.5px solid var(--outline);
       border-radius:22px;
       background:#ffffff;
       color:#555555;
       text-align:center;
       text-align-last:center;
-      padding:0 56px;
-      font-size:25px;
+      padding:0 50px;
+      font-size:clamp(14px, 1.9vw, 24px);
       font-weight:500;
       line-height:1;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .select-wrap::after{
       content:"";
       position:absolute;
-      left:22px;
+      left:4.3%;
       top:50%;
       transform:translateY(-42%);
       width:0;height:0;
-      border-left:14px solid transparent;
-      border-right:14px solid transparent;
-      border-top:22px solid #666666;
+      border-left:15px solid transparent;
+      border-right:15px solid transparent;
+      border-top:24px solid #666666;
       pointer-events:none;
     }
 
     .start-btn{
-      width:180px;
-      height:49px;
-      margin-top:17px;
-      border-radius:18px;
-      border:2px solid var(--outline);
+      margin-top:4.8%;
+      width:min(34%, 220px);
+      height:25.7%;
+      border-radius:22px;
       background:linear-gradient(180deg,var(--btn-orange) 0%, var(--btn-orange-dark) 100%);
+      border:2px solid var(--outline);
       color:#ffffff;
-      font-size:32px;
-      line-height:1;
+      font-size:clamp(16px, 2.1vw, 28px);
       font-weight:500;
-      box-shadow: inset 0 -4px 0 rgba(0,0,0,.08);
-      text-shadow:0 1px 0 rgba(0,0,0,.12);
+      line-height:1;
     }
 
-    .grid{
+    /* 2x2 buttons */
+    .cards-grid{
       position:absolute;
-      left:330px;
-      top:470px;
-      width:740px;
+      left:50%;
+      transform:translateX(-50%);
+      top:61.3%;
+      width:min(78%, 1040px);
       display:grid;
-      grid-template-columns:353px 353px;
-      gap:28px 36px;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:clamp(14px, 2.2vw, 28px) clamp(18px, 2.8vw, 36px);
+      align-content:start;
     }
 
     .card-btn{
-      height:72px;
-      border:3px solid var(--outline);
-      border-radius:20px;
+      border:2.5px solid var(--outline);
+      border-radius:18px;
       background:#ffffff;
       color:var(--text);
+      font-size:clamp(18px, 2.3vw, 34px);
+      font-weight:500;
+      line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
       padding:0 18px;
-      font-size:32px;
-      line-height:1.1;
-      font-weight:500;
+      min-height:clamp(56px, 8vh, 74px);
       white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
+    /* Footer bar */
     .footer-bar{
       position:absolute;
       left:0;
       right:0;
       bottom:0;
-      height:71px;
+      height:8.9%;
       background:var(--blue);
       border-top:2.5px solid var(--outline);
     }
 
     .home-btn{
       position:absolute;
-      left:9px;
-      top:12px;
-      width:148px;
-      height:48px;
+      left:0.9%;
+      top:50%;
+      transform:translateY(-50%);
+      width:min(14%, 170px);
+      height:67.5%;
       border-radius:22px;
+      background:linear-gradient(180deg,var(--home-red) 0%, var(--home-red-dark) 100%);
       border:2px solid var(--outline);
-      background:linear-gradient(180deg,var(--btn-red) 0%, var(--btn-red-dark) 100%);
       color:#ffffff;
+      font-size:clamp(14px, 1.9vw, 24px);
+      font-weight:500;
+      line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      font-size:30px;
-      line-height:1;
-      font-weight:500;
     }
 
-    .decor{
+    /* Other pages */
+    .screen{
+      display:none;
       position:absolute;
-      pointer-events:none;
+      inset:0;
+      background:var(--bg);
+      overflow:auto;
+      padding:3.2% 4.5% 5%;
     }
-    .coil{left:62px; top:20px; width:83px; height:auto}
-    .stars{right:49px; top:22px; width:106px; height:auto}
-    .flower{left:142px; top:277px; width:57px; height:auto}
-    .squiggle{left:-24px; top:472px; width:183px; height:auto}
-    .splash{right:47px; top:514px; width:124px; height:auto}
-
-    .screen{display:none}
-    .screen.active{display:block}
-
-    .screen-inner{
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      width:760px;
-      max-width:90%;
-    }
+    .screen.active{ display:block; }
 
     .screen-card{
-      width:100%;
-      border:3px solid var(--outline);
-      border-radius:26px;
+      width:min(860px, 92%);
+      margin:0 auto;
       background:#ffffff;
+      border:2.5px solid var(--outline);
+      border-radius:24px;
       padding:28px;
     }
 
@@ -306,94 +318,61 @@
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:18px;
+      gap:16px;
       margin-bottom:18px;
     }
 
     .screen-title{
       margin:0;
-      font-size:44px;
-      line-height:1.2;
-      font-weight:500;
+      font-size:clamp(22px, 2.8vw, 40px);
+      font-weight:600;
     }
 
     .back-btn{
-      min-width:148px;
-      min-height:52px;
       border:2px solid var(--outline);
       border-radius:18px;
       background:var(--title-yellow);
       color:var(--text);
-      font-size:24px;
-      font-weight:500;
+      padding:12px 18px;
+      font-size:18px;
+      font-weight:600;
+      white-space:nowrap;
     }
 
     .screen-note{
       margin:0 0 18px;
       color:#555;
       text-align:center;
-      font-size:22px;
+      font-size:18px;
       line-height:1.8;
       font-weight:500;
     }
 
-    .menu-list{
-      display:grid;
-      gap:14px;
-    }
-
-    .menu-item{
-      min-height:76px;
-      border:3px solid var(--outline);
-      border-radius:20px;
-      background:#ffffff;
-      font-size:30px;
-      font-weight:500;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:0 16px;
-    }
-
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:calc(16px + var(--safe-bottom));
-      transform:translateX(-50%) translateY(120px);
-      width:min(420px, calc(100% - 24px));
-      background:#111;
-      color:#fff;
-      border-radius:18px;
-      padding:14px 16px;
-      text-align:center;
-      font-size:18px;
-      line-height:1.5;
-      font-weight:700;
-      opacity:0;
-      transition:.24s ease;
-      z-index:80;
-    }
-
-    .toast.show{
-      opacity:1;
-      transform:translateX(-50%) translateY(0);
-    }
-
+    /* Portrait lock */
     @media (orientation: portrait){
-      .app{display:none}
-      .landscape-lock{display:flex}
+      .app{ display:none; }
+      .rotate-lock{ display:flex; }
+      html,body{ overflow:hidden; }
+    }
+
+    /* Small heights: keep everything visible */
+    @media (orientation: landscape) and (max-height: 520px){
+      .title-pill{ height:11.5%; }
+      .play-shell{ top:22.8%; height:30.5%; }
+      .cards-grid{ top:60.5%; }
+      .footer-bar{ height:10.5%; }
     }
   </style>
 </head>
 <body>
-  <div class="landscape-lock">
+  <div class="rotate-lock">
     <div class="rotate-icon"></div>
     <div class="rotate-text">هذه الواجهة تعمل بالوضع الأفقي فقط<br>لف الجهاز إلى الوضع الأفقي</div>
   </div>
 
   <main class="app">
-    <div class="surface">
+    <section class="stage">
+      <!-- decor -->
       <svg class="decor coil" viewBox="0 0 120 130" aria-hidden="true">
         <g fill="none" stroke="#1f2b21" stroke-width="2.4" stroke-linecap="round">
           <ellipse cx="30" cy="46" rx="18" ry="38" stroke="#1f2b21"/>
@@ -437,6 +416,7 @@
         </g>
       </svg>
 
+      <!-- home -->
       <section class="home-screen" id="homeScreen">
         <div class="title-pill">صندوق الالعاب التعليمية</div>
 
@@ -466,115 +446,84 @@
         </div>
       </section>
 
+      <!-- screens -->
       <section class="screen" id="createScreen">
-        <div class="screen-inner">
-          <div class="screen-card">
-            <div class="screen-head">
-              <h2 class="screen-title">إنشاء لعبة جديدة</h2>
-              <button class="back-btn" data-back-home>الرئيسية</button>
-            </div>
-            <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
-            <div class="menu-list">
-              <button class="menu-item">العجلة الدوارة</button>
-              <button class="menu-item">افتح الصندوق</button>
-              <button class="menu-item">اختيارات</button>
-              <button class="menu-item">صح أو خطأ</button>
-              <button class="menu-item">المطابقة</button>
-            </div>
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">إنشاء لعبة جديدة</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
+          </div>
+          <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
+          <div class="menu-list">
+            <button class="card-btn" style="min-height:66px">العجلة الدوارة</button>
+            <button class="card-btn" style="min-height:66px">افتح الصندوق</button>
+            <button class="card-btn" style="min-height:66px">اختيارات</button>
+            <button class="card-btn" style="min-height:66px">صح أو خطأ</button>
+            <button class="card-btn" style="min-height:66px">المطابقة</button>
           </div>
         </div>
       </section>
 
       <section class="screen" id="savedScreen">
-        <div class="screen-inner">
-          <div class="screen-card">
-            <div class="screen-head">
-              <h2 class="screen-title">العابي المحفوظة</h2>
-              <button class="back-btn" data-back-home>الرئيسية</button>
-            </div>
-            <p class="screen-note">ستظهر هنا الألعاب التي تحفظها داخل جهازك.</p>
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">العابي المحفوظة</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
           </div>
+          <p class="screen-note">ستظهر هنا الألعاب التي تحفظها داخل جهازك.</p>
         </div>
       </section>
 
       <section class="screen" id="backupScreen">
-        <div class="screen-inner">
-          <div class="screen-card">
-            <div class="screen-head">
-              <h2 class="screen-title">التصدير والاستيراد</h2>
-              <button class="back-btn" data-back-home>الرئيسية</button>
-            </div>
-            <p class="screen-note">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها بين الأجهزة.</p>
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">التصدير والاستيراد</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
           </div>
+          <p class="screen-note">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها بين الأجهزة.</p>
         </div>
       </section>
 
       <section class="screen" id="settingsScreen">
-        <div class="screen-inner">
-          <div class="screen-card">
-            <div class="screen-head">
-              <h2 class="screen-title">الإعدادات</h2>
-              <button class="back-btn" data-back-home>الرئيسية</button>
-            </div>
-            <p class="screen-note">هذه الصفحة سنبنيها لاحقًا. والواجهة تعمل بالوضع الأفقي فقط.</p>
+        <div class="screen-card">
+          <div class="screen-head">
+            <h2 class="screen-title">الإعدادات</h2>
+            <button class="back-btn" data-back-home>الرئيسية</button>
           </div>
+          <p class="screen-note">هذه الصفحة سنبنيها لاحقًا.</p>
         </div>
       </section>
-    </div>
+    </section>
   </main>
 
-  <div class="toast" id="toast"></div>
-
   <script>
-    const DESIGN_W = 1366;
-    const DESIGN_H = 768;
-    const app = document.querySelector('.app');
+    // Safari (especially iOS/iPadOS) height stability:
+    // use innerHeight to lock the app height and avoid layout jumps when the bar shows/hides.
+    function setAppHeight(){
+      document.documentElement.style.setProperty('--app-h', window.innerHeight + 'px');
+    }
+    window.addEventListener('resize', setAppHeight, {passive:true});
+    window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 120), {passive:true});
+    setAppHeight();
+
     const screens = ["homeScreen","createScreen","savedScreen","backupScreen","settingsScreen"];
-    const toast = document.getElementById("toast");
-    const startGameBtn = document.getElementById("startGameBtn");
-
-    function fitSurface(){
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      document.documentElement.style.setProperty('--app-h', h + 'px');
-      const scale = Math.min(w / DESIGN_W, h / DESIGN_H);
-      document.documentElement.style.setProperty('--scale', scale.toString());
-    }
-
-    function showToast(message){
-      toast.textContent = message;
-      toast.classList.add("show");
-      clearTimeout(showToast.timer);
-      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2400);
-    }
-
     function openScreen(screenId){
-      screens.forEach((id) => {
+      screens.forEach((id)=>{
         const el = document.getElementById(id);
         if(!el) return;
         if(id === "homeScreen"){
-          el.style.display = screenId === "homeScreen" ? "block" : "none";
+          el.style.display = (screenId === "homeScreen") ? "block" : "none";
         } else {
           el.classList.toggle("active", id === screenId);
         }
       });
     }
-
-    document.querySelectorAll("[data-open-screen]").forEach((button) => {
-      button.addEventListener("click", () => openScreen(button.getAttribute("data-open-screen")));
+    document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
+      btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
     });
-
-    document.querySelectorAll("[data-back-home]").forEach((button) => {
-      button.addEventListener("click", () => openScreen("homeScreen"));
+    document.querySelectorAll("[data-back-home]").forEach((btn)=>{
+      btn.addEventListener("click", ()=> openScreen("homeScreen"));
     });
-
-    startGameBtn.addEventListener("click", () => {
-      showToast("سيتم تشغيل: درس العلوم / العجلة الدوارة");
-    });
-
-    window.addEventListener('resize', fitSurface, {passive:true});
-    window.addEventListener('orientationchange', () => setTimeout(fitSurface, 120), {passive:true});
-    fitSurface();
   </script>
 </body>
 </html>
