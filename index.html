@@ -1,500 +1,508 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>صندوق الألعاب التعليمية</title>
-  <meta name="description" content="صندوق الألعاب التعليمية - تعمل بالوضع الأفقي فقط." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>صندوق الالعاب التعليمية</title>
 
   <style>
     :root{
-      /* palette (matches your reference) */
-      --bg:#ece9cf;
-      --blue:#4f89e6;
-      --title-yellow:#f4d33c;
-      --panel-orange:#ff6d3a;
-      --panel-gray:#e9e9e9;
-      --btn-orange:#ff6c35;
-      --btn-orange-dark:#ed5e2a;
-      --home-red:#ff565a;
-      --home-red-dark:#f0494d;
-      --ink:#131313;
+      --bg:#ece8cf;
+      --ink:#111111;
+      --panel:#e9e9e9;
+      --title-yellow:#efd553;
+      --orange:#f47a45;
+      --orange-dark:#e66a35;
+      --blue-bar:#5e88db;
+      --home-red:#f05d5b;
+      --green:#59c46a;
 
-      /* safe areas */
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-
-      /* iOS/Safari stable height (same idea you used in barcode) */
-      --app-h: 100vh;
-
-      /* fixed footer height */
-      --footer-h: clamp(58px, 9.2vh, 78px);
+      --footer-h: 78px;
     }
 
-    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+      font-family: Tahoma, Arial, "Segoe UI", sans-serif;
+    }
+
     html,body{
       margin:0;
-      width:100%;
-      height:100%;
+      min-height:100%;
       background:var(--bg);
-      color:#111;
-      overflow:hidden;
-      font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif;
-      -webkit-text-size-adjust: 100%;
+      color:var(--ink);
     }
-    button,select{ font:inherit; }
-    button{ border:0; cursor:pointer; user-select:none; -webkit-user-select:none; }
 
-    /* portrait lock */
-    .rotate-lock{
-      position:fixed; inset:0;
-      display:none;
-      align-items:center; justify-content:center;
-      flex-direction:column; gap:18px;
-      text-align:center;
-      background:var(--bg);
-      z-index:999;
-      padding:28px;
+    body{
+      min-height:100vh;
+      overflow-x:hidden;
+      -webkit-text-size-adjust:100%;
     }
-    .rotate-icon{
-      width:94px; height:94px;
-      border:3px solid var(--ink);
-      border-radius:22px;
-      background:#fff;
+
+    .page{
       position:relative;
-    }
-    .rotate-icon::before{
-      content:"";
-      position:absolute;
-      left:50%; top:50%;
-      width:54px; height:32px;
-      transform:translate(-50%,-50%) rotate(90deg);
-      border:3px solid var(--ink);
-      border-radius:10px;
-      background:var(--panel-gray);
-    }
-    .rotate-text{ font-size:24px; font-weight:700; line-height:1.6; }
-
-    /* app root */
-    .app{
-      position:fixed; inset:0;
-      width:100vw; height:var(--app-h);
+      min-height:100dvh;
+      overflow-x:hidden;
+      overflow-y:auto;
       background:var(--bg);
-      overflow:hidden;
-      padding-top: var(--safe-top);
-      padding-bottom: var(--safe-bottom);
-      overscroll-behavior:none;
-      touch-action:manipulation;
+      padding:
+        max(14px, var(--safe-top))
+        clamp(14px, 2vw, 28px)
+        calc(var(--footer-h) + 18px + var(--safe-bottom));
     }
 
-    /* Full-bleed stage with centered content (like barcode page: full bg, centered shell) */
-    .stage{
-      position:relative;
-      width:100%;
-      height:100%;
-      background:var(--bg);
-      overflow:hidden;
-    }
-
-    /* Decorative layer (absolute, doesn't affect layout) */
-    .decor{ position:absolute; pointer-events:none; }
-    .coil{ left:2.8%; top:3.2%; width:clamp(66px, 7.2vw, 110px); }
-    .stars{ right:3.0%; top:2.7%; width:clamp(82px, 8.4vw, 130px); }
-    .flower{ left:10.2%; top:36.2%; width:clamp(44px, 4.6vw, 72px); }
-    .squiggle{ left:-2.8%; top:63.0%; width:clamp(140px, 14.6vw, 220px); }
-    .splash{ right:3.4%; top:66.0%; width:clamp(92px, 8.2vw, 150px); }
-
-    /* layout container (CENTERED, RESPONSIVE) */
     .shell{
-      position:relative;
-      z-index:2;
-      width:min(1120px, 92vw);
-      height:calc(100% - var(--footer-h) - 10px);
+      width:min(100%, 1320px);
       margin:0 auto;
       display:flex;
       flex-direction:column;
       align-items:center;
-      justify-content:flex-start;
-      gap:clamp(14px, 2.2vh, 22px);
-      padding-top:clamp(10px, 1.8vh, 18px);
+      gap:clamp(18px, 2vw, 26px);
+      position:relative;
+      z-index:2;
     }
 
-    /* title pill */
+    .decor{
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+    }
+    .decor.coil{ left:2.5%; top:28px; width:90px; }
+    .decor.stars{ right:3.4%; top:22px; width:110px; }
+    .decor.flower{ left:9%; top:230px; width:66px; }
+    .decor.wave{ left:-1%; top:415px; width:170px; }
+    .decor.splash{ right:3.6%; top:468px; width:110px; }
+
     .title-pill{
-      width:min(980px, 88%);
-      height:clamp(58px, 10vh, 92px);
+      width:min(1080px, 92%);
+      min-height:62px;
       background:var(--title-yellow);
       border:3px solid var(--ink);
-      border-radius:26px;
+      border-radius:24px;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      padding:0 18px;
-      font-size:clamp(20px, 3.1vw, 44px);
+      padding:14px 20px;
+      font-size:clamp(28px, 3.15vw, 46px);
       font-weight:700;
-      line-height:1;
-      white-space:nowrap;
+      line-height:1.05;
     }
 
-    /* play panel */
     .play-shell{
-      width:min(980px, 88%);
-      background:var(--panel-orange);
+      width:min(1180px, 92%);
+      background:var(--orange);
       border:3px solid var(--ink);
-      border-radius:26px;
+      border-radius:28px;
       padding:10px;
     }
+
     .play-card{
-      background:var(--panel-gray);
+      width:100%;
+      min-height:220px;
+      background:var(--panel);
       border:3px solid var(--ink);
-      border-radius:22px;
-      padding:clamp(14px, 2.0vh, 20px) clamp(14px, 2.2vw, 24px);
+      border-radius:24px;
       display:flex;
       flex-direction:column;
       align-items:center;
-      gap:clamp(10px, 1.8vh, 16px);
+      justify-content:center;
+      gap:clamp(16px, 1.8vw, 22px);
+      padding:22px 24px;
     }
+
     .play-title{
       margin:0;
-      font-size:clamp(20px, 2.9vw, 46px);
-      font-weight:800;
-      line-height:1.15;
+      font-size:clamp(34px, 4vw, 64px);
+      font-weight:700;
+      line-height:1.05;
       text-align:center;
-      white-space:nowrap;
     }
 
     .select-wrap{
       position:relative;
-      width:min(560px, 78%);
-      height:clamp(46px, 6.4vh, 66px);
-      flex:0 0 auto;
+      width:min(780px, 82%);
+      height:64px;
     }
+
     .select-wrap select{
       width:100%;
       height:100%;
       appearance:none;
-      outline:none;
       border:3px solid var(--ink);
       border-radius:22px;
       background:#fff;
-      color:#555;
+      color:#5a5a5a;
+      padding:0 70px 0 28px;
       text-align:center;
       text-align-last:center;
-      padding:0 56px;
-      font-size:clamp(14px, 2.1vw, 26px);
+      font-size:clamp(20px, 2.25vw, 34px);
       font-weight:700;
-      line-height:1;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      outline:none;
     }
+
     .select-wrap::after{
       content:"";
       position:absolute;
-      left:18px;
+      left:22px;
       top:50%;
-      transform:translateY(-42%);
-      border-left:14px solid transparent;
-      border-right:14px solid transparent;
-      border-top:22px solid #666;
+      transform:translateY(-35%);
+      border-left:16px solid transparent;
+      border-right:16px solid transparent;
+      border-top:25px solid #666;
       pointer-events:none;
     }
 
     .start-btn{
-      width:min(240px, 34%);
-      height:clamp(42px, 5.6vh, 58px);
+      min-width:240px;
+      height:56px;
+      border:none;
       border-radius:20px;
       border:2px solid var(--ink);
-      background:linear-gradient(180deg, var(--btn-orange) 0%, var(--btn-orange-dark) 100%);
+      background:linear-gradient(180deg, #ff7f45 0%, var(--orange-dark) 100%);
       color:#fff;
-      font-size:clamp(16px, 2.2vw, 30px);
-      font-weight:800;
+      font-size:clamp(22px, 2.1vw, 34px);
+      font-weight:700;
       line-height:1;
-      box-shadow: inset 0 -4px 0 rgba(0,0,0,.08);
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+      padding:0 28px;
+      cursor:pointer;
     }
 
-    /* buttons grid 2x2 */
     .cards-grid{
-      width:min(980px, 88%);
+      width:min(1180px, 92%);
       display:grid;
       grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:clamp(14px, 2.2vh, 22px) clamp(18px, 2.2vw, 30px);
-      margin-top:clamp(6px, 1vh, 10px);
+      gap:22px 28px;
+      margin-top:8px;
     }
-    .card-btn{
-      height:clamp(56px, 7.6vh, 78px);
+
+    .menu-btn{
+      min-height:88px;
+      border:none;
+      border-radius:24px;
       border:3px solid var(--ink);
-      border-radius:22px;
-      background:#fff;
+      background:#f6f6f6;
       color:#111;
-      font-size:clamp(18px, 2.3vw, 34px);
-      font-weight:800;
-      line-height:1;
+      font-size:clamp(24px, 2.5vw, 44px);
+      font-weight:700;
+      line-height:1.1;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      padding:0 18px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      padding:14px 18px;
+      cursor:pointer;
     }
 
-    /* footer bar */
-    .footer-bar{
-      position:absolute;
-      left:0; right:0;
+    .bottom-bar{
+      position:fixed;
+      left:0;
+      right:0;
       bottom:0;
-      height:var(--footer-h);
-      background:var(--blue);
+      height:calc(var(--footer-h) + var(--safe-bottom));
+      padding-bottom:var(--safe-bottom);
+      background:var(--blue-bar);
       border-top:3px solid var(--ink);
-      z-index:3;
+      z-index:20;
     }
+
     .home-btn{
       position:absolute;
       left:10px;
       top:50%;
       transform:translateY(-50%);
-      width:clamp(120px, 13vw, 170px);
-      height:clamp(40px, 5.6vh, 54px);
-      border-radius:22px;
+      min-width:142px;
+      height:50px;
+      border:none;
+      border-radius:20px;
       border:2px solid var(--ink);
-      background:linear-gradient(180deg, var(--home-red) 0%, var(--home-red-dark) 100%);
+      background:var(--home-red);
       color:#fff;
-      font-size:clamp(14px, 1.9vw, 24px);
-      font-weight:800;
+      font-size:clamp(18px, 1.6vw, 26px);
+      font-weight:700;
       line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
+      padding:0 22px;
+      cursor:pointer;
     }
 
-    /* pages */
     .screen{
       display:none;
-      position:absolute;
-      inset:0;
-      background:var(--bg);
-      overflow:auto;
-      padding:clamp(18px, 3vh, 28px) clamp(18px, 4vw, 34px);
-      z-index:10;
-    }
-    .screen.active{ display:block; }
-    .screen-card{
-      width:min(860px, 92%);
-      margin:0 auto;
+      width:min(1180px, 92%);
       background:#fff;
       border:3px solid var(--ink);
       border-radius:26px;
-      padding:clamp(18px, 2.6vh, 28px);
+      padding:22px;
     }
+    .screen.active{ display:block; }
+
     .screen-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:16px;
-      margin-bottom:16px;
+      gap:12px;
+      margin-bottom:14px;
     }
+
     .screen-title{
       margin:0;
-      font-size:clamp(22px, 2.7vw, 40px);
-      font-weight:900;
-      line-height:1.2;
+      font-size:clamp(28px, 2.5vw, 40px);
+      font-weight:700;
     }
+
     .back-btn{
+      border:none;
+      border-radius:16px;
       border:2px solid var(--ink);
-      border-radius:18px;
       background:var(--title-yellow);
       color:#111;
-      padding:10px 16px;
       font-size:18px;
-      font-weight:800;
-      white-space:nowrap;
+      font-weight:700;
+      padding:10px 16px;
+      cursor:pointer;
     }
+
     .screen-note{
       margin:0;
-      text-align:center;
       color:#444;
-      font-size:clamp(16px, 1.8vw, 20px);
-      line-height:1.8;
-      font-weight:650;
+      font-size:clamp(18px, 1.6vw, 22px);
+      line-height:1.9;
     }
 
-    /* portrait -> lock */
-    @media (orientation: portrait){
-      .app{ display:none; }
-      .rotate-lock{ display:flex; }
-      html,body{ overflow:hidden; }
+    /* Tablet */
+    @media (max-width: 1100px){
+      .decor.flower{ top:255px; left:7%; width:56px; }
+      .decor.wave{ top:455px; width:150px; }
+      .decor.splash{ top:530px; width:100px; }
+      .cards-grid{ gap:18px 20px; }
+      .menu-btn{ min-height:82px; }
     }
 
-    /* very small heights: reduce gaps so nothing clips */
-    @media (orientation: landscape) and (max-height: 520px){
-      .shell{ gap:10px; padding-top:10px; }
-      .cards-grid{ gap:12px 16px; }
-      .card-btn{ height:56px; }
-      :root{ --footer-h: 64px; }
+    /* Mobile / portrait */
+    @media (max-width: 760px){
+      :root{ --footer-h: 72px; }
+
+      .page{
+        padding: max(12px, var(--safe-top)) 12px calc(var(--footer-h) + 16px + var(--safe-bottom));
+      }
+
+      .shell{
+        gap:14px;
+      }
+
+      .decor.coil{ left:10px; top:20px; width:58px; }
+      .decor.stars{ right:10px; top:18px; width:72px; }
+      .decor.flower{ left:14px; top:220px; width:46px; }
+      .decor.wave{ left:-36px; top:auto; bottom:138px; width:108px; }
+      .decor.splash{ right:10px; top:auto; bottom:90px; width:74px; }
+
+      .title-pill{
+        width:100%;
+        min-height:56px;
+        border-radius:20px;
+        padding:12px 16px;
+        font-size:clamp(22px, 6vw, 30px);
+      }
+
+      .play-shell,
+      .cards-grid,
+      .screen{
+        width:100%;
+      }
+
+      .play-card{
+        min-height:auto;
+        padding:18px 14px 16px;
+        gap:14px;
+      }
+
+      .play-title{
+        font-size:clamp(24px, 8vw, 34px);
+      }
+
+      .select-wrap{
+        width:100%;
+        height:58px;
+      }
+
+      .select-wrap select{
+        font-size:clamp(17px, 5vw, 23px);
+        padding:0 56px 0 18px;
+      }
+
+      .select-wrap::after{
+        left:18px;
+        border-left-width:13px;
+        border-right-width:13px;
+        border-top-width:20px;
+      }
+
+      .start-btn{
+        min-width:190px;
+        height:52px;
+        font-size:clamp(20px, 6vw, 26px);
+      }
+
+      .cards-grid{
+        grid-template-columns:1fr;
+        gap:14px;
+      }
+
+      .menu-btn{
+        min-height:72px;
+        border-radius:20px;
+        font-size:clamp(20px, 7vw, 28px);
+      }
+
+      .home-btn{
+        min-width:116px;
+        height:46px;
+        font-size:20px;
+        left:8px;
+      }
+
+      .screen-head{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .back-btn{
+        width:100%;
+      }
     }
   </style>
 </head>
-
 <body>
-  <div class="rotate-lock">
-    <div class="rotate-icon"></div>
-    <div class="rotate-text">هذه الواجهة تعمل بالوضع الأفقي فقط<br>لف الجهاز إلى الوضع الأفقي</div>
-  </div>
+  <main class="page">
+    <!-- Decorations -->
+    <svg class="decor coil" viewBox="0 0 120 130" aria-hidden="true">
+      <g fill="none" stroke-width="2.4" stroke-linecap="round">
+        <ellipse cx="30" cy="46" rx="18" ry="38" stroke="#2c9a65"/>
+        <ellipse cx="36" cy="50" rx="18" ry="38" stroke="#2c9a65"/>
+        <ellipse cx="46" cy="54" rx="18" ry="38" stroke="#1c1c1c"/>
+        <ellipse cx="56" cy="58" rx="18" ry="38" stroke="#2c9a65"/>
+        <ellipse cx="66" cy="62" rx="18" ry="38" stroke="#1c1c1c"/>
+        <ellipse cx="76" cy="66" rx="18" ry="38" stroke="#2c9a65"/>
+      </g>
+    </svg>
 
-  <main class="app">
-    <section class="stage">
-      <!-- Decor -->
-      <svg class="decor coil" viewBox="0 0 120 130" aria-hidden="true">
-        <g fill="none" stroke="#1f2b21" stroke-width="2.4" stroke-linecap="round">
-          <ellipse cx="30" cy="46" rx="18" ry="38" stroke="#1f2b21"/>
-          <ellipse cx="36" cy="50" rx="18" ry="38" stroke="#2c9a65"/>
-          <ellipse cx="46" cy="54" rx="18" ry="38" stroke="#1f2b21"/>
-          <ellipse cx="56" cy="58" rx="18" ry="38" stroke="#2c9a65"/>
-          <ellipse cx="66" cy="62" rx="18" ry="38" stroke="#1f2b21"/>
-          <ellipse cx="76" cy="66" rx="18" ry="38" stroke="#2c9a65"/>
-        </g>
-      </svg>
+    <svg class="decor stars" viewBox="0 0 160 120" aria-hidden="true">
+      <g fill="#ff8748" stroke="#111" stroke-width="2.3">
+        <path d="M28 62 Q52 52 56 20 Q60 52 86 62 Q60 70 56 104 Q50 70 28 62Z"/>
+        <path d="M94 40 Q116 30 120 2 Q124 30 148 40 Q124 48 120 84 Q114 48 94 40Z"/>
+      </g>
+    </svg>
 
-      <svg class="decor stars" viewBox="0 0 160 120" aria-hidden="true">
-        <g fill="#ff7b3c" stroke="#111" stroke-width="2.3">
-          <path d="M28 62 Q52 52 56 20 Q60 52 86 62 Q60 70 56 104 Q50 70 28 62Z"/>
-          <path d="M94 40 Q116 30 120 2 Q124 30 148 40 Q124 48 120 84 Q114 48 94 40Z"/>
-        </g>
-      </svg>
+    <svg class="decor flower" viewBox="0 0 90 90" aria-hidden="true">
+      <g fill="#f5cd42" stroke="#111" stroke-width="2.2">
+        <ellipse cx="45" cy="18" rx="10" ry="22"/>
+        <ellipse cx="45" cy="72" rx="10" ry="22"/>
+        <ellipse cx="18" cy="45" rx="22" ry="10"/>
+        <ellipse cx="72" cy="45" rx="22" ry="10"/>
+        <ellipse cx="25" cy="25" rx="10" ry="22" transform="rotate(-45 25 25)"/>
+        <ellipse cx="65" cy="65" rx="10" ry="22" transform="rotate(-45 65 65)"/>
+        <ellipse cx="65" cy="25" rx="10" ry="22" transform="rotate(45 65 25)"/>
+        <ellipse cx="25" cy="65" rx="10" ry="22" transform="rotate(45 25 65)"/>
+      </g>
+    </svg>
 
-      <svg class="decor flower" viewBox="0 0 90 90" aria-hidden="true">
-        <g fill="#f5cd42" stroke="#111" stroke-width="2.2">
-          <ellipse cx="45" cy="18" rx="10" ry="22"/>
-          <ellipse cx="45" cy="72" rx="10" ry="22"/>
-          <ellipse cx="18" cy="45" rx="22" ry="10"/>
-          <ellipse cx="72" cy="45" rx="22" ry="10"/>
-          <ellipse cx="25" cy="25" rx="10" ry="22" transform="rotate(-45 25 25)"/>
-          <ellipse cx="65" cy="65" rx="10" ry="22" transform="rotate(-45 65 65)"/>
-          <ellipse cx="65" cy="25" rx="10" ry="22" transform="rotate(45 65 25)"/>
-          <ellipse cx="25" cy="65" rx="10" ry="22" transform="rotate(45 25 65)"/>
-        </g>
-      </svg>
+    <svg class="decor wave" viewBox="0 0 220 120" aria-hidden="true">
+      <path d="M-8 75 C28 28, 68 118, 102 74 S170 28, 214 92" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round"/>
+      <path d="M-8 71 C28 24, 68 114, 102 70 S170 24, 214 88" fill="none" stroke="#4dbc72" stroke-width="18" stroke-linecap="round"/>
+      <circle cx="214" cy="88" r="9" fill="#111"/>
+    </svg>
 
-      <svg class="decor squiggle" viewBox="0 0 220 120" aria-hidden="true">
-        <path d="M-8 75 C28 28, 68 118, 102 74 S170 28, 214 92" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round"/>
-        <path d="M-8 71 C28 24, 68 114, 102 70 S170 24, 214 88" fill="none" stroke="#36b36b" stroke-width="18" stroke-linecap="round"/>
-        <circle cx="214" cy="88" r="9" fill="#111"/>
-      </svg>
+    <svg class="decor splash" viewBox="0 0 140 140" aria-hidden="true">
+      <g fill="#ea5aa1" stroke="#111" stroke-width="2.4">
+        <path d="M70 10 C78 24 80 40 88 48 C98 44 110 40 124 44 C118 54 108 62 106 72 C116 78 126 88 130 100 C118 100 106 98 96 102 C96 114 94 124 86 132 C78 122 72 112 64 108 C56 118 50 126 38 132 C36 120 38 110 34 100 C22 102 12 100 4 94 C14 86 26 80 32 72 C22 64 12 54 10 42 C24 40 36 42 46 38 C48 26 54 16 62 10 C66 18 68 24 70 10Z"/>
+      </g>
+    </svg>
 
-      <svg class="decor splash" viewBox="0 0 140 140" aria-hidden="true">
-        <g fill="#ef4f91" stroke="#111" stroke-width="2.4">
-          <path d="M70 10 C78 24 80 40 88 48 C98 44 110 40 124 44 C118 54 108 62 106 72 C116 78 126 88 130 100 C118 100 106 98 96 102 C96 114 94 124 86 132 C78 122 72 112 64 108 C56 118 50 126 38 132 C36 120 38 110 34 100 C22 102 12 100 4 94 C14 86 26 80 32 72 C22 64 12 54 10 42 C24 40 36 42 46 38 C48 26 54 16 62 10 C66 18 68 24 70 10Z"/>
-        </g>
-      </svg>
+    <section class="shell" id="homeShell">
+      <div class="title-pill">صندوق الالعاب التعليمية</div>
 
-      <!-- HOME -->
-      <section class="shell" id="homeShell">
-        <div class="title-pill">صندوق الالعاب التعليمية</div>
+      <div class="play-shell">
+        <div class="play-card">
+          <h2 class="play-title">اختر اللعبة لعرضها</h2>
 
-        <div class="play-shell">
-          <div class="play-card">
-            <h2 class="play-title">اختر اللعبة لعرضها</h2>
-
-            <div class="select-wrap">
-              <select id="savedGameSelect">
-                <option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
-              </select>
-            </div>
-
-            <button class="start-btn" id="startGameBtn">إبدأ اللعبة</button>
+          <div class="select-wrap">
+            <select id="savedGameSelect">
+              <option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
+            </select>
           </div>
-        </div>
 
-        <div class="cards-grid">
-          <button class="card-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
-          <button class="card-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
-          <button class="card-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
-          <button class="card-btn" data-open-screen="settingsScreen">الإعدادات</button>
+          <button class="start-btn" type="button">إبدأ اللعبة</button>
         </div>
-      </section>
-
-      <!-- FOOTER -->
-      <div class="footer-bar">
-        <button class="home-btn" type="button" data-back-home>الرئيسية</button>
       </div>
 
-      <!-- SCREENS -->
-      <section class="screen" id="createScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">إنشاء لعبة جديدة</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
-          </div>
-          <p class="screen-note">اختر نوع اللعبة. بعدها نجهز صفحة الإدخال الخاصة بها.</p>
-        </div>
-      </section>
+      <div class="cards-grid">
+        <button class="menu-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
+        <button class="menu-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
+        <button class="menu-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
+        <button class="menu-btn" data-open-screen="settingsScreen">الإعدادات</button>
+      </div>
+    </section>
 
-      <section class="screen" id="savedScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">العابي المحفوظة</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
-          </div>
-          <p class="screen-note">ستظهر هنا الألعاب التي تحفظها داخل جهازك.</p>
-        </div>
-      </section>
+    <section class="screen" id="createScreen">
+      <div class="screen-head">
+        <h2 class="screen-title">إنشاء لعبة جديدة</h2>
+        <button class="back-btn" data-back-home>الرئيسية</button>
+      </div>
+      <p class="screen-note">هنا نضيف لاحقًا أنواع الألعاب وخطوات إنشاء اللعبة.</p>
+    </section>
 
-      <section class="screen" id="backupScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">التصدير والاستيراد</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
-          </div>
-          <p class="screen-note">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها بين الأجهزة.</p>
-        </div>
-      </section>
+    <section class="screen" id="savedScreen">
+      <div class="screen-head">
+        <h2 class="screen-title">العابي المحفوظة</h2>
+        <button class="back-btn" data-back-home>الرئيسية</button>
+      </div>
+      <p class="screen-note">هنا ستظهر الألعاب المحفوظة داخل الجهاز.</p>
+    </section>
 
-      <section class="screen" id="settingsScreen">
-        <div class="screen-card">
-          <div class="screen-head">
-            <h2 class="screen-title">الإعدادات</h2>
-            <button class="back-btn" data-back-home>الرئيسية</button>
-          </div>
-          <p class="screen-note">هذه الصفحة سنبنيها لاحقًا.</p>
-        </div>
-      </section>
+    <section class="screen" id="backupScreen">
+      <div class="screen-head">
+        <h2 class="screen-title">التصدير والاستيراد</h2>
+        <button class="back-btn" data-back-home>الرئيسية</button>
+      </div>
+      <p class="screen-note">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها.</p>
+    </section>
+
+    <section class="screen" id="settingsScreen">
+      <div class="screen-head">
+        <h2 class="screen-title">الإعدادات</h2>
+        <button class="back-btn" data-back-home>الرئيسية</button>
+      </div>
+      <p class="screen-note">هذه صفحة الإعدادات، وسنربطها لاحقًا.</p>
     </section>
   </main>
 
-  <script>
-    // Safari/iPadOS fix (same principle used across your game pages):
-    // lock the app height to the real visible viewport height.
-    function setAppHeight(){
-      const vv = window.visualViewport;
-      const h = vv && vv.height ? vv.height : window.innerHeight;
-      document.documentElement.style.setProperty('--app-h', h + 'px');
-    }
-    window.addEventListener('resize', setAppHeight, {passive:true});
-    window.addEventListener('orientationchange', () => setTimeout(setAppHeight, 120), {passive:true});
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', setAppHeight, {passive:true});
-      window.visualViewport.addEventListener('scroll', setAppHeight, {passive:true});
-    }
-    setAppHeight();
+  <div class="bottom-bar">
+    <button class="home-btn" type="button" data-back-home>الرئيسية</button>
+  </div>
 
-    // navigation
+  <script>
     const screens = ["createScreen","savedScreen","backupScreen","settingsScreen"];
     function openScreen(id){
-      screens.forEach(sid => {
+      screens.forEach((sid)=>{
         const el = document.getElementById(sid);
-        if (!el) return;
-        el.classList.toggle('active', sid === id);
+        if (el) el.classList.toggle("active", sid === id);
       });
-      document.getElementById('homeShell').style.display = id ? 'none' : 'flex';
+      const home = document.getElementById("homeShell");
+      if (home) home.style.display = id ? "none" : "flex";
+      window.scrollTo({top:0, behavior:"instant"});
     }
-    document.querySelectorAll('[data-open-screen]').forEach(btn=>{
-      btn.addEventListener('click', ()=> openScreen(btn.getAttribute('data-open-screen')));
+
+    document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
+      btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
     });
-    document.querySelectorAll('[data-back-home]').forEach(btn=>{
-      btn.addEventListener('click', ()=> openScreen(''));
+
+    document.querySelectorAll("[data-back-home]").forEach((btn)=>{
+      btn.addEventListener("click", ()=> openScreen(""));
     });
   </script>
 </body>
