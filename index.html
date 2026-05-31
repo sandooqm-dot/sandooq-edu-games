@@ -3,302 +3,233 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>صندوق التعليم التفاعلي</title>
-  <meta name="description" content="صندوق التعليم التفاعلي: اختر لعبة محفوظة، أنشئ لعبة جديدة، واستورد أو صدّر ألعابك التعليمية بسهولة." />
-
+  <title>صندوق الالعاب التعليمية</title>
   <style>
     :root {
-      --blue: #2a4596;
-      --yellow: #f6b916;
-      --pink: #f05283;
-      --sky: #38b6f2;
-      --white: #f7f7f7;
-      --black: #050505;
+      --side-blue: #294894;
+      --title-blue: #4d5f90;
+      --main-blue: #2f4f9b;
+      --ink: #111111;
+      --white: #ffffff;
+      --green: #11c760;
+      --red: #ff4f55;
+      --dot: rgba(40, 54, 85, 0.055);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-    html,
-    body {
+    html, body {
       margin: 0;
       width: 100%;
       min-height: 100%;
-      background: var(--blue);
+      background: var(--side-blue);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Arial, sans-serif;
-      color: #fff;
-      overflow-x: hidden;
+      color: var(--ink);
+      overflow: hidden;
     }
 
-    body {
-      min-height: 100svh;
-    }
+    body { min-height: 100svh; }
 
-    button,
-    select {
-      font: inherit;
-    }
+    button, select { font: inherit; }
+    button { border: 0; cursor: pointer; user-select: none; }
 
-    button {
-      cursor: pointer;
-      border: 0;
-      user-select: none;
-    }
-
-    .app {
-      width: min(100%, 768px);
+    .stage {
+      width: min(100vw, 768px);
       height: 100svh;
-      min-height: 680px;
-      max-height: 1180px;
+      min-height: 650px;
       margin: 0 auto;
-      background: var(--blue);
       position: relative;
       overflow: hidden;
-      padding: 0 clamp(26px, 7vw, 78px);
+      background:
+        radial-gradient(circle at center, var(--dot) 0 13px, transparent 14px) 0 0 / 45px 45px,
+        linear-gradient(180deg, #ffffff 0%, #fdfdfd 100%);
+      box-shadow: inset 43px 0 0 var(--side-blue), inset -43px 0 0 var(--side-blue);
     }
 
-    .home-screen,
-    .screen {
+    .home-screen, .screen {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
-      position: relative;
-      z-index: 1;
     }
 
-    .home-screen {
-      display: grid;
-      grid-template-rows:
-        17.5%
-        16.5%
-        6.5%
-        7.5%
-        8%
-        12.5%
-        14.5%
-        1fr
-        8%
-        5.2%;
-      align-items: center;
-      justify-items: center;
-    }
+    .home-screen { display: block; }
 
-    .logo {
-      grid-row: 1;
-      width: clamp(175px, 39vw, 285px);
-      height: auto;
-      object-fit: contain;
-      align-self: end;
-      margin-bottom: 0;
-    }
-
-    .title {
-      grid-row: 2;
+    .hero-title {
+      position: absolute;
+      top: 6.45%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 130px);
       margin: 0;
-      align-self: end;
-      color: rgba(255,255,255,.82);
       text-align: center;
-      font-size: clamp(39px, 8.2vw, 68px);
-      line-height: 1.14;
+      color: var(--title-blue);
+      font-size: clamp(42px, 8.4vw, 72px);
+      line-height: 1.13;
       font-weight: 1000;
-      letter-spacing: -1px;
-      white-space: nowrap;
+      letter-spacing: -1.4px;
     }
 
-    .choose-label {
-      grid-row: 3;
-      margin: 0;
-      align-self: end;
-      color: #fff;
+    .hero-title span { display: block; }
+
+    .mark {
+      position: absolute;
+      top: 7.1%;
+      width: 52px;
+      height: 52px;
+    }
+
+    .mark-left { left: clamp(78px, 14vw, 132px); transform: rotate(-18deg); }
+    .mark-right { right: clamp(78px, 14vw, 132px); transform: scaleX(-1) rotate(-18deg); }
+
+    .ray {
+      position: absolute;
+      width: 4px;
+      height: 24px;
+      border-radius: 999px;
+      background: #111;
+      transform-origin: center bottom;
+    }
+
+    .ray.r1 { left: 6px; top: 18px; transform: rotate(-58deg); }
+    .ray.r2 { left: 17px; top: 10px; transform: rotate(-34deg); }
+    .ray.r3 { left: 30px; top: 5px; transform: rotate(-8deg); }
+    .ray.r4 { left: 43px; top: 10px; transform: rotate(22deg); }
+
+    .main-panel {
+      position: absolute;
+      top: 26.75%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(70.7%, 560px);
+      height: 21.2%;
+      min-height: 164px;
+      background: var(--main-blue);
+      border: 5px solid var(--ink);
+      border-radius: 18px;
+      padding: 3.25% 4.4% 2.7%;
       text-align: center;
-      font-size: clamp(24px, 5vw, 38px);
-      line-height: 1.1;
-      font-weight: 900;
+    }
+
+    .panel-title {
+      margin: 0 0 4.9%;
+      color: var(--white);
+      font-size: clamp(25px, 4.5vw, 40px);
+      line-height: 1.18;
+      font-weight: 1000;
       white-space: nowrap;
     }
 
     .select-wrap {
-      grid-row: 4;
       position: relative;
-      width: min(500px, 100%);
-      align-self: center;
+      width: 100%;
+      height: clamp(54px, 6.6svh, 66px);
+      margin: 0 auto;
     }
 
     select {
       width: 100%;
-      height: clamp(55px, 6svh, 66px);
-      border: 0;
-      outline: 0;
-      border-radius: 999px;
+      height: 100%;
+      border: 4px solid var(--ink);
+      border-radius: 16px;
+      outline: none;
+      appearance: none;
       background: var(--white);
       color: #4a4a4a;
-      appearance: none;
-      padding: 0 58px 0 26px;
+      padding: 0 56px 0 22px;
       text-align: center;
       text-align-last: center;
-      font-size: clamp(17px, 3.4vw, 25px);
-      font-weight: 900;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,.08);
+      font-size: clamp(18px, 3.3vw, 27px);
+      line-height: 1;
+      font-weight: 850;
     }
 
     .select-wrap::after {
       content: "";
       position: absolute;
-      right: 25px;
+      right: 23px;
       top: 50%;
-      transform: translateY(-45%);
-      border-top: 18px solid #555;
-      border-right: 14px solid transparent;
-      border-left: 14px solid transparent;
+      transform: translateY(-42%);
+      border-top: 22px solid #4b4b4b;
+      border-right: 15px solid transparent;
+      border-left: 15px solid transparent;
       pointer-events: none;
     }
 
     .start-btn {
-      grid-row: 5;
-      width: min(300px, 72%);
-      height: clamp(60px, 6.7svh, 74px);
-      align-self: center;
+      width: min(45.4%, 235px);
+      height: clamp(54px, 6.4svh, 66px);
+      margin-top: 5.9%;
       border-radius: 999px;
-      background: var(--yellow);
-      color: #000;
-      font-size: clamp(27px, 5.3vw, 40px);
+      background: linear-gradient(180deg, var(--green) 0%, #0bae51 100%);
+      color: #fff;
+      font-size: clamp(23px, 4.4vw, 36px);
       line-height: 1;
       font-weight: 1000;
-      box-shadow: 0 7px 0 var(--black);
-      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+      box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.08);
     }
 
-    .start-btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 2px 0 var(--black);
+    .action-stack {
+      position: absolute;
+      top: 51.1%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(70.7%, 560px);
+      display: grid;
+      gap: clamp(24px, 4.6svh, 38px);
     }
 
-    .start-btn:disabled {
-      opacity: .65;
-      cursor: not-allowed;
-      filter: grayscale(.1);
-    }
-
-    .main-actions {
-      grid-row: 6;
+    .outline-btn {
       width: 100%;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: clamp(18px, 5vw, 44px);
-      align-self: center;
-    }
-
-    .small-tools {
-      grid-row: 7;
-      width: min(620px, 100%);
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: clamp(10px, 2.7vw, 22px);
-      align-self: center;
-    }
-
-    .btn {
-      min-height: clamp(54px, 6svh, 72px);
-      border-radius: 999px;
-      color: #fff;
-      padding: 10px clamp(9px, 3vw, 22px);
-      font-size: clamp(15px, 3.1vw, 28px);
-      line-height: 1.1;
+      height: clamp(66px, 8.25svh, 86px);
+      border: 5px solid var(--ink);
+      border-radius: 15px;
+      background: var(--white);
+      color: var(--ink);
+      font-size: clamp(28px, 5.55vw, 46px);
+      line-height: 1;
       font-weight: 1000;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      white-space: nowrap;
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-
-    .btn:active {
-      transform: translateY(4px);
-    }
-
-    .btn-pink {
-      background: var(--pink);
-      box-shadow: 0 7px 0 #d84672;
-    }
-
-    .btn-sky {
-      min-height: clamp(50px, 5.7svh, 64px);
-      background: var(--sky);
-      box-shadow: 0 5px 0 rgba(255,255,255,.85);
-      font-size: clamp(14px, 2.8vw, 25px);
-    }
-
-    .btn-icon {
-      width: clamp(22px, 3.9vw, 30px);
-      height: clamp(22px, 3.9vw, 30px);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex: 0 0 auto;
-    }
-
-    .btn-icon svg {
-      width: 100%;
-      height: 100%;
-      display: block;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 3.2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+      display: grid;
+      place-items: center;
     }
 
     .home-btn {
-      grid-row: 9;
-      width: min(340px, 76%);
-      height: clamp(66px, 7.2svh, 84px);
-      align-self: center;
+      position: absolute;
+      left: 50%;
+      bottom: calc(6.25% + var(--safe-bottom));
+      transform: translateX(-50%);
+      width: min(40.1%, 320px);
+      height: clamp(55px, 6.85svh, 70px);
       border-radius: 999px;
-      background: var(--yellow);
-      color: #000;
-      font-size: clamp(31px, 6vw, 46px);
+      background: linear-gradient(180deg, var(--red) 0%, #f34b50 100%);
+      color: #fff;
+      font-size: clamp(25px, 5vw, 40px);
       line-height: 1;
       font-weight: 1000;
-      box-shadow: 0 8px 0 var(--black);
-    }
-
-    .footer {
-      grid-row: 10;
-      margin: 0;
-      align-self: end;
-      padding-bottom: 0;
-      color: rgba(255,255,255,.93);
-      text-align: center;
-      font-size: clamp(14px, 2.7vw, 22px);
-      line-height: 1.35;
-      font-weight: 850;
-      white-space: nowrap;
-    }
-
-    .demo-line {
-      display: none;
+      box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.08);
     }
 
     .screen {
       display: none;
-      padding-top: clamp(28px, 5svh, 70px);
+      overflow: auto;
+      padding: clamp(34px, 6svh, 64px) 58px;
+      background:
+        radial-gradient(circle at center, var(--dot) 0 13px, transparent 14px) 0 0 / 45px 45px,
+        linear-gradient(180deg, #ffffff 0%, #fdfdfd 100%);
+      box-shadow: inset 43px 0 0 var(--side-blue), inset -43px 0 0 var(--side-blue);
     }
 
-    .screen.active {
-      display: block;
-    }
+    .screen.active { display: block; }
 
     .screen-card {
-      width: min(650px, 100%);
+      width: min(560px, 100%);
       margin: 0 auto;
-      background: #fff;
-      color: #1d1d1d;
-      border-radius: 30px;
-      padding: clamp(22px, 4vw, 36px);
-      box-shadow: 0 24px 50px rgba(0,0,0,.2);
+      background: var(--white);
+      color: var(--ink);
+      border: 5px solid var(--ink);
+      border-radius: 18px;
+      padding: clamp(22px, 4vw, 34px);
     }
 
     .screen-head {
@@ -306,47 +237,44 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .screen-title {
       margin: 0;
-      color: var(--blue);
-      font-size: clamp(26px, 5vw, 42px);
+      color: var(--title-blue);
+      font-size: clamp(28px, 5vw, 42px);
       line-height: 1.2;
       font-weight: 1000;
     }
 
     .back-btn {
-      border-radius: 999px;
-      background: var(--yellow);
-      color: #000;
-      padding: 11px 18px;
+      border: 4px solid var(--ink);
+      border-radius: 14px;
+      background: var(--white);
+      color: var(--ink);
+      padding: 10px 16px;
       font-size: 15px;
-      font-weight: 1000;
-      box-shadow: 0 5px 0 #111;
+      font-weight: 950;
       white-space: nowrap;
     }
 
     .screen-note {
       margin: 0 0 20px;
-      color: #5f6677;
+      color: #555;
       text-align: center;
       font-size: 16px;
       line-height: 1.8;
       font-weight: 750;
     }
 
-    .template-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 13px;
-    }
+    .template-grid { display: grid; grid-template-columns: 1fr; gap: 13px; }
 
     .template-card {
-      border-radius: 22px;
-      background: #eef4ff;
-      color: #1d1d1d;
+      border: 4px solid var(--ink);
+      border-radius: 15px;
+      background: var(--white);
+      color: var(--ink);
       padding: 16px 18px;
       text-align: right;
       display: grid;
@@ -354,16 +282,15 @@
       align-items: center;
       gap: 15px;
       min-height: 78px;
-      box-shadow: inset 0 -3px 0 rgba(42,68,149,.12);
     }
 
     .template-icon {
       width: 46px;
       height: 46px;
-      border-radius: 15px;
+      border-radius: 12px;
       display: grid;
       place-items: center;
-      background: var(--blue);
+      background: var(--title-blue);
       color: #fff;
       font-size: 23px;
       font-weight: 1000;
@@ -371,51 +298,29 @@
 
     .template-card h3 {
       margin: 0 0 4px;
-      color: var(--blue);
+      color: var(--ink);
       font-size: 19px;
       font-weight: 1000;
     }
 
     .template-card p {
       margin: 0;
-      color: #606b80;
+      color: #555;
       font-size: 13px;
       line-height: 1.5;
       font-weight: 750;
     }
 
-    .info-box,
-    .saved-list {
-      border-radius: 24px;
-      background: #f1f6ff;
+    .info-box {
+      border: 4px solid var(--ink);
+      border-radius: 15px;
+      background: var(--white);
       padding: 22px;
       text-align: center;
-      color: #5c6678;
+      color: #333;
       font-size: 16px;
       line-height: 1.8;
       font-weight: 850;
-    }
-
-    .saved-item {
-      background: #fff;
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 12px;
-      text-align: right;
-      box-shadow: 0 9px 22px rgba(42,68,149,.1);
-    }
-
-    .saved-item strong {
-      display: block;
-      color: #171717;
-      font-size: 18px;
-      font-weight: 1000;
-      margin-bottom: 4px;
-    }
-
-    .saved-item span {
-      color: var(--blue);
-      font-weight: 950;
     }
 
     .toast {
@@ -424,7 +329,7 @@
       bottom: calc(18px + var(--safe-bottom));
       transform: translateX(-50%) translateY(120px);
       width: min(460px, calc(100% - 28px));
-      background: #111827;
+      background: #111;
       color: #fff;
       border-radius: 18px;
       padding: 14px 16px;
@@ -442,251 +347,94 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    @media (min-width: 900px) {
-      .app {
-        width: 100%;
-        max-width: none;
-        padding-inline: clamp(90px, 15vw, 190px);
+    @media (max-width: 520px) {
+      .stage {
+        box-shadow: inset 24px 0 0 var(--side-blue), inset -24px 0 0 var(--side-blue);
       }
 
-      .home-screen {
-        max-width: 900px;
-        margin: 0 auto;
+      .hero-title {
+        width: calc(100% - 84px);
+        font-size: clamp(38px, 10vw, 52px);
       }
 
-      .logo {
-        width: clamp(210px, 22vw, 315px);
+      .mark { display: none; }
+
+      .main-panel,
+      .action-stack {
+        width: calc(100% - 104px);
       }
 
-      .title {
-        font-size: clamp(48px, 5vw, 78px);
-      }
+      .panel-title { font-size: clamp(23px, 6vw, 31px); }
+      select { font-size: clamp(16px, 4vw, 21px); }
+      .outline-btn { font-size: clamp(27px, 7vw, 36px); }
+      .home-btn { width: min(45%, 260px); }
 
-      .main-actions {
-        max-width: 690px;
-      }
-
-      .small-tools {
-        max-width: 650px;
-      }
-    }
-
-    @media (orientation: landscape) and (max-height: 640px) {
-      .app {
-        min-height: 100svh;
-        max-height: none;
-        height: auto;
-        overflow: auto;
-        padding-top: 22px;
-        padding-bottom: 22px;
-      }
-
-      .home-screen {
-        min-height: auto;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .logo {
-        width: 170px;
-        margin: 0 auto 26px;
-      }
-
-      .title {
-        font-size: clamp(30px, 5vw, 48px);
-        margin: 0 0 22px;
-      }
-
-      .choose-label {
-        font-size: clamp(22px, 4vw, 32px);
-        margin-bottom: 12px;
-      }
-
-      .select-wrap {
-        margin-bottom: 16px;
-      }
-
-      .start-btn {
-        margin: 0 auto 26px;
-      }
-
-      .main-actions {
-        margin-top: 0;
-        margin-bottom: 18px;
-      }
-
-      .small-tools {
-        margin-top: 0;
-        margin-bottom: 26px;
-      }
-
-      .home-btn {
-        margin: 0 auto 18px;
-      }
-
-      .footer {
-        margin: 0;
-      }
-    }
-
-    @media (max-width: 560px) {
-      .app {
-        padding-inline: 24px;
-      }
-
-      .home-screen {
-        grid-template-rows:
-          13.5%
-          19.5%
-          6.5%
-          7%
-          8.5%
-          11.5%
-          11.5%
-          1fr
-          8%
-          5.5%;
-      }
-
-      .logo {
-        width: clamp(150px, 46vw, 210px);
-      }
-
-      .title {
-        font-size: clamp(36px, 10vw, 50px);
-      }
-
-      .choose-label {
-        font-size: clamp(23px, 6vw, 31px);
-      }
-
-      .main-actions {
-        gap: 14px;
-      }
-
-      .btn-pink {
-        font-size: clamp(15px, 4.2vw, 20px);
-      }
-
-      .small-tools {
-        width: 100%;
-        gap: 10px;
-      }
-
-      .btn-sky {
-        min-height: 52px;
-        font-size: clamp(13px, 3.7vw, 16px);
-        padding-inline: 8px;
-      }
-
-      .btn-icon {
-        width: 23px;
-        height: 23px;
+      .screen {
+        padding-inline: 34px;
+        box-shadow: inset 24px 0 0 var(--side-blue), inset -24px 0 0 var(--side-blue);
       }
 
       .screen-head {
-        align-items: stretch;
         flex-direction: column;
+        align-items: stretch;
       }
 
-      .back-btn {
-        width: 100%;
-      }
+      .back-btn { width: 100%; }
     }
 
-    @media (max-height: 760px) and (orientation: portrait) {
-      .home-screen {
-        grid-template-rows:
-          12%
-          17%
-          6.5%
-          7%
-          8%
-          11.5%
-          11%
-          1fr
-          7.8%
-          5%;
-      }
-
-      .logo {
-        width: clamp(132px, 41vw, 180px);
-      }
-
-      .title {
-        font-size: clamp(31px, 8.5vw, 44px);
-      }
-
-      .start-btn {
-        height: 58px;
-      }
-
-      .btn {
-        min-height: 50px;
-      }
-
-      .btn-sky {
-        min-height: 46px;
-      }
-
-      .home-btn {
-        height: 58px;
-        font-size: clamp(26px, 6vw, 34px);
-      }
-
-      .footer {
-        font-size: clamp(12px, 2.5vw, 15px);
-      }
+    @media (max-height: 750px) and (orientation: portrait) {
+      .stage { min-height: 620px; }
+      .hero-title { top: 6.05%; font-size: clamp(33px, 8.8vw, 45px); }
+      .main-panel { top: 25.2%; height: 20.6%; }
+      .action-stack { top: 50.3%; gap: 18px; }
+      .outline-btn { height: 60px; }
+      .home-btn { bottom: calc(5.15% + var(--safe-bottom)); }
     }
   </style>
 </head>
 
 <body>
-  <main class="app">
+  <main class="stage">
     <section class="home-screen" id="homeScreen">
-      <img class="logo" src="logo.PNG" alt="صندوق المسابقات" />
+      <h1 class="hero-title">
+        <span>صندوق الالعاب</span>
+        <span>التعليمية</span>
+      </h1>
 
-      <h1 class="title">صندوق الألعاب التعليمية</h1>
-
-      <h2 class="choose-label">يرجى اختيار لعبة</h2>
-
-      <div class="select-wrap">
-        <select id="savedGameSelect">
-          <option value="">لا توجد ألعاب محفوظة حتى الآن</option>
-        </select>
+      <div class="mark mark-left">
+        <span class="ray r1"></span>
+        <span class="ray r2"></span>
+        <span class="ray r3"></span>
+        <span class="ray r4"></span>
       </div>
 
-      <button class="start-btn" id="startGameBtn" disabled>ابدأ اللعبة</button>
-
-      <div class="main-actions">
-        <button class="btn btn-pink" data-open-screen="savedScreen">
-          <span class="btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 32 32"><path d="M5 6h6v6H5zM5 20h6v6H5zM20 6h6v6h-6zM20 20h6v6h-6z"/></svg>
-          </span>
-          <span>الألعاب المحفوظة</span>
-        </button>
-
-        <button class="btn btn-pink" data-open-screen="createScreen">
-          <span class="btn-icon" aria-hidden="true">
-            <svg viewBox="0 0 32 32"><path d="M6 24l2 2 7-2 11-11-7-7L8 17z"/><path d="M18 7l7 7"/></svg>
-          </span>
-          <span>إنشاء لعبة</span>
-        </button>
+      <div class="mark mark-right">
+        <span class="ray r1"></span>
+        <span class="ray r2"></span>
+        <span class="ray r3"></span>
+        <span class="ray r4"></span>
       </div>
 
-      <div class="small-tools">
-        <button class="btn btn-sky" data-open-screen="helpScreen">التعليمات</button>
-        <button class="btn btn-sky" data-open-screen="backupScreen">استيراد لعبة</button>
-        <button class="btn btn-sky" data-open-screen="backupScreen">تصدير لعبة</button>
-      </div>
+      <section class="main-panel">
+        <h2 class="panel-title">اختر اللعبة التي تريد عرضها</h2>
+
+        <div class="select-wrap">
+          <select id="savedGameSelect">
+            <option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
+          </select>
+        </div>
+
+        <button class="start-btn" id="startGameBtn">إبدأ اللعبة</button>
+      </section>
+
+      <section class="action-stack">
+        <button class="outline-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
+        <button class="outline-btn" data-open-screen="backupScreen">تصدير الالعاب</button>
+        <button class="outline-btn" data-open-screen="backupScreen">استيراد الالعاب</button>
+        <button class="outline-btn" data-open-screen="helpScreen">التعليمات</button>
+      </section>
 
       <button class="home-btn" type="button">الرئيسية</button>
-
-      <footer class="footer">جميع الحقوق محفوظة © صندوق المسابقات 2026</footer>
-
-      <div class="demo-line" id="savedSummary">
-        <button id="demoDataBtn">إضافة مثال للتجربة</button>
-      </div>
     </section>
 
     <section class="screen" id="createScreen">
@@ -742,17 +490,6 @@
       </div>
     </section>
 
-    <section class="screen" id="savedScreen">
-      <div class="screen-card">
-        <div class="screen-head">
-          <h2 class="screen-title">الألعاب المحفوظة</h2>
-          <button class="back-btn" data-back-home>الرجوع للرئيسية</button>
-        </div>
-
-        <div class="saved-list" id="savedList">لا توجد ألعاب محفوظة حتى الآن.</div>
-      </div>
-    </section>
-
     <section class="screen" id="backupScreen">
       <div class="screen-card">
         <div class="screen-head">
@@ -774,7 +511,7 @@
         </div>
 
         <div class="info-box">
-          أنشئ لعبة جديدة، أضف الأسئلة أو الصور، احفظها باسم، ثم اخترها من الرئيسية واضغط ابدأ.
+          أنشئ لعبة جديدة، أضف الأسئلة أو الصور، احفظها باسم، ثم اخترها من الرئيسية واضغط إبدأ اللعبة.
         </div>
       </div>
     </section>
@@ -783,25 +520,9 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const STORAGE_KEY = "sandooq_edu_saved_games_v7";
-
-    const screens = ["homeScreen", "createScreen", "savedScreen", "backupScreen", "helpScreen"];
+    const screens = ["homeScreen", "createScreen", "backupScreen", "helpScreen"];
     const toast = document.getElementById("toast");
-    const savedGameSelect = document.getElementById("savedGameSelect");
     const startGameBtn = document.getElementById("startGameBtn");
-    const savedList = document.getElementById("savedList");
-
-    function getSavedGames() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      } catch (error) {
-        return [];
-      }
-    }
-
-    function setSavedGames(games) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
-    }
 
     function showToast(message) {
       toast.textContent = message;
@@ -818,61 +539,13 @@
         if (!el) return;
 
         if (id === "homeScreen") {
-          el.style.display = screenId === "homeScreen" ? "grid" : "none";
+          el.style.display = screenId === "homeScreen" ? "block" : "none";
         } else {
           el.classList.toggle("active", id === screenId);
         }
       });
 
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function escapeHtml(text) {
-      return String(text)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    function renderSavedGames() {
-      const games = getSavedGames();
-      savedGameSelect.innerHTML = "";
-
-      if (!games.length) {
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "لا توجد ألعاب محفوظة حتى الآن";
-        savedGameSelect.appendChild(option);
-
-        startGameBtn.disabled = true;
-        savedList.innerHTML = "لا توجد ألعاب محفوظة حتى الآن.";
-        return;
-      }
-
-      const defaultOption = document.createElement("option");
-      defaultOption.value = "";
-      defaultOption.textContent = "يرجى اختيار لعبة";
-      savedGameSelect.appendChild(defaultOption);
-
-      games.forEach((game) => {
-        const option = document.createElement("option");
-        option.value = game.id;
-        option.textContent = `${game.name} / ${game.typeName}`;
-        savedGameSelect.appendChild(option);
-      });
-
-      startGameBtn.disabled = true;
-
-      savedList.innerHTML = games.map((game) => {
-        return `
-          <div class="saved-item">
-            <strong>${escapeHtml(game.name)}</strong>
-            <span>${escapeHtml(game.typeName)}</span>
-          </div>
-        `;
-      }).join("");
     }
 
     document.querySelectorAll("[data-open-screen]").forEach((button) => {
@@ -893,29 +566,9 @@
       });
     });
 
-    savedGameSelect.addEventListener("change", () => {
-      startGameBtn.disabled = !savedGameSelect.value;
-    });
-
     startGameBtn.addEventListener("click", () => {
-      const gameId = savedGameSelect.value;
-
-      if (!gameId) {
-        showToast("اختر لعبة محفوظة أولًا.");
-        return;
-      }
-
-      const game = getSavedGames().find((item) => item.id === gameId);
-
-      if (!game) {
-        showToast("لم يتم العثور على اللعبة.");
-        return;
-      }
-
-      showToast(`سيتم تشغيل: ${game.name}`);
+      showToast("سيتم تشغيل: درس العلوم / العجلة الدوارة");
     });
-
-    renderSavedGames();
   </script>
 </body>
 </html>
