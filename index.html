@@ -585,6 +585,237 @@
       }
     }
 
+    /* v20: ضبط التكبير في الجوال ومنع تضخم النصوص داخل المربعات */
+    @media (max-width: 760px){
+      .page{
+        padding-left:14px;
+        padding-right:14px;
+      }
+
+      .shell{
+        width:100%;
+        max-width:520px;
+        gap:10px;
+      }
+
+      .title-pill{
+        width:88%;
+        min-height:40px;
+        padding:7px 12px;
+        border-width:3px;
+        border-radius:16px;
+        font-size:clamp(17px, 4.2vw, 22px);
+        line-height:1.05;
+      }
+
+      .play-shell{
+        width:90%;
+        padding:7px;
+        border-radius:22px;
+        margin-top:10px;
+      }
+
+      .play-card{
+        padding:10px 10px 11px;
+        gap:8px;
+        border-radius:19px;
+      }
+
+      .play-title{
+        font-size:clamp(18px, 4.8vw, 24px);
+        line-height:1.05;
+      }
+
+      .select-wrap{
+        width:92%;
+        height:42px;
+      }
+
+      .select-wrap select{
+        font-size:clamp(13px, 3.35vw, 16px);
+        padding-right:38px;
+        padding-left:34px;
+        border-width:3px;
+        border-radius:17px;
+        line-height:1;
+      }
+
+      .select-wrap::after{
+        left:13px;
+        border-left-width:9px;
+        border-right-width:9px;
+        border-top-width:14px;
+      }
+
+      .start-btn{
+        min-width:136px;
+        height:38px;
+        font-size:clamp(15px, 4vw, 19px);
+        border-radius:16px;
+        padding:0 18px;
+      }
+
+      .cards-grid{
+        width:84%;
+        gap:9px;
+      }
+
+      .menu-btn{
+        min-height:46px;
+        border-radius:17px;
+        border-width:3px;
+        font-size:clamp(15px, 4vw, 19px);
+        line-height:1.1;
+        padding:8px 12px;
+      }
+
+      .bottom-bar{
+        height:calc(66px + var(--safe-bottom));
+      }
+
+      .home-btn{
+        min-width:104px;
+        height:40px;
+        border-radius:16px;
+        font-size:17px;
+        padding:0 16px;
+      }
+
+      .screen{
+        width:92%;
+        padding:16px 12px;
+        border-width:3px;
+        border-radius:22px;
+      }
+
+      .screen-title{
+        font-size:clamp(22px, 5.4vw, 28px);
+        margin-bottom:14px;
+      }
+
+      .screen-note{
+        font-size:clamp(14px, 3.7vw, 17px);
+      }
+
+      .template-list{
+        gap:12px;
+        margin-top:14px;
+      }
+
+      .template-card{
+        min-height:auto;
+        grid-template-columns:74px minmax(0, 1fr);
+        gap:10px;
+        padding:10px;
+        border-width:4px;
+        border-radius:20px;
+        align-items:center;
+      }
+
+      .template-cover{
+        border-radius:12px;
+      }
+
+      .template-title{
+        font-size:clamp(20px, 5vw, 25px);
+        line-height:1.05;
+        margin-bottom:6px;
+      }
+
+      .template-desc{
+        font-size:clamp(12px, 3.2vw, 15px);
+        line-height:1.45;
+      }
+    }
+
+    @media (max-width: 760px) and (max-height: 760px){
+      :root{ --footer-h: 62px; }
+
+      .page{
+        padding-top:max(7px, var(--safe-top));
+        padding-bottom:calc(62px + 10px + var(--safe-bottom));
+      }
+
+      .shell{
+        gap:8px;
+      }
+
+      .title-pill{
+        min-height:36px;
+        font-size:clamp(16px, 3.9vw, 20px);
+      }
+
+      .play-shell{
+        margin-top:8px;
+        padding:6px;
+      }
+
+      .play-card{
+        padding:9px;
+        gap:7px;
+      }
+
+      .play-title{
+        font-size:clamp(17px, 4.3vw, 22px);
+      }
+
+      .select-wrap{
+        height:38px;
+      }
+
+      .select-wrap select{
+        font-size:clamp(12px, 3.1vw, 15px);
+      }
+
+      .select-wrap::after{
+        border-left-width:8px;
+        border-right-width:8px;
+        border-top-width:12px;
+      }
+
+      .start-btn{
+        height:35px;
+        min-width:126px;
+        font-size:clamp(14px, 3.7vw, 18px);
+      }
+
+      .menu-btn{
+        min-height:42px;
+        font-size:clamp(14px, 3.7vw, 18px);
+      }
+
+      .cards-grid{
+        gap:7px;
+      }
+
+      .template-card{
+        grid-template-columns:64px minmax(0, 1fr);
+        gap:8px;
+        padding:8px;
+      }
+
+      .template-title{
+        font-size:clamp(18px, 4.5vw, 23px);
+      }
+
+      .template-desc{
+        font-size:clamp(11px, 2.9vw, 14px);
+        line-height:1.35;
+      }
+    }
+
+    @media (max-width: 430px){
+      .select-wrap select{
+        letter-spacing:-0.2px;
+      }
+
+      .play-title,
+      .title-pill,
+      .menu-btn{
+        letter-spacing:-0.25px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -669,7 +900,7 @@
           <div class="template-cover" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">العجلة الدوارة</h3>
-            <p class="template-desc">أنشئ عجلة تفاعلية للنصوص أو الصور، ثم شغّلها مباشرة وقت الدرس.</p>
+            <p class="template-desc">عجلة للنصوص أو الصور.</p>
           </div>
         </button>
 
@@ -677,7 +908,7 @@
           <div class="template-cover empty" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">افتح الصندوق</h3>
-            <p class="template-desc">صناديق تفاعلية تكشف سؤالًا أو صورة عند الضغط عليها.</p>
+            <p class="template-desc">صناديق تكشف سؤالًا أو صورة.</p>
           </div>
         </button>
 
@@ -685,7 +916,7 @@
           <div class="template-cover empty" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">اختيارات</h3>
-            <p class="template-desc">أسئلة متعددة الخيارات بإجابة صحيحة واضحة للعرض والمراجعة.</p>
+            <p class="template-desc">أسئلة متعددة الخيارات.</p>
           </div>
         </button>
 
@@ -693,7 +924,7 @@
           <div class="template-cover empty" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">صح أو خطأ</h3>
-            <p class="template-desc">عبارات سريعة يختار فيها الطلاب هل الإجابة صحيحة أم خاطئة.</p>
+            <p class="template-desc">عبارات بإجابة صح أو خطأ.</p>
           </div>
         </button>
 
@@ -701,7 +932,7 @@
           <div class="template-cover empty" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">المطابقة</h3>
-            <p class="template-desc">طابق الكلمات أو الصور أو المفاهيم بطريقة تفاعلية واضحة.</p>
+            <p class="template-desc">طابق الكلمات أو الصور.</p>
           </div>
         </button>
 
@@ -709,7 +940,7 @@
           <div class="template-cover empty" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">التصنيف</h3>
-            <p class="template-desc">رتّب العناصر داخل مجموعات مناسبة حسب الدرس أو المهارة.</p>
+            <p class="template-desc">رتّب العناصر داخل مجموعات.</p>
           </div>
         </button>
 
@@ -717,7 +948,7 @@
           <div class="template-cover empty" aria-hidden="true"></div>
           <div class="template-content">
             <h3 class="template-title">خمن الصورة</h3>
-            <p class="template-desc">اعرض صورة ويخمّن الطلاب الإجابة بطريقة مرحة وسريعة.</p>
+            <p class="template-desc">اعرض صورة وخمّن الإجابة.</p>
           </div>
         </button>
       </div>
