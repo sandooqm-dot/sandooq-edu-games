@@ -1846,6 +1846,104 @@
       }
     }
 
+    /* v27: ضبط أقسام العجلة والنصوص والتوقف عند السهم */
+    .real-wheel{
+      overflow:visible;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.11));
+    }
+
+    .wheel-slices{
+      overflow:hidden;
+      border-radius:50%;
+      background:var(--wheel-bg) !important;
+    }
+
+    .wheel-slices::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:var(--wheel-lines, none);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .wheel-slices::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      box-shadow:inset 0 0 0 3px rgba(255,255,255,.95);
+      pointer-events:none;
+      z-index:4;
+    }
+
+    .slice-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:26%;
+      min-height:36px;
+      height:auto;
+      margin:0;
+      transform-origin:center center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      font-size:clamp(14px, 2.25vw, 24px);
+      font-weight:800;
+      line-height:1.15;
+      padding:4px 6px;
+      z-index:3;
+      direction:rtl;
+      overflow:visible;
+      white-space:normal;
+      text-shadow:0 1px 2px rgba(0,0,0,.22);
+      pointer-events:none;
+    }
+
+    .slice-label.dark{
+      color:#1b1b1b;
+      text-shadow:none;
+    }
+
+    .slice-label img{
+      width:clamp(34px, 6.2vw, 64px);
+      height:clamp(34px, 6.2vw, 64px);
+      object-fit:contain;
+      border-radius:6px;
+      background:#fff;
+      padding:3px;
+      box-shadow:0 1px 5px rgba(0,0,0,.16);
+    }
+
+    .real-wheel-center{
+      z-index:8;
+      box-shadow:0 0 0 2px rgba(0,0,0,.04);
+    }
+
+    @media (max-width: 760px){
+      .slice-label{
+        width:28%;
+        font-size:clamp(13px, 4vw, 19px);
+        min-height:30px;
+      }
+
+      .slice-label img{
+        width:clamp(30px, 8vw, 46px);
+        height:clamp(30px, 8vw, 46px);
+      }
+    }
+
+    @media (max-width: 430px){
+      .slice-label{
+        width:30%;
+        font-size:clamp(12px, 3.7vw, 17px);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2281,18 +2379,25 @@
       const step = 360 / count;
       const stops = [];
       for (let i = 0; i < count; i++){
+        const start = i * step;
+        const end = (i + 1) * step;
         const color = lightSliceIndexes.has(i % 9) ? "#ffffff" : wheelColors[i % wheelColors.length];
-        stops.push(`${color} ${i * step}deg ${(i + 1) * step}deg`);
+
+        // فاصل أبيض رفيع وواضح بين الأقسام بدون ترك فراغ فعلي.
+        const gap = Math.min(1.4, step * 0.08);
+        stops.push(`#ffffff ${start}deg ${start + gap}deg`);
+        stops.push(`${color} ${start + gap}deg ${end - gap}deg`);
+        stops.push(`#ffffff ${end - gap}deg ${end}deg`);
       }
-      return `conic-gradient(${stops.join(",")})`;
+      return `conic-gradient(from 0deg, ${stops.join(",")})`;
     }
 
     function makeSliceLines(count){
       const step = 360 / count;
       const layers = [];
       for (let i = 0; i < count; i++){
-        const deg = i * step;
-        layers.push(`linear-gradient(${deg}deg, transparent calc(50% - 1px), rgba(255,255,255,.92) calc(50% - 1px), rgba(255,255,255,.92) calc(50% + 1px), transparent calc(50% + 1px))`);
+        const deg = (i * step) - 90;
+        layers.push(`linear-gradient(${deg}deg, transparent calc(50% - 1.2px), rgba(255,255,255,.96) calc(50% - 1.2px), rgba(255,255,255,.96) calc(50% + 1.2px), transparent calc(50% + 1.2px))`);
       }
       return layers.join(",");
     }
@@ -2320,14 +2425,27 @@
         label.className = "slice-label";
         if (lightSliceIndexes.has(index % 9)) label.classList.add("dark");
 
-        const angle = (index * step) + (step / 2);
-        label.style.transform = `rotate(${angle}deg) translate(30%, -50%) rotate(90deg)`;
+        // conic-gradient يبدأ من الأعلى، أما translateX يبدأ من اليمين.
+        // لذلك نحول زاوية القسم حتى يكون العنصر فعليًا في منتصف القسم.
+        const conicCenter = (index * step) + (step / 2);
+        const positionAngle = conicCenter - 90;
+
+        // النص يكون مواجهًا للمشاهد دائمًا.
+        label.style.transform = `translate(-50%, -50%) rotate(${positionAngle}deg) translateX(31%) rotate(${-positionAngle}deg)`;
 
         if ((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData) {
           const img = document.createElement("img");
           img.src = entry.imageData;
           img.alt = "";
           label.appendChild(img);
+
+          if (wheelContentType === "mixed" && (entry.text || "").trim()) {
+            const span = document.createElement("span");
+            span.textContent = entry.text.trim();
+            span.style.marginInlineStart = "4px";
+            span.style.fontSize = "0.74em";
+            label.appendChild(span);
+          }
         } else {
           label.textContent = textForEntry(entry, index);
         }
@@ -2364,7 +2482,8 @@
       const count = Math.max(items.length, 2);
       const step = 360 / count;
       const selected = Math.floor(Math.random() * count);
-      const targetAngle = 180 - (selected * step + step / 2);
+      const selectedCenter = selected * step + step / 2;
+      const targetAngle = 270 - selectedCenter;
       const fullTurns = 4 + Math.floor(Math.random() * 3);
 
       wheelRotation = (fullTurns * 360) + targetAngle;
@@ -2407,6 +2526,7 @@
       }
 
       currentSelectedIndex = -1;
+      wheelRotation = 0;
       buildWheel();
       renderWheelEntries();
     });
