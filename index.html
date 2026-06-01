@@ -1944,6 +1944,116 @@
       }
     }
 
+    /* v28: محرك العجلة الفعلي SVG */
+    .real-wheel{
+      overflow:visible !important;
+      background:transparent !important;
+      border-radius:50%;
+      transform:none !important;
+      transition:none !important;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.12));
+    }
+
+    .real-wheel::after{
+      display:none !important;
+    }
+
+    .wheel-slices,
+    .slice-label{
+      display:none !important;
+    }
+
+    .svg-wheel{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      overflow:visible;
+      display:block;
+    }
+
+    .svg-wheel-rotor{
+      transform-box:fill-box;
+      transform-origin:center;
+      transition:transform 3.45s cubic-bezier(.12,.72,.13,1);
+      will-change:transform;
+    }
+
+    .svg-sector{
+      stroke:#fff;
+      stroke-width:3.5;
+      stroke-linejoin:round;
+    }
+
+    .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+      font-weight:800;
+      dominant-baseline:middle;
+      text-anchor:middle;
+      paint-order:stroke;
+      stroke:rgba(0,0,0,.22);
+      stroke-width:.9px;
+      stroke-linejoin:round;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      pointer-events:none;
+    }
+
+    .svg-wheel-label.light{
+      fill:#ffffff;
+    }
+
+    .svg-wheel-label.dark{
+      fill:#202020;
+      stroke:rgba(255,255,255,.72);
+      stroke-width:1.1px;
+    }
+
+    .svg-wheel-image-bg{
+      fill:#fff;
+      stroke:rgba(0,0,0,.18);
+      stroke-width:1.2;
+      rx:8;
+      ry:8;
+      filter:drop-shadow(0 1px 3px rgba(0,0,0,.18));
+    }
+
+    .svg-wheel-image{
+      pointer-events:none;
+    }
+
+    .real-wheel-center{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      transform:translate(-50%,-50%) !important;
+      width:29% !important;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:4px solid rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:clamp(15px, 2.55vw, 26px);
+      font-weight:600;
+      line-height:1.22;
+      padding:10px;
+      z-index:6;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      white-space:pre-line;
+      box-shadow:0 0 0 2px rgba(255,255,255,.9);
+      pointer-events:none;
+    }
+
+    @media (max-width: 760px){
+      .real-wheel-center{
+        font-size:clamp(13px, 3.6vw, 18px);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2151,7 +2261,12 @@
         <div class="game-wheel-arrow" aria-hidden="true"></div>
 
         <div class="real-wheel" id="realWheel">
-          <div class="wheel-slices" id="wheelSlices"></div>
+          <svg class="svg-wheel" id="svgWheel" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
+            <g class="svg-wheel-rotor" id="svgWheelRotor">
+              <g id="svgWheelSectors"></g>
+              <g id="svgWheelLabels"></g>
+            </g>
+          </svg>
           <div class="real-wheel-center" id="realWheelCenter"></div>
         </div>
       </div>
@@ -2200,20 +2315,28 @@
     let wheelRotation = 0;
     let currentSelectedIndex = -1;
 
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const XLINK_NS = "http://www.w3.org/1999/xlink";
+
     const defaultWheelEntries = [
-      { text:"run" },
-      { text:"climb" },
-      { text:"sleep" },
-      { text:"sing" },
-      { text:"play" },
-      { text:"read" },
-      { text:"jump" },
-      { text:"Dance" },
-      { text:"close\nthe\ndoor" }
+      { text:"اتغدى" },
+      { text:"انام" },
+      { text:"اشتغل" },
+      { text:"اروح" },
+      { text:"اكعد" },
+      { text:"احجي" },
+      { text:"اقرأ" },
+      { text:"العب" }
     ];
 
-    const wheelColors = ["#e91e63","#0097a7","#f4511e","#8e24aa","#1e88e5","#43a047","#ef6c00","#c2185b","#7b1fa2","#00897b","#3949ab","#d81b60"];
-    const lightSliceIndexes = new Set([1, 4, 7]);
+    const wheelColors = [
+      "#e91e63", "#0097a7", "#f4511e", "#8e24aa",
+      "#1e88e5", "#43a047", "#ef6c00", "#c2185b",
+      "#7b1fa2", "#00897b", "#3949ab", "#d81b60",
+      "#7cb342", "#039be5", "#fb8c00", "#ec407a"
+    ];
+
+    const lightSectorEvery = new Set([1, 5, 9, 13]);
 
     function openScreen(id){
       const isWheelGame = id === "wheelGameScreen";
@@ -2328,6 +2451,8 @@
 
         wheelContentType = btn.getAttribute("data-wheel-type") || "text";
         wheelEntries = [];
+        wheelRotation = 0;
+        currentSelectedIndex = -1;
         renderWheelEntries();
       });
     });
@@ -2375,83 +2500,172 @@
       return `عنصر ${fallbackIndex + 1}`;
     }
 
-    function makeConicGradient(count){
-      const step = 360 / count;
-      const stops = [];
-      for (let i = 0; i < count; i++){
-        const start = i * step;
-        const end = (i + 1) * step;
-        const color = lightSliceIndexes.has(i % 9) ? "#ffffff" : wheelColors[i % wheelColors.length];
-
-        // فاصل أبيض رفيع وواضح بين الأقسام بدون ترك فراغ فعلي.
-        const gap = Math.min(1.4, step * 0.08);
-        stops.push(`#ffffff ${start}deg ${start + gap}deg`);
-        stops.push(`${color} ${start + gap}deg ${end - gap}deg`);
-        stops.push(`#ffffff ${end - gap}deg ${end}deg`);
-      }
-      return `conic-gradient(from 0deg, ${stops.join(",")})`;
+    function polarToCartesian(radius, angleDeg){
+      const angle = angleDeg * Math.PI / 180;
+      return {
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle)
+      };
     }
 
-    function makeSliceLines(count){
-      const step = 360 / count;
-      const layers = [];
-      for (let i = 0; i < count; i++){
-        const deg = (i * step) - 90;
-        layers.push(`linear-gradient(${deg}deg, transparent calc(50% - 1.2px), rgba(255,255,255,.96) calc(50% - 1.2px), rgba(255,255,255,.96) calc(50% + 1.2px), transparent calc(50% + 1.2px))`);
+    function sectorPath(startAngle, endAngle, radius){
+      const start = polarToCartesian(radius, startAngle);
+      const end = polarToCartesian(radius, endAngle);
+      const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+      return [
+        `M 0 0`,
+        `L ${start.x.toFixed(3)} ${start.y.toFixed(3)}`,
+        `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)}`,
+        `Z`
+      ].join(" ");
+    }
+
+    function createSvgElement(tag, attrs = {}){
+      const el = document.createElementNS(SVG_NS, tag);
+      Object.entries(attrs).forEach(([key, value])=>{
+        if (key === "href") {
+          el.setAttributeNS(XLINK_NS, "href", value);
+        } else {
+          el.setAttribute(key, value);
+        }
+      });
+      return el;
+    }
+
+    function readableTextAngle(angle){
+      const normalized = ((angle % 360) + 360) % 360;
+      if (normalized > 90 && normalized < 270) {
+        return angle + 180;
       }
-      return layers.join(",");
+      return angle;
+    }
+
+    function labelFontSize(count, text){
+      const length = String(text || "").length;
+      if (count <= 5) return length > 12 ? 24 : 29;
+      if (count <= 8) return length > 12 ? 19 : 24;
+      if (count <= 12) return length > 12 ? 15 : 19;
+      return length > 10 ? 12 : 15;
+    }
+
+    function drawTextLabel(parent, text, angle, radius, count, isDark){
+      const p = polarToCartesian(radius, angle);
+      const textAngle = readableTextAngle(angle);
+      const label = createSvgElement("text", {
+        x: p.x.toFixed(3),
+        y: p.y.toFixed(3),
+        class: `svg-wheel-label ${isDark ? "dark" : "light"}`,
+        "font-size": String(labelFontSize(count, text)),
+        transform: `rotate(${textAngle.toFixed(3)} ${p.x.toFixed(3)} ${p.y.toFixed(3)})`
+      });
+
+      label.textContent = text;
+      parent.appendChild(label);
+    }
+
+    function drawImageLabel(parent, entry, angle, radius, count, withText){
+      const p = polarToCartesian(radius, angle);
+      const size = count <= 6 ? 64 : count <= 10 ? 52 : 42;
+      const boxW = withText ? size + 18 : size + 10;
+      const boxH = withText ? size + 38 : size + 10;
+
+      const g = createSvgElement("g", {
+        transform: `translate(${p.x.toFixed(3)} ${p.y.toFixed(3)}) rotate(${readableTextAngle(angle).toFixed(3)})`
+      });
+
+      const bg = createSvgElement("rect", {
+        x: (-boxW / 2).toFixed(3),
+        y: (-boxH / 2).toFixed(3),
+        width: String(boxW),
+        height: String(boxH),
+        class: "svg-wheel-image-bg"
+      });
+      g.appendChild(bg);
+
+      if (entry.imageData) {
+        const img = createSvgElement("image", {
+          x: (-size / 2).toFixed(3),
+          y: (withText ? (-size / 2 - 12) : (-size / 2)).toFixed(3),
+          width: String(size),
+          height: String(size),
+          href: entry.imageData,
+          class: "svg-wheel-image",
+          preserveAspectRatio: "xMidYMid meet"
+        });
+        g.appendChild(img);
+      }
+
+      if (withText && (entry.text || "").trim()) {
+        const t = createSvgElement("text", {
+          x: "0",
+          y: String(size / 2 + 13),
+          class: "svg-wheel-label dark",
+          "font-size": count <= 8 ? "13" : "11"
+        });
+        t.textContent = entry.text.trim();
+        g.appendChild(t);
+      }
+
+      parent.appendChild(g);
+    }
+
+    function setRotorRotation(degrees, animate = true){
+      const rotor = document.getElementById("svgWheelRotor");
+      if (!rotor) return;
+
+      rotor.style.transition = animate ? "transform 3.45s cubic-bezier(.12,.72,.13,1)" : "none";
+      rotor.style.transform = `rotate(${degrees}deg)`;
     }
 
     function buildWheel(){
       const items = getWheelItems();
       const count = Math.max(items.length, 2);
-      const wheel = document.getElementById("realWheel");
-      const slices = document.getElementById("wheelSlices");
+      const sectors = document.getElementById("svgWheelSectors");
+      const labels = document.getElementById("svgWheelLabels");
       const center = document.getElementById("realWheelCenter");
       const result = document.getElementById("selectedResult");
       const afterSpin = document.getElementById("wheelAfterSpin");
 
-      if (!wheel || !slices || !center) return;
+      if (!sectors || !labels || !center) return;
 
-      slices.innerHTML = "";
-      wheel.style.setProperty("--wheel-bg", makeConicGradient(count));
-      wheel.style.setProperty("--wheel-lines", makeSliceLines(count));
-      wheel.style.transform = `rotate(${wheelRotation}deg)`;
+      sectors.innerHTML = "";
+      labels.innerHTML = "";
 
+      const radius = 220;
+      const labelRadius = count <= 5 ? 139 : count <= 8 ? 145 : count <= 12 ? 153 : 160;
       const step = 360 / count;
 
       items.forEach((entry, index)=>{
-        const label = document.createElement("div");
-        label.className = "slice-label";
-        if (lightSliceIndexes.has(index % 9)) label.classList.add("dark");
+        const start = -90 + (index * step);
+        const end = start + step;
+        const mid = start + (step / 2);
+        const isWhite = lightSectorEvery.has(index % 16);
+        const color = isWhite ? "#ffffff" : wheelColors[index % wheelColors.length];
 
-        // conic-gradient يبدأ من الأعلى، أما translateX يبدأ من اليمين.
-        // لذلك نحول زاوية القسم حتى يكون العنصر فعليًا في منتصف القسم.
-        const conicCenter = (index * step) + (step / 2);
-        const positionAngle = conicCenter - 90;
-
-        // النص يكون مواجهًا للمشاهد دائمًا.
-        label.style.transform = `translate(-50%, -50%) rotate(${positionAngle}deg) translateX(31%) rotate(${-positionAngle}deg)`;
+        const sector = createSvgElement("path", {
+          d: sectorPath(start, end, radius),
+          fill: color,
+          class: "svg-sector"
+        });
+        sectors.appendChild(sector);
 
         if ((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData) {
-          const img = document.createElement("img");
-          img.src = entry.imageData;
-          img.alt = "";
-          label.appendChild(img);
-
-          if (wheelContentType === "mixed" && (entry.text || "").trim()) {
-            const span = document.createElement("span");
-            span.textContent = entry.text.trim();
-            span.style.marginInlineStart = "4px";
-            span.style.fontSize = "0.74em";
-            label.appendChild(span);
-          }
+          drawImageLabel(labels, entry, mid, labelRadius, count, wheelContentType === "mixed");
         } else {
-          label.textContent = textForEntry(entry, index);
+          drawTextLabel(labels, textForEntry(entry, index), mid, labelRadius, count, isWhite);
         }
-
-        slices.appendChild(label);
       });
+
+      const rim = createSvgElement("circle", {
+        cx: "0",
+        cy: "0",
+        r: String(radius),
+        fill: "none",
+        stroke: "rgba(0,0,0,.06)",
+        "stroke-width": "2"
+      });
+      sectors.appendChild(rim);
 
       const centerQuestionEnabled = questionPanel?.classList.contains("enabled");
       const centerText = (centerQuestionInput?.value || "").trim();
@@ -2460,6 +2674,9 @@
       if (result) result.textContent = "";
       if (afterSpin) afterSpin.classList.remove("show");
       currentSelectedIndex = -1;
+
+      setRotorRotation(wheelRotation, false);
+      requestAnimationFrame(()=> setRotorRotation(wheelRotation, true));
     }
 
     function openWheelGame(){
@@ -2482,23 +2699,24 @@
       const count = Math.max(items.length, 2);
       const step = 360 / count;
       const selected = Math.floor(Math.random() * count);
-      const selectedCenter = selected * step + step / 2;
-      const targetAngle = 270 - selectedCenter;
+
+      const selectedCenterAngle = -90 + selected * step + step / 2;
+      const targetAngle = 180 - selectedCenterAngle;
       const fullTurns = 4 + Math.floor(Math.random() * 3);
 
       wheelRotation = (fullTurns * 360) + targetAngle;
       currentSelectedIndex = selected;
 
-      const wheel = document.getElementById("realWheel");
       const result = document.getElementById("selectedResult");
       const afterSpin = document.getElementById("wheelAfterSpin");
 
       if (result) result.textContent = "";
       if (afterSpin) afterSpin.classList.remove("show");
-      if (wheel) wheel.style.transform = `rotate(${wheelRotation}deg)`;
+
+      setRotorRotation(wheelRotation, true);
 
       window.setTimeout(()=>{
-        const item = items[selected];
+        const item = getWheelItems()[selected];
         if (result) result.textContent = textForEntry(item, selected);
         if (afterSpin) afterSpin.classList.add("show");
       }, 3500);
