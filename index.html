@@ -2261,64 +2261,6 @@
     }
 
   
-    /* v30 - العجلة الدوارة SVG: قراءة واضحة، سهم مضبوط، سحب يدوي، ودوران قريب من Wordwall */
-    .wheel-setup-screen{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow);}
-    .wheel-setup-body{display:grid;gap:18px;margin-top:18px;}
-    .wheel-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
-    .wheel-type{min-height:92px;border:2px solid rgba(8,124,168,.24);border-radius:20px;background:#fff;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 10px;text-align:center;box-shadow:0 10px 22px rgba(7,95,128,.08);}
-    .wheel-type.active{background:linear-gradient(180deg,#ffe27a,#f7b638);border-color:rgba(17,17,17,.35);transform:translateY(-2px);}
-    .wheel-type strong{font-size:clamp(16px,2.3vw,24px);line-height:1.1;}
-    .wheel-type span{color:var(--muted);font-size:clamp(12px,1.55vw,15px);font-weight:700;line-height:1.4;}
-    .question-panel,.items-panel{border:2px solid rgba(8,124,168,.18);border-radius:22px;background:#fff;padding:16px;box-shadow:0 10px 22px rgba(7,95,128,.06);}
-    .question-row,.items-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
-    .question-row h3,.items-head h3{margin:0;font-size:clamp(18px,2.2vw,26px);line-height:1.2;}
-    .items-head span{color:var(--muted);font-weight:700;font-size:14px;}
-    .toggle{display:inline-flex;border:2px solid rgba(8,124,168,.26);border-radius:999px;padding:4px;gap:4px;background:#f8fdff;}
-    .toggle button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font-weight:800;color:var(--text);}
-    .toggle button.active{background:var(--blue);color:#fff;}
-    .center-question-input{display:none;width:100%;height:50px;border:2px solid rgba(8,124,168,.24);border-radius:16px;text-align:center;padding:0 14px;font-weight:800;outline:none;color:var(--text);background:#fff;}
-    .question-panel.enabled .center-question-input{display:block;}
-    .wheel-items-editor{display:grid;gap:12px;}
-    .wheel-entry{position:relative;display:grid;gap:10px;border:2px solid rgba(8,124,168,.18);border-radius:18px;padding:12px;background:#f8fdff;}
-    .wheel-entry-input,.wheel-entry-file{width:100%;min-height:46px;border:2px solid rgba(8,124,168,.20);border-radius:14px;background:#fff;padding:0 12px;font-weight:800;color:var(--text);outline:none;}
-    .wheel-entry-file{padding:9px 12px;}
-    .remove-entry-btn{position:absolute;top:-9px;left:-9px;width:30px;height:30px;border:2px solid #fff;border-radius:50%;background:#ee4b4b;color:#fff;font-size:22px;line-height:1;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(238,75,75,.24);}
-    .add-item-btn{width:56px;height:56px;margin:14px auto 0;border:0;border-radius:50%;background:linear-gradient(180deg,#ffe27a,#f7b638);color:#111;font-size:38px;font-weight:900;line-height:1;box-shadow:0 12px 24px rgba(247,182,56,.24);display:flex;align-items:center;justify-content:center;}
-    .wheel-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .test-btn,.save-btn{min-height:54px;border:0;border-radius:18px;font-size:clamp(17px,2.1vw,24px);font-weight:900;box-shadow:0 12px 24px rgba(7,95,128,.12);}
-    .test-btn{background:linear-gradient(180deg,#ff8a55,#f47a45);color:#fff;}
-    .save-btn{background:linear-gradient(180deg,#28c86b,#0aa84f);color:#fff;}
-    body.playing-wheel{overflow:hidden;}
-    body.playing-wheel .app > :not(.wheel-game-screen),body.playing-wheel .toast{display:none !important;}
-    .wheel-game-screen{display:none;position:fixed;inset:0;width:100vw;height:100dvh;min-height:100dvh;background:#fff;z-index:1000;overflow:hidden;color:#222;direction:ltr;user-select:none;touch-action:none;padding:0;}
-    .wheel-game-screen.active{display:flex;flex-direction:column;}
-    .wheel-stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:clamp(8px,2vh,20px) clamp(8px,2vw,22px) 0;}
-    .wheel-stage-inner{--wheel-size:min(94vw,76dvh,760px);width:var(--wheel-size);height:var(--wheel-size);position:relative;display:flex;align-items:center;justify-content:center;}
-    .real-wheel{width:100%;height:100%;position:relative;border-radius:50%;background:transparent;overflow:visible;filter:drop-shadow(0 14px 32px rgba(0,0,0,.13));touch-action:none;cursor:grab;}
-    .real-wheel:active{cursor:grabbing;}
-    .real-wheel::before{content:"";position:absolute;inset:-10px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(94,136,219,.30) 0deg 2.1deg,transparent 2.1deg 6deg);z-index:-1;opacity:.9;}
-    .real-wheel::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid rgba(8,124,168,.08);pointer-events:none;z-index:5;}
-    .game-wheel-arrow{position:absolute;left:clamp(-58px,-7vw,-38px);top:50%;transform:translateY(-50%);width:0;height:0;border-top:clamp(25px,4.5vw,42px) solid transparent;border-bottom:clamp(25px,4.5vw,42px) solid transparent;border-left:clamp(45px,7vw,72px) solid #e8eef7;filter:drop-shadow(0 1px 0 rgba(0,0,0,.28));z-index:20;pointer-events:none;}
-    .svg-wheel{position:absolute;inset:0;width:100%;height:100%;overflow:visible;display:block;}
-    .svg-wheel-rotor{transform-box:fill-box;transform-origin:center;will-change:transform;}
-    .svg-sector{stroke:#fff;stroke-width:3.8;stroke-linejoin:round;}
-    .svg-wheel-label{font-family:Tahoma,Arial,"Segoe UI",sans-serif;font-weight:900;dominant-baseline:middle;text-anchor:middle;direction:rtl;unicode-bidi:plaintext;pointer-events:none;}
-    .svg-wheel-label.light{fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.22);stroke-width:.8px;}
-    .svg-wheel-label.dark{fill:#1f1f1f;paint-order:stroke;stroke:rgba(255,255,255,.70);stroke-width:1px;}
-    .svg-wheel-image-bg{fill:#fff;stroke:rgba(0,0,0,.18);stroke-width:1.2;rx:8;ry:8;}
-    .svg-wheel-image{pointer-events:none;}
-    .real-wheel-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:25%;aspect-ratio:1/1;border-radius:50%;background:#fff;border:4px solid rgba(0,0,0,.10);display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(10px,2.2vmin,23px);font-weight:900;line-height:1.18;padding:clamp(6px,1.3vmin,12px);z-index:12;direction:rtl;unicode-bidi:plaintext;overflow:hidden;word-break:normal;white-space:normal;box-shadow:0 0 0 2px rgba(255,255,255,.88);pointer-events:none;}
-    .selected-result{flex:0 0 auto;min-height:32px;text-align:center;font-size:clamp(18px,2.8vw,30px);font-weight:900;color:#222;padding:2px 12px 4px;direction:rtl;}
-    .wheel-game-controls{flex:0 0 auto;min-height:82px;display:grid;grid-template-columns:64px minmax(180px,360px) 64px;align-items:center;justify-content:center;gap:clamp(18px,5vw,64px);padding:0 18px clamp(10px,2vh,18px);}
-    .game-icon-btn{width:56px;height:56px;border:0;background:transparent;color:#222;font-size:42px;line-height:1;display:flex;align-items:center;justify-content:center;}
-    .spin-game-btn{height:54px;border:3px solid #777;border-radius:8px;background:#fff;color:#222;font-size:clamp(22px,3.7vw,32px);font-weight:800;}
-    .wheel-after-spin{display:none;justify-content:center;padding:0 0 calc(12px + var(--safe-bottom));}
-    .wheel-after-spin.show{display:flex;}
-    .remove-selected-btn{min-width:210px;min-height:48px;border:3px solid #222;border-radius:15px;background:#ee5a5a;color:#fff;font-size:22px;font-weight:900;}
-    @media (orientation:landscape){.wheel-stage-inner{--wheel-size:min(74dvh,58vw,690px);}.wheel-stage{padding-top:4px;}.wheel-game-controls{min-height:68px;padding-bottom:8px;}.spin-game-btn{height:46px;}.real-wheel-center{font-size:clamp(9px,2.1vmin,20px);width:24%;}}
-    @media (max-width:760px){.wheel-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}.wheel-type{min-height:76px;padding:9px 6px;}.wheel-type strong{font-size:clamp(13px,3.6vw,17px);}.wheel-type span{font-size:clamp(10px,2.7vw,12px);}.wheel-actions{grid-template-columns:1fr;}.wheel-stage-inner{--wheel-size:min(94vw,70dvh,520px);}.game-wheel-arrow{left:clamp(-46px,-8vw,-32px);}.wheel-game-controls{grid-template-columns:54px minmax(160px,310px) 54px;gap:16px;min-height:76px;}.game-icon-btn{width:48px;height:48px;font-size:38px;}.spin-game-btn{height:50px;}}
-
-  
     /* v31: تعديلات العجلة فقط بدون تغيير ترتيب الصفحات */
     body.playing-wheel{
       overflow:hidden !important;
@@ -2594,44 +2536,39 @@
     }
 
 
+    /* v34: تعديلات شاشة العجلة فقط - لا يغير صفحة الإعدادات أو ترتيب الصفحات */
+    :root{
+      --app-width:100vw;
+      --app-height:100dvh;
+      --app-top:0px;
+      --app-left:0px;
+    }
 
-    /* v33: تعديلات العجلة الجديدة فقط */
-    body.playing-wheel{
-      position:fixed !important;
-      inset:0 !important;
-      width:100vw !important;
-      height:100svh !important;
-      min-height:100svh !important;
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:var(--app-width) !important;
+      height:var(--app-height) !important;
+      min-height:var(--app-height) !important;
+      max-height:var(--app-height) !important;
       overflow:hidden !important;
       overscroll-behavior:none !important;
       background:#fff !important;
     }
 
-    body.playing-wheel .page{
-      position:fixed !important;
-      inset:0 !important;
-      width:100vw !important;
-      height:100svh !important;
-      min-height:100svh !important;
-      padding:0 !important;
-      margin:0 !important;
-      overflow:hidden !important;
-      background:#fff !important;
-    }
-
     body.playing-wheel .wheel-game-screen{
-      --play-wheel-size:min(96vw, calc(100svh - 134px), 730px);
-      --arrow-w:clamp(38px, 6.2vmin, 66px);
-      --arrow-h:clamp(22px, 3.8vmin, 38px);
+      --wheel-size:min(94vw, calc(var(--app-height) - 146px), 720px);
       position:fixed !important;
-      inset:0 !important;
-      width:100vw !important;
-      height:100svh !important;
-      min-height:100svh !important;
-      overflow:hidden !important;
+      top:var(--app-top) !important;
+      left:var(--app-left) !important;
+      width:var(--app-width) !important;
+      height:var(--app-height) !important;
+      min-height:var(--app-height) !important;
+      max-height:var(--app-height) !important;
       background:#fff !important;
-      flex-direction:column !important;
+      overflow:hidden !important;
       touch-action:none !important;
+      display:none;
+      flex-direction:column !important;
     }
 
     body.playing-wheel .wheel-game-screen.active{
@@ -2641,17 +2578,19 @@
     body.playing-wheel .wheel-stage{
       flex:1 1 auto !important;
       min-height:0 !important;
-      height:auto !important;
+      width:100% !important;
       display:flex !important;
       align-items:center !important;
       justify-content:center !important;
-      padding:6px 6px 0 !important;
+      padding:4px 4px 0 !important;
       overflow:visible !important;
     }
 
     body.playing-wheel .real-wheel{
-      width:var(--play-wheel-size) !important;
-      max-width:var(--play-wheel-size) !important;
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
       aspect-ratio:1/1 !important;
       position:relative !important;
       border-radius:50% !important;
@@ -2659,7 +2598,7 @@
       overflow:visible !important;
       transition:none !important;
       transform:none !important;
-      filter:drop-shadow(0 12px 26px rgba(0,0,0,.13)) !important;
+      filter:drop-shadow(0 12px 28px rgba(0,0,0,.12)) !important;
       cursor:grab !important;
       touch-action:none !important;
     }
@@ -2670,14 +2609,13 @@
 
     body.playing-wheel .real-wheel::before{
       inset:-7px !important;
-      background:repeating-conic-gradient(from 0deg, rgba(94,136,219,.33) 0deg 1.8deg, transparent 1.8deg 5.6deg) !important;
-      opacity:.86 !important;
+      background:repeating-conic-gradient(from 0deg, rgba(94,136,219,.30) 0deg 2deg, transparent 2deg 6deg) !important;
+      opacity:.82 !important;
     }
 
     body.playing-wheel .svg-sector{
       stroke:#fff !important;
-      stroke-width:3.6 !important;
-      stroke-linejoin:round !important;
+      stroke-width:3.2 !important;
     }
 
     body.playing-wheel .svg-wheel-image-bg,
@@ -2685,67 +2623,98 @@
       display:none !important;
     }
 
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.26) !important;
+      stroke-width:.7px !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#151515 !important;
+      paint-order:stroke !important;
+      stroke:rgba(255,255,255,.78) !important;
+      stroke-width:.9px !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      width:24.5% !important;
+      font-size:clamp(9px, 2.05vmin, 21px) !important;
+      line-height:1.12 !important;
+      padding:clamp(4px, 1.05vmin, 10px) !important;
+      overflow:hidden !important;
+      overflow-wrap:anywhere !important;
+      word-break:break-word !important;
+    }
+
     body.playing-wheel .game-wheel-arrow{
       position:absolute !important;
+      left:var(--game-arrow-left, 8px) !important;
       top:50% !important;
       transform:translateY(-50%) !important;
       width:0 !important;
       height:0 !important;
-      border-top:var(--arrow-h) solid transparent !important;
-      border-bottom:var(--arrow-h) solid transparent !important;
-      border-left:var(--arrow-w) solid #111 !important;
-      filter:drop-shadow(0 1px 0 rgba(255,255,255,.7)) drop-shadow(0 1px 2px rgba(0,0,0,.28)) !important;
-      opacity:.96 !important;
+      border-top:var(--game-arrow-h, 24px) solid transparent !important;
+      border-bottom:var(--game-arrow-h, 24px) solid transparent !important;
+      border-left:var(--game-arrow-w, 44px) solid #111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)) !important;
       z-index:30 !important;
       pointer-events:none !important;
-    }
-
-    body.playing-wheel .real-wheel-center{
-      width:25.5% !important;
-      font-size:clamp(9px, 2.05vmin, 22px) !important;
-      line-height:1.13 !important;
-      font-weight:900 !important;
-      padding:clamp(5px, 1.15vmin, 11px) !important;
-      white-space:normal !important;
-      word-break:normal !important;
-      overflow-wrap:anywhere !important;
-      overflow:hidden !important;
-    }
-
-    body.playing-wheel .wheel-game-controls{
-      flex:0 0 auto !important;
-      height:62px !important;
-      min-height:62px !important;
-      display:grid !important;
-      grid-template-columns:46px minmax(150px, 310px) !important;
-      align-items:center !important;
-      justify-content:center !important;
-      gap:clamp(16px, 4vw, 44px) !important;
-      padding:4px 12px 8px !important;
-    }
-
-    body.playing-wheel .game-icon-btn{
-      width:44px !important;
-      height:44px !important;
-      font-size:32px !important;
-      padding:0 !important;
-    }
-
-    body.playing-wheel .spin-game-btn{
-      height:44px !important;
-      max-width:310px !important;
-      border-width:3px !important;
-      font-size:clamp(20px, 2.8vw, 28px) !important;
-      line-height:1 !important;
-      padding:0 14px !important;
     }
 
     body.playing-wheel .selected-result{
       flex:0 0 auto !important;
       min-height:24px !important;
-      font-size:clamp(16px, 2.3vw, 24px) !important;
+      font-size:clamp(17px, 2.3vw, 26px) !important;
+      font-weight:900 !important;
       line-height:1.1 !important;
-      padding:0 10px 2px !important;
+      padding:0 12px 2px !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      min-height:58px !important;
+      height:58px !important;
+      display:grid !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:46px !important;
+      height:46px !important;
+      font-size:34px !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:46px !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(20px, 3vw, 28px) !important;
+      font-weight:800 !important;
     }
 
     body.playing-wheel .wheel-after-spin{
@@ -2754,80 +2723,79 @@
     }
 
     body.playing-wheel .remove-selected-btn{
-      min-width:clamp(145px, 25vw, 210px) !important;
-      min-height:40px !important;
+      min-width:clamp(150px, 26vw, 220px) !important;
+      min-height:42px !important;
+      font-size:clamp(16px, 2.2vw, 20px) !important;
       border-radius:12px !important;
-      font-size:clamp(16px, 2vw, 20px) !important;
     }
 
     @media (orientation:landscape){
       body.playing-wheel .wheel-game-screen{
-        --play-wheel-size:min(54vw, calc(100svh - 86px), 720px);
-        --arrow-w:clamp(30px, 4.2vmin, 54px);
-        --arrow-h:clamp(18px, 3.2vmin, 32px);
+        --wheel-size:min(70vw, calc(var(--app-height) - 58px), 760px);
       }
 
       body.playing-wheel .wheel-stage{
-        padding-top:0 !important;
-        padding-bottom:0 !important;
+        padding:0 4px !important;
       }
 
-      body.playing-wheel .wheel-game-controls{
-        height:48px !important;
-        min-height:48px !important;
-        grid-template-columns:34px minmax(130px, 260px) !important;
-        gap:clamp(12px, 3vw, 34px) !important;
-        padding:0 10px 5px !important;
-      }
-
-      body.playing-wheel .game-icon-btn{
-        width:34px !important;
-        height:34px !important;
-        font-size:26px !important;
-      }
-
-      body.playing-wheel .spin-game-btn{
-        height:36px !important;
-        max-width:260px !important;
-        font-size:20px !important;
+      body.playing-wheel .real-wheel-center{
+        width:23.5% !important;
+        font-size:clamp(8px, 1.75vmin, 18px) !important;
+        line-height:1.08 !important;
       }
 
       body.playing-wheel .selected-result{
-        min-height:18px !important;
-        font-size:18px !important;
+        min-height:16px !important;
+        font-size:clamp(13px, 2.5vh, 18px) !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        min-height:42px !important;
+        height:42px !important;
+        grid-template-columns:38px minmax(120px, 240px) !important;
+        gap:clamp(14px, 4vw, 42px) !important;
+        padding:0 12px 4px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:36px !important;
+        height:36px !important;
+        font-size:28px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:34px !important;
+        font-size:clamp(16px, 4vh, 22px) !important;
+        border-width:2px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 4px !important;
       }
 
       body.playing-wheel .remove-selected-btn{
         min-height:34px !important;
-        font-size:16px !important;
-      }
-
-      body.playing-wheel .real-wheel-center{
-        width:24.5% !important;
-        font-size:clamp(8px, 1.65vmin, 18px) !important;
-        line-height:1.08 !important;
-        padding:clamp(4px, .8vmin, 8px) !important;
+        min-width:150px !important;
+        font-size:15px !important;
+        border-width:2px !important;
       }
     }
 
-    @media (max-width:760px) and (orientation:portrait){
+    @media (max-width:430px){
       body.playing-wheel .wheel-game-screen{
-        --play-wheel-size:min(96vw, calc(100svh - 142px), 560px);
-        --arrow-w:40px;
-        --arrow-h:24px;
+        --wheel-size:min(95vw, calc(var(--app-height) - 138px), 430px);
       }
 
       body.playing-wheel .wheel-game-controls{
-        height:64px !important;
-        min-height:64px !important;
-        grid-template-columns:44px minmax(150px, 270px) !important;
-        gap:18px !important;
+        grid-template-columns:44px minmax(142px, 240px) !important;
+        gap:12px !important;
       }
 
       body.playing-wheel .game-icon-btn{
         width:42px !important;
         height:42px !important;
-        font-size:32px !important;
+        font-size:31px !important;
       }
 
       body.playing-wheel .spin-game-btn{
@@ -3032,81 +3000,24 @@
       </div>
     </section>
 
-    
-    <section class="screen wheel-setup-screen" id="wheelSetupScreen">
-      <div class="screen-head">
-        <h2 class="screen-title">العجلة الدوارة</h2>
-        <button class="back-btn" data-back-home>رجوع</button>
-      </div>
-
-      <div class="wheel-setup-body">
-        <div class="wheel-options" aria-label="نوع محتوى العجلة">
-          <button class="wheel-type active" type="button" data-wheel-type="text">
-            <strong>نصوص فقط</strong>
-            <span>كلمات أو أسئلة قصيرة</span>
-          </button>
-
-          <button class="wheel-type" type="button" data-wheel-type="images">
-            <strong>صور فقط</strong>
-            <span>صور داخل أقسام العجلة</span>
-          </button>
-
-          <button class="wheel-type" type="button" data-wheel-type="mixed">
-            <strong>صور مع نصوص</strong>
-            <span>صورة ومعها نص مختصر</span>
-          </button>
-        </div>
-
-        <div class="question-panel" id="questionPanel">
-          <div class="question-row">
-            <h3>سؤال في منتصف العجلة</h3>
-            <div class="toggle" aria-label="تشغيل سؤال المنتصف">
-              <button type="button" class="active" data-question-toggle="off">تعطيل</button>
-              <button type="button" data-question-toggle="on">تشغيل</button>
-            </div>
-          </div>
-
-          <input
-            class="center-question-input"
-            id="centerQuestionInput"
-            type="text"
-            maxlength="55"
-            placeholder="اكتب السؤال الذي يظهر في منتصف العجلة"
-          />
-        </div>
-
-        <div class="items-panel">
-          <div class="items-head">
-            <h3>عناصر العجلة</h3>
-            <span id="itemsHint">أضف كلمات أو أسئلة قصيرة.</span>
-          </div>
-
-          <div class="wheel-items-editor" id="wheelItemsEditor"></div>
-
-          <button class="add-item-btn" type="button" id="addWheelItemBtn" aria-label="إضافة عنصر">+</button>
-        </div>
-
-        <div class="wheel-actions">
-          <button class="test-btn" type="button" id="testWheelBtn">اختبار اللعبة</button>
-          <button class="save-btn" type="button" id="saveWheelBtn">حفظ اللعبة</button>
-        </div>
-      </div>
-    </section>
 
     <section class="wheel-game-screen" id="wheelGameScreen">
-      <div class="wheel-stage">
-        <div class="wheel-stage-inner">
-          <div class="game-wheel-arrow" aria-hidden="true"></div>
+      <div class="wheel-topbar">
+        <div class="wheel-timer" id="wheelTimer"></div>
+        <div class="wheel-instruction"></div>
+      </div>
 
-          <div class="real-wheel" id="realWheel">
-            <svg class="svg-wheel" id="svgWheel" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
-              <g class="svg-wheel-rotor" id="svgWheelRotor">
-                <g id="svgWheelSectors"></g>
-                <g id="svgWheelLabels"></g>
-              </g>
-            </svg>
-            <div class="real-wheel-center" id="realWheelCenter"></div>
-          </div>
+      <div class="wheel-stage">
+        <div class="game-wheel-arrow" aria-hidden="true"></div>
+
+        <div class="real-wheel" id="realWheel">
+          <svg class="svg-wheel" id="svgWheel" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
+            <g class="svg-wheel-rotor" id="svgWheelRotor">
+              <g id="svgWheelSectors"></g>
+              <g id="svgWheelLabels"></g>
+            </g>
+          </svg>
+          <div class="real-wheel-center" id="realWheelCenter"></div>
         </div>
       </div>
 
@@ -3115,13 +3026,14 @@
       <div class="wheel-game-controls">
         <button class="game-icon-btn" type="button" id="exitWheelGameBtn" aria-label="القائمة">☰</button>
         <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
+        <button class="game-icon-btn" type="button" id="soundGameBtn" aria-label="الصوت">🔊</button>
+        <button class="game-icon-btn" type="button" id="fullscreenGameBtn" aria-label="تكبير">⛶</button>
       </div>
 
       <div class="wheel-after-spin" id="wheelAfterSpin">
         <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف العنصر</button>
       </div>
     </section>
-
 
     <section class="screen" id="savedScreen">
       <h2 class="screen-title">العابي المحفوظة</h2>
@@ -3177,9 +3089,57 @@
       "#7cb342", "#039be5", "#fb8c00", "#ec407a"
     ];
 
+
+    function updateViewportVars(){
+      const root = document.documentElement;
+      const viewport = window.visualViewport;
+      const width = viewport ? viewport.width : window.innerWidth;
+      const height = viewport ? viewport.height : window.innerHeight;
+      const top = viewport ? viewport.offsetTop : 0;
+      const left = viewport ? viewport.offsetLeft : 0;
+
+      root.style.setProperty("--app-width", `${width}px`);
+      root.style.setProperty("--app-height", `${height}px`);
+      root.style.setProperty("--app-top", `${top}px`);
+      root.style.setProperty("--app-left", `${left}px`);
+
+      requestAnimationFrame(updateWheelGameLayout);
+    }
+
+    function updateWheelGameLayout(){
+      if (!document.body.classList.contains("playing-wheel")) return;
+
+      const screen = document.getElementById("wheelGameScreen");
+      const stage = document.querySelector(".wheel-stage");
+      const wheel = document.getElementById("realWheel");
+      if (!screen || !stage || !wheel) return;
+
+      const stageRect = stage.getBoundingClientRect();
+      const wheelRect = wheel.getBoundingClientRect();
+      if (!wheelRect.width || !stageRect.width) return;
+
+      const arrowW = Math.max(32, Math.min(58, wheelRect.width * 0.085));
+      const arrowH = Math.max(19, Math.min(34, wheelRect.width * 0.052));
+      const arrowLeft = wheelRect.left - stageRect.left - arrowW + Math.max(3, wheelRect.width * 0.012);
+
+      screen.style.setProperty("--game-arrow-left", `${Math.max(2, arrowLeft)}px`);
+      screen.style.setProperty("--game-arrow-w", `${arrowW}px`);
+      screen.style.setProperty("--game-arrow-h", `${arrowH}px`);
+    }
+
+    updateViewportVars();
+    window.addEventListener("resize", updateViewportVars, { passive:true });
+    window.addEventListener("orientationchange", ()=> setTimeout(updateViewportVars, 120), { passive:true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", updateViewportVars, { passive:true });
+      window.visualViewport.addEventListener("scroll", updateViewportVars, { passive:true });
+    }
+
     function openScreen(id){
       const isWheelGame = id === "wheelGameScreen";
       const isSubpage = Boolean(id) && !isWheelGame;
+
+      if (isWheelGame) updateViewportVars();
 
       document.body.classList.toggle("subpage", isSubpage);
       document.body.classList.toggle("playing-wheel", isWheelGame);
@@ -3191,7 +3151,19 @@
 
       if (homeShell) homeShell.style.display = Boolean(id) ? "none" : "flex";
 
-      if (!isWheelGame) {
+      if (isWheelGame) {
+        updateViewportVars();
+        requestAnimationFrame(()=>{
+          updateViewportVars();
+          updateWheelGameLayout();
+          fitCenterText();
+        });
+        setTimeout(()=>{
+          updateViewportVars();
+          updateWheelGameLayout();
+          fitCenterText();
+        }, 90);
+      } else {
         window.scrollTo({ top:0, behavior:"auto" });
       }
     }
@@ -3354,6 +3326,17 @@
     }
 
     function sectorPath(startAngle, endAngle, radius){
+      const sweep = Math.abs(endAngle - startAngle);
+
+      if (sweep >= 359.999) {
+        return [
+          `M ${radius} 0`,
+          `A ${radius} ${radius} 0 1 1 ${-radius} 0`,
+          `A ${radius} ${radius} 0 1 1 ${radius} 0`,
+          `Z`
+        ].join(" ");
+      }
+
       const start = polarToCartesian(radius, startAngle);
       const end = polarToCartesian(radius, endAngle);
       const largeArc = endAngle - startAngle > 180 ? 1 : 0;
@@ -3460,19 +3443,21 @@
       upright.appendChild(label);
     }
 
-    function drawImageLabel(parent, entry, angle, radius, count, withText){
+    function drawImageLabel(parent, entry, angle, radius, count, withText, isDark){
       const upright = createUprightHolder(parent, angle, radius);
-      const size = count <= 5 ? 70 : count <= 8 ? 56 : 44;
-      const text = (entry.text || "").trim();
-      const hasText = Boolean(withText && text);
+      const hasText = Boolean(withText && String(entry.text || "").trim());
+      const text = String(entry.text || "").trim();
+      const imgSize = count <= 5 ? 58 : count <= 8 ? 48 : count <= 12 ? 40 : 32;
+      const textSize = count <= 5 ? 15 : count <= 8 ? 12 : 10;
+      const gap = count <= 8 ? 8 : 5;
 
       if (entry.imageData) {
-        const imgX = hasText ? (-size - 7) : (-size / 2);
+        const imgX = hasText ? gap : (-imgSize / 2);
         const img = createSvgElement("image", {
           x: imgX.toFixed(3),
-          y: (-size / 2).toFixed(3),
-          width: String(size),
-          height: String(size),
+          y: (-imgSize / 2).toFixed(3),
+          width: String(imgSize),
+          height: String(imgSize),
           href: entry.imageData,
           class: "svg-wheel-image",
           preserveAspectRatio: "xMidYMid meet"
@@ -3482,20 +3467,20 @@
 
       if (hasText) {
         const label = createSvgElement("text", {
-          x: String(size * 0.16),
+          x: (-gap).toFixed(3),
           y: "0",
-          class: "svg-wheel-label light",
-          "font-size": count <= 6 ? "15" : count <= 10 ? "12" : "10",
-          "text-anchor": "start"
+          class: `svg-wheel-label ${isDark ? "dark" : "light"}`,
+          "font-size": String(textSize),
+          "text-anchor": "end"
         });
 
-        const lines = splitTextLines(text, count <= 6 ? 7 : 5).slice(0, 2);
-        const lineHeight = count <= 6 ? 17 : 14;
+        const lines = splitTextLines(text, count <= 6 ? 8 : 6).slice(0, 2);
+        const lineHeight = textSize * 1.05;
         const startY = -((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, idx)=>{
           const tspan = createSvgElement("tspan", {
-            x: String(size * 0.16),
+            x: (-gap).toFixed(3),
             y: String(startY + idx * lineHeight)
           });
           tspan.textContent = line;
@@ -3553,27 +3538,25 @@
       labelUprightNodes = [];
 
       const radius = 224;
-      const labelRadius = count <= 1 ? 132 : count <= 5 ? 142 : count <= 8 ? 148 : count <= 12 ? 155 : 162;
+      const labelRadius = count <= 5 ? 142 : count <= 8 ? 148 : count <= 12 ? 155 : 162;
       const step = 360 / count;
 
       items.forEach((entry, index)=>{
         const start = -90 + (index * step);
         const end = start + step;
-        const mid = count === 1 ? 90 : start + (step / 2);
+        const mid = start + (step / 2);
         const color = wheelColors[index % wheelColors.length];
         const isDark = colorBrightness(color) > 168;
 
-        const sector = count === 1
-          ? createSvgElement("circle", { cx:"0", cy:"0", r:String(radius), fill:color, class:"svg-sector" })
-          : createSvgElement("path", {
-              d: sectorPath(start, end, radius),
-              fill: color,
-              class: "svg-sector"
-            });
+        const sector = createSvgElement("path", {
+          d: sectorPath(start, end, radius),
+          fill: color,
+          class: "svg-sector"
+        });
         sectors.appendChild(sector);
 
         if ((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData) {
-          drawImageLabel(labels, entry, mid, labelRadius, count, wheelContentType === "mixed");
+          drawImageLabel(labels, entry, mid, labelRadius, count, wheelContentType === "mixed", isDark);
         } else {
           drawTextLabel(labels, textForEntry(entry, index), mid, labelRadius, count, isDark);
         }
@@ -3601,32 +3584,20 @@
       requestAnimationFrame(fitCenterText);
     }
 
-    function updateWheelArrowPosition(){
-      const stage = document.querySelector(".wheel-stage");
-      const wheel = document.getElementById("realWheel");
-      const arrow = document.querySelector(".game-wheel-arrow");
-      if (!stage || !wheel || !arrow || !document.body.classList.contains("playing-wheel")) return;
-
-      const stageRect = stage.getBoundingClientRect();
-      const wheelRect = wheel.getBoundingClientRect();
-      const arrowRect = arrow.getBoundingClientRect();
-      const arrowWidth = arrowRect.width || 42;
-      const left = Math.max(4, (wheelRect.left - stageRect.left) - arrowWidth + 7);
-      arrow.style.left = `${left}px`;
-      arrow.style.top = `${(wheelRect.top - stageRect.top) + (wheelRect.height / 2)}px`;
-    }
-
     function openWheelGame(){
       wheelRotation = 0;
+      updateViewportVars();
       buildWheel();
       openScreen("wheelGameScreen");
       requestAnimationFrame(()=>{
+        updateViewportVars();
+        updateWheelGameLayout();
         fitCenterText();
-        updateWheelArrowPosition();
       });
       setTimeout(()=>{
+        updateViewportVars();
+        updateWheelGameLayout();
         fitCenterText();
-        updateWheelArrowPosition();
       }, 120);
     }
 
@@ -3643,7 +3614,6 @@
     function getSelectedIndexAtArrow(){
       const items = getWheelItems();
       const count = Math.max(items.length, 1);
-      if (count <= 1) return 0;
       const step = 360 / count;
       const localAngleAtArrow = normalizeAngle(180 - normalizeAngle(wheelRotation));
       const relative = normalizeAngle(localAngleAtArrow - (-90));
@@ -3704,27 +3674,33 @@
       spinAnimationId = requestAnimationFrame(frame);
     }
 
-    function spinWheelAuto(){
+    function spinWheelRandom(direction = 1){
       const items = getWheelItems();
       const count = Math.max(items.length, 1);
       const step = 360 / count;
-      const selected = count <= 1 ? 0 : Math.floor(Math.random() * count);
-      const selectedCenterAngle = count === 1 ? 90 : (-90 + selected * step + step / 2);
+      const selected = count === 1 ? 0 : Math.floor(Math.random() * count);
+
+      const selectedCenterAngle = -90 + selected * step + step / 2;
       const currentNorm = normalizeAngle(wheelRotation);
       const desiredNorm = normalizeAngle(180 - selectedCenterAngle);
 
       let delta = desiredNorm - currentNorm;
-      while (delta < 0) delta += 360;
-
       const fullTurns = 4 + Math.floor(Math.random() * 2);
-      const targetRotation = wheelRotation + delta + fullTurns * 360;
+
+      if (direction < 0) {
+        while (delta > 0) delta -= 360;
+        delta -= fullTurns * 360;
+      } else {
+        while (delta < 0) delta += 360;
+        delta += fullTurns * 360;
+      }
 
       currentSelectedIndex = selected;
-      animateWheelTo(targetRotation, 5200);
+      animateWheelTo(wheelRotation + delta, 5200);
     }
 
     document.getElementById("spinGameBtn")?.addEventListener("click", ()=>{
-      spinWheelAuto();
+      spinWheelRandom(1);
     });
 
     function angleFromPointer(event, element){
@@ -3749,7 +3725,8 @@
       dragState = {
         pointerId: event.pointerId,
         lastAngle: angleFromPointer(event, realWheel),
-        totalDelta: 0
+        totalDelta: 0,
+        lastDirection: 1
       };
     });
 
@@ -3764,18 +3741,21 @@
       if (delta < -180) delta += 360;
 
       dragState.lastAngle = currentAngle;
-      dragState.totalDelta += Math.abs(delta);
+      dragState.totalDelta += delta;
+      if (Math.abs(delta) > 0.35) dragState.lastDirection = delta >= 0 ? 1 : -1;
+
       setRotorRotation(wheelRotation + delta);
     });
 
     function endDrag(event){
       if (!dragState || dragState.pointerId !== event.pointerId) return;
 
-      const movedEnough = dragState.totalDelta > 5;
+      const totalDelta = dragState.totalDelta || 0;
+      const direction = totalDelta < 0 ? -1 : (dragState.lastDirection || 1);
       dragState = null;
 
-      if (movedEnough) {
-        spinWheelAuto();
+      if (Math.abs(totalDelta) >= 4) {
+        spinWheelRandom(direction);
       } else {
         showSelectedAtArrow();
       }
@@ -3830,20 +3810,6 @@
       }
 
       window.location.href = WEBSITE_HOME_URL;
-    });
-
-    window.addEventListener("resize", ()=>{
-      requestAnimationFrame(()=>{
-        fitCenterText();
-        updateWheelArrowPosition();
-      });
-    });
-
-    window.addEventListener("orientationchange", ()=>{
-      setTimeout(()=>{
-        fitCenterText();
-        updateWheelArrowPosition();
-      }, 220);
     });
 
     renderWheelEntries();
