@@ -2261,62 +2261,279 @@
     }
 
   
-    /* v30 - العجلة الدوارة SVG: قراءة واضحة، سهم مضبوط، سحب يدوي، ودوران قريب من Wordwall */
-    .wheel-setup-screen{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow);}
-    .wheel-setup-body{display:grid;gap:18px;margin-top:18px;}
-    .wheel-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
-    .wheel-type{min-height:92px;border:2px solid rgba(8,124,168,.24);border-radius:20px;background:#fff;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 10px;text-align:center;box-shadow:0 10px 22px rgba(7,95,128,.08);}
-    .wheel-type.active{background:linear-gradient(180deg,#ffe27a,#f7b638);border-color:rgba(17,17,17,.35);transform:translateY(-2px);}
-    .wheel-type strong{font-size:clamp(16px,2.3vw,24px);line-height:1.1;}
-    .wheel-type span{color:var(--muted);font-size:clamp(12px,1.55vw,15px);font-weight:700;line-height:1.4;}
-    .question-panel,.items-panel{border:2px solid rgba(8,124,168,.18);border-radius:22px;background:#fff;padding:16px;box-shadow:0 10px 22px rgba(7,95,128,.06);}
-    .question-row,.items-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
-    .question-row h3,.items-head h3{margin:0;font-size:clamp(18px,2.2vw,26px);line-height:1.2;}
-    .items-head span{color:var(--muted);font-weight:700;font-size:14px;}
-    .toggle{display:inline-flex;border:2px solid rgba(8,124,168,.26);border-radius:999px;padding:4px;gap:4px;background:#f8fdff;}
-    .toggle button{border:0;background:transparent;border-radius:999px;padding:8px 16px;font-weight:800;color:var(--text);}
-    .toggle button.active{background:var(--blue);color:#fff;}
-    .center-question-input{display:none;width:100%;height:50px;border:2px solid rgba(8,124,168,.24);border-radius:16px;text-align:center;padding:0 14px;font-weight:800;outline:none;color:var(--text);background:#fff;}
-    .question-panel.enabled .center-question-input{display:block;}
-    .wheel-items-editor{display:grid;gap:12px;}
-    .wheel-entry{position:relative;display:grid;gap:10px;border:2px solid rgba(8,124,168,.18);border-radius:18px;padding:12px;background:#f8fdff;}
-    .wheel-entry-input,.wheel-entry-file{width:100%;min-height:46px;border:2px solid rgba(8,124,168,.20);border-radius:14px;background:#fff;padding:0 12px;font-weight:800;color:var(--text);outline:none;}
-    .wheel-entry-file{padding:9px 12px;}
-    .remove-entry-btn{position:absolute;top:-9px;left:-9px;width:30px;height:30px;border:2px solid #fff;border-radius:50%;background:#ee4b4b;color:#fff;font-size:22px;line-height:1;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 14px rgba(238,75,75,.24);}
-    .add-item-btn{width:56px;height:56px;margin:14px auto 0;border:0;border-radius:50%;background:linear-gradient(180deg,#ffe27a,#f7b638);color:#111;font-size:38px;font-weight:900;line-height:1;box-shadow:0 12px 24px rgba(247,182,56,.24);display:flex;align-items:center;justify-content:center;}
-    .wheel-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .test-btn,.save-btn{min-height:54px;border:0;border-radius:18px;font-size:clamp(17px,2.1vw,24px);font-weight:900;box-shadow:0 12px 24px rgba(7,95,128,.12);}
-    .test-btn{background:linear-gradient(180deg,#ff8a55,#f47a45);color:#fff;}
-    .save-btn{background:linear-gradient(180deg,#28c86b,#0aa84f);color:#fff;}
-    body.playing-wheel{overflow:hidden;}
-    body.playing-wheel .app > :not(.wheel-game-screen),body.playing-wheel .toast{display:none !important;}
-    .wheel-game-screen{display:none;position:fixed;inset:0;width:100vw;height:100dvh;min-height:100dvh;background:#fff;z-index:1000;overflow:hidden;color:#222;direction:ltr;user-select:none;touch-action:none;padding:0;}
-    .wheel-game-screen.active{display:flex;flex-direction:column;}
-    .wheel-stage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;padding:clamp(8px,2vh,20px) clamp(8px,2vw,22px) 0;}
-    .wheel-stage-inner{--wheel-size:min(94vw,76dvh,760px);width:var(--wheel-size);height:var(--wheel-size);position:relative;display:flex;align-items:center;justify-content:center;}
-    .real-wheel{width:100%;height:100%;position:relative;border-radius:50%;background:transparent;overflow:visible;filter:drop-shadow(0 14px 32px rgba(0,0,0,.13));touch-action:none;cursor:grab;}
-    .real-wheel:active{cursor:grabbing;}
-    .real-wheel::before{content:"";position:absolute;inset:-10px;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(94,136,219,.30) 0deg 2.1deg,transparent 2.1deg 6deg);z-index:-1;opacity:.9;}
-    .real-wheel::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:2px solid rgba(8,124,168,.08);pointer-events:none;z-index:5;}
-    .game-wheel-arrow{position:absolute;left:clamp(-58px,-7vw,-38px);top:50%;transform:translateY(-50%);width:0;height:0;border-top:clamp(25px,4.5vw,42px) solid transparent;border-bottom:clamp(25px,4.5vw,42px) solid transparent;border-left:clamp(45px,7vw,72px) solid #e8eef7;filter:drop-shadow(0 1px 0 rgba(0,0,0,.28));z-index:20;pointer-events:none;}
-    .svg-wheel{position:absolute;inset:0;width:100%;height:100%;overflow:visible;display:block;}
-    .svg-wheel-rotor{transform-box:fill-box;transform-origin:center;will-change:transform;}
-    .svg-sector{stroke:#fff;stroke-width:3.8;stroke-linejoin:round;}
-    .svg-wheel-label{font-family:Tahoma,Arial,"Segoe UI",sans-serif;font-weight:900;dominant-baseline:middle;text-anchor:middle;direction:rtl;unicode-bidi:plaintext;pointer-events:none;}
-    .svg-wheel-label.light{fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.22);stroke-width:.8px;}
-    .svg-wheel-label.dark{fill:#1f1f1f;paint-order:stroke;stroke:rgba(255,255,255,.70);stroke-width:1px;}
-    .svg-wheel-image-bg{fill:#fff;stroke:rgba(0,0,0,.18);stroke-width:1.2;rx:8;ry:8;}
-    .svg-wheel-image{pointer-events:none;}
-    .real-wheel-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:25%;aspect-ratio:1/1;border-radius:50%;background:#fff;border:4px solid rgba(0,0,0,.10);display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(10px,2.2vmin,23px);font-weight:900;line-height:1.18;padding:clamp(6px,1.3vmin,12px);z-index:12;direction:rtl;unicode-bidi:plaintext;overflow:hidden;word-break:normal;white-space:normal;box-shadow:0 0 0 2px rgba(255,255,255,.88);pointer-events:none;}
-    .selected-result{flex:0 0 auto;min-height:32px;text-align:center;font-size:clamp(18px,2.8vw,30px);font-weight:900;color:#222;padding:2px 12px 4px;direction:rtl;}
-    .wheel-game-controls{flex:0 0 auto;min-height:82px;display:grid;grid-template-columns:64px minmax(180px,360px) 64px;align-items:center;justify-content:center;gap:clamp(18px,5vw,64px);padding:0 18px clamp(10px,2vh,18px);}
-    .game-icon-btn{width:56px;height:56px;border:0;background:transparent;color:#222;font-size:42px;line-height:1;display:flex;align-items:center;justify-content:center;}
-    .spin-game-btn{height:54px;border:3px solid #777;border-radius:8px;background:#fff;color:#222;font-size:clamp(22px,3.7vw,32px);font-weight:800;}
-    .wheel-after-spin{display:none;justify-content:center;padding:0 0 calc(12px + var(--safe-bottom));}
-    .wheel-after-spin.show{display:flex;}
-    .remove-selected-btn{min-width:210px;min-height:48px;border:3px solid #222;border-radius:15px;background:#ee5a5a;color:#fff;font-size:22px;font-weight:900;}
-    @media (orientation:landscape){.wheel-stage-inner{--wheel-size:min(74dvh,58vw,690px);}.wheel-stage{padding-top:4px;}.wheel-game-controls{min-height:68px;padding-bottom:8px;}.spin-game-btn{height:46px;}.real-wheel-center{font-size:clamp(9px,2.1vmin,20px);width:24%;}}
-    @media (max-width:760px){.wheel-options{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}.wheel-type{min-height:76px;padding:9px 6px;}.wheel-type strong{font-size:clamp(13px,3.6vw,17px);}.wheel-type span{font-size:clamp(10px,2.7vw,12px);}.wheel-actions{grid-template-columns:1fr;}.wheel-stage-inner{--wheel-size:min(94vw,70dvh,520px);}.game-wheel-arrow{left:clamp(-46px,-8vw,-32px);}.wheel-game-controls{grid-template-columns:54px minmax(160px,310px) 54px;gap:16px;min-height:76px;}.game-icon-btn{width:48px;height:48px;font-size:38px;}.spin-game-btn{height:50px;}}
+    /* v31: تعديلات العجلة فقط بدون تغيير ترتيب الصفحات */
+    body.playing-wheel{
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-topbar{
+      display:none !important;
+    }
+
+    body.playing-wheel #soundGameBtn,
+    body.playing-wheel #fullscreenGameBtn{
+      display:none !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      background:#fff !important;
+      touch-action:none;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:clamp(6px, 1.2vh, 14px) clamp(6px, 1.5vw, 16px) 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:min(94vw, 74dvh, 720px) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      border-radius:50% !important;
+      background:transparent !important;
+      overflow:visible !important;
+      transition:none !important;
+      transform:none !important;
+      filter:drop-shadow(0 14px 30px rgba(0,0,0,.13)) !important;
+      touch-action:none !important;
+      cursor:grab;
+    }
+
+    body.playing-wheel .real-wheel:active{
+      cursor:grabbing;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      content:"" !important;
+      position:absolute !important;
+      inset:-8px !important;
+      border-radius:50% !important;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          rgba(94,136,219,.34) 0deg 2.1deg,
+          transparent 2.1deg 6.4deg
+        ) !important;
+      z-index:-1 !important;
+      opacity:.88 !important;
+    }
+
+    body.playing-wheel .real-wheel::after{
+      content:"" !important;
+      display:block !important;
+      position:absolute !important;
+      inset:-1px !important;
+      border-radius:50% !important;
+      border:2px solid rgba(8,124,168,.08) !important;
+      pointer-events:none !important;
+      z-index:7 !important;
+    }
+
+    body.playing-wheel .svg-wheel{
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      overflow:visible !important;
+      display:block !important;
+      touch-action:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-rotor{
+      transform-box:fill-box !important;
+      transform-origin:center !important;
+      will-change:transform !important;
+      transition:none !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:3.8 !important;
+      stroke-linejoin:round !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.28) !important;
+      stroke-width:.8px !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#1f1f1f !important;
+      paint-order:stroke !important;
+      stroke:rgba(255,255,255,.80) !important;
+      stroke-width:1px !important;
+    }
+
+    body.playing-wheel .svg-wheel-image-bg{
+      fill:#fff !important;
+      stroke:rgba(0,0,0,.16) !important;
+      stroke-width:1.1 !important;
+      rx:8 !important;
+      ry:8 !important;
+      filter:drop-shadow(0 1px 3px rgba(0,0,0,.13));
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      transform:translate(-50%,-50%) !important;
+      width:25.5% !important;
+      aspect-ratio:1/1 !important;
+      border-radius:50% !important;
+      background:#fff !important;
+      border:4px solid rgba(0,0,0,.11) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      font-size:clamp(9px, 2.05vmin, 22px) !important;
+      font-weight:900 !important;
+      line-height:1.13 !important;
+      padding:clamp(5px, 1.15vmin, 11px) !important;
+      z-index:12 !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      overflow:hidden !important;
+      word-break:normal !important;
+      white-space:normal !important;
+      box-shadow:0 0 0 2px rgba(255,255,255,.88) !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      position:absolute !important;
+      left:clamp(10px, 3.4vw, 34px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:clamp(25px, 4.3vmin, 40px) solid transparent !important;
+      border-bottom:clamp(25px, 4.3vmin, 40px) solid transparent !important;
+      border-left:clamp(44px, 7vmin, 70px) solid #e8eef7 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.35)) !important;
+      z-index:20 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      height:auto !important;
+      min-height:72px !important;
+      display:grid !important;
+      grid-template-columns:60px minmax(190px, 370px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(22px, 6vw, 80px) !important;
+      padding:2px 18px clamp(10px, 2vh, 18px) !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:56px !important;
+      height:56px !important;
+      border:0 !important;
+      background:transparent !important;
+      color:#222 !important;
+      font-size:42px !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:54px !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(22px, 3.4vw, 32px) !important;
+      font-weight:800 !important;
+    }
+
+    body.playing-wheel .selected-result{
+      min-height:28px !important;
+      text-align:center !important;
+      font-size:clamp(18px, 2.6vw, 30px) !important;
+      font-weight:900 !important;
+      color:#222 !important;
+      padding:0 12px 2px !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      padding:0 0 calc(10px + var(--safe-bottom)) !important;
+    }
+
+    @media (orientation: landscape){
+      body.playing-wheel .real-wheel{
+        width:min(72dvh, 58vw, 690px) !important;
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding-top:2px !important;
+      }
+
+      body.playing-wheel .real-wheel-center{
+        font-size:clamp(8px, 1.85vmin, 19px) !important;
+        width:24.5% !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        min-height:62px !important;
+        padding-bottom:6px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:46px !important;
+      }
+    }
+
+    @media (max-width:760px){
+      body.playing-wheel .real-wheel{
+        width:min(95vw, 70dvh, 540px) !important;
+      }
+
+      body.playing-wheel .game-wheel-arrow{
+        left:10px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        grid-template-columns:54px minmax(160px, 300px) !important;
+        gap:18px !important;
+        min-height:72px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:50px !important;
+        height:50px !important;
+        font-size:38px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:50px !important;
+      }
+    }
 
   </style>
 </head>
@@ -2514,81 +2731,24 @@
       </div>
     </section>
 
-    
-    <section class="screen wheel-setup-screen" id="wheelSetupScreen">
-      <div class="screen-head">
-        <h2 class="screen-title">العجلة الدوارة</h2>
-        <button class="back-btn" data-back-home>رجوع</button>
-      </div>
-
-      <div class="wheel-setup-body">
-        <div class="wheel-options" aria-label="نوع محتوى العجلة">
-          <button class="wheel-type active" type="button" data-wheel-type="text">
-            <strong>نصوص فقط</strong>
-            <span>كلمات أو أسئلة قصيرة</span>
-          </button>
-
-          <button class="wheel-type" type="button" data-wheel-type="images">
-            <strong>صور فقط</strong>
-            <span>صور داخل أقسام العجلة</span>
-          </button>
-
-          <button class="wheel-type" type="button" data-wheel-type="mixed">
-            <strong>صور مع نصوص</strong>
-            <span>صورة ومعها نص مختصر</span>
-          </button>
-        </div>
-
-        <div class="question-panel" id="questionPanel">
-          <div class="question-row">
-            <h3>سؤال في منتصف العجلة</h3>
-            <div class="toggle" aria-label="تشغيل سؤال المنتصف">
-              <button type="button" class="active" data-question-toggle="off">تعطيل</button>
-              <button type="button" data-question-toggle="on">تشغيل</button>
-            </div>
-          </div>
-
-          <input
-            class="center-question-input"
-            id="centerQuestionInput"
-            type="text"
-            maxlength="55"
-            placeholder="اكتب السؤال الذي يظهر في منتصف العجلة"
-          />
-        </div>
-
-        <div class="items-panel">
-          <div class="items-head">
-            <h3>عناصر العجلة</h3>
-            <span id="itemsHint">أضف كلمات أو أسئلة قصيرة.</span>
-          </div>
-
-          <div class="wheel-items-editor" id="wheelItemsEditor"></div>
-
-          <button class="add-item-btn" type="button" id="addWheelItemBtn" aria-label="إضافة عنصر">+</button>
-        </div>
-
-        <div class="wheel-actions">
-          <button class="test-btn" type="button" id="testWheelBtn">اختبار اللعبة</button>
-          <button class="save-btn" type="button" id="saveWheelBtn">حفظ اللعبة</button>
-        </div>
-      </div>
-    </section>
 
     <section class="wheel-game-screen" id="wheelGameScreen">
-      <div class="wheel-stage">
-        <div class="wheel-stage-inner">
-          <div class="game-wheel-arrow" aria-hidden="true"></div>
+      <div class="wheel-topbar">
+        <div class="wheel-timer" id="wheelTimer"></div>
+        <div class="wheel-instruction"></div>
+      </div>
 
-          <div class="real-wheel" id="realWheel">
-            <svg class="svg-wheel" id="svgWheel" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
-              <g class="svg-wheel-rotor" id="svgWheelRotor">
-                <g id="svgWheelSectors"></g>
-                <g id="svgWheelLabels"></g>
-              </g>
-            </svg>
-            <div class="real-wheel-center" id="realWheelCenter"></div>
-          </div>
+      <div class="wheel-stage">
+        <div class="game-wheel-arrow" aria-hidden="true"></div>
+
+        <div class="real-wheel" id="realWheel">
+          <svg class="svg-wheel" id="svgWheel" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
+            <g class="svg-wheel-rotor" id="svgWheelRotor">
+              <g id="svgWheelSectors"></g>
+              <g id="svgWheelLabels"></g>
+            </g>
+          </svg>
+          <div class="real-wheel-center" id="realWheelCenter"></div>
         </div>
       </div>
 
@@ -2597,13 +2757,14 @@
       <div class="wheel-game-controls">
         <button class="game-icon-btn" type="button" id="exitWheelGameBtn" aria-label="القائمة">☰</button>
         <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
+        <button class="game-icon-btn" type="button" id="soundGameBtn" aria-label="الصوت">🔊</button>
+        <button class="game-icon-btn" type="button" id="fullscreenGameBtn" aria-label="تكبير">⛶</button>
       </div>
 
       <div class="wheel-after-spin" id="wheelAfterSpin">
         <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف العنصر</button>
       </div>
     </section>
-
 
     <section class="screen" id="savedScreen">
       <h2 class="screen-title">العابي المحفوظة</h2>
@@ -2625,81 +2786,654 @@
     <button class="home-btn" type="button" id="homeButton">الرئيسية</button>
   </div>
   <script>
-    const STORAGE_KEY = "sandooq_edu_saved_games_v1";
-    const screens = ["homeScreen", "createScreen", "wheelSetupScreen", "wheelGameScreen", "savedScreen", "backupScreen", "helpScreen"];
-    const toast = document.getElementById("toast");
-    const savedGameSelect = document.getElementById("savedGameSelect");
-    const startGameBtn = document.getElementById("startGameBtn");
-    const savedSummary = document.getElementById("savedSummary");
-    const savedList = document.getElementById("savedList");
-    const SVG_NS = "http://www.w3.org/2000/svg";
-    const XLINK_NS = "http://www.w3.org/1999/xlink";
+    const WEBSITE_HOME_URL = "https://sandooq-games.com/";
+    const screens = ["createScreen","wheelSetupScreen","savedScreen","backupScreen","settingsScreen","wheelGameScreen"];
+    const homeShell = document.getElementById("homeShell");
+    const homeButton = document.getElementById("homeButton");
+
     let wheelContentType = "text";
     let wheelEntries = [];
-    let activeWheelData = null;
     let wheelRotation = 0;
     let currentSelectedIndex = -1;
     let labelUprightNodes = [];
     let spinAnimationId = null;
     let dragState = null;
-    const wheelColors = ["#e91e63", "#8e24aa", "#f4511e", "#0097a7", "#1e88e5", "#43a047", "#ef6c00", "#c2185b", "#7b1fa2", "#00897b", "#3949ab", "#d81b60", "#7cb342", "#039be5", "#fb8c00", "#ec407a"];
-    const defaultWheelEntries = [{text:"الإبطال"},{text:"الأحياء"},{text:"الرياضيات"},{text:"الاجتماعيات"},{text:"العلوم"}];
-    function escapeHtml(value){return String(value||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
-    function showToast(message){if(!toast)return;toast.textContent=message;toast.classList.add("show");window.clearTimeout(showToast.timer);showToast.timer=window.setTimeout(()=>toast.classList.remove("show"),1800);}
-    function openScreen(id){const isWheelGame=id==="wheelGameScreen";document.body.classList.toggle("playing-wheel",isWheelGame);screens.forEach((screenId)=>{const screen=document.getElementById(screenId);if(!screen)return;screen.classList.toggle("active",screenId===id);});if(!isWheelGame)window.scrollTo({top:0,behavior:"auto"});}
-    function getSavedGames(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");}catch(error){return[];}}
-    function setSavedGames(games){localStorage.setItem(STORAGE_KEY,JSON.stringify(games));}
-    function renderSavedGames(){const games=getSavedGames();savedGameSelect.innerHTML="";if(!games.length){const option=document.createElement("option");option.value="";option.textContent="لا توجد ألعاب محفوظة حتى الآن";savedGameSelect.appendChild(option);startGameBtn.disabled=true;savedSummary.innerHTML=`لا توجد ألعاب محفوظة حتى الآن. ابدأ من زر "إنشاء لعبة".<br /><button class="mini-example" id="demoDataBtn">إضافة مثال للتجربة</button>`;savedList.innerHTML="لا توجد ألعاب محفوظة حتى الآن.";bindDemoButton();return;}const defaultOption=document.createElement("option");defaultOption.value="";defaultOption.textContent="اختر لعبة محفوظة";savedGameSelect.appendChild(defaultOption);games.forEach((game)=>{const option=document.createElement("option");option.value=game.id;option.textContent=`${game.name} - ${game.typeName}`;savedGameSelect.appendChild(option);});startGameBtn.disabled=true;savedSummary.innerHTML=`لديك ${games.length} لعبة محفوظة. اختر واحدة من القائمة ثم اضغط ابدأ اللعبة.`;savedList.innerHTML=games.map((game)=>`<div class="saved-item"><strong>${escapeHtml(game.name)}</strong><span>${escapeHtml(game.typeName)}</span></div>`).join("");}
-    function bindDemoButton(){const demoButton=document.getElementById("demoDataBtn");if(!demoButton)return;demoButton.addEventListener("click",()=>{const games=[{id:"demo-wheel",name:"درس العلوم",type:"wheel",typeName:"العجلة الدوارة",wheelData:{contentType:"text",centerEnabled:true,centerQuestion:"اختر الإجابة الصحيحة",entries:defaultWheelEntries},createdAt:new Date().toISOString()}];setSavedGames(games);renderSavedGames();showToast("تمت إضافة مثال للتجربة.");});}
-    function entryHint(){if(wheelContentType==="images")return"أضف الصور التي تظهر داخل أقسام العجلة.";if(wheelContentType==="mixed")return"أضف صورة ومعها نص مختصر لكل عنصر.";return"أضف كلمات أو أسئلة قصيرة.";}
-    function createEntry(){if(wheelContentType==="images")return{imageName:"",imageData:""};if(wheelContentType==="mixed")return{text:"",imageName:"",imageData:""};return{text:""};}
-    function readFileAsDataURL(file,callback){if(!file)return;const reader=new FileReader();reader.onload=()=>callback(String(reader.result||""));reader.readAsDataURL(file);}
-    const wheelItemsEditor=document.getElementById("wheelItemsEditor");const addWheelItemBtn=document.getElementById("addWheelItemBtn");const itemsHint=document.getElementById("itemsHint");const questionPanel=document.getElementById("questionPanel");const centerQuestionInput=document.getElementById("centerQuestionInput");
-    function renderWheelEntries(){if(!wheelItemsEditor)return;if(itemsHint)itemsHint.textContent=entryHint();wheelItemsEditor.innerHTML="";wheelEntries.forEach((entry,index)=>{const box=document.createElement("div");box.className="wheel-entry";const remove=document.createElement("button");remove.type="button";remove.className="remove-entry-btn";remove.textContent="×";remove.setAttribute("aria-label","حذف العنصر");remove.addEventListener("click",()=>{wheelEntries.splice(index,1);renderWheelEntries();});box.appendChild(remove);if(wheelContentType==="text"||wheelContentType==="mixed"){const input=document.createElement("input");input.className="wheel-entry-input";input.type="text";input.maxLength=42;input.placeholder=wheelContentType==="mixed"?"اكتب النص المختصر":"اكتب النص أو السؤال";input.value=entry.text||"";input.addEventListener("input",()=>{wheelEntries[index].text=input.value;});box.appendChild(input);}if(wheelContentType==="images"||wheelContentType==="mixed"){const file=document.createElement("input");file.className="wheel-entry-file";file.type="file";file.accept="image/*";file.addEventListener("change",()=>{const selectedFile=file.files&&file.files[0]?file.files[0]:null;wheelEntries[index].imageName=selectedFile?selectedFile.name:"";readFileAsDataURL(selectedFile,(dataUrl)=>{wheelEntries[index].imageData=dataUrl;});});box.appendChild(file);}wheelItemsEditor.appendChild(box);});}
-    function prepareWheelSetup(){wheelContentType="text";wheelEntries=[];document.querySelectorAll(".wheel-type").forEach((item)=>item.classList.remove("active"));document.querySelector(".wheel-type[data-wheel-type='text']")?.classList.add("active");questionPanel?.classList.remove("enabled");document.querySelectorAll("[data-question-toggle]").forEach((item)=>item.classList.remove("active"));document.querySelector("[data-question-toggle='off']")?.classList.add("active");if(centerQuestionInput)centerQuestionInput.value="";renderWheelEntries();openScreen("wheelSetupScreen");}
-    document.querySelectorAll(".wheel-type").forEach((btn)=>{btn.addEventListener("click",()=>{document.querySelectorAll(".wheel-type").forEach((item)=>item.classList.remove("active"));btn.classList.add("active");wheelContentType=btn.getAttribute("data-wheel-type")||"text";wheelEntries=[];renderWheelEntries();});});
-    addWheelItemBtn?.addEventListener("click",()=>{wheelEntries.push(createEntry());renderWheelEntries();setTimeout(()=>{const inputs=wheelItemsEditor?.querySelectorAll("input");const last=inputs&&inputs.length?inputs[inputs.length-1]:null;if(last&&last.type!=="file")last.focus();},0);});
-    document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{btn.addEventListener("click",()=>{document.querySelectorAll("[data-question-toggle]").forEach((item)=>item.classList.remove("active"));btn.classList.add("active");const enabled=btn.getAttribute("data-question-toggle")==="on";questionPanel?.classList.toggle("enabled",enabled);if(enabled)centerQuestionInput?.focus();});});
-    function getWheelItems(){const data=activeWheelData||{contentType:wheelContentType,entries:wheelEntries,centerEnabled:questionPanel?.classList.contains("enabled"),centerQuestion:centerQuestionInput?.value||""};const filled=(data.entries||[]).filter((entry)=>{if(data.contentType==="images")return entry.imageData||entry.imageName;if(data.contentType==="mixed")return entry.text||entry.imageData||entry.imageName;return entry.text;});return filled.length?filled:defaultWheelEntries;}
-    function textForEntry(entry,fallbackIndex){const text=(entry.text||"").trim();if(text)return text;if(entry.imageName)return entry.imageName.replace(/\.[^.]+$/," ");return`عنصر ${fallbackIndex+1}`;}
-    function polarToCartesian(radius,angleDeg){const angle=angleDeg*Math.PI/180;return{x:radius*Math.cos(angle),y:radius*Math.sin(angle)};}
-    function sectorPath(startAngle,endAngle,radius){const start=polarToCartesian(radius,startAngle);const end=polarToCartesian(radius,endAngle);const largeArc=endAngle-startAngle>180?1:0;return[`M 0 0`,`L ${start.x.toFixed(3)} ${start.y.toFixed(3)}`,`A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)}`,"Z"].join(" ");}
-    function createSvgElement(tag,attrs={}){const el=document.createElementNS(SVG_NS,tag);Object.entries(attrs).forEach(([key,value])=>{if(key==="href")el.setAttributeNS(XLINK_NS,"href",value);else el.setAttribute(key,value);});return el;}
-    function normalizeAngle(angle){return((angle%360)+360)%360;}
-    function colorBrightness(hex){const value=hex.replace("#","");const r=parseInt(value.substring(0,2),16);const g=parseInt(value.substring(2,4),16);const b=parseInt(value.substring(4,6),16);return(r*299+g*587+b*114)/1000;}
-    function labelFontSize(count,text){const length=String(text||"").length;if(count<=5)return length>16?20:26;if(count<=8)return length>14?16:21;if(count<=12)return length>12?13:17;return length>10?10:13;}
-    function splitTextLines(text,maxChars){const clean=String(text||"").trim();if(!clean)return[""];if(clean.length<=maxChars)return[clean];const words=clean.split(/\s+/);const lines=[];let current="";words.forEach((word)=>{const test=current?`${current} ${word}`:word;if(test.length>maxChars&&current){lines.push(current);current=word;}else current=test;});if(current)lines.push(current);return lines.slice(0,3);}
-    function createUprightHolder(parent,angle,radius){const p=polarToCartesian(radius,angle);const holder=createSvgElement("g",{class:"svg-wheel-label-holder",transform:`translate(${p.x.toFixed(3)} ${p.y.toFixed(3)})`});const upright=createSvgElement("g",{class:"svg-wheel-upright"});holder.appendChild(upright);parent.appendChild(holder);labelUprightNodes.push(upright);return upright;}
-    function drawTextLabel(parent,text,angle,radius,count,isDark){const upright=createUprightHolder(parent,angle,radius);const label=createSvgElement("text",{x:"0",y:"0",class:`svg-wheel-label ${isDark?"dark":"light"}`,"font-size":String(labelFontSize(count,text))});const lines=splitTextLines(text,count<=6?9:7);const lineHeight=labelFontSize(count,text)*1.05;const startY=-((lines.length-1)*lineHeight)/2;lines.forEach((line,idx)=>{const tspan=createSvgElement("tspan",{x:"0",y:String(startY+idx*lineHeight)});tspan.textContent=line;label.appendChild(tspan);});upright.appendChild(label);}
-    function drawImageLabel(parent,entry,angle,radius,count,withText){const upright=createUprightHolder(parent,angle,radius);const size=count<=5?76:count<=8?60:48;const text=(entry.text||"").trim();const boxW=withText&&text?size+34:size+16;const boxH=withText&&text?size+38:size+16;const bg=createSvgElement("rect",{x:(-boxW/2).toFixed(3),y:(-boxH/2).toFixed(3),width:String(boxW),height:String(boxH),class:"svg-wheel-image-bg"});upright.appendChild(bg);if(entry.imageData){const img=createSvgElement("image",{x:(-size/2).toFixed(3),y:(withText&&text?(-size/2-10):(-size/2)).toFixed(3),width:String(size),height:String(size),href:entry.imageData,class:"svg-wheel-image",preserveAspectRatio:"xMidYMid meet"});upright.appendChild(img);}if(withText&&text){const label=createSvgElement("text",{x:"0",y:String(size/2+14),class:"svg-wheel-label dark","font-size":count<=8?"13":"11"});label.textContent=text;upright.appendChild(label);}}
-    function updateUprightLabels(){labelUprightNodes.forEach((node)=>node.setAttribute("transform",`rotate(${-wheelRotation.toFixed(3)})`));}
-    function setRotorRotation(degrees){const rotor=document.getElementById("svgWheelRotor");if(!rotor)return;wheelRotation=degrees;rotor.style.transform=`rotate(${degrees}deg)`;updateUprightLabels();}
-    function fitCenterText(){const center=document.getElementById("realWheelCenter");if(!center)return;center.style.fontSize="";let size=parseFloat(getComputedStyle(center).fontSize||"18");for(let i=0;i<12;i++){if(center.scrollWidth<=center.clientWidth+2&&center.scrollHeight<=center.clientHeight+2)break;size-=1;if(size<9)break;center.style.fontSize=`${size}px`;}}
-    function buildWheel(){const data=activeWheelData||{contentType:wheelContentType,entries:wheelEntries,centerEnabled:questionPanel?.classList.contains("enabled"),centerQuestion:centerQuestionInput?.value||""};const items=getWheelItems();const count=Math.max(items.length,2);const sectors=document.getElementById("svgWheelSectors");const labels=document.getElementById("svgWheelLabels");const center=document.getElementById("realWheelCenter");const result=document.getElementById("selectedResult");const afterSpin=document.getElementById("wheelAfterSpin");if(!sectors||!labels||!center)return;sectors.innerHTML="";labels.innerHTML="";labelUprightNodes=[];const radius=224;const labelRadius=count<=5?142:count<=8?148:count<=12?155:162;const step=360/count;items.forEach((entry,index)=>{const start=-90+index*step;const end=start+step;const mid=start+step/2;const color=wheelColors[index%wheelColors.length];const isDark=colorBrightness(color)>170;const sector=createSvgElement("path",{d:sectorPath(start,end,radius),fill:color,class:"svg-sector"});sectors.appendChild(sector);if((data.contentType==="images"||data.contentType==="mixed")&&entry.imageData)drawImageLabel(labels,entry,mid,labelRadius,count,data.contentType==="mixed");else drawTextLabel(labels,textForEntry(entry,index),mid,labelRadius,count,isDark);});const rim=createSvgElement("circle",{cx:"0",cy:"0",r:String(radius),fill:"none",stroke:"rgba(0,0,0,.08)","stroke-width":"2"});sectors.appendChild(rim);center.textContent=data.centerEnabled?(data.centerQuestion||"السؤال"):"";if(result)result.textContent="";if(afterSpin)afterSpin.classList.remove("show");currentSelectedIndex=-1;setRotorRotation(wheelRotation);requestAnimationFrame(fitCenterText);}
-    function getCurrentWheelData(){return{contentType:wheelContentType,centerEnabled:questionPanel?.classList.contains("enabled")||false,centerQuestion:centerQuestionInput?.value||"",entries:wheelEntries.slice()};}
-    function openWheelGame(data){activeWheelData=data||getCurrentWheelData();wheelRotation=0;buildWheel();openScreen("wheelGameScreen");}
-    function getSelectedIndexAtArrow(){const items=getWheelItems();const count=Math.max(items.length,2);const step=360/count;const localAngleAtArrow=normalizeAngle(180-normalizeAngle(wheelRotation));const relative=normalizeAngle(localAngleAtArrow-(-90));return Math.floor(relative/step)%count;}
-    function showSelectedAtArrow(){const items=getWheelItems();const index=getSelectedIndexAtArrow();currentSelectedIndex=index;const result=document.getElementById("selectedResult");const afterSpin=document.getElementById("wheelAfterSpin");if(result)result.textContent=textForEntry(items[index],index);if(afterSpin)afterSpin.classList.add("show");}
-    function easeOutQuint(t){return 1-Math.pow(1-t,5);}
-    function cancelSpinAnimation(){if(spinAnimationId){cancelAnimationFrame(spinAnimationId);spinAnimationId=null;}}
-    function animateWheelTo(targetRotation,duration=5200){cancelSpinAnimation();const start=wheelRotation;const change=targetRotation-start;const startTime=performance.now();const result=document.getElementById("selectedResult");const afterSpin=document.getElementById("wheelAfterSpin");if(result)result.textContent="";if(afterSpin)afterSpin.classList.remove("show");function frame(now){const progress=Math.min(1,(now-startTime)/duration);const eased=easeOutQuint(progress);setRotorRotation(start+change*eased);if(progress<1)spinAnimationId=requestAnimationFrame(frame);else{spinAnimationId=null;setRotorRotation(targetRotation);showSelectedAtArrow();}}spinAnimationId=requestAnimationFrame(frame);}
-    function spinWheel(){const items=getWheelItems();const count=Math.max(items.length,2);const step=360/count;const selected=Math.floor(Math.random()*count);const selectedCenterAngle=-90+selected*step+step/2;const currentNorm=normalizeAngle(wheelRotation);const desiredNorm=normalizeAngle(180-selectedCenterAngle);let delta=desiredNorm-currentNorm;while(delta<0)delta+=360;const fullTurns=4+Math.floor(Math.random()*2);const targetRotation=wheelRotation+delta+fullTurns*360;currentSelectedIndex=selected;animateWheelTo(targetRotation,5200);}
-    function angleFromPointer(event,element){const rect=element.getBoundingClientRect();const cx=rect.left+rect.width/2;const cy=rect.top+rect.height/2;return Math.atan2(event.clientY-cy,event.clientX-cx)*180/Math.PI;}
-    const realWheel=document.getElementById("realWheel");realWheel?.addEventListener("pointerdown",(event)=>{cancelSpinAnimation();realWheel.setPointerCapture?.(event.pointerId);const afterSpin=document.getElementById("wheelAfterSpin");const result=document.getElementById("selectedResult");if(afterSpin)afterSpin.classList.remove("show");if(result)result.textContent="";dragState={pointerId:event.pointerId,lastAngle:angleFromPointer(event,realWheel)};});
-    realWheel?.addEventListener("pointermove",(event)=>{if(!dragState||dragState.pointerId!==event.pointerId)return;event.preventDefault();const currentAngle=angleFromPointer(event,realWheel);let delta=currentAngle-dragState.lastAngle;if(delta>180)delta-=360;if(delta<-180)delta+=360;dragState.lastAngle=currentAngle;setRotorRotation(wheelRotation+delta);});
-    function endDrag(event){if(!dragState||dragState.pointerId!==event.pointerId)return;dragState=null;showSelectedAtArrow();}
-    realWheel?.addEventListener("pointerup",endDrag);realWheel?.addEventListener("pointercancel",endDrag);
-    document.getElementById("testWheelBtn")?.addEventListener("click",()=>openWheelGame(getCurrentWheelData()));
-    document.getElementById("saveWheelBtn")?.addEventListener("click",()=>{const data=getCurrentWheelData();const entries=data.entries.filter((entry)=>{if(data.contentType==="images")return entry.imageData||entry.imageName;if(data.contentType==="mixed")return entry.text||entry.imageData||entry.imageName;return entry.text;});if(!entries.length){showToast("أضف عنصرًا واحدًا على الأقل قبل الحفظ.");return;}const games=getSavedGames();const game={id:`wheel-${Date.now()}`,name:"العجلة الدوارة",type:"wheel",typeName:"العجلة الدوارة",wheelData:{...data,entries},createdAt:new Date().toISOString()};games.unshift(game);setSavedGames(games);renderSavedGames();showToast("تم حفظ العجلة.");openScreen("homeScreen");});
-    document.getElementById("spinGameBtn")?.addEventListener("click",spinWheel);
-    document.getElementById("removeSelectedBtn")?.addEventListener("click",()=>{if(currentSelectedIndex<0)return;const items=getWheelItems();if(activeWheelData?.entries?.length){const filledIndexes=[];activeWheelData.entries.forEach((entry,index)=>{const isFilled=activeWheelData.contentType==="images"?(entry.imageData||entry.imageName):activeWheelData.contentType==="mixed"?(entry.text||entry.imageData||entry.imageName):entry.text;if(isFilled)filledIndexes.push(index);});const originalIndex=filledIndexes[currentSelectedIndex];if(typeof originalIndex==="number")activeWheelData.entries.splice(originalIndex,1);}if(!activeWheelData?.entries?.length&&items.length){activeWheelData={contentType:"text",centerEnabled:false,centerQuestion:"",entries:items.filter((_,idx)=>idx!==currentSelectedIndex)};}currentSelectedIndex=-1;wheelRotation=0;buildWheel();});
-    document.getElementById("exitWheelGameBtn")?.addEventListener("click",()=>{cancelSpinAnimation();openScreen("wheelSetupScreen");});
-    document.querySelectorAll("[data-open-screen]").forEach((button)=>button.addEventListener("click",()=>openScreen(button.getAttribute("data-open-screen"))));
-    document.querySelectorAll("[data-back-home]").forEach((button)=>button.addEventListener("click",()=>openScreen("homeScreen")));
-    document.querySelectorAll("[data-template]").forEach((button)=>{button.addEventListener("click",()=>{if(button.dataset.template==="wheel"){prepareWheelSetup();return;}showToast(`الخطوة القادمة: صفحة إدخال ${button.dataset.template}.`);});});
-    savedGameSelect.addEventListener("change",()=>{startGameBtn.disabled=!savedGameSelect.value;});
-    startGameBtn.addEventListener("click",()=>{const gameId=savedGameSelect.value;if(!gameId){showToast("اختر لعبة محفوظة أولًا.");return;}const game=getSavedGames().find((item)=>item.id===gameId);if(!game){showToast("لم يتم العثور على اللعبة.");return;}if(game.type==="wheel"){openWheelGame(game.wheelData||{contentType:"text",centerEnabled:true,centerQuestion:"اختر الإجابة الصحيحة",entries:defaultWheelEntries});return;}showToast(`سيتم تشغيل: ${game.name}`);});
-    renderSavedGames();
+
+    const SVG_NS = "http://www.w3.org/2000/svg";
+    const XLINK_NS = "http://www.w3.org/1999/xlink";
+
+    const defaultWheelEntries = [
+      { text:"اتغدى" },
+      { text:"انام" },
+      { text:"اشتغل" },
+      { text:"اروح" },
+      { text:"اكعد" },
+      { text:"احجي" },
+      { text:"اقرأ" },
+      { text:"العب" }
+    ];
+
+    const wheelColors = [
+      "#e91e63", "#0097a7", "#f4511e", "#8e24aa",
+      "#1e88e5", "#43a047", "#ef6c00", "#c2185b",
+      "#7b1fa2", "#00897b", "#3949ab", "#d81b60",
+      "#7cb342", "#039be5", "#fb8c00", "#ec407a"
+    ];
+
+    function openScreen(id){
+      const isWheelGame = id === "wheelGameScreen";
+      const isSubpage = Boolean(id) && !isWheelGame;
+
+      document.body.classList.toggle("subpage", isSubpage);
+      document.body.classList.toggle("playing-wheel", isWheelGame);
+
+      screens.forEach((sid)=>{
+        const el = document.getElementById(sid);
+        if (el) el.classList.toggle("active", sid === id);
+      });
+
+      if (homeShell) homeShell.style.display = Boolean(id) ? "none" : "flex";
+
+      if (!isWheelGame) {
+        window.scrollTo({ top:0, behavior:"auto" });
+      }
+    }
+
+    document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
+      btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
+    });
+
+    document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
+      btn.addEventListener("click", ()=> {
+        openScreen("wheelSetupScreen");
+        renderWheelEntries();
+      });
+    });
+
+    const wheelItemsEditor = document.getElementById("wheelItemsEditor");
+    const addWheelItemBtn = document.getElementById("addWheelItemBtn");
+    const itemsHint = document.getElementById("itemsHint");
+
+    function entryHint(){
+      if (wheelContentType === "images") return "أضف الصور التي تظهر داخل أقسام العجلة.";
+      if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
+      return "أضف كلمات أو أسئلة قصيرة.";
+    }
+
+    function createEntry(){
+      if (wheelContentType === "images") return { imageName:"", imageData:"" };
+      if (wheelContentType === "mixed") return { text:"", imageName:"", imageData:"" };
+      return { text:"" };
+    }
+
+    function readFileAsDataURL(file, callback){
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => callback(String(reader.result || ""));
+      reader.readAsDataURL(file);
+    }
+
+    function renderWheelEntries(){
+      if (!wheelItemsEditor) return;
+
+      if (itemsHint) itemsHint.textContent = entryHint();
+
+      wheelItemsEditor.innerHTML = "";
+
+      wheelEntries.forEach((entry, index)=>{
+        const box = document.createElement("div");
+        box.className = "wheel-entry";
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove-entry-btn";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", "حذف العنصر");
+        remove.addEventListener("click", ()=>{
+          wheelEntries.splice(index, 1);
+          renderWheelEntries();
+        });
+
+        box.appendChild(remove);
+
+        if (wheelContentType === "text" || wheelContentType === "mixed") {
+          const input = document.createElement("input");
+          input.className = "wheel-entry-input";
+          input.type = "text";
+          input.maxLength = 40;
+          input.placeholder = wheelContentType === "mixed" ? "اكتب النص المختصر" : "اكتب النص أو السؤال";
+          input.value = entry.text || "";
+          input.addEventListener("input", ()=>{
+            wheelEntries[index].text = input.value;
+          });
+          box.appendChild(input);
+        }
+
+        if (wheelContentType === "images" || wheelContentType === "mixed") {
+          const file = document.createElement("input");
+          file.className = "wheel-entry-file";
+          file.type = "file";
+          file.accept = "image/*";
+          file.addEventListener("change", ()=>{
+            const selectedFile = file.files && file.files[0] ? file.files[0] : null;
+            wheelEntries[index].imageName = selectedFile ? selectedFile.name : "";
+            readFileAsDataURL(selectedFile, (dataUrl)=>{
+              wheelEntries[index].imageData = dataUrl;
+            });
+          });
+          box.appendChild(file);
+        }
+
+        wheelItemsEditor.appendChild(box);
+      });
+    }
+
+    document.querySelectorAll(".wheel-type").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".wheel-type").forEach((item)=> item.classList.remove("active"));
+        btn.classList.add("active");
+
+        wheelContentType = btn.getAttribute("data-wheel-type") || "text";
+        wheelEntries = [];
+        wheelRotation = 0;
+        currentSelectedIndex = -1;
+        renderWheelEntries();
+      });
+    });
+
+    addWheelItemBtn?.addEventListener("click", ()=>{
+      wheelEntries.push(createEntry());
+      renderWheelEntries();
+
+      setTimeout(()=>{
+        const inputs = wheelItemsEditor?.querySelectorAll("input");
+        const last = inputs && inputs.length ? inputs[inputs.length - 1] : null;
+        if (last && last.type !== "file") last.focus();
+      }, 0);
+    });
+
+    const questionPanel = document.getElementById("questionPanel");
+    const centerQuestionInput = document.getElementById("centerQuestionInput");
+
+    document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll("[data-question-toggle]").forEach((item)=> item.classList.remove("active"));
+        btn.classList.add("active");
+
+        const enabled = btn.getAttribute("data-question-toggle") === "on";
+        questionPanel?.classList.toggle("enabled", enabled);
+
+        if (enabled) centerQuestionInput?.focus();
+      });
+    });
+
+    function getWheelItems(){
+      const filled = wheelEntries.filter((entry)=>{
+        if (wheelContentType === "images") return entry.imageData || entry.imageName;
+        if (wheelContentType === "mixed") return entry.text || entry.imageData || entry.imageName;
+        return entry.text;
+      });
+
+      return filled.length ? filled : defaultWheelEntries;
+    }
+
+    function textForEntry(entry, fallbackIndex){
+      const text = (entry.text || "").trim();
+      if (text) return text;
+      if (entry.imageName) return entry.imageName.replace(/\.[^.]+$/, "");
+      return `عنصر ${fallbackIndex + 1}`;
+    }
+
+    function normalizeAngle(angle){
+      return ((angle % 360) + 360) % 360;
+    }
+
+    function polarToCartesian(radius, angleDeg){
+      const angle = angleDeg * Math.PI / 180;
+      return {
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle)
+      };
+    }
+
+    function sectorPath(startAngle, endAngle, radius){
+      const start = polarToCartesian(radius, startAngle);
+      const end = polarToCartesian(radius, endAngle);
+      const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+      return [
+        `M 0 0`,
+        `L ${start.x.toFixed(3)} ${start.y.toFixed(3)}`,
+        `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)}`,
+        `Z`
+      ].join(" ");
+    }
+
+    function createSvgElement(tag, attrs = {}){
+      const el = document.createElementNS(SVG_NS, tag);
+      Object.entries(attrs).forEach(([key, value])=>{
+        if (key === "href") {
+          el.setAttributeNS(XLINK_NS, "href", value);
+        } else {
+          el.setAttribute(key, value);
+        }
+      });
+      return el;
+    }
+
+    function colorBrightness(hex){
+      const value = String(hex || "").replace("#", "");
+      const r = parseInt(value.substring(0, 2), 16) || 0;
+      const g = parseInt(value.substring(2, 4), 16) || 0;
+      const b = parseInt(value.substring(4, 6), 16) || 0;
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    function labelFontSize(count, text){
+      const length = String(text || "").length;
+      if (count <= 5) return length > 16 ? 20 : 26;
+      if (count <= 8) return length > 14 ? 16 : 21;
+      if (count <= 12) return length > 12 ? 13 : 17;
+      return length > 10 ? 10 : 13;
+    }
+
+    function splitTextLines(text, maxChars){
+      const clean = String(text || "").trim();
+      if (!clean) return [""];
+      if (clean.length <= maxChars) return [clean];
+
+      const words = clean.split(/\s+/);
+      const lines = [];
+      let current = "";
+
+      words.forEach((word)=>{
+        const test = current ? `${current} ${word}` : word;
+        if (test.length > maxChars && current) {
+          lines.push(current);
+          current = word;
+        } else {
+          current = test;
+        }
+      });
+
+      if (current) lines.push(current);
+      return lines.slice(0, 3);
+    }
+
+    function createUprightHolder(parent, angle, radius){
+      const p = polarToCartesian(radius, angle);
+      const holder = createSvgElement("g", {
+        transform: `translate(${p.x.toFixed(3)} ${p.y.toFixed(3)})`
+      });
+
+      const upright = createSvgElement("g", {
+        class: "svg-wheel-upright"
+      });
+
+      holder.appendChild(upright);
+      parent.appendChild(holder);
+      labelUprightNodes.push(upright);
+      return upright;
+    }
+
+    function drawTextLabel(parent, text, angle, radius, count, isDark){
+      const upright = createUprightHolder(parent, angle, radius);
+      const size = labelFontSize(count, text);
+
+      const label = createSvgElement("text", {
+        x: "0",
+        y: "0",
+        class: `svg-wheel-label ${isDark ? "dark" : "light"}`,
+        "font-size": String(size)
+      });
+
+      const lines = splitTextLines(text, count <= 6 ? 9 : 7);
+      const lineHeight = size * 1.06;
+      const startY = -((lines.length - 1) * lineHeight) / 2;
+
+      lines.forEach((line, idx)=>{
+        const tspan = createSvgElement("tspan", {
+          x: "0",
+          y: String(startY + idx * lineHeight)
+        });
+        tspan.textContent = line;
+        label.appendChild(tspan);
+      });
+
+      upright.appendChild(label);
+    }
+
+    function drawImageLabel(parent, entry, angle, radius, count, withText){
+      const upright = createUprightHolder(parent, angle, radius);
+      const size = count <= 5 ? 76 : count <= 8 ? 60 : 48;
+      const text = (entry.text || "").trim();
+      const boxW = withText && text ? size + 34 : size + 16;
+      const boxH = withText && text ? size + 38 : size + 16;
+
+      const bg = createSvgElement("rect", {
+        x: (-boxW / 2).toFixed(3),
+        y: (-boxH / 2).toFixed(3),
+        width: String(boxW),
+        height: String(boxH),
+        class: "svg-wheel-image-bg"
+      });
+      upright.appendChild(bg);
+
+      if (entry.imageData) {
+        const img = createSvgElement("image", {
+          x: (-size / 2).toFixed(3),
+          y: (withText && text ? (-size / 2 - 10) : (-size / 2)).toFixed(3),
+          width: String(size),
+          height: String(size),
+          href: entry.imageData,
+          class: "svg-wheel-image",
+          preserveAspectRatio: "xMidYMid meet"
+        });
+        upright.appendChild(img);
+      }
+
+      if (withText && text) {
+        const label = createSvgElement("text", {
+          x: "0",
+          y: String(size / 2 + 14),
+          class: "svg-wheel-label dark",
+          "font-size": count <= 8 ? "13" : "11"
+        });
+        label.textContent = text;
+        upright.appendChild(label);
+      }
+    }
+
+    function updateUprightLabels(){
+      labelUprightNodes.forEach((node)=>{
+        node.setAttribute("transform", `rotate(${-wheelRotation.toFixed(3)})`);
+      });
+    }
+
+    function setRotorRotation(degrees){
+      const rotor = document.getElementById("svgWheelRotor");
+      if (!rotor) return;
+
+      wheelRotation = degrees;
+      rotor.style.transition = "none";
+      rotor.style.transform = `rotate(${degrees}deg)`;
+      updateUprightLabels();
+    }
+
+    function fitCenterText(){
+      const center = document.getElementById("realWheelCenter");
+      if (!center) return;
+
+      center.style.fontSize = "";
+      let size = parseFloat(getComputedStyle(center).fontSize || "18");
+
+      for (let i = 0; i < 14; i++) {
+        if (center.scrollWidth <= center.clientWidth + 2 && center.scrollHeight <= center.clientHeight + 2) break;
+        size -= 1;
+        if (size < 8) break;
+        center.style.fontSize = `${size}px`;
+      }
+    }
+
+    function buildWheel(){
+      const items = getWheelItems();
+      const count = Math.max(items.length, 2);
+      const sectors = document.getElementById("svgWheelSectors");
+      const labels = document.getElementById("svgWheelLabels");
+      const center = document.getElementById("realWheelCenter");
+      const result = document.getElementById("selectedResult");
+      const afterSpin = document.getElementById("wheelAfterSpin");
+
+      if (!sectors || !labels || !center) return;
+
+      sectors.innerHTML = "";
+      labels.innerHTML = "";
+      labelUprightNodes = [];
+
+      const radius = 224;
+      const labelRadius = count <= 5 ? 142 : count <= 8 ? 148 : count <= 12 ? 155 : 162;
+      const step = 360 / count;
+
+      items.forEach((entry, index)=>{
+        const start = -90 + (index * step);
+        const end = start + step;
+        const mid = start + (step / 2);
+        const color = wheelColors[index % wheelColors.length];
+        const isDark = colorBrightness(color) > 168;
+
+        const sector = createSvgElement("path", {
+          d: sectorPath(start, end, radius),
+          fill: color,
+          class: "svg-sector"
+        });
+        sectors.appendChild(sector);
+
+        if ((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData) {
+          drawImageLabel(labels, entry, mid, labelRadius, count, wheelContentType === "mixed");
+        } else {
+          drawTextLabel(labels, textForEntry(entry, index), mid, labelRadius, count, isDark);
+        }
+      });
+
+      const rim = createSvgElement("circle", {
+        cx: "0",
+        cy: "0",
+        r: String(radius),
+        fill: "none",
+        stroke: "rgba(0,0,0,.08)",
+        "stroke-width": "2"
+      });
+      sectors.appendChild(rim);
+
+      const centerQuestionEnabled = questionPanel?.classList.contains("enabled");
+      const centerText = (centerQuestionInput?.value || "").trim();
+      center.textContent = centerQuestionEnabled ? (centerText || "السؤال") : "";
+
+      if (result) result.textContent = "";
+      if (afterSpin) afterSpin.classList.remove("show");
+      currentSelectedIndex = -1;
+
+      setRotorRotation(wheelRotation);
+      requestAnimationFrame(fitCenterText);
+    }
+
+    function openWheelGame(){
+      wheelRotation = 0;
+      buildWheel();
+      openScreen("wheelGameScreen");
+    }
+
+    document.getElementById("testWheelBtn")?.addEventListener("click", openWheelGame);
+
+    document.querySelector(".start-btn")?.addEventListener("click", ()=>{
+      openWheelGame();
+    });
+
+    document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
+      alert("تم حفظ اللعبة.");
+    });
+
+    function getSelectedIndexAtArrow(){
+      const items = getWheelItems();
+      const count = Math.max(items.length, 2);
+      const step = 360 / count;
+      const localAngleAtArrow = normalizeAngle(180 - normalizeAngle(wheelRotation));
+      const relative = normalizeAngle(localAngleAtArrow - (-90));
+      return Math.floor(relative / step) % count;
+    }
+
+    function showSelectedAtArrow(){
+      const items = getWheelItems();
+      const index = getSelectedIndexAtArrow();
+      currentSelectedIndex = index;
+
+      const result = document.getElementById("selectedResult");
+      const afterSpin = document.getElementById("wheelAfterSpin");
+
+      if (result) result.textContent = textForEntry(items[index], index);
+      if (afterSpin) afterSpin.classList.add("show");
+    }
+
+    function easeOutQuint(t){
+      return 1 - Math.pow(1 - t, 5);
+    }
+
+    function cancelSpinAnimation(){
+      if (spinAnimationId) {
+        cancelAnimationFrame(spinAnimationId);
+        spinAnimationId = null;
+      }
+    }
+
+    function animateWheelTo(targetRotation, duration = 5200){
+      cancelSpinAnimation();
+
+      const start = wheelRotation;
+      const change = targetRotation - start;
+      const startTime = performance.now();
+
+      const result = document.getElementById("selectedResult");
+      const afterSpin = document.getElementById("wheelAfterSpin");
+
+      if (result) result.textContent = "";
+      if (afterSpin) afterSpin.classList.remove("show");
+
+      function frame(now){
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutQuint(progress);
+
+        setRotorRotation(start + change * eased);
+
+        if (progress < 1) {
+          spinAnimationId = requestAnimationFrame(frame);
+        } else {
+          spinAnimationId = null;
+          setRotorRotation(targetRotation);
+          showSelectedAtArrow();
+        }
+      }
+
+      spinAnimationId = requestAnimationFrame(frame);
+    }
+
+    document.getElementById("spinGameBtn")?.addEventListener("click", ()=>{
+      const items = getWheelItems();
+      const count = Math.max(items.length, 2);
+      const step = 360 / count;
+      const selected = Math.floor(Math.random() * count);
+
+      const selectedCenterAngle = -90 + selected * step + step / 2;
+      const currentNorm = normalizeAngle(wheelRotation);
+      const desiredNorm = normalizeAngle(180 - selectedCenterAngle);
+
+      let delta = desiredNorm - currentNorm;
+      while (delta < 0) delta += 360;
+
+      const fullTurns = 4 + Math.floor(Math.random() * 2);
+      const targetRotation = wheelRotation + delta + fullTurns * 360;
+
+      currentSelectedIndex = selected;
+      animateWheelTo(targetRotation, 5200);
+    });
+
+    function angleFromPointer(event, element){
+      const rect = element.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      return Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI;
+    }
+
+    const realWheel = document.getElementById("realWheel");
+
+    realWheel?.addEventListener("pointerdown", (event)=>{
+      cancelSpinAnimation();
+      realWheel.setPointerCapture?.(event.pointerId);
+
+      const afterSpin = document.getElementById("wheelAfterSpin");
+      const result = document.getElementById("selectedResult");
+
+      if (afterSpin) afterSpin.classList.remove("show");
+      if (result) result.textContent = "";
+
+      dragState = {
+        pointerId: event.pointerId,
+        lastAngle: angleFromPointer(event, realWheel)
+      };
+    });
+
+    realWheel?.addEventListener("pointermove", (event)=>{
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      event.preventDefault();
+
+      const currentAngle = angleFromPointer(event, realWheel);
+      let delta = currentAngle - dragState.lastAngle;
+
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+
+      dragState.lastAngle = currentAngle;
+      setRotorRotation(wheelRotation + delta);
+    });
+
+    function endDrag(event){
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      dragState = null;
+      showSelectedAtArrow();
+    }
+
+    realWheel?.addEventListener("pointerup", endDrag);
+    realWheel?.addEventListener("pointercancel", endDrag);
+
+    document.getElementById("removeSelectedBtn")?.addEventListener("click", ()=>{
+      if (currentSelectedIndex < 0) return;
+
+      if (wheelEntries.length) {
+        const filledIndexes = [];
+
+        wheelEntries.forEach((entry, index)=>{
+          const isFilled = wheelContentType === "images"
+            ? (entry.imageData || entry.imageName)
+            : wheelContentType === "mixed"
+              ? (entry.text || entry.imageData || entry.imageName)
+              : entry.text;
+
+          if (isFilled) filledIndexes.push(index);
+        });
+
+        const originalIndex = filledIndexes[currentSelectedIndex];
+        if (typeof originalIndex === "number") {
+          wheelEntries.splice(originalIndex, 1);
+        }
+      }
+
+      currentSelectedIndex = -1;
+      wheelRotation = 0;
+      buildWheel();
+      renderWheelEntries();
+    });
+
+    document.getElementById("exitWheelGameBtn")?.addEventListener("click", ()=>{
+      cancelSpinAnimation();
+      openScreen("wheelSetupScreen");
+    });
+
+    homeButton.addEventListener("click", ()=>{
+      if (document.body.classList.contains("playing-wheel")) {
+        cancelSpinAnimation();
+        openScreen("wheelSetupScreen");
+        return;
+      }
+
+      if (document.body.classList.contains("subpage")) {
+        openScreen("");
+        return;
+      }
+
+      window.location.href = WEBSITE_HOME_URL;
+    });
+
+    renderWheelEntries();
   </script>
+
 </body>
 </html>
