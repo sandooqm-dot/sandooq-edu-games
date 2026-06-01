@@ -2804,6 +2804,187 @@
       }
     }
 
+  
+
+    /* v35: تعديلات شاشة العجلة فقط - معالجة Safari + ترتيب صورة/نص + زخرفة خارجية متموجة */
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:100vw !important;
+      height:100svh !important;
+      min-height:100svh !important;
+      max-height:100svh !important;
+      overflow:hidden !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      top:0 !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:auto !important;
+      width:100vw !important;
+      height:100svh !important;
+      min-height:100svh !important;
+      max-height:100svh !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      flex-direction:column !important;
+      --wheel-size:min(94vw, calc(100svh - 142px), 730px);
+    }
+
+    @supports not (height:100svh){
+      body.playing-wheel,
+      body.playing-wheel .page,
+      body.playing-wheel .wheel-game-screen{
+        height:100dvh !important;
+        min-height:100dvh !important;
+        max-height:100dvh !important;
+      }
+
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(94vw, calc(100dvh - 142px), 730px);
+      }
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:6px 8px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      display:none !important;
+      content:none !important;
+      background:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-line{
+      fill:none !important;
+      stroke:#87b9e8 !important;
+      stroke-width:2.15 !important;
+      stroke-linecap:round !important;
+      stroke-linejoin:round !important;
+      opacity:.58 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-dot{
+      fill:#b9ddff !important;
+      opacity:.78 !important;
+      pointer-events:none !important;
+      filter:drop-shadow(0 0 2px rgba(122,180,235,.55));
+    }
+
+    body.playing-wheel .svg-wheel-image-bg,
+    body.playing-wheel .svg-wheel-image-card{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.16));
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      border-left-color:#111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)) !important;
+      z-index:30 !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      height:58px !important;
+      min-height:58px !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:46px !important;
+      height:46px !important;
+      font-size:34px !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:46px !important;
+      font-size:clamp(20px, 3vw, 28px) !important;
+      border-width:3px !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel,
+      body.playing-wheel .page,
+      body.playing-wheel .wheel-game-screen{
+        height:100svh !important;
+        min-height:100svh !important;
+        max-height:100svh !important;
+      }
+
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100svh - 44px), 86svh, 780px);
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding:0 6px !important;
+      }
+
+      body.playing-wheel .selected-result{
+        min-height:14px !important;
+        font-size:clamp(12px, 2.3vh, 17px) !important;
+        line-height:1 !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        height:38px !important;
+        min-height:38px !important;
+        grid-template-columns:34px minmax(120px, 240px) !important;
+        gap:clamp(12px, 4vw, 38px) !important;
+        padding:0 10px 4px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:32px !important;
+        height:32px !important;
+        font-size:25px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:31px !important;
+        font-size:clamp(15px, 3.7vh, 21px) !important;
+        border-width:2px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 3px !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
+        min-height:31px !important;
+        min-width:140px !important;
+        font-size:14px !important;
+        border-width:2px !important;
+      }
+    }
+
+
   </style>
 </head>
 <body>
@@ -3092,16 +3273,14 @@
 
     function updateViewportVars(){
       const root = document.documentElement;
-      const viewport = window.visualViewport;
-      const width = viewport ? viewport.width : window.innerWidth;
-      const height = viewport ? viewport.height : window.innerHeight;
-      const top = viewport ? viewport.offsetTop : 0;
-      const left = viewport ? viewport.offsetLeft : 0;
+      /* v35: نثبت قياسات العرض على window مثل صفحات العرض المستقرة، بدل ضغط Safari للعبة عبر visualViewport. */
+      const width = window.innerWidth || document.documentElement.clientWidth || 0;
+      const height = window.innerHeight || document.documentElement.clientHeight || 0;
 
       root.style.setProperty("--app-width", `${width}px`);
       root.style.setProperty("--app-height", `${height}px`);
-      root.style.setProperty("--app-top", `${top}px`);
-      root.style.setProperty("--app-left", `${left}px`);
+      root.style.setProperty("--app-top", `0px`);
+      root.style.setProperty("--app-left", `0px`);
 
       requestAnimationFrame(updateWheelGameLayout);
     }
@@ -3447,14 +3626,18 @@
       const upright = createUprightHolder(parent, angle, radius);
       const hasText = Boolean(withText && String(entry.text || "").trim());
       const text = String(entry.text || "").trim();
-      const imgSize = count <= 5 ? 58 : count <= 8 ? 48 : count <= 12 ? 40 : 32;
-      const textSize = count <= 5 ? 15 : count <= 8 ? 12 : 10;
-      const gap = count <= 8 ? 8 : 5;
+
+      const imgSize = count <= 5 ? 70 : count <= 8 ? 58 : count <= 12 ? 48 : 38;
+      const textSize = count <= 5 ? 17 : count <= 8 ? 14 : count <= 12 ? 11 : 9;
+      const gap = count <= 8 ? 13 : 9;
+
+      // v35: عرض الصور مع النصوص يكون مثل المثال: صورة بدون خلفية، وبجانبها النص مباشرة.
+      const imageCenterX = hasText ? -(imgSize * 0.50) : 0;
+      const textCenterX = hasText ? (imgSize * 0.50 + gap) : 0;
 
       if (entry.imageData) {
-        const imgX = hasText ? gap : (-imgSize / 2);
         const img = createSvgElement("image", {
-          x: imgX.toFixed(3),
+          x: (imageCenterX - imgSize / 2).toFixed(3),
           y: (-imgSize / 2).toFixed(3),
           width: String(imgSize),
           height: String(imgSize),
@@ -3467,11 +3650,11 @@
 
       if (hasText) {
         const label = createSvgElement("text", {
-          x: (-gap).toFixed(3),
+          x: textCenterX.toFixed(3),
           y: "0",
           class: `svg-wheel-label ${isDark ? "dark" : "light"}`,
           "font-size": String(textSize),
-          "text-anchor": "end"
+          "text-anchor": "middle"
         });
 
         const lines = splitTextLines(text, count <= 6 ? 8 : 6).slice(0, 2);
@@ -3480,7 +3663,7 @@
 
         lines.forEach((line, idx)=>{
           const tspan = createSvgElement("tspan", {
-            x: (-gap).toFixed(3),
+            x: textCenterX.toFixed(3),
             y: String(startY + idx * lineHeight)
           });
           tspan.textContent = line;
@@ -3522,6 +3705,38 @@
       }
     }
 
+    function wheelDecorPath(radius = 234, waves = 20, amplitude = 3.2, points = 240){
+      let d = "";
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * 360;
+        const r = radius + Math.sin((angle * Math.PI / 180) * waves) * amplitude;
+        const p = polarToCartesian(r, angle);
+        d += `${i === 0 ? "M" : "L"} ${p.x.toFixed(3)} ${p.y.toFixed(3)} `;
+      }
+      return d + "Z";
+    }
+
+    function drawWheelDecoration(parent){
+      const decorLine = createSvgElement("path", {
+        d: wheelDecorPath(),
+        class: "svg-wheel-decor-line"
+      });
+      parent.appendChild(decorLine);
+
+      for (let i = 0; i < 44; i++) {
+        const angle = (i / 44) * 360;
+        const radius = 236 + Math.sin((angle * Math.PI / 180) * 18) * 2.8;
+        const p = polarToCartesian(radius, angle);
+        const dot = createSvgElement("circle", {
+          cx: p.x.toFixed(3),
+          cy: p.y.toFixed(3),
+          r: String(i % 4 === 0 ? 1.65 : 1.1),
+          class: "svg-wheel-decor-dot"
+        });
+        parent.appendChild(dot);
+      }
+    }
+
     function buildWheel(){
       const items = getWheelItems();
       const count = Math.max(items.length, 1);
@@ -3536,6 +3751,7 @@
       sectors.innerHTML = "";
       labels.innerHTML = "";
       labelUprightNodes = [];
+      drawWheelDecoration(sectors);
 
       const radius = 224;
       const labelRadius = count <= 5 ? 142 : count <= 8 ? 148 : count <= 12 ? 155 : 162;
