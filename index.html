@@ -816,6 +816,351 @@
       }
     }
 
+    /* صفحة إعداد العجلة */
+    .wheel-setup{
+      display:none;
+      width:min(1180px, 92%);
+      margin:0 auto;
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:26px;
+      padding:clamp(18px, 2.4vw, 28px);
+      position:relative;
+      z-index:5;
+    }
+
+    .wheel-setup.active{
+      display:block;
+    }
+
+    .wheel-layout{
+      display:grid;
+      grid-template-columns:minmax(280px, 420px) minmax(0, 1fr);
+      gap:clamp(18px, 3vw, 34px);
+      align-items:center;
+      margin-top:clamp(16px, 2vw, 24px);
+    }
+
+    .wheel-preview-box{
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:26px;
+      padding:clamp(18px, 2.2vw, 26px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:clamp(330px, 34vw, 430px);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .wheel-arrow{
+      position:absolute;
+      left:clamp(10px, 1.5vw, 20px);
+      top:50%;
+      transform:translateY(-50%);
+      width:0;
+      height:0;
+      border-top:24px solid transparent;
+      border-bottom:24px solid transparent;
+      border-left:42px solid #d0d0d0;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.35));
+      z-index:3;
+    }
+
+    .wheel-preview{
+      width:min(84vw, 330px);
+      max-width:100%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      position:relative;
+      border:5px solid #efefef;
+      box-shadow:0 8px 22px rgba(0,0,0,.12);
+      background:
+        conic-gradient(
+          #ec174f 0deg 40deg,
+          #ffffff 40deg 80deg,
+          #2e75d4 80deg 120deg,
+          #ffffff 120deg 160deg,
+          #f39c12 160deg 200deg,
+          #ffffff 200deg 240deg,
+          #1abc9c 240deg 280deg,
+          #ffffff 280deg 320deg,
+          #ec174f 320deg 360deg
+        );
+      overflow:hidden;
+      transition:transform 2.8s cubic-bezier(.12,.72,.13,1);
+    }
+
+    .wheel-preview::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:
+        linear-gradient(90deg, transparent calc(50% - 1px), rgba(255,255,255,.95) calc(50% - 1px), rgba(255,255,255,.95) calc(50% + 1px), transparent calc(50% + 1px)),
+        linear-gradient(45deg, transparent calc(50% - 1px), rgba(255,255,255,.95) calc(50% - 1px), rgba(255,255,255,.95) calc(50% + 1px), transparent calc(50% + 1px)),
+        linear-gradient(-45deg, transparent calc(50% - 1px), rgba(255,255,255,.95) calc(50% - 1px), rgba(255,255,255,.95) calc(50% + 1px), transparent calc(50% + 1px));
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .wheel-center{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:34%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:3px solid #e8e8e8;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:10px;
+      font-size:clamp(14px, 1.6vw, 20px);
+      font-weight:800;
+      line-height:1.3;
+      color:#111;
+      z-index:2;
+    }
+
+    .wheel-items{
+      position:absolute;
+      inset:0;
+      z-index:1;
+      pointer-events:none;
+    }
+
+    .wheel-item{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:34%;
+      text-align:center;
+      color:#fff;
+      font-weight:800;
+      font-size:clamp(12px, 1.5vw, 18px);
+      transform-origin:0 0;
+    }
+
+    .wheel-item:nth-child(1){ transform:rotate(18deg) translate(38%, -50%) rotate(72deg); }
+    .wheel-item:nth-child(2){ transform:rotate(82deg) translate(38%, -50%) rotate(8deg); color:#222; }
+    .wheel-item:nth-child(3){ transform:rotate(146deg) translate(38%, -50%) rotate(-56deg); }
+    .wheel-item:nth-child(4){ transform:rotate(212deg) translate(38%, -50%) rotate(-122deg); color:#222; }
+    .wheel-item:nth-child(5){ transform:rotate(278deg) translate(38%, -50%) rotate(-188deg); }
+
+    .wheel-options{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:clamp(10px, 1.5vw, 16px);
+    }
+
+    .wheel-type{
+      min-height:clamp(76px, 8vw, 104px);
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#f6f6f6;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      text-align:center;
+      padding:10px;
+      cursor:pointer;
+      transition:.16s ease;
+    }
+
+    .wheel-type.active{
+      background:var(--title-yellow);
+      box-shadow:0 6px 0 rgba(0,0,0,.18);
+      transform:translateY(-3px);
+    }
+
+    .wheel-type strong{
+      font-size:clamp(18px, 2vw, 28px);
+      line-height:1;
+    }
+
+    .wheel-type span{
+      color:#555;
+      font-size:clamp(12px, 1.3vw, 16px);
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .question-panel{
+      margin-top:clamp(14px, 1.9vw, 22px);
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#f8f8f8;
+      padding:clamp(14px, 1.7vw, 20px);
+    }
+
+    .question-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .question-title{
+      margin:0;
+      font-size:clamp(18px, 2vw, 28px);
+      font-weight:800;
+    }
+
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:999px;
+      padding:5px;
+    }
+
+    .toggle button{
+      border:none;
+      border-radius:999px;
+      padding:9px 18px;
+      background:transparent;
+      color:#111;
+      font-size:clamp(14px, 1.4vw, 18px);
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .toggle button.active{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .center-question-input{
+      display:none;
+      width:100%;
+      margin-top:14px;
+      height:52px;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      padding:0 16px;
+      font-size:clamp(16px, 1.7vw, 22px);
+      font-weight:700;
+      outline:none;
+      text-align:center;
+    }
+
+    .question-panel.enabled .center-question-input{
+      display:block;
+    }
+
+    .wheel-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+      margin-top:clamp(16px, 2vw, 24px);
+    }
+
+    .test-btn,
+    .save-btn{
+      min-height:56px;
+      border:3px solid var(--ink);
+      border-radius:20px;
+      font-size:clamp(18px, 2vw, 28px);
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .test-btn{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .save-btn{
+      background:var(--title-yellow);
+      color:#111;
+    }
+
+    @media (max-width: 760px){
+      .wheel-setup{
+        width:92%;
+        padding:16px 12px;
+        border-radius:22px;
+      }
+
+      .wheel-layout{
+        grid-template-columns:1fr;
+        gap:14px;
+        margin-top:14px;
+      }
+
+      .wheel-preview-box{
+        min-height:265px;
+        padding:14px;
+        border-radius:22px;
+      }
+
+      .wheel-preview{
+        width:min(70vw, 245px);
+      }
+
+      .wheel-arrow{
+        left:8px;
+        border-top-width:18px;
+        border-bottom-width:18px;
+        border-left-width:30px;
+      }
+
+      .wheel-options{
+        grid-template-columns:repeat(3, minmax(0, 1fr));
+        gap:8px;
+      }
+
+      .wheel-type{
+        min-height:72px;
+        border-radius:16px;
+        padding:8px 5px;
+      }
+
+      .wheel-type strong{
+        font-size:clamp(14px, 3.7vw, 18px);
+      }
+
+      .wheel-type span{
+        font-size:clamp(10px, 2.7vw, 12px);
+      }
+
+      .question-panel{
+        padding:12px;
+        border-radius:18px;
+      }
+
+      .question-title{
+        font-size:clamp(16px, 4.1vw, 20px);
+      }
+
+      .toggle button{
+        padding:7px 13px;
+        font-size:14px;
+      }
+
+      .center-question-input{
+        height:44px;
+        font-size:15px;
+      }
+
+      .test-btn,
+      .save-btn{
+        min-height:48px;
+        border-radius:17px;
+        font-size:17px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -954,6 +1299,70 @@
       </div>
     </section>
 
+
+    <section class="wheel-setup" id="wheelSetupScreen">
+      <h2 class="screen-title">العجلة الدوارة</h2>
+
+      <div class="wheel-layout">
+        <div class="wheel-preview-box">
+          <div class="wheel-arrow" aria-hidden="true"></div>
+
+          <div class="wheel-preview" id="wheelPreview">
+            <div class="wheel-items" aria-hidden="true">
+              <div class="wheel-item">قلم</div>
+              <div class="wheel-item">كتاب</div>
+              <div class="wheel-item">صورة</div>
+              <div class="wheel-item">كلمة</div>
+              <div class="wheel-item">سؤال</div>
+            </div>
+            <div class="wheel-center" id="wheelCenterText"></div>
+          </div>
+        </div>
+
+        <div class="wheel-settings">
+          <div class="wheel-options" aria-label="نوع محتوى العجلة">
+            <button class="wheel-type active" type="button" data-wheel-type="text">
+              <strong>نصوص فقط</strong>
+              <span>كلمات أو أسئلة قصيرة</span>
+            </button>
+
+            <button class="wheel-type" type="button" data-wheel-type="images">
+              <strong>صور فقط</strong>
+              <span>صور داخل أقسام العجلة</span>
+            </button>
+
+            <button class="wheel-type" type="button" data-wheel-type="mixed">
+              <strong>صور مع نصوص</strong>
+              <span>صورة ومعها نص مختصر</span>
+            </button>
+          </div>
+
+          <div class="question-panel" id="questionPanel">
+            <div class="question-row">
+              <h3 class="question-title">سؤال في منتصف العجلة</h3>
+              <div class="toggle" aria-label="تشغيل سؤال المنتصف">
+                <button type="button" class="active" data-question-toggle="off">تعطيل</button>
+                <button type="button" data-question-toggle="on">تشغيل</button>
+              </div>
+            </div>
+
+            <input
+              class="center-question-input"
+              id="centerQuestionInput"
+              type="text"
+              maxlength="45"
+              placeholder="اكتب السؤال الذي يظهر في منتصف العجلة"
+            />
+          </div>
+
+          <div class="wheel-actions">
+            <button class="test-btn" type="button" id="testWheelBtn">اختبار اللعبة</button>
+            <button class="save-btn" type="button">حفظ اللعبة</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="screen" id="savedScreen">
       <h2 class="screen-title">العابي المحفوظة</h2>
       <p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
@@ -976,7 +1385,7 @@
 
   <script>
     const WEBSITE_HOME_URL = "https://sandooq-games.com/";
-    const screens = ["createScreen","savedScreen","backupScreen","settingsScreen"];
+    const screens = ["createScreen","wheelSetupScreen","savedScreen","backupScreen","settingsScreen"];
     const homeShell = document.getElementById("homeShell");
     const homeButton = document.getElementById("homeButton");
 
@@ -998,6 +1407,57 @@
       btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
     });
 
+    document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
+      btn.addEventListener("click", ()=> openScreen("wheelSetupScreen"));
+    });
+
+    document.querySelectorAll(".wheel-type").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".wheel-type").forEach((item)=> item.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+
+    const questionPanel = document.getElementById("questionPanel");
+    const centerQuestionInput = document.getElementById("centerQuestionInput");
+    const wheelCenterText = document.getElementById("wheelCenterText");
+
+    function updateCenterQuestion(){
+      if (!questionPanel || !wheelCenterText) return;
+      if (!questionPanel.classList.contains("enabled")) {
+        wheelCenterText.textContent = "";
+        return;
+      }
+      const value = (centerQuestionInput?.value || "").trim();
+      wheelCenterText.textContent = value || "السؤال";
+    }
+
+    document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll("[data-question-toggle]").forEach((item)=> item.classList.remove("active"));
+        btn.classList.add("active");
+
+        const enabled = btn.getAttribute("data-question-toggle") === "on";
+        questionPanel?.classList.toggle("enabled", enabled);
+
+        if (enabled) {
+          centerQuestionInput?.focus();
+        }
+
+        updateCenterQuestion();
+      });
+    });
+
+    centerQuestionInput?.addEventListener("input", updateCenterQuestion);
+
+    let wheelRotation = 0;
+    document.getElementById("testWheelBtn")?.addEventListener("click", ()=>{
+      const wheel = document.getElementById("wheelPreview");
+      if (!wheel) return;
+      wheelRotation += 720 + Math.floor(Math.random() * 360);
+      wheel.style.transform = `rotate(${wheelRotation}deg)`;
+    });
+
     homeButton.addEventListener("click", ()=>{
       if (document.body.classList.contains("subpage")) {
         openScreen("");
@@ -1005,6 +1465,8 @@
       }
       window.location.href = WEBSITE_HOME_URL;
     });
+
+    updateCenterQuestion();
   </script>
 </body>
 </html>
