@@ -282,25 +282,65 @@
       font-weight:650;
     }
 
-    .create-list{
+    .template-list{
       display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:18px;
-      margin-top:18px;
+      grid-template-columns:1fr;
+      gap:clamp(18px, 2.4vw, 28px);
+      margin-top:clamp(18px, 2.3vw, 28px);
     }
 
-    .create-card{
-      min-height:76px;
-      border:3px solid var(--ink);
-      border-radius:22px;
-      background:#f6f6f6;
-      display:flex;
+    .template-card{
+      width:100%;
+      min-height:clamp(170px, 18vw, 230px);
+      border:6px solid var(--ink);
+      border-radius:30px;
+      background:#fff;
+      display:grid;
+      grid-template-columns:clamp(120px, 20vw, 220px) minmax(0, 1fr);
+      gap:clamp(18px, 3vw, 34px);
       align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-size:clamp(20px, 2vw, 30px);
+      padding:clamp(16px, 2.3vw, 26px);
+      direction:ltr;
+      text-align:right;
+    }
+
+    .template-cover{
+      width:100%;
+      aspect-ratio:4/3;
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,.92) 0 20%, transparent 21%),
+        conic-gradient(from 20deg, #ff5b8b 0 16%, #f7c948 16% 32%, #42b883 32% 48%, #4f89e6 48% 64%, #f47a45 64% 80%, #9b5de5 80% 100%);
+      border:2px solid rgba(17,17,17,.12);
+      overflow:hidden;
+    }
+
+    .template-cover.empty{
+      background:
+        linear-gradient(135deg, rgba(244,211,60,.42), rgba(255,255,255,.88)),
+        radial-gradient(circle at 30% 30%, rgba(244,122,69,.22) 0 12%, transparent 13%),
+        radial-gradient(circle at 70% 70%, rgba(94,136,219,.18) 0 15%, transparent 16%);
+    }
+
+    .template-content{
+      direction:rtl;
+      min-width:0;
+    }
+
+    .template-title{
+      margin:0 0 clamp(10px, 1.5vw, 18px);
+      font-size:clamp(32px, 4.2vw, 58px);
+      line-height:1.05;
+      font-weight:800;
+      color:#111;
+    }
+
+    .template-desc{
+      margin:0;
+      color:#5b5b5b;
+      font-size:clamp(18px, 2.25vw, 30px);
+      line-height:1.7;
       font-weight:700;
-      padding:12px;
     }
 
     /* Tablet */
@@ -424,13 +464,32 @@
         font-size:clamp(16px, 4.2vw, 20px);
       }
 
-      .create-list{
-        grid-template-columns:1fr;
-        gap:12px;
+      .template-list{
+        gap:14px;
+        margin-top:16px;
       }
 
-      .create-card{
-        min-height:60px;
+      .template-card{
+        min-height:138px;
+        border-width:4px;
+        border-radius:22px;
+        grid-template-columns:96px minmax(0, 1fr);
+        gap:12px;
+        padding:12px;
+      }
+
+      .template-cover{
+        border-radius:14px;
+      }
+
+      .template-title{
+        font-size:clamp(24px, 6vw, 32px);
+        margin-bottom:8px;
+      }
+
+      .template-desc{
+        font-size:clamp(14px, 3.8vw, 18px);
+        line-height:1.55;
       }
     }
 
@@ -500,6 +559,21 @@
         min-width:108px;
         font-size:18px;
       }
+      .template-card{
+        min-height:118px;
+        grid-template-columns:82px minmax(0, 1fr);
+        gap:10px;
+        padding:10px;
+      }
+
+      .template-title{
+        font-size:clamp(21px, 5.2vw, 28px);
+      }
+
+      .template-desc{
+        font-size:clamp(13px, 3.4vw, 16px);
+      }
+
     }
     @media (min-width: 761px){
       .shell{
@@ -589,28 +663,79 @@
 
     <section class="screen" id="createScreen">
       <h2 class="screen-title">إنشاء لعبة جديدة</h2>
-      <p class="screen-note">هنا نضيف لاحقًا أنواع الألعاب وخطوات إنشاء اللعبة.</p>
-      <div class="create-list">
-        <div class="create-card">العجلة الدوارة</div>
-        <div class="create-card">افتح الصندوق</div>
-        <div class="create-card">اختيارات</div>
-        <div class="create-card">صح أو خطأ</div>
+
+      <div class="template-list">
+        <button class="template-card" type="button" data-template="wheel">
+          <div class="template-cover" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">العجلة الدوارة</h3>
+            <p class="template-desc">أنشئ عجلة تفاعلية للنصوص أو الصور، ثم شغّلها مباشرة وقت الدرس.</p>
+          </div>
+        </button>
+
+        <button class="template-card" type="button" data-template="open-box">
+          <div class="template-cover empty" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">افتح الصندوق</h3>
+            <p class="template-desc">صناديق تفاعلية تكشف سؤالًا أو صورة عند الضغط عليها.</p>
+          </div>
+        </button>
+
+        <button class="template-card" type="button" data-template="quiz">
+          <div class="template-cover empty" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">اختيارات</h3>
+            <p class="template-desc">أسئلة متعددة الخيارات بإجابة صحيحة واضحة للعرض والمراجعة.</p>
+          </div>
+        </button>
+
+        <button class="template-card" type="button" data-template="true-false">
+          <div class="template-cover empty" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">صح أو خطأ</h3>
+            <p class="template-desc">عبارات سريعة يختار فيها الطلاب هل الإجابة صحيحة أم خاطئة.</p>
+          </div>
+        </button>
+
+        <button class="template-card" type="button" data-template="matching">
+          <div class="template-cover empty" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">المطابقة</h3>
+            <p class="template-desc">طابق الكلمات أو الصور أو المفاهيم بطريقة تفاعلية واضحة.</p>
+          </div>
+        </button>
+
+        <button class="template-card" type="button" data-template="sort">
+          <div class="template-cover empty" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">التصنيف</h3>
+            <p class="template-desc">رتّب العناصر داخل مجموعات مناسبة حسب الدرس أو المهارة.</p>
+          </div>
+        </button>
+
+        <button class="template-card" type="button" data-template="guess-image">
+          <div class="template-cover empty" aria-hidden="true"></div>
+          <div class="template-content">
+            <h3 class="template-title">خمن الصورة</h3>
+            <p class="template-desc">اعرض صورة ويخمّن الطلاب الإجابة بطريقة مرحة وسريعة.</p>
+          </div>
+        </button>
       </div>
     </section>
 
     <section class="screen" id="savedScreen">
       <h2 class="screen-title">العابي المحفوظة</h2>
-      <p class="screen-note">هنا ستظهر الألعاب المحفوظة داخل الجهاز.</p>
+      <p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
     </section>
 
     <section class="screen" id="backupScreen">
       <h2 class="screen-title">التصدير والاستيراد</h2>
-      <p class="screen-note">هنا سنضيف لاحقًا تصدير الألعاب واستيرادها.</p>
+      <p class="screen-note">صدّر ألعابك كملف أو استوردها على جهاز آخر.</p>
     </section>
 
     <section class="screen" id="settingsScreen">
       <h2 class="screen-title">الإعدادات</h2>
-      <p class="screen-note">هذه صفحة الإعدادات، وسنربطها لاحقًا.</p>
+      <p class="screen-note">تحكم بالصوت وطريقة العرض داخل اللعبة.</p>
     </section>
   </main>
 
