@@ -1161,6 +1161,344 @@
       }
     }
 
+    /* v23: إعداد العجلة بدون عرض العجلة داخل صفحة الإدخال */
+    .wheel-setup{
+      display:none;
+      width:min(1180px, 92%);
+      margin:0 auto;
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:26px;
+      padding:clamp(18px, 2.4vw, 28px);
+      position:relative;
+      z-index:5;
+    }
+
+    .wheel-setup.active{
+      display:block;
+    }
+
+    .wheel-setup .wheel-layout,
+    .wheel-setup .wheel-preview-box,
+    .wheel-setup .wheel-preview,
+    .wheel-setup .wheel-arrow{
+      display:none !important;
+    }
+
+    .wheel-setup-body{
+      margin-top:clamp(16px, 2vw, 24px);
+      display:grid;
+      gap:clamp(14px, 1.8vw, 22px);
+    }
+
+    .wheel-options{
+      display:grid;
+      grid-template-columns:repeat(3, minmax(0, 1fr));
+      gap:clamp(10px, 1.5vw, 16px);
+    }
+
+    .wheel-type{
+      min-height:clamp(76px, 8vw, 104px);
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#f6f6f6;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      text-align:center;
+      padding:10px;
+      cursor:pointer;
+      transition:.16s ease;
+    }
+
+    .wheel-type.active{
+      background:var(--title-yellow);
+      box-shadow:0 6px 0 rgba(0,0,0,.18);
+      transform:translateY(-3px);
+    }
+
+    .wheel-type strong{
+      font-size:clamp(18px, 2vw, 28px);
+      line-height:1;
+    }
+
+    .wheel-type span{
+      color:#555;
+      font-size:clamp(12px, 1.3vw, 16px);
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .question-panel,
+    .items-panel{
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#f8f8f8;
+      padding:clamp(14px, 1.7vw, 20px);
+    }
+
+    .question-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .question-title,
+    .items-head h3{
+      margin:0;
+      font-size:clamp(18px, 2vw, 28px);
+      font-weight:800;
+    }
+
+    .toggle{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:999px;
+      padding:5px;
+    }
+
+    .toggle button{
+      border:none;
+      border-radius:999px;
+      padding:9px 18px;
+      background:transparent;
+      color:#111;
+      font-size:clamp(14px, 1.4vw, 18px);
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .toggle button.active{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .center-question-input{
+      display:none;
+      width:100%;
+      margin-top:14px;
+      height:52px;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      padding:0 16px;
+      font-size:clamp(16px, 1.7vw, 22px);
+      font-weight:700;
+      outline:none;
+      text-align:center;
+    }
+
+    .question-panel.enabled .center-question-input{
+      display:block;
+    }
+
+    .items-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .items-head span{
+      color:#555;
+      font-size:clamp(13px, 1.4vw, 17px);
+      font-weight:700;
+      line-height:1.5;
+    }
+
+    .wheel-items-editor{
+      display:grid;
+      gap:12px;
+    }
+
+    .wheel-entry{
+      position:relative;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      padding:14px;
+      display:grid;
+      gap:10px;
+    }
+
+    .wheel-entry-input,
+    .wheel-entry-file{
+      width:100%;
+      min-height:48px;
+      border:2px solid var(--ink);
+      border-radius:15px;
+      background:#fff;
+      padding:0 14px;
+      font-size:clamp(15px, 1.6vw, 21px);
+      font-weight:700;
+      outline:none;
+    }
+
+    .wheel-entry-file{
+      padding:10px 14px;
+      display:flex;
+      align-items:center;
+    }
+
+    .remove-entry-btn{
+      position:absolute;
+      top:-10px;
+      left:-10px;
+      width:32px;
+      height:32px;
+      border:2px solid var(--ink);
+      border-radius:50%;
+      background:#ff4d4f;
+      color:#fff;
+      font-size:22px;
+      line-height:1;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+    }
+
+    .add-item-btn{
+      width:62px;
+      height:62px;
+      margin:16px auto 0;
+      border:3px solid var(--ink);
+      border-radius:50%;
+      background:var(--title-yellow);
+      color:#111;
+      font-size:42px;
+      line-height:1;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      box-shadow:0 5px 0 rgba(0,0,0,.18);
+    }
+
+    .wheel-actions{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+
+    .test-btn,
+    .save-btn{
+      min-height:56px;
+      border:3px solid var(--ink);
+      border-radius:20px;
+      font-size:clamp(18px, 2vw, 28px);
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    .test-btn{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .save-btn{
+      background:var(--title-yellow);
+      color:#111;
+    }
+
+    @media (max-width: 760px){
+      .wheel-setup{
+        width:92%;
+        padding:16px 12px;
+        border-radius:22px;
+      }
+
+      .wheel-setup-body{
+        gap:12px;
+        margin-top:14px;
+      }
+
+      .wheel-options{
+        grid-template-columns:repeat(3, minmax(0, 1fr));
+        gap:8px;
+      }
+
+      .wheel-type{
+        min-height:70px;
+        border-radius:16px;
+        padding:8px 5px;
+      }
+
+      .wheel-type strong{
+        font-size:clamp(14px, 3.7vw, 18px);
+      }
+
+      .wheel-type span{
+        font-size:clamp(10px, 2.7vw, 12px);
+      }
+
+      .question-panel,
+      .items-panel{
+        padding:12px;
+        border-radius:18px;
+      }
+
+      .question-title,
+      .items-head h3{
+        font-size:clamp(16px, 4.1vw, 20px);
+      }
+
+      .items-head span{
+        font-size:12px;
+      }
+
+      .toggle button{
+        padding:7px 13px;
+        font-size:14px;
+      }
+
+      .center-question-input{
+        height:44px;
+        font-size:15px;
+      }
+
+      .wheel-entry{
+        padding:12px;
+        border-radius:16px;
+      }
+
+      .wheel-entry-input,
+      .wheel-entry-file{
+        min-height:44px;
+        font-size:14px;
+        border-radius:13px;
+      }
+
+      .remove-entry-btn{
+        width:28px;
+        height:28px;
+        font-size:19px;
+      }
+
+      .add-item-btn{
+        width:54px;
+        height:54px;
+        font-size:36px;
+      }
+
+      .test-btn,
+      .save-btn{
+        min-height:48px;
+        border-radius:17px;
+        font-size:17px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1303,62 +1641,56 @@
     <section class="wheel-setup" id="wheelSetupScreen">
       <h2 class="screen-title">العجلة الدوارة</h2>
 
-      <div class="wheel-layout">
-        <div class="wheel-preview-box">
-          <div class="wheel-arrow" aria-hidden="true"></div>
+      <div class="wheel-setup-body">
+        <div class="wheel-options" aria-label="نوع محتوى العجلة">
+          <button class="wheel-type active" type="button" data-wheel-type="text">
+            <strong>نصوص فقط</strong>
+            <span>كلمات أو أسئلة قصيرة</span>
+          </button>
 
-          <div class="wheel-preview" id="wheelPreview">
-            <div class="wheel-items" aria-hidden="true">
-              <div class="wheel-item">قلم</div>
-              <div class="wheel-item">كتاب</div>
-              <div class="wheel-item">صورة</div>
-              <div class="wheel-item">كلمة</div>
-              <div class="wheel-item">سؤال</div>
-            </div>
-            <div class="wheel-center" id="wheelCenterText"></div>
-          </div>
+          <button class="wheel-type" type="button" data-wheel-type="images">
+            <strong>صور فقط</strong>
+            <span>صور داخل أقسام العجلة</span>
+          </button>
+
+          <button class="wheel-type" type="button" data-wheel-type="mixed">
+            <strong>صور مع نصوص</strong>
+            <span>صورة ومعها نص مختصر</span>
+          </button>
         </div>
 
-        <div class="wheel-settings">
-          <div class="wheel-options" aria-label="نوع محتوى العجلة">
-            <button class="wheel-type active" type="button" data-wheel-type="text">
-              <strong>نصوص فقط</strong>
-              <span>كلمات أو أسئلة قصيرة</span>
-            </button>
-
-            <button class="wheel-type" type="button" data-wheel-type="images">
-              <strong>صور فقط</strong>
-              <span>صور داخل أقسام العجلة</span>
-            </button>
-
-            <button class="wheel-type" type="button" data-wheel-type="mixed">
-              <strong>صور مع نصوص</strong>
-              <span>صورة ومعها نص مختصر</span>
-            </button>
-          </div>
-
-          <div class="question-panel" id="questionPanel">
-            <div class="question-row">
-              <h3 class="question-title">سؤال في منتصف العجلة</h3>
-              <div class="toggle" aria-label="تشغيل سؤال المنتصف">
-                <button type="button" class="active" data-question-toggle="off">تعطيل</button>
-                <button type="button" data-question-toggle="on">تشغيل</button>
-              </div>
+        <div class="question-panel" id="questionPanel">
+          <div class="question-row">
+            <h3 class="question-title">سؤال في منتصف العجلة</h3>
+            <div class="toggle" aria-label="تشغيل سؤال المنتصف">
+              <button type="button" class="active" data-question-toggle="off">تعطيل</button>
+              <button type="button" data-question-toggle="on">تشغيل</button>
             </div>
-
-            <input
-              class="center-question-input"
-              id="centerQuestionInput"
-              type="text"
-              maxlength="45"
-              placeholder="اكتب السؤال الذي يظهر في منتصف العجلة"
-            />
           </div>
 
-          <div class="wheel-actions">
-            <button class="test-btn" type="button" id="testWheelBtn">اختبار اللعبة</button>
-            <button class="save-btn" type="button">حفظ اللعبة</button>
+          <input
+            class="center-question-input"
+            id="centerQuestionInput"
+            type="text"
+            maxlength="45"
+            placeholder="اكتب السؤال الذي يظهر في منتصف العجلة"
+          />
+        </div>
+
+        <div class="items-panel">
+          <div class="items-head">
+            <h3 id="itemsTitle">عناصر العجلة</h3>
+            <span id="itemsHint">أضف كلمات أو أسئلة قصيرة.</span>
           </div>
+
+          <div class="wheel-items-editor" id="wheelItemsEditor"></div>
+
+          <button class="add-item-btn" type="button" id="addWheelItemBtn" aria-label="إضافة عنصر">+</button>
+        </div>
+
+        <div class="wheel-actions">
+          <button class="test-btn" type="button" id="testWheelBtn">اختبار اللعبة</button>
+          <button class="save-btn" type="button" id="saveWheelBtn">حفظ اللعبة</button>
         </div>
       </div>
     </section>
@@ -1382,12 +1714,14 @@
   <div class="bottom-bar">
     <button class="home-btn" type="button" id="homeButton">الرئيسية</button>
   </div>
-
   <script>
     const WEBSITE_HOME_URL = "https://sandooq-games.com/";
     const screens = ["createScreen","wheelSetupScreen","savedScreen","backupScreen","settingsScreen"];
     const homeShell = document.getElementById("homeShell");
     const homeButton = document.getElementById("homeButton");
+
+    let wheelContentType = "text";
+    let wheelEntries = [];
 
     function openScreen(id){
       const isSubpage = Boolean(id);
@@ -1408,29 +1742,103 @@
     });
 
     document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
-      btn.addEventListener("click", ()=> openScreen("wheelSetupScreen"));
+      btn.addEventListener("click", ()=> {
+        openScreen("wheelSetupScreen");
+        renderWheelEntries();
+      });
     });
+
+    const wheelItemsEditor = document.getElementById("wheelItemsEditor");
+    const addWheelItemBtn = document.getElementById("addWheelItemBtn");
+    const itemsHint = document.getElementById("itemsHint");
+
+    function entryHint(){
+      if (wheelContentType === "images") return "أضف الصور التي تظهر داخل أقسام العجلة.";
+      if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
+      return "أضف كلمات أو أسئلة قصيرة.";
+    }
+
+    function createEntry(){
+      if (wheelContentType === "images") return { imageName:"" };
+      if (wheelContentType === "mixed") return { text:"", imageName:"" };
+      return { text:"" };
+    }
+
+    function renderWheelEntries(){
+      if (!wheelItemsEditor) return;
+
+      if (itemsHint) itemsHint.textContent = entryHint();
+
+      wheelItemsEditor.innerHTML = "";
+
+      wheelEntries.forEach((entry, index)=>{
+        const box = document.createElement("div");
+        box.className = "wheel-entry";
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "remove-entry-btn";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", "حذف العنصر");
+        remove.addEventListener("click", ()=>{
+          wheelEntries.splice(index, 1);
+          renderWheelEntries();
+        });
+
+        box.appendChild(remove);
+
+        if (wheelContentType === "text" || wheelContentType === "mixed") {
+          const input = document.createElement("input");
+          input.className = "wheel-entry-input";
+          input.type = "text";
+          input.maxLength = 40;
+          input.placeholder = wheelContentType === "mixed" ? "اكتب النص المختصر" : "اكتب النص أو السؤال";
+          input.value = entry.text || "";
+          input.addEventListener("input", ()=>{
+            wheelEntries[index].text = input.value;
+          });
+          box.appendChild(input);
+        }
+
+        if (wheelContentType === "images" || wheelContentType === "mixed") {
+          const file = document.createElement("input");
+          file.className = "wheel-entry-file";
+          file.type = "file";
+          file.accept = "image/*";
+          file.addEventListener("change", ()=>{
+            wheelEntries[index].imageName = file.files && file.files[0] ? file.files[0].name : "";
+          });
+          box.appendChild(file);
+        }
+
+        wheelItemsEditor.appendChild(box);
+      });
+    }
 
     document.querySelectorAll(".wheel-type").forEach((btn)=>{
       btn.addEventListener("click", ()=>{
         document.querySelectorAll(".wheel-type").forEach((item)=> item.classList.remove("active"));
         btn.classList.add("active");
+
+        wheelContentType = btn.getAttribute("data-wheel-type") || "text";
+        wheelEntries = [];
+        renderWheelEntries();
       });
+    });
+
+    addWheelItemBtn?.addEventListener("click", ()=>{
+      wheelEntries.push(createEntry());
+      renderWheelEntries();
+
+      setTimeout(()=>{
+        const inputs = wheelItemsEditor?.querySelectorAll("input");
+        const last = inputs && inputs.length ? inputs[inputs.length - 1] : null;
+        if (last && last.type !== "file") last.focus();
+      }, 0);
     });
 
     const questionPanel = document.getElementById("questionPanel");
     const centerQuestionInput = document.getElementById("centerQuestionInput");
-    const wheelCenterText = document.getElementById("wheelCenterText");
-
-    function updateCenterQuestion(){
-      if (!questionPanel || !wheelCenterText) return;
-      if (!questionPanel.classList.contains("enabled")) {
-        wheelCenterText.textContent = "";
-        return;
-      }
-      const value = (centerQuestionInput?.value || "").trim();
-      wheelCenterText.textContent = value || "السؤال";
-    }
 
     document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
       btn.addEventListener("click", ()=>{
@@ -1440,22 +1848,16 @@
         const enabled = btn.getAttribute("data-question-toggle") === "on";
         questionPanel?.classList.toggle("enabled", enabled);
 
-        if (enabled) {
-          centerQuestionInput?.focus();
-        }
-
-        updateCenterQuestion();
+        if (enabled) centerQuestionInput?.focus();
       });
     });
 
-    centerQuestionInput?.addEventListener("input", updateCenterQuestion);
-
-    let wheelRotation = 0;
     document.getElementById("testWheelBtn")?.addEventListener("click", ()=>{
-      const wheel = document.getElementById("wheelPreview");
-      if (!wheel) return;
-      wheelRotation += 720 + Math.floor(Math.random() * 360);
-      wheel.style.transform = `rotate(${wheelRotation}deg)`;
+      alert("سيتم فتح شاشة اختبار العجلة في الخطوة التالية.");
+    });
+
+    document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
+      alert("تم حفظ إعدادات العجلة.");
     });
 
     homeButton.addEventListener("click", ()=>{
@@ -1466,7 +1868,7 @@
       window.location.href = WEBSITE_HOME_URL;
     });
 
-    updateCenterQuestion();
+    renderWheelEntries();
   </script>
 </body>
 </html>
