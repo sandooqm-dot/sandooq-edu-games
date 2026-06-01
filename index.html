@@ -1499,6 +1499,353 @@
       }
     }
 
+    /* v25: شاشة تشغيل العجلة الرئيسية والاختبار */
+    body.playing-wheel .bottom-bar,
+    body.playing-wheel .page > .decor{
+      display:none !important;
+    }
+
+    body.playing-wheel .page{
+      padding:0 !important;
+      background:#fff !important;
+      overflow:hidden !important;
+    }
+
+    .wheel-game-screen{
+      display:none;
+      position:fixed;
+      inset:0;
+      width:100vw;
+      height:100dvh;
+      min-height:100dvh;
+      background:#fff;
+      z-index:1000;
+      overflow:hidden;
+      color:#222;
+      direction:ltr;
+      user-select:none;
+      touch-action:manipulation;
+    }
+
+    .wheel-game-screen.active{
+      display:flex;
+      flex-direction:column;
+    }
+
+    .wheel-topbar{
+      height:clamp(60px, 8.5vh, 86px);
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      padding:0 clamp(18px, 3vw, 30px);
+      color:#777;
+      flex:0 0 auto;
+    }
+
+    .wheel-timer{
+      justify-self:start;
+      font-size:clamp(28px, 5vw, 50px);
+      font-weight:500;
+      line-height:1;
+    }
+
+    .wheel-instruction{
+      justify-self:center;
+      font-size:clamp(27px, 5vw, 50px);
+      font-weight:500;
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    .wheel-stage{
+      position:relative;
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(14px, 3vh, 32px) clamp(14px, 4vw, 42px) clamp(20px, 4vh, 44px);
+    }
+
+    .game-wheel-arrow{
+      position:absolute;
+      left:clamp(22px, 4.6vw, 64px);
+      top:50%;
+      transform:translateY(-50%);
+      width:0;
+      height:0;
+      border-top:clamp(24px, 4.5vw, 42px) solid transparent;
+      border-bottom:clamp(24px, 4.5vw, 42px) solid transparent;
+      border-left:clamp(42px, 7.4vw, 76px) solid #f2f2f2;
+      filter:drop-shadow(0 0 1px #777);
+      z-index:5;
+    }
+
+    .real-wheel{
+      width:min(76vw, 58vh, 560px);
+      aspect-ratio:1/1;
+      position:relative;
+      border-radius:50%;
+      background:#fff;
+      filter:drop-shadow(0 10px 26px rgba(0,0,0,.12));
+      transition:transform 3.4s cubic-bezier(.12,.72,.13,1);
+      transform:rotate(0deg);
+    }
+
+    .real-wheel::before{
+      content:"";
+      position:absolute;
+      inset:-18px;
+      border-radius:50%;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          #fff 0deg 3.3deg,
+          transparent 3.3deg 6.6deg
+        );
+      z-index:-1;
+    }
+
+    .real-wheel::after{
+      content:"";
+      position:absolute;
+      inset:-5px;
+      border-radius:50%;
+      border:5px solid rgba(0,0,0,.04);
+      pointer-events:none;
+      z-index:5;
+    }
+
+    .wheel-slices{
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      overflow:hidden;
+      background:var(--wheel-bg, conic-gradient(#e91e63 0 60deg, #fff 60deg 120deg, #2196f3 120deg 180deg, #fff 180deg 240deg, #ff9800 240deg 300deg, #fff 300deg 360deg));
+    }
+
+    .wheel-slices::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:var(--wheel-lines, none);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .slice-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:42%;
+      height:48px;
+      margin-top:-24px;
+      transform-origin:0 50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      font-size:clamp(15px, 2.45vw, 27px);
+      font-weight:700;
+      line-height:1.1;
+      padding:0 6px;
+      z-index:3;
+      direction:ltr;
+      overflow:hidden;
+      white-space:pre-line;
+    }
+
+    .slice-label.dark{
+      color:#222;
+    }
+
+    .slice-label img{
+      width:clamp(30px, 6vw, 58px);
+      height:clamp(30px, 6vw, 58px);
+      object-fit:contain;
+      border-radius:4px;
+      background:#fff;
+      padding:2px;
+    }
+
+    .real-wheel-center{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:29%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:4px solid rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:clamp(15px, 2.55vw, 26px);
+      font-weight:500;
+      line-height:1.22;
+      padding:10px;
+      z-index:6;
+      direction:ltr;
+      white-space:pre-line;
+    }
+
+    .selected-result{
+      flex:0 0 auto;
+      min-height:32px;
+      text-align:center;
+      font-size:clamp(18px, 3vw, 28px);
+      font-weight:700;
+      color:#222;
+      padding:0 12px;
+    }
+
+    .wheel-game-controls{
+      height:clamp(76px, 12vh, 112px);
+      display:grid;
+      grid-template-columns:76px minmax(150px, 320px) 76px 76px;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(14px, 4vw, 48px);
+      padding:0 clamp(12px, 3vw, 32px) clamp(8px, 2vh, 16px);
+      flex:0 0 auto;
+    }
+
+    .game-icon-btn{
+      width:clamp(46px, 7vw, 64px);
+      height:clamp(46px, 7vw, 64px);
+      border:0;
+      background:transparent;
+      color:#222;
+      font-size:clamp(34px, 6vw, 48px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .spin-game-btn{
+      height:clamp(44px, 6.8vh, 58px);
+      border:3px solid #777;
+      border-radius:7px;
+      background:#fff;
+      color:#222;
+      font-size:clamp(22px, 4vw, 32px);
+      font-weight:500;
+      cursor:pointer;
+    }
+
+    .wheel-after-spin{
+      display:none;
+      justify-content:center;
+      padding:0 0 12px;
+    }
+
+    .wheel-after-spin.show{
+      display:flex;
+    }
+
+    .remove-selected-btn{
+      min-width:190px;
+      min-height:46px;
+      border:3px solid #222;
+      border-radius:12px;
+      background:#f05d5b;
+      color:#fff;
+      font-size:20px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    @media (max-width: 760px){
+      .wheel-topbar{
+        height:74px;
+      }
+
+      .wheel-timer,
+      .wheel-instruction{
+        font-size:32px;
+      }
+
+      .real-wheel{
+        width:min(74vw, 390px);
+      }
+
+      .wheel-stage{
+        align-items:center;
+        padding-bottom:10vh;
+      }
+
+      .game-wheel-arrow{
+        left:18px;
+        border-top-width:26px;
+        border-bottom-width:26px;
+        border-left-width:44px;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:54px minmax(155px, 300px) 54px 54px;
+        gap:14px;
+        height:84px;
+      }
+
+      .game-icon-btn{
+        width:50px;
+        height:50px;
+        font-size:38px;
+      }
+
+      .spin-game-btn{
+        height:50px;
+        font-size:26px;
+      }
+
+      .slice-label{
+        font-size:18px;
+      }
+
+      .slice-label img{
+        width:36px;
+        height:36px;
+      }
+    }
+
+    @media (max-width: 430px){
+      .wheel-topbar{
+        padding:0 18px;
+      }
+
+      .wheel-timer,
+      .wheel-instruction{
+        font-size:27px;
+      }
+
+      .real-wheel{
+        width:min(76vw, 330px);
+      }
+
+      .wheel-stage{
+        padding-bottom:12vh;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:48px minmax(140px, 230px) 48px 48px;
+        gap:10px;
+      }
+
+      .game-icon-btn{
+        font-size:34px;
+      }
+
+      .spin-game-btn{
+        font-size:24px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1695,6 +2042,36 @@
       </div>
     </section>
 
+
+    <section class="wheel-game-screen" id="wheelGameScreen">
+      <div class="wheel-topbar">
+        <div class="wheel-timer" id="wheelTimer">0:14</div>
+        <div class="wheel-instruction">اسحب العجلة للتدوير</div>
+      </div>
+
+      <div class="wheel-stage">
+        <div class="game-wheel-arrow" aria-hidden="true"></div>
+
+        <div class="real-wheel" id="realWheel">
+          <div class="wheel-slices" id="wheelSlices"></div>
+          <div class="real-wheel-center" id="realWheelCenter"></div>
+        </div>
+      </div>
+
+      <div class="selected-result" id="selectedResult" aria-live="polite"></div>
+
+      <div class="wheel-game-controls">
+        <button class="game-icon-btn" type="button" id="exitWheelGameBtn" aria-label="القائمة">☰</button>
+        <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
+        <button class="game-icon-btn" type="button" id="soundGameBtn" aria-label="الصوت">🔊</button>
+        <button class="game-icon-btn" type="button" id="fullscreenGameBtn" aria-label="تكبير">⛶</button>
+      </div>
+
+      <div class="wheel-after-spin" id="wheelAfterSpin">
+        <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف العنصر</button>
+      </div>
+    </section>
+
     <section class="screen" id="savedScreen">
       <h2 class="screen-title">العابي المحفوظة</h2>
       <p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
@@ -1716,23 +2093,45 @@
   </div>
   <script>
     const WEBSITE_HOME_URL = "https://sandooq-games.com/";
-    const screens = ["createScreen","wheelSetupScreen","savedScreen","backupScreen","settingsScreen"];
+    const screens = ["createScreen","wheelSetupScreen","savedScreen","backupScreen","settingsScreen","wheelGameScreen"];
     const homeShell = document.getElementById("homeShell");
     const homeButton = document.getElementById("homeButton");
 
     let wheelContentType = "text";
     let wheelEntries = [];
+    let wheelRotation = 0;
+    let currentSelectedIndex = -1;
+
+    const defaultWheelEntries = [
+      { text:"run" },
+      { text:"climb" },
+      { text:"sleep" },
+      { text:"sing" },
+      { text:"play" },
+      { text:"read" },
+      { text:"jump" },
+      { text:"Dance" },
+      { text:"close
+the
+door" }
+    ];
+
+    const wheelColors = ["#e91e63","#0097a7","#f4511e","#8e24aa","#1e88e5","#43a047","#ef6c00","#c2185b","#7b1fa2","#00897b","#3949ab","#d81b60"];
+    const lightSliceIndexes = new Set([1, 4, 7]);
 
     function openScreen(id){
-      const isSubpage = Boolean(id);
+      const isWheelGame = id === "wheelGameScreen";
+      const isSubpage = Boolean(id) && !isWheelGame;
+
       document.body.classList.toggle("subpage", isSubpage);
+      document.body.classList.toggle("playing-wheel", isWheelGame);
 
       screens.forEach((sid)=>{
         const el = document.getElementById(sid);
         if (el) el.classList.toggle("active", sid === id);
       });
 
-      if (homeShell) homeShell.style.display = isSubpage ? "none" : "flex";
+      if (homeShell) homeShell.style.display = Boolean(id) ? "none" : "flex";
 
       window.scrollTo({ top:0, behavior:"instant" });
     }
@@ -1759,9 +2158,16 @@
     }
 
     function createEntry(){
-      if (wheelContentType === "images") return { imageName:"" };
-      if (wheelContentType === "mixed") return { text:"", imageName:"" };
+      if (wheelContentType === "images") return { imageName:"", imageData:"" };
+      if (wheelContentType === "mixed") return { text:"", imageName:"", imageData:"" };
       return { text:"" };
+    }
+
+    function readFileAsDataURL(file, callback){
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => callback(String(reader.result || ""));
+      reader.readAsDataURL(file);
     }
 
     function renderWheelEntries(){
@@ -1806,7 +2212,11 @@
           file.type = "file";
           file.accept = "image/*";
           file.addEventListener("change", ()=>{
-            wheelEntries[index].imageName = file.files && file.files[0] ? file.files[0].name : "";
+            const selectedFile = file.files && file.files[0] ? file.files[0] : null;
+            wheelEntries[index].imageName = selectedFile ? selectedFile.name : "";
+            readFileAsDataURL(selectedFile, (dataUrl)=>{
+              wheelEntries[index].imageData = dataUrl;
+            });
           });
           box.appendChild(file);
         }
@@ -1852,19 +2262,185 @@
       });
     });
 
-    document.getElementById("testWheelBtn")?.addEventListener("click", ()=>{
-      alert("سيتم فتح شاشة اختبار العجلة في الخطوة التالية.");
+    function getWheelItems(){
+      const filled = wheelEntries.filter((entry)=>{
+        if (wheelContentType === "images") return entry.imageData || entry.imageName;
+        if (wheelContentType === "mixed") return entry.text || entry.imageData || entry.imageName;
+        return entry.text;
+      });
+
+      return filled.length ? filled : defaultWheelEntries;
+    }
+
+    function textForEntry(entry, fallbackIndex){
+      const text = (entry.text || "").trim();
+      if (text) return text;
+      if (entry.imageName) return entry.imageName.replace(/\.[^.]+$/, "");
+      return `عنصر ${fallbackIndex + 1}`;
+    }
+
+    function makeConicGradient(count){
+      const step = 360 / count;
+      const stops = [];
+      for (let i = 0; i < count; i++){
+        const color = lightSliceIndexes.has(i % 9) ? "#ffffff" : wheelColors[i % wheelColors.length];
+        stops.push(`${color} ${i * step}deg ${(i + 1) * step}deg`);
+      }
+      return `conic-gradient(${stops.join(",")})`;
+    }
+
+    function makeSliceLines(count){
+      const step = 360 / count;
+      const layers = [];
+      for (let i = 0; i < count; i++){
+        const deg = i * step;
+        layers.push(`linear-gradient(${deg}deg, transparent calc(50% - 1px), rgba(255,255,255,.92) calc(50% - 1px), rgba(255,255,255,.92) calc(50% + 1px), transparent calc(50% + 1px))`);
+      }
+      return layers.join(",");
+    }
+
+    function buildWheel(){
+      const items = getWheelItems();
+      const count = Math.max(items.length, 2);
+      const wheel = document.getElementById("realWheel");
+      const slices = document.getElementById("wheelSlices");
+      const center = document.getElementById("realWheelCenter");
+      const result = document.getElementById("selectedResult");
+      const afterSpin = document.getElementById("wheelAfterSpin");
+
+      if (!wheel || !slices || !center) return;
+
+      slices.innerHTML = "";
+      wheel.style.setProperty("--wheel-bg", makeConicGradient(count));
+      wheel.style.setProperty("--wheel-lines", makeSliceLines(count));
+      wheel.style.transform = `rotate(${wheelRotation}deg)`;
+
+      const step = 360 / count;
+
+      items.forEach((entry, index)=>{
+        const label = document.createElement("div");
+        label.className = "slice-label";
+        if (lightSliceIndexes.has(index % 9)) label.classList.add("dark");
+
+        const angle = (index * step) + (step / 2);
+        label.style.transform = `rotate(${angle}deg) translate(30%, -50%) rotate(90deg)`;
+
+        if ((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData) {
+          const img = document.createElement("img");
+          img.src = entry.imageData;
+          img.alt = "";
+          label.appendChild(img);
+        } else {
+          label.textContent = textForEntry(entry, index);
+        }
+
+        slices.appendChild(label);
+      });
+
+      const centerQuestionEnabled = questionPanel?.classList.contains("enabled");
+      const centerText = (centerQuestionInput?.value || "").trim();
+      center.textContent = centerQuestionEnabled ? (centerText || "السؤال") : "";
+
+      if (result) result.textContent = "";
+      if (afterSpin) afterSpin.classList.remove("show");
+      currentSelectedIndex = -1;
+    }
+
+    function openWheelGame(){
+      buildWheel();
+      openScreen("wheelGameScreen");
+    }
+
+    document.getElementById("testWheelBtn")?.addEventListener("click", openWheelGame);
+
+    document.querySelector(".start-btn")?.addEventListener("click", ()=>{
+      openWheelGame();
     });
 
     document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
-      alert("تم حفظ إعدادات العجلة.");
+      alert("تم حفظ اللعبة.");
+    });
+
+    document.getElementById("spinGameBtn")?.addEventListener("click", ()=>{
+      const items = getWheelItems();
+      const count = Math.max(items.length, 2);
+      const step = 360 / count;
+      const selected = Math.floor(Math.random() * count);
+      const targetAngle = 180 - (selected * step + step / 2);
+      const fullTurns = 4 + Math.floor(Math.random() * 3);
+
+      wheelRotation = (fullTurns * 360) + targetAngle;
+      currentSelectedIndex = selected;
+
+      const wheel = document.getElementById("realWheel");
+      const result = document.getElementById("selectedResult");
+      const afterSpin = document.getElementById("wheelAfterSpin");
+
+      if (result) result.textContent = "";
+      if (afterSpin) afterSpin.classList.remove("show");
+      if (wheel) wheel.style.transform = `rotate(${wheelRotation}deg)`;
+
+      window.setTimeout(()=>{
+        const item = items[selected];
+        if (result) result.textContent = textForEntry(item, selected);
+        if (afterSpin) afterSpin.classList.add("show");
+      }, 3500);
+    });
+
+    document.getElementById("removeSelectedBtn")?.addEventListener("click", ()=>{
+      if (currentSelectedIndex < 0) return;
+
+      if (wheelEntries.length) {
+        const filledIndexes = [];
+        wheelEntries.forEach((entry, index)=>{
+          const isFilled = wheelContentType === "images"
+            ? (entry.imageData || entry.imageName)
+            : wheelContentType === "mixed"
+              ? (entry.text || entry.imageData || entry.imageName)
+              : entry.text;
+
+          if (isFilled) filledIndexes.push(index);
+        });
+
+        const originalIndex = filledIndexes[currentSelectedIndex];
+        if (typeof originalIndex === "number") {
+          wheelEntries.splice(originalIndex, 1);
+        }
+      }
+
+      currentSelectedIndex = -1;
+      buildWheel();
+      renderWheelEntries();
+    });
+
+    document.getElementById("exitWheelGameBtn")?.addEventListener("click", ()=>{
+      openScreen("wheelSetupScreen");
+    });
+
+    document.getElementById("fullscreenGameBtn")?.addEventListener("click", ()=>{
+      const el = document.documentElement;
+      if (!document.fullscreenElement && el.requestFullscreen) {
+        el.requestFullscreen().catch(()=>{});
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen().catch(()=>{});
+      }
+    });
+
+    document.getElementById("soundGameBtn")?.addEventListener("click", ()=>{
+      alert("الصوت يتم ضبطه في الخطوة التالية.");
     });
 
     homeButton.addEventListener("click", ()=>{
+      if (document.body.classList.contains("playing-wheel")) {
+        openScreen("wheelSetupScreen");
+        return;
+      }
+
       if (document.body.classList.contains("subpage")) {
         openScreen("");
         return;
       }
+
       window.location.href = WEBSITE_HOME_URL;
     });
 
