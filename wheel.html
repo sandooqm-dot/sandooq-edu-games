@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة</title>
+  <title>العجلة الدوارة - wheel-5</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -13,8 +13,9 @@
       --red:#f05d5b;
       --orange:#f47a45;
       --orange-dark:#e85f2f;
-      --wheel-size:min(84vw, calc(100dvh - 186px), 620px);
+      --wheel-size:min(86vw, calc(100dvh - 132px), 640px);
       --arrow-left:8px;
+      --arrow-top:50%;
       --arrow-w:52px;
       --arrow-h:28px;
       --zoom-scale:1.12;
@@ -31,26 +32,23 @@
     html,body{
       margin:0;
       width:100%;
-      min-height:calc(100dvh + 120px);
+      height:100dvh;
+      min-height:100dvh;
       background:#fff;
       color:#222;
-      overflow-x:hidden;
-      overflow-y:auto;
-      overscroll-behavior-y:none;
-      -webkit-overflow-scrolling:touch;
+      overflow:hidden;
+      overscroll-behavior:none;
       -webkit-text-size-adjust:100%;
     }
 
     body::after{
-      content:"";
-      display:block;
-      height:120px;
-      pointer-events:none;
+      content:none;
+      display:none;
     }
 
     .wheel-page{
-      position:sticky;
-      top:0;
+      position:fixed;
+      inset:0;
       width:100vw;
       height:100dvh;
       min-height:100dvh;
@@ -60,6 +58,8 @@
       user-select:none;
       touch-action:none;
       direction:ltr;
+      transform-origin:center center;
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
     }
 
     .wheel-logo{
@@ -77,18 +77,21 @@
 
     .wheel-stage{
       position:absolute;
-      inset:0;
+      left:0;
+      right:0;
+      top:0;
+      bottom:calc(70px + var(--safe-bottom));
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:max(30px, calc(var(--safe-top) + 20px)) 8px calc(92px + var(--safe-bottom));
+      padding:max(28px, calc(var(--safe-top) + 18px)) 8px 10px;
       overflow:hidden;
     }
 
     .wheel-arrow{
       position:absolute;
       left:var(--arrow-left);
-      top:50%;
+      top:var(--arrow-top, 50%);
       transform:translateY(-50%);
       width:0;
       height:0;
@@ -125,7 +128,8 @@
       transform:translateX(var(--zoom-x, 0px)) scale(var(--zoom-scale, 1.12));
     }
 
-    .wheel-shell.zoom .wheel-label-content{
+    .wheel-shell.zoom .wheel-label-content,
+    .wheel-shell.zoom .wheel-image{
       transform:scale(var(--zoom-inverse, .892857));
       transform-origin:center center;
     }
@@ -210,8 +214,6 @@
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
-      transform-origin:center center;
-      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
     }
 
     .wheel-label.text-only .wheel-label-content{
@@ -294,7 +296,6 @@
       overflow:hidden;
       pointer-events:none;
       padding:0;
-      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
     }
 
     .wheel-center.has-question{
@@ -307,27 +308,14 @@
     }
 
     .selected-result{
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:calc(58px + var(--safe-bottom));
-      min-height:32px;
-      text-align:center;
-      font-size:clamp(18px, 2.8vw, 30px);
-      font-weight:900;
-      line-height:1.1;
-      color:#222;
-      padding:0 12px 4px;
-      direction:rtl;
-      z-index:70;
-      pointer-events:none;
+      display:none !important;
     }
 
     .fixed-controls{
       position:absolute;
       left:0;
       right:0;
-      bottom:calc(14px + var(--safe-bottom));
+      bottom:calc(8px + var(--safe-bottom));
       height:clamp(44px, 6.2vh, 60px);
       z-index:90;
       pointer-events:none;
@@ -435,11 +423,12 @@
 
     @media (orientation:landscape){
       :root{
-        --wheel-size:min(55vw, calc(100dvh - 70px), 73dvh, 680px);
+        --wheel-size:min(58vw, calc(100dvh - 58px), 78dvh, 700px);
       }
 
       .wheel-stage{
-        padding:max(8px, var(--safe-top)) 6px calc(54px + var(--safe-bottom));
+        bottom:calc(46px + var(--safe-bottom));
+        padding:max(6px, var(--safe-top)) 6px 4px;
       }
 
       .wheel-logo{
@@ -453,15 +442,8 @@
         font-size:clamp(10px, 2.1vmin, 20px);
       }
 
-      .selected-result{
-        bottom:calc(42px + var(--safe-bottom));
-        min-height:18px;
-        font-size:clamp(13px, 2.5vh, 18px);
-        padding:0 8px;
-      }
-
       .fixed-controls{
-        bottom:calc(8px + var(--safe-bottom));
+        bottom:calc(6px + var(--safe-bottom));
         height:clamp(32px, 8.2vh, 44px);
       }
 
@@ -505,7 +487,7 @@
 
     @media (max-width:430px){
       :root{
-        --wheel-size:min(84vw, calc(100dvh - 190px), 370px);
+        --wheel-size:min(88vw, calc(100dvh - 128px), 400px);
       }
 
       .wheel-logo{
@@ -514,10 +496,15 @@
         width:64px;
       }
 
+      .wheel-stage{
+        bottom:calc(66px + var(--safe-bottom));
+        padding:max(36px, calc(var(--safe-top) + 20px)) 6px 8px;
+      }
+
       /* الزوم يحسب برمجيًا حتى لا يخرج جزء من العجلة خارج الشاشة */
 
       .fixed-controls{
-        bottom:calc(12px + var(--safe-bottom));
+        bottom:calc(8px + var(--safe-bottom));
       }
 
       .back-btn{
@@ -550,11 +537,6 @@
       .remove-btn{
         min-width:62px;
         padding:0 14px;
-      }
-
-      .continue-btn{
-        min-width:78px;
-        padding:0 12px;
       }
 
       .wheel-text{
@@ -927,10 +909,15 @@
     function updateLayout(){
       const size = wheelShell.offsetWidth || wheelShell.clientWidth || 0;
       if (size) {
+        const stageRect = wheelStage.getBoundingClientRect();
+        const pageRect = wheelPage.getBoundingClientRect();
+        const shellRect = wheelShell.getBoundingClientRect();
         const arrowW = Math.max(36, Math.min(62, size * 0.092));
         const arrowH = Math.max(22, Math.min(38, size * 0.056));
-        const arrowLeft = wheelShell.offsetLeft - arrowW - Math.max(4, size * 0.010);
+        const arrowLeft = shellRect.left - stageRect.left - arrowW - Math.max(4, size * 0.010);
+        const arrowTop = shellRect.top - pageRect.top + shellRect.height / 2;
         wheelPage.style.setProperty("--arrow-left", `${Math.max(2, arrowLeft)}px`);
+        wheelPage.style.setProperty("--arrow-top", `${arrowTop.toFixed(2)}px`);
         wheelPage.style.setProperty("--arrow-w", `${arrowW}px`);
         wheelPage.style.setProperty("--arrow-h", `${arrowH}px`);
       }
@@ -1038,7 +1025,7 @@
         stageRect.bottom - cy - margin
       )) / size;
 
-      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1, desiredScale);
+      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1.02, desiredScale);
       const minX = margin + (size * scale) / 2 - cx;
       const maxX = window.innerWidth - margin - (size * scale) / 2 - cx;
       const safeX = clamp(desiredX, minX, maxX);
@@ -1084,7 +1071,7 @@
         : getSelectedIndexAtArrow();
 
       selectedIndex = index;
-      selectedResult.textContent = textForEntry(items[index], index);
+      selectedResult.textContent = "";
       afterSpin.classList.add("show");
       highlightSelected(index);
       applyFocus();
