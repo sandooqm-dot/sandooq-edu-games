@@ -2985,234 +2985,222 @@
     }
 
 
-  
 
-    /* v36: توزيع أزرار شاشة العجلة حسب الرسم: شعار أعلى اليسار، رجوع يسار، حذف بجانب التدوير، تدوير يمين */
+    /* v36: مواقع أزرار شاشة العجلة حسب الرسم المرفق فقط */
+    body.playing-wheel .wheel-game-screen{
+      position:fixed !important;
+    }
+
     body.playing-wheel .wheel-game-logo{
       position:absolute !important;
-      top:calc(12px + var(--safe-top)) !important;
-      left:clamp(12px, 2.2vw, 34px) !important;
-      width:clamp(78px, 10vw, 146px) !important;
+      top:calc(16px + var(--safe-top)) !important;
+      left:clamp(16px, 2.8vw, 34px) !important;
+      width:clamp(76px, 8vw, 130px) !important;
       height:auto !important;
-      max-height:clamp(54px, 9vh, 96px) !important;
-      object-fit:contain !important;
       z-index:60 !important;
+      object-fit:contain !important;
       pointer-events:none !important;
       user-select:none !important;
     }
 
-    .wheel-game-logo{
-      display:none;
-    }
-
-    body.playing-wheel .wheel-game-logo{
-      display:block !important;
-    }
-
-    body.playing-wheel .wheel-stage{
-      padding-bottom:clamp(54px, 9vh, 92px) !important;
-    }
-
-    body.playing-wheel .selected-result{
-      position:absolute !important;
-      left:0 !important;
-      right:0 !important;
-      bottom:calc(clamp(70px, 10vh, 100px) + var(--safe-bottom)) !important;
-      min-height:26px !important;
-      z-index:42 !important;
-      pointer-events:none !important;
-    }
-
     body.playing-wheel .wheel-game-controls{
-      --back-w:clamp(82px, 8vw, 104px);
-      --spin-w:clamp(160px, 16vw, 246px);
-      --delete-w:clamp(132px, 14vw, 218px);
-      --control-h:clamp(48px, 7.4vh, 66px);
-      --edge-gap:clamp(12px, 2.2vw, 28px);
-      --between-gap:clamp(12px, 2vw, 26px);
       position:absolute !important;
       left:0 !important;
       right:0 !important;
-      bottom:calc(12px + var(--safe-bottom)) !important;
-      width:100% !important;
-      height:calc(var(--control-h) + 8px) !important;
+      bottom:calc(14px + var(--safe-bottom)) !important;
+      height:auto !important;
       min-height:0 !important;
-      display:block !important;
-      padding:0 !important;
-      margin:0 !important;
-      z-index:55 !important;
+      display:flex !important;
+      align-items:flex-end !important;
+      justify-content:space-between !important;
+      gap:16px !important;
+      padding:0 clamp(18px, 3vw, 34px) !important;
+      z-index:70 !important;
       pointer-events:none !important;
     }
 
-    body.playing-wheel .back-game-btn,
+    body.playing-wheel .wheel-back-btn,
     body.playing-wheel .spin-game-btn,
     body.playing-wheel .remove-selected-btn{
-      position:absolute !important;
-      bottom:0 !important;
-      height:var(--control-h) !important;
+      pointer-events:auto !important;
       border:4px solid #111 !important;
-      box-shadow:0 6px 0 rgba(0,0,0,.20) !important;
+      box-shadow:0 8px 0 rgba(0,0,0,.18) !important;
+      color:#fff !important;
       font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
       font-weight:900 !important;
       line-height:1 !important;
+      cursor:pointer !important;
       display:flex !important;
       align-items:center !important;
       justify-content:center !important;
       text-align:center !important;
-      cursor:pointer !important;
-      pointer-events:auto !important;
       user-select:none !important;
-      white-space:nowrap !important;
+      -webkit-user-select:none !important;
     }
 
-    body.playing-wheel .back-game-btn{
-      left:var(--edge-gap) !important;
-      width:var(--back-w) !important;
-      border-radius:16px !important;
-      background:var(--title-yellow) !important;
+    body.playing-wheel .wheel-back-btn{
+      width:clamp(92px, 10vw, 138px) !important;
+      height:clamp(54px, 7vh, 76px) !important;
+      border-radius:18px !important;
+      background:linear-gradient(180deg, #ffe66d 0%, #efd553 100%) !important;
       color:#111 !important;
-      font-size:clamp(18px, 2.2vw, 28px) !important;
+      font-size:clamp(20px, 2.5vw, 34px) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions{
+      display:flex !important;
+      align-items:flex-end !important;
+      justify-content:flex-end !important;
+      gap:clamp(18px, 2.5vw, 34px) !important;
+      pointer-events:none !important;
     }
 
     body.playing-wheel .spin-game-btn{
-      right:var(--edge-gap) !important;
-      width:var(--spin-w) !important;
-      border-radius:24px !important;
-      background:linear-gradient(180deg, #ff8a4d 0%, #f4773f 52%, #e76632 100%) !important;
+      width:clamp(190px, 18vw, 340px) !important;
+      height:clamp(58px, 8vh, 88px) !important;
+      border-radius:28px !important;
+      background:linear-gradient(180deg, #ff884d 0%, #f47a45 54%, #e66a35 100%) !important;
       color:#fff !important;
-      font-size:clamp(22px, 3vw, 38px) !important;
-      text-shadow:0 1px 0 rgba(0,0,0,.16) !important;
+      font-size:clamp(28px, 3.4vw, 52px) !important;
+      text-shadow:0 2px 0 rgba(0,0,0,.16) !important;
     }
 
     body.playing-wheel .wheel-after-spin{
-      position:absolute !important;
-      right:calc(var(--edge-gap) + var(--spin-w) + var(--between-gap)) !important;
-      bottom:0 !important;
-      width:var(--delete-w) !important;
-      height:var(--control-h) !important;
-      display:none !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
       padding:0 !important;
       margin:0 !important;
-      z-index:56 !important;
+      width:clamp(150px, 15vw, 260px) !important;
+      height:clamp(58px, 8vh, 88px) !important;
+      visibility:hidden !important;
+      opacity:0 !important;
       pointer-events:none !important;
     }
 
     body.playing-wheel .wheel-after-spin.show{
-      display:block !important;
+      visibility:visible !important;
+      opacity:1 !important;
+      pointer-events:auto !important;
     }
 
     body.playing-wheel .remove-selected-btn{
-      left:0 !important;
-      right:auto !important;
-      width:100% !important;
       min-width:0 !important;
+      width:100% !important;
       min-height:0 !important;
+      height:100% !important;
       border-radius:18px !important;
-      background:#ef3f3d !important;
+      background:linear-gradient(180deg, #ff6868 0%, #f05d5b 56%, #d94444 100%) !important;
       color:#fff !important;
-      font-size:clamp(18px, 2.4vw, 30px) !important;
+      font-size:clamp(22px, 2.8vw, 42px) !important;
+      text-shadow:0 2px 0 rgba(0,0,0,.16) !important;
     }
 
-    body.playing-wheel .back-game-btn:active,
-    body.playing-wheel .spin-game-btn:active,
-    body.playing-wheel .remove-selected-btn:active{
-      transform:translateY(3px) !important;
-      box-shadow:0 3px 0 rgba(0,0,0,.20) !important;
+    body.playing-wheel .selected-result{
+      position:absolute !important;
+      left:50% !important;
+      bottom:calc(86px + var(--safe-bottom)) !important;
+      transform:translateX(-50%) !important;
+      z-index:50 !important;
+      max-width:48vw !important;
+      min-height:24px !important;
+      padding:0 10px !important;
+      pointer-events:none !important;
     }
 
     @media (orientation:landscape){
-      body.playing-wheel .wheel-game-logo{
-        top:calc(8px + var(--safe-top)) !important;
-        width:clamp(72px, 8.5vw, 132px) !important;
-        max-height:clamp(48px, 13vh, 86px) !important;
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100svh - 28px), 86svh, 780px) !important;
       }
 
       body.playing-wheel .wheel-stage{
-        padding-bottom:clamp(40px, 11vh, 70px) !important;
-      }
-
-      body.playing-wheel .wheel-game-controls{
-        --back-w:clamp(74px, 7vw, 94px);
-        --spin-w:clamp(150px, 15vw, 238px);
-        --delete-w:clamp(124px, 13vw, 210px);
-        --control-h:clamp(40px, 9.2vh, 60px);
-        bottom:calc(8px + var(--safe-bottom)) !important;
+        padding:0 6px 0 !important;
       }
 
       body.playing-wheel .selected-result{
-        bottom:calc(clamp(58px, 13vh, 84px) + var(--safe-bottom)) !important;
+        bottom:calc(62px + var(--safe-bottom)) !important;
+        font-size:clamp(12px, 2.3vh, 17px) !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        bottom:calc(10px + var(--safe-bottom)) !important;
+        padding-left:clamp(14px, 2.5vw, 28px) !important;
+        padding-right:clamp(18px, 3vw, 40px) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        width:clamp(86px, 9vw, 126px) !important;
+        height:clamp(46px, 10vh, 68px) !important;
+        font-size:clamp(18px, 4vh, 30px) !important;
+      }
+
+      body.playing-wheel .spin-game-btn,
+      body.playing-wheel .wheel-after-spin{
+        height:clamp(48px, 10vh, 72px) !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        width:clamp(176px, 18vw, 318px) !important;
+        font-size:clamp(25px, 5.7vh, 46px) !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        width:clamp(140px, 15vw, 246px) !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
+        font-size:clamp(20px, 5vh, 38px) !important;
       }
     }
 
     @media (max-width:760px){
       body.playing-wheel .wheel-game-logo{
-        top:calc(10px + var(--safe-top)) !important;
-        left:12px !important;
-        width:clamp(64px, 18vw, 92px) !important;
-        max-height:64px !important;
-      }
-
-      body.playing-wheel .wheel-stage{
-        padding-bottom:76px !important;
+        top:calc(12px + var(--safe-top)) !important;
+        left:14px !important;
+        width:clamp(62px, 18vw, 92px) !important;
       }
 
       body.playing-wheel .wheel-game-controls{
-        --back-w:68px;
-        --spin-w:132px;
-        --delete-w:96px;
-        --control-h:46px;
-        --edge-gap:10px;
-        --between-gap:10px;
         bottom:calc(10px + var(--safe-bottom)) !important;
+        padding:0 12px !important;
+        gap:10px !important;
       }
 
-      body.playing-wheel .back-game-btn{
+      body.playing-wheel .wheel-back-btn{
+        width:76px !important;
+        height:50px !important;
         border-radius:14px !important;
-        font-size:17px !important;
+        font-size:18px !important;
+        border-width:3px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        gap:8px !important;
       }
 
       body.playing-wheel .spin-game-btn{
-        border-radius:19px !important;
-        font-size:23px !important;
+        width:128px !important;
+        height:50px !important;
+        border-radius:18px !important;
+        font-size:25px !important;
+        border-width:3px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        width:84px !important;
+        height:50px !important;
       }
 
       body.playing-wheel .remove-selected-btn{
-        border-radius:16px !important;
-        font-size:18px !important;
+        border-radius:14px !important;
+        font-size:21px !important;
+        border-width:3px !important;
       }
 
       body.playing-wheel .selected-result{
-        bottom:calc(62px + var(--safe-bottom)) !important;
+        bottom:calc(64px + var(--safe-bottom)) !important;
+        max-width:58vw !important;
         font-size:18px !important;
-      }
-    }
-
-    @media (max-width:430px){
-      body.playing-wheel .wheel-game-controls{
-        --back-w:62px;
-        --spin-w:120px;
-        --delete-w:86px;
-        --control-h:42px;
-        --between-gap:8px;
-      }
-
-      body.playing-wheel .back-game-btn,
-      body.playing-wheel .spin-game-btn,
-      body.playing-wheel .remove-selected-btn{
-        border-width:3px !important;
-        box-shadow:0 5px 0 rgba(0,0,0,.18) !important;
-      }
-
-      body.playing-wheel .back-game-btn{
-        font-size:15px !important;
-      }
-
-      body.playing-wheel .spin-game-btn{
-        font-size:20px !important;
-      }
-
-      body.playing-wheel .remove-selected-btn{
-        font-size:15px !important;
       }
     }
 
@@ -3414,12 +3402,12 @@
 
 
     <section class="wheel-game-screen" id="wheelGameScreen">
-      <img class="wheel-game-logo" src="logo.PNG" alt="صندوق الألعاب التعليمية" />
-
       <div class="wheel-topbar">
         <div class="wheel-timer" id="wheelTimer"></div>
         <div class="wheel-instruction"></div>
       </div>
+
+      <img class="wheel-game-logo" src="logo.PNG" alt="صندوق الألعاب التعليمية" />
 
       <div class="wheel-stage">
         <div class="game-wheel-arrow" aria-hidden="true"></div>
@@ -3438,13 +3426,15 @@
       <div class="selected-result" id="selectedResult" aria-live="polite"></div>
 
       <div class="wheel-game-controls">
-        <button class="back-game-btn" type="button" id="exitWheelGameBtn" aria-label="رجوع">رجوع</button>
+        <button class="wheel-back-btn" type="button" id="exitWheelGameBtn" aria-label="رجوع">رجوع</button>
 
-        <div class="wheel-after-spin" id="wheelAfterSpin">
-          <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف</button>
+        <div class="wheel-right-actions">
+          <div class="wheel-after-spin" id="wheelAfterSpin">
+            <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف</button>
+          </div>
+
+          <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
         </div>
-
-        <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
       </div>
     </section>
 
