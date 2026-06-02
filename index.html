@@ -1,11 +1,11 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>صندوق الالعاب التعليمية</title>
+<!DOCTYPE html>
 
-  <style>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<title>صندوق الالعاب التعليمية</title>
+<style>
     :root{
       --bg:#ece8cf;
       --ink:#111111;
@@ -1497,509 +1497,2665 @@
         border-radius:17px;
         font-size:17px;
       }
-    }<body>
-  <main class="page">
-    <!-- زخارف الصفحة الرئيسية فقط -->
-    <svg class="decor coil" viewBox="0 0 120 130" aria-hidden="true">
-      <g fill="none" stroke-width="2.4" stroke-linecap="round">
-        <ellipse cx="30" cy="46" rx="18" ry="38" stroke="#2c9a65"/>
-        <ellipse cx="36" cy="50" rx="18" ry="38" stroke="#2c9a65"/>
-        <ellipse cx="46" cy="54" rx="18" ry="38" stroke="#1c1c1c"/>
-        <ellipse cx="56" cy="58" rx="18" ry="38" stroke="#2c9a65"/>
-        <ellipse cx="66" cy="62" rx="18" ry="38" stroke="#1c1c1c"/>
-        <ellipse cx="76" cy="66" rx="18" ry="38" stroke="#2c9a65"/>
-      </g>
-    </svg>
-
-    <svg class="decor stars" viewBox="0 0 160 120" aria-hidden="true">
-      <g fill="#ff8748" stroke="#111" stroke-width="2.3">
-        <path d="M28 62 Q52 52 56 20 Q60 52 86 62 Q60 70 56 104 Q50 70 28 62Z"/>
-        <path d="M94 40 Q116 30 120 2 Q124 30 148 40 Q124 48 120 84 Q114 48 94 40Z"/>
-      </g>
-    </svg>
-
-    <svg class="decor flower" viewBox="0 0 90 90" aria-hidden="true">
-      <g fill="#f5cd42" stroke="#111" stroke-width="2.2">
-        <ellipse cx="45" cy="18" rx="10" ry="22"/>
-        <ellipse cx="45" cy="72" rx="10" ry="22"/>
-        <ellipse cx="18" cy="45" rx="22" ry="10"/>
-        <ellipse cx="72" cy="45" rx="22" ry="10"/>
-        <ellipse cx="25" cy="25" rx="10" ry="22" transform="rotate(-45 25 25)"/>
-        <ellipse cx="65" cy="65" rx="10" ry="22" transform="rotate(-45 65 65)"/>
-        <ellipse cx="65" cy="25" rx="10" ry="22" transform="rotate(45 65 25)"/>
-        <ellipse cx="25" cy="65" rx="10" ry="22" transform="rotate(45 25 65)"/>
-      </g>
-    </svg>
-
-    <svg class="decor wave" viewBox="0 0 220 120" aria-hidden="true">
-      <path d="M-8 75 C28 28, 68 118, 102 74 S170 28, 214 92" fill="none" stroke="#111" stroke-width="10" stroke-linecap="round"/>
-      <path d="M-8 71 C28 24, 68 114, 102 70 S170 24, 214 88" fill="none" stroke="#4dbc72" stroke-width="18" stroke-linecap="round"/>
-      <circle cx="214" cy="88" r="9" fill="#111"/>
-    </svg>
-
-    <svg class="decor splash" viewBox="0 0 140 140" aria-hidden="true">
-      <g fill="#ea5aa1" stroke="#111" stroke-width="2.4">
-        <path d="M70 10 C78 24 80 40 88 48 C98 44 110 40 124 44 C118 54 108 62 106 72 C116 78 126 88 130 100 C118 100 106 98 96 102 C96 114 94 124 86 132 C78 122 72 112 64 108 C56 118 50 126 38 132 C36 120 38 110 34 100 C22 102 12 100 4 94 C14 86 26 80 32 72 C22 64 12 54 10 42 C24 40 36 42 46 38 C48 26 54 16 62 10 C66 18 68 24 70 10Z"/>
-      </g>
-    </svg>
-
-    <section class="shell" id="homeShell">
-      <div class="title-pill">صندوق الالعاب التعليمية</div>
-
-      <div class="play-shell">
-        <div class="play-card">
-          <h2 class="play-title">اختر اللعبة لعرضها</h2>
-
-          <div class="select-wrap">
-            <select id="savedGameSelect">
-              <option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
-            </select>
-          </div>
-
-          <button class="start-btn" type="button">إبدأ اللعبة</button>
-        </div>
-      </div>
-
-      <div class="cards-grid primary-grid">
-        <button class="menu-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
-        <button class="menu-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
-      </div>
-
-      <div class="cards-grid secondary-grid">
-        <button class="menu-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
-        <button class="menu-btn" data-open-screen="settingsScreen">الإعدادات</button>
-      </div>
-    </section>
-
-    <section class="screen" id="createScreen">
-      <h2 class="screen-title">إنشاء لعبة جديدة</h2>
-
-      <div class="template-list">
-        <button class="template-card" type="button" data-template="wheel">
-          <div class="template-cover" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">العجلة الدوارة</h3>
-            <p class="template-desc">عجلة للنصوص أو الصور.</p>
-          </div>
-        </button>
-
-        <button class="template-card" type="button" data-template="open-box">
-          <div class="template-cover empty" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">افتح الصندوق</h3>
-            <p class="template-desc">صناديق تكشف سؤالًا أو صورة.</p>
-          </div>
-        </button>
-
-        <button class="template-card" type="button" data-template="quiz">
-          <div class="template-cover empty" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">اختيارات</h3>
-            <p class="template-desc">أسئلة متعددة الخيارات.</p>
-          </div>
-        </button>
-
-        <button class="template-card" type="button" data-template="true-false">
-          <div class="template-cover empty" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">صح أو خطأ</h3>
-            <p class="template-desc">عبارات بإجابة صح أو خطأ.</p>
-          </div>
-        </button>
-
-        <button class="template-card" type="button" data-template="matching">
-          <div class="template-cover empty" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">المطابقة</h3>
-            <p class="template-desc">طابق الكلمات أو الصور.</p>
-          </div>
-        </button>
-
-        <button class="template-card" type="button" data-template="sort">
-          <div class="template-cover empty" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">التصنيف</h3>
-            <p class="template-desc">رتّب العناصر داخل مجموعات.</p>
-          </div>
-        </button>
-
-        <button class="template-card" type="button" data-template="guess-image">
-          <div class="template-cover empty" aria-hidden="true"></div>
-          <div class="template-content">
-            <h3 class="template-title">خمن الصورة</h3>
-            <p class="template-desc">اعرض صورة وخمّن الإجابة.</p>
-          </div>
-        </button>
-      </div>
-    </section>
-
-
-    <section class="wheel-setup" id="wheelSetupScreen">
-      <h2 class="screen-title">العجلة الدوارة</h2>
-
-      <div class="wheel-setup-body">
-        <div class="wheel-options" aria-label="نوع محتوى العجلة">
-          <button class="wheel-type active" type="button" data-wheel-type="text">
-            <strong>نصوص فقط</strong>
-            <span>كلمات أو أسئلة قصيرة</span>
-          </button>
-
-          <button class="wheel-type" type="button" data-wheel-type="images">
-            <strong>صور فقط</strong>
-            <span>صور داخل أقسام العجلة</span>
-          </button>
-
-          <button class="wheel-type" type="button" data-wheel-type="mixed">
-            <strong>صور مع نصوص</strong>
-            <span>صورة ومعها نص مختصر</span>
-          </button>
-        </div>
-
-        <div class="question-panel" id="questionPanel">
-          <div class="question-row">
-            <h3 class="question-title">سؤال في منتصف العجلة</h3>
-            <div class="toggle" aria-label="تشغيل سؤال المنتصف">
-              <button type="button" class="active" data-question-toggle="off">تعطيل</button>
-              <button type="button" data-question-toggle="on">تشغيل</button>
-            </div>
-          </div>
-
-          <input
-            class="center-question-input"
-            id="centerQuestionInput"
-            type="text"
-            maxlength="45"
-            placeholder="اكتب السؤال الذي يظهر في منتصف العجلة"
-          />
-        </div>
-
-        <div class="items-panel">
-          <div class="items-head">
-            <h3 id="itemsTitle">عناصر العجلة</h3>
-            <span id="itemsHint">أضف كلمات أو أسئلة قصيرة.</span>
-          </div>
-
-          <div class="wheel-items-editor" id="wheelItemsEditor"></div>
-
-          <button class="add-item-btn" type="button" id="addWheelItemBtn" aria-label="إضافة عنصر">+</button>
-        </div>
-
-        <div class="wheel-actions">
-          <button class="test-btn" type="button" id="testWheelBtn">اختبار اللعبة</button>
-          <button class="save-btn" type="button" id="saveWheelBtn">حفظ اللعبة</button>
-        </div>
-      </div>
-    </section>
-    <section class="screen" id="savedScreen">
-      <h2 class="screen-title">العابي المحفوظة</h2>
-      <p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
-    </section>
-
-    <section class="screen" id="backupScreen">
-      <h2 class="screen-title">التصدير والاستيراد</h2>
-      <p class="screen-note">صدّر ألعابك كملف أو استوردها على جهاز آخر.</p>
-    </section>
-
-    <section class="screen" id="settingsScreen">
-      <h2 class="screen-title">الإعدادات</h2>
-      <p class="screen-note">تحكم بالصوت وطريقة العرض داخل اللعبة.</p>
-    </section>
-  </main>
-
-  <div class="bottom-bar">
-    <button class="home-btn" type="button" id="homeButton">الرئيسية</button>
-  </div>
-
-  <script>
-    const WEBSITE_HOME_URL = "https://sandooq-games.com/";
-    const WHEEL_PAYLOAD_KEY = "sandooq_wheel_payload_v1";
-    const WHEEL_DRAFT_KEY = "sandooq_wheel_draft_v1";
-
-    const screens = ["createScreen","wheelSetupScreen","savedScreen","backupScreen","settingsScreen"];
-    const homeShell = document.getElementById("homeShell");
-    const homeButton = document.getElementById("homeButton");
-    const wheelItemsEditor = document.getElementById("wheelItemsEditor");
-    const addWheelItemBtn = document.getElementById("addWheelItemBtn");
-    const itemsHint = document.getElementById("itemsHint");
-    const questionPanel = document.getElementById("questionPanel");
-    const centerQuestionInput = document.getElementById("centerQuestionInput");
-
-    let wheelContentType = "text";
-    let wheelEntries = [];
-
-    const defaultWheelEntries = [
-      { text:"اتغدى" },
-      { text:"انام" },
-      { text:"اشتغل" },
-      { text:"اروح" },
-      { text:"اكعد" },
-      { text:"احجي" },
-      { text:"اقرأ" },
-      { text:"العب" }
-    ];
-
-    function openScreen(id){
-      const isSubpage = Boolean(id);
-      document.body.classList.toggle("subpage", isSubpage);
-
-      screens.forEach((sid)=>{
-        const el = document.getElementById(sid);
-        if (el) el.classList.toggle("active", sid === id);
-      });
-
-      if (homeShell) homeShell.style.display = Boolean(id) ? "none" : "flex";
-      window.scrollTo({ top:0, behavior:"auto" });
     }
 
-    function setWheelType(type){
-      wheelContentType = type || "text";
-
-      document.querySelectorAll(".wheel-type").forEach((item)=>{
-        item.classList.toggle("active", item.getAttribute("data-wheel-type") === wheelContentType);
-      });
-
-      if (itemsHint) itemsHint.textContent = entryHint();
+    /* v25: شاشة تشغيل العجلة الرئيسية والاختبار */
+    body.playing-wheel .bottom-bar,
+    body.playing-wheel .page > .decor{
+      display:none !important;
     }
 
-    function entryHint(){
-      if (wheelContentType === "images") return "أضف الصور التي تظهر داخل أقسام العجلة.";
-      if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
-      return "أضف كلمات أو أسئلة قصيرة.";
+    body.playing-wheel .page{
+      padding:0 !important;
+      background:#fff !important;
+      overflow:hidden !important;
     }
 
-    function createEntry(){
-      if (wheelContentType === "images") return { imageName:"", imageData:"" };
-      if (wheelContentType === "mixed") return { text:"", imageName:"", imageData:"" };
-      return { text:"" };
+    .wheel-game-screen{
+      display:none;
+      position:fixed;
+      inset:0;
+      width:100vw;
+      height:100dvh;
+      min-height:100dvh;
+      background:#fff;
+      z-index:1000;
+      overflow:hidden;
+      color:#222;
+      direction:ltr;
+      user-select:none;
+      touch-action:manipulation;
     }
 
-    function readFileAsDataURL(file, callback){
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => callback(String(reader.result || ""));
-      reader.readAsDataURL(file);
+    .wheel-game-screen.active{
+      display:flex;
+      flex-direction:column;
     }
 
-    function isEntryFilled(entry){
-      if (wheelContentType === "images") return Boolean(entry.imageData || entry.imageName);
-      if (wheelContentType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
-      return Boolean(entry.text);
+    .wheel-topbar{
+      height:clamp(60px, 8.5vh, 86px);
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      padding:0 clamp(18px, 3vw, 30px);
+      color:#777;
+      flex:0 0 auto;
     }
 
-    function getFilledEntries(){
-      const filled = wheelEntries.filter(isEntryFilled).map((entry)=> ({ ...entry }));
-      return filled.length ? filled : defaultWheelEntries.map((entry)=> ({ ...entry }));
+    .wheel-timer{
+      justify-self:start;
+      font-size:clamp(28px, 5vw, 50px);
+      font-weight:500;
+      line-height:1;
     }
 
-    function getCenterQuestionEnabled(){
-      return Boolean(questionPanel && questionPanel.classList.contains("enabled"));
+    .wheel-instruction{
+      justify-self:center;
+      font-size:clamp(27px, 5vw, 50px);
+      font-weight:500;
+      line-height:1;
+      white-space:nowrap;
     }
 
-    function buildWheelPayload(){
-      return {
-        version: 1,
-        source: "index-6",
-        type: wheelContentType,
-        entries: getFilledEntries(),
-        centerQuestionEnabled: getCenterQuestionEnabled(),
-        centerQuestion: String(centerQuestionInput?.value || "").trim(),
-        updatedAt: Date.now()
-      };
+    .wheel-stage{
+      position:relative;
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(14px, 3vh, 32px) clamp(14px, 4vw, 42px) clamp(20px, 4vh, 44px);
     }
 
-    function saveDraft(){
-      const draft = {
-        version: 1,
-        type: wheelContentType,
-        entries: wheelEntries.map((entry)=> ({ ...entry })),
-        centerQuestionEnabled: getCenterQuestionEnabled(),
-        centerQuestion: String(centerQuestionInput?.value || "").trim(),
-        updatedAt: Date.now()
-      };
-
-      try {
-        sessionStorage.setItem(WHEEL_DRAFT_KEY, JSON.stringify(draft));
-      } catch (_) {}
+    .game-wheel-arrow{
+      position:absolute;
+      left:clamp(22px, 4.6vw, 64px);
+      top:50%;
+      transform:translateY(-50%);
+      width:0;
+      height:0;
+      border-top:clamp(24px, 4.5vw, 42px) solid transparent;
+      border-bottom:clamp(24px, 4.5vw, 42px) solid transparent;
+      border-left:clamp(42px, 7.4vw, 76px) solid #f2f2f2;
+      filter:drop-shadow(0 0 1px #777);
+      z-index:5;
     }
 
-    function loadDraft(){
-      try {
-        const raw = sessionStorage.getItem(WHEEL_DRAFT_KEY);
-        if (!raw) return false;
+    .real-wheel{
+      width:min(76vw, 58vh, 560px);
+      aspect-ratio:1/1;
+      position:relative;
+      border-radius:50%;
+      background:#fff;
+      filter:drop-shadow(0 10px 26px rgba(0,0,0,.12));
+      transition:transform 3.4s cubic-bezier(.12,.72,.13,1);
+      transform:rotate(0deg);
+    }
 
-        const draft = JSON.parse(raw);
-        if (!draft || typeof draft !== "object") return false;
+    .real-wheel::before{
+      content:"";
+      position:absolute;
+      inset:-18px;
+      border-radius:50%;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          #fff 0deg 3.3deg,
+          transparent 3.3deg 6.6deg
+        );
+      z-index:-1;
+    }
 
-        setWheelType(draft.type || "text");
-        wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
+    .real-wheel::after{
+      content:"";
+      position:absolute;
+      inset:-5px;
+      border-radius:50%;
+      border:5px solid rgba(0,0,0,.04);
+      pointer-events:none;
+      z-index:5;
+    }
 
-        const enabled = Boolean(draft.centerQuestionEnabled);
-        questionPanel?.classList.toggle("enabled", enabled);
-        document.querySelectorAll("[data-question-toggle]").forEach((item)=>{
-          item.classList.toggle("active", item.getAttribute("data-question-toggle") === (enabled ? "on" : "off"));
-        });
+    .wheel-slices{
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      overflow:hidden;
+      background:var(--wheel-bg, conic-gradient(#e91e63 0 60deg, #fff 60deg 120deg, #2196f3 120deg 180deg, #fff 180deg 240deg, #ff9800 240deg 300deg, #fff 300deg 360deg));
+    }
 
-        if (centerQuestionInput) centerQuestionInput.value = draft.centerQuestion || "";
+    .wheel-slices::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:var(--wheel-lines, none);
+      pointer-events:none;
+      z-index:2;
+    }
 
-        renderWheelEntries();
-        return true;
-      } catch (_) {
-        return false;
+    .slice-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:42%;
+      height:48px;
+      margin-top:-24px;
+      transform-origin:0 50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      font-size:clamp(15px, 2.45vw, 27px);
+      font-weight:700;
+      line-height:1.1;
+      padding:0 6px;
+      z-index:3;
+      direction:ltr;
+      overflow:hidden;
+      white-space:pre-line;
+    }
+
+    .slice-label.dark{
+      color:#222;
+    }
+
+    .slice-label img{
+      width:clamp(30px, 6vw, 58px);
+      height:clamp(30px, 6vw, 58px);
+      object-fit:contain;
+      border-radius:4px;
+      background:#fff;
+      padding:2px;
+    }
+
+    .real-wheel-center{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:29%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:4px solid rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:clamp(15px, 2.55vw, 26px);
+      font-weight:500;
+      line-height:1.22;
+      padding:10px;
+      z-index:6;
+      direction:ltr;
+      white-space:pre-line;
+    }
+
+    .selected-result{
+      flex:0 0 auto;
+      min-height:32px;
+      text-align:center;
+      font-size:clamp(18px, 3vw, 28px);
+      font-weight:700;
+      color:#222;
+      padding:0 12px;
+    }
+
+    .wheel-game-controls{
+      height:clamp(76px, 12vh, 112px);
+      display:grid;
+      grid-template-columns:76px minmax(150px, 320px) 76px 76px;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(14px, 4vw, 48px);
+      padding:0 clamp(12px, 3vw, 32px) clamp(8px, 2vh, 16px);
+      flex:0 0 auto;
+    }
+
+    .game-icon-btn{
+      width:clamp(46px, 7vw, 64px);
+      height:clamp(46px, 7vw, 64px);
+      border:0;
+      background:transparent;
+      color:#222;
+      font-size:clamp(34px, 6vw, 48px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .spin-game-btn{
+      height:clamp(44px, 6.8vh, 58px);
+      border:3px solid #777;
+      border-radius:7px;
+      background:#fff;
+      color:#222;
+      font-size:clamp(22px, 4vw, 32px);
+      font-weight:500;
+      cursor:pointer;
+    }
+
+    .wheel-after-spin{
+      display:none;
+      justify-content:center;
+      padding:0 0 12px;
+    }
+
+    .wheel-after-spin.show{
+      display:flex;
+    }
+
+    .remove-selected-btn{
+      min-width:190px;
+      min-height:46px;
+      border:3px solid #222;
+      border-radius:12px;
+      background:#f05d5b;
+      color:#fff;
+      font-size:20px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    @media (max-width: 760px){
+      .wheel-topbar{
+        height:74px;
+      }
+
+      .wheel-timer,
+      .wheel-instruction{
+        font-size:32px;
+      }
+
+      .real-wheel{
+        width:min(74vw, 390px);
+      }
+
+      .wheel-stage{
+        align-items:center;
+        padding-bottom:10vh;
+      }
+
+      .game-wheel-arrow{
+        left:18px;
+        border-top-width:26px;
+        border-bottom-width:26px;
+        border-left-width:44px;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:54px minmax(155px, 300px) 54px 54px;
+        gap:14px;
+        height:84px;
+      }
+
+      .game-icon-btn{
+        width:50px;
+        height:50px;
+        font-size:38px;
+      }
+
+      .spin-game-btn{
+        height:50px;
+        font-size:26px;
+      }
+
+      .slice-label{
+        font-size:18px;
+      }
+
+      .slice-label img{
+        width:36px;
+        height:36px;
       }
     }
 
-    function renderWheelEntries(){
-      if (!wheelItemsEditor) return;
+    @media (max-width: 430px){
+      .wheel-topbar{
+        padding:0 18px;
+      }
 
-      if (itemsHint) itemsHint.textContent = entryHint();
-      wheelItemsEditor.innerHTML = "";
+      .wheel-timer,
+      .wheel-instruction{
+        font-size:27px;
+      }
 
-      wheelEntries.forEach((entry, index)=>{
-        const box = document.createElement("div");
-        box.className = "wheel-entry";
+      .real-wheel{
+        width:min(76vw, 330px);
+      }
 
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "remove-entry-btn";
-        remove.textContent = "×";
-        remove.setAttribute("aria-label", "حذف العنصر");
-        remove.addEventListener("click", ()=>{
-          wheelEntries.splice(index, 1);
-          renderWheelEntries();
+      .wheel-stage{
+        padding-bottom:12vh;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:48px minmax(140px, 230px) 48px 48px;
+        gap:10px;
+      }
+
+      .game-icon-btn{
+        font-size:34px;
+      }
+
+      .spin-game-btn{
+        font-size:24px;
+      }
+    }
+
+    /* v27: ضبط أقسام العجلة والنصوص والتوقف عند السهم */
+    .real-wheel{
+      overflow:visible;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.11));
+    }
+
+    .wheel-slices{
+      overflow:hidden;
+      border-radius:50%;
+      background:var(--wheel-bg) !important;
+    }
+
+    .wheel-slices::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:var(--wheel-lines, none);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .wheel-slices::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      box-shadow:inset 0 0 0 3px rgba(255,255,255,.95);
+      pointer-events:none;
+      z-index:4;
+    }
+
+    .slice-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:26%;
+      min-height:36px;
+      height:auto;
+      margin:0;
+      transform-origin:center center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      font-size:clamp(14px, 2.25vw, 24px);
+      font-weight:800;
+      line-height:1.15;
+      padding:4px 6px;
+      z-index:3;
+      direction:rtl;
+      overflow:visible;
+      white-space:normal;
+      text-shadow:0 1px 2px rgba(0,0,0,.22);
+      pointer-events:none;
+    }
+
+    .slice-label.dark{
+      color:#1b1b1b;
+      text-shadow:none;
+    }
+
+    .slice-label img{
+      width:clamp(34px, 6.2vw, 64px);
+      height:clamp(34px, 6.2vw, 64px);
+      object-fit:contain;
+      border-radius:6px;
+      background:#fff;
+      padding:3px;
+      box-shadow:0 1px 5px rgba(0,0,0,.16);
+    }
+
+    .real-wheel-center{
+      z-index:8;
+      box-shadow:0 0 0 2px rgba(0,0,0,.04);
+    }
+
+    @media (max-width: 760px){
+      .slice-label{
+        width:28%;
+        font-size:clamp(13px, 4vw, 19px);
+        min-height:30px;
+      }
+
+      .slice-label img{
+        width:clamp(30px, 8vw, 46px);
+        height:clamp(30px, 8vw, 46px);
+      }
+    }
+
+    @media (max-width: 430px){
+      .slice-label{
+        width:30%;
+        font-size:clamp(12px, 3.7vw, 17px);
+      }
+    }
+
+
+    /* v29: تحسين العجلة الحقيقية - حجم أكبر، سهم مضبوط، بدون نصوص زائدة، وسحب يدوي */
+    body.playing-wheel .bottom-bar,
+    body.playing-wheel .page > .decor{
+      display:none !important;
+    }
+
+    body.playing-wheel .page{
+      padding:0 !important;
+      background:#fff !important;
+      overflow:hidden !important;
+    }
+
+    .wheel-game-screen{
+      background:#fff !important;
+      overflow:hidden !important;
+      touch-action:none;
+    }
+
+    .wheel-topbar,
+    .wheel-timer,
+    .wheel-instruction{
+      display:none !important;
+      height:0 !important;
+      min-height:0 !important;
+      padding:0 !important;
+      margin:0 !important;
+      overflow:hidden !important;
+    }
+
+    .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:clamp(8px, 2.2vh, 18px) clamp(10px, 2vw, 26px) clamp(6px, 1.6vh, 14px) !important;
+    }
+
+    .real-wheel{
+      --actual-wheel-size:min(90vw, 78dvh, 720px);
+      width:var(--actual-wheel-size) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      overflow:visible !important;
+      background:transparent !important;
+      border-radius:50% !important;
+      transform:none !important;
+      transition:none !important;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.13));
+      cursor:grab;
+      touch-action:none;
+    }
+
+    .real-wheel:active{
+      cursor:grabbing;
+    }
+
+    .real-wheel::before{
+      content:"" !important;
+      position:absolute !important;
+      inset:-10px !important;
+      border-radius:50% !important;
+      background:repeating-conic-gradient(from 0deg, rgba(219,228,237,.82) 0deg 2.15deg, transparent 2.15deg 5.35deg) !important;
+      z-index:-1 !important;
+      opacity:.9 !important;
+    }
+
+    .real-wheel::after,
+    .wheel-slices,
+    .slice-label{
+      display:none !important;
+    }
+
+    .svg-wheel{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      overflow:visible;
+      display:block;
+      touch-action:none;
+    }
+
+    .svg-wheel-rotor{
+      transform-box:fill-box;
+      transform-origin:center;
+      transition:transform 4.35s cubic-bezier(.08,.72,.10,1);
+      will-change:transform;
+    }
+
+    .svg-sector{
+      stroke:#fff;
+      stroke-width:3.4;
+      stroke-linejoin:round;
+    }
+
+    .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+      font-weight:800;
+      dominant-baseline:middle;
+      text-anchor:middle;
+      paint-order:stroke;
+      stroke:rgba(0,0,0,.24);
+      stroke-width:.85px;
+      stroke-linejoin:round;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .svg-wheel-label.light{
+      fill:#fff;
+    }
+
+    .svg-wheel-label.dark{
+      fill:#141414;
+      stroke:rgba(255,255,255,.7);
+      stroke-width:1.05px;
+    }
+
+    .svg-wheel-image-card{
+      fill:#fff;
+      stroke:rgba(0,0,0,.20);
+      stroke-width:1.15;
+      rx:8;
+      ry:8;
+      filter:drop-shadow(0 1px 3px rgba(0,0,0,.20));
+    }
+
+    .svg-wheel-image{
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .real-wheel-center{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      transform:translate(-50%,-50%) !important;
+      width:25.5% !important;
+      aspect-ratio:1/1 !important;
+      border-radius:50% !important;
+      background:#fff !important;
+      border:4px solid rgba(0,0,0,.12) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      font-size:clamp(11px, min(2.15vw, 2.15vh), 21px) !important;
+      font-weight:700 !important;
+      line-height:1.14 !important;
+      padding:clamp(5px, 1.1vw, 10px) !important;
+      z-index:8 !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      white-space:normal !important;
+      overflow:hidden !important;
+      overflow-wrap:anywhere !important;
+      word-break:break-word !important;
+      box-shadow:0 0 0 2px rgba(255,255,255,.9) !important;
+      pointer-events:none;
+    }
+
+    .game-wheel-arrow{
+      position:absolute !important;
+      left:clamp(14px, 4vw, 60px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:clamp(24px, 4vw, 42px) solid transparent !important;
+      border-bottom:clamp(24px, 4vw, 42px) solid transparent !important;
+      border-left:clamp(44px, 6vw, 72px) solid #f2f2f2 !important;
+      filter:drop-shadow(0 0 1px #777) !important;
+      z-index:10 !important;
+      pointer-events:none !important;
+    }
+
+    .selected-result{
+      flex:0 0 auto !important;
+      min-height:26px !important;
+      text-align:center !important;
+      font-size:clamp(17px, 2.6vw, 27px) !important;
+      font-weight:700 !important;
+      color:#222 !important;
+      padding:0 12px 2px !important;
+    }
+
+    .wheel-game-controls{
+      height:clamp(68px, 10dvh, 94px) !important;
+      display:grid !important;
+      grid-template-columns:clamp(48px, 6vw, 64px) minmax(170px, 370px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(18px, 5vw, 58px) !important;
+      padding:0 clamp(12px, 3vw, 32px) clamp(6px, 1.5vh, 12px) !important;
+      flex:0 0 auto !important;
+    }
+
+    #soundGameBtn,
+    #fullscreenGameBtn{
+      display:none !important;
+    }
+
+    .game-icon-btn{
+      width:clamp(44px, 6vw, 60px) !important;
+      height:clamp(44px, 6vw, 60px) !important;
+      border:0 !important;
+      background:transparent !important;
+      color:#222 !important;
+      font-size:clamp(32px, 5vw, 44px) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      cursor:pointer !important;
+      line-height:1 !important;
+    }
+
+    .spin-game-btn{
+      height:clamp(42px, 6dvh, 56px) !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(21px, 3.3vw, 31px) !important;
+      font-weight:600 !important;
+      cursor:pointer !important;
+    }
+
+    .wheel-after-spin{
+      flex:0 0 auto !important;
+      justify-content:center !important;
+      padding:0 0 clamp(8px, 1.6vh, 14px) !important;
+    }
+
+    .remove-selected-btn{
+      min-width:clamp(160px, 28vw, 230px) !important;
+      min-height:clamp(42px, 5.5dvh, 52px) !important;
+      border:3px solid #222 !important;
+      border-radius:13px !important;
+      background:#f05d5b !important;
+      color:#fff !important;
+      font-size:clamp(17px, 2.5vw, 22px) !important;
+      font-weight:800 !important;
+      cursor:pointer !important;
+    }
+
+    @media (orientation: landscape){
+      .real-wheel{
+        --actual-wheel-size:min(76vw, 72dvh, 710px);
+      }
+
+      .wheel-stage{
+        padding-top:2px !important;
+        padding-bottom:0 !important;
+      }
+
+      .real-wheel-center{
+        font-size:clamp(10px, min(1.65vw, 3.3vh), 19px) !important;
+        line-height:1.1 !important;
+      }
+
+      .wheel-game-controls{
+        height:clamp(58px, 12dvh, 82px) !important;
+      }
+    }
+
+    @media (max-width: 760px){
+      .real-wheel{
+        --actual-wheel-size:min(89vw, 70dvh, 520px);
+      }
+
+      .wheel-stage{
+        padding-top:6px !important;
+        padding-bottom:4px !important;
+      }
+
+      .game-wheel-arrow{
+        left:18px !important;
+        border-top-width:25px !important;
+        border-bottom-width:25px !important;
+        border-left-width:43px !important;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:48px minmax(150px, 260px) !important;
+        gap:16px !important;
+        height:74px !important;
+      }
+
+      .spin-game-btn{
+        height:48px !important;
+        font-size:24px !important;
+      }
+
+      .selected-result{
+        min-height:24px !important;
+        font-size:20px !important;
+      }
+    }
+
+    @media (max-width: 430px){
+      .real-wheel{
+        --actual-wheel-size:min(91vw, 66dvh, 410px);
+      }
+
+      .game-wheel-arrow{
+        left:14px !important;
+        border-top-width:22px !important;
+        border-bottom-width:22px !important;
+        border-left-width:38px !important;
+      }
+    }
+
+  
+    /* v31: تعديلات العجلة فقط بدون تغيير ترتيب الصفحات */
+    body.playing-wheel{
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-topbar{
+      display:none !important;
+    }
+
+    body.playing-wheel #soundGameBtn,
+    body.playing-wheel #fullscreenGameBtn{
+      display:none !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      background:#fff !important;
+      touch-action:none;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:clamp(6px, 1.2vh, 14px) clamp(6px, 1.5vw, 16px) 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:min(94vw, 74dvh, 720px) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      border-radius:50% !important;
+      background:transparent !important;
+      overflow:visible !important;
+      transition:none !important;
+      transform:none !important;
+      filter:drop-shadow(0 14px 30px rgba(0,0,0,.13)) !important;
+      touch-action:none !important;
+      cursor:grab;
+    }
+
+    body.playing-wheel .real-wheel:active{
+      cursor:grabbing;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      content:"" !important;
+      position:absolute !important;
+      inset:-8px !important;
+      border-radius:50% !important;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          rgba(94,136,219,.34) 0deg 2.1deg,
+          transparent 2.1deg 6.4deg
+        ) !important;
+      z-index:-1 !important;
+      opacity:.88 !important;
+    }
+
+    body.playing-wheel .real-wheel::after{
+      content:"" !important;
+      display:block !important;
+      position:absolute !important;
+      inset:-1px !important;
+      border-radius:50% !important;
+      border:2px solid rgba(8,124,168,.08) !important;
+      pointer-events:none !important;
+      z-index:7 !important;
+    }
+
+    body.playing-wheel .svg-wheel{
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      overflow:visible !important;
+      display:block !important;
+      touch-action:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-rotor{
+      transform-box:fill-box !important;
+      transform-origin:center !important;
+      will-change:transform !important;
+      transition:none !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:3.8 !important;
+      stroke-linejoin:round !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.28) !important;
+      stroke-width:.8px !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#1f1f1f !important;
+      paint-order:stroke !important;
+      stroke:rgba(255,255,255,.80) !important;
+      stroke-width:1px !important;
+    }
+
+    body.playing-wheel .svg-wheel-image-bg{
+      fill:#fff !important;
+      stroke:rgba(0,0,0,.16) !important;
+      stroke-width:1.1 !important;
+      rx:8 !important;
+      ry:8 !important;
+      filter:drop-shadow(0 1px 3px rgba(0,0,0,.13));
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      transform:translate(-50%,-50%) !important;
+      width:25.5% !important;
+      aspect-ratio:1/1 !important;
+      border-radius:50% !important;
+      background:#fff !important;
+      border:4px solid rgba(0,0,0,.11) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      font-size:clamp(9px, 2.05vmin, 22px) !important;
+      font-weight:900 !important;
+      line-height:1.13 !important;
+      padding:clamp(5px, 1.15vmin, 11px) !important;
+      z-index:12 !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      overflow:hidden !important;
+      word-break:normal !important;
+      white-space:normal !important;
+      box-shadow:0 0 0 2px rgba(255,255,255,.88) !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      position:absolute !important;
+      left:clamp(10px, 3.4vw, 34px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:clamp(25px, 4.3vmin, 40px) solid transparent !important;
+      border-bottom:clamp(25px, 4.3vmin, 40px) solid transparent !important;
+      border-left:clamp(44px, 7vmin, 70px) solid #e8eef7 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.35)) !important;
+      z-index:20 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      height:auto !important;
+      min-height:72px !important;
+      display:grid !important;
+      grid-template-columns:60px minmax(190px, 370px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(22px, 6vw, 80px) !important;
+      padding:2px 18px clamp(10px, 2vh, 18px) !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:56px !important;
+      height:56px !important;
+      border:0 !important;
+      background:transparent !important;
+      color:#222 !important;
+      font-size:42px !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:54px !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(22px, 3.4vw, 32px) !important;
+      font-weight:800 !important;
+    }
+
+    body.playing-wheel .selected-result{
+      min-height:28px !important;
+      text-align:center !important;
+      font-size:clamp(18px, 2.6vw, 30px) !important;
+      font-weight:900 !important;
+      color:#222 !important;
+      padding:0 12px 2px !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      padding:0 0 calc(10px + var(--safe-bottom)) !important;
+    }
+
+    @media (orientation: landscape){
+      body.playing-wheel .real-wheel{
+        width:min(72dvh, 58vw, 690px) !important;
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding-top:2px !important;
+      }
+
+      body.playing-wheel .real-wheel-center{
+        font-size:clamp(8px, 1.85vmin, 19px) !important;
+        width:24.5% !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        min-height:62px !important;
+        padding-bottom:6px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:46px !important;
+      }
+    }
+
+    @media (max-width:760px){
+      body.playing-wheel .real-wheel{
+        width:min(95vw, 70dvh, 540px) !important;
+      }
+
+      body.playing-wheel .game-wheel-arrow{
+        left:10px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        grid-template-columns:54px minmax(160px, 300px) !important;
+        gap:18px !important;
+        min-height:72px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:50px !important;
+        height:50px !important;
+        font-size:38px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:50px !important;
+      }
+    }
+
+
+    /* v34: تعديلات شاشة العجلة فقط - لا يغير صفحة الإعدادات أو ترتيب الصفحات */
+    :root{
+      --app-width:100vw;
+      --app-height:100dvh;
+      --app-top:0px;
+      --app-left:0px;
+    }
+
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:var(--app-width) !important;
+      height:var(--app-height) !important;
+      min-height:var(--app-height) !important;
+      max-height:var(--app-height) !important;
+      overflow:hidden !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      --wheel-size:min(94vw, calc(var(--app-height) - 146px), 720px);
+      position:fixed !important;
+      top:var(--app-top) !important;
+      left:var(--app-left) !important;
+      width:var(--app-width) !important;
+      height:var(--app-height) !important;
+      min-height:var(--app-height) !important;
+      max-height:var(--app-height) !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      touch-action:none !important;
+      display:none;
+      flex-direction:column !important;
+    }
+
+    body.playing-wheel .wheel-game-screen.active{
+      display:flex !important;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:4px 4px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      border-radius:50% !important;
+      background:transparent !important;
+      overflow:visible !important;
+      transition:none !important;
+      transform:none !important;
+      filter:drop-shadow(0 12px 28px rgba(0,0,0,.12)) !important;
+      cursor:grab !important;
+      touch-action:none !important;
+    }
+
+    body.playing-wheel .real-wheel:active{
+      cursor:grabbing !important;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      inset:-7px !important;
+      background:repeating-conic-gradient(from 0deg, rgba(94,136,219,.30) 0deg 2deg, transparent 2deg 6deg) !important;
+      opacity:.82 !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:3.2 !important;
+    }
+
+    body.playing-wheel .svg-wheel-image-bg,
+    body.playing-wheel .svg-wheel-image-card{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.26) !important;
+      stroke-width:.7px !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#151515 !important;
+      paint-order:stroke !important;
+      stroke:rgba(255,255,255,.78) !important;
+      stroke-width:.9px !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      width:24.5% !important;
+      font-size:clamp(9px, 2.05vmin, 21px) !important;
+      line-height:1.12 !important;
+      padding:clamp(4px, 1.05vmin, 10px) !important;
+      overflow:hidden !important;
+      overflow-wrap:anywhere !important;
+      word-break:break-word !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      position:absolute !important;
+      left:var(--game-arrow-left, 8px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:var(--game-arrow-h, 24px) solid transparent !important;
+      border-bottom:var(--game-arrow-h, 24px) solid transparent !important;
+      border-left:var(--game-arrow-w, 44px) solid #111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)) !important;
+      z-index:30 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .selected-result{
+      flex:0 0 auto !important;
+      min-height:24px !important;
+      font-size:clamp(17px, 2.3vw, 26px) !important;
+      font-weight:900 !important;
+      line-height:1.1 !important;
+      padding:0 12px 2px !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      min-height:58px !important;
+      height:58px !important;
+      display:grid !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:46px !important;
+      height:46px !important;
+      font-size:34px !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:46px !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(20px, 3vw, 28px) !important;
+      font-weight:800 !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      flex:0 0 auto !important;
+      padding:0 0 calc(8px + var(--safe-bottom)) !important;
+    }
+
+    body.playing-wheel .remove-selected-btn{
+      min-width:clamp(150px, 26vw, 220px) !important;
+      min-height:42px !important;
+      font-size:clamp(16px, 2.2vw, 20px) !important;
+      border-radius:12px !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(70vw, calc(var(--app-height) - 58px), 760px);
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding:0 4px !important;
+      }
+
+      body.playing-wheel .real-wheel-center{
+        width:23.5% !important;
+        font-size:clamp(8px, 1.75vmin, 18px) !important;
+        line-height:1.08 !important;
+      }
+
+      body.playing-wheel .selected-result{
+        min-height:16px !important;
+        font-size:clamp(13px, 2.5vh, 18px) !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        min-height:42px !important;
+        height:42px !important;
+        grid-template-columns:38px minmax(120px, 240px) !important;
+        gap:clamp(14px, 4vw, 42px) !important;
+        padding:0 12px 4px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:36px !important;
+        height:36px !important;
+        font-size:28px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:34px !important;
+        font-size:clamp(16px, 4vh, 22px) !important;
+        border-width:2px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 4px !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
+        min-height:34px !important;
+        min-width:150px !important;
+        font-size:15px !important;
+        border-width:2px !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(95vw, calc(var(--app-height) - 138px), 430px);
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        grid-template-columns:44px minmax(142px, 240px) !important;
+        gap:12px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:42px !important;
+        height:42px !important;
+        font-size:31px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:44px !important;
+        font-size:23px !important;
+      }
+    }
+
+  
+
+    /* v35: تعديلات شاشة العجلة فقط - معالجة Safari + ترتيب صورة/نص + زخرفة خارجية متموجة */
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:100vw !important;
+      height:100svh !important;
+      min-height:100svh !important;
+      max-height:100svh !important;
+      overflow:hidden !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      top:0 !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:auto !important;
+      width:100vw !important;
+      height:100svh !important;
+      min-height:100svh !important;
+      max-height:100svh !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      flex-direction:column !important;
+      --wheel-size:min(94vw, calc(100svh - 142px), 730px);
+    }
+
+    @supports not (height:100svh){
+      body.playing-wheel,
+      body.playing-wheel .page,
+      body.playing-wheel .wheel-game-screen{
+        height:100dvh !important;
+        min-height:100dvh !important;
+        max-height:100dvh !important;
+      }
+
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(94vw, calc(100dvh - 142px), 730px);
+      }
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:6px 8px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      display:none !important;
+      content:none !important;
+      background:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-line{
+      fill:none !important;
+      stroke:#87b9e8 !important;
+      stroke-width:2.15 !important;
+      stroke-linecap:round !important;
+      stroke-linejoin:round !important;
+      opacity:.58 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-dot{
+      fill:#b9ddff !important;
+      opacity:.78 !important;
+      pointer-events:none !important;
+      filter:drop-shadow(0 0 2px rgba(122,180,235,.55));
+    }
+
+    body.playing-wheel .svg-wheel-image-bg,
+    body.playing-wheel .svg-wheel-image-card{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.16));
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      border-left-color:#111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)) !important;
+      z-index:30 !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      height:58px !important;
+      min-height:58px !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:46px !important;
+      height:46px !important;
+      font-size:34px !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:46px !important;
+      font-size:clamp(20px, 3vw, 28px) !important;
+      border-width:3px !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel,
+      body.playing-wheel .page,
+      body.playing-wheel .wheel-game-screen{
+        height:100svh !important;
+        min-height:100svh !important;
+        max-height:100svh !important;
+      }
+
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100svh - 44px), 86svh, 780px);
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding:0 6px !important;
+      }
+
+      body.playing-wheel .selected-result{
+        min-height:14px !important;
+        font-size:clamp(12px, 2.3vh, 17px) !important;
+        line-height:1 !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        height:38px !important;
+        min-height:38px !important;
+        grid-template-columns:34px minmax(120px, 240px) !important;
+        gap:clamp(12px, 4vw, 38px) !important;
+        padding:0 10px 4px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:32px !important;
+        height:32px !important;
+        font-size:25px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:31px !important;
+        font-size:clamp(15px, 3.7vh, 21px) !important;
+        border-width:2px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 3px !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
+        min-height:31px !important;
+        min-width:140px !important;
+        font-size:14px !important;
+        border-width:2px !important;
+      }
+    }
+
+    /* v36: طريقة عرض العجلة مثل صفحة الباركود - 100dvh بدون قفل 100svh حتى لا يبقى شريط Safari مزعجًا */
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:100% !important;
+      min-height:100dvh !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .page{
+      padding:0 !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      position:relative !important;
+      inset:auto !important;
+      width:100% !important;
+      min-height:100dvh !important;
+      height:100dvh !important;
+      max-height:none !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      touch-action:none !important;
+      flex-direction:column !important;
+      --wheel-size:min(94vw, calc(100dvh - 142px), 730px);
+    }
+
+    body.playing-wheel .wheel-game-screen.active{
+      display:flex !important;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      padding:6px 8px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.10)) !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-line{
+      stroke:#26313a !important;
+      stroke-width:.9 !important;
+      opacity:.48 !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-dot{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-star{
+      fill:#26313a !important;
+      opacity:.62 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      height:58px !important;
+      min-height:58px !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      padding:0 0 calc(8px + var(--safe-bottom)) !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100dvh - 44px), 86dvh, 780px);
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding:0 6px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        height:38px !important;
+        min-height:38px !important;
+        grid-template-columns:34px minmax(120px, 240px) !important;
+        gap:clamp(12px, 4vw, 38px) !important;
+        padding:0 10px 4px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 3px !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(95vw, calc(100dvh - 138px), 430px);
+      }
+    }
+
+    /* v37: سلوك أقرب لـ Wordwall + طي شريط Safari عبر صفحة قابلة للتمرير قليلًا */
+    body.playing-wheel{
+      min-height:calc(100dvh + 120px) !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch !important;
+      overscroll-behavior-y:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .page{
+      min-height:calc(100dvh + 120px) !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow:visible !important;
+      background:#fff !important;
+      padding:0 !important;
+    }
+
+    body.playing-wheel .page::after{
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      position:sticky !important;
+      top:0 !important;
+      right:auto !important;
+      bottom:auto !important;
+      left:auto !important;
+      width:100vw !important;
+      height:100dvh !important;
+      min-height:100dvh !important;
+      max-height:100dvh !important;
+      overflow:hidden !important;
+      background:#fff !important;
+      --wheel-size:min(94vw, calc(100dvh - 150px), 730px);
+    }
+
+    body.playing-wheel .wheel-stage{
+      overflow:hidden !important;
+      padding:8px 8px 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+      transform:translateX(0) scale(1) !important;
+      transform-origin:center center !important;
+      transition:transform 760ms cubic-bezier(.18,.82,.18,1) !important;
+      will-change:transform !important;
+    }
+
+    body.playing-wheel .real-wheel.wordwall-zoom{
+      transform:translateX(clamp(38px, 11vw, 132px)) scale(1.48) !important;
+    }
+
+    body.playing-wheel .svg-wheel-rotor{
+      transition:none !important;
+    }
+
+    body.playing-wheel .selected-result{
+      min-height:32px !important;
+      font-size:clamp(18px, 2.8vw, 30px) !important;
+      padding:0 12px 4px !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      display:none !important;
+      justify-content:center !important;
+      align-items:center !important;
+      gap:10px !important;
+      padding:0 12px calc(10px + var(--safe-bottom)) !important;
+    }
+
+    body.playing-wheel .wheel-after-spin.show{
+      display:flex !important;
+    }
+
+    body.playing-wheel .resume-selected-btn,
+    body.playing-wheel .remove-selected-btn{
+      min-width:clamp(128px, 26vw, 210px) !important;
+      min-height:44px !important;
+      border:3px solid #222 !important;
+      border-radius:13px !important;
+      color:#111 !important;
+      font-size:clamp(16px, 2.3vw, 21px) !important;
+      font-weight:900 !important;
+      cursor:pointer !important;
+      box-shadow:0 3px 0 rgba(0,0,0,.18) !important;
+    }
+
+    body.playing-wheel .resume-selected-btn{
+      background:#fff !important;
+    }
+
+    body.playing-wheel .remove-selected-btn{
+      background:#f05d5b !important;
+      color:#fff !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100dvh - 54px), 86dvh, 780px);
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(30px, 9vw, 110px)) scale(1.36) !important;
+      }
+
+      body.playing-wheel .selected-result{
+        min-height:18px !important;
+        font-size:clamp(13px, 2.5vh, 18px) !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .resume-selected-btn,
+      body.playing-wheel .remove-selected-btn{
+        min-height:32px !important;
+        min-width:128px !important;
+        font-size:14px !important;
+        border-width:2px !important;
+        border-radius:10px !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(95vw, calc(100dvh - 148px), 430px);
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38) !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        gap:8px !important;
+      }
+
+      body.playing-wheel .resume-selected-btn,
+      body.playing-wheel .remove-selected-btn{
+        min-width:118px !important;
+        min-height:40px !important;
+        font-size:15px !important;
+      }
+    }
+
+    /* v38: شكل العجلة النهائي أقرب لـ Wordwall: بدون زخرفة خارجية، عناصر شعاعية، وسهم واضح */
+    body.playing-wheel .wheel-game-screen{
+      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+    }
+
+    body.playing-wheel .wheel-stage{
+      padding:10px 8px 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      filter:drop-shadow(0 5px 14px rgba(0,0,0,.16)) !important;
+    }
+
+    body.playing-wheel .real-wheel::before,
+    body.playing-wheel .svg-wheel-decor-line,
+    body.playing-wheel .svg-wheel-decor-dot,
+    body.playing-wheel .svg-wheel-star{
+      display:none !important;
+      content:none !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:2.4 !important;
+      stroke-linejoin:round !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:800 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.18) !important;
+      stroke-width:.45px !important;
+      stroke-linejoin:round !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#151515 !important;
+      stroke:rgba(255,255,255,.72) !important;
+      stroke-width:.65px !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:none !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      width:18.5% !important;
+      min-width:0 !important;
+      border:4px solid rgba(0,0,0,.10) !important;
+      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12) !important;
+      font-size:0 !important;
+      padding:0 !important;
+    }
+
+    body.playing-wheel .real-wheel-center.has-question{
+      width:25.5% !important;
+      font-size:clamp(13px, 2.75vmin, 28px) !important;
+      line-height:1.2 !important;
+      font-weight:800 !important;
+      padding:clamp(8px, 1.5vmin, 16px) !important;
+      white-space:normal !important;
+      overflow-wrap:anywhere !important;
+      word-break:normal !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      left:var(--game-arrow-left, clamp(10px, 4vw, 56px)) !important;
+      border-top:var(--game-arrow-h, 28px) solid transparent !important;
+      border-bottom:var(--game-arrow-h, 28px) solid transparent !important;
+      border-left:var(--game-arrow-w, 52px) solid #111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.22)) !important;
+      z-index:30 !important;
+    }
+
+    body.playing-wheel .real-wheel.wordwall-zoom{
+      transform:translateX(clamp(26px, 7vw, 82px)) scale(1.28) !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+      }
+
+      body.playing-wheel .real-wheel-center.has-question{
+        font-size:clamp(10px, 2.1vmin, 20px) !important;
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24) !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+      }
+
+      body.playing-wheel .real-wheel-center.has-question{
+        font-size:clamp(12px, 3.1vmin, 19px) !important;
+        line-height:1.18 !important;
+      }
+    }
+
+
+
+    /* v39: نقل أزرار العجلة حسب الرسم وإزالة الأزرار القديمة */
+    body.playing-wheel .wheel-game-screen{
+      position:sticky !important;
+      top:0 !important;
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-game-logo{
+      position:absolute !important;
+      top:clamp(14px, 2.4vw, 30px) !important;
+      left:clamp(16px, 2.8vw, 38px) !important;
+      width:clamp(64px, 8.2vw, 120px) !important;
+      height:auto !important;
+      max-height:clamp(52px, 8vw, 96px) !important;
+      object-fit:contain !important;
+      z-index:80 !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .wheel-fixed-controls{
+      position:absolute !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:calc(14px + var(--safe-bottom)) !important;
+      height:clamp(44px, 6.2vh, 60px) !important;
+      z-index:90 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-back-btn,
+    body.playing-wheel .wheel-right-actions,
+    body.playing-wheel .wheel-right-actions button{
+      pointer-events:auto !important;
+    }
+
+    body.playing-wheel .wheel-back-btn{
+      position:absolute !important;
+      left:clamp(16px, 2.6vw, 34px) !important;
+      bottom:0 !important;
+      width:clamp(88px, 9.5vw, 126px) !important;
+      height:clamp(40px, 5.5vh, 52px) !important;
+      border:3px solid #111 !important;
+      border-radius:13px !important;
+      background:#efd553 !important;
+      color:#111 !important;
+      font-size:clamp(16px, 2vw, 23px) !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:0 14px !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.18) !important;
+      cursor:pointer !important;
+    }
+
+    body.playing-wheel .wheel-right-actions{
+      position:absolute !important;
+      right:clamp(16px, 2.8vw, 42px) !important;
+      bottom:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-end !important;
+      gap:clamp(10px, 1.5vw, 18px) !important;
+      height:clamp(40px, 5.5vh, 54px) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .wheel-after-spin{
+      display:none !important;
+      padding:0 !important;
+      margin:0 !important;
+      height:auto !important;
+      min-height:0 !important;
+      flex:0 0 auto !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .wheel-after-spin.show{
+      display:block !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn,
+    body.playing-wheel .wheel-right-actions .remove-selected-btn{
+      min-width:0 !important;
+      width:auto !important;
+      height:clamp(40px, 5.5vh, 54px) !important;
+      min-height:0 !important;
+      border:3px solid #111 !important;
+      border-radius:14px !important;
+      color:#fff !important;
+      font-size:clamp(17px, 2.15vw, 26px) !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      padding:0 clamp(18px, 2.6vw, 32px) !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.20) !important;
+      cursor:pointer !important;
+      white-space:nowrap !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn{
+      min-width:clamp(118px, 13vw, 178px) !important;
+      background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .remove-selected-btn{
+      min-width:clamp(86px, 9vw, 128px) !important;
+      background:#f05d5b !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn:active,
+    body.playing-wheel .wheel-right-actions .remove-selected-btn:active,
+    body.playing-wheel .wheel-back-btn:active{
+      transform:translateY(2px) !important;
+      box-shadow:0 2px 0 rgba(0,0,0,.20) !important;
+    }
+
+    body.playing-wheel .wheel-game-controls,
+    body.playing-wheel #soundGameBtn,
+    body.playing-wheel #fullscreenGameBtn,
+    body.playing-wheel #resumeWheelBtn{
+      display:none !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-logo{
+        top:clamp(10px, 2.2vh, 18px) !important;
+        left:clamp(14px, 2vw, 28px) !important;
+        width:clamp(54px, 7vw, 92px) !important;
+        max-height:clamp(44px, 10vh, 70px) !important;
+      }
+
+      body.playing-wheel .wheel-fixed-controls{
+        bottom:calc(8px + var(--safe-bottom)) !important;
+        height:clamp(32px, 8.2vh, 44px) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn,
+      body.playing-wheel .wheel-right-actions .spin-game-btn,
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        height:clamp(32px, 8vh, 42px) !important;
+        border-width:2px !important;
+        border-radius:10px !important;
+        font-size:clamp(14px, 3.3vh, 20px) !important;
+        box-shadow:0 3px 0 rgba(0,0,0,.18) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        width:clamp(72px, 8vw, 104px) !important;
+        left:clamp(12px, 2vw, 26px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        right:clamp(12px, 2.4vw, 34px) !important;
+        gap:clamp(8px, 1.1vw, 14px) !important;
+        height:clamp(32px, 8vh, 42px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn{
+        min-width:clamp(92px, 12vw, 142px) !important;
+        padding:0 clamp(14px, 2.2vw, 24px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        min-width:clamp(66px, 8vw, 96px) !important;
+        padding:0 clamp(12px, 1.8vw, 20px) !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-logo{
+        top:12px !important;
+        left:14px !important;
+        width:64px !important;
+      }
+
+      body.playing-wheel .wheel-fixed-controls{
+        bottom:calc(12px + var(--safe-bottom)) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        left:12px !important;
+        width:78px !important;
+        height:40px !important;
+        font-size:15px !important;
+        border-radius:11px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        right:12px !important;
+        gap:8px !important;
+        height:40px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn,
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        height:40px !important;
+        border-radius:11px !important;
+        font-size:15px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn{
+        min-width:92px !important;
+        padding:0 18px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        min-width:62px !important;
+        padding:0 14px !important;
+      }
+    }
+
+
+
+    /* v42: توزيع محتوى العجلة مثل Wordwall + إصلاح حذف العنصر المختار */
+    body.playing-wheel #svgWheelLabels{
+      display:none !important;
+    }
+
+    body.playing-wheel .wheel-html-labels{
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      border-radius:50% !important;
+      overflow:hidden !important;
+      transform-origin:50% 50% !important;
+      will-change:transform !important;
+      pointer-events:none !important;
+      z-index:6 !important;
+      direction:ltr !important;
+    }
+
+    body.playing-wheel .wheel-html-label{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      width:var(--html-label-width, 150px) !important;
+      height:var(--html-label-height, 60px) !important;
+      transform-origin:50% 50% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      pointer-events:none !important;
+      overflow:visible !important;
+      z-index:7 !important;
+    }
+
+    body.playing-wheel .wheel-html-inner{
+      width:100% !important;
+      height:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:var(--html-label-gap, 8px) !important;
+      direction:ltr !important;
+      unicode-bidi:normal !important;
+      pointer-events:none !important;
+      overflow:hidden !important;
+      padding:0 4px !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.text-only{
+      justify-content:center !important;
+      padding:0 6px !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.mixed{
+      flex-direction:row !important;
+      justify-content:space-between !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.mixed.flipped{
+      flex-direction:row-reverse !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.image-only{
+      justify-content:center !important;
+    }
+
+    body.playing-wheel .wheel-html-text{
+      display:-webkit-box !important;
+      -webkit-box-orient:vertical !important;
+      -webkit-line-clamp:var(--html-line-clamp, 3) !important;
+      max-width:var(--html-text-max, 100%) !important;
+      overflow:hidden !important;
+      color:#fff !important;
+      font-size:var(--html-font-size, 17px) !important;
+      font-weight:900 !important;
+      line-height:1.08 !important;
+      text-align:center !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      overflow-wrap:anywhere !important;
+      word-break:normal !important;
+      text-shadow:0 1px 2px rgba(0,0,0,.24) !important;
+      flex:1 1 auto !important;
+      min-width:0 !important;
+    }
+
+    body.playing-wheel .wheel-html-label.dark .wheel-html-text{
+      color:#151515 !important;
+      text-shadow:0 1px 0 rgba(255,255,255,.55) !important;
+    }
+
+    body.playing-wheel .wheel-html-label.light .wheel-html-text{
+      color:#fff !important;
+      text-shadow:0 1px 2px rgba(0,0,0,.25) !important;
+    }
+
+    body.playing-wheel .wheel-html-image{
+      width:var(--html-image-size, 48px) !important;
+      height:var(--html-image-size, 48px) !important;
+      object-fit:contain !important;
+      display:block !important;
+      flex:0 0 auto !important;
+      border-radius:5px !important;
+      background:transparent !important;
+      pointer-events:none !important;
+      user-select:none !important;
+      -webkit-user-drag:none !important;
+    }
+
+    body.playing-wheel .svg-sector.selected{
+      animation:wheelSelectedPulse .72s ease-in-out 0s 2;
+      filter:brightness(1.13) saturate(1.05);
+    }
+
+    @keyframes wheelSelectedPulse{
+      0%{ opacity:1; }
+      35%{ opacity:.72; }
+      70%{ opacity:1; }
+      100%{ opacity:1; }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-html-text{
+        line-height:1.04 !important;
+      }
+    }
+
+  </style>
+</head>
+<body>
+<main class="page">
+<!-- زخارف الصفحة الرئيسية فقط -->
+<svg aria-hidden="true" class="decor coil" viewbox="0 0 120 130">
+<g fill="none" stroke-linecap="round" stroke-width="2.4">
+<ellipse cx="30" cy="46" rx="18" ry="38" stroke="#2c9a65"></ellipse>
+<ellipse cx="36" cy="50" rx="18" ry="38" stroke="#2c9a65"></ellipse>
+<ellipse cx="46" cy="54" rx="18" ry="38" stroke="#1c1c1c"></ellipse>
+<ellipse cx="56" cy="58" rx="18" ry="38" stroke="#2c9a65"></ellipse>
+<ellipse cx="66" cy="62" rx="18" ry="38" stroke="#1c1c1c"></ellipse>
+<ellipse cx="76" cy="66" rx="18" ry="38" stroke="#2c9a65"></ellipse>
+</g>
+</svg>
+<svg aria-hidden="true" class="decor stars" viewbox="0 0 160 120">
+<g fill="#ff8748" stroke="#111" stroke-width="2.3">
+<path d="M28 62 Q52 52 56 20 Q60 52 86 62 Q60 70 56 104 Q50 70 28 62Z"></path>
+<path d="M94 40 Q116 30 120 2 Q124 30 148 40 Q124 48 120 84 Q114 48 94 40Z"></path>
+</g>
+</svg>
+<svg aria-hidden="true" class="decor flower" viewbox="0 0 90 90">
+<g fill="#f5cd42" stroke="#111" stroke-width="2.2">
+<ellipse cx="45" cy="18" rx="10" ry="22"></ellipse>
+<ellipse cx="45" cy="72" rx="10" ry="22"></ellipse>
+<ellipse cx="18" cy="45" rx="22" ry="10"></ellipse>
+<ellipse cx="72" cy="45" rx="22" ry="10"></ellipse>
+<ellipse cx="25" cy="25" rx="10" ry="22" transform="rotate(-45 25 25)"></ellipse>
+<ellipse cx="65" cy="65" rx="10" ry="22" transform="rotate(-45 65 65)"></ellipse>
+<ellipse cx="65" cy="25" rx="10" ry="22" transform="rotate(45 65 25)"></ellipse>
+<ellipse cx="25" cy="65" rx="10" ry="22" transform="rotate(45 25 65)"></ellipse>
+</g>
+</svg>
+<svg aria-hidden="true" class="decor wave" viewbox="0 0 220 120">
+<path d="M-8 75 C28 28, 68 118, 102 74 S170 28, 214 92" fill="none" stroke="#111" stroke-linecap="round" stroke-width="10"></path>
+<path d="M-8 71 C28 24, 68 114, 102 70 S170 24, 214 88" fill="none" stroke="#4dbc72" stroke-linecap="round" stroke-width="18"></path>
+<circle cx="214" cy="88" fill="#111" r="9"></circle>
+</svg>
+<svg aria-hidden="true" class="decor splash" viewbox="0 0 140 140">
+<g fill="#ea5aa1" stroke="#111" stroke-width="2.4">
+<path d="M70 10 C78 24 80 40 88 48 C98 44 110 40 124 44 C118 54 108 62 106 72 C116 78 126 88 130 100 C118 100 106 98 96 102 C96 114 94 124 86 132 C78 122 72 112 64 108 C56 118 50 126 38 132 C36 120 38 110 34 100 C22 102 12 100 4 94 C14 86 26 80 32 72 C22 64 12 54 10 42 C24 40 36 42 46 38 C48 26 54 16 62 10 C66 18 68 24 70 10Z"></path>
+</g>
+</svg>
+<section class="shell" id="homeShell">
+<div class="title-pill">صندوق الالعاب التعليمية</div>
+<div class="play-shell">
+<div class="play-card">
+<h2 class="play-title">اختر اللعبة لعرضها</h2>
+<div class="select-wrap">
+<select id="savedGameSelect">
+<option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
+</select>
+</div>
+<button class="start-btn" type="button">إبدأ اللعبة</button>
+</div>
+</div>
+<div class="cards-grid primary-grid">
+<button class="menu-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
+<button class="menu-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
+</div>
+<div class="cards-grid secondary-grid">
+<button class="menu-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
+<button class="menu-btn" data-open-screen="settingsScreen">الإعدادات</button>
+</div>
+</section>
+<section class="screen" id="createScreen">
+<h2 class="screen-title">إنشاء لعبة جديدة</h2>
+<div class="template-list">
+<button class="template-card" data-template="wheel" type="button">
+<div aria-hidden="true" class="template-cover"></div>
+<div class="template-content">
+<h3 class="template-title">العجلة الدوارة</h3>
+<p class="template-desc">عجلة للنصوص أو الصور.</p>
+</div>
+</button>
+<button class="template-card" data-template="open-box" type="button">
+<div aria-hidden="true" class="template-cover empty"></div>
+<div class="template-content">
+<h3 class="template-title">افتح الصندوق</h3>
+<p class="template-desc">صناديق تكشف سؤالًا أو صورة.</p>
+</div>
+</button>
+<button class="template-card" data-template="quiz" type="button">
+<div aria-hidden="true" class="template-cover empty"></div>
+<div class="template-content">
+<h3 class="template-title">اختيارات</h3>
+<p class="template-desc">أسئلة متعددة الخيارات.</p>
+</div>
+</button>
+<button class="template-card" data-template="true-false" type="button">
+<div aria-hidden="true" class="template-cover empty"></div>
+<div class="template-content">
+<h3 class="template-title">صح أو خطأ</h3>
+<p class="template-desc">عبارات بإجابة صح أو خطأ.</p>
+</div>
+</button>
+<button class="template-card" data-template="matching" type="button">
+<div aria-hidden="true" class="template-cover empty"></div>
+<div class="template-content">
+<h3 class="template-title">المطابقة</h3>
+<p class="template-desc">طابق الكلمات أو الصور.</p>
+</div>
+</button>
+<button class="template-card" data-template="sort" type="button">
+<div aria-hidden="true" class="template-cover empty"></div>
+<div class="template-content">
+<h3 class="template-title">التصنيف</h3>
+<p class="template-desc">رتّب العناصر داخل مجموعات.</p>
+</div>
+</button>
+<button class="template-card" data-template="guess-image" type="button">
+<div aria-hidden="true" class="template-cover empty"></div>
+<div class="template-content">
+<h3 class="template-title">خمن الصورة</h3>
+<p class="template-desc">اعرض صورة وخمّن الإجابة.</p>
+</div>
+</button>
+</div>
+</section>
+<section class="wheel-setup" id="wheelSetupScreen">
+<h2 class="screen-title">العجلة الدوارة</h2>
+<div class="wheel-setup-body">
+<div aria-label="نوع محتوى العجلة" class="wheel-options">
+<button class="wheel-type active" data-wheel-type="text" type="button">
+<strong>نصوص فقط</strong>
+<span>كلمات أو أسئلة قصيرة</span>
+</button>
+<button class="wheel-type" data-wheel-type="images" type="button">
+<strong>صور فقط</strong>
+<span>صور داخل أقسام العجلة</span>
+</button>
+<button class="wheel-type" data-wheel-type="mixed" type="button">
+<strong>صور مع نصوص</strong>
+<span>صورة ومعها نص مختصر</span>
+</button>
+</div>
+<div class="question-panel" id="questionPanel">
+<div class="question-row">
+<h3 class="question-title">سؤال في منتصف العجلة</h3>
+<div aria-label="تشغيل سؤال المنتصف" class="toggle">
+<button class="active" data-question-toggle="off" type="button">تعطيل</button>
+<button data-question-toggle="on" type="button">تشغيل</button>
+</div>
+</div>
+<input class="center-question-input" id="centerQuestionInput" maxlength="45" placeholder="اكتب السؤال الذي يظهر في منتصف العجلة" type="text"/>
+</div>
+<div class="items-panel">
+<div class="items-head">
+<h3 id="itemsTitle">عناصر العجلة</h3>
+<span id="itemsHint">أضف كلمات أو أسئلة قصيرة.</span>
+</div>
+<div class="wheel-items-editor" id="wheelItemsEditor"></div>
+<button aria-label="إضافة عنصر" class="add-item-btn" id="addWheelItemBtn" type="button">+</button>
+</div>
+<div class="wheel-actions">
+<button class="test-btn" id="testWheelBtn" type="button">اختبار اللعبة</button>
+<button class="save-btn" id="saveWheelBtn" type="button">حفظ اللعبة</button>
+</div>
+</div>
+</section>
+
+<section class="screen" id="savedScreen">
+<h2 class="screen-title">العابي المحفوظة</h2>
+<p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
+</section>
+<section class="screen" id="backupScreen">
+<h2 class="screen-title">التصدير والاستيراد</h2>
+<p class="screen-note">صدّر ألعابك كملف أو استوردها على جهاز آخر.</p>
+</section>
+<section class="screen" id="settingsScreen">
+<h2 class="screen-title">الإعدادات</h2>
+<p class="screen-note">تحكم بالصوت وطريقة العرض داخل اللعبة.</p>
+</section>
+</main>
+<div class="bottom-bar">
+<button class="home-btn" id="homeButton" type="button">الرئيسية</button>
+</div>
+
+
+<script>
+  const WEBSITE_HOME_URL = "https://sandooq-games.com/";
+  const WHEEL_PAYLOAD_KEY = "sandooq_wheel_payload_v1";
+  const WHEEL_DRAFT_KEY = "sandooq_wheel_draft_v1";
+
+  const screens = ["createScreen", "wheelSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const homeShell = document.getElementById("homeShell");
+  const homeButton = document.getElementById("homeButton");
+  const wheelItemsEditor = document.getElementById("wheelItemsEditor");
+  const addWheelItemBtn = document.getElementById("addWheelItemBtn");
+  const itemsHint = document.getElementById("itemsHint");
+  const questionPanel = document.getElementById("questionPanel");
+  const centerQuestionInput = document.getElementById("centerQuestionInput");
+
+  let wheelContentType = "text";
+  let wheelEntries = [];
+
+  const defaultWheelEntries = [
+    { text:"اتغدى" },
+    { text:"انام" },
+    { text:"اشتغل" },
+    { text:"اروح" },
+    { text:"اكعد" },
+    { text:"احجي" },
+    { text:"اقرأ" },
+    { text:"العب" }
+  ];
+
+  function openScreen(id){
+    const isSubpage = Boolean(id);
+    document.body.classList.toggle("subpage", isSubpage);
+
+    screens.forEach((sid)=>{
+      const el = document.getElementById(sid);
+      if (el) el.classList.toggle("active", sid === id);
+    });
+
+    if (homeShell) homeShell.style.display = isSubpage ? "none" : "flex";
+    try { window.scrollTo({ top:0, behavior:"auto" }); } catch (_) { window.scrollTo(0, 0); }
+  }
+
+  function entryHint(){
+    if (wheelContentType === "images") return "أضف الصور التي تظهر داخل أقسام العجلة.";
+    if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
+    return "أضف كلمات أو أسئلة قصيرة.";
+  }
+
+  function createEntry(){
+    if (wheelContentType === "images") return { imageName:"", imageData:"" };
+    if (wheelContentType === "mixed") return { text:"", imageName:"", imageData:"" };
+    return { text:"" };
+  }
+
+  function isEntryFilled(entry){
+    if (wheelContentType === "images") return Boolean(entry.imageData || entry.imageName);
+    if (wheelContentType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
+    return Boolean(entry.text);
+  }
+
+  function getFilledEntries(){
+    const filled = wheelEntries.filter(isEntryFilled).map((entry)=> ({
+      text: String(entry.text || "").trim(),
+      imageName: entry.imageName || "",
+      imageData: entry.imageData || ""
+    }));
+
+    return filled.length ? filled : defaultWheelEntries;
+  }
+
+  function saveDraft(){
+    const payload = {
+      type: wheelContentType,
+      entries: wheelEntries,
+      centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
+      centerQuestion: String(centerQuestionInput?.value || "").trim()
+    };
+
+    try { sessionStorage.setItem(WHEEL_DRAFT_KEY, JSON.stringify(payload)); } catch (_) {}
+  }
+
+  function loadDraft(){
+    try {
+      const raw = sessionStorage.getItem(WHEEL_DRAFT_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+      if (!draft || typeof draft !== "object") return false;
+
+      wheelContentType = draft.type || "text";
+      wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
+
+      document.querySelectorAll(".wheel-type").forEach((btn)=>{
+        btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
+      });
+
+      const enabled = Boolean(draft.centerQuestionEnabled);
+      questionPanel?.classList.toggle("enabled", enabled);
+      document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
+        btn.classList.toggle("active", btn.getAttribute("data-question-toggle") === (enabled ? "on" : "off"));
+      });
+      if (centerQuestionInput) centerQuestionInput.value = draft.centerQuestion || "";
+
+      renderWheelEntries();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function readFileAsDataURL(file, callback){
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => callback(String(reader.result || ""));
+    reader.readAsDataURL(file);
+  }
+
+  function renderWheelEntries(){
+    if (!wheelItemsEditor) return;
+
+    if (itemsHint) itemsHint.textContent = entryHint();
+    wheelItemsEditor.innerHTML = "";
+
+    wheelEntries.forEach((entry, index)=>{
+      const box = document.createElement("div");
+      box.className = "wheel-entry";
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "remove-entry-btn";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", "حذف العنصر");
+      remove.addEventListener("click", ()=>{
+        wheelEntries.splice(index, 1);
+        renderWheelEntries();
+        saveDraft();
+      });
+      box.appendChild(remove);
+
+      if (wheelContentType === "text" || wheelContentType === "mixed") {
+        const input = document.createElement("input");
+        input.className = "wheel-entry-input";
+        input.type = "text";
+        input.maxLength = 80;
+        input.placeholder = wheelContentType === "mixed" ? "اكتب النص المختصر" : "اكتب النص أو السؤال";
+        input.value = entry.text || "";
+        input.addEventListener("input", ()=>{
+          wheelEntries[index].text = input.value;
           saveDraft();
         });
-        box.appendChild(remove);
+        box.appendChild(input);
+      }
 
-        if (wheelContentType === "text" || wheelContentType === "mixed") {
-          const input = document.createElement("input");
-          input.className = "wheel-entry-input";
-          input.type = "text";
-          input.maxLength = 80;
-          input.placeholder = wheelContentType === "mixed" ? "اكتب النص المختصر" : "اكتب النص أو السؤال";
-          input.value = entry.text || "";
-          input.addEventListener("input", ()=>{
-            wheelEntries[index].text = input.value;
+      if (wheelContentType === "images" || wheelContentType === "mixed") {
+        const file = document.createElement("input");
+        file.className = "wheel-entry-file";
+        file.type = "file";
+        file.accept = "image/*";
+        file.addEventListener("change", ()=>{
+          const selectedFile = file.files && file.files[0] ? file.files[0] : null;
+          wheelEntries[index].imageName = selectedFile ? selectedFile.name : "";
+          readFileAsDataURL(selectedFile, (dataUrl)=>{
+            wheelEntries[index].imageData = dataUrl;
             saveDraft();
           });
-          box.appendChild(input);
-        }
-
-        if (wheelContentType === "images" || wheelContentType === "mixed") {
-          const file = document.createElement("input");
-          file.className = "wheel-entry-file";
-          file.type = "file";
-          file.accept = "image/*";
-          file.addEventListener("change", ()=>{
-            const selectedFile = file.files && file.files[0] ? file.files[0] : null;
-            wheelEntries[index].imageName = selectedFile ? selectedFile.name : "";
-            readFileAsDataURL(selectedFile, (dataUrl)=>{
-              wheelEntries[index].imageData = dataUrl;
-              saveDraft();
-            });
-          });
-          box.appendChild(file);
-
-          if (entry.imageName) {
-            const note = document.createElement("div");
-            note.style.cssText = "font-weight:700;color:#555;font-size:13px;text-align:center;";
-            note.textContent = entry.imageName;
-            box.appendChild(note);
-          }
-        }
-
-        wheelItemsEditor.appendChild(box);
-      });
-    }
-
-    function openWheelPage(){
-      saveDraft();
-
-      try {
-        sessionStorage.setItem(WHEEL_PAYLOAD_KEY, JSON.stringify(buildWheelPayload()));
-      } catch (error) {
-        alert("حجم الصور كبير جدًا. قلل حجم الصور ثم جرّب مرة أخرى.");
-        return;
+        });
+        box.appendChild(file);
       }
 
-      window.location.href = "wheel.html";
-    }
-
-    document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
-      btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
+      wheelItemsEditor.appendChild(box);
     });
+  }
 
-    document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
-      btn.addEventListener("click", ()=> {
-        openScreen("wheelSetupScreen");
-        renderWheelEntries();
-      });
-    });
-
+  function setWheelType(type){
+    wheelContentType = type || "text";
     document.querySelectorAll(".wheel-type").forEach((btn)=>{
-      btn.addEventListener("click", ()=>{
-        setWheelType(btn.getAttribute("data-wheel-type") || "text");
-        wheelEntries = [];
-        renderWheelEntries();
-        saveDraft();
-      });
+      btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
     });
+  }
 
-    addWheelItemBtn?.addEventListener("click", ()=>{
-      wheelEntries.push(createEntry());
-      renderWheelEntries();
-      saveDraft();
+  function openWheelPage(){
+    saveDraft();
 
-      setTimeout(()=>{
-        const inputs = wheelItemsEditor?.querySelectorAll("input");
-        const last = inputs && inputs.length ? inputs[inputs.length - 1] : null;
-        if (last && last.type !== "file") last.focus();
-      }, 0);
-    });
+    const payload = {
+      type: wheelContentType,
+      entries: getFilledEntries(),
+      centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
+      centerQuestion: String(centerQuestionInput?.value || "").trim()
+    };
 
-    document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
-      btn.addEventListener("click", ()=>{
-        const enabled = btn.getAttribute("data-question-toggle") === "on";
+    try { sessionStorage.setItem(WHEEL_PAYLOAD_KEY, JSON.stringify(payload)); } catch (_) {}
+    window.location.href = "wheel.html";
+  }
 
-        document.querySelectorAll("[data-question-toggle]").forEach((item)=> item.classList.remove("active"));
-        btn.classList.add("active");
+  document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
+    btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
+  });
 
-        questionPanel?.classList.toggle("enabled", enabled);
-        if (enabled) centerQuestionInput?.focus();
-        saveDraft();
-      });
-    });
-
-    centerQuestionInput?.addEventListener("input", saveDraft);
-
-    document.getElementById("testWheelBtn")?.addEventListener("click", openWheelPage);
-    document.querySelector(".start-btn")?.addEventListener("click", openWheelPage);
-
-    document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
-      saveDraft();
-      alert("تم حفظ اللعبة.");
-    });
-
-    homeButton.addEventListener("click", ()=>{
-      if (document.body.classList.contains("subpage")) {
-        openScreen("");
-        return;
-      }
-
-      window.location.href = WEBSITE_HOME_URL;
-    });
-
-    window.addEventListener("pageshow", ()=>{
-      loadDraft();
-    });
-
-    if (!loadDraft()) {
-      renderWheelEntries();
-    }
-
-    if (window.location.hash === "#wheelSetup") {
+  document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
+    btn.addEventListener("click", ()=> {
       openScreen("wheelSetupScreen");
-    }
-  </script>
+      renderWheelEntries();
+    });
+  });
 
+  document.querySelectorAll(".wheel-type").forEach((btn)=>{
+    btn.addEventListener("click", ()=>{
+      setWheelType(btn.getAttribute("data-wheel-type") || "text");
+      wheelEntries = [];
+      renderWheelEntries();
+      saveDraft();
+    });
+  });
+
+  addWheelItemBtn?.addEventListener("click", ()=>{
+    wheelEntries.push(createEntry());
+    renderWheelEntries();
+    saveDraft();
+
+    setTimeout(()=>{
+      const inputs = wheelItemsEditor?.querySelectorAll("input");
+      const last = inputs && inputs.length ? inputs[inputs.length - 1] : null;
+      if (last && last.type !== "file") last.focus();
+    }, 0);
+  });
+
+  document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
+    btn.addEventListener("click", ()=>{
+      const enabled = btn.getAttribute("data-question-toggle") === "on";
+
+      document.querySelectorAll("[data-question-toggle]").forEach((item)=> item.classList.remove("active"));
+      btn.classList.add("active");
+
+      questionPanel?.classList.toggle("enabled", enabled);
+      if (enabled) centerQuestionInput?.focus();
+      saveDraft();
+    });
+  });
+
+  centerQuestionInput?.addEventListener("input", saveDraft);
+
+  document.getElementById("testWheelBtn")?.addEventListener("click", openWheelPage);
+  document.querySelector(".start-btn")?.addEventListener("click", openWheelPage);
+
+  document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
+    saveDraft();
+    alert("تم حفظ اللعبة.");
+  });
+
+  homeButton.addEventListener("click", ()=>{
+    if (document.body.classList.contains("subpage")) {
+      openScreen("");
+      return;
+    }
+
+    window.location.href = WEBSITE_HOME_URL;
+  });
+
+  window.addEventListener("pageshow", ()=>{
+    loadDraft();
+  });
+
+  if (!loadDraft()) {
+    renderWheelEntries();
+  }
+
+  if (window.location.hash === "#wheelSetup") {
+    openScreen("wheelSetupScreen");
+  }
+</script>
 </body>
 </html>
