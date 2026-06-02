@@ -13,7 +13,7 @@
       --red:#f05d5b;
       --orange:#f47a45;
       --orange-dark:#e85f2f;
-      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+      --wheel-size:min(86vw, calc(100dvh - 190px), 620px);
       --arrow-left:8px;
       --arrow-w:52px;
       --arrow-h:28px;
@@ -46,8 +46,8 @@
     }
 
     .wheel-page{
-      position:sticky;
-      top:0;
+      position:fixed;
+      inset:0;
       width:100vw;
       height:100dvh;
       min-height:100dvh;
@@ -78,7 +78,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:10px 8px calc(74px + var(--safe-bottom));
+      padding:max(44px, calc(var(--safe-top) + 28px)) 8px calc(92px + var(--safe-bottom));
       overflow:hidden;
     }
 
@@ -119,7 +119,7 @@
     }
 
     .wheel-shell.zoom{
-      transform:translateX(clamp(26px, 7vw, 82px)) scale(1.28);
+      transform:translateX(clamp(8px, 2.5vw, 26px)) scale(1.06);
     }
 
     .wheel-rotor{
@@ -411,15 +411,15 @@
 
     @media (orientation:landscape){
       :root{
-        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+        --wheel-size:min(58vw, calc(100dvh - 76px), 76dvh, 690px);
       }
 
       .wheel-stage{
-        padding:0 6px calc(42px + var(--safe-bottom));
+        padding:max(10px, var(--safe-top)) 6px calc(58px + var(--safe-bottom));
       }
 
       .wheel-shell.zoom{
-        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24);
+        transform:translateX(clamp(6px, 2vw, 18px)) scale(1.05);
       }
 
       .wheel-logo{
@@ -479,7 +479,7 @@
 
     @media (max-width:430px){
       :root{
-        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+        --wheel-size:min(88vw, calc(100dvh - 205px), 380px);
       }
 
       .wheel-logo{
@@ -489,7 +489,7 @@
       }
 
       .wheel-shell.zoom{
-        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38);
+        transform:translateX(clamp(6px, 2.5vw, 16px)) scale(1.06);
       }
 
       .fixed-controls{
@@ -755,47 +755,52 @@
       const text = textForEntry(entry, 0);
       const textLength = String(text || "").trim().length;
 
-      const centerRect = wheelCenter.getBoundingClientRect();
-      const centerSize = centerRect.width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
+      const centerSize = wheelCenter.getBoundingClientRect().width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
       const centerRadius = centerSize / 2;
 
-      const rimRadius = size * 0.448;
-      const innerEdge = centerRadius + size * (count <= 5 ? 0.070 : count <= 8 ? 0.064 : count <= 12 ? 0.056 : 0.050);
-      const outerEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.026 : count <= 12 ? 0.023 : 0.020);
-      const available = Math.max(size * 0.12, outerEdge - innerEdge);
+      /*
+        wheel-2:
+        توزيع محتوى القطاع أصبح مبنيًا على مساحة الحلقة الحقيقية بين دائرة المنتصف
+        وحافة العجلة. لا نضع النص عند المركز ولا نسمح له بالخروج خارج القطاع.
+      */
+      const rimRadius = size * 0.438;
+      const innerEdge = centerRadius + size * (count <= 5 ? 0.068 : count <= 8 ? 0.060 : count <= 12 ? 0.052 : 0.046);
+      const outerEdge = rimRadius - size * (count <= 5 ? 0.035 : count <= 8 ? 0.030 : count <= 12 ? 0.026 : 0.022);
+      const availableRadial = Math.max(size * 0.10, outerEdge - innerEdge);
 
       const radialWidth = clamp(
-        available * (count <= 5 ? 0.96 : count <= 8 ? 0.92 : count <= 12 ? 0.86 : 0.80),
-        size * (count <= 5 ? 0.18 : count <= 8 ? 0.14 : count <= 12 ? 0.105 : 0.078),
-        available
+        availableRadial * (count <= 5 ? 0.92 : count <= 8 ? 0.88 : count <= 12 ? 0.82 : 0.76),
+        size * (count <= 5 ? 0.17 : count <= 8 ? 0.13 : count <= 12 ? 0.095 : 0.070),
+        availableRadial
       );
 
-      const midRadius = innerEdge + available * (count <= 5 ? 0.58 : count <= 8 ? 0.57 : count <= 12 ? 0.55 : 0.53);
+      const midRadius = innerEdge + availableRadial * (count <= 5 ? 0.56 : count <= 8 ? 0.55 : count <= 12 ? 0.53 : 0.51);
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
 
       const labelHeight = clamp(
-        arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
-        size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
-        size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
+        arcAtMiddle * (count <= 5 ? 0.52 : count <= 8 ? 0.46 : count <= 12 ? 0.38 : 0.30),
+        size * (count <= 5 ? 0.090 : count <= 8 ? 0.064 : count <= 12 ? 0.046 : 0.034),
+        size * (count <= 5 ? 0.170 : count <= 8 ? 0.118 : count <= 12 ? 0.082 : 0.058)
       );
 
       const imageSize = hasImage
-        ? clamp(labelHeight * 0.82, size * 0.030, size * (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040))
+        ? clamp(labelHeight * 0.78, size * 0.030, size * (count <= 5 ? 0.088 : count <= 8 ? 0.066 : count <= 12 ? 0.050 : 0.038))
         : 0;
 
-      let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019);
-      if (hasImage && hasText) maxFont *= 0.72;
+      let maxFont = size * (count <= 5 ? 0.047 : count <= 8 ? 0.034 : count <= 12 ? 0.024 : 0.017);
+      if (hasImage && hasText) maxFont *= 0.70;
 
-      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.30 : 0.42), maxFont);
+      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.28 : 0.34), maxFont);
 
-      if (textLength > 46) fontSize *= 0.72;
-      else if (textLength > 32) fontSize *= 0.80;
-      else if (textLength > 20) fontSize *= 0.90;
+      if (textLength > 46) fontSize *= 0.68;
+      else if (textLength > 32) fontSize *= 0.76;
+      else if (textLength > 20) fontSize *= 0.84;
+      else if (textLength > 12) fontSize *= 0.92;
 
       fontSize = clamp(fontSize, count <= 12 ? 8 : 6.5, maxFont);
 
-      const gap = clamp(size * 0.014, 4, 10);
-      const lines = count <= 6 ? 4 : count <= 12 ? 3 : 5;
+      const gap = clamp(size * 0.012, 4, 9);
+      const lines = count <= 5 ? 3 : count <= 10 ? 2 : 1;
       const textMax = hasImage ? Math.max(24, radialWidth - imageSize - gap - 8) : Math.max(34, radialWidth - 8);
 
       return {
