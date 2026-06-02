@@ -3248,6 +3248,122 @@
       }
     }
 
+    /* v38: شكل العجلة النهائي أقرب لـ Wordwall: بدون زخرفة خارجية، عناصر شعاعية، وسهم واضح */
+    body.playing-wheel .wheel-game-screen{
+      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+    }
+
+    body.playing-wheel .wheel-stage{
+      padding:10px 8px 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      filter:drop-shadow(0 5px 14px rgba(0,0,0,.16)) !important;
+    }
+
+    body.playing-wheel .real-wheel::before,
+    body.playing-wheel .svg-wheel-decor-line,
+    body.playing-wheel .svg-wheel-decor-dot,
+    body.playing-wheel .svg-wheel-star{
+      display:none !important;
+      content:none !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:2.4 !important;
+      stroke-linejoin:round !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:800 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.18) !important;
+      stroke-width:.45px !important;
+      stroke-linejoin:round !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#151515 !important;
+      stroke:rgba(255,255,255,.72) !important;
+      stroke-width:.65px !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:none !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      width:18.5% !important;
+      min-width:0 !important;
+      border:4px solid rgba(0,0,0,.10) !important;
+      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12) !important;
+      font-size:0 !important;
+      padding:0 !important;
+    }
+
+    body.playing-wheel .real-wheel-center.has-question{
+      width:25.5% !important;
+      font-size:clamp(13px, 2.75vmin, 28px) !important;
+      line-height:1.2 !important;
+      font-weight:800 !important;
+      padding:clamp(8px, 1.5vmin, 16px) !important;
+      white-space:normal !important;
+      overflow-wrap:anywhere !important;
+      word-break:normal !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      left:var(--game-arrow-left, clamp(10px, 4vw, 56px)) !important;
+      border-top:var(--game-arrow-h, 28px) solid transparent !important;
+      border-bottom:var(--game-arrow-h, 28px) solid transparent !important;
+      border-left:var(--game-arrow-w, 52px) solid #111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.22)) !important;
+      z-index:30 !important;
+    }
+
+    body.playing-wheel .real-wheel.wordwall-zoom{
+      transform:translateX(clamp(26px, 7vw, 82px)) scale(1.28) !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+      }
+
+      body.playing-wheel .real-wheel-center.has-question{
+        font-size:clamp(10px, 2.1vmin, 20px) !important;
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24) !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+      }
+
+      body.playing-wheel .real-wheel-center.has-question{
+        font-size:clamp(12px, 3.1vmin, 19px) !important;
+        line-height:1.18 !important;
+      }
+    }
+
 
   </style>
 </head>
@@ -3598,9 +3714,9 @@
       const wheelRect = wheel.getBoundingClientRect();
       if (!wheelRect.width || !stageRect.width) return;
 
-      const arrowW = Math.max(32, Math.min(58, wheelRect.width * 0.085));
-      const arrowH = Math.max(19, Math.min(34, wheelRect.width * 0.052));
-      const arrowLeft = wheelRect.left - stageRect.left - arrowW + Math.max(3, wheelRect.width * 0.012);
+      const arrowW = Math.max(36, Math.min(62, wheelRect.width * 0.092));
+      const arrowH = Math.max(22, Math.min(38, wheelRect.width * 0.056));
+      const arrowLeft = wheelRect.left - stageRect.left - arrowW - Math.max(4, wheelRect.width * 0.010);
 
       screen.style.setProperty("--game-arrow-left", `${Math.max(2, arrowLeft)}px`);
       screen.style.setProperty("--game-arrow-w", `${arrowW}px`);
@@ -3858,46 +3974,55 @@
     function labelFontSize(count, text){
       const length = String(text || "").trim().length;
       if (count <= 5) {
-        if (length > 34) return 14;
-        if (length > 24) return 17;
-        if (length > 16) return 20;
-        return 26;
+        if (length > 42) return 11;
+        if (length > 30) return 13;
+        if (length > 20) return 16;
+        if (length > 12) return 20;
+        return 24;
       }
       if (count <= 8) {
-        if (length > 30) return 11;
-        if (length > 22) return 13;
-        if (length > 14) return 16;
-        return 21;
+        if (length > 36) return 9;
+        if (length > 26) return 11;
+        if (length > 16) return 13;
+        if (length > 10) return 16;
+        return 19;
       }
       if (count <= 12) {
-        if (length > 26) return 9;
-        if (length > 18) return 11;
-        if (length > 12) return 13;
-        return 17;
+        if (length > 30) return 7;
+        if (length > 22) return 8;
+        if (length > 14) return 10;
+        if (length > 9) return 12;
+        return 15;
       }
-      if (length > 20) return 8;
-      if (length > 10) return 10;
-      return 13;
+      if (length > 28) return 5.8;
+      if (length > 20) return 6.8;
+      if (length > 12) return 8;
+      return 10;
     }
 
     function mixedTextFontSize(count, text){
       const length = String(text || "").trim().length;
       if (count <= 5) {
-        if (length > 24) return 13;
-        if (length > 16) return 15;
-        return 18;
+        if (length > 34) return 9.5;
+        if (length > 24) return 11.5;
+        if (length > 16) return 13.5;
+        return 17;
       }
       if (count <= 8) {
-        if (length > 22) return 10;
-        if (length > 14) return 12;
-        return 15;
+        if (length > 28) return 7.2;
+        if (length > 20) return 8.8;
+        if (length > 13) return 10.5;
+        return 13;
       }
       if (count <= 12) {
-        if (length > 18) return 8;
-        if (length > 12) return 10;
-        return 12;
+        if (length > 24) return 5.8;
+        if (length > 16) return 6.8;
+        if (length > 10) return 8.3;
+        return 10;
       }
-      return length > 12 ? 7 : 9;
+      if (length > 18) return 4.9;
+      if (length > 12) return 5.7;
+      return 7.2;
     }
 
     function splitTextLines(text, maxChars, maxLines = 4){
@@ -3936,9 +4061,10 @@
     }
 
     function createUprightHolder(parent, angle, radius){
-      const p = polarToCartesian(radius, angle);
+      const normalized = normalizeAngle(angle);
+      const flip = normalized > 90 && normalized < 270;
       const holder = createSvgElement("g", {
-        transform: `translate(${p.x.toFixed(3)} ${p.y.toFixed(3)})`
+        transform: `rotate(${angle.toFixed(3)}) translate(${radius.toFixed(3)} 0) rotate(${flip ? 180 : 0})`
       });
 
       const upright = createSvgElement("g", {
@@ -3947,7 +4073,6 @@
 
       holder.appendChild(upright);
       parent.appendChild(holder);
-      labelUprightNodes.push(upright);
       return upright;
     }
 
@@ -3962,8 +4087,8 @@
         "font-size": String(size)
       });
 
-      const maxChars = count <= 5 ? 12 : count <= 8 ? 10 : count <= 12 ? 8 : 7;
-      const lines = splitTextLines(text, maxChars, count <= 8 ? 4 : 3);
+      const maxChars = count <= 5 ? 10 : count <= 8 ? 8 : count <= 12 ? 6 : 5;
+      const lines = splitTextLines(text, maxChars, count <= 8 ? 5 : 4);
       const lineHeight = size * 1.02;
       const startY = -((lines.length - 1) * lineHeight) / 2;
 
@@ -3984,13 +4109,13 @@
       const hasText = Boolean(withText && String(entry.text || "").trim());
       const text = String(entry.text || "").trim();
 
-      const imgSize = count <= 5 ? 70 : count <= 8 ? 56 : count <= 12 ? 46 : 36;
+      const imgSize = count <= 5 ? 66 : count <= 8 ? 50 : count <= 12 ? 38 : 28;
       const textSize = mixedTextFontSize(count, text);
-      const gap = count <= 5 ? 18 : count <= 8 ? 14 : 10;
+      const gap = count <= 5 ? 18 : count <= 8 ? 12 : 8;
 
-      // v36: نفس توزيع المثال: الصورة في مساحة مستقلة يسار القطاع، والنص في مساحة مستقلة يمينها.
-      const imageCenterX = hasText ? -(imgSize * 0.68 + gap * 0.45) : 0;
-      const textCenterX = hasText ? (imgSize * 0.70 + gap) : 0;
+      // v38: توزيع Wordwall: الصورة باتجاه الحافة الخارجية، والنص باتجاه المنتصف داخل نفس القطاع.
+      const imageCenterX = hasText ? (imgSize * 0.55 + gap) : 0;
+      const textCenterX = hasText ? -(imgSize * 0.50 + gap * 0.55) : 0;
 
       if (entry.imageData) {
         const img = createSvgElement("image", {
@@ -4014,7 +4139,7 @@
           "text-anchor": "middle"
         });
 
-        const lines = splitTextLines(text, count <= 5 ? 9 : count <= 8 ? 7 : 6, count <= 8 ? 3 : 2);
+        const lines = splitTextLines(text, count <= 5 ? 8 : count <= 8 ? 6 : 5, count <= 8 ? 4 : 3);
         const lineHeight = textSize * 1.03;
         const startY = -((lines.length - 1) * lineHeight) / 2;
 
@@ -4032,9 +4157,7 @@
     }
 
     function updateUprightLabels(){
-      labelUprightNodes.forEach((node)=>{
-        node.setAttribute("transform", `rotate(${-wheelRotation.toFixed(3)})`);
-      });
+      // v38: عناصر Wordwall تدور مع القطاع نفسه، لذلك لا نعكس دوران النصوص.
     }
 
     function setRotorRotation(degrees){
@@ -4108,22 +4231,7 @@
     }
 
     function drawWheelDecoration(parent){
-      const decorLine = createSvgElement("path", {
-        d: wheelDecorPath(),
-        class: "svg-wheel-decor-line"
-      });
-      parent.appendChild(decorLine);
-
-      for (let i = 0; i < 24; i++) {
-        const angle = (i / 24) * 360;
-        const radius = 229 + Math.sin((angle * Math.PI / 180) * 10) * 1.7;
-        const p = polarToCartesian(radius, angle);
-        const star = createSvgElement("path", {
-          d: starPath(p.x, p.y, i % 3 === 0 ? 3.3 : 2.6, i % 3 === 0 ? 1.4 : 1.05),
-          class: "svg-wheel-star"
-        });
-        parent.appendChild(star);
-      }
+      // v38: بدون خطوط أو نجوم حول العجلة، مثل مرجع Wordwall.
     }
 
     function buildWheel(){
@@ -4140,10 +4248,9 @@
       sectors.innerHTML = "";
       labels.innerHTML = "";
       labelUprightNodes = [];
-      drawWheelDecoration(sectors);
 
       const radius = 224;
-      const labelRadius = count <= 5 ? 142 : count <= 8 ? 148 : count <= 12 ? 155 : 162;
+      const labelRadius = count <= 5 ? 142 : count <= 8 ? 150 : count <= 12 ? 158 : 164;
       const step = 360 / count;
 
       items.forEach((entry, index)=>{
@@ -4172,14 +4279,15 @@
         cy: "0",
         r: String(radius),
         fill: "none",
-        stroke: "rgba(0,0,0,.08)",
-        "stroke-width": "2"
+        stroke: "rgba(0,0,0,.16)",
+        "stroke-width": "1.3"
       });
       sectors.appendChild(rim);
 
       const centerQuestionEnabled = questionPanel?.classList.contains("enabled");
       const centerText = (centerQuestionInput?.value || "").trim();
       center.textContent = centerQuestionEnabled ? (centerText || "السؤال") : "";
+      center.classList.toggle("has-question", Boolean(centerQuestionEnabled));
 
       if (result) result.textContent = "";
       resetWordwallFocus();
