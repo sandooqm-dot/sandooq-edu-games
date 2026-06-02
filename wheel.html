@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-5</title>
+  <title>العجلة الدوارة - wheel-6</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -32,23 +32,26 @@
     html,body{
       margin:0;
       width:100%;
-      height:100dvh;
-      min-height:100dvh;
+      min-height:calc(100dvh + 120px);
       background:#fff;
       color:#222;
-      overflow:hidden;
-      overscroll-behavior:none;
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
       -webkit-text-size-adjust:100%;
     }
 
     body::after{
-      content:none;
-      display:none;
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
     }
 
     .wheel-page{
-      position:fixed;
-      inset:0;
+      position:sticky;
+      top:0;
       width:100vw;
       height:100dvh;
       min-height:100dvh;
@@ -677,6 +680,7 @@
     }
 
     function collapseSafariBars(){
+      // wheel-6: يعتمد على غلاف wheel-4: صفحة قابلة للتمرير + wheel-page sticky حتى يطوي Safari شريطه.
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
