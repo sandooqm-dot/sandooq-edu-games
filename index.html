@@ -1499,25 +1499,16 @@
       }
     }
 
-
-    /* index-3: محرك العجلة النظيف - قطاعات SVG فقط + محتوى HTML مستقل */
+    /* v25: شاشة تشغيل العجلة الرئيسية والاختبار */
     body.playing-wheel .bottom-bar,
     body.playing-wheel .page > .decor{
       display:none !important;
     }
 
-    body.playing-wheel,
-    body.playing-wheel .page{
-      margin:0 !important;
-      width:100% !important;
-      min-height:100dvh !important;
-      background:#fff !important;
-      overflow:hidden !important;
-      overscroll-behavior:none !important;
-    }
-
     body.playing-wheel .page{
       padding:0 !important;
+      background:#fff !important;
+      overflow:hidden !important;
     }
 
     .wheel-game-screen{
@@ -1533,8 +1524,7 @@
       color:#222;
       direction:ltr;
       user-select:none;
-      touch-action:none;
-      --wheel-size:min(84vw, calc(100dvh - 158px), 650px);
+      touch-action:manipulation;
     }
 
     .wheel-game-screen.active{
@@ -1542,90 +1532,490 @@
       flex-direction:column;
     }
 
-    .wheel-topbar,
-    .wheel-timer,
-    .wheel-instruction,
-    .wheel-game-controls,
-    #soundGameBtn,
-    #fullscreenGameBtn,
-    #resumeWheelBtn{
-      display:none !important;
+    .wheel-topbar{
+      height:clamp(60px, 8.5vh, 86px);
+      display:grid;
+      grid-template-columns:1fr auto 1fr;
+      align-items:center;
+      padding:0 clamp(18px, 3vw, 30px);
+      color:#777;
+      flex:0 0 auto;
     }
 
-    .wheel-game-logo{
-      position:absolute;
-      top:clamp(12px, 2.3vw, 28px);
-      left:clamp(14px, 2.8vw, 36px);
-      width:clamp(62px, 8vw, 112px);
-      height:auto;
-      max-height:clamp(48px, 7.5vw, 88px);
-      object-fit:contain;
-      z-index:80;
-      pointer-events:none;
-      user-select:none;
+    .wheel-timer{
+      justify-self:start;
+      font-size:clamp(28px, 5vw, 50px);
+      font-weight:500;
+      line-height:1;
+    }
+
+    .wheel-instruction{
+      justify-self:center;
+      font-size:clamp(27px, 5vw, 50px);
+      font-weight:500;
+      line-height:1;
+      white-space:nowrap;
     }
 
     .wheel-stage{
       position:relative;
       flex:1 1 auto;
       min-height:0;
-      width:100%;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:clamp(10px, 2.4vh, 24px) clamp(8px, 2vw, 24px) 0;
-      overflow:hidden;
+      padding:clamp(14px, 3vh, 32px) clamp(14px, 4vw, 42px) clamp(20px, 4vh, 44px);
     }
 
     .game-wheel-arrow{
       position:absolute;
-      left:var(--game-arrow-left, clamp(10px, 4vw, 56px));
+      left:clamp(22px, 4.6vw, 64px);
       top:50%;
       transform:translateY(-50%);
       width:0;
       height:0;
-      border-top:var(--game-arrow-h, 28px) solid transparent;
-      border-bottom:var(--game-arrow-h, 28px) solid transparent;
-      border-left:var(--game-arrow-w, 52px) solid #111;
-      filter:drop-shadow(0 1px 0 rgba(0,0,0,.24));
-      z-index:30;
-      pointer-events:none;
+      border-top:clamp(24px, 4.5vw, 42px) solid transparent;
+      border-bottom:clamp(24px, 4.5vw, 42px) solid transparent;
+      border-left:clamp(42px, 7.4vw, 76px) solid #f2f2f2;
+      filter:drop-shadow(0 0 1px #777);
+      z-index:5;
     }
 
     .real-wheel{
-      width:var(--wheel-size);
-      height:var(--wheel-size);
-      max-width:var(--wheel-size);
-      max-height:var(--wheel-size);
+      width:min(76vw, 58vh, 560px);
       aspect-ratio:1/1;
       position:relative;
       border-radius:50%;
+      background:#fff;
+      filter:drop-shadow(0 10px 26px rgba(0,0,0,.12));
+      transition:transform 3.4s cubic-bezier(.12,.72,.13,1);
+      transform:rotate(0deg);
+    }
+
+    .real-wheel::before{
+      content:"";
+      position:absolute;
+      inset:-18px;
+      border-radius:50%;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          #fff 0deg 3.3deg,
+          transparent 3.3deg 6.6deg
+        );
+      z-index:-1;
+    }
+
+    .real-wheel::after{
+      content:"";
+      position:absolute;
+      inset:-5px;
+      border-radius:50%;
+      border:5px solid rgba(0,0,0,.04);
+      pointer-events:none;
+      z-index:5;
+    }
+
+    .wheel-slices{
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      overflow:hidden;
+      background:var(--wheel-bg, conic-gradient(#e91e63 0 60deg, #fff 60deg 120deg, #2196f3 120deg 180deg, #fff 180deg 240deg, #ff9800 240deg 300deg, #fff 300deg 360deg));
+    }
+
+    .wheel-slices::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:var(--wheel-lines, none);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .slice-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:42%;
+      height:48px;
+      margin-top:-24px;
+      transform-origin:0 50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      font-size:clamp(15px, 2.45vw, 27px);
+      font-weight:700;
+      line-height:1.1;
+      padding:0 6px;
+      z-index:3;
+      direction:ltr;
+      overflow:hidden;
+      white-space:pre-line;
+    }
+
+    .slice-label.dark{
+      color:#222;
+    }
+
+    .slice-label img{
+      width:clamp(30px, 6vw, 58px);
+      height:clamp(30px, 6vw, 58px);
+      object-fit:contain;
+      border-radius:4px;
+      background:#fff;
+      padding:2px;
+    }
+
+    .real-wheel-center{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:29%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:4px solid rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      font-size:clamp(15px, 2.55vw, 26px);
+      font-weight:500;
+      line-height:1.22;
+      padding:10px;
+      z-index:6;
+      direction:ltr;
+      white-space:pre-line;
+    }
+
+    .selected-result{
+      flex:0 0 auto;
+      min-height:32px;
+      text-align:center;
+      font-size:clamp(18px, 3vw, 28px);
+      font-weight:700;
+      color:#222;
+      padding:0 12px;
+    }
+
+    .wheel-game-controls{
+      height:clamp(76px, 12vh, 112px);
+      display:grid;
+      grid-template-columns:76px minmax(150px, 320px) 76px 76px;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(14px, 4vw, 48px);
+      padding:0 clamp(12px, 3vw, 32px) clamp(8px, 2vh, 16px);
+      flex:0 0 auto;
+    }
+
+    .game-icon-btn{
+      width:clamp(46px, 7vw, 64px);
+      height:clamp(46px, 7vw, 64px);
+      border:0;
       background:transparent;
+      color:#222;
+      font-size:clamp(34px, 6vw, 48px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      line-height:1;
+    }
+
+    .spin-game-btn{
+      height:clamp(44px, 6.8vh, 58px);
+      border:3px solid #777;
+      border-radius:7px;
+      background:#fff;
+      color:#222;
+      font-size:clamp(22px, 4vw, 32px);
+      font-weight:500;
+      cursor:pointer;
+    }
+
+    .wheel-after-spin{
+      display:none;
+      justify-content:center;
+      padding:0 0 12px;
+    }
+
+    .wheel-after-spin.show{
+      display:flex;
+    }
+
+    .remove-selected-btn{
+      min-width:190px;
+      min-height:46px;
+      border:3px solid #222;
+      border-radius:12px;
+      background:#f05d5b;
+      color:#fff;
+      font-size:20px;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    @media (max-width: 760px){
+      .wheel-topbar{
+        height:74px;
+      }
+
+      .wheel-timer,
+      .wheel-instruction{
+        font-size:32px;
+      }
+
+      .real-wheel{
+        width:min(74vw, 390px);
+      }
+
+      .wheel-stage{
+        align-items:center;
+        padding-bottom:10vh;
+      }
+
+      .game-wheel-arrow{
+        left:18px;
+        border-top-width:26px;
+        border-bottom-width:26px;
+        border-left-width:44px;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:54px minmax(155px, 300px) 54px 54px;
+        gap:14px;
+        height:84px;
+      }
+
+      .game-icon-btn{
+        width:50px;
+        height:50px;
+        font-size:38px;
+      }
+
+      .spin-game-btn{
+        height:50px;
+        font-size:26px;
+      }
+
+      .slice-label{
+        font-size:18px;
+      }
+
+      .slice-label img{
+        width:36px;
+        height:36px;
+      }
+    }
+
+    @media (max-width: 430px){
+      .wheel-topbar{
+        padding:0 18px;
+      }
+
+      .wheel-timer,
+      .wheel-instruction{
+        font-size:27px;
+      }
+
+      .real-wheel{
+        width:min(76vw, 330px);
+      }
+
+      .wheel-stage{
+        padding-bottom:12vh;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:48px minmax(140px, 230px) 48px 48px;
+        gap:10px;
+      }
+
+      .game-icon-btn{
+        font-size:34px;
+      }
+
+      .spin-game-btn{
+        font-size:24px;
+      }
+    }
+
+    /* v27: ضبط أقسام العجلة والنصوص والتوقف عند السهم */
+    .real-wheel{
       overflow:visible;
-      filter:drop-shadow(0 6px 16px rgba(0,0,0,.15));
-      touch-action:none;
-      cursor:grab;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.11));
+    }
+
+    .wheel-slices{
+      overflow:hidden;
+      border-radius:50%;
+      background:var(--wheel-bg) !important;
+    }
+
+    .wheel-slices::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      background:var(--wheel-lines, none);
+      pointer-events:none;
+      z-index:2;
+    }
+
+    .wheel-slices::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:50%;
+      box-shadow:inset 0 0 0 3px rgba(255,255,255,.95);
+      pointer-events:none;
+      z-index:4;
+    }
+
+    .slice-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:26%;
+      min-height:36px;
+      height:auto;
+      margin:0;
       transform-origin:center center;
-      transition:transform 520ms cubic-bezier(.16,.84,.2,1);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#fff;
+      font-size:clamp(14px, 2.25vw, 24px);
+      font-weight:800;
+      line-height:1.15;
+      padding:4px 6px;
+      z-index:3;
+      direction:rtl;
+      overflow:visible;
+      white-space:normal;
+      text-shadow:0 1px 2px rgba(0,0,0,.22);
+      pointer-events:none;
+    }
+
+    .slice-label.dark{
+      color:#1b1b1b;
+      text-shadow:none;
+    }
+
+    .slice-label img{
+      width:clamp(34px, 6.2vw, 64px);
+      height:clamp(34px, 6.2vw, 64px);
+      object-fit:contain;
+      border-radius:6px;
+      background:#fff;
+      padding:3px;
+      box-shadow:0 1px 5px rgba(0,0,0,.16);
+    }
+
+    .real-wheel-center{
+      z-index:8;
+      box-shadow:0 0 0 2px rgba(0,0,0,.04);
+    }
+
+    @media (max-width: 760px){
+      .slice-label{
+        width:28%;
+        font-size:clamp(13px, 4vw, 19px);
+        min-height:30px;
+      }
+
+      .slice-label img{
+        width:clamp(30px, 8vw, 46px);
+        height:clamp(30px, 8vw, 46px);
+      }
+    }
+
+    @media (max-width: 430px){
+      .slice-label{
+        width:30%;
+        font-size:clamp(12px, 3.7vw, 17px);
+      }
+    }
+
+
+    /* v29: تحسين العجلة الحقيقية - حجم أكبر، سهم مضبوط، بدون نصوص زائدة، وسحب يدوي */
+    body.playing-wheel .bottom-bar,
+    body.playing-wheel .page > .decor{
+      display:none !important;
+    }
+
+    body.playing-wheel .page{
+      padding:0 !important;
+      background:#fff !important;
+      overflow:hidden !important;
+    }
+
+    .wheel-game-screen{
+      background:#fff !important;
+      overflow:hidden !important;
+      touch-action:none;
+    }
+
+    .wheel-topbar,
+    .wheel-timer,
+    .wheel-instruction{
+      display:none !important;
+      height:0 !important;
+      min-height:0 !important;
+      padding:0 !important;
+      margin:0 !important;
+      overflow:hidden !important;
+    }
+
+    .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:clamp(8px, 2.2vh, 18px) clamp(10px, 2vw, 26px) clamp(6px, 1.6vh, 14px) !important;
+    }
+
+    .real-wheel{
+      --actual-wheel-size:min(90vw, 78dvh, 720px);
+      width:var(--actual-wheel-size) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      overflow:visible !important;
+      background:transparent !important;
+      border-radius:50% !important;
+      transform:none !important;
+      transition:none !important;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.13));
+      cursor:grab;
+      touch-action:none;
     }
 
     .real-wheel:active{
       cursor:grabbing;
     }
 
-    .real-wheel.wordwall-zoom{
-      transform:translateX(clamp(20px, 6vw, 76px)) scale(1.18);
+    .real-wheel::before{
+      content:"" !important;
+      position:absolute !important;
+      inset:-10px !important;
+      border-radius:50% !important;
+      background:repeating-conic-gradient(from 0deg, rgba(219,228,237,.82) 0deg 2.15deg, transparent 2.15deg 5.35deg) !important;
+      z-index:-1 !important;
+      opacity:.9 !important;
     }
 
-    .real-wheel.settle-pop{
-      animation:wheelSettlePop 520ms cubic-bezier(.2,.9,.2,1);
-    }
-
-    @keyframes wheelSettlePop{
-      0%{ transform:translateX(clamp(20px, 6vw, 76px)) scale(1.18) rotate(0deg); }
-      28%{ transform:translateX(clamp(20px, 6vw, 76px)) scale(1.205) rotate(-.55deg); }
-      58%{ transform:translateX(clamp(20px, 6vw, 76px)) scale(1.17) rotate(.35deg); }
-      100%{ transform:translateX(clamp(20px, 6vw, 76px)) scale(1.18) rotate(0deg); }
+    .real-wheel::after,
+    .wheel-slices,
+    .slice-label{
+      display:none !important;
     }
 
     .svg-wheel{
@@ -1636,402 +2026,1684 @@
       overflow:visible;
       display:block;
       touch-action:none;
-      z-index:1;
     }
 
     .svg-wheel-rotor{
-      transform-origin:center center;
       transform-box:fill-box;
+      transform-origin:center;
+      transition:transform 4.35s cubic-bezier(.08,.72,.10,1);
       will-change:transform;
     }
 
     .svg-sector{
       stroke:#fff;
-      stroke-width:2.6;
+      stroke-width:3.4;
       stroke-linejoin:round;
-      transition:filter 180ms ease, opacity 180ms ease;
     }
 
-    .svg-sector.is-selected{
-      filter:brightness(1.13) drop-shadow(0 0 7px rgba(255,255,255,.85));
-      animation:selectedSliceGlow 1050ms ease-in-out 2;
-    }
-
-    @keyframes selectedSliceGlow{
-      0%,100%{ filter:brightness(1.04) drop-shadow(0 0 0 rgba(255,255,255,0)); }
-      45%{ filter:brightness(1.20) drop-shadow(0 0 10px rgba(255,255,255,.96)); }
-    }
-
-    #svgWheelLabels,
-    .svg-wheel-label,
-    .svg-wheel-image,
-    .svg-wheel-image-card,
-    .svg-wheel-image-bg{
-      display:none !important;
-    }
-
-    .wheel-html-labels{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      border-radius:50%;
-      overflow:visible;
-      pointer-events:none;
-      z-index:6;
-      direction:rtl;
-    }
-
-    .wheel-html-label{
-      position:absolute;
-      left:50%;
-      top:50%;
-      width:var(--html-label-width, 30%);
-      min-height:var(--html-label-height, 46px);
-      transform:translate(-50%,-50%);
-      transform-origin:center center;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      pointer-events:none;
-      will-change:left, top, transform;
-    }
-
-    .wheel-html-label.is-selected .wheel-html-inner{
-      filter:drop-shadow(0 0 6px rgba(255,255,255,.9));
-    }
-
-    .wheel-html-inner{
-      width:100%;
-      min-height:var(--html-label-height, 46px);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:var(--html-label-gap, 8px);
-      direction:ltr;
-      pointer-events:none;
-    }
-
-    .wheel-html-inner.mixed{
-      justify-content:space-between;
-    }
-
-    .wheel-html-inner.mixed.flipped{
-      flex-direction:row-reverse;
-    }
-
-    .wheel-html-inner.image-only{
-      justify-content:center;
-    }
-
-    .wheel-html-text{
-      display:-webkit-box;
-      -webkit-box-orient:vertical;
-      -webkit-line-clamp:var(--html-line-clamp, 3);
-      max-width:var(--html-text-max, 100%);
-      overflow:hidden;
-      color:#fff;
-      font-size:var(--html-font-size, 18px);
-      font-weight:900;
-      line-height:1.08;
-      text-align:center;
+    .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+      font-weight:800;
+      dominant-baseline:middle;
+      text-anchor:middle;
+      paint-order:stroke;
+      stroke:rgba(0,0,0,.24);
+      stroke-width:.85px;
+      stroke-linejoin:round;
       direction:rtl;
       unicode-bidi:plaintext;
-      overflow-wrap:anywhere;
-      word-break:normal;
-      text-shadow:0 1px 2px rgba(0,0,0,.24);
-      flex:1 1 auto;
-    }
-
-    .wheel-html-label.dark .wheel-html-text{
-      color:#151515;
-      text-shadow:0 1px 0 rgba(255,255,255,.48);
-    }
-
-    .wheel-html-label.light .wheel-html-text{
-      color:#fff;
-      text-shadow:0 1px 2px rgba(0,0,0,.24);
-    }
-
-    .wheel-html-image{
-      width:var(--html-image-size, 48px);
-      height:var(--html-image-size, 48px);
-      object-fit:contain;
-      display:block;
-      flex:0 0 auto;
-      border-radius:4px;
-      background:rgba(255,255,255,.95);
-      padding:2px;
       pointer-events:none;
       user-select:none;
-      -webkit-user-drag:none;
     }
 
-    .wheel-html-inner.image-only .wheel-html-image{
-      width:calc(var(--html-image-size, 48px) * 1.16);
-      height:calc(var(--html-image-size, 48px) * 1.16);
+    .svg-wheel-label.light{
+      fill:#fff;
+    }
+
+    .svg-wheel-label.dark{
+      fill:#141414;
+      stroke:rgba(255,255,255,.7);
+      stroke-width:1.05px;
+    }
+
+    .svg-wheel-image-card{
+      fill:#fff;
+      stroke:rgba(0,0,0,.20);
+      stroke-width:1.15;
+      rx:8;
+      ry:8;
+      filter:drop-shadow(0 1px 3px rgba(0,0,0,.20));
+    }
+
+    .svg-wheel-image{
+      pointer-events:none;
+      user-select:none;
     }
 
     .real-wheel-center{
-      position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      width:18.5%;
-      aspect-ratio:1/1;
-      border-radius:50%;
-      background:#fff;
-      border:4px solid rgba(0,0,0,.10);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      font-size:0;
-      font-weight:900;
-      line-height:1.16;
-      padding:0;
-      z-index:12;
-      direction:rtl;
-      unicode-bidi:plaintext;
-      overflow:hidden;
-      overflow-wrap:anywhere;
-      word-break:normal;
-      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12);
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      transform:translate(-50%,-50%) !important;
+      width:25.5% !important;
+      aspect-ratio:1/1 !important;
+      border-radius:50% !important;
+      background:#fff !important;
+      border:4px solid rgba(0,0,0,.12) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      font-size:clamp(11px, min(2.15vw, 2.15vh), 21px) !important;
+      font-weight:700 !important;
+      line-height:1.14 !important;
+      padding:clamp(5px, 1.1vw, 10px) !important;
+      z-index:8 !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      white-space:normal !important;
+      overflow:hidden !important;
+      overflow-wrap:anywhere !important;
+      word-break:break-word !important;
+      box-shadow:0 0 0 2px rgba(255,255,255,.9) !important;
       pointer-events:none;
     }
 
-    .real-wheel-center.has-question{
-      width:25.5%;
-      font-size:clamp(13px, 2.75vmin, 28px);
-      padding:clamp(8px, 1.5vmin, 16px);
+    .game-wheel-arrow{
+      position:absolute !important;
+      left:clamp(14px, 4vw, 60px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:clamp(24px, 4vw, 42px) solid transparent !important;
+      border-bottom:clamp(24px, 4vw, 42px) solid transparent !important;
+      border-left:clamp(44px, 6vw, 72px) solid #f2f2f2 !important;
+      filter:drop-shadow(0 0 1px #777) !important;
+      z-index:10 !important;
+      pointer-events:none !important;
     }
 
     .selected-result{
-      flex:0 0 auto;
-      min-height:28px;
-      text-align:center;
-      font-size:clamp(18px, 2.6vw, 28px);
-      font-weight:900;
-      line-height:1.1;
-      color:#222;
-      padding:0 12px 4px;
-      direction:rtl;
+      flex:0 0 auto !important;
+      min-height:26px !important;
+      text-align:center !important;
+      font-size:clamp(17px, 2.6vw, 27px) !important;
+      font-weight:700 !important;
+      color:#222 !important;
+      padding:0 12px 2px !important;
     }
 
-    .wheel-fixed-controls{
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:calc(14px + var(--safe-bottom));
-      height:clamp(44px, 6.2vh, 60px);
-      z-index:90;
-      pointer-events:none;
+    .wheel-game-controls{
+      height:clamp(68px, 10dvh, 94px) !important;
+      display:grid !important;
+      grid-template-columns:clamp(48px, 6vw, 64px) minmax(170px, 370px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(18px, 5vw, 58px) !important;
+      padding:0 clamp(12px, 3vw, 32px) clamp(6px, 1.5vh, 12px) !important;
+      flex:0 0 auto !important;
     }
 
-    .wheel-back-btn,
-    .wheel-right-actions,
-    .wheel-right-actions button{
-      pointer-events:auto;
+    #soundGameBtn,
+    #fullscreenGameBtn{
+      display:none !important;
     }
 
-    .wheel-back-btn{
-      position:absolute;
-      left:clamp(16px, 2.6vw, 34px);
-      bottom:0;
-      width:clamp(88px, 9.5vw, 126px);
-      height:clamp(40px, 5.5vh, 52px);
-      border:3px solid #111;
-      border-radius:13px;
-      background:#efd553;
-      color:#111;
-      font-size:clamp(16px, 2vw, 23px);
-      font-weight:900;
-      line-height:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:0 14px;
-      box-shadow:0 4px 0 rgba(0,0,0,.18);
-      cursor:pointer;
+    .game-icon-btn{
+      width:clamp(44px, 6vw, 60px) !important;
+      height:clamp(44px, 6vw, 60px) !important;
+      border:0 !important;
+      background:transparent !important;
+      color:#222 !important;
+      font-size:clamp(32px, 5vw, 44px) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      cursor:pointer !important;
+      line-height:1 !important;
     }
 
-    .wheel-right-actions{
-      position:absolute;
-      right:clamp(16px, 2.8vw, 42px);
-      bottom:0;
-      display:flex;
-      align-items:center;
-      justify-content:flex-end;
-      gap:clamp(10px, 1.5vw, 18px);
-      height:clamp(40px, 5.5vh, 54px);
+    .spin-game-btn{
+      height:clamp(42px, 6dvh, 56px) !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(21px, 3.3vw, 31px) !important;
+      font-weight:600 !important;
+      cursor:pointer !important;
     }
 
-    .wheel-right-actions .wheel-after-spin{
-      display:none;
-      padding:0;
-      margin:0;
-      height:auto;
-      min-height:0;
-      flex:0 0 auto;
+    .wheel-after-spin{
+      flex:0 0 auto !important;
+      justify-content:center !important;
+      padding:0 0 clamp(8px, 1.6vh, 14px) !important;
     }
 
-    .wheel-right-actions .wheel-after-spin.show{
-      display:block;
+    .remove-selected-btn{
+      min-width:clamp(160px, 28vw, 230px) !important;
+      min-height:clamp(42px, 5.5dvh, 52px) !important;
+      border:3px solid #222 !important;
+      border-radius:13px !important;
+      background:#f05d5b !important;
+      color:#fff !important;
+      font-size:clamp(17px, 2.5vw, 22px) !important;
+      font-weight:800 !important;
+      cursor:pointer !important;
     }
 
-    .wheel-right-actions .spin-game-btn,
-    .wheel-right-actions .remove-selected-btn{
-      min-width:0;
-      width:auto;
-      height:clamp(40px, 5.5vh, 54px);
-      min-height:0;
-      border:3px solid #111;
-      border-radius:14px;
-      color:#fff;
-      font-size:clamp(17px, 2.15vw, 26px);
-      font-weight:900;
-      line-height:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:0 clamp(18px, 2.6vw, 32px);
-      box-shadow:0 4px 0 rgba(0,0,0,.20);
-      cursor:pointer;
-      white-space:nowrap;
-    }
-
-    .wheel-right-actions .spin-game-btn{
-      min-width:clamp(118px, 13vw, 178px);
-      background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%);
-    }
-
-    .wheel-right-actions .remove-selected-btn{
-      min-width:clamp(86px, 9vw, 128px);
-      background:#f05d5b;
-    }
-
-    .wheel-right-actions .spin-game-btn:active,
-    .wheel-right-actions .remove-selected-btn:active,
-    .wheel-back-btn:active{
-      transform:translateY(2px);
-      box-shadow:0 2px 0 rgba(0,0,0,.20);
-    }
-
-    @media (orientation:landscape){
-      .wheel-game-screen{
-        --wheel-size:min(55vw, calc(100dvh - 54px), 76dvh, 690px);
+    @media (orientation: landscape){
+      .real-wheel{
+        --actual-wheel-size:min(76vw, 72dvh, 710px);
       }
 
       .wheel-stage{
-        padding:0 6px;
+        padding-top:2px !important;
+        padding-bottom:0 !important;
       }
 
-      .real-wheel.wordwall-zoom{
-        transform:translateX(clamp(18px, 5vw, 64px)) scale(1.15);
+      .real-wheel-center{
+        font-size:clamp(10px, min(1.65vw, 3.3vh), 19px) !important;
+        line-height:1.1 !important;
       }
 
-      @keyframes wheelSettlePop{
-        0%{ transform:translateX(clamp(18px, 5vw, 64px)) scale(1.15) rotate(0deg); }
-        28%{ transform:translateX(clamp(18px, 5vw, 64px)) scale(1.175) rotate(-.5deg); }
-        58%{ transform:translateX(clamp(18px, 5vw, 64px)) scale(1.14) rotate(.3deg); }
-        100%{ transform:translateX(clamp(18px, 5vw, 64px)) scale(1.15) rotate(0deg); }
+      .wheel-game-controls{
+        height:clamp(58px, 12dvh, 82px) !important;
+      }
+    }
+
+    @media (max-width: 760px){
+      .real-wheel{
+        --actual-wheel-size:min(89vw, 70dvh, 520px);
       }
 
-      .wheel-game-logo{
-        top:clamp(10px, 2.2vh, 18px);
-        left:clamp(14px, 2vw, 28px);
-        width:clamp(54px, 7vw, 92px);
-        max-height:clamp(44px, 10vh, 70px);
+      .wheel-stage{
+        padding-top:6px !important;
+        padding-bottom:4px !important;
+      }
+
+      .game-wheel-arrow{
+        left:18px !important;
+        border-top-width:25px !important;
+        border-bottom-width:25px !important;
+        border-left-width:43px !important;
+      }
+
+      .wheel-game-controls{
+        grid-template-columns:48px minmax(150px, 260px) !important;
+        gap:16px !important;
+        height:74px !important;
+      }
+
+      .spin-game-btn{
+        height:48px !important;
+        font-size:24px !important;
       }
 
       .selected-result{
-        min-height:16px;
-        font-size:clamp(13px, 2.5vh, 18px);
-        padding:0 8px;
+        min-height:24px !important;
+        font-size:20px !important;
+      }
+    }
+
+    @media (max-width: 430px){
+      .real-wheel{
+        --actual-wheel-size:min(91vw, 66dvh, 410px);
       }
 
-      .wheel-fixed-controls{
-        bottom:calc(8px + var(--safe-bottom));
-        height:clamp(32px, 8.2vh, 44px);
+      .game-wheel-arrow{
+        left:14px !important;
+        border-top-width:22px !important;
+        border-bottom-width:22px !important;
+        border-left-width:38px !important;
+      }
+    }
+
+  
+    /* v31: تعديلات العجلة فقط بدون تغيير ترتيب الصفحات */
+    body.playing-wheel{
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-topbar{
+      display:none !important;
+    }
+
+    body.playing-wheel #soundGameBtn,
+    body.playing-wheel #fullscreenGameBtn{
+      display:none !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      background:#fff !important;
+      touch-action:none;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:clamp(6px, 1.2vh, 14px) clamp(6px, 1.5vw, 16px) 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:min(94vw, 74dvh, 720px) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      border-radius:50% !important;
+      background:transparent !important;
+      overflow:visible !important;
+      transition:none !important;
+      transform:none !important;
+      filter:drop-shadow(0 14px 30px rgba(0,0,0,.13)) !important;
+      touch-action:none !important;
+      cursor:grab;
+    }
+
+    body.playing-wheel .real-wheel:active{
+      cursor:grabbing;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      content:"" !important;
+      position:absolute !important;
+      inset:-8px !important;
+      border-radius:50% !important;
+      background:
+        repeating-conic-gradient(
+          from 0deg,
+          rgba(94,136,219,.34) 0deg 2.1deg,
+          transparent 2.1deg 6.4deg
+        ) !important;
+      z-index:-1 !important;
+      opacity:.88 !important;
+    }
+
+    body.playing-wheel .real-wheel::after{
+      content:"" !important;
+      display:block !important;
+      position:absolute !important;
+      inset:-1px !important;
+      border-radius:50% !important;
+      border:2px solid rgba(8,124,168,.08) !important;
+      pointer-events:none !important;
+      z-index:7 !important;
+    }
+
+    body.playing-wheel .svg-wheel{
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      overflow:visible !important;
+      display:block !important;
+      touch-action:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-rotor{
+      transform-box:fill-box !important;
+      transform-origin:center !important;
+      will-change:transform !important;
+      transition:none !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:3.8 !important;
+      stroke-linejoin:round !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.28) !important;
+      stroke-width:.8px !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#1f1f1f !important;
+      paint-order:stroke !important;
+      stroke:rgba(255,255,255,.80) !important;
+      stroke-width:1px !important;
+    }
+
+    body.playing-wheel .svg-wheel-image-bg{
+      fill:#fff !important;
+      stroke:rgba(0,0,0,.16) !important;
+      stroke-width:1.1 !important;
+      rx:8 !important;
+      ry:8 !important;
+      filter:drop-shadow(0 1px 3px rgba(0,0,0,.13));
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      transform:translate(-50%,-50%) !important;
+      width:25.5% !important;
+      aspect-ratio:1/1 !important;
+      border-radius:50% !important;
+      background:#fff !important;
+      border:4px solid rgba(0,0,0,.11) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      font-size:clamp(9px, 2.05vmin, 22px) !important;
+      font-weight:900 !important;
+      line-height:1.13 !important;
+      padding:clamp(5px, 1.15vmin, 11px) !important;
+      z-index:12 !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      overflow:hidden !important;
+      word-break:normal !important;
+      white-space:normal !important;
+      box-shadow:0 0 0 2px rgba(255,255,255,.88) !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      position:absolute !important;
+      left:clamp(10px, 3.4vw, 34px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:clamp(25px, 4.3vmin, 40px) solid transparent !important;
+      border-bottom:clamp(25px, 4.3vmin, 40px) solid transparent !important;
+      border-left:clamp(44px, 7vmin, 70px) solid #e8eef7 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.35)) !important;
+      z-index:20 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      height:auto !important;
+      min-height:72px !important;
+      display:grid !important;
+      grid-template-columns:60px minmax(190px, 370px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(22px, 6vw, 80px) !important;
+      padding:2px 18px clamp(10px, 2vh, 18px) !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:56px !important;
+      height:56px !important;
+      border:0 !important;
+      background:transparent !important;
+      color:#222 !important;
+      font-size:42px !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:54px !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(22px, 3.4vw, 32px) !important;
+      font-weight:800 !important;
+    }
+
+    body.playing-wheel .selected-result{
+      min-height:28px !important;
+      text-align:center !important;
+      font-size:clamp(18px, 2.6vw, 30px) !important;
+      font-weight:900 !important;
+      color:#222 !important;
+      padding:0 12px 2px !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      padding:0 0 calc(10px + var(--safe-bottom)) !important;
+    }
+
+    @media (orientation: landscape){
+      body.playing-wheel .real-wheel{
+        width:min(72dvh, 58vw, 690px) !important;
       }
 
-      .wheel-back-btn,
-      .wheel-right-actions .spin-game-btn,
-      .wheel-right-actions .remove-selected-btn{
-        height:clamp(32px, 8vh, 42px);
-        border-width:2px;
-        border-radius:10px;
-        font-size:clamp(14px, 3.3vh, 20px);
-        box-shadow:0 3px 0 rgba(0,0,0,.18);
+      body.playing-wheel .wheel-stage{
+        padding-top:2px !important;
       }
 
-      .wheel-back-btn{
-        width:clamp(72px, 8vw, 104px);
-        left:clamp(12px, 2vw, 26px);
+      body.playing-wheel .real-wheel-center{
+        font-size:clamp(8px, 1.85vmin, 19px) !important;
+        width:24.5% !important;
       }
 
-      .wheel-right-actions{
-        right:clamp(12px, 2.4vw, 34px);
-        gap:clamp(8px, 1.1vw, 14px);
-        height:clamp(32px, 8vh, 42px);
+      body.playing-wheel .wheel-game-controls{
+        min-height:62px !important;
+        padding-bottom:6px !important;
       }
 
-      .wheel-right-actions .spin-game-btn{
-        min-width:clamp(92px, 12vw, 142px);
-        padding:0 clamp(14px, 2.2vw, 24px);
+      body.playing-wheel .spin-game-btn{
+        height:46px !important;
+      }
+    }
+
+    @media (max-width:760px){
+      body.playing-wheel .real-wheel{
+        width:min(95vw, 70dvh, 540px) !important;
       }
 
-      .wheel-right-actions .remove-selected-btn{
-        min-width:clamp(66px, 8vw, 96px);
-        padding:0 clamp(12px, 1.8vw, 20px);
+      body.playing-wheel .game-wheel-arrow{
+        left:10px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        grid-template-columns:54px minmax(160px, 300px) !important;
+        gap:18px !important;
+        min-height:72px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:50px !important;
+        height:50px !important;
+        font-size:38px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:50px !important;
+      }
+    }
+
+
+    /* v34: تعديلات شاشة العجلة فقط - لا يغير صفحة الإعدادات أو ترتيب الصفحات */
+    :root{
+      --app-width:100vw;
+      --app-height:100dvh;
+      --app-top:0px;
+      --app-left:0px;
+    }
+
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:var(--app-width) !important;
+      height:var(--app-height) !important;
+      min-height:var(--app-height) !important;
+      max-height:var(--app-height) !important;
+      overflow:hidden !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      --wheel-size:min(94vw, calc(var(--app-height) - 146px), 720px);
+      position:fixed !important;
+      top:var(--app-top) !important;
+      left:var(--app-left) !important;
+      width:var(--app-width) !important;
+      height:var(--app-height) !important;
+      min-height:var(--app-height) !important;
+      max-height:var(--app-height) !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      touch-action:none !important;
+      display:none;
+      flex-direction:column !important;
+    }
+
+    body.playing-wheel .wheel-game-screen.active{
+      display:flex !important;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:4px 4px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+      aspect-ratio:1/1 !important;
+      position:relative !important;
+      border-radius:50% !important;
+      background:transparent !important;
+      overflow:visible !important;
+      transition:none !important;
+      transform:none !important;
+      filter:drop-shadow(0 12px 28px rgba(0,0,0,.12)) !important;
+      cursor:grab !important;
+      touch-action:none !important;
+    }
+
+    body.playing-wheel .real-wheel:active{
+      cursor:grabbing !important;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      inset:-7px !important;
+      background:repeating-conic-gradient(from 0deg, rgba(94,136,219,.30) 0deg 2deg, transparent 2deg 6deg) !important;
+      opacity:.82 !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:3.2 !important;
+    }
+
+    body.playing-wheel .svg-wheel-image-bg,
+    body.playing-wheel .svg-wheel-image-card{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.18));
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.26) !important;
+      stroke-width:.7px !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#151515 !important;
+      paint-order:stroke !important;
+      stroke:rgba(255,255,255,.78) !important;
+      stroke-width:.9px !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      width:24.5% !important;
+      font-size:clamp(9px, 2.05vmin, 21px) !important;
+      line-height:1.12 !important;
+      padding:clamp(4px, 1.05vmin, 10px) !important;
+      overflow:hidden !important;
+      overflow-wrap:anywhere !important;
+      word-break:break-word !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      position:absolute !important;
+      left:var(--game-arrow-left, 8px) !important;
+      top:50% !important;
+      transform:translateY(-50%) !important;
+      width:0 !important;
+      height:0 !important;
+      border-top:var(--game-arrow-h, 24px) solid transparent !important;
+      border-bottom:var(--game-arrow-h, 24px) solid transparent !important;
+      border-left:var(--game-arrow-w, 44px) solid #111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)) !important;
+      z-index:30 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .selected-result{
+      flex:0 0 auto !important;
+      min-height:24px !important;
+      font-size:clamp(17px, 2.3vw, 26px) !important;
+      font-weight:900 !important;
+      line-height:1.1 !important;
+      padding:0 12px 2px !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      min-height:58px !important;
+      height:58px !important;
+      display:grid !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:46px !important;
+      height:46px !important;
+      font-size:34px !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:46px !important;
+      border:3px solid #777 !important;
+      border-radius:8px !important;
+      background:#fff !important;
+      color:#222 !important;
+      font-size:clamp(20px, 3vw, 28px) !important;
+      font-weight:800 !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      flex:0 0 auto !important;
+      padding:0 0 calc(8px + var(--safe-bottom)) !important;
+    }
+
+    body.playing-wheel .remove-selected-btn{
+      min-width:clamp(150px, 26vw, 220px) !important;
+      min-height:42px !important;
+      font-size:clamp(16px, 2.2vw, 20px) !important;
+      border-radius:12px !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(70vw, calc(var(--app-height) - 58px), 760px);
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding:0 4px !important;
+      }
+
+      body.playing-wheel .real-wheel-center{
+        width:23.5% !important;
+        font-size:clamp(8px, 1.75vmin, 18px) !important;
+        line-height:1.08 !important;
+      }
+
+      body.playing-wheel .selected-result{
+        min-height:16px !important;
+        font-size:clamp(13px, 2.5vh, 18px) !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        min-height:42px !important;
+        height:42px !important;
+        grid-template-columns:38px minmax(120px, 240px) !important;
+        gap:clamp(14px, 4vw, 42px) !important;
+        padding:0 12px 4px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:36px !important;
+        height:36px !important;
+        font-size:28px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:34px !important;
+        font-size:clamp(16px, 4vh, 22px) !important;
+        border-width:2px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 4px !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
+        min-height:34px !important;
+        min-width:150px !important;
+        font-size:15px !important;
+        border-width:2px !important;
       }
     }
 
     @media (max-width:430px){
-      .wheel-game-screen{
-        --wheel-size:min(84vw, calc(100dvh - 170px), 360px);
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(95vw, calc(var(--app-height) - 138px), 430px);
       }
 
-      .wheel-game-logo{
-        top:12px;
-        left:14px;
-        width:64px;
+      body.playing-wheel .wheel-game-controls{
+        grid-template-columns:44px minmax(142px, 240px) !important;
+        gap:12px !important;
       }
 
-      .wheel-fixed-controls{
-        bottom:calc(12px + var(--safe-bottom));
+      body.playing-wheel .game-icon-btn{
+        width:42px !important;
+        height:42px !important;
+        font-size:31px !important;
       }
 
-      .wheel-back-btn{
-        left:12px;
-        width:78px;
-        height:40px;
-        font-size:15px;
-        border-radius:11px;
+      body.playing-wheel .spin-game-btn{
+        height:44px !important;
+        font-size:23px !important;
+      }
+    }
+
+  
+
+    /* v35: تعديلات شاشة العجلة فقط - معالجة Safari + ترتيب صورة/نص + زخرفة خارجية متموجة */
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:100vw !important;
+      height:100svh !important;
+      min-height:100svh !important;
+      max-height:100svh !important;
+      overflow:hidden !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      top:0 !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:auto !important;
+      width:100vw !important;
+      height:100svh !important;
+      min-height:100svh !important;
+      max-height:100svh !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      flex-direction:column !important;
+      --wheel-size:min(94vw, calc(100svh - 142px), 730px);
+    }
+
+    @supports not (height:100svh){
+      body.playing-wheel,
+      body.playing-wheel .page,
+      body.playing-wheel .wheel-game-screen{
+        height:100dvh !important;
+        min-height:100dvh !important;
+        max-height:100dvh !important;
       }
 
-      .wheel-right-actions{
-        right:12px;
-        gap:8px;
-        height:40px;
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(94vw, calc(100dvh - 142px), 730px);
+      }
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:6px 8px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+    }
+
+    body.playing-wheel .real-wheel::before{
+      display:none !important;
+      content:none !important;
+      background:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-line{
+      fill:none !important;
+      stroke:#87b9e8 !important;
+      stroke-width:2.15 !important;
+      stroke-linecap:round !important;
+      stroke-linejoin:round !important;
+      opacity:.58 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-dot{
+      fill:#b9ddff !important;
+      opacity:.78 !important;
+      pointer-events:none !important;
+      filter:drop-shadow(0 0 2px rgba(122,180,235,.55));
+    }
+
+    body.playing-wheel .svg-wheel-image-bg,
+    body.playing-wheel .svg-wheel-image-card{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:drop-shadow(0 1px 2px rgba(0,0,0,.16));
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      border-left-color:#111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.28)) !important;
+      z-index:30 !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      flex:0 0 auto !important;
+      height:58px !important;
+      min-height:58px !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .game-icon-btn{
+      width:46px !important;
+      height:46px !important;
+      font-size:34px !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      height:46px !important;
+      font-size:clamp(20px, 3vw, 28px) !important;
+      border-width:3px !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel,
+      body.playing-wheel .page,
+      body.playing-wheel .wheel-game-screen{
+        height:100svh !important;
+        min-height:100svh !important;
+        max-height:100svh !important;
       }
 
-      .wheel-right-actions .spin-game-btn,
-      .wheel-right-actions .remove-selected-btn{
-        height:40px;
-        border-radius:11px;
-        font-size:15px;
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100svh - 44px), 86svh, 780px);
       }
 
-      .wheel-right-actions .spin-game-btn{
-        min-width:92px;
-        padding:0 18px;
+      body.playing-wheel .wheel-stage{
+        padding:0 6px !important;
       }
 
-      .wheel-right-actions .remove-selected-btn{
-        min-width:62px;
-        padding:0 14px;
+      body.playing-wheel .selected-result{
+        min-height:14px !important;
+        font-size:clamp(12px, 2.3vh, 17px) !important;
+        line-height:1 !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        height:38px !important;
+        min-height:38px !important;
+        grid-template-columns:34px minmax(120px, 240px) !important;
+        gap:clamp(12px, 4vw, 38px) !important;
+        padding:0 10px 4px !important;
+      }
+
+      body.playing-wheel .game-icon-btn{
+        width:32px !important;
+        height:32px !important;
+        font-size:25px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        height:31px !important;
+        font-size:clamp(15px, 3.7vh, 21px) !important;
+        border-width:2px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 3px !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
+        min-height:31px !important;
+        min-width:140px !important;
+        font-size:14px !important;
+        border-width:2px !important;
+      }
+    }
+
+    /* v36: طريقة عرض العجلة مثل صفحة الباركود - 100dvh بدون قفل 100svh حتى لا يبقى شريط Safari مزعجًا */
+    body.playing-wheel,
+    body.playing-wheel .page{
+      width:100% !important;
+      min-height:100dvh !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      overscroll-behavior:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .page{
+      padding:0 !important;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      position:relative !important;
+      inset:auto !important;
+      width:100% !important;
+      min-height:100dvh !important;
+      height:100dvh !important;
+      max-height:none !important;
+      background:#fff !important;
+      overflow:hidden !important;
+      touch-action:none !important;
+      flex-direction:column !important;
+      --wheel-size:min(94vw, calc(100dvh - 142px), 730px);
+    }
+
+    body.playing-wheel .wheel-game-screen.active{
+      display:flex !important;
+    }
+
+    body.playing-wheel .wheel-stage{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      padding:6px 8px 0 !important;
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+      filter:drop-shadow(0 10px 24px rgba(0,0,0,.10)) !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-line{
+      stroke:#26313a !important;
+      stroke-width:.9 !important;
+      opacity:.48 !important;
+    }
+
+    body.playing-wheel .svg-wheel-decor-dot{
+      display:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-star{
+      fill:#26313a !important;
+      opacity:.62 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      overflow:visible !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      height:58px !important;
+      min-height:58px !important;
+      grid-template-columns:48px minmax(160px, 330px) !important;
+      gap:clamp(16px, 5vw, 54px) !important;
+      padding:0 14px 6px !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      padding:0 0 calc(8px + var(--safe-bottom)) !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100dvh - 44px), 86dvh, 780px);
+      }
+
+      body.playing-wheel .wheel-stage{
+        padding:0 6px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        height:38px !important;
+        min-height:38px !important;
+        grid-template-columns:34px minmax(120px, 240px) !important;
+        gap:clamp(12px, 4vw, 38px) !important;
+        padding:0 10px 4px !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        padding:0 0 3px !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(95vw, calc(100dvh - 138px), 430px);
+      }
+    }
+
+    /* v37: سلوك أقرب لـ Wordwall + طي شريط Safari عبر صفحة قابلة للتمرير قليلًا */
+    body.playing-wheel{
+      min-height:calc(100dvh + 120px) !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow-x:hidden !important;
+      overflow-y:auto !important;
+      -webkit-overflow-scrolling:touch !important;
+      overscroll-behavior-y:none !important;
+      background:#fff !important;
+    }
+
+    body.playing-wheel .page{
+      min-height:calc(100dvh + 120px) !important;
+      height:auto !important;
+      max-height:none !important;
+      overflow:visible !important;
+      background:#fff !important;
+      padding:0 !important;
+    }
+
+    body.playing-wheel .page::after{
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
+    }
+
+    body.playing-wheel .wheel-game-screen{
+      position:sticky !important;
+      top:0 !important;
+      right:auto !important;
+      bottom:auto !important;
+      left:auto !important;
+      width:100vw !important;
+      height:100dvh !important;
+      min-height:100dvh !important;
+      max-height:100dvh !important;
+      overflow:hidden !important;
+      background:#fff !important;
+      --wheel-size:min(94vw, calc(100dvh - 150px), 730px);
+    }
+
+    body.playing-wheel .wheel-stage{
+      overflow:hidden !important;
+      padding:8px 8px 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      width:var(--wheel-size) !important;
+      height:var(--wheel-size) !important;
+      max-width:var(--wheel-size) !important;
+      max-height:var(--wheel-size) !important;
+      transform:translateX(0) scale(1) !important;
+      transform-origin:center center !important;
+      transition:transform 760ms cubic-bezier(.18,.82,.18,1) !important;
+      will-change:transform !important;
+    }
+
+    body.playing-wheel .real-wheel.wordwall-zoom{
+      transform:translateX(clamp(38px, 11vw, 132px)) scale(1.48) !important;
+    }
+
+    body.playing-wheel .svg-wheel-rotor{
+      transition:none !important;
+    }
+
+    body.playing-wheel .selected-result{
+      min-height:32px !important;
+      font-size:clamp(18px, 2.8vw, 30px) !important;
+      padding:0 12px 4px !important;
+    }
+
+    body.playing-wheel .wheel-after-spin{
+      display:none !important;
+      justify-content:center !important;
+      align-items:center !important;
+      gap:10px !important;
+      padding:0 12px calc(10px + var(--safe-bottom)) !important;
+    }
+
+    body.playing-wheel .wheel-after-spin.show{
+      display:flex !important;
+    }
+
+    body.playing-wheel .resume-selected-btn,
+    body.playing-wheel .remove-selected-btn{
+      min-width:clamp(128px, 26vw, 210px) !important;
+      min-height:44px !important;
+      border:3px solid #222 !important;
+      border-radius:13px !important;
+      color:#111 !important;
+      font-size:clamp(16px, 2.3vw, 21px) !important;
+      font-weight:900 !important;
+      cursor:pointer !important;
+      box-shadow:0 3px 0 rgba(0,0,0,.18) !important;
+    }
+
+    body.playing-wheel .resume-selected-btn{
+      background:#fff !important;
+    }
+
+    body.playing-wheel .remove-selected-btn{
+      background:#f05d5b !important;
+      color:#fff !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(68vw, calc(100dvh - 54px), 86dvh, 780px);
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(30px, 9vw, 110px)) scale(1.36) !important;
+      }
+
+      body.playing-wheel .selected-result{
+        min-height:18px !important;
+        font-size:clamp(13px, 2.5vh, 18px) !important;
+        padding:0 8px !important;
+      }
+
+      body.playing-wheel .resume-selected-btn,
+      body.playing-wheel .remove-selected-btn{
+        min-height:32px !important;
+        min-width:128px !important;
+        font-size:14px !important;
+        border-width:2px !important;
+        border-radius:10px !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(95vw, calc(100dvh - 148px), 430px);
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38) !important;
+      }
+
+      body.playing-wheel .wheel-after-spin{
+        gap:8px !important;
+      }
+
+      body.playing-wheel .resume-selected-btn,
+      body.playing-wheel .remove-selected-btn{
+        min-width:118px !important;
+        min-height:40px !important;
+        font-size:15px !important;
+      }
+    }
+
+    /* v38: شكل العجلة النهائي أقرب لـ Wordwall: بدون زخرفة خارجية، عناصر شعاعية، وسهم واضح */
+    body.playing-wheel .wheel-game-screen{
+      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+    }
+
+    body.playing-wheel .wheel-stage{
+      padding:10px 8px 0 !important;
+    }
+
+    body.playing-wheel .real-wheel{
+      filter:drop-shadow(0 5px 14px rgba(0,0,0,.16)) !important;
+    }
+
+    body.playing-wheel .real-wheel::before,
+    body.playing-wheel .svg-wheel-decor-line,
+    body.playing-wheel .svg-wheel-decor-dot,
+    body.playing-wheel .svg-wheel-star{
+      display:none !important;
+      content:none !important;
+    }
+
+    body.playing-wheel .svg-sector{
+      stroke:#fff !important;
+      stroke-width:2.4 !important;
+      stroke-linejoin:round !important;
+    }
+
+    body.playing-wheel .svg-wheel-label{
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:800 !important;
+      dominant-baseline:middle !important;
+      text-anchor:middle !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      paint-order:stroke !important;
+      stroke:rgba(0,0,0,.18) !important;
+      stroke-width:.45px !important;
+      stroke-linejoin:round !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.light{
+      fill:#fff !important;
+    }
+
+    body.playing-wheel .svg-wheel-label.dark{
+      fill:#151515 !important;
+      stroke:rgba(255,255,255,.72) !important;
+      stroke-width:.65px !important;
+    }
+
+    body.playing-wheel .svg-wheel-image{
+      pointer-events:none !important;
+      user-select:none !important;
+      filter:none !important;
+    }
+
+    body.playing-wheel .real-wheel-center{
+      width:18.5% !important;
+      min-width:0 !important;
+      border:4px solid rgba(0,0,0,.10) !important;
+      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12) !important;
+      font-size:0 !important;
+      padding:0 !important;
+    }
+
+    body.playing-wheel .real-wheel-center.has-question{
+      width:25.5% !important;
+      font-size:clamp(13px, 2.75vmin, 28px) !important;
+      line-height:1.2 !important;
+      font-weight:800 !important;
+      padding:clamp(8px, 1.5vmin, 16px) !important;
+      white-space:normal !important;
+      overflow-wrap:anywhere !important;
+      word-break:normal !important;
+    }
+
+    body.playing-wheel .game-wheel-arrow{
+      left:var(--game-arrow-left, clamp(10px, 4vw, 56px)) !important;
+      border-top:var(--game-arrow-h, 28px) solid transparent !important;
+      border-bottom:var(--game-arrow-h, 28px) solid transparent !important;
+      border-left:var(--game-arrow-w, 52px) solid #111 !important;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.22)) !important;
+      z-index:30 !important;
+    }
+
+    body.playing-wheel .real-wheel.wordwall-zoom{
+      transform:translateX(clamp(26px, 7vw, 82px)) scale(1.28) !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+      }
+
+      body.playing-wheel .real-wheel-center.has-question{
+        font-size:clamp(10px, 2.1vmin, 20px) !important;
+      }
+
+      body.playing-wheel .real-wheel.wordwall-zoom{
+        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24) !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-screen{
+        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+      }
+
+      body.playing-wheel .real-wheel-center.has-question{
+        font-size:clamp(12px, 3.1vmin, 19px) !important;
+        line-height:1.18 !important;
+      }
+    }
+
+
+
+    /* v39: نقل أزرار العجلة حسب الرسم وإزالة الأزرار القديمة */
+    body.playing-wheel .wheel-game-screen{
+      position:sticky !important;
+      top:0 !important;
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-game-logo{
+      position:absolute !important;
+      top:clamp(14px, 2.4vw, 30px) !important;
+      left:clamp(16px, 2.8vw, 38px) !important;
+      width:clamp(64px, 8.2vw, 120px) !important;
+      height:auto !important;
+      max-height:clamp(52px, 8vw, 96px) !important;
+      object-fit:contain !important;
+      z-index:80 !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .wheel-fixed-controls{
+      position:absolute !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:calc(14px + var(--safe-bottom)) !important;
+      height:clamp(44px, 6.2vh, 60px) !important;
+      z-index:90 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-back-btn,
+    body.playing-wheel .wheel-right-actions,
+    body.playing-wheel .wheel-right-actions button{
+      pointer-events:auto !important;
+    }
+
+    body.playing-wheel .wheel-back-btn{
+      position:absolute !important;
+      left:clamp(16px, 2.6vw, 34px) !important;
+      bottom:0 !important;
+      width:clamp(88px, 9.5vw, 126px) !important;
+      height:clamp(40px, 5.5vh, 52px) !important;
+      border:3px solid #111 !important;
+      border-radius:13px !important;
+      background:#efd553 !important;
+      color:#111 !important;
+      font-size:clamp(16px, 2vw, 23px) !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:0 14px !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.18) !important;
+      cursor:pointer !important;
+    }
+
+    body.playing-wheel .wheel-right-actions{
+      position:absolute !important;
+      right:clamp(16px, 2.8vw, 42px) !important;
+      bottom:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-end !important;
+      gap:clamp(10px, 1.5vw, 18px) !important;
+      height:clamp(40px, 5.5vh, 54px) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .wheel-after-spin{
+      display:none !important;
+      padding:0 !important;
+      margin:0 !important;
+      height:auto !important;
+      min-height:0 !important;
+      flex:0 0 auto !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .wheel-after-spin.show{
+      display:block !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn,
+    body.playing-wheel .wheel-right-actions .remove-selected-btn{
+      min-width:0 !important;
+      width:auto !important;
+      height:clamp(40px, 5.5vh, 54px) !important;
+      min-height:0 !important;
+      border:3px solid #111 !important;
+      border-radius:14px !important;
+      color:#fff !important;
+      font-size:clamp(17px, 2.15vw, 26px) !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      padding:0 clamp(18px, 2.6vw, 32px) !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.20) !important;
+      cursor:pointer !important;
+      white-space:nowrap !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn{
+      min-width:clamp(118px, 13vw, 178px) !important;
+      background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .remove-selected-btn{
+      min-width:clamp(86px, 9vw, 128px) !important;
+      background:#f05d5b !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn:active,
+    body.playing-wheel .wheel-right-actions .remove-selected-btn:active,
+    body.playing-wheel .wheel-back-btn:active{
+      transform:translateY(2px) !important;
+      box-shadow:0 2px 0 rgba(0,0,0,.20) !important;
+    }
+
+    body.playing-wheel .wheel-game-controls,
+    body.playing-wheel #soundGameBtn,
+    body.playing-wheel #fullscreenGameBtn,
+    body.playing-wheel #resumeWheelBtn{
+      display:none !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-logo{
+        top:clamp(10px, 2.2vh, 18px) !important;
+        left:clamp(14px, 2vw, 28px) !important;
+        width:clamp(54px, 7vw, 92px) !important;
+        max-height:clamp(44px, 10vh, 70px) !important;
+      }
+
+      body.playing-wheel .wheel-fixed-controls{
+        bottom:calc(8px + var(--safe-bottom)) !important;
+        height:clamp(32px, 8.2vh, 44px) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn,
+      body.playing-wheel .wheel-right-actions .spin-game-btn,
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        height:clamp(32px, 8vh, 42px) !important;
+        border-width:2px !important;
+        border-radius:10px !important;
+        font-size:clamp(14px, 3.3vh, 20px) !important;
+        box-shadow:0 3px 0 rgba(0,0,0,.18) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        width:clamp(72px, 8vw, 104px) !important;
+        left:clamp(12px, 2vw, 26px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        right:clamp(12px, 2.4vw, 34px) !important;
+        gap:clamp(8px, 1.1vw, 14px) !important;
+        height:clamp(32px, 8vh, 42px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn{
+        min-width:clamp(92px, 12vw, 142px) !important;
+        padding:0 clamp(14px, 2.2vw, 24px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        min-width:clamp(66px, 8vw, 96px) !important;
+        padding:0 clamp(12px, 1.8vw, 20px) !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-logo{
+        top:12px !important;
+        left:14px !important;
+        width:64px !important;
+      }
+
+      body.playing-wheel .wheel-fixed-controls{
+        bottom:calc(12px + var(--safe-bottom)) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        left:12px !important;
+        width:78px !important;
+        height:40px !important;
+        font-size:15px !important;
+        border-radius:11px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        right:12px !important;
+        gap:8px !important;
+        height:40px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn,
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        height:40px !important;
+        border-radius:11px !important;
+        font-size:15px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn{
+        min-width:92px !important;
+        padding:0 18px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        min-width:62px !important;
+        padding:0 14px !important;
+      }
+    }
+
+
+
+    /* v41: محرك محتوى العجلة النظيف - يحافظ على أزرار index-2 وحل Safari */
+    body.playing-wheel #svgWheelLabels{
+      display:none !important;
+    }
+
+    body.playing-wheel .wheel-html-labels{
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      border-radius:50% !important;
+      overflow:hidden !important;
+      transform-origin:50% 50% !important;
+      will-change:transform !important;
+      pointer-events:none !important;
+      z-index:6 !important;
+      direction:rtl !important;
+    }
+
+    body.playing-wheel .wheel-html-label{
+      position:absolute !important;
+      left:50% !important;
+      top:50% !important;
+      width:120px !important;
+      height:44px !important;
+      transform-origin:50% 50% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      pointer-events:none !important;
+      overflow:visible !important;
+      z-index:7 !important;
+    }
+
+    body.playing-wheel .wheel-html-inner{
+      width:100% !important;
+      height:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:var(--html-label-gap, 8px) !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      pointer-events:none !important;
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.text-only{
+      padding:0 4px !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.mixed{
+      flex-direction:row !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.mixed.flipped{
+      flex-direction:row-reverse !important;
+    }
+
+    body.playing-wheel .wheel-html-inner.image-only{
+      justify-content:center !important;
+    }
+
+    body.playing-wheel .wheel-html-text{
+      display:-webkit-box !important;
+      -webkit-box-orient:vertical !important;
+      -webkit-line-clamp:var(--html-line-clamp, 3) !important;
+      max-width:100% !important;
+      overflow:hidden !important;
+      color:#fff !important;
+      font-size:var(--html-font-size, 17px) !important;
+      font-weight:900 !important;
+      line-height:1.08 !important;
+      text-align:center !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
+      overflow-wrap:anywhere !important;
+      word-break:normal !important;
+      text-shadow:0 1px 2px rgba(0,0,0,.24) !important;
+      flex:1 1 auto !important;
+      min-width:0 !important;
+    }
+
+    body.playing-wheel .wheel-html-label.dark .wheel-html-text{
+      color:#151515 !important;
+      text-shadow:0 1px 0 rgba(255,255,255,.52) !important;
+    }
+
+    body.playing-wheel .wheel-html-label.light .wheel-html-text{
+      color:#fff !important;
+      text-shadow:0 1px 2px rgba(0,0,0,.25) !important;
+    }
+
+    body.playing-wheel .wheel-html-image{
+      width:var(--html-image-size, 48px) !important;
+      height:var(--html-image-size, 48px) !important;
+      object-fit:contain !important;
+      display:block !important;
+      flex:0 0 auto !important;
+      border-radius:5px !important;
+      background:transparent !important;
+      pointer-events:none !important;
+      user-select:none !important;
+      -webkit-user-drag:none !important;
+    }
+
+    body.playing-wheel .svg-sector.selected{
+      animation:wheelSelectedPulse .72s ease-in-out 0s 2;
+      filter:brightness(1.13) saturate(1.05);
+    }
+
+    @keyframes wheelSelectedPulse{
+      0%{ opacity:1; }
+      35%{ opacity:.72; }
+      70%{ opacity:1; }
+      100%{ opacity:1; }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-html-text{
+        line-height:1.04 !important;
       }
     }
 
@@ -2233,6 +3905,8 @@
 
 
     <section class="wheel-game-screen" id="wheelGameScreen">
+      <img class="wheel-game-logo" src="logo.PNG" alt="" aria-hidden="true" />
+
       <div class="wheel-topbar">
         <div class="wheel-timer" id="wheelTimer"></div>
         <div class="wheel-instruction"></div>
@@ -2248,22 +3922,22 @@
               <g id="svgWheelLabels"></g>
             </g>
           </svg>
-          <div class="html-wheel-content" id="htmlWheelContent" aria-hidden="true"></div>
+          <div class="wheel-html-labels" id="wheelHtmlLabels" aria-hidden="true"></div>
           <div class="real-wheel-center" id="realWheelCenter"></div>
         </div>
       </div>
 
       <div class="selected-result" id="selectedResult" aria-live="polite"></div>
 
-      <div class="wheel-game-controls">
-        <button class="game-icon-btn" type="button" id="exitWheelGameBtn" aria-label="القائمة">☰</button>
-        <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
-        <button class="game-icon-btn" type="button" id="soundGameBtn" aria-label="الصوت">🔊</button>
-        <button class="game-icon-btn" type="button" id="fullscreenGameBtn" aria-label="تكبير">⛶</button>
-      </div>
+      <div class="wheel-fixed-controls" aria-label="أزرار التحكم في العجلة">
+        <button class="wheel-back-btn" type="button" id="exitWheelGameBtn">رجوع</button>
 
-      <div class="wheel-after-spin" id="wheelAfterSpin">
-        <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف العنصر</button>
+        <div class="wheel-right-actions">
+          <div class="wheel-after-spin" id="wheelAfterSpin">
+            <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف</button>
+          </div>
+          <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
+        </div>
       </div>
     </section>
 
@@ -2297,9 +3971,9 @@
     let wheelRotation = 0;
     let currentSelectedIndex = -1;
     let labelUprightNodes = [];
-    let htmlWheelContentNodes = [];
     let spinAnimationId = null;
     let dragState = null;
+    let safariCollapseTimers = [];
 
     const SVG_NS = "http://www.w3.org/2000/svg";
     const XLINK_NS = "http://www.w3.org/1999/xlink";
@@ -2323,6 +3997,41 @@
     ];
 
 
+    function isIosWebKit(){
+      const ua = navigator.userAgent || "";
+      const isiOS = /iP(ad|hone|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      return isiOS && /WebKit/i.test(ua);
+    }
+
+    function collapseSafariBars(){
+      safariCollapseTimers.forEach((timer)=> clearTimeout(timer));
+      safariCollapseTimers = [];
+
+      if (!document.body.classList.contains("playing-wheel") || !isIosWebKit()) return;
+
+      [0, 80, 220, 520, 900].forEach((delay)=>{
+        safariCollapseTimers.push(setTimeout(()=>{
+          if (!document.body.classList.contains("playing-wheel")) return;
+          try {
+            window.scrollTo({ top:76, left:0, behavior:"auto" });
+          } catch (_) {
+            window.scrollTo(0, 76);
+          }
+          requestAnimationFrame(updateWheelGameLayout);
+        }, delay));
+      });
+    }
+
+    function clearSafariCollapse(){
+      safariCollapseTimers.forEach((timer)=> clearTimeout(timer));
+      safariCollapseTimers = [];
+      try {
+        window.scrollTo({ top:0, left:0, behavior:"auto" });
+      } catch (_) {
+        window.scrollTo(0, 0);
+      }
+    }
+
     function updateViewportVars(){
       const root = document.documentElement;
       /* v35: نثبت قياسات العرض على window مثل صفحات العرض المستقرة، بدل ضغط Safari للعبة عبر visualViewport. */
@@ -2334,10 +4043,7 @@
       root.style.setProperty("--app-top", `0px`);
       root.style.setProperty("--app-left", `0px`);
 
-      requestAnimationFrame(()=>{
-        updateWheelGameLayout();
-        updateHtmlWheelItems();
-      });
+      requestAnimationFrame(updateWheelGameLayout);
     }
 
     function updateWheelGameLayout(){
@@ -2352,13 +4058,14 @@
       const wheelRect = wheel.getBoundingClientRect();
       if (!wheelRect.width || !stageRect.width) return;
 
-      const arrowW = Math.max(32, Math.min(58, wheelRect.width * 0.085));
-      const arrowH = Math.max(19, Math.min(34, wheelRect.width * 0.052));
-      const arrowLeft = wheelRect.left - stageRect.left - arrowW + Math.max(3, wheelRect.width * 0.012);
+      const arrowW = Math.max(36, Math.min(62, wheelRect.width * 0.092));
+      const arrowH = Math.max(22, Math.min(38, wheelRect.width * 0.056));
+      const arrowLeft = wheelRect.left - stageRect.left - arrowW - Math.max(4, wheelRect.width * 0.010);
 
       screen.style.setProperty("--game-arrow-left", `${Math.max(2, arrowLeft)}px`);
       screen.style.setProperty("--game-arrow-w", `${arrowW}px`);
       screen.style.setProperty("--game-arrow-h", `${arrowH}px`);
+      positionHtmlWheelLabels();
     }
 
     updateViewportVars();
@@ -2368,6 +4075,10 @@
       window.visualViewport.addEventListener("resize", updateViewportVars, { passive:true });
       window.visualViewport.addEventListener("scroll", updateViewportVars, { passive:true });
     }
+
+    document.addEventListener("touchend", ()=>{
+      if (document.body.classList.contains("playing-wheel")) collapseSafariBars();
+    }, { passive:true });
 
     function openScreen(id){
       const isWheelGame = id === "wheelGameScreen";
@@ -2387,19 +4098,19 @@
 
       if (isWheelGame) {
         updateViewportVars();
+        collapseSafariBars();
         requestAnimationFrame(()=>{
           updateViewportVars();
           updateWheelGameLayout();
-          updateHtmlWheelItems();
           fitCenterText();
         });
         setTimeout(()=>{
           updateViewportVars();
           updateWheelGameLayout();
-          updateHtmlWheelItems();
           fitCenterText();
         }, 90);
       } else {
+        clearSafariCollapse();
         window.scrollTo({ top:0, behavior:"auto" });
       }
     }
@@ -2606,14 +4317,60 @@
     }
 
     function labelFontSize(count, text){
-      const length = String(text || "").length;
-      if (count <= 5) return length > 16 ? 20 : 26;
-      if (count <= 8) return length > 14 ? 16 : 21;
-      if (count <= 12) return length > 12 ? 13 : 17;
-      return length > 10 ? 10 : 13;
+      const length = String(text || "").trim().length;
+      if (count <= 5) {
+        if (length > 42) return 11;
+        if (length > 30) return 13;
+        if (length > 20) return 16;
+        if (length > 12) return 20;
+        return 24;
+      }
+      if (count <= 8) {
+        if (length > 36) return 9;
+        if (length > 26) return 11;
+        if (length > 16) return 13;
+        if (length > 10) return 16;
+        return 19;
+      }
+      if (count <= 12) {
+        if (length > 30) return 7;
+        if (length > 22) return 8;
+        if (length > 14) return 10;
+        if (length > 9) return 12;
+        return 15;
+      }
+      if (length > 28) return 5.8;
+      if (length > 20) return 6.8;
+      if (length > 12) return 8;
+      return 10;
     }
 
-    function splitTextLines(text, maxChars){
+    function mixedTextFontSize(count, text){
+      const length = String(text || "").trim().length;
+      if (count <= 5) {
+        if (length > 34) return 9.5;
+        if (length > 24) return 11.5;
+        if (length > 16) return 13.5;
+        return 17;
+      }
+      if (count <= 8) {
+        if (length > 28) return 7.2;
+        if (length > 20) return 8.8;
+        if (length > 13) return 10.5;
+        return 13;
+      }
+      if (count <= 12) {
+        if (length > 24) return 5.8;
+        if (length > 16) return 6.8;
+        if (length > 10) return 8.3;
+        return 10;
+      }
+      if (length > 18) return 4.9;
+      if (length > 12) return 5.7;
+      return 7.2;
+    }
+
+    function splitTextLines(text, maxChars, maxLines = 4){
       const clean = String(text || "").trim();
       if (!clean) return [""];
       if (clean.length <= maxChars) return [clean];
@@ -2623,6 +4380,18 @@
       let current = "";
 
       words.forEach((word)=>{
+        if (word.length > maxChars) {
+          if (current) {
+            lines.push(current);
+            current = "";
+          }
+
+          for (let i = 0; i < word.length; i += maxChars) {
+            lines.push(word.slice(i, i + maxChars));
+          }
+          return;
+        }
+
         const test = current ? `${current} ${word}` : word;
         if (test.length > maxChars && current) {
           lines.push(current);
@@ -2633,160 +4402,120 @@
       });
 
       if (current) lines.push(current);
-      return lines.slice(0, 3);
+      return lines.slice(0, maxLines);
     }
 
-
-    function getWheelBaseSize(){
-      const wheel = document.getElementById("realWheel");
-      if (!wheel) return 500;
-
-      const offset = wheel.offsetWidth || 0;
-      if (offset > 0) return offset;
-
-      const styleWidth = parseFloat(getComputedStyle(wheel).width || "0");
-      return styleWidth > 0 ? styleWidth : 500;
-    }
-
-    function clampNumber(value, min, max){
-      return Math.max(min, Math.min(max, value));
-    }
-
-    function htmlLabelFontSize(count, text, mixed = false){
-      const base = mixed ? mixedTextFontSize(count, text) : labelFontSize(count, text);
-      const scale = getWheelBaseSize() / 500;
-      const min = mixed ? 8 : 10;
-      const max = mixed ? 24 : 34;
-      return clampNumber(base * scale * 1.04, min, max);
-    }
-
-    function htmlItemMetrics(count, hasImage, hasText){
-      const scale = getWheelBaseSize() / 500;
-      const radius = count <= 5 ? 140 : count <= 8 ? 150 : count <= 12 ? 158 : 164;
-      const textWidthBase = count <= 5 ? 118 : count <= 8 ? 92 : count <= 12 ? 72 : 56;
-      const mixedWidthBase = count <= 5 ? 150 : count <= 8 ? 118 : count <= 12 ? 92 : 72;
-      const imageBase = count <= 5 ? 58 : count <= 8 ? 44 : count <= 12 ? 34 : 27;
-      const gapBase = count <= 5 ? 10 : count <= 8 ? 8 : 6;
-
-      return {
-        radiusPx: radius * scale,
-        textWidthPx: (hasImage && hasText ? mixedWidthBase : textWidthBase) * scale,
-        imagePx: imageBase * scale,
-        gapPx: gapBase * scale
-      };
-    }
-
-    function createHtmlText(text, fontSize){
-      const span = document.createElement("span");
-      span.className = "wheel-html-text";
-      span.dir = "rtl";
-      span.style.fontSize = `${fontSize}px`;
-      span.textContent = text;
-      return span;
-    }
-
-    function buildHtmlWheelContent(items, count){
-      const layer = document.getElementById("htmlWheelContent");
-      if (!layer) return;
-
-      layer.innerHTML = "";
-      htmlWheelContentNodes = [];
-
-      const step = 360 / count;
-
-      items.forEach((entry, index)=>{
-        const mid = -90 + (index * step) + (step / 2);
-        const color = wheelColors[index % wheelColors.length];
-        const isDark = colorBrightness(color) > 168;
-        const hasImage = Boolean((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData);
-        const hasText = wheelContentType !== "images" || Boolean(String(entry.text || "").trim());
-        const text = hasText ? textForEntry(entry, index) : "";
-        const metrics = htmlItemMetrics(count, hasImage, Boolean(text));
-
-        const item = document.createElement("div");
-        item.className = `wheel-html-item ${isDark ? "dark" : "light"}`;
-        item.dataset.angle = String(mid);
-        item.dataset.radius = String(metrics.radiusPx);
-
-        const inner = document.createElement("div");
-        inner.className = `wheel-html-inner ${hasImage && text ? "mixed" : hasImage ? "image-only" : "text-only"}`;
-        inner.style.width = `${metrics.textWidthPx}px`;
-        inner.style.setProperty("--wheel-html-img-size", `${metrics.imagePx}px`);
-        inner.style.setProperty("--wheel-html-gap", `${metrics.gapPx}px`);
-
-        if (hasImage) {
-          const img = document.createElement("img");
-          img.className = "wheel-html-img";
-          img.alt = "";
-          img.draggable = false;
-          img.src = entry.imageData;
-          inner.appendChild(img);
-        }
-
-        if (text) {
-          inner.appendChild(createHtmlText(text, htmlLabelFontSize(count, text, hasImage)));
-        }
-
-        item.appendChild(inner);
-        layer.appendChild(item);
-        htmlWheelContentNodes.push(item);
+    function createUprightHolder(parent, angle, radius){
+      const normalized = normalizeAngle(angle);
+      const flip = normalized > 90 && normalized < 270;
+      const holder = createSvgElement("g", {
+        transform: `rotate(${angle.toFixed(3)}) translate(${radius.toFixed(3)} 0) rotate(${flip ? 180 : 0})`
       });
 
-      updateHtmlWheelItems();
-    }
-
-    function updateHtmlWheelItems(){
-      if (!htmlWheelContentNodes || !htmlWheelContentNodes.length) return;
-
-      htmlWheelContentNodes.forEach((item)=>{
-        const baseAngle = Number(item.dataset.angle || 0);
-        const radiusPx = Number(item.dataset.radius || 0);
-        const screenAngle = baseAngle + wheelRotation;
-        const normalized = normalizeAngle(screenAngle);
-        const flip = normalized > 90 && normalized < 270 ? 180 : 0;
-
-        item.style.transform = `translate(-50%, -50%) rotate(${screenAngle.toFixed(3)}deg) translateX(${radiusPx.toFixed(3)}px) rotate(${flip}deg)`;
+      const upright = createSvgElement("g", {
+        class: "svg-wheel-upright"
       });
+
+      holder.appendChild(upright);
+      parent.appendChild(holder);
+      return upright;
     }
 
-    function clearSelectedVisuals(){
-      document.querySelectorAll(".svg-sector.is-selected").forEach((el)=> el.classList.remove("is-selected"));
-      document.querySelectorAll(".wheel-html-label.is-selected").forEach((el)=> el.classList.remove("is-selected"));
-      const wheel = document.getElementById("realWheel");
-      if (wheel) wheel.classList.remove("settle-pop");
+    function drawTextLabel(parent, text, angle, radius, count, isDark){
+      const upright = createUprightHolder(parent, angle, radius);
+      const size = labelFontSize(count, text);
+
+      const label = createSvgElement("text", {
+        x: "0",
+        y: "0",
+        class: `svg-wheel-label ${isDark ? "dark" : "light"}`,
+        "font-size": String(size)
+      });
+
+      const maxChars = count <= 5 ? 10 : count <= 8 ? 8 : count <= 12 ? 6 : 5;
+      const lines = splitTextLines(text, maxChars, count <= 8 ? 5 : 4);
+      const lineHeight = size * 1.02;
+      const startY = -((lines.length - 1) * lineHeight) / 2;
+
+      lines.forEach((line, idx)=>{
+        const tspan = createSvgElement("tspan", {
+          x: "0",
+          y: String(startY + idx * lineHeight)
+        });
+        tspan.textContent = line;
+        label.appendChild(tspan);
+      });
+
+      upright.appendChild(label);
     }
 
-    function markSelectedVisual(index){
-      clearSelectedVisuals();
+    function drawImageLabel(parent, entry, angle, radius, count, withText, isDark){
+      const upright = createUprightHolder(parent, angle, radius);
+      const hasText = Boolean(withText && String(entry.text || "").trim());
+      const text = String(entry.text || "").trim();
 
-      const sector = document.querySelector(`.svg-sector[data-index="${index}"]`);
-      const label = document.querySelector(`.wheel-html-label[data-index="${index}"]`);
-      if (sector) sector.classList.add("is-selected");
-      if (label) label.classList.add("is-selected");
+      const imgSize = count <= 5 ? 66 : count <= 8 ? 50 : count <= 12 ? 38 : 28;
+      const textSize = mixedTextFontSize(count, text);
+      const gap = count <= 5 ? 18 : count <= 8 ? 12 : 8;
 
-      const wheel = document.getElementById("realWheel");
-      if (wheel) {
-        wheel.classList.remove("settle-pop");
-        void wheel.offsetWidth;
-        wheel.classList.add("settle-pop");
+      // v38: توزيع Wordwall: الصورة باتجاه الحافة الخارجية، والنص باتجاه المنتصف داخل نفس القطاع.
+      const imageCenterX = hasText ? (imgSize * 0.55 + gap) : 0;
+      const textCenterX = hasText ? -(imgSize * 0.50 + gap * 0.55) : 0;
+
+      if (entry.imageData) {
+        const img = createSvgElement("image", {
+          x: (imageCenterX - imgSize / 2).toFixed(3),
+          y: (-imgSize / 2).toFixed(3),
+          width: String(imgSize),
+          height: String(imgSize),
+          href: entry.imageData,
+          class: "svg-wheel-image",
+          preserveAspectRatio: "xMidYMid meet"
+        });
+        upright.appendChild(img);
+      }
+
+      if (hasText) {
+        const label = createSvgElement("text", {
+          x: textCenterX.toFixed(3),
+          y: "0",
+          class: `svg-wheel-label ${isDark ? "dark" : "light"}`,
+          "font-size": String(textSize),
+          "text-anchor": "middle"
+        });
+
+        const lines = splitTextLines(text, count <= 5 ? 8 : count <= 8 ? 6 : 5, count <= 8 ? 4 : 3);
+        const lineHeight = textSize * 1.03;
+        const startY = -((lines.length - 1) * lineHeight) / 2;
+
+        lines.forEach((line, idx)=>{
+          const tspan = createSvgElement("tspan", {
+            x: textCenterX.toFixed(3),
+            y: String(startY + idx * lineHeight)
+          });
+          tspan.textContent = line;
+          label.appendChild(tspan);
+        });
+
+        upright.appendChild(label);
       }
     }
 
     function updateUprightLabels(){
-      const rotation = wheelRotation || 0;
+      const rotation = normalizeAngle(wheelRotation || 0);
 
       labelUprightNodes.forEach((item)=>{
         const finalAngle = normalizeAngle((item.baseAngle || 0) + rotation);
-        const rad = finalAngle * Math.PI / 180;
-        const x = 50 + Math.cos(rad) * item.radiusPct;
-        const y = 50 + Math.sin(rad) * item.radiusPct;
         const flipped = finalAngle > 90 && finalAngle < 270;
-        const displayAngle = finalAngle + (flipped ? 180 : 0);
+        const labelRotation = (item.baseAngle || 0) + (flipped ? 180 : 0);
 
-        item.label.style.left = `${x.toFixed(3)}%`;
-        item.label.style.top = `${y.toFixed(3)}%`;
-        item.label.style.transform = `translate(-50%, -50%) rotate(${displayAngle.toFixed(3)}deg)`;
-        item.inner.classList.toggle("flipped", flipped);
+        if (item.label) {
+          item.label.style.transform = `translate(-50%, -50%) rotate(${labelRotation.toFixed(3)}deg)`;
+        }
+
+        if (item.inner) {
+          item.inner.classList.toggle("flipped", flipped);
+        }
       });
     }
 
@@ -2794,17 +4523,25 @@
       const rotor = document.getElementById("svgWheelRotor");
       if (!rotor) return;
 
+      const htmlLayer = document.getElementById("wheelHtmlLabels");
+
       wheelRotation = degrees;
+      rotor.style.transition = "none";
       rotor.style.transform = `rotate(${degrees}deg)`;
+
+      if (htmlLayer) {
+        htmlLayer.style.transform = `rotate(${degrees}deg)`;
+      }
+
       updateUprightLabels();
     }
 
     function resetWordwallFocus(){
       const wheel = document.getElementById("realWheel");
       const afterSpin = document.getElementById("wheelAfterSpin");
-      if (wheel) wheel.classList.remove("wordwall-zoom", "settle-pop");
+      if (wheel) wheel.classList.remove("wordwall-zoom");
       if (afterSpin) afterSpin.classList.remove("show");
-      clearSelectedVisuals();
+      clearSelectedSectorHighlight();
     }
 
     function applyWordwallFocus(){
@@ -2819,7 +4556,7 @@
 
     function fitCenterText(){
       const center = document.getElementById("realWheelCenter");
-      if (!center || !center.classList.contains("has-question")) return;
+      if (!center) return;
 
       center.style.fontSize = "";
       let size = parseFloat(getComputedStyle(center).fontSize || "18");
@@ -2832,94 +4569,114 @@
       }
     }
 
-    function drawWheelDecoration(parent){
-      // index-3: لا توجد زخرفة خارجية. المحرك الجديد يرسم القطاعات فقط.
+    function wheelDecorPath(radius = 229, waves = 32, amplitude = 1.15, points = 260){
+      let d = "";
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * 360;
+        const r = radius + Math.sin((angle * Math.PI / 180) * waves) * amplitude;
+        const p = polarToCartesian(r, angle);
+        d += `${i === 0 ? "M" : "L"} ${p.x.toFixed(3)} ${p.y.toFixed(3)} `;
+      }
+      return d + "Z";
     }
 
-    function htmlWheelMetrics(count, entry, hasImage, hasText){
-      const cleanText = String(hasText ? textForEntry(entry, 0) : "").trim();
-      const length = cleanText.length;
-
-      let radiusPct;
-      let widthPct;
-      let fontSize;
-      let imageSize;
-      let height;
-      let textMax;
-      let lineClamp;
-
-      if (count <= 4) {
-        radiusPct = hasImage ? 31 : 29;
-        widthPct = hasImage && hasText ? 31 : 29;
-        fontSize = length > 28 ? 16 : length > 18 ? 19 : 24;
-        imageSize = hasImage ? 64 : 0;
-        height = hasImage ? 66 : 54;
-        lineClamp = 3;
-      } else if (count <= 6) {
-        radiusPct = hasImage ? 32 : 30;
-        widthPct = hasImage && hasText ? 29 : 27;
-        fontSize = length > 28 ? 13 : length > 18 ? 16 : 20;
-        imageSize = hasImage ? 56 : 0;
-        height = hasImage ? 58 : 48;
-        lineClamp = 3;
-      } else if (count <= 8) {
-        radiusPct = hasImage ? 33 : 31;
-        widthPct = hasImage && hasText ? 25 : 23;
-        fontSize = length > 24 ? 11 : length > 15 ? 14 : 17;
-        imageSize = hasImage ? 48 : 0;
-        height = hasImage ? 50 : 42;
-        lineClamp = 3;
-      } else if (count <= 12) {
-        radiusPct = hasImage ? 34 : 32;
-        widthPct = hasImage && hasText ? 21 : 18;
-        fontSize = length > 20 ? 8.5 : length > 12 ? 10.5 : 13;
-        imageSize = hasImage ? 38 : 0;
-        height = hasImage ? 40 : 34;
-        lineClamp = 2;
-      } else {
-        radiusPct = hasImage ? 35 : 33;
-        widthPct = hasImage && hasText ? 17 : 14;
-        fontSize = length > 16 ? 6.5 : length > 10 ? 8 : 10;
-        imageSize = hasImage ? 30 : 0;
-        height = hasImage ? 32 : 28;
-        lineClamp = 2;
+    function starPath(cx, cy, outerRadius = 3.1, innerRadius = 1.35){
+      const points = [];
+      for (let i = 0; i < 10; i++) {
+        const angle = (-90 + i * 36) * Math.PI / 180;
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        points.push({
+          x: cx + Math.cos(angle) * radius,
+          y: cy + Math.sin(angle) * radius
+        });
       }
 
-      textMax = hasImage ? `calc(100% - ${imageSize + 8}px)` : "100%";
-      return { radiusPct, widthPct, fontSize, imageSize, height, textMax, lineClamp, gap: count <= 8 ? 8 : 5 };
+      return points.map((point, index)=> {
+        const command = index === 0 ? "M" : "L";
+        return `${command} ${point.x.toFixed(3)} ${point.y.toFixed(3)}`;
+      }).join(" ") + " Z";
     }
 
-    function buildHtmlWheelLabels(items, count){
+    function drawWheelDecoration(parent){
+      // v38: بدون خطوط أو نجوم حول العجلة، مثل مرجع Wordwall.
+    }
+
+    function htmlWheelMetrics(count, hasImage, hasText){
+      const wheel = document.getElementById("realWheel");
+      const center = document.getElementById("realWheelCenter");
+      const wheelSize = Math.max(260, wheel?.getBoundingClientRect?.().width || wheel?.clientWidth || 360);
+      const centerSize = Math.max(0, center?.getBoundingClientRect?.().width || wheelSize * 0.19);
+      const step = 360 / Math.max(count, 1);
+
+      const innerRadius = (centerSize / 2) + wheelSize * (count <= 5 ? 0.075 : count <= 8 ? 0.068 : 0.062);
+      const outerRadius = wheelSize * 0.448;
+      const radialWidth = Math.max(wheelSize * 0.145, outerRadius - innerRadius - wheelSize * 0.015);
+      const midRadius = innerRadius + radialWidth / 2;
+      const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
+
+      const labelHeight = Math.max(
+        wheelSize * (count <= 5 ? 0.092 : count <= 8 ? 0.070 : count <= 12 ? 0.056 : 0.044),
+        Math.min(wheelSize * (count <= 5 ? 0.165 : count <= 8 ? 0.120 : 0.085), arcAtMiddle * 0.68)
+      );
+
+      const imageSize = hasImage
+        ? Math.min(labelHeight * 0.92, wheelSize * (count <= 5 ? 0.102 : count <= 8 ? 0.078 : count <= 12 ? 0.058 : 0.045))
+        : 0;
+
+      let fontSize;
+      if (hasImage && hasText) {
+        fontSize = Math.min(labelHeight * 0.34, wheelSize * (count <= 5 ? 0.035 : count <= 8 ? 0.028 : count <= 12 ? 0.021 : 0.016));
+      } else {
+        fontSize = Math.min(labelHeight * 0.48, wheelSize * (count <= 5 ? 0.050 : count <= 8 ? 0.039 : count <= 12 ? 0.028 : 0.020));
+      }
+
+      fontSize = Math.max(8, fontSize);
+      const gap = Math.max(4, Math.min(10, wheelSize * 0.014));
+      const lines = count <= 5 ? 3 : count <= 10 ? 2 : 1;
+
+      return {
+        innerRadius,
+        outerRadius,
+        midRadius,
+        radialWidth,
+        labelHeight,
+        imageSize,
+        fontSize,
+        gap,
+        lines
+      };
+    }
+
+    function buildHtmlWheelLabels(items, count, step){
       const htmlLayer = document.getElementById("wheelHtmlLabels");
       if (!htmlLayer) return;
 
       htmlLayer.innerHTML = "";
+      htmlLayer.style.transform = `rotate(${wheelRotation}deg)`;
       labelUprightNodes = [];
-
-      const step = 360 / count;
 
       items.forEach((entry, index)=>{
         const mid = -90 + (index * step) + (step / 2);
         const color = wheelColors[index % wheelColors.length];
         const isDark = colorBrightness(color) > 168;
         const hasImage = Boolean((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData);
-        const hasText = Boolean(wheelContentType !== "images" && textForEntry(entry, index));
-        const metrics = htmlWheelMetrics(count, entry, hasImage, hasText);
+        const hasText = Boolean((wheelContentType !== "images") && textForEntry(entry, index));
+        const metrics = htmlWheelMetrics(count, hasImage, hasText);
 
         const label = document.createElement("div");
         label.className = `wheel-html-label ${isDark ? "dark" : "light"}`;
-        label.dataset.index = String(index);
-        label.style.setProperty("--html-label-width", `${metrics.widthPct}%`);
-        label.style.setProperty("--html-label-height", `${metrics.height}px`);
+        label.dataset.baseAngle = String(mid);
+        label.dataset.count = String(count);
+        label.dataset.hasImage = hasImage ? "1" : "0";
+        label.dataset.hasText = hasText ? "1" : "0";
         label.style.setProperty("--html-label-gap", `${metrics.gap}px`);
         label.style.setProperty("--html-font-size", `${metrics.fontSize}px`);
         label.style.setProperty("--html-image-size", `${metrics.imageSize}px`);
-        label.style.setProperty("--html-text-max", metrics.textMax);
-        label.style.setProperty("--html-line-clamp", String(metrics.lineClamp));
+        label.style.setProperty("--html-line-clamp", String(metrics.lines));
 
         const inner = document.createElement("div");
         inner.className = hasImage && hasText ? "wheel-html-inner mixed" : hasImage ? "wheel-html-inner image-only" : "wheel-html-inner text-only";
-        inner.setAttribute("dir", "ltr");
+        inner.setAttribute("dir", "rtl");
 
         if (hasText) {
           const textEl = document.createElement("div");
@@ -2940,10 +4697,62 @@
 
         label.appendChild(inner);
         htmlLayer.appendChild(label);
-        labelUprightNodes.push({ label, inner, baseAngle: mid, radiusPct: metrics.radiusPct });
+        labelUprightNodes.push({ label, inner, baseAngle: mid, hasImage, hasText });
+      });
+
+      positionHtmlWheelLabels();
+      updateUprightLabels();
+    }
+
+function positionHtmlWheelLabels(){
+      const wheel = document.getElementById("realWheel");
+      const htmlLayer = document.getElementById("wheelHtmlLabels");
+      if (!wheel || !htmlLayer || !labelUprightNodes.length) return;
+
+      const rect = wheel.getBoundingClientRect();
+      const size = rect.width || wheel.clientWidth || 0;
+      if (!size) return;
+
+      const items = getWheelItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const center = size / 2;
+
+      labelUprightNodes.forEach((item, index)=>{
+        const entry = items[index] || {};
+        const hasImage = Boolean((wheelContentType === "images" || wheelContentType === "mixed") && entry.imageData);
+        const hasText = Boolean((wheelContentType !== "images") && textForEntry(entry, index));
+        const metrics = htmlWheelMetrics(count, hasImage, hasText);
+        const angle = item.baseAngle || (-90 + (index * step) + step / 2);
+        const p = polarToCartesian(metrics.midRadius, angle);
+
+        item.label.style.left = `${center + p.x}px`;
+        item.label.style.top = `${center + p.y}px`;
+        item.label.style.width = `${metrics.radialWidth}px`;
+        item.label.style.height = `${metrics.labelHeight}px`;
+        item.label.style.setProperty("--html-label-gap", `${metrics.gap}px`);
+        item.label.style.setProperty("--html-font-size", `${metrics.fontSize}px`);
+        item.label.style.setProperty("--html-image-size", `${metrics.imageSize}px`);
+        item.label.style.setProperty("--html-line-clamp", String(metrics.lines));
       });
 
       updateUprightLabels();
+    }
+
+    function clearSelectedSectorHighlight(){
+      document.querySelectorAll(".svg-sector.selected").forEach((sector)=>{
+        sector.classList.remove("selected");
+      });
+    }
+
+    function highlightSelectedSector(index){
+      clearSelectedSectorHighlight();
+      const sector = document.querySelector(`.svg-sector[data-index="${index}"]`);
+      if (!sector) return;
+      // إعادة تشغيل الحركة حتى تظهر في كل توقف.
+      sector.classList.remove("selected");
+      void sector.getBoundingClientRect();
+      sector.classList.add("selected");
     }
 
     function buildWheel(){
@@ -2953,6 +4762,7 @@
       const labels = document.getElementById("svgWheelLabels");
       const center = document.getElementById("realWheelCenter");
       const result = document.getElementById("selectedResult");
+      const afterSpin = document.getElementById("wheelAfterSpin");
 
       if (!sectors || !labels || !center) return;
 
@@ -2961,12 +4771,15 @@
       labelUprightNodes = [];
 
       const radius = 224;
+      const labelRadius = count <= 5 ? 142 : count <= 8 ? 150 : count <= 12 ? 158 : 164;
       const step = 360 / count;
 
       items.forEach((entry, index)=>{
         const start = -90 + (index * step);
         const end = start + step;
+        const mid = start + (step / 2);
         const color = wheelColors[index % wheelColors.length];
+        const isDark = colorBrightness(color) > 168;
 
         const sector = createSvgElement("path", {
           d: sectorPath(start, end, radius),
@@ -2975,6 +4788,8 @@
           "data-index": String(index)
         });
         sectors.appendChild(sector);
+
+        // v40: محتوى العجلة النصي/الصور يُعرض عبر طبقة HTML مستقلة لضمان سلامة العربية في Safari.
       });
 
       const rim = createSvgElement("circle", {
@@ -2987,7 +4802,7 @@
       });
       sectors.appendChild(rim);
 
-      buildHtmlWheelLabels(items, count);
+      buildHtmlWheelLabels(items, count, step);
 
       const centerQuestionEnabled = questionPanel?.classList.contains("enabled");
       const centerText = (centerQuestionInput?.value || "").trim();
@@ -2995,27 +4810,28 @@
       center.classList.toggle("has-question", Boolean(centerQuestionEnabled));
 
       if (result) result.textContent = "";
-      currentSelectedIndex = -1;
       resetWordwallFocus();
+      currentSelectedIndex = -1;
+
       setRotorRotation(wheelRotation);
       requestAnimationFrame(fitCenterText);
     }
 
     function openWheelGame(){
       wheelRotation = 0;
+      resetWordwallFocus();
       updateViewportVars();
       buildWheel();
       openScreen("wheelGameScreen");
+      collapseSafariBars();
       requestAnimationFrame(()=>{
         updateViewportVars();
         updateWheelGameLayout();
-        updateHtmlWheelItems();
         fitCenterText();
       });
       setTimeout(()=>{
         updateViewportVars();
         updateWheelGameLayout();
-        updateHtmlWheelItems();
         fitCenterText();
       }, 120);
     }
@@ -3049,18 +4865,12 @@
 
       if (result) result.textContent = textForEntry(items[index], index);
       if (afterSpin) afterSpin.classList.add("show");
+      highlightSelectedSector(index);
       applyWordwallFocus();
-      markSelectedVisual(index);
     }
 
-    function easeOutExpo(t){
-      return t >= 1 ? 1 : 1 - Math.pow(2, -10 * t);
-    }
-
-    function easeOutBackSoft(t){
-      const c1 = 1.05;
-      const c3 = c1 + 1;
-      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    function easeOutQuint(t){
+      return 1 - Math.pow(1 - t, 5);
     }
 
     function cancelSpinAnimation(){
@@ -3083,14 +4893,18 @@
       resetWordwallFocus();
       if (result) result.textContent = "";
       if (afterSpin) afterSpin.classList.remove("show");
+      let focusStarted = false;
 
       function frame(now){
         const progress = Math.min(1, (now - startTime) / duration);
-        const eased = progress < .82
-          ? easeOutExpo(progress / .82) * .94
-          : .94 + (easeOutBackSoft((progress - .82) / .18) * .06);
+        const eased = easeOutQuint(progress);
 
-        setRotorRotation(start + change * Math.min(1.012, eased));
+        setRotorRotation(start + change * eased);
+
+        if (!focusStarted && progress >= 0.68) {
+          focusStarted = true;
+          applyWordwallFocus();
+        }
 
         if (progress < 1) {
           spinAnimationId = requestAnimationFrame(frame);
@@ -3126,7 +4940,7 @@
       }
 
       currentSelectedIndex = selected;
-      animateWheelTo(wheelRotation + delta, 4700 + Math.floor(Math.random() * 550));
+      animateWheelTo(wheelRotation + delta, 4700 + Math.floor(Math.random() * 450));
     }
 
     document.getElementById("spinGameBtn")?.addEventListener("click", ()=>{
@@ -3144,6 +4958,7 @@
 
     realWheel?.addEventListener("pointerdown", (event)=>{
       cancelSpinAnimation();
+      resetWordwallFocus();
       realWheel.setPointerCapture?.(event.pointerId);
 
       const afterSpin = document.getElementById("wheelAfterSpin");
@@ -3194,8 +5009,14 @@
     realWheel?.addEventListener("pointerup", endDrag);
     realWheel?.addEventListener("pointercancel", endDrag);
 
+    document.getElementById("resumeWheelBtn")?.addEventListener("click", ()=>{
+      resetWordwallFocus();
+      collapseSafariBars();
+    });
+
     document.getElementById("removeSelectedBtn")?.addEventListener("click", ()=>{
       if (currentSelectedIndex < 0) return;
+      resetWordwallFocus();
 
       if (wheelEntries.length) {
         const filledIndexes = [];
@@ -3224,12 +5045,14 @@
 
     document.getElementById("exitWheelGameBtn")?.addEventListener("click", ()=>{
       cancelSpinAnimation();
+      resetWordwallFocus();
       openScreen("wheelSetupScreen");
     });
 
     homeButton.addEventListener("click", ()=>{
       if (document.body.classList.contains("playing-wheel")) {
         cancelSpinAnimation();
+        resetWordwallFocus();
         openScreen("wheelSetupScreen");
         return;
       }
