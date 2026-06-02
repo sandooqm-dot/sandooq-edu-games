@@ -3365,6 +3365,222 @@
     }
 
 
+
+    /* v39: نقل أزرار العجلة حسب الرسم وإزالة الأزرار القديمة */
+    body.playing-wheel .wheel-game-screen{
+      position:sticky !important;
+      top:0 !important;
+      overflow:hidden !important;
+    }
+
+    body.playing-wheel .wheel-game-logo{
+      position:absolute !important;
+      top:clamp(14px, 2.4vw, 30px) !important;
+      left:clamp(16px, 2.8vw, 38px) !important;
+      width:clamp(64px, 8.2vw, 120px) !important;
+      height:auto !important;
+      max-height:clamp(52px, 8vw, 96px) !important;
+      object-fit:contain !important;
+      z-index:80 !important;
+      pointer-events:none !important;
+      user-select:none !important;
+    }
+
+    body.playing-wheel .wheel-fixed-controls{
+      position:absolute !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:calc(14px + var(--safe-bottom)) !important;
+      height:clamp(44px, 6.2vh, 60px) !important;
+      z-index:90 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-back-btn,
+    body.playing-wheel .wheel-right-actions,
+    body.playing-wheel .wheel-right-actions button{
+      pointer-events:auto !important;
+    }
+
+    body.playing-wheel .wheel-back-btn{
+      position:absolute !important;
+      left:clamp(16px, 2.6vw, 34px) !important;
+      bottom:0 !important;
+      width:clamp(88px, 9.5vw, 126px) !important;
+      height:clamp(40px, 5.5vh, 52px) !important;
+      border:3px solid #111 !important;
+      border-radius:13px !important;
+      background:#efd553 !important;
+      color:#111 !important;
+      font-size:clamp(16px, 2vw, 23px) !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding:0 14px !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.18) !important;
+      cursor:pointer !important;
+    }
+
+    body.playing-wheel .wheel-right-actions{
+      position:absolute !important;
+      right:clamp(16px, 2.8vw, 42px) !important;
+      bottom:0 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:flex-end !important;
+      gap:clamp(10px, 1.5vw, 18px) !important;
+      height:clamp(40px, 5.5vh, 54px) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .wheel-after-spin{
+      display:none !important;
+      padding:0 !important;
+      margin:0 !important;
+      height:auto !important;
+      min-height:0 !important;
+      flex:0 0 auto !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .wheel-after-spin.show{
+      display:block !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn,
+    body.playing-wheel .wheel-right-actions .remove-selected-btn{
+      min-width:0 !important;
+      width:auto !important;
+      height:clamp(40px, 5.5vh, 54px) !important;
+      min-height:0 !important;
+      border:3px solid #111 !important;
+      border-radius:14px !important;
+      color:#fff !important;
+      font-size:clamp(17px, 2.15vw, 26px) !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      padding:0 clamp(18px, 2.6vw, 32px) !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.20) !important;
+      cursor:pointer !important;
+      white-space:nowrap !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn{
+      min-width:clamp(118px, 13vw, 178px) !important;
+      background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%) !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .remove-selected-btn{
+      min-width:clamp(86px, 9vw, 128px) !important;
+      background:#f05d5b !important;
+    }
+
+    body.playing-wheel .wheel-right-actions .spin-game-btn:active,
+    body.playing-wheel .wheel-right-actions .remove-selected-btn:active,
+    body.playing-wheel .wheel-back-btn:active{
+      transform:translateY(2px) !important;
+      box-shadow:0 2px 0 rgba(0,0,0,.20) !important;
+    }
+
+    body.playing-wheel .wheel-game-controls,
+    body.playing-wheel #soundGameBtn,
+    body.playing-wheel #fullscreenGameBtn,
+    body.playing-wheel #resumeWheelBtn{
+      display:none !important;
+    }
+
+    @media (orientation:landscape){
+      body.playing-wheel .wheel-game-logo{
+        top:clamp(10px, 2.2vh, 18px) !important;
+        left:clamp(14px, 2vw, 28px) !important;
+        width:clamp(54px, 7vw, 92px) !important;
+        max-height:clamp(44px, 10vh, 70px) !important;
+      }
+
+      body.playing-wheel .wheel-fixed-controls{
+        bottom:calc(8px + var(--safe-bottom)) !important;
+        height:clamp(32px, 8.2vh, 44px) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn,
+      body.playing-wheel .wheel-right-actions .spin-game-btn,
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        height:clamp(32px, 8vh, 42px) !important;
+        border-width:2px !important;
+        border-radius:10px !important;
+        font-size:clamp(14px, 3.3vh, 20px) !important;
+        box-shadow:0 3px 0 rgba(0,0,0,.18) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        width:clamp(72px, 8vw, 104px) !important;
+        left:clamp(12px, 2vw, 26px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        right:clamp(12px, 2.4vw, 34px) !important;
+        gap:clamp(8px, 1.1vw, 14px) !important;
+        height:clamp(32px, 8vh, 42px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn{
+        min-width:clamp(92px, 12vw, 142px) !important;
+        padding:0 clamp(14px, 2.2vw, 24px) !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        min-width:clamp(66px, 8vw, 96px) !important;
+        padding:0 clamp(12px, 1.8vw, 20px) !important;
+      }
+    }
+
+    @media (max-width:430px){
+      body.playing-wheel .wheel-game-logo{
+        top:12px !important;
+        left:14px !important;
+        width:64px !important;
+      }
+
+      body.playing-wheel .wheel-fixed-controls{
+        bottom:calc(12px + var(--safe-bottom)) !important;
+      }
+
+      body.playing-wheel .wheel-back-btn{
+        left:12px !important;
+        width:78px !important;
+        height:40px !important;
+        font-size:15px !important;
+        border-radius:11px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions{
+        right:12px !important;
+        gap:8px !important;
+        height:40px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn,
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        height:40px !important;
+        border-radius:11px !important;
+        font-size:15px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .spin-game-btn{
+        min-width:92px !important;
+        padding:0 18px !important;
+      }
+
+      body.playing-wheel .wheel-right-actions .remove-selected-btn{
+        min-width:62px !important;
+        padding:0 14px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -3563,6 +3779,8 @@
 
 
     <section class="wheel-game-screen" id="wheelGameScreen">
+      <img class="wheel-game-logo" src="logo.PNG" alt="" aria-hidden="true" />
+
       <div class="wheel-topbar">
         <div class="wheel-timer" id="wheelTimer"></div>
         <div class="wheel-instruction"></div>
@@ -3584,16 +3802,15 @@
 
       <div class="selected-result" id="selectedResult" aria-live="polite"></div>
 
-      <div class="wheel-game-controls">
-        <button class="game-icon-btn" type="button" id="exitWheelGameBtn" aria-label="القائمة">☰</button>
-        <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
-        <button class="game-icon-btn" type="button" id="soundGameBtn" aria-label="الصوت">🔊</button>
-        <button class="game-icon-btn" type="button" id="fullscreenGameBtn" aria-label="تكبير">⛶</button>
-      </div>
+      <div class="wheel-fixed-controls" aria-label="أزرار التحكم في العجلة">
+        <button class="wheel-back-btn" type="button" id="exitWheelGameBtn">رجوع</button>
 
-      <div class="wheel-after-spin" id="wheelAfterSpin">
-        <button class="resume-selected-btn" type="button" id="resumeWheelBtn">استئناف</button>
-        <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف العنصر</button>
+        <div class="wheel-right-actions">
+          <div class="wheel-after-spin" id="wheelAfterSpin">
+            <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف</button>
+          </div>
+          <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
+        </div>
       </div>
     </section>
 
