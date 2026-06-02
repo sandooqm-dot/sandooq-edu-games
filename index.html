@@ -2984,386 +2984,237 @@
       }
     }
 
-    /* v36: طريقة عرض العجلة مثل صفحة الباركود - 100dvh بدون قفل 100svh حتى لا يبقى شريط Safari مزعجًا */
-    body.playing-wheel,
-    body.playing-wheel .page{
-      width:100% !important;
-      min-height:100dvh !important;
+
+  
+
+    /* v36: توزيع أزرار شاشة العجلة حسب الرسم: شعار أعلى اليسار، رجوع يسار، حذف بجانب التدوير، تدوير يمين */
+    body.playing-wheel .wheel-game-logo{
+      position:absolute !important;
+      top:calc(12px + var(--safe-top)) !important;
+      left:clamp(12px, 2.2vw, 34px) !important;
+      width:clamp(78px, 10vw, 146px) !important;
       height:auto !important;
-      max-height:none !important;
-      overflow-x:hidden !important;
-      overflow-y:auto !important;
-      overscroll-behavior:none !important;
-      background:#fff !important;
-    }
-
-    body.playing-wheel .page{
-      padding:0 !important;
-    }
-
-    body.playing-wheel .wheel-game-screen{
-      position:relative !important;
-      inset:auto !important;
-      width:100% !important;
-      min-height:100dvh !important;
-      height:100dvh !important;
-      max-height:none !important;
-      background:#fff !important;
-      overflow:hidden !important;
-      touch-action:none !important;
-      flex-direction:column !important;
-      --wheel-size:min(94vw, calc(100dvh - 142px), 730px);
-    }
-
-    body.playing-wheel .wheel-game-screen.active{
-      display:flex !important;
-    }
-
-    body.playing-wheel .wheel-stage{
-      flex:1 1 auto !important;
-      min-height:0 !important;
-      width:100% !important;
-      padding:6px 8px 0 !important;
-      overflow:visible !important;
-    }
-
-    body.playing-wheel .real-wheel{
-      width:var(--wheel-size) !important;
-      height:var(--wheel-size) !important;
-      max-width:var(--wheel-size) !important;
-      max-height:var(--wheel-size) !important;
-      filter:drop-shadow(0 10px 24px rgba(0,0,0,.10)) !important;
-    }
-
-    body.playing-wheel .svg-wheel-decor-line{
-      stroke:#26313a !important;
-      stroke-width:.9 !important;
-      opacity:.48 !important;
-    }
-
-    body.playing-wheel .svg-wheel-decor-dot{
-      display:none !important;
-    }
-
-    body.playing-wheel .svg-wheel-star{
-      fill:#26313a !important;
-      opacity:.62 !important;
+      max-height:clamp(54px, 9vh, 96px) !important;
+      object-fit:contain !important;
+      z-index:60 !important;
       pointer-events:none !important;
+      user-select:none !important;
     }
 
-    body.playing-wheel .svg-wheel-label{
-      overflow:visible !important;
+    .wheel-game-logo{
+      display:none;
     }
 
-    body.playing-wheel .wheel-game-controls{
-      height:58px !important;
-      min-height:58px !important;
-      grid-template-columns:48px minmax(160px, 330px) !important;
-      gap:clamp(16px, 5vw, 54px) !important;
-      padding:0 14px 6px !important;
-    }
-
-    body.playing-wheel .wheel-after-spin{
-      padding:0 0 calc(8px + var(--safe-bottom)) !important;
-    }
-
-    @media (orientation:landscape){
-      body.playing-wheel .wheel-game-screen{
-        --wheel-size:min(68vw, calc(100dvh - 44px), 86dvh, 780px);
-      }
-
-      body.playing-wheel .wheel-stage{
-        padding:0 6px !important;
-      }
-
-      body.playing-wheel .wheel-game-controls{
-        height:38px !important;
-        min-height:38px !important;
-        grid-template-columns:34px minmax(120px, 240px) !important;
-        gap:clamp(12px, 4vw, 38px) !important;
-        padding:0 10px 4px !important;
-      }
-
-      body.playing-wheel .wheel-after-spin{
-        padding:0 0 3px !important;
-      }
-    }
-
-    @media (max-width:430px){
-      body.playing-wheel .wheel-game-screen{
-        --wheel-size:min(95vw, calc(100dvh - 138px), 430px);
-      }
-    }
-
-    /* v37: سلوك أقرب لـ Wordwall + طي شريط Safari عبر صفحة قابلة للتمرير قليلًا */
-    body.playing-wheel{
-      min-height:calc(100dvh + 120px) !important;
-      height:auto !important;
-      max-height:none !important;
-      overflow-x:hidden !important;
-      overflow-y:auto !important;
-      -webkit-overflow-scrolling:touch !important;
-      overscroll-behavior-y:none !important;
-      background:#fff !important;
-    }
-
-    body.playing-wheel .page{
-      min-height:calc(100dvh + 120px) !important;
-      height:auto !important;
-      max-height:none !important;
-      overflow:visible !important;
-      background:#fff !important;
-      padding:0 !important;
-    }
-
-    body.playing-wheel .page::after{
-      content:"";
-      display:block;
-      height:120px;
-      pointer-events:none;
-    }
-
-    body.playing-wheel .wheel-game-screen{
-      position:sticky !important;
-      top:0 !important;
-      right:auto !important;
-      bottom:auto !important;
-      left:auto !important;
-      width:100vw !important;
-      height:100dvh !important;
-      min-height:100dvh !important;
-      max-height:100dvh !important;
-      overflow:hidden !important;
-      background:#fff !important;
-      --wheel-size:min(94vw, calc(100dvh - 150px), 730px);
+    body.playing-wheel .wheel-game-logo{
+      display:block !important;
     }
 
     body.playing-wheel .wheel-stage{
-      overflow:hidden !important;
-      padding:8px 8px 0 !important;
-    }
-
-    body.playing-wheel .real-wheel{
-      width:var(--wheel-size) !important;
-      height:var(--wheel-size) !important;
-      max-width:var(--wheel-size) !important;
-      max-height:var(--wheel-size) !important;
-      transform:translateX(0) scale(1) !important;
-      transform-origin:center center !important;
-      transition:transform 760ms cubic-bezier(.18,.82,.18,1) !important;
-      will-change:transform !important;
-    }
-
-    body.playing-wheel .real-wheel.wordwall-zoom{
-      transform:translateX(clamp(38px, 11vw, 132px)) scale(1.48) !important;
-    }
-
-    body.playing-wheel .svg-wheel-rotor{
-      transition:none !important;
+      padding-bottom:clamp(54px, 9vh, 92px) !important;
     }
 
     body.playing-wheel .selected-result{
-      min-height:32px !important;
-      font-size:clamp(18px, 2.8vw, 30px) !important;
-      padding:0 12px 4px !important;
+      position:absolute !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:calc(clamp(70px, 10vh, 100px) + var(--safe-bottom)) !important;
+      min-height:26px !important;
+      z-index:42 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .wheel-game-controls{
+      --back-w:clamp(82px, 8vw, 104px);
+      --spin-w:clamp(160px, 16vw, 246px);
+      --delete-w:clamp(132px, 14vw, 218px);
+      --control-h:clamp(48px, 7.4vh, 66px);
+      --edge-gap:clamp(12px, 2.2vw, 28px);
+      --between-gap:clamp(12px, 2vw, 26px);
+      position:absolute !important;
+      left:0 !important;
+      right:0 !important;
+      bottom:calc(12px + var(--safe-bottom)) !important;
+      width:100% !important;
+      height:calc(var(--control-h) + 8px) !important;
+      min-height:0 !important;
+      display:block !important;
+      padding:0 !important;
+      margin:0 !important;
+      z-index:55 !important;
+      pointer-events:none !important;
+    }
+
+    body.playing-wheel .back-game-btn,
+    body.playing-wheel .spin-game-btn,
+    body.playing-wheel .remove-selected-btn{
+      position:absolute !important;
+      bottom:0 !important;
+      height:var(--control-h) !important;
+      border:4px solid #111 !important;
+      box-shadow:0 6px 0 rgba(0,0,0,.20) !important;
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
+      font-weight:900 !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      cursor:pointer !important;
+      pointer-events:auto !important;
+      user-select:none !important;
+      white-space:nowrap !important;
+    }
+
+    body.playing-wheel .back-game-btn{
+      left:var(--edge-gap) !important;
+      width:var(--back-w) !important;
+      border-radius:16px !important;
+      background:var(--title-yellow) !important;
+      color:#111 !important;
+      font-size:clamp(18px, 2.2vw, 28px) !important;
+    }
+
+    body.playing-wheel .spin-game-btn{
+      right:var(--edge-gap) !important;
+      width:var(--spin-w) !important;
+      border-radius:24px !important;
+      background:linear-gradient(180deg, #ff8a4d 0%, #f4773f 52%, #e76632 100%) !important;
+      color:#fff !important;
+      font-size:clamp(22px, 3vw, 38px) !important;
+      text-shadow:0 1px 0 rgba(0,0,0,.16) !important;
     }
 
     body.playing-wheel .wheel-after-spin{
+      position:absolute !important;
+      right:calc(var(--edge-gap) + var(--spin-w) + var(--between-gap)) !important;
+      bottom:0 !important;
+      width:var(--delete-w) !important;
+      height:var(--control-h) !important;
       display:none !important;
-      justify-content:center !important;
-      align-items:center !important;
-      gap:10px !important;
-      padding:0 12px calc(10px + var(--safe-bottom)) !important;
+      padding:0 !important;
+      margin:0 !important;
+      z-index:56 !important;
+      pointer-events:none !important;
     }
 
     body.playing-wheel .wheel-after-spin.show{
-      display:flex !important;
-    }
-
-    body.playing-wheel .resume-selected-btn,
-    body.playing-wheel .remove-selected-btn{
-      min-width:clamp(128px, 26vw, 210px) !important;
-      min-height:44px !important;
-      border:3px solid #222 !important;
-      border-radius:13px !important;
-      color:#111 !important;
-      font-size:clamp(16px, 2.3vw, 21px) !important;
-      font-weight:900 !important;
-      cursor:pointer !important;
-      box-shadow:0 3px 0 rgba(0,0,0,.18) !important;
-    }
-
-    body.playing-wheel .resume-selected-btn{
-      background:#fff !important;
+      display:block !important;
     }
 
     body.playing-wheel .remove-selected-btn{
-      background:#f05d5b !important;
+      left:0 !important;
+      right:auto !important;
+      width:100% !important;
+      min-width:0 !important;
+      min-height:0 !important;
+      border-radius:18px !important;
+      background:#ef3f3d !important;
       color:#fff !important;
+      font-size:clamp(18px, 2.4vw, 30px) !important;
+    }
+
+    body.playing-wheel .back-game-btn:active,
+    body.playing-wheel .spin-game-btn:active,
+    body.playing-wheel .remove-selected-btn:active{
+      transform:translateY(3px) !important;
+      box-shadow:0 3px 0 rgba(0,0,0,.20) !important;
     }
 
     @media (orientation:landscape){
-      body.playing-wheel .wheel-game-screen{
-        --wheel-size:min(68vw, calc(100dvh - 54px), 86dvh, 780px);
+      body.playing-wheel .wheel-game-logo{
+        top:calc(8px + var(--safe-top)) !important;
+        width:clamp(72px, 8.5vw, 132px) !important;
+        max-height:clamp(48px, 13vh, 86px) !important;
       }
 
-      body.playing-wheel .real-wheel.wordwall-zoom{
-        transform:translateX(clamp(30px, 9vw, 110px)) scale(1.36) !important;
+      body.playing-wheel .wheel-stage{
+        padding-bottom:clamp(40px, 11vh, 70px) !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        --back-w:clamp(74px, 7vw, 94px);
+        --spin-w:clamp(150px, 15vw, 238px);
+        --delete-w:clamp(124px, 13vw, 210px);
+        --control-h:clamp(40px, 9.2vh, 60px);
+        bottom:calc(8px + var(--safe-bottom)) !important;
       }
 
       body.playing-wheel .selected-result{
-        min-height:18px !important;
-        font-size:clamp(13px, 2.5vh, 18px) !important;
-        padding:0 8px !important;
+        bottom:calc(clamp(58px, 13vh, 84px) + var(--safe-bottom)) !important;
+      }
+    }
+
+    @media (max-width:760px){
+      body.playing-wheel .wheel-game-logo{
+        top:calc(10px + var(--safe-top)) !important;
+        left:12px !important;
+        width:clamp(64px, 18vw, 92px) !important;
+        max-height:64px !important;
       }
 
-      body.playing-wheel .resume-selected-btn,
+      body.playing-wheel .wheel-stage{
+        padding-bottom:76px !important;
+      }
+
+      body.playing-wheel .wheel-game-controls{
+        --back-w:68px;
+        --spin-w:132px;
+        --delete-w:96px;
+        --control-h:46px;
+        --edge-gap:10px;
+        --between-gap:10px;
+        bottom:calc(10px + var(--safe-bottom)) !important;
+      }
+
+      body.playing-wheel .back-game-btn{
+        border-radius:14px !important;
+        font-size:17px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        border-radius:19px !important;
+        font-size:23px !important;
+      }
+
       body.playing-wheel .remove-selected-btn{
-        min-height:32px !important;
-        min-width:128px !important;
-        font-size:14px !important;
-        border-width:2px !important;
-        border-radius:10px !important;
+        border-radius:16px !important;
+        font-size:18px !important;
+      }
+
+      body.playing-wheel .selected-result{
+        bottom:calc(62px + var(--safe-bottom)) !important;
+        font-size:18px !important;
       }
     }
 
     @media (max-width:430px){
-      body.playing-wheel .wheel-game-screen{
-        --wheel-size:min(95vw, calc(100dvh - 148px), 430px);
+      body.playing-wheel .wheel-game-controls{
+        --back-w:62px;
+        --spin-w:120px;
+        --delete-w:86px;
+        --control-h:42px;
+        --between-gap:8px;
       }
 
-      body.playing-wheel .real-wheel.wordwall-zoom{
-        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38) !important;
-      }
-
-      body.playing-wheel .wheel-after-spin{
-        gap:8px !important;
-      }
-
-      body.playing-wheel .resume-selected-btn,
+      body.playing-wheel .back-game-btn,
+      body.playing-wheel .spin-game-btn,
       body.playing-wheel .remove-selected-btn{
-        min-width:118px !important;
-        min-height:40px !important;
+        border-width:3px !important;
+        box-shadow:0 5px 0 rgba(0,0,0,.18) !important;
+      }
+
+      body.playing-wheel .back-game-btn{
+        font-size:15px !important;
+      }
+
+      body.playing-wheel .spin-game-btn{
+        font-size:20px !important;
+      }
+
+      body.playing-wheel .remove-selected-btn{
         font-size:15px !important;
       }
     }
-
-    /* v38: شكل العجلة النهائي أقرب لـ Wordwall: بدون زخرفة خارجية، عناصر شعاعية، وسهم واضح */
-    body.playing-wheel .wheel-game-screen{
-      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
-    }
-
-    body.playing-wheel .wheel-stage{
-      padding:10px 8px 0 !important;
-    }
-
-    body.playing-wheel .real-wheel{
-      filter:drop-shadow(0 5px 14px rgba(0,0,0,.16)) !important;
-    }
-
-    body.playing-wheel .real-wheel::before,
-    body.playing-wheel .svg-wheel-decor-line,
-    body.playing-wheel .svg-wheel-decor-dot,
-    body.playing-wheel .svg-wheel-star{
-      display:none !important;
-      content:none !important;
-    }
-
-    body.playing-wheel .svg-sector{
-      stroke:#fff !important;
-      stroke-width:2.4 !important;
-      stroke-linejoin:round !important;
-    }
-
-    body.playing-wheel .svg-wheel-label{
-      font-family:Tahoma, Arial, "Segoe UI", sans-serif !important;
-      font-weight:800 !important;
-      dominant-baseline:middle !important;
-      text-anchor:middle !important;
-      direction:rtl !important;
-      unicode-bidi:plaintext !important;
-      paint-order:stroke !important;
-      stroke:rgba(0,0,0,.18) !important;
-      stroke-width:.45px !important;
-      stroke-linejoin:round !important;
-      pointer-events:none !important;
-      user-select:none !important;
-    }
-
-    body.playing-wheel .svg-wheel-label.light{
-      fill:#fff !important;
-    }
-
-    body.playing-wheel .svg-wheel-label.dark{
-      fill:#151515 !important;
-      stroke:rgba(255,255,255,.72) !important;
-      stroke-width:.65px !important;
-    }
-
-    body.playing-wheel .svg-wheel-image{
-      pointer-events:none !important;
-      user-select:none !important;
-      filter:none !important;
-    }
-
-    body.playing-wheel .real-wheel-center{
-      width:18.5% !important;
-      min-width:0 !important;
-      border:4px solid rgba(0,0,0,.10) !important;
-      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12) !important;
-      font-size:0 !important;
-      padding:0 !important;
-    }
-
-    body.playing-wheel .real-wheel-center.has-question{
-      width:25.5% !important;
-      font-size:clamp(13px, 2.75vmin, 28px) !important;
-      line-height:1.2 !important;
-      font-weight:800 !important;
-      padding:clamp(8px, 1.5vmin, 16px) !important;
-      white-space:normal !important;
-      overflow-wrap:anywhere !important;
-      word-break:normal !important;
-    }
-
-    body.playing-wheel .game-wheel-arrow{
-      left:var(--game-arrow-left, clamp(10px, 4vw, 56px)) !important;
-      border-top:var(--game-arrow-h, 28px) solid transparent !important;
-      border-bottom:var(--game-arrow-h, 28px) solid transparent !important;
-      border-left:var(--game-arrow-w, 52px) solid #111 !important;
-      filter:drop-shadow(0 1px 0 rgba(0,0,0,.22)) !important;
-      z-index:30 !important;
-    }
-
-    body.playing-wheel .real-wheel.wordwall-zoom{
-      transform:translateX(clamp(26px, 7vw, 82px)) scale(1.28) !important;
-    }
-
-    @media (orientation:landscape){
-      body.playing-wheel .wheel-game-screen{
-        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
-      }
-
-      body.playing-wheel .real-wheel-center.has-question{
-        font-size:clamp(10px, 2.1vmin, 20px) !important;
-      }
-
-      body.playing-wheel .real-wheel.wordwall-zoom{
-        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24) !important;
-      }
-    }
-
-    @media (max-width:430px){
-      body.playing-wheel .wheel-game-screen{
-        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
-      }
-
-      body.playing-wheel .real-wheel-center.has-question{
-        font-size:clamp(12px, 3.1vmin, 19px) !important;
-        line-height:1.18 !important;
-      }
-    }
-
 
   </style>
 </head>
@@ -3563,6 +3414,8 @@
 
 
     <section class="wheel-game-screen" id="wheelGameScreen">
+      <img class="wheel-game-logo" src="logo.PNG" alt="صندوق الألعاب التعليمية" />
+
       <div class="wheel-topbar">
         <div class="wheel-timer" id="wheelTimer"></div>
         <div class="wheel-instruction"></div>
@@ -3585,15 +3438,13 @@
       <div class="selected-result" id="selectedResult" aria-live="polite"></div>
 
       <div class="wheel-game-controls">
-        <button class="game-icon-btn" type="button" id="exitWheelGameBtn" aria-label="القائمة">☰</button>
-        <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
-        <button class="game-icon-btn" type="button" id="soundGameBtn" aria-label="الصوت">🔊</button>
-        <button class="game-icon-btn" type="button" id="fullscreenGameBtn" aria-label="تكبير">⛶</button>
-      </div>
+        <button class="back-game-btn" type="button" id="exitWheelGameBtn" aria-label="رجوع">رجوع</button>
 
-      <div class="wheel-after-spin" id="wheelAfterSpin">
-        <button class="resume-selected-btn" type="button" id="resumeWheelBtn">استئناف</button>
-        <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف العنصر</button>
+        <div class="wheel-after-spin" id="wheelAfterSpin">
+          <button class="remove-selected-btn" type="button" id="removeSelectedBtn">حذف</button>
+        </div>
+
+        <button class="spin-game-btn" type="button" id="spinGameBtn">تدوير</button>
       </div>
     </section>
 
@@ -3629,7 +3480,6 @@
     let labelUprightNodes = [];
     let spinAnimationId = null;
     let dragState = null;
-    let safariCollapseTimers = [];
 
     const SVG_NS = "http://www.w3.org/2000/svg";
     const XLINK_NS = "http://www.w3.org/1999/xlink";
@@ -3652,41 +3502,6 @@
       "#7cb342", "#039be5", "#fb8c00", "#ec407a"
     ];
 
-
-    function isIosWebKit(){
-      const ua = navigator.userAgent || "";
-      const isiOS = /iP(ad|hone|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-      return isiOS && /WebKit/i.test(ua);
-    }
-
-    function collapseSafariBars(){
-      safariCollapseTimers.forEach((timer)=> clearTimeout(timer));
-      safariCollapseTimers = [];
-
-      if (!document.body.classList.contains("playing-wheel") || !isIosWebKit()) return;
-
-      [0, 80, 220, 520, 900].forEach((delay)=>{
-        safariCollapseTimers.push(setTimeout(()=>{
-          if (!document.body.classList.contains("playing-wheel")) return;
-          try {
-            window.scrollTo({ top:76, left:0, behavior:"auto" });
-          } catch (_) {
-            window.scrollTo(0, 76);
-          }
-          requestAnimationFrame(updateWheelGameLayout);
-        }, delay));
-      });
-    }
-
-    function clearSafariCollapse(){
-      safariCollapseTimers.forEach((timer)=> clearTimeout(timer));
-      safariCollapseTimers = [];
-      try {
-        window.scrollTo({ top:0, left:0, behavior:"auto" });
-      } catch (_) {
-        window.scrollTo(0, 0);
-      }
-    }
 
     function updateViewportVars(){
       const root = document.documentElement;
@@ -3714,9 +3529,9 @@
       const wheelRect = wheel.getBoundingClientRect();
       if (!wheelRect.width || !stageRect.width) return;
 
-      const arrowW = Math.max(36, Math.min(62, wheelRect.width * 0.092));
-      const arrowH = Math.max(22, Math.min(38, wheelRect.width * 0.056));
-      const arrowLeft = wheelRect.left - stageRect.left - arrowW - Math.max(4, wheelRect.width * 0.010);
+      const arrowW = Math.max(32, Math.min(58, wheelRect.width * 0.085));
+      const arrowH = Math.max(19, Math.min(34, wheelRect.width * 0.052));
+      const arrowLeft = wheelRect.left - stageRect.left - arrowW + Math.max(3, wheelRect.width * 0.012);
 
       screen.style.setProperty("--game-arrow-left", `${Math.max(2, arrowLeft)}px`);
       screen.style.setProperty("--game-arrow-w", `${arrowW}px`);
@@ -3730,10 +3545,6 @@
       window.visualViewport.addEventListener("resize", updateViewportVars, { passive:true });
       window.visualViewport.addEventListener("scroll", updateViewportVars, { passive:true });
     }
-
-    document.addEventListener("touchend", ()=>{
-      if (document.body.classList.contains("playing-wheel")) collapseSafariBars();
-    }, { passive:true });
 
     function openScreen(id){
       const isWheelGame = id === "wheelGameScreen";
@@ -3753,7 +3564,6 @@
 
       if (isWheelGame) {
         updateViewportVars();
-        collapseSafariBars();
         requestAnimationFrame(()=>{
           updateViewportVars();
           updateWheelGameLayout();
@@ -3765,7 +3575,6 @@
           fitCenterText();
         }, 90);
       } else {
-        clearSafariCollapse();
         window.scrollTo({ top:0, behavior:"auto" });
       }
     }
@@ -3972,60 +3781,14 @@
     }
 
     function labelFontSize(count, text){
-      const length = String(text || "").trim().length;
-      if (count <= 5) {
-        if (length > 42) return 11;
-        if (length > 30) return 13;
-        if (length > 20) return 16;
-        if (length > 12) return 20;
-        return 24;
-      }
-      if (count <= 8) {
-        if (length > 36) return 9;
-        if (length > 26) return 11;
-        if (length > 16) return 13;
-        if (length > 10) return 16;
-        return 19;
-      }
-      if (count <= 12) {
-        if (length > 30) return 7;
-        if (length > 22) return 8;
-        if (length > 14) return 10;
-        if (length > 9) return 12;
-        return 15;
-      }
-      if (length > 28) return 5.8;
-      if (length > 20) return 6.8;
-      if (length > 12) return 8;
-      return 10;
+      const length = String(text || "").length;
+      if (count <= 5) return length > 16 ? 20 : 26;
+      if (count <= 8) return length > 14 ? 16 : 21;
+      if (count <= 12) return length > 12 ? 13 : 17;
+      return length > 10 ? 10 : 13;
     }
 
-    function mixedTextFontSize(count, text){
-      const length = String(text || "").trim().length;
-      if (count <= 5) {
-        if (length > 34) return 9.5;
-        if (length > 24) return 11.5;
-        if (length > 16) return 13.5;
-        return 17;
-      }
-      if (count <= 8) {
-        if (length > 28) return 7.2;
-        if (length > 20) return 8.8;
-        if (length > 13) return 10.5;
-        return 13;
-      }
-      if (count <= 12) {
-        if (length > 24) return 5.8;
-        if (length > 16) return 6.8;
-        if (length > 10) return 8.3;
-        return 10;
-      }
-      if (length > 18) return 4.9;
-      if (length > 12) return 5.7;
-      return 7.2;
-    }
-
-    function splitTextLines(text, maxChars, maxLines = 4){
+    function splitTextLines(text, maxChars){
       const clean = String(text || "").trim();
       if (!clean) return [""];
       if (clean.length <= maxChars) return [clean];
@@ -4035,18 +3798,6 @@
       let current = "";
 
       words.forEach((word)=>{
-        if (word.length > maxChars) {
-          if (current) {
-            lines.push(current);
-            current = "";
-          }
-
-          for (let i = 0; i < word.length; i += maxChars) {
-            lines.push(word.slice(i, i + maxChars));
-          }
-          return;
-        }
-
         const test = current ? `${current} ${word}` : word;
         if (test.length > maxChars && current) {
           lines.push(current);
@@ -4057,14 +3808,13 @@
       });
 
       if (current) lines.push(current);
-      return lines.slice(0, maxLines);
+      return lines.slice(0, 3);
     }
 
     function createUprightHolder(parent, angle, radius){
-      const normalized = normalizeAngle(angle);
-      const flip = normalized > 90 && normalized < 270;
+      const p = polarToCartesian(radius, angle);
       const holder = createSvgElement("g", {
-        transform: `rotate(${angle.toFixed(3)}) translate(${radius.toFixed(3)} 0) rotate(${flip ? 180 : 0})`
+        transform: `translate(${p.x.toFixed(3)} ${p.y.toFixed(3)})`
       });
 
       const upright = createSvgElement("g", {
@@ -4073,6 +3823,7 @@
 
       holder.appendChild(upright);
       parent.appendChild(holder);
+      labelUprightNodes.push(upright);
       return upright;
     }
 
@@ -4087,9 +3838,8 @@
         "font-size": String(size)
       });
 
-      const maxChars = count <= 5 ? 10 : count <= 8 ? 8 : count <= 12 ? 6 : 5;
-      const lines = splitTextLines(text, maxChars, count <= 8 ? 5 : 4);
-      const lineHeight = size * 1.02;
+      const lines = splitTextLines(text, count <= 6 ? 9 : 7);
+      const lineHeight = size * 1.06;
       const startY = -((lines.length - 1) * lineHeight) / 2;
 
       lines.forEach((line, idx)=>{
@@ -4109,13 +3859,13 @@
       const hasText = Boolean(withText && String(entry.text || "").trim());
       const text = String(entry.text || "").trim();
 
-      const imgSize = count <= 5 ? 66 : count <= 8 ? 50 : count <= 12 ? 38 : 28;
-      const textSize = mixedTextFontSize(count, text);
-      const gap = count <= 5 ? 18 : count <= 8 ? 12 : 8;
+      const imgSize = count <= 5 ? 70 : count <= 8 ? 58 : count <= 12 ? 48 : 38;
+      const textSize = count <= 5 ? 17 : count <= 8 ? 14 : count <= 12 ? 11 : 9;
+      const gap = count <= 8 ? 13 : 9;
 
-      // v38: توزيع Wordwall: الصورة باتجاه الحافة الخارجية، والنص باتجاه المنتصف داخل نفس القطاع.
-      const imageCenterX = hasText ? (imgSize * 0.55 + gap) : 0;
-      const textCenterX = hasText ? -(imgSize * 0.50 + gap * 0.55) : 0;
+      // v35: عرض الصور مع النصوص يكون مثل المثال: صورة بدون خلفية، وبجانبها النص مباشرة.
+      const imageCenterX = hasText ? -(imgSize * 0.50) : 0;
+      const textCenterX = hasText ? (imgSize * 0.50 + gap) : 0;
 
       if (entry.imageData) {
         const img = createSvgElement("image", {
@@ -4139,8 +3889,8 @@
           "text-anchor": "middle"
         });
 
-        const lines = splitTextLines(text, count <= 5 ? 8 : count <= 8 ? 6 : 5, count <= 8 ? 4 : 3);
-        const lineHeight = textSize * 1.03;
+        const lines = splitTextLines(text, count <= 6 ? 8 : 6).slice(0, 2);
+        const lineHeight = textSize * 1.05;
         const startY = -((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, idx)=>{
@@ -4157,7 +3907,9 @@
     }
 
     function updateUprightLabels(){
-      // v38: عناصر Wordwall تدور مع القطاع نفسه، لذلك لا نعكس دوران النصوص.
+      labelUprightNodes.forEach((node)=>{
+        node.setAttribute("transform", `rotate(${-wheelRotation.toFixed(3)})`);
+      });
     }
 
     function setRotorRotation(degrees){
@@ -4168,23 +3920,6 @@
       rotor.style.transition = "none";
       rotor.style.transform = `rotate(${degrees}deg)`;
       updateUprightLabels();
-    }
-
-    function resetWordwallFocus(){
-      const wheel = document.getElementById("realWheel");
-      const afterSpin = document.getElementById("wheelAfterSpin");
-      if (wheel) wheel.classList.remove("wordwall-zoom");
-      if (afterSpin) afterSpin.classList.remove("show");
-    }
-
-    function applyWordwallFocus(){
-      const wheel = document.getElementById("realWheel");
-      if (!wheel) return;
-
-      requestAnimationFrame(()=>{
-        wheel.classList.add("wordwall-zoom");
-        collapseSafariBars();
-      });
     }
 
     function fitCenterText(){
@@ -4202,7 +3937,7 @@
       }
     }
 
-    function wheelDecorPath(radius = 229, waves = 32, amplitude = 1.15, points = 260){
+    function wheelDecorPath(radius = 234, waves = 20, amplitude = 3.2, points = 240){
       let d = "";
       for (let i = 0; i <= points; i++) {
         const angle = (i / points) * 360;
@@ -4213,25 +3948,25 @@
       return d + "Z";
     }
 
-    function starPath(cx, cy, outerRadius = 3.1, innerRadius = 1.35){
-      const points = [];
-      for (let i = 0; i < 10; i++) {
-        const angle = (-90 + i * 36) * Math.PI / 180;
-        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-        points.push({
-          x: cx + Math.cos(angle) * radius,
-          y: cy + Math.sin(angle) * radius
-        });
-      }
-
-      return points.map((point, index)=> {
-        const command = index === 0 ? "M" : "L";
-        return `${command} ${point.x.toFixed(3)} ${point.y.toFixed(3)}`;
-      }).join(" ") + " Z";
-    }
-
     function drawWheelDecoration(parent){
-      // v38: بدون خطوط أو نجوم حول العجلة، مثل مرجع Wordwall.
+      const decorLine = createSvgElement("path", {
+        d: wheelDecorPath(),
+        class: "svg-wheel-decor-line"
+      });
+      parent.appendChild(decorLine);
+
+      for (let i = 0; i < 44; i++) {
+        const angle = (i / 44) * 360;
+        const radius = 236 + Math.sin((angle * Math.PI / 180) * 18) * 2.8;
+        const p = polarToCartesian(radius, angle);
+        const dot = createSvgElement("circle", {
+          cx: p.x.toFixed(3),
+          cy: p.y.toFixed(3),
+          r: String(i % 4 === 0 ? 1.65 : 1.1),
+          class: "svg-wheel-decor-dot"
+        });
+        parent.appendChild(dot);
+      }
     }
 
     function buildWheel(){
@@ -4248,9 +3983,10 @@
       sectors.innerHTML = "";
       labels.innerHTML = "";
       labelUprightNodes = [];
+      drawWheelDecoration(sectors);
 
       const radius = 224;
-      const labelRadius = count <= 5 ? 142 : count <= 8 ? 150 : count <= 12 ? 158 : 164;
+      const labelRadius = count <= 5 ? 142 : count <= 8 ? 148 : count <= 12 ? 155 : 162;
       const step = 360 / count;
 
       items.forEach((entry, index)=>{
@@ -4279,18 +4015,17 @@
         cy: "0",
         r: String(radius),
         fill: "none",
-        stroke: "rgba(0,0,0,.16)",
-        "stroke-width": "1.3"
+        stroke: "rgba(0,0,0,.08)",
+        "stroke-width": "2"
       });
       sectors.appendChild(rim);
 
       const centerQuestionEnabled = questionPanel?.classList.contains("enabled");
       const centerText = (centerQuestionInput?.value || "").trim();
       center.textContent = centerQuestionEnabled ? (centerText || "السؤال") : "";
-      center.classList.toggle("has-question", Boolean(centerQuestionEnabled));
 
       if (result) result.textContent = "";
-      resetWordwallFocus();
+      if (afterSpin) afterSpin.classList.remove("show");
       currentSelectedIndex = -1;
 
       setRotorRotation(wheelRotation);
@@ -4299,11 +4034,9 @@
 
     function openWheelGame(){
       wheelRotation = 0;
-      resetWordwallFocus();
       updateViewportVars();
       buildWheel();
       openScreen("wheelGameScreen");
-      collapseSafariBars();
       requestAnimationFrame(()=>{
         updateViewportVars();
         updateWheelGameLayout();
@@ -4345,7 +4078,6 @@
 
       if (result) result.textContent = textForEntry(items[index], index);
       if (afterSpin) afterSpin.classList.add("show");
-      applyWordwallFocus();
     }
 
     function easeOutQuint(t){
@@ -4369,21 +4101,14 @@
       const result = document.getElementById("selectedResult");
       const afterSpin = document.getElementById("wheelAfterSpin");
 
-      resetWordwallFocus();
       if (result) result.textContent = "";
       if (afterSpin) afterSpin.classList.remove("show");
-      let focusStarted = false;
 
       function frame(now){
         const progress = Math.min(1, (now - startTime) / duration);
         const eased = easeOutQuint(progress);
 
         setRotorRotation(start + change * eased);
-
-        if (!focusStarted && progress >= 0.68) {
-          focusStarted = true;
-          applyWordwallFocus();
-        }
 
         if (progress < 1) {
           spinAnimationId = requestAnimationFrame(frame);
@@ -4408,7 +4133,7 @@
       const desiredNorm = normalizeAngle(180 - selectedCenterAngle);
 
       let delta = desiredNorm - currentNorm;
-      const fullTurns = 5 + Math.floor(Math.random() * 3);
+      const fullTurns = 4 + Math.floor(Math.random() * 2);
 
       if (direction < 0) {
         while (delta > 0) delta -= 360;
@@ -4419,7 +4144,7 @@
       }
 
       currentSelectedIndex = selected;
-      animateWheelTo(wheelRotation + delta, 4700 + Math.floor(Math.random() * 450));
+      animateWheelTo(wheelRotation + delta, 5200);
     }
 
     document.getElementById("spinGameBtn")?.addEventListener("click", ()=>{
@@ -4437,7 +4162,6 @@
 
     realWheel?.addEventListener("pointerdown", (event)=>{
       cancelSpinAnimation();
-      resetWordwallFocus();
       realWheel.setPointerCapture?.(event.pointerId);
 
       const afterSpin = document.getElementById("wheelAfterSpin");
@@ -4488,14 +4212,8 @@
     realWheel?.addEventListener("pointerup", endDrag);
     realWheel?.addEventListener("pointercancel", endDrag);
 
-    document.getElementById("resumeWheelBtn")?.addEventListener("click", ()=>{
-      resetWordwallFocus();
-      collapseSafariBars();
-    });
-
     document.getElementById("removeSelectedBtn")?.addEventListener("click", ()=>{
       if (currentSelectedIndex < 0) return;
-      resetWordwallFocus();
 
       if (wheelEntries.length) {
         const filledIndexes = [];
@@ -4524,14 +4242,12 @@
 
     document.getElementById("exitWheelGameBtn")?.addEventListener("click", ()=>{
       cancelSpinAnimation();
-      resetWordwallFocus();
       openScreen("wheelSetupScreen");
     });
 
     homeButton.addEventListener("click", ()=>{
       if (document.body.classList.contains("playing-wheel")) {
         cancelSpinAnimation();
-        resetWordwallFocus();
         openScreen("wheelSetupScreen");
         return;
       }
