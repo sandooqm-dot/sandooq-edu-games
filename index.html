@@ -3583,7 +3583,7 @@
 
 
 
-    /* v41: محرك محتوى العجلة النظيف - يحافظ على أزرار index-2 وحل Safari */
+    /* v42: توزيع محتوى العجلة مثل Wordwall + إصلاح حذف العنصر المختار */
     body.playing-wheel #svgWheelLabels{
       display:none !important;
     }
@@ -3599,15 +3599,15 @@
       will-change:transform !important;
       pointer-events:none !important;
       z-index:6 !important;
-      direction:rtl !important;
+      direction:ltr !important;
     }
 
     body.playing-wheel .wheel-html-label{
       position:absolute !important;
       left:50% !important;
       top:50% !important;
-      width:120px !important;
-      height:44px !important;
+      width:var(--html-label-width, 150px) !important;
+      height:var(--html-label-height, 60px) !important;
       transform-origin:50% 50% !important;
       display:flex !important;
       align-items:center !important;
@@ -3624,18 +3624,21 @@
       align-items:center !important;
       justify-content:center !important;
       gap:var(--html-label-gap, 8px) !important;
-      direction:rtl !important;
-      unicode-bidi:plaintext !important;
+      direction:ltr !important;
+      unicode-bidi:normal !important;
       pointer-events:none !important;
       overflow:hidden !important;
+      padding:0 4px !important;
     }
 
     body.playing-wheel .wheel-html-inner.text-only{
-      padding:0 4px !important;
+      justify-content:center !important;
+      padding:0 6px !important;
     }
 
     body.playing-wheel .wheel-html-inner.mixed{
       flex-direction:row !important;
+      justify-content:space-between !important;
     }
 
     body.playing-wheel .wheel-html-inner.mixed.flipped{
@@ -3650,7 +3653,7 @@
       display:-webkit-box !important;
       -webkit-box-orient:vertical !important;
       -webkit-line-clamp:var(--html-line-clamp, 3) !important;
-      max-width:100% !important;
+      max-width:var(--html-text-max, 100%) !important;
       overflow:hidden !important;
       color:#fff !important;
       font-size:var(--html-font-size, 17px) !important;
@@ -3668,7 +3671,7 @@
 
     body.playing-wheel .wheel-html-label.dark .wheel-html-text{
       color:#151515 !important;
-      text-shadow:0 1px 0 rgba(255,255,255,.52) !important;
+      text-shadow:0 1px 0 rgba(255,255,255,.55) !important;
     }
 
     body.playing-wheel .wheel-html-label.light .wheel-html-text{
@@ -4607,43 +4610,57 @@
       const wheelSize = Math.max(260, wheel?.getBoundingClientRect?.().width || wheel?.clientWidth || 360);
       const centerSize = Math.max(0, center?.getBoundingClientRect?.().width || wheelSize * 0.19);
       const step = 360 / Math.max(count, 1);
+      const clamp = (value, min, max)=> Math.max(min, Math.min(max, value));
 
-      const innerRadius = (centerSize / 2) + wheelSize * (count <= 5 ? 0.075 : count <= 8 ? 0.068 : 0.062);
-      const outerRadius = wheelSize * 0.448;
-      const radialWidth = Math.max(wheelSize * 0.145, outerRadius - innerRadius - wheelSize * 0.015);
-      const midRadius = innerRadius + radialWidth / 2;
+      // المحتوى يبدأ بعد دائرة المنتصف وينتهي قبل حافة العجلة، مثل Wordwall.
+      const centerRadius = centerSize / 2;
+      const rimRadius = wheelSize * 0.448;
+      const innerEdge = centerRadius + wheelSize * (count <= 5 ? 0.088 : count <= 8 ? 0.076 : count <= 12 ? 0.066 : 0.058);
+      const outerEdge = rimRadius - wheelSize * (count <= 5 ? 0.035 : count <= 8 ? 0.030 : count <= 12 ? 0.026 : 0.022);
+      const available = Math.max(wheelSize * 0.13, outerEdge - innerEdge);
+
+      const radialWidth = clamp(
+        available * (count <= 5 ? 0.98 : count <= 8 ? 0.94 : count <= 12 ? 0.88 : 0.82),
+        wheelSize * (count <= 5 ? 0.19 : count <= 8 ? 0.16 : count <= 12 ? 0.12 : 0.085),
+        available
+      );
+
+      // دفع النص/الصورة للخارج قليلًا حتى لا تتجمع حول الدائرة الوسطى.
+      const midRadius = innerEdge + available * (count <= 5 ? 0.62 : count <= 8 ? 0.60 : count <= 12 ? 0.58 : 0.55);
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
 
-      const labelHeight = Math.max(
-        wheelSize * (count <= 5 ? 0.092 : count <= 8 ? 0.070 : count <= 12 ? 0.056 : 0.044),
-        Math.min(wheelSize * (count <= 5 ? 0.165 : count <= 8 ? 0.120 : 0.085), arcAtMiddle * 0.68)
+      const labelHeight = clamp(
+        arcAtMiddle * (count <= 5 ? 0.48 : count <= 8 ? 0.42 : count <= 12 ? 0.36 : 0.30),
+        wheelSize * (count <= 5 ? 0.078 : count <= 8 ? 0.058 : count <= 12 ? 0.044 : 0.034),
+        wheelSize * (count <= 5 ? 0.150 : count <= 8 ? 0.110 : count <= 12 ? 0.078 : 0.056)
       );
 
       const imageSize = hasImage
-        ? Math.min(labelHeight * 0.92, wheelSize * (count <= 5 ? 0.102 : count <= 8 ? 0.078 : count <= 12 ? 0.058 : 0.045))
+        ? clamp(labelHeight * 0.82, wheelSize * 0.030, wheelSize * (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040))
         : 0;
 
       let fontSize;
       if (hasImage && hasText) {
-        fontSize = Math.min(labelHeight * 0.34, wheelSize * (count <= 5 ? 0.035 : count <= 8 ? 0.028 : count <= 12 ? 0.021 : 0.016));
+        fontSize = clamp(labelHeight * 0.30, 7.5, wheelSize * (count <= 5 ? 0.034 : count <= 8 ? 0.026 : count <= 12 ? 0.019 : 0.014));
       } else {
-        fontSize = Math.min(labelHeight * 0.48, wheelSize * (count <= 5 ? 0.050 : count <= 8 ? 0.039 : count <= 12 ? 0.028 : 0.020));
+        fontSize = clamp(labelHeight * 0.40, 8.5, wheelSize * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019));
       }
 
-      fontSize = Math.max(8, fontSize);
-      const gap = Math.max(4, Math.min(10, wheelSize * 0.014));
+      const gap = clamp(wheelSize * 0.014, 4, 10);
       const lines = count <= 5 ? 3 : count <= 10 ? 2 : 1;
+      const textMax = hasImage ? Math.max(24, radialWidth - imageSize - gap - 8) : Math.max(34, radialWidth - 8);
 
       return {
-        innerRadius,
-        outerRadius,
+        innerRadius: innerEdge,
+        outerRadius: outerEdge,
         midRadius,
         radialWidth,
         labelHeight,
         imageSize,
         fontSize,
         gap,
-        lines
+        lines,
+        textMax
       };
     }
 
@@ -4669,14 +4686,16 @@
         label.dataset.count = String(count);
         label.dataset.hasImage = hasImage ? "1" : "0";
         label.dataset.hasText = hasText ? "1" : "0";
+        label.style.setProperty("--html-label-width", `${metrics.radialWidth}px`);
+        label.style.setProperty("--html-label-height", `${metrics.labelHeight}px`);
         label.style.setProperty("--html-label-gap", `${metrics.gap}px`);
         label.style.setProperty("--html-font-size", `${metrics.fontSize}px`);
         label.style.setProperty("--html-image-size", `${metrics.imageSize}px`);
         label.style.setProperty("--html-line-clamp", String(metrics.lines));
+        label.style.setProperty("--html-text-max", `${metrics.textMax}px`);
 
         const inner = document.createElement("div");
         inner.className = hasImage && hasText ? "wheel-html-inner mixed" : hasImage ? "wheel-html-inner image-only" : "wheel-html-inner text-only";
-        inner.setAttribute("dir", "rtl");
 
         if (hasText) {
           const textEl = document.createElement("div");
@@ -4704,7 +4723,7 @@
       updateUprightLabels();
     }
 
-function positionHtmlWheelLabels(){
+    function positionHtmlWheelLabels(){
       const wheel = document.getElementById("realWheel");
       const htmlLayer = document.getElementById("wheelHtmlLabels");
       if (!wheel || !htmlLayer || !labelUprightNodes.length) return;
@@ -4728,12 +4747,13 @@ function positionHtmlWheelLabels(){
 
         item.label.style.left = `${center + p.x}px`;
         item.label.style.top = `${center + p.y}px`;
-        item.label.style.width = `${metrics.radialWidth}px`;
-        item.label.style.height = `${metrics.labelHeight}px`;
+        item.label.style.setProperty("--html-label-width", `${metrics.radialWidth}px`);
+        item.label.style.setProperty("--html-label-height", `${metrics.labelHeight}px`);
         item.label.style.setProperty("--html-label-gap", `${metrics.gap}px`);
         item.label.style.setProperty("--html-font-size", `${metrics.fontSize}px`);
         item.label.style.setProperty("--html-image-size", `${metrics.imageSize}px`);
         item.label.style.setProperty("--html-line-clamp", String(metrics.lines));
+        item.label.style.setProperty("--html-text-max", `${metrics.textMax}px`);
       });
 
       updateUprightLabels();
@@ -4852,12 +4872,17 @@ function positionHtmlWheelLabels(){
       const step = 360 / count;
       const localAngleAtArrow = normalizeAngle(180 - normalizeAngle(wheelRotation));
       const relative = normalizeAngle(localAngleAtArrow - (-90));
-      return Math.floor(relative / step) % count;
+      const nearestCenterIndex = Math.round((relative - step / 2) / step);
+      return ((nearestCenterIndex % count) + count) % count;
     }
 
-    function showSelectedAtArrow(){
+    function showSelectedAtArrow(forcedIndex = null){
       const items = getWheelItems();
-      const index = getSelectedIndexAtArrow();
+      const count = Math.max(items.length, 1);
+      const computedIndex = getSelectedIndexAtArrow();
+      const index = Number.isInteger(forcedIndex)
+        ? ((forcedIndex % count) + count) % count
+        : computedIndex;
       currentSelectedIndex = index;
 
       const result = document.getElementById("selectedResult");
@@ -4880,7 +4905,7 @@ function positionHtmlWheelLabels(){
       }
     }
 
-    function animateWheelTo(targetRotation, duration = 5200){
+    function animateWheelTo(targetRotation, duration = 5200, targetSelectedIndex = null){
       cancelSpinAnimation();
 
       const start = wheelRotation;
@@ -4911,7 +4936,7 @@ function positionHtmlWheelLabels(){
         } else {
           spinAnimationId = null;
           setRotorRotation(targetRotation);
-          showSelectedAtArrow();
+          showSelectedAtArrow(targetSelectedIndex);
         }
       }
 
@@ -4940,7 +4965,7 @@ function positionHtmlWheelLabels(){
       }
 
       currentSelectedIndex = selected;
-      animateWheelTo(wheelRotation + delta, 4700 + Math.floor(Math.random() * 450));
+      animateWheelTo(wheelRotation + delta, 4700 + Math.floor(Math.random() * 450), selected);
     }
 
     document.getElementById("spinGameBtn")?.addEventListener("click", ()=>{
