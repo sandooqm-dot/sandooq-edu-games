@@ -13,10 +13,13 @@
       --red:#f05d5b;
       --orange:#f47a45;
       --orange-dark:#e85f2f;
-      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+      --wheel-size:min(84vw, calc(100dvh - 186px), 620px);
       --arrow-left:8px;
       --arrow-w:52px;
       --arrow-h:28px;
+      --zoom-scale:1.12;
+      --zoom-inverse:.892857;
+      --zoom-x:0px;
     }
 
     *{
@@ -78,7 +81,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:10px 8px calc(74px + var(--safe-bottom));
+      padding:max(30px, calc(var(--safe-top) + 20px)) 8px calc(92px + var(--safe-bottom));
       overflow:hidden;
     }
 
@@ -107,8 +110,7 @@
       border-radius:50%;
       transform:translateX(0) scale(1);
       transform-origin:center center;
-      /* wheel-3: الزوم بصري فقط وبحركة أبطأ، بدون إعادة حساب مواقع النصوص */
-      transition:transform 1250ms cubic-bezier(.16,.82,.16,1);
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
       filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
       touch-action:none;
       cursor:grab;
@@ -120,7 +122,17 @@
     }
 
     .wheel-shell.zoom{
-      transform:translateX(clamp(26px, 7vw, 82px)) scale(1.28);
+      transform:translateX(var(--zoom-x, 0px)) scale(var(--zoom-scale, 1.12));
+    }
+
+    .wheel-shell.zoom .wheel-label-content{
+      transform:scale(var(--zoom-inverse, .892857));
+      transform-origin:center center;
+    }
+
+    .wheel-shell.zoom .wheel-center{
+      transform:translate(-50%,-50%) scale(var(--zoom-inverse, .892857));
+      transform-origin:center center;
     }
 
     .wheel-rotor{
@@ -151,15 +163,13 @@
     }
 
     .wheel-sector.selected{
-      animation:sectorPulse .72s ease-in-out 0s 2;
-      filter:brightness(1.13) saturate(1.05);
+      animation:sectorPulse 1.15s ease-in-out infinite;
+      filter:brightness(1.16) saturate(1.06);
     }
 
     @keyframes sectorPulse{
-      0%{ opacity:1; }
-      35%{ opacity:.72; }
-      70%{ opacity:1; }
-      100%{ opacity:1; }
+      0%,100%{ opacity:1; }
+      45%{ opacity:.68; }
     }
 
     .label-layer{
@@ -200,6 +210,8 @@
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
+      transform-origin:center center;
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
     }
 
     .wheel-label.text-only .wheel-label-content{
@@ -282,6 +294,7 @@
       overflow:hidden;
       pointer-events:none;
       padding:0;
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
     }
 
     .wheel-center.has-question{
@@ -368,11 +381,14 @@
     }
 
     .after-spin.show{
-      display:block;
+      display:flex;
+      align-items:center;
+      gap:clamp(8px, 1.1vw, 14px);
     }
 
     .spin-btn,
-    .remove-btn{
+    .remove-btn,
+    .continue-btn{
       min-width:0;
       width:auto;
       height:clamp(40px, 5.5vh, 54px);
@@ -403,8 +419,15 @@
       background:#f05d5b;
     }
 
+    .continue-btn{
+      min-width:clamp(98px, 10vw, 140px);
+      background:#eeeeee;
+      color:#111;
+    }
+
     .spin-btn:active,
     .remove-btn:active,
+    .continue-btn:active,
     .back-btn:active{
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.20);
@@ -412,15 +435,11 @@
 
     @media (orientation:landscape){
       :root{
-        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+        --wheel-size:min(55vw, calc(100dvh - 70px), 73dvh, 680px);
       }
 
       .wheel-stage{
-        padding:0 6px calc(42px + var(--safe-bottom));
-      }
-
-      .wheel-shell.zoom{
-        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24);
+        padding:max(8px, var(--safe-top)) 6px calc(54px + var(--safe-bottom));
       }
 
       .wheel-logo{
@@ -448,7 +467,8 @@
 
       .back-btn,
       .spin-btn,
-      .remove-btn{
+      .remove-btn,
+      .continue-btn{
         height:clamp(32px, 8vh, 42px);
         border-width:2px;
         border-radius:10px;
@@ -476,11 +496,16 @@
         min-width:clamp(66px, 8vw, 96px);
         padding:0 clamp(12px, 1.8vw, 20px);
       }
+
+      .continue-btn{
+        min-width:clamp(78px, 9vw, 112px);
+        padding:0 clamp(12px, 1.8vw, 20px);
+      }
     }
 
     @media (max-width:430px){
       :root{
-        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+        --wheel-size:min(84vw, calc(100dvh - 190px), 370px);
       }
 
       .wheel-logo{
@@ -489,9 +514,7 @@
         width:64px;
       }
 
-      .wheel-shell.zoom{
-        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38);
-      }
+      /* الزوم يحسب برمجيًا حتى لا يخرج جزء من العجلة خارج الشاشة */
 
       .fixed-controls{
         bottom:calc(12px + var(--safe-bottom));
@@ -512,7 +535,8 @@
       }
 
       .spin-btn,
-      .remove-btn{
+      .remove-btn,
+      .continue-btn{
         height:40px;
         border-radius:11px;
         font-size:15px;
@@ -526,6 +550,11 @@
       .remove-btn{
         min-width:62px;
         padding:0 14px;
+      }
+
+      .continue-btn{
+        min-width:78px;
+        padding:0 12px;
       }
 
       .wheel-text{
@@ -561,6 +590,7 @@
       <div class="right-actions">
         <div class="after-spin" id="afterSpin">
           <button class="remove-btn" type="button" id="removeBtn">حذف</button>
+          <button class="continue-btn" type="button" id="continueBtn">استكمال</button>
         </div>
         <button class="spin-btn" type="button" id="spinBtn">تدوير</button>
       </div>
@@ -748,23 +778,8 @@
       return Math.max(min, Math.min(max, value));
     }
 
-    function getWheelBaseSize(){
-      /*
-        wheel-3:
-        لا نستخدم getBoundingClientRect لحساب النصوص لأنه يتغير مع CSS transform/zoom.
-        هذا كان سبب انتقال النصوص عند التقريب. offsetWidth/clientWidth يبقيان على الحجم الأصلي.
-      */
-      const cssWidth = parseFloat(getComputedStyle(wheelShell).width || "0") || 0;
-      return Math.max(260, wheelShell.offsetWidth || wheelShell.clientWidth || cssWidth || 360);
-    }
-
-    function getCenterBaseSize(baseSize){
-      const cssWidth = parseFloat(getComputedStyle(wheelCenter).width || "0") || 0;
-      return wheelCenter.offsetWidth || wheelCenter.clientWidth || cssWidth || baseSize * (payload.centerQuestionEnabled ? 0.255 : 0.185);
-    }
-
     function labelMetrics(count, entry){
-      const size = getWheelBaseSize();
+      const size = Math.max(260, wheelShell.offsetWidth || wheelShell.clientWidth || 360);
       const step = 360 / Math.max(count, 1);
       const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
       const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
@@ -910,24 +925,22 @@
     }
 
     function updateLayout(){
-      const stageWidth = wheelStage.clientWidth || wheelStage.getBoundingClientRect().width || 0;
-      const baseSize = getWheelBaseSize();
-      if (baseSize && stageWidth) {
-        const arrowW = Math.max(36, Math.min(62, baseSize * 0.092));
-        const arrowH = Math.max(22, Math.min(38, baseSize * 0.056));
-        // السهم يبقى ثابتًا بناءً على مكان العجلة الأصلي، ولا يتحرك مع الزوم.
-        const baseWheelLeft = (stageWidth - baseSize) / 2;
-        const arrowLeft = baseWheelLeft - arrowW - Math.max(4, baseSize * 0.010);
+      const size = wheelShell.offsetWidth || wheelShell.clientWidth || 0;
+      if (size) {
+        const arrowW = Math.max(36, Math.min(62, size * 0.092));
+        const arrowH = Math.max(22, Math.min(38, size * 0.056));
+        const arrowLeft = wheelShell.offsetLeft - arrowW - Math.max(4, size * 0.010);
         wheelPage.style.setProperty("--arrow-left", `${Math.max(2, arrowLeft)}px`);
         wheelPage.style.setProperty("--arrow-w", `${arrowW}px`);
         wheelPage.style.setProperty("--arrow-h", `${arrowH}px`);
       }
 
+      configureZoom();
       positionLabels();
     }
 
     function positionLabels(){
-      const size = getWheelBaseSize();
+      const size = wheelShell.offsetWidth || wheelShell.clientWidth || 0;
       if (!size || !labelNodes.length) return;
 
       const items = getItems();
@@ -1000,6 +1013,45 @@
       sector.classList.add("selected");
     }
 
+    function configureZoom(){
+      const size = wheelShell.offsetWidth || wheelShell.clientWidth || 0;
+      if (!size) return;
+
+      const stageRect = wheelStage.getBoundingClientRect();
+      const pageRect = wheelPage.getBoundingClientRect();
+      const baseLeft = pageRect.left + wheelShell.offsetLeft;
+      const baseTop = pageRect.top + wheelShell.offsetTop;
+      const cx = baseLeft + size / 2;
+      const cy = baseTop + size / 2;
+      const margin = Math.max(8, size * 0.018);
+
+      const desiredScale = window.matchMedia("(orientation: landscape)").matches ? 1.12 : 1.14;
+      const desiredX = Math.max(8, Math.min(size * 0.085, window.innerWidth * 0.06));
+
+      const maxHorizontalScale = (2 * Math.min(
+        cx + desiredX - margin,
+        window.innerWidth - margin - (cx + desiredX)
+      )) / size;
+
+      const maxVerticalScale = (2 * Math.min(
+        cy - stageRect.top - margin,
+        stageRect.bottom - cy - margin
+      )) / size;
+
+      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1, desiredScale);
+      const minX = margin + (size * scale) / 2 - cx;
+      const maxX = window.innerWidth - margin - (size * scale) / 2 - cx;
+      const safeX = clamp(desiredX, minX, maxX);
+
+      wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
+      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
+      wheelPage.style.setProperty("--zoom-x", `${safeX.toFixed(2)}px`);
+    }
+
+    function clearZoomOnly(){
+      wheelShell.classList.remove("zoom");
+    }
+
     function resetFocus(){
       wheelShell.classList.remove("zoom");
       afterSpin.classList.remove("show");
@@ -1008,6 +1060,7 @@
 
     function applyFocus(){
       requestAnimationFrame(()=>{
+        configureZoom();
         wheelShell.classList.add("zoom");
         collapseSafariBars();
       });
@@ -1062,6 +1115,7 @@
         const eased = easeOutQuint(progress);
 
         setRotation(start + change * eased);
+
 
         if (progress < 1) {
           animationId = requestAnimationFrame(frame);
@@ -1155,6 +1209,7 @@
     wheelShell.addEventListener("pointercancel", endDrag);
 
     document.getElementById("spinBtn").addEventListener("click", ()=> spinRandom(1));
+    document.getElementById("continueBtn")?.addEventListener("click", ()=> clearZoomOnly());
 
     document.getElementById("removeBtn").addEventListener("click", ()=>{
       if (selectedIndex < 0) return;
@@ -1182,7 +1237,7 @@
       if (document.referrer && document.referrer !== location.href) {
         history.back();
       } else {
-        window.location.href = "index-7.html#wheelSetup";
+        window.location.href = "index-6.html#wheelSetup";
       }
     });
 
