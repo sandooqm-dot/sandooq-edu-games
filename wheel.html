@@ -2,169 +2,2585 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <title>Wheel Layout Test</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>العجلة الدوارة - wheel-8</title>
   <style>
-    body{
-      font-family:Tahoma,Arial,sans-serif;
-      background:#f0f0f0;
+    :root{
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --ink:#111;
+      --yellow:#efd553;
+      --red:#f05d5b;
+      --orange:#f47a45;
+      --orange-dark:#e85f2f;
+      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+      --arrow-left:8px;
+      --arrow-w:52px;
+      --arrow-h:28px;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+    }
+
+    html,body{
       margin:0;
-      padding:20px;
-      direction:rtl;
-    }
-    h1{ font-size:22px; margin:0 0 16px; }
-    .info{
+      width:100%;
+      min-height:calc(100dvh + 120px);
       background:#fff;
-      border:1px solid #ccc;
-      border-radius:8px;
-      padding:14px 18px;
-      margin-bottom:16px;
-      font-size:14px;
-      line-height:1.7;
+      color:#222;
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+      -webkit-text-size-adjust:100%;
     }
-    .info code{
-      background:#eee;
-      padding:1px 5px;
-      border-radius:3px;
-      font-size:13px;
+
+    body::after{
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
     }
-    .tests{
+
+    .wheel-page{
+      position:sticky;
+      top:0;
+      width:100vw;
+      height:var(--vvh, 100dvh);
+      min-height:var(--vvh, 100dvh);
+      max-height:var(--vvh, 100dvh);
+      overflow:hidden;
+      background:#fff;
+      user-select:none;
+      touch-action:none;
+      direction:ltr;
+    }
+
+    .wheel-logo{
+      position:absolute;
+      top:clamp(14px, 2.4vw, 30px);
+      left:clamp(16px, 2.8vw, 38px);
+      width:clamp(64px, 8.2vw, 120px);
+      height:auto;
+      max-height:clamp(52px, 8vw, 96px);
+      object-fit:contain;
+      z-index:80;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .wheel-stage{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+    }
+
+    .wheel-arrow{
+      position:absolute;
+      left:var(--arrow-left);
+      top:var(--arrow-top, 50%);
+      transform:translateY(-50%);
+      width:0;
+      height:0;
+      border-top:var(--arrow-h) solid transparent;
+      border-bottom:var(--arrow-h) solid transparent;
+      border-left:var(--arrow-w) solid #111;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.22));
+      z-index:30;
+      pointer-events:none;
+    }
+
+    .wheel-shell{
+      width:var(--wheel-size);
+      height:var(--wheel-size);
+      max-width:var(--wheel-size);
+      max-height:var(--wheel-size);
+      aspect-ratio:1/1;
+      position:absolute;
+      left:var(--wheel-left);
+      top:var(--wheel-top);<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>العجلة الدوارة - wheel-8</title>
+  <style>
+    :root{
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --ink:#111;
+      --yellow:#efd553;
+      --red:#f05d5b;
+      --orange:#f47a45;
+      --orange-dark:#e85f2f;
+      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
+      --arrow-left:8px;
+      --arrow-w:52px;
+      --arrow-h:28px;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+    }
+
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:calc(100dvh + 120px);
+      background:#fff;
+      color:#222;
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
+    }
+
+    .wheel-page{
+      position:sticky;
+      top:0;
+      width:100vw;
+      height:var(--vvh, 100dvh);
+      min-height:var(--vvh, 100dvh);
+      max-height:var(--vvh, 100dvh);
+      overflow:hidden;
+      background:#fff;
+      user-select:none;
+      touch-action:none;
+      direction:ltr;
+    }
+
+    .wheel-logo{
+      position:absolute;
+      top:clamp(14px, 2.4vw, 30px);
+      left:clamp(16px, 2.8vw, 38px);
+      width:clamp(64px, 8.2vw, 120px);
+      height:auto;
+      max-height:clamp(52px, 8vw, 96px);
+      object-fit:contain;
+      z-index:80;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .wheel-stage{
+      position:absolute;
+      inset:0;
+      overflow:hidden;
+    }
+
+    .wheel-arrow{
+      position:absolute;
+      left:var(--arrow-left);
+      top:var(--arrow-top, 50%);
+      transform:translateY(-50%);
+      width:0;
+      height:0;
+      border-top:var(--arrow-h) solid transparent;
+      border-bottom:var(--arrow-h) solid transparent;
+      border-left:var(--arrow-w) solid #111;
+      filter:drop-shadow(0 1px 0 rgba(0,0,0,.22));
+      z-index:30;
+      pointer-events:none;
+    }
+
+    .wheel-shell{
+      width:var(--wheel-size);
+      height:var(--wheel-size);
+      max-width:var(--wheel-size);
+      max-height:var(--wheel-size);
+      aspect-ratio:1/1;
+      position:absolute;
+      left:var(--wheel-left);
+      top:var(--wheel-top);
+      border-radius:50%;
+      transform:translateX(0) scale(1);
+      transform-origin:center center;
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
+      filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
+      touch-action:none;
+      cursor:grab;
+      background:transparent;
+    }
+
+    .wheel-shell:active{
+      cursor:grabbing;
+    }
+
+    .wheel-shell.zoom{
+      transform:translateX(var(--zoom-x, 0px)) scale(var(--zoom-scale, 1.10));
+    }
+
+    .wheel-shell.zoom .wheel-label-content,
+    .wheel-shell.zoom .wheel-image{
+      transform:scale(var(--zoom-inverse, .9091));
+      transform-origin:center center;
+    }
+
+    .wheel-shell.zoom .wheel-center{
+      transform:translate(-50%,-50%) scale(var(--zoom-inverse, .9091));
+      transform-origin:center center;
+    }
+
+    .wheel-rotor{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      transform-origin:50% 50%;
+      will-change:transform;
+      overflow:visible;
+    }
+
+    .wheel-svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:visible;
+      pointer-events:none;
+    }
+
+    .wheel-sector{
+      stroke:#fff;
+      stroke-width:2.4;
+      stroke-linejoin:round;
+    }
+
+    .wheel-sector.selected{
+      animation:sectorPulse .72s ease-in-out 0s 2;
+      filter:brightness(1.13) saturate(1.05);
+    }
+
+    @keyframes sectorPulse{
+      0%{ opacity:1; }
+      35%{ opacity:.72; }
+      70%{ opacity:1; }
+      100%{ opacity:1; }
+    }
+
+    .label-layer{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      overflow:hidden;
+      pointer-events:none;
+      z-index:4;
+      direction:ltr;
+    }
+
+    .wheel-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:var(--label-w, 150px);
+      height:var(--label-h, 56px);
+      transform-origin:50% 50%;
       display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-bottom:24px;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      overflow:visible;
+      z-index:5;
     }
-    button{
-      padding:10px 18px;
-      border:2px solid #333;
-      border-radius:8px;
+
+    .wheel-label-content{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:var(--label-gap, 8px);
+      overflow:hidden;
+      pointer-events:none;
+      padding:0 4px;
+      direction:ltr;
+    }
+
+    .wheel-label.text-only .wheel-label-content{
+      padding:0 6px;
+      justify-content:center;
+    }
+
+    .wheel-label.mixed .wheel-label-content{
+      justify-content:space-between;
+      flex-direction:row;
+    }
+
+    .wheel-label.mixed.flipped .wheel-label-content{
+      flex-direction:row-reverse;
+    }
+
+    .wheel-label.image-only .wheel-label-content{
+      justify-content:center;
+    }
+
+    .wheel-text{
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:var(--line-clamp, 3);
+      max-width:var(--text-max, 100%);
+      overflow:hidden;
+      color:#fff;
+      font-size:var(--font-size, 18px);
+      font-weight:900;
+      line-height:1.08;
+      text-align:center;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      overflow-wrap:anywhere;
+      word-break:normal;
+      text-shadow:0 1px 2px rgba(0,0,0,.25);
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    .wheel-label.dark .wheel-text{
+      color:#151515;
+      text-shadow:0 1px 0 rgba(255,255,255,.56);
+    }
+
+    .wheel-image{
+      width:var(--image-size, 48px);
+      height:var(--image-size, 48px);
+      object-fit:contain;
+      display:block;
+      flex:0 0 auto;
+      border-radius:5px;
+      background:transparent;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .wheel-center{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:18.5%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:4px solid rgba(0,0,0,.10);
+      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12);
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      font-size:0;
+      line-height:1.15;
+      font-weight:900;
+      overflow:hidden;
+      pointer-events:none;
+      padding:0;
+    }
+
+    .wheel-center.has-question{
+      width:25.5%;
+      font-size:clamp(13px, 2.75vmin, 28px);
+      line-height:1.2;
+      padding:clamp(8px, 1.5vmin, 16px);
+      overflow-wrap:anywhere;
+      word-break:normal;
+    }
+
+    .selected-result{
+      display:none;
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(58px + var(--safe-bottom));
+      min-height:32px;
+      text-align:center;
+      font-size:clamp(18px, 2.8vw, 30px);
+      font-weight:900;
+      line-height:1.1;
+      color:#222;
+      padding:0 12px 4px;
+      direction:rtl;
+      z-index:70;
+      pointer-events:none;
+    }
+
+    .fixed-controls{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(14px + var(--safe-bottom));
+      height:clamp(44px, 6.2vh, 60px);
+      z-index:90;
+      pointer-events:none;
+    }
+
+    .back-btn,
+    .right-actions,
+    .right-actions button{
+      pointer-events:auto;
+    }
+
+    .back-btn{
+      position:absolute;
+      left:clamp(16px, 2.6vw, 34px);
+      bottom:0;
+      width:clamp(88px, 9.5vw, 126px);
+      height:clamp(40px, 5.5vh, 52px);
+      border:3px solid #111;
+      border-radius:13px;
       background:#efd553;
       color:#111;
-      font-size:15px;
-      font-weight:700;
+      font-size:clamp(16px, 2vw, 23px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
       cursor:pointer;
     }
-    button:hover{ background:#e0c500; }
-    button.danger{ background:#f05d5b; color:#fff; border-color:#c00; }
-    button.danger:hover{ background:#c00; }
-    .status{
-      margin-top:8px;
-      padding:8px 12px;
-      background:#e8f5e9;
-      border-left:4px solid #43a047;
-      border-radius:4px;
-      font-size:13px;
+
+    .right-actions{
+      position:absolute;
+      right:clamp(16px, 2.8vw, 42px);
+      bottom:0;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:clamp(10px, 1.5vw, 18px);
+      height:clamp(40px, 5.5vh, 54px);
     }
-    iframe{
-      width:100%;
-      height:520px;
-      border:2px solid #999;
-      border-radius:8px;
-      margin-top:14px;
-      background:#fff;
+
+    .after-spin{
+      display:none;
+      padding:0;
+      margin:0;
+      height:auto;
+      min-height:0;
+      flex:0 0 auto;
     }
-    @media(max-width:600px){
-      iframe{ height:420px; }
+
+    .after-spin.show{
+      display:block;
+    }
+
+    .spin-btn,
+    .remove-btn{
+      min-width:0;
+      width:auto;
+      height:clamp(40px, 5.5vh, 54px);
+      min-height:0;
+      border:3px solid #111;
+      border-radius:14px;
+      color:#fff;
+      font-size:clamp(17px, 2.15vw, 26px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:0 clamp(18px, 2.6vw, 32px);
+      box-shadow:0 4px 0 rgba(0,0,0,.20);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .spin-btn{
+      min-width:clamp(118px, 13vw, 178px);
+      background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%);
+    }
+
+    .remove-btn{
+      min-width:clamp(86px, 9vw, 128px);
+      background:#f05d5b;
+    }
+
+    .spin-btn:active,
+    .remove-btn:active,
+    .back-btn:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.20);
+    }
+
+    @media (orientation:landscape){
+      :root{
+        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+      }
+
+      .wheel-stage{
+        padding:0 6px calc(42px + var(--safe-bottom));
+      }
+
+      .wheel-shell.zoom{
+        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24);
+      }
+
+      .wheel-logo{
+        top:clamp(10px, 2.2vh, 18px);
+        left:clamp(14px, 2vw, 28px);
+        width:clamp(54px, 7vw, 92px);
+        max-height:clamp(44px, 10vh, 70px);
+      }
+
+      .wheel-center.has-question{
+        font-size:clamp(10px, 2.1vmin, 20px);
+      }
+
+      .selected-result{
+        bottom:calc(42px + var(--safe-bottom));
+        min-height:18px;
+        font-size:clamp(13px, 2.5vh, 18px);
+        padding:0 8px;
+      }
+
+      .fixed-controls{
+        bottom:calc(8px + var(--safe-bottom));
+        height:clamp(32px, 8.2vh, 44px);
+      }
+
+      .back-btn,
+      .spin-btn,
+      .remove-btn{
+        height:clamp(32px, 8vh, 42px);
+        border-width:2px;
+        border-radius:10px;
+        font-size:clamp(14px, 3.3vh, 20px);
+        box-shadow:0 3px 0 rgba(0,0,0,.18);
+      }
+
+      .back-btn{
+        width:clamp(72px, 8vw, 104px);
+        left:clamp(12px, 2vw, 26px);
+      }
+
+      .right-actions{
+        right:clamp(12px, 2.4vw, 34px);
+        gap:clamp(8px, 1.1vw, 14px);
+        height:clamp(32px, 8vh, 42px);
+      }
+
+      .spin-btn{
+        min-width:clamp(92px, 12vw, 142px);
+        padding:0 clamp(14px, 2.2vw, 24px);
+      }
+
+      .remove-btn{
+        min-width:clamp(66px, 8vw, 96px);
+        padding:0 clamp(12px, 1.8vw, 20px);
+      }
+    }
+
+    @media (max-width:430px){
+      :root{
+        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+      }
+
+      .wheel-logo{
+        top:12px;
+        left:14px;
+        width:64px;
+      }
+
+      .wheel-shell.zoom{
+        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38);
+      }
+
+      .fixed-controls{
+        bottom:calc(12px + var(--safe-bottom));
+      }
+
+      .back-btn{
+        left:12px;
+        width:78px;
+        height:40px;
+        font-size:15px;
+        border-radius:11px;
+      }
+
+      .right-actions{
+        right:12px;
+        gap:8px;
+        height:40px;
+      }
+
+      .spin-btn,
+      .remove-btn{
+        height:40px;
+        border-radius:11px;
+        font-size:15px;
+      }
+
+      .spin-btn{
+        min-width:92px;
+        padding:0 18px;
+      }
+
+      .remove-btn{
+        min-width:62px;
+        padding:0 14px;
+      }
+
+      .wheel-text{
+        line-height:1.04;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>اختبار تخطيط العجلة — wheel-layout-test</h1>
+  <main class="wheel-page" id="wheelPage">
+    <img class="wheel-logo" src="logo.PNG" alt="" aria-hidden="true" />
 
-  <div class="info">
-    <strong>الهدف:</strong> التحقق من أن العجلة مركزة أفقياً وعمودياً، والسهم متوافق مع مركز العجلة، والأزرار في الأسفل.<br>
-    <strong>الملف المختبَر:</strong> <code>wheel.html</code><br>
-    <strong>الاختبارات:</strong> اضغط على أي زر لتحميل بيانات مختلفة ثم افتح <code>wheel.html</code> في نفس المتصفح.
-  </div>
+    <div class="wheel-stage" id="wheelStage">
+      <div class="wheel-arrow" aria-hidden="true"></div>
 
-  <div class="tests">
-    <button onclick="loadTest('text8')">8 عناصر نصية</button>
-    <button onclick="loadTest('text3')">3 عناصر (قطاعات كبيرة)</button>
-    <button onclick="loadTest('text16')">16 عنصراً (قطاعات صغيرة)</button>
-    <button onclick="loadTest('question')">مع سؤال في المركز</button>
-    <button onclick="loadTest('clear')" class="danger">مسح البيانات (اختبار defaultWheelEntries)</button>
-  </div>
+      <div class="wheel-shell" id="wheelShell">
+        <div class="wheel-rotor" id="wheelRotor">
+          <svg class="wheel-svg" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
+            <g id="sectorLayer"></g>
+          </svg>
+          <div class="label-layer" id="labelLayer" aria-hidden="true"></div>
+        </div>
 
-  <div class="status" id="status">اختر اختباراً لتحميل البيانات.</div>
+        <div class="wheel-center" id="wheelCenter"></div>
+      </div>
+    </div>
 
-  <div style="margin-top:12px">
-    <strong>معاينة مدمجة</strong> (iframe — للتحقق السريع):
-    <iframe id="previewFrame" src="wheel.html" title="معاينة العجلة"></iframe>
-  </div>
+    <div class="selected-result" id="selectedResult" aria-live="polite"></div>
+
+    <div class="fixed-controls" aria-label="أزرار التحكم في العجلة">
+      <button class="back-btn" type="button" id="backBtn">رجوع</button>
+
+      <div class="right-actions">
+        <div class="after-spin" id="afterSpin">
+          <button class="remove-btn" type="button" id="removeBtn">حذف</button>
+        </div>
+        <button class="spin-btn" type="button" id="spinBtn">تدوير</button>
+      </div>
+    </div>
+  </main>
 
   <script>
     const PAYLOAD_KEY = "sandooq_wheel_payload_v1";
+    const DRAFT_KEY = "sandooq_wheel_draft_v1";
+    const SVG_NS = "http://www.w3.org/2000/svg";
 
-    const datasets = {
-      text8: {
-        type:"text",
-        entries:[
-          {text:"رياضيات"},{text:"علوم"},{text:"عربي"},{text:"إنجليزي"},
-          {text:"تاريخ"},{text:"جغرافيا"},{text:"فنون"},{text:"تربية بدنية"}
-        ],
-        centerQuestionEnabled:false, centerQuestion:""
-      },
-      text3: {
-        type:"text",
-        entries:[{text:"جائزة كبرى"},{text:"فرصة ثانية"},{text:"مفاجأة!"}],
-        centerQuestionEnabled:false, centerQuestion:""
-      },
-      text16: {
-        type:"text",
-        entries:[
-          {text:"أ"},{text:"ب"},{text:"ت"},{text:"ث"},
-          {text:"ج"},{text:"ح"},{text:"خ"},{text:"د"},
-          {text:"ذ"},{text:"ر"},{text:"ز"},{text:"س"},
-          {text:"ش"},{text:"ص"},{text:"ض"},{text:"ط"}
-        ],
-        centerQuestionEnabled:false, centerQuestion:""
-      },
-      question: {
-        type:"text",
-        entries:[
-          {text:"صح"},{text:"خطأ"},{text:"ربما"},{text:"لا أعلم"},
-          {text:"نعم"},{text:"أحياناً"}
-        ],
-        centerQuestionEnabled:true,
-        centerQuestion:"ما رأيك؟"
-      }
-    };
-
-    function loadTest(name){
-      const status = document.getElementById("status");
-      if (name === "clear") {
-        try { sessionStorage.removeItem(PAYLOAD_KEY); } catch(e){}
-        status.textContent = "✓ تم مسح البيانات. ستظهر القيم الافتراضية (defaultWheelEntries) في العجلة.";
-      } else {
-        const data = datasets[name];
-        if (!data) return;
-        try {
-          sessionStorage.setItem(PAYLOAD_KEY, JSON.stringify(data));
-          status.textContent = `✓ تم تحميل "${name}": ${data.entries.length} عنصر. يتم إعادة تحميل المعاينة…`;
-        } catch(e) {
-          status.textContent = "✗ خطأ في sessionStorage: " + e.message;
-          return;
-        }
-      }
-      // Reload the preview iframe
-      const frame = document.getElementById("previewFrame");
-      frame.src = "wheel.html?" + Date.now();
-    }
-
-    // Verify checklist
-    const checks = [
-      "العجلة مركزة أفقياً (يسار = يمين)",
-      "العجلة مركزة عمودياً بين الشعار والأزرار",
-      "السهم يشير لمنتصف العجلة رأسياً",
-      "الأزرار (رجوع / تدوير) ثابتة في الأسفل",
-      "لا مسافة فارغة كبيرة أسفل الصفحة",
-      "يعمل على الديسكتوب والموبايل"
+    const defaultWheelEntries = [
+      { text:"اتغدى" },
+      { text:"انام" },
+      { text:"اشتغل" },
+      { text:"اروح" },
+      { text:"اكعد" },
+      { text:"احجي" },
+      { text:"اقرأ" },
+      { text:"العب" }
     ];
 
-    const list = document.createElement("div");
-    list.className = "info";
-    list.innerHTML = "<strong>قائمة التحقق:</strong><ul style='margin:6px 0 0;padding-right:18px'>" +
-      checks.map(c => `<li>${c}</li>`).join("") + "</ul>";
-    document.querySelector(".info").after(list);
+    const wheelColors = [
+      "#e91e63", "#0097a7", "#f4511e", "#8e24aa",
+      "#1e88e5", "#43a047", "#ef6c00", "#c2185b",
+      "#7b1fa2", "#00897b", "#3949ab", "#d81b60",
+      "#7cb342", "#039be5", "#fb8c00", "#ec407a"
+    ];
+
+    let payload = readPayload();
+    let rotation = 0;
+    let selectedIndex = -1;
+    let animationId = null;
+    let dragState = null;
+    let labelNodes = [];
+    let safariTimers = [];
+    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:52, arrowH:28 };
+
+    const wheelPage = document.getElementById("wheelPage");
+    const wheelStage = document.getElementById("wheelStage");
+    const wheelShell = document.getElementById("wheelShell");
+    const wheelRotor = document.getElementById("wheelRotor");
+    const sectorLayer = document.getElementById("sectorLayer");
+    const labelLayer = document.getElementById("labelLayer");
+    const wheelCenter = document.getElementById("wheelCenter");
+    const selectedResult = document.getElementById("selectedResult");
+    const afterSpin = document.getElementById("afterSpin");
+    const fixedControls = document.querySelector(".fixed-controls");
+
+    function readPayload(){
+      try {
+        const raw = sessionStorage.getItem(PAYLOAD_KEY);
+        if (!raw) throw new Error("NO_PAYLOAD");
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== "object") throw new Error("BAD_PAYLOAD");
+        return normalizePayload(data);
+      } catch (_) {
+        return normalizePayload({
+          type:"text",
+          entries: defaultWheelEntries,
+          centerQuestionEnabled:false,
+          centerQuestion:""
+        });
+      }
+    }
+
+    function normalizePayload(data){
+      const type = ["text","images","mixed"].includes(data.type) ? data.type : "text";
+      const entries = Array.isArray(data.entries) && data.entries.length
+        ? data.entries.map((entry)=> ({
+            text: String(entry.text || ""),
+            imageName: String(entry.imageName || ""),
+            imageData: String(entry.imageData || "")
+          }))
+        : defaultWheelEntries.map((entry)=> ({ ...entry }));
+
+      return {
+        version: 1,
+        type,
+        entries,
+        centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
+        centerQuestion: String(data.centerQuestion || "")
+      };
+    }
+
+    function persistPayload(){
+      try {
+        sessionStorage.setItem(PAYLOAD_KEY, JSON.stringify(payload));
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
+          version: 1,
+          type: payload.type,
+          entries: payload.entries,
+          centerQuestionEnabled: payload.centerQuestionEnabled,
+          centerQuestion: payload.centerQuestion,
+          updatedAt: Date.now()
+        }));
+      } catch (_) {}
+    }
+
+    function isIosWebKit(){
+      const ua = navigator.userAgent || "";
+      const isiOS = /iP(ad|hone|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      return isiOS && /WebKit/i.test(ua);
+    }
+
+    function collapseSafariBars(){
+      safariTimers.forEach((timer)=> clearTimeout(timer));
+      safariTimers = [];
+
+      if (!isIosWebKit()) return;
+
+      [0, 80, 220, 520, 900].forEach((delay)=>{
+        safariTimers.push(setTimeout(()=>{
+          try {
+            window.scrollTo({ top:76, left:0, behavior:"auto" });
+          } catch (_) {
+            window.scrollTo(0, 76);
+          }
+          requestAnimationFrame(updateLayout);
+        }, delay));
+      });
+    }
+
+    function getItems(){
+      return payload.entries && payload.entries.length ? payload.entries : defaultWheelEntries;
+    }
+
+    function textForEntry(entry, index){
+      const text = String(entry.text || "").trim();
+      if (text) return text;
+      const imageName = String(entry.imageName || "").trim();
+      if (imageName) return imageName.replace(/\.[^.]+$/, "");
+      return `عنصر ${index + 1}`;
+    }
+
+    function normalizeAngle(angle){
+      return ((angle % 360) + 360) % 360;
+    }
+
+    function polarToCartesian(radius, angleDeg){
+      const angle = angleDeg * Math.PI / 180;
+      return {
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle)
+      };
+    }
+
+    function sectorPath(startAngle, endAngle, radius){
+      const sweep = Math.abs(endAngle - startAngle);
+
+      if (sweep >= 359.999) {
+        return [
+          `M ${radius} 0`,
+          `A ${radius} ${radius} 0 1 1 ${-radius} 0`,
+          `A ${radius} ${radius} 0 1 1 ${radius} 0`,
+          `Z`
+        ].join(" ");
+      }
+
+      const start = polarToCartesian(radius, startAngle);
+      const end = polarToCartesian(radius, endAngle);
+      const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+      return [
+        `M 0 0`,
+        `L ${start.x.toFixed(3)} ${start.y.toFixed(3)}`,
+        `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)}`,
+        `Z`
+      ].join(" ");
+    }
+
+    function createSvgElement(tag, attrs = {}){
+      const el = document.createElementNS(SVG_NS, tag);
+      Object.entries(attrs).forEach(([key, value])=> el.setAttribute(key, value));
+      return el;
+    }
+
+    function colorBrightness(hex){
+      const value = String(hex || "").replace("#", "");
+      const r = parseInt(value.substring(0, 2), 16) || 0;
+      const g = parseInt(value.substring(2, 4), 16) || 0;
+      const b = parseInt(value.substring(4, 6), 16) || 0;
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    function clamp(value, min, max){
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function labelMetrics(count, entry){
+      const size = Math.max(260, layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 360);
+      const step = 360 / Math.max(count, 1);
+      const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
+      const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
+      const text = textForEntry(entry, 0);
+      const textLength = String(text || "").trim().length;
+
+      const centerRect = wheelCenter.getBoundingClientRect();
+      const centerSize = centerRect.width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
+      const centerRadius = centerSize / 2;
+
+      const rimRadius = size * 0.448;
+      const innerEdge = centerRadius + size * (count <= 5 ? 0.070 : count <= 8 ? 0.064 : count <= 12 ? 0.056 : 0.050);
+      const outerEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.026 : count <= 12 ? 0.023 : 0.020);
+      const available = Math.max(size * 0.12, outerEdge - innerEdge);
+
+      const radialWidth = clamp(
+        available * (count <= 5 ? 0.96 : count <= 8 ? 0.92 : count <= 12 ? 0.86 : 0.80),
+        size * (count <= 5 ? 0.18 : count <= 8 ? 0.14 : count <= 12 ? 0.105 : 0.078),
+        available
+      );
+
+      const midRadius = innerEdge + available * (count <= 5 ? 0.58 : count <= 8 ? 0.57 : count <= 12 ? 0.55 : 0.53);
+      const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
+
+      const labelHeight = clamp(
+        arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
+        size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
+        size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
+      );
+
+      const imageSize = hasImage
+        ? clamp(labelHeight * 0.82, size * 0.030, size * (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040))
+        : 0;
+
+      let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019);
+      if (hasImage && hasText) maxFont *= 0.72;
+
+      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.30 : 0.42), maxFont);
+
+      if (textLength > 46) fontSize *= 0.72;
+      else if (textLength > 32) fontSize *= 0.80;
+      else if (textLength > 20) fontSize *= 0.90;
+
+      fontSize = clamp(fontSize, count <= 12 ? 8 : 6.5, maxFont);
+
+      const gap = clamp(size * 0.014, 4, 10);
+      const lines = count <= 6 ? 4 : count <= 12 ? 3 : 5;
+      const textMax = hasImage ? Math.max(24, radialWidth - imageSize - gap - 8) : Math.max(34, radialWidth - 8);
+
+      return {
+        midRadius,
+        radialWidth,
+        labelHeight,
+        imageSize,
+        fontSize,
+        gap,
+        lines,
+        textMax
+      };
+    }
+
+    function buildWheel(){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+
+      sectorLayer.innerHTML = "";
+      labelLayer.innerHTML = "";
+      labelNodes = [];
+      clearSelected();
+
+      const radius = 224;
+
+      items.forEach((entry, index)=>{
+        const start = -90 + index * step;
+        const end = start + step;
+        const mid = start + step / 2;
+        const color = wheelColors[index % wheelColors.length];
+
+        const sector = createSvgElement("path", {
+          d: sectorPath(start, end, radius),
+          fill: color,
+          class: "wheel-sector",
+          "data-index": String(index)
+        });
+        sectorLayer.appendChild(sector);
+
+        const rim = index === count - 1 ? createSvgElement("circle", {
+          cx:"0",
+          cy:"0",
+          r:String(radius),
+          fill:"none",
+          stroke:"rgba(0,0,0,.16)",
+          "stroke-width":"1.3"
+        }) : null;
+        if (rim) sectorLayer.appendChild(rim);
+
+        const label = document.createElement("div");
+        const isDark = colorBrightness(color) > 168;
+        const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
+        const hasText = Boolean(payload.type !== "images" && textForEntry(entry, index));
+        label.className = `wheel-label ${isDark ? "dark" : "light"} ${hasImage && hasText ? "mixed" : hasImage ? "image-only" : "text-only"}`;
+        label.dataset.baseAngle = String(mid);
+
+        const content = document.createElement("div");
+        content.className = "wheel-label-content";
+
+        if (hasText) {
+          const textEl = document.createElement("div");
+          textEl.className = "wheel-text";
+          textEl.setAttribute("dir", "rtl");
+          textEl.textContent = textForEntry(entry, index);
+          content.appendChild(textEl);
+        }
+
+        if (hasImage) {
+          const img = document.createElement("img");
+          img.className = "wheel-image";
+          img.alt = "";
+          img.draggable = false;
+          img.src = entry.imageData;
+          content.appendChild(img);
+        }
+
+        label.appendChild(content);
+        labelLayer.appendChild(label);
+        labelNodes.push({ label, content, baseAngle: mid, entry });
+      });
+
+      const centerText = payload.centerQuestionEnabled ? (payload.centerQuestion || "السؤال") : "";
+      wheelCenter.textContent = centerText;
+      wheelCenter.classList.toggle("has-question", Boolean(payload.centerQuestionEnabled));
+
+      selectedResult.textContent = "";
+      afterSpin.classList.remove("show");
+      selectedIndex = -1;
+
+      setRotation(rotation);
+      requestAnimationFrame(()=>{
+        updateLayout();
+        fitCenterText();
+      });
+    }
+
+
+    function readNumber(value, fallback){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function computeLayoutGeometry(){
+      const viewportH = updateVisualViewportHeight();
+      const viewportW = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 0);
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+
+      const controlsHeight = Math.max(
+        isLandscape ? 36 : 44,
+        fixedControls ? fixedControls.offsetHeight || 0 : 0
+      );
+
+      const safeBottomApprox = Math.max(0, viewportH - (window.visualViewport ? window.visualViewport.height : viewportH));
+      const controlBottomGap = isLandscape ? 8 : 12;
+      const controlsTop = viewportH - controlsHeight - controlBottomGap;
+
+      /*
+        مصدر هندسي واحد:
+        العجلة والسهم وحساب الاختيار يعتمدون على هذه القيم فقط.
+        لا نستخدم getBoundingClientRect للعجلة بعد الزوم حتى لا يغيّر الزوم موضع السهم أو النصوص.
+      */
+      const topReserve = isLandscape ? 10 : 58;
+      const bottomReserve = isLandscape ? 10 : 14;
+      const availableTop = topReserve;
+      const availableBottom = Math.max(availableTop + 260, controlsTop - bottomReserve);
+      const availableH = Math.max(260, availableBottom - availableTop);
+
+      const maxByWidth = isLandscape ? viewportW * 0.56 : viewportW * 0.88;
+      const maxByHeight = availableH * (isLandscape ? 0.88 : 0.82);
+      const maxAbsolute = isLandscape ? 700 : 430;
+      const minSize = Math.min(320, viewportW * 0.82, availableH * 0.78);
+      const size = Math.round(clamp(Math.min(maxByWidth, maxByHeight, maxAbsolute), Math.max(260, minSize), maxAbsolute));
+
+      const left = Math.round((viewportW - size) / 2);
+      const top = Math.round(availableTop + (availableH - size) / 2);
+      const centerX = left + size / 2;
+      const centerY = top + size / 2;
+
+      const arrowW = Math.round(clamp(size * 0.092, 36, 62));
+      const arrowH = Math.round(clamp(size * 0.056, 22, 38));
+      const arrowGap = Math.max(4, size * 0.010);
+      const arrowLeft = Math.max(2, Math.round(left - arrowW - arrowGap));
+      const arrowTop = Math.round(centerY);
+
+      return { size, left, top, centerX, centerY, arrowLeft, arrowTop, arrowW, arrowH, viewportW, viewportH, controlsTop };
+    }
+
+    function applyLayoutGeometry(geometry){
+      layoutGeometry = geometry;
+      wheelPage.style.setProperty("--wheel-size", `${geometry.size}px`);
+      wheelPage.style.setProperty("--wheel-left", `${geometry.left}px`);
+      wheelPage.style.setProperty("--wheel-top", `${geometry.top}px`);
+      wheelPage.style.setProperty("--arrow-left", `${geometry.arrowLeft}px`);
+      wheelPage.style.setProperty("--arrow-top", `${geometry.arrowTop}px`);
+      wheelPage.style.setProperty("--arrow-w", `${geometry.arrowW}px`);
+      wheelPage.style.setProperty("--arrow-h", `${geometry.arrowH}px`);
+    }
+
+    function configureZoom(geometry = layoutGeometry){
+      const size = geometry.size || wheelShell.offsetWidth || 0;
+      if (!size) return;
+
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      const desiredScale = isLandscape ? 1.10 : 1.10;
+      const desiredX = Math.max(4, Math.min(size * 0.060, (geometry.viewportW || window.innerWidth) * 0.045));
+      const margin = Math.max(8, size * 0.018);
+
+      const maxHorizontalScale = (2 * Math.min(
+        geometry.centerX + desiredX - margin,
+        (geometry.viewportW || window.innerWidth) - margin - (geometry.centerX + desiredX)
+      )) / size;
+
+      const maxVerticalScale = (2 * Math.min(
+        geometry.centerY - margin,
+        (geometry.viewportH || window.innerHeight) - margin - geometry.centerY
+      )) / size;
+
+      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1.02, desiredScale);
+      const minX = margin + (size * scale) / 2 - geometry.centerX;
+      const maxX = (geometry.viewportW || window.innerWidth) - margin - (size * scale) / 2 - geometry.centerX;
+      const safeX = clamp(desiredX, minX, maxX);
+
+      wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
+      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
+      wheelPage.style.setProperty("--zoom-x", `${safeX.toFixed(2)}px`);
+    }
+
+    function updateLayout(){
+      const geometry = computeLayoutGeometry();
+      applyLayoutGeometry(geometry);
+      configureZoom(geometry);
+      positionLabels();
+    }
+
+    function positionLabels(){
+      const size = layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 0;
+      if (!size || !labelNodes.length) return;
+
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const center = size / 2;
+
+      labelNodes.forEach((node, index)=>{
+        const entry = items[index] || {};
+        const metrics = labelMetrics(count, entry);
+        const baseAngle = node.baseAngle || (-90 + index * step + step / 2);
+        const p = polarToCartesian(metrics.midRadius, baseAngle);
+
+        node.label.style.left = `${center + p.x}px`;
+        node.label.style.top = `${center + p.y}px`;
+        node.label.style.setProperty("--label-w", `${metrics.radialWidth}px`);
+        node.label.style.setProperty("--label-h", `${metrics.labelHeight}px`);
+        node.label.style.setProperty("--label-gap", `${metrics.gap}px`);
+        node.label.style.setProperty("--font-size", `${metrics.fontSize}px`);
+        node.label.style.setProperty("--image-size", `${metrics.imageSize}px`);
+        node.label.style.setProperty("--line-clamp", String(metrics.lines));
+        node.label.style.setProperty("--text-max", `${metrics.textMax}px`);
+      });
+
+      updateLabelDirections();
+    }
+
+    function updateLabelDirections(){
+      labelNodes.forEach((node)=>{
+        const finalAngle = normalizeAngle(node.baseAngle + rotation);
+        const flipped = finalAngle > 90 && finalAngle < 270;
+        const labelAngle = node.baseAngle + (flipped ? 180 : 0);
+        node.label.classList.toggle("flipped", flipped);
+        node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
+      });
+    }
+
+    function setRotation(degrees){
+      rotation = degrees;
+      wheelRotor.style.transform = `rotate(${degrees}deg)`;
+      updateLabelDirections();
+    }
+
+    function fitCenterText(){
+      if (!wheelCenter.classList.contains("has-question")) return;
+
+      wheelCenter.style.fontSize = "";
+      let size = parseFloat(getComputedStyle(wheelCenter).fontSize || "18");
+
+      for (let i = 0; i < 14; i++) {
+        if (wheelCenter.scrollWidth <= wheelCenter.clientWidth + 2 && wheelCenter.scrollHeight <= wheelCenter.clientHeight + 2) break;
+        size -= 1;
+        if (size < 8) break;
+        wheelCenter.style.fontSize = `${size}px`;
+      }
+    }
+
+    function clearSelected(){
+      document.querySelectorAll(".wheel-sector.selected").forEach((sector)=>{
+        sector.classList.remove("selected");
+      });
+    }
+
+    function highlightSelected(index){
+      clearSelected();
+      const sector = document.querySelector(`.wheel-sector[data-index="${index}"]`);
+      if (!sector) return;
+      sector.classList.remove("selected");
+      void sector.getBoundingClientRect();
+      sector.classList.add("selected");
+    }
+
+    function resetFocus(){
+      wheelShell.classList.remove("zoom");
+      afterSpin.classList.remove("show");
+      clearSelected();
+    }
+
+    function applyFocus(){
+      requestAnimationFrame(()=>{
+        configureZoom(layoutGeometry);
+        wheelShell.classList.add("zoom");
+        collapseSafariBars();
+      });
+    }
+
+    function getSelectedIndexAtArrow(){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const localAngleAtArrow = normalizeAngle(180 - normalizeAngle(rotation));
+      const relative = normalizeAngle(localAngleAtArrow - (-90));
+      const nearestCenterIndex = Math.round((relative - step / 2) / step);
+      return ((nearestCenterIndex % count) + count) % count;
+    }
+
+    function showSelected(forcedIndex = null){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const index = Number.isInteger(forcedIndex)
+        ? ((forcedIndex % count) + count) % count
+        : getSelectedIndexAtArrow();
+
+      selectedIndex = index;
+      selectedResult.textContent = textForEntry(items[index], index);
+      afterSpin.classList.add("show");
+      highlightSelected(index);
+      applyFocus();
+    }
+
+    function easeOutQuint(t){
+      return 1 - Math.pow(1 - t, 5);
+    }
+
+    function cancelAnimation(){
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    }
+
+    function animateTo(targetRotation, duration = 5200, targetIndex = null){
+      cancelAnimation();
+
+      const start = rotation;
+      const change = targetRotation - start;
+      const startTime = performance.now();
+      resetFocus();
+      selectedResult.textContent = "";
+
+      function frame(now){
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutQuint(progress);
+
+        setRotation(start + change * eased);
+
+        if (progress < 1) {
+          animationId = requestAnimationFrame(frame);
+        } else {
+          animationId = null;
+          setRotation(targetRotation);
+          showSelected(targetIndex);
+        }
+      }
+
+      animationId = requestAnimationFrame(frame);
+    }
+
+    function spinRandom(direction = 1){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const selected = count === 1 ? 0 : Math.floor(Math.random() * count);
+      const selectedCenterAngle = -90 + selected * step + step / 2;
+      const desiredNorm = normalizeAngle(180 - selectedCenterAngle);
+      const currentNorm = normalizeAngle(rotation);
+
+      let delta = desiredNorm - currentNorm;
+      const fullTurns = 5 + Math.floor(Math.random() * 3);
+
+      if (direction < 0) {
+        while (delta > 0) delta -= 360;
+        delta -= fullTurns * 360;
+      } else {
+        while (delta < 0) delta += 360;
+        delta += fullTurns * 360;
+      }
+
+      selectedIndex = selected;
+      animateTo(rotation + delta, 4700 + Math.floor(Math.random() * 450), selected);
+    }
+
+    function angleFromPointer(event, element){
+      const rect = element.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      return Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI;
+    }
+
+    wheelShell.addEventListener("pointerdown", (event)=>{
+      cancelAnimation();
+      resetFocus();
+      wheelShell.setPointerCapture?.(event.pointerId);
+      selectedResult.textContent = "";
+
+      dragState = {
+        pointerId: event.pointerId,
+        lastAngle: angleFromPointer(event, wheelShell),
+        totalDelta: 0,
+        lastDirection: 1
+      };
+    });
+
+    wheelShell.addEventListener("pointermove", (event)=>{
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      event.preventDefault();
+
+      const currentAngle = angleFromPointer(event, wheelShell);
+      let delta = currentAngle - dragState.lastAngle;
+
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+
+      dragState.lastAngle = currentAngle;
+      dragState.totalDelta += delta;
+      if (Math.abs(delta) > 0.35) dragState.lastDirection = delta >= 0 ? 1 : -1;
+
+      setRotation(rotation + delta);
+    });
+
+    function endDrag(event){
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+
+      const totalDelta = dragState.totalDelta || 0;
+      const direction = totalDelta < 0 ? -1 : (dragState.lastDirection || 1);
+      dragState = null;
+
+      if (Math.abs(totalDelta) >= 4) {
+        spinRandom(direction);
+      } else {
+        showSelected();
+      }
+    }
+
+    wheelShell.addEventListener("pointerup", endDrag);
+    wheelShell.addEventListener("pointercancel", endDrag);
+
+    document.getElementById("spinBtn").addEventListener("click", ()=> spinRandom(1));
+
+    document.getElementById("removeBtn").addEventListener("click", ()=>{
+      if (selectedIndex < 0) return;
+
+      const items = getItems();
+      if (!items.length) return;
+
+      payload.entries = items.slice();
+      payload.entries.splice(selectedIndex, 1);
+
+      if (!payload.entries.length) {
+        payload.entries = defaultWheelEntries.map((entry)=> ({ ...entry }));
+      }
+
+      selectedIndex = -1;
+      rotation = 0;
+      resetFocus();
+      persistPayload();
+      buildWheel();
+    });
+
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+      persistPayload();
+
+      if (document.referrer && document.referrer !== location.href) {
+        history.back();
+      } else {
+        window.location.href = "index-6.html#wheelSetup";
+      }
+    });
+
+    window.addEventListener("resize", ()=> {
+      requestAnimationFrame(updateLayout);
+      requestAnimationFrame(fitCenterText);
+    }, { passive:true });
+
+    window.addEventListener("orientationchange", ()=> {
+      setTimeout(()=>{
+        updateLayout();
+        fitCenterText();
+        collapseSafariBars();
+      }, 120);
+    }, { passive:true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", ()=> requestAnimationFrame(updateLayout), { passive:true });
+      window.visualViewport.addEventListener("scroll", ()=> requestAnimationFrame(updateLayout), { passive:true });
+    }
+
+    document.addEventListener("touchend", collapseSafariBars, { passive:true });
+
+    buildWheel();
+    updateLayout();
+    fitCenterText();
+    collapseSafariBars();
+  </script>
+</body>
+</html>
+
+      border-radius:50%;
+      transform:scale(1);
+      transform-origin:left center;
+      transition:transform 1600ms cubic-bezier(.19,.68,.24,1);
+      filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
+      touch-action:none;
+      cursor:grab;
+      background:transparent;
+    }
+
+    .wheel-shell:active{
+      cursor:grabbing;
+    }
+
+    .wheel-shell.zoom{
+      transform:translateX(var(--zoom-x, 0px)) scale(var(--zoom-scale, 1.10));
+    }
+
+    .wheel-shell.zoom .wheel-label-content,
+    .wheel-shell.zoom .wheel-image{
+      transform:scale(var(--zoom-inverse, .9091));
+      transform-origin:center center;
+    }
+
+    .wheel-shell.zoom .wheel-center{
+      transform:translate(-50%,-50%) scale(var(--zoom-inverse, .9091));
+      transform-origin:center center;
+    }
+
+    .wheel-rotor{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      transform-origin:50% 50%;
+      will-change:transform;
+      overflow:visible;
+    }
+
+    .wheel-svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:visible;
+      pointer-events:none;
+    }
+
+    .wheel-sector{
+      stroke:#fff;
+      stroke-width:2.4;
+      stroke-linejoin:round;
+    }
+
+    .wheel-sector.selected{
+      animation:sectorPulse .72s ease-in-out 0s 2;
+      filter:brightness(1.13) saturate(1.05);
+    }
+
+    @keyframes sectorPulse{
+      0%{ opacity:1; }
+      35%{ opacity:.72; }
+      70%{ opacity:1; }
+      100%{ opacity:1; }
+    }
+
+    .label-layer{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      overflow:hidden;
+      pointer-events:none;
+      z-index:4;
+      direction:ltr;
+    }
+
+    .wheel-label{
+      position:absolute;
+      left:50%;
+      top:50%;
+      width:var(--label-w, 150px);
+      height:var(--label-h, 56px);
+      transform-origin:50% 50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      overflow:visible;
+      z-index:5;
+    }
+
+    .wheel-label-content{
+      width:100%;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:var(--label-gap, 8px);
+      overflow:hidden;
+      pointer-events:none;
+      padding:0 4px;
+      direction:ltr;
+    }
+
+    .wheel-label.text-only .wheel-label-content{
+      padding:0 6px;
+      justify-content:center;
+    }
+
+    .wheel-label.mixed .wheel-label-content{
+      justify-content:space-between;
+      flex-direction:row;
+    }
+
+    .wheel-label.mixed.flipped .wheel-label-content{
+      flex-direction:row-reverse;
+    }
+
+    .wheel-label.image-only .wheel-label-content{
+      justify-content:center;
+    }
+
+    .wheel-text{
+      display:-webkit-box;
+      -webkit-box-orient:vertical;
+      -webkit-line-clamp:var(--line-clamp, 3);
+      max-width:var(--text-max, 100%);
+      overflow:hidden;
+      color:#fff;
+      font-size:var(--font-size, 18px);
+      font-weight:900;
+      line-height:1.08;
+      text-align:center;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      overflow-wrap:anywhere;
+      word-break:normal;
+      text-shadow:0 1px 2px rgba(0,0,0,.25);
+      flex:1 1 auto;
+      min-width:0;
+    }
+
+    .wheel-label.dark .wheel-text{
+      color:#151515;
+      text-shadow:0 1px 0 rgba(255,255,255,.56);
+    }
+
+    .wheel-image{
+      width:var(--image-size, 48px);
+      height:var(--image-size, 48px);
+      object-fit:contain;
+      display:block;
+      flex:0 0 auto;
+      border-radius:5px;
+      background:transparent;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .wheel-center{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:18.5%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:#fff;
+      border:4px solid rgba(0,0,0,.10);
+      box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.12);
+      z-index:20;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      font-size:0;
+      line-height:1.15;
+      font-weight:900;
+      overflow:hidden;
+      pointer-events:none;
+      padding:0;
+    }
+
+    .wheel-center.has-question{
+      width:25.5%;
+      font-size:clamp(13px, 2.75vmin, 28px);
+      line-height:1.2;
+      padding:clamp(8px, 1.5vmin, 16px);
+      overflow-wrap:anywhere;
+      word-break:normal;
+    }
+
+    .selected-result{
+      display:none;
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(58px + var(--safe-bottom));
+      min-height:32px;
+      text-align:center;
+      font-size:clamp(18px, 2.8vw, 30px);
+      font-weight:900;
+      line-height:1.1;
+      color:#222;
+      padding:0 12px 4px;
+      direction:rtl;
+      z-index:70;
+      pointer-events:none;
+    }
+
+    .fixed-controls{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(14px + var(--safe-bottom));
+      height:clamp(44px, 6.2vh, 60px);
+      z-index:90;
+      pointer-events:none;
+    }
+
+    .back-btn,
+    .right-actions,
+    .right-actions button{
+      pointer-events:auto;
+    }
+
+    .back-btn{
+      position:absolute;
+      left:clamp(16px, 2.6vw, 34px);
+      bottom:0;
+      width:clamp(88px, 9.5vw, 126px);
+      height:clamp(40px, 5.5vh, 52px);
+      border:3px solid #111;
+      border-radius:13px;
+      background:#efd553;
+      color:#111;
+      font-size:clamp(16px, 2vw, 23px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 14px;
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+      cursor:pointer;
+    }
+
+    .right-actions{
+      position:absolute;
+      right:clamp(16px, 2.8vw, 42px);
+      bottom:0;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:clamp(10px, 1.5vw, 18px);
+      height:clamp(40px, 5.5vh, 54px);
+    }
+
+    .after-spin{
+      display:none;
+      padding:0;
+      margin:0;
+      height:auto;
+      min-height:0;
+      flex:0 0 auto;
+    }
+
+    .after-spin.show{
+      display:block;
+    }
+
+    .spin-btn,
+    .remove-btn{
+      min-width:0;
+      width:auto;
+      height:clamp(40px, 5.5vh, 54px);
+      min-height:0;
+      border:3px solid #111;
+      border-radius:14px;
+      color:#fff;
+      font-size:clamp(17px, 2.15vw, 26px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:0 clamp(18px, 2.6vw, 32px);
+      box-shadow:0 4px 0 rgba(0,0,0,.20);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .spin-btn{
+      min-width:clamp(118px, 13vw, 178px);
+      background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%);
+    }
+
+    .remove-btn{
+      min-width:clamp(86px, 9vw, 128px);
+      background:#f05d5b;
+    }
+
+    .spin-btn:active,
+    .remove-btn:active,
+    .back-btn:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.20);
+    }
+
+    @media (orientation:landscape){
+      :root{
+        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
+      }
+
+      .wheel-stage{
+        padding:0 6px calc(42px + var(--safe-bottom));
+      }
+
+      .wheel-shell.zoom{
+        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24);
+      }
+
+      .wheel-logo{
+        top:clamp(10px, 2.2vh, 18px);
+        left:clamp(14px, 2vw, 28px);
+        width:clamp(54px, 7vw, 92px);
+        max-height:clamp(44px, 10vh, 70px);
+      }
+
+      .wheel-center.has-question{
+        font-size:clamp(10px, 2.1vmin, 20px);
+      }
+
+      .selected-result{
+        bottom:calc(42px + var(--safe-bottom));
+        min-height:18px;
+        font-size:clamp(13px, 2.5vh, 18px);
+        padding:0 8px;
+      }
+
+      .fixed-controls{
+        bottom:calc(8px + var(--safe-bottom));
+        height:clamp(32px, 8.2vh, 44px);
+      }
+
+      .back-btn,
+      .spin-btn,
+      .remove-btn{
+        height:clamp(32px, 8vh, 42px);
+        border-width:2px;
+        border-radius:10px;
+        font-size:clamp(14px, 3.3vh, 20px);
+        box-shadow:0 3px 0 rgba(0,0,0,.18);
+      }
+
+      .back-btn{
+        width:clamp(72px, 8vw, 104px);
+        left:clamp(12px, 2vw, 26px);
+      }
+
+      .right-actions{
+        right:clamp(12px, 2.4vw, 34px);
+        gap:clamp(8px, 1.1vw, 14px);
+        height:clamp(32px, 8vh, 42px);
+      }
+
+      .spin-btn{
+        min-width:clamp(92px, 12vw, 142px);
+        padding:0 clamp(14px, 2.2vw, 24px);
+      }
+
+      .remove-btn{
+        min-width:clamp(66px, 8vw, 96px);
+        padding:0 clamp(12px, 1.8vw, 20px);
+      }
+    }
+
+    @media (max-width:430px){
+      :root{
+        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
+      }
+
+      .wheel-logo{
+        top:12px;
+        left:14px;
+        width:64px;
+      }
+
+      .wheel-shell.zoom{
+        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38);
+      }
+
+      .fixed-controls{
+        bottom:calc(12px + var(--safe-bottom));
+      }
+
+      .back-btn{
+        left:12px;
+        width:78px;
+        height:40px;
+        font-size:15px;
+        border-radius:11px;
+      }
+
+      .right-actions{
+        right:12px;
+        gap:8px;
+        height:40px;
+      }
+
+      .spin-btn,
+      .remove-btn{
+        height:40px;
+        border-radius:11px;
+        font-size:15px;
+      }
+
+      .spin-btn{
+        min-width:92px;
+        padding:0 18px;
+      }
+
+      .remove-btn{
+        min-width:62px;
+        padding:0 14px;
+      }
+
+      .wheel-text{
+        line-height:1.04;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wheel-page" id="wheelPage">
+    <img class="wheel-logo" src="logo.PNG" alt="" aria-hidden="true" />
+
+    <div class="wheel-stage" id="wheelStage">
+      <div class="wheel-arrow" aria-hidden="true"></div>
+
+      <div class="wheel-shell" id="wheelShell">
+        <div class="wheel-rotor" id="wheelRotor">
+          <svg class="wheel-svg" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
+            <g id="sectorLayer"></g>
+          </svg>
+          <div class="label-layer" id="labelLayer" aria-hidden="true"></div>
+        </div>
+
+        <div class="wheel-center" id="wheelCenter"></div>
+      </div>
+    </div>
+
+    <div class="selected-result" id="selectedResult" aria-live="polite"></div>
+
+    <div class="fixed-controls" aria-label="أزرار التحكم في العجلة">
+      <button class="back-btn" type="button" id="backBtn">رجوع</button>
+
+      <div class="right-actions">
+        <div class="after-spin" id="afterSpin">
+          <button class="remove-btn" type="button" id="removeBtn">حذف</button>
+        </div>
+        <button class="spin-btn" type="button" id="spinBtn">تدوير</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const PAYLOAD_KEY = "sandooq_wheel_payload_v1";
+    const DRAFT_KEY = "sandooq_wheel_draft_v1";
+    const SVG_NS = "http://www.w3.org/2000/svg";
+
+    const defaultWheelEntries = [
+      { text:"اتغدى" },
+      { text:"انام" },
+      { text:"اشتغل" },
+      { text:"اروح" },
+      { text:"اكعد" },
+      { text:"احجي" },
+      { text:"اقرأ" },
+      { text:"العب" }
+    ];
+
+    const wheelColors = [
+      "#e91e63", "#0097a7", "#f4511e", "#8e24aa",
+      "#1e88e5", "#43a047", "#ef6c00", "#c2185b",
+      "#7b1fa2", "#00897b", "#3949ab", "#d81b60",
+      "#7cb342", "#039be5", "#fb8c00", "#ec407a"
+    ];
+
+    let payload = readPayload();
+    let rotation = 0;
+    let selectedIndex = -1;
+    let animationId = null;
+    let dragState = null;
+    let labelNodes = [];
+    let safariTimers = [];
+    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:52, arrowH:28 };
+
+    const wheelPage = document.getElementById("wheelPage");
+    const wheelStage = document.getElementById("wheelStage");
+    const wheelShell = document.getElementById("wheelShell");
+    const wheelRotor = document.getElementById("wheelRotor");
+    const sectorLayer = document.getElementById("sectorLayer");
+    const labelLayer = document.getElementById("labelLayer");
+    const wheelCenter = document.getElementById("wheelCenter");
+    const selectedResult = document.getElementById("selectedResult");
+    const afterSpin = document.getElementById("afterSpin");
+    const fixedControls = document.querySelector(".fixed-controls");
+
+    function readPayload(){
+      try {
+        const raw = sessionStorage.getItem(PAYLOAD_KEY);
+        if (!raw) throw new Error("NO_PAYLOAD");
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== "object") throw new Error("BAD_PAYLOAD");
+        return normalizePayload(data);
+      } catch (_) {
+        return normalizePayload({
+          type:"text",
+          entries: defaultWheelEntries,
+          centerQuestionEnabled:false,
+          centerQuestion:""
+        });
+      }
+    }
+
+    function normalizePayload(data){
+      const type = ["text","images","mixed"].includes(data.type) ? data.type : "text";
+      const entries = Array.isArray(data.entries) && data.entries.length
+        ? data.entries.map((entry)=> ({
+            text: String(entry.text || ""),
+            imageName: String(entry.imageName || ""),
+            imageData: String(entry.imageData || "")
+          }))
+        : defaultWheelEntries.map((entry)=> ({ ...entry }));
+
+      return {
+        version: 1,
+        type,
+        entries,
+        centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
+        centerQuestion: String(data.centerQuestion || "")
+      };
+    }
+
+    function persistPayload(){
+      try {
+        sessionStorage.setItem(PAYLOAD_KEY, JSON.stringify(payload));
+        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
+          version: 1,
+          type: payload.type,
+          entries: payload.entries,
+          centerQuestionEnabled: payload.centerQuestionEnabled,
+          centerQuestion: payload.centerQuestion,
+          updatedAt: Date.now()
+        }));
+      } catch (_) {}
+    }
+
+    function isIosWebKit(){
+      const ua = navigator.userAgent || "";
+      const isiOS = /iP(ad|hone|od)/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      return isiOS && /WebKit/i.test(ua);
+    }
+
+    function collapseSafariBars(){
+      safariTimers.forEach((timer)=> clearTimeout(timer));
+      safariTimers = [];
+
+      if (!isIosWebKit()) return;
+
+      [0, 80, 220, 520, 900].forEach((delay)=>{
+        safariTimers.push(setTimeout(()=>{
+          try {
+            window.scrollTo({ top:76, left:0, behavior:"auto" });
+          } catch (_) {
+            window.scrollTo(0, 76);
+          }
+          requestAnimationFrame(updateLayout);
+        }, delay));
+      });
+    }
+
+    function getItems(){
+      return payload.entries && payload.entries.length ? payload.entries : defaultWheelEntries;
+    }
+
+    function textForEntry(entry, index){
+      const text = String(entry.text || "").trim();
+      if (text) return text;
+      const imageName = String(entry.imageName || "").trim();
+      if (imageName) return imageName.replace(/\.[^.]+$/, "");
+      return `عنصر ${index + 1}`;
+    }
+
+    function normalizeAngle(angle){
+      return ((angle % 360) + 360) % 360;
+    }
+
+    function polarToCartesian(radius, angleDeg){
+      const angle = angleDeg * Math.PI / 180;
+      return {
+        x: radius * Math.cos(angle),
+        y: radius * Math.sin(angle)
+      };
+    }
+
+    function sectorPath(startAngle, endAngle, radius){
+      const sweep = Math.abs(endAngle - startAngle);
+
+      if (sweep >= 359.999) {
+        return [
+          `M ${radius} 0`,
+          `A ${radius} ${radius} 0 1 1 ${-radius} 0`,
+          `A ${radius} ${radius} 0 1 1 ${radius} 0`,
+          `Z`
+        ].join(" ");
+      }
+
+      const start = polarToCartesian(radius, startAngle);
+      const end = polarToCartesian(radius, endAngle);
+      const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+
+      return [
+        `M 0 0`,
+        `L ${start.x.toFixed(3)} ${start.y.toFixed(3)}`,
+        `A ${radius} ${radius} 0 ${largeArc} 1 ${end.x.toFixed(3)} ${end.y.toFixed(3)}`,
+        `Z`
+      ].join(" ");
+    }
+
+    function createSvgElement(tag, attrs = {}){
+      const el = document.createElementNS(SVG_NS, tag);
+      Object.entries(attrs).forEach(([key, value])=> el.setAttribute(key, value));
+      return el;
+    }
+
+    function colorBrightness(hex){
+      const value = String(hex || "").replace("#", "");
+      const r = parseInt(value.substring(0, 2), 16) || 0;
+      const g = parseInt(value.substring(2, 4), 16) || 0;
+      const b = parseInt(value.substring(4, 6), 16) || 0;
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    function clamp(value, min, max){
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function labelMetrics(count, entry){
+      const size = Math.max(260, layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 360);
+      const step = 360 / Math.max(count, 1);
+      const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
+      const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
+      const text = textForEntry(entry, 0);
+      const textLength = String(text || "").trim().length;
+
+      const centerRect = wheelCenter.getBoundingClientRect();
+      const centerSize = centerRect.width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
+      const centerRadius = centerSize / 2;
+
+      const rimRadius = size * 0.448;
+      const innerEdge = centerRadius + size * (count <= 5 ? 0.070 : count <= 8 ? 0.064 : count <= 12 ? 0.056 : 0.050);
+      const outerEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.026 : count <= 12 ? 0.023 : 0.020);
+      const available = Math.max(size * 0.12, outerEdge - innerEdge);
+
+      const radialWidth = clamp(
+        available * (count <= 5 ? 0.96 : count <= 8 ? 0.92 : count <= 12 ? 0.86 : 0.80),
+        size * (count <= 5 ? 0.18 : count <= 8 ? 0.14 : count <= 12 ? 0.105 : 0.078),
+        available
+      );
+
+      const midRadius = innerEdge + available * (count <= 5 ? 0.58 : count <= 8 ? 0.57 : count <= 12 ? 0.55 : 0.53);
+      const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
+
+      const labelHeight = clamp(
+        arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
+        size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
+        size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
+      );
+
+      const imageSize = hasImage
+        ? clamp(labelHeight * 0.82, size * 0.030, size * (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040))
+        : 0;
+
+      let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019);
+      if (hasImage && hasText) maxFont *= 0.72;
+
+      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.30 : 0.42), maxFont);
+
+      if (textLength > 46) fontSize *= 0.72;
+      else if (textLength > 32) fontSize *= 0.80;
+      else if (textLength > 20) fontSize *= 0.90;
+
+      fontSize = clamp(fontSize, count <= 12 ? 8 : 6.5, maxFont);
+
+      const gap = clamp(size * 0.014, 4, 10);
+      const lines = count <= 6 ? 4 : count <= 12 ? 3 : 5;
+      const textMax = hasImage ? Math.max(24, radialWidth - imageSize - gap - 8) : Math.max(34, radialWidth - 8);
+
+      return {
+        midRadius,
+        radialWidth,
+        labelHeight,
+        imageSize,
+        fontSize,
+        gap,
+        lines,
+        textMax
+      };
+    }
+
+    function buildWheel(){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+
+      sectorLayer.innerHTML = "";
+      labelLayer.innerHTML = "";
+      labelNodes = [];
+      clearSelected();
+
+      const radius = 224;
+
+      items.forEach((entry, index)=>{
+        const start = -90 + index * step;
+        const end = start + step;
+        const mid = start + step / 2;
+        const color = wheelColors[index % wheelColors.length];
+
+        const sector = createSvgElement("path", {
+          d: sectorPath(start, end, radius),
+          fill: color,
+          class: "wheel-sector",
+          "data-index": String(index)
+        });
+        sectorLayer.appendChild(sector);
+
+        const rim = index === count - 1 ? createSvgElement("circle", {
+          cx:"0",
+          cy:"0",
+          r:String(radius),
+          fill:"none",
+          stroke:"rgba(0,0,0,.16)",
+          "stroke-width":"1.3"
+        }) : null;
+        if (rim) sectorLayer.appendChild(rim);
+
+        const label = document.createElement("div");
+        const isDark = colorBrightness(color) > 168;
+        const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
+        const hasText = Boolean(payload.type !== "images" && textForEntry(entry, index));
+        label.className = `wheel-label ${isDark ? "dark" : "light"} ${hasImage && hasText ? "mixed" : hasImage ? "image-only" : "text-only"}`;
+        label.dataset.baseAngle = String(mid);
+
+        const content = document.createElement("div");
+        content.className = "wheel-label-content";
+
+        if (hasText) {
+          const textEl = document.createElement("div");
+          textEl.className = "wheel-text";
+          textEl.setAttribute("dir", "rtl");
+          textEl.textContent = textForEntry(entry, index);
+          content.appendChild(textEl);
+        }
+
+        if (hasImage) {
+          const img = document.createElement("img");
+          img.className = "wheel-image";
+          img.alt = "";
+          img.draggable = false;
+          img.src = entry.imageData;
+          content.appendChild(img);
+        }
+
+        label.appendChild(content);
+        labelLayer.appendChild(label);
+        labelNodes.push({ label, content, baseAngle: mid, entry });
+      });
+
+      const centerText = payload.centerQuestionEnabled ? (payload.centerQuestion || "السؤال") : "";
+      wheelCenter.textContent = centerText;
+      wheelCenter.classList.toggle("has-question", Boolean(payload.centerQuestionEnabled));
+
+      selectedResult.textContent = "";
+      afterSpin.classList.remove("show");
+      selectedIndex = -1;
+
+      setRotation(rotation);
+      requestAnimationFrame(()=>{
+        updateLayout();
+        fitCenterText();
+      });
+    }
+
+
+    function readNumber(value, fallback){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function computeLayoutGeometry(){
+      const viewportH = updateVisualViewportHeight();
+      const viewportW = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 0);
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+
+      const controlsHeight = Math.max(
+        isLandscape ? 36 : 44,
+        fixedControls ? fixedControls.offsetHeight || 0 : 0
+      );
+
+      const safeBottomApprox = Math.max(0, viewportH - (window.visualViewport ? window.visualViewport.height : viewportH));
+      const controlBottomGap = isLandscape ? 8 : 12;
+      const controlsTop = viewportH - controlsHeight - controlBottomGap;
+
+      /*
+        مصدر هندسي واحد:
+        العجلة والسهم وحساب الاختيار يعتمدون على هذه القيم فقط.
+        لا نستخدم getBoundingClientRect للعجلة بعد الزوم حتى لا يغيّر الزوم موضع السهم أو النصوص.
+      */
+      const topReserve = isLandscape ? 10 : 58;
+      const bottomReserve = isLandscape ? 10 : 14;
+      const availableTop = topReserve;
+      const availableBottom = Math.max(availableTop + 260, controlsTop - bottomReserve);
+      const availableH = Math.max(260, availableBottom - availableTop);
+
+      const maxByWidth = isLandscape ? viewportW * 0.56 : viewportW * 0.88;
+      const maxByHeight = availableH * (isLandscape ? 0.88 : 0.82);
+      const maxAbsolute = isLandscape ? 700 : 430;
+      const minSize = Math.min(320, viewportW * 0.82, availableH * 0.78);
+      const size = Math.round(clamp(Math.min(maxByWidth, maxByHeight, maxAbsolute), Math.max(260, minSize), maxAbsolute));
+
+      const left = Math.round((viewportW - size) / 2);
+      const top = Math.round(availableTop + (availableH - size) / 2);
+      const centerX = left + size / 2;
+      const centerY = top + size / 2;
+
+      const arrowW = Math.round(clamp(size * 0.092, 36, 62));
+      const arrowH = Math.round(clamp(size * 0.056, 22, 38));
+      const arrowGap = Math.max(4, size * 0.010);
+      const arrowLeft = Math.max(2, Math.round(left - arrowW - arrowGap));
+      const arrowTop = Math.round(centerY);
+
+      return { size, left, top, centerX, centerY, arrowLeft, arrowTop, arrowW, arrowH, viewportW, viewportH, controlsTop };
+    }
+
+    function applyLayoutGeometry(geometry){
+      layoutGeometry = geometry;
+      wheelPage.style.setProperty("--wheel-size", `${geometry.size}px`);
+      wheelPage.style.setProperty("--wheel-left", `${geometry.left}px`);
+      wheelPage.style.setProperty("--wheel-top", `${geometry.top}px`);
+      wheelPage.style.setProperty("--arrow-left", `${geometry.arrowLeft}px`);
+      wheelPage.style.setProperty("--arrow-top", `${geometry.arrowTop}px`);
+      wheelPage.style.setProperty("--arrow-w", `${geometry.arrowW}px`);
+      wheelPage.style.setProperty("--arrow-h", `${geometry.arrowH}px`);
+    }
+
+    function configureZoom(geometry = layoutGeometry){
+      const size = geometry.size || wheelShell.offsetWidth || 0;
+      if (!size) return;
+
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      const desiredScale = isLandscape ? 1.10 : 1.10;
+      const desiredX = Math.max(4, Math.min(size * 0.060, (geometry.viewportW || window.innerWidth) * 0.045));
+      const margin = Math.max(8, size * 0.018);
+
+      const maxHorizontalScale = (2 * Math.min(
+        geometry.centerX + desiredX - margin,
+        (geometry.viewportW || window.innerWidth) - margin - (geometry.centerX + desiredX)
+      )) / size;
+
+      const maxVerticalScale = (2 * Math.min(
+        geometry.centerY - margin,
+        (geometry.viewportH || window.innerHeight) - margin - geometry.centerY
+      )) / size;
+
+      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1.02, desiredScale);
+      const minX = margin + (size * scale) / 2 - geometry.centerX;
+      const maxX = (geometry.viewportW || window.innerWidth) - margin - (size * scale) / 2 - geometry.centerX;
+      const safeX = clamp(desiredX, minX, maxX);
+
+      wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
+      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
+      wheelPage.style.setProperty("--zoom-x", `${safeX.toFixed(2)}px`);
+    }
+
+    function updateLayout(){
+      const geometry = computeLayoutGeometry();
+      applyLayoutGeometry(geometry);
+      configureZoom(geometry);
+      positionLabels();
+    }
+
+    function positionLabels(){
+      const size = layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 0;
+      if (!size || !labelNodes.length) return;
+
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const center = size / 2;
+
+      labelNodes.forEach((node, index)=>{
+        const entry = items[index] || {};
+        const metrics = labelMetrics(count, entry);
+        const baseAngle = node.baseAngle || (-90 + index * step + step / 2);
+        const p = polarToCartesian(metrics.midRadius, baseAngle);
+
+        node.label.style.left = `${center + p.x}px`;
+        node.label.style.top = `${center + p.y}px`;
+        node.label.style.setProperty("--label-w", `${metrics.radialWidth}px`);
+        node.label.style.setProperty("--label-h", `${metrics.labelHeight}px`);
+        node.label.style.setProperty("--label-gap", `${metrics.gap}px`);
+        node.label.style.setProperty("--font-size", `${metrics.fontSize}px`);
+        node.label.style.setProperty("--image-size", `${metrics.imageSize}px`);
+        node.label.style.setProperty("--line-clamp", String(metrics.lines));
+        node.label.style.setProperty("--text-max", `${metrics.textMax}px`);
+      });
+
+      updateLabelDirections();
+    }
+
+    function updateLabelDirections(){
+      labelNodes.forEach((node)=>{
+        const finalAngle = normalizeAngle(node.baseAngle + rotation);
+        const flipped = finalAngle > 90 && finalAngle < 270;
+        const labelAngle = node.baseAngle + (flipped ? 180 : 0);
+        node.label.classList.toggle("flipped", flipped);
+        node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
+      });
+    }
+
+    function setRotation(degrees){
+      rotation = degrees;
+      wheelRotor.style.transform = `rotate(${degrees}deg)`;
+      updateLabelDirections();
+    }
+
+    function fitCenterText(){
+      if (!wheelCenter.classList.contains("has-question")) return;
+
+      wheelCenter.style.fontSize = "";
+      let size = parseFloat(getComputedStyle(wheelCenter).fontSize || "18");
+
+      for (let i = 0; i < 14; i++) {
+        if (wheelCenter.scrollWidth <= wheelCenter.clientWidth + 2 && wheelCenter.scrollHeight <= wheelCenter.clientHeight + 2) break;
+        size -= 1;
+        if (size < 8) break;
+        wheelCenter.style.fontSize = `${size}px`;
+      }
+    }
+
+    function clearSelected(){
+      document.querySelectorAll(".wheel-sector.selected").forEach((sector)=>{
+        sector.classList.remove("selected");
+      });
+    }
+
+    function highlightSelected(index){
+      clearSelected();
+      const sector = document.querySelector(`.wheel-sector[data-index="${index}"]`);
+      if (!sector) return;
+      sector.classList.remove("selected");
+      void sector.getBoundingClientRect();
+      sector.classList.add("selected");
+    }
+
+    function resetFocus(){
+      wheelShell.classList.remove("zoom");
+      afterSpin.classList.remove("show");
+      clearSelected();
+    }
+
+    function applyFocus(){
+      requestAnimationFrame(()=>{
+        configureZoom(layoutGeometry);
+        wheelShell.classList.add("zoom");
+        collapseSafariBars();
+      });
+    }
+
+    function getSelectedIndexAtArrow(){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const localAngleAtArrow = normalizeAngle(180 - normalizeAngle(rotation));
+      const relative = normalizeAngle(localAngleAtArrow - (-90));
+      const nearestCenterIndex = Math.round((relative - step / 2) / step);
+      return ((nearestCenterIndex % count) + count) % count;
+    }
+
+    function showSelected(forcedIndex = null){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const index = Number.isInteger(forcedIndex)
+        ? ((forcedIndex % count) + count) % count
+        : getSelectedIndexAtArrow();
+
+      selectedIndex = index;
+      selectedResult.textContent = textForEntry(items[index], index);
+      afterSpin.classList.add("show");
+      highlightSelected(index);
+      applyFocus();
+    }
+
+    function easeOutQuint(t){
+      return 1 - Math.pow(1 - t, 5);
+    }
+
+    function cancelAnimation(){
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    }
+
+    function animateTo(targetRotation, duration = 5200, targetIndex = null){
+      cancelAnimation();
+
+      const start = rotation;
+      const change = targetRotation - start;
+      const startTime = performance.now();
+      resetFocus();
+      selectedResult.textContent = "";
+
+      function frame(now){
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutQuint(progress);
+
+        setRotation(start + change * eased);
+
+        if (progress < 1) {
+          animationId = requestAnimationFrame(frame);
+        } else {
+          animationId = null;
+          setRotation(targetRotation);
+          showSelected(targetIndex);
+        }
+      }
+
+      animationId = requestAnimationFrame(frame);
+    }
+
+    function spinRandom(direction = 1){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      const selected = count === 1 ? 0 : Math.floor(Math.random() * count);
+      const selectedCenterAngle = -90 + selected * step + step / 2;
+      const desiredNorm = normalizeAngle(180 - selectedCenterAngle);
+      const currentNorm = normalizeAngle(rotation);
+
+      let delta = desiredNorm - currentNorm;
+      const fullTurns = 5 + Math.floor(Math.random() * 3);
+
+      if (direction < 0) {
+        while (delta > 0) delta -= 360;
+        delta -= fullTurns * 360;
+      } else {
+        while (delta < 0) delta += 360;
+        delta += fullTurns * 360;
+      }
+
+      selectedIndex = selected;
+      animateTo(rotation + delta, 4700 + Math.floor(Math.random() * 450), selected);
+    }
+
+    function angleFromPointer(event, element){
+      const rect = element.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      return Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI;
+    }
+
+    wheelShell.addEventListener("pointerdown", (event)=>{
+      cancelAnimation();
+      resetFocus();
+      wheelShell.setPointerCapture?.(event.pointerId);
+      selectedResult.textContent = "";
+
+      dragState = {
+        pointerId: event.pointerId,
+        lastAngle: angleFromPointer(event, wheelShell),
+        totalDelta: 0,
+        lastDirection: 1
+      };
+    });
+
+    wheelShell.addEventListener("pointermove", (event)=>{
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+      event.preventDefault();
+
+      const currentAngle = angleFromPointer(event, wheelShell);
+      let delta = currentAngle - dragState.lastAngle;
+
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+
+      dragState.lastAngle = currentAngle;
+      dragState.totalDelta += delta;
+      if (Math.abs(delta) > 0.35) dragState.lastDirection = delta >= 0 ? 1 : -1;
+
+      setRotation(rotation + delta);
+    });
+
+    function endDrag(event){
+      if (!dragState || dragState.pointerId !== event.pointerId) return;
+
+      const totalDelta = dragState.totalDelta || 0;
+      const direction = totalDelta < 0 ? -1 : (dragState.lastDirection || 1);
+      dragState = null;
+
+      if (Math.abs(totalDelta) >= 4) {
+        spinRandom(direction);
+      } else {
+        showSelected();
+      }
+    }
+
+    wheelShell.addEventListener("pointerup", endDrag);
+    wheelShell.addEventListener("pointercancel", endDrag);
+
+    document.getElementById("spinBtn").addEventListener("click", ()=> spinRandom(1));
+
+    document.getElementById("removeBtn").addEventListener("click", ()=>{
+      if (selectedIndex < 0) return;
+
+      const items = getItems();
+      if (!items.length) return;
+
+      payload.entries = items.slice();
+      payload.entries.splice(selectedIndex, 1);
+
+      if (!payload.entries.length) {
+        payload.entries = defaultWheelEntries.map((entry)=> ({ ...entry }));
+      }
+
+      selectedIndex = -1;
+      rotation = 0;
+      resetFocus();
+      persistPayload();
+      buildWheel();
+    });
+
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+      persistPayload();
+
+      if (document.referrer && document.referrer !== location.href) {
+        history.back();
+      } else {
+        window.location.href = "index-6.html#wheelSetup";
+      }
+    });
+
+    window.addEventListener("resize", ()=> {
+      requestAnimationFrame(updateLayout);
+      requestAnimationFrame(fitCenterText);
+    }, { passive:true });
+
+    window.addEventListener("orientationchange", ()=> {
+      setTimeout(()=>{
+        updateLayout();
+        fitCenterText();
+        collapseSafariBars();
+      }, 120);
+    }, { passive:true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", ()=> requestAnimationFrame(updateLayout), { passive:true });
+      window.visualViewport.addEventListener("scroll", ()=> requestAnimationFrame(updateLayout), { passive:true });
+    }
+
+    document.addEventListener("touchend", collapseSafariBars, { passive:true });
+
+    buildWheel();
+    updateLayout();
+    fitCenterText();
+    collapseSafariBars();
   </script>
 </body>
 </html>
