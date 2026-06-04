@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-8</title>
+  <title>العجلة الدوارة - wheel-9</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -103,8 +103,9 @@
       left:var(--wheel-left);
       top:var(--wheel-top);
       border-radius:50%;
-      transform:translateX(0) scale(1);
-      transform-origin:center center;
+      /* transform-origin fixed at left-center (arrow contact point) so zoom never shifts the wheel away from the arrow */
+      transform-origin:left center;
+      transform:scale(1);
       transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
       filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
       touch-action:none;
@@ -116,8 +117,9 @@
       cursor:grabbing;
     }
 
+    /* Scale only — no translateX — so the left edge (arrow tip) stays fixed */
     .wheel-shell.zoom{
-      transform:translateX(var(--zoom-x, 0px)) scale(var(--zoom-scale, 1.10));
+      transform:scale(var(--zoom-scale, 1.10));
     }
 
     .wheel-shell.zoom .wheel-label-content,
@@ -427,10 +429,6 @@
         padding:0 6px calc(42px + var(--safe-bottom));
       }
 
-      .wheel-shell.zoom{
-        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24);
-      }
-
       .wheel-logo{
         top:clamp(10px, 2.2vh, 18px);
         left:clamp(14px, 2vw, 28px);
@@ -495,10 +493,6 @@
         top:12px;
         left:14px;
         width:64px;
-      }
-
-      .wheel-shell.zoom{
-        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38);
       }
 
       .fixed-controls{
@@ -910,6 +904,18 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
+    /* Returns the real visual-viewport height and writes --vvh so CSS can use it.
+       Must be called before any layout geometry is computed. */
+    function updateVisualViewportHeight(){
+      const h = Math.max(200, Math.round(
+        window.visualViewport
+          ? window.visualViewport.height
+          : (window.innerHeight || document.documentElement.clientHeight || 640)
+      ));
+      wheelPage.style.setProperty("--vvh", `${h}px`);
+      return h;
+    }
+
     function computeLayoutGeometry(){
       const viewportH = updateVisualViewportHeight();
       const viewportW = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 0);
@@ -966,33 +972,28 @@
       wheelPage.style.setProperty("--arrow-h", `${geometry.arrowH}px`);
     }
 
+    /* Computes --zoom-scale and --zoom-inverse only.
+       No translateX: transform-origin is left center on .wheel-shell so the
+       arrow contact point (9-o'clock rim) stays fixed during zoom. */
     function configureZoom(geometry = layoutGeometry){
       const size = geometry.size || wheelShell.offsetWidth || 0;
       if (!size) return;
 
-      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-      const desiredScale = isLandscape ? 1.10 : 1.10;
-      const desiredX = Math.max(4, Math.min(size * 0.060, (geometry.viewportW || window.innerWidth) * 0.045));
+      const desiredScale = 1.10;
       const margin = Math.max(8, size * 0.018);
 
-      const maxHorizontalScale = (2 * Math.min(
-        geometry.centerX + desiredX - margin,
-        (geometry.viewportW || window.innerWidth) - margin - (geometry.centerX + desiredX)
-      )) / size;
+      /* With transform-origin:left center the wheel expands top/bottom equally
+         from centerY, so only vertical headroom constrains the scale. */
+      const verticalRoom = Math.min(
+        (geometry.centerY || 0) - margin,
+        ((geometry.viewportH || window.innerHeight) - margin) - (geometry.centerY || 0)
+      );
+      const maxVerticalScale = size > 0 ? (2 * Math.max(0, verticalRoom)) / size : desiredScale;
 
-      const maxVerticalScale = (2 * Math.min(
-        geometry.centerY - margin,
-        (geometry.viewportH || window.innerHeight) - margin - geometry.centerY
-      )) / size;
-
-      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1.02, desiredScale);
-      const minX = margin + (size * scale) / 2 - geometry.centerX;
-      const maxX = (geometry.viewportW || window.innerWidth) - margin - (size * scale) / 2 - geometry.centerX;
-      const safeX = clamp(desiredX, minX, maxX);
+      const scale = clamp(Math.min(desiredScale, maxVerticalScale), 1.02, desiredScale);
 
       wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
       wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
-      wheelPage.style.setProperty("--zoom-x", `${safeX.toFixed(2)}px`);
     }
 
     function updateLayout(){
