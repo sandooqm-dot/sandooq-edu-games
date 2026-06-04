@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة</title>
+  <title>العجلة الدوارة - wheel-8</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -13,7 +13,7 @@
       --red:#f05d5b;
       --orange:#f47a45;
       --orange-dark:#e85f2f;
-      --wheel-size:min(86vw, calc(100dvh - 190px), 620px);
+      --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
       --arrow-left:8px;
       --arrow-w:52px;
       --arrow-h:28px;
@@ -28,7 +28,7 @@
     html,body{
       margin:0;
       width:100%;
-      min-height:calc(var(--vvh, 100dvh) + 120px);
+      min-height:calc(100dvh + 120px);
       background:#fff;
       color:#222;
       overflow-x:hidden;
@@ -46,8 +46,8 @@
     }
 
     .wheel-page{
-      position:fixed;
-      inset:0;
+      position:sticky;
+      top:0;
       width:100vw;
       height:100dvh;
       min-height:100dvh;
@@ -75,17 +75,13 @@
     .wheel-stage{
       position:absolute;
       inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:max(44px, calc(var(--safe-top) + 28px)) 8px calc(92px + var(--safe-bottom));
       overflow:hidden;
     }
 
     .wheel-arrow{
       position:absolute;
       left:var(--arrow-left);
-      top:50%;
+      top:var(--arrow-top, 50%);
       transform:translateY(-50%);
       width:0;
       height:0;
@@ -103,11 +99,13 @@
       max-width:var(--wheel-size);
       max-height:var(--wheel-size);
       aspect-ratio:1/1;
-      position:relative;
+      position:absolute;
+      left:var(--wheel-left);
+      top:var(--wheel-top);
       border-radius:50%;
       transform:translateX(0) scale(1);
       transform-origin:center center;
-      transition:transform 760ms cubic-bezier(.18,.82,.18,1);
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
       filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
       touch-action:none;
       cursor:grab;
@@ -119,7 +117,18 @@
     }
 
     .wheel-shell.zoom{
-      transform:translateX(clamp(8px, 2.5vw, 26px)) scale(1.06);
+      transform:translateX(var(--zoom-x, 0px)) scale(var(--zoom-scale, 1.10));
+    }
+
+    .wheel-shell.zoom .wheel-label-content,
+    .wheel-shell.zoom .wheel-image{
+      transform:scale(var(--zoom-inverse, .9091));
+      transform-origin:center center;
+    }
+
+    .wheel-shell.zoom .wheel-center{
+      transform:translate(-50%,-50%) scale(var(--zoom-inverse, .9091));
+      transform-origin:center center;
     }
 
     .wheel-rotor{
@@ -411,15 +420,15 @@
 
     @media (orientation:landscape){
       :root{
-        --wheel-size:min(58vw, calc(100dvh - 76px), 76dvh, 690px);
+        --wheel-size:min(55vw, calc(100dvh - 56px), 76dvh, 690px);
       }
 
       .wheel-stage{
-        padding:max(10px, var(--safe-top)) 6px calc(58px + var(--safe-bottom));
+        padding:0 6px calc(42px + var(--safe-bottom));
       }
 
       .wheel-shell.zoom{
-        transform:translateX(clamp(6px, 2vw, 18px)) scale(1.05);
+        transform:translateX(clamp(22px, 6vw, 72px)) scale(1.24);
       }
 
       .wheel-logo{
@@ -479,7 +488,7 @@
 
     @media (max-width:430px){
       :root{
-        --wheel-size:min(88vw, calc(100dvh - 205px), 380px);
+        --wheel-size:min(84vw, calc(100dvh - 172px), 360px);
       }
 
       .wheel-logo{
@@ -489,7 +498,7 @@
       }
 
       .wheel-shell.zoom{
-        transform:translateX(clamp(6px, 2.5vw, 16px)) scale(1.06);
+        transform:translateX(clamp(28px, 10vw, 62px)) scale(1.38);
       }
 
       .fixed-controls{
@@ -596,6 +605,7 @@
     let dragState = null;
     let labelNodes = [];
     let safariTimers = [];
+    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:52, arrowH:28 };
 
     const wheelPage = document.getElementById("wheelPage");
     const wheelStage = document.getElementById("wheelStage");
@@ -606,19 +616,7 @@
     const wheelCenter = document.getElementById("wheelCenter");
     const selectedResult = document.getElementById("selectedResult");
     const afterSpin = document.getElementById("afterSpin");
-
-    function updateVisualViewportHeight(){
-      const height = Math.max(
-        320,
-        Math.round(
-          (window.visualViewport && window.visualViewport.height) ||
-          window.innerHeight ||
-          document.documentElement.clientHeight ||
-          0
-        )
-      );
-      document.documentElement.style.setProperty("--vvh", `${height}px`);
-    }
+    const fixedControls = document.querySelector(".fixed-controls");
 
     function readPayload(){
       try {
@@ -761,59 +759,54 @@
     }
 
     function labelMetrics(count, entry){
-      const size = Math.max(260, wheelShell.getBoundingClientRect().width || wheelShell.clientWidth || 360);
+      const size = Math.max(260, layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 360);
       const step = 360 / Math.max(count, 1);
       const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
       const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
       const text = textForEntry(entry, 0);
       const textLength = String(text || "").trim().length;
 
-      const centerSize = wheelCenter.getBoundingClientRect().width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
+      const centerRect = wheelCenter.getBoundingClientRect();
+      const centerSize = centerRect.width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
       const centerRadius = centerSize / 2;
 
-      /*
-        wheel-2:
-        توزيع محتوى القطاع أصبح مبنيًا على مساحة الحلقة الحقيقية بين دائرة المنتصف
-        وحافة العجلة. لا نضع النص عند المركز ولا نسمح له بالخروج خارج القطاع.
-      */
-      const rimRadius = size * 0.438;
-      const innerEdge = centerRadius + size * (count <= 5 ? 0.068 : count <= 8 ? 0.060 : count <= 12 ? 0.052 : 0.046);
-      const outerEdge = rimRadius - size * (count <= 5 ? 0.035 : count <= 8 ? 0.030 : count <= 12 ? 0.026 : 0.022);
-      const availableRadial = Math.max(size * 0.10, outerEdge - innerEdge);
+      const rimRadius = size * 0.448;
+      const innerEdge = centerRadius + size * (count <= 5 ? 0.070 : count <= 8 ? 0.064 : count <= 12 ? 0.056 : 0.050);
+      const outerEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.026 : count <= 12 ? 0.023 : 0.020);
+      const available = Math.max(size * 0.12, outerEdge - innerEdge);
 
       const radialWidth = clamp(
-        availableRadial * (count <= 5 ? 0.92 : count <= 8 ? 0.88 : count <= 12 ? 0.82 : 0.76),
-        size * (count <= 5 ? 0.17 : count <= 8 ? 0.13 : count <= 12 ? 0.095 : 0.070),
-        availableRadial
+        available * (count <= 5 ? 0.96 : count <= 8 ? 0.92 : count <= 12 ? 0.86 : 0.80),
+        size * (count <= 5 ? 0.18 : count <= 8 ? 0.14 : count <= 12 ? 0.105 : 0.078),
+        available
       );
 
-      const midRadius = innerEdge + availableRadial * (count <= 5 ? 0.56 : count <= 8 ? 0.55 : count <= 12 ? 0.53 : 0.51);
+      const midRadius = innerEdge + available * (count <= 5 ? 0.58 : count <= 8 ? 0.57 : count <= 12 ? 0.55 : 0.53);
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
 
       const labelHeight = clamp(
-        arcAtMiddle * (count <= 5 ? 0.52 : count <= 8 ? 0.46 : count <= 12 ? 0.38 : 0.30),
-        size * (count <= 5 ? 0.090 : count <= 8 ? 0.064 : count <= 12 ? 0.046 : 0.034),
-        size * (count <= 5 ? 0.170 : count <= 8 ? 0.118 : count <= 12 ? 0.082 : 0.058)
+        arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
+        size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
+        size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
       );
 
       const imageSize = hasImage
-        ? clamp(labelHeight * 0.78, size * 0.030, size * (count <= 5 ? 0.088 : count <= 8 ? 0.066 : count <= 12 ? 0.050 : 0.038))
+        ? clamp(labelHeight * 0.82, size * 0.030, size * (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040))
         : 0;
 
-      let maxFont = size * (count <= 5 ? 0.047 : count <= 8 ? 0.034 : count <= 12 ? 0.024 : 0.017);
-      if (hasImage && hasText) maxFont *= 0.70;
+      let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019);
+      if (hasImage && hasText) maxFont *= 0.72;
 
-      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.28 : 0.34), maxFont);
+      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.30 : 0.42), maxFont);
 
-      if (textLength > 46) fontSize *= 0.68;
-      else if (textLength > 32) fontSize *= 0.76;
-      else if (textLength > 20) fontSize *= 0.84;
-      else if (textLength > 12) fontSize *= 0.92;
+      if (textLength > 46) fontSize *= 0.72;
+      else if (textLength > 32) fontSize *= 0.80;
+      else if (textLength > 20) fontSize *= 0.90;
 
       fontSize = clamp(fontSize, count <= 12 ? 8 : 6.5, maxFont);
 
-      const gap = clamp(size * 0.012, 4, 9);
-      const lines = count <= 5 ? 3 : count <= 10 ? 2 : 1;
+      const gap = clamp(size * 0.014, 4, 10);
+      const lines = count <= 6 ? 4 : count <= 12 ? 3 : 5;
       const textMax = hasImage ? Math.max(24, radialWidth - imageSize - gap - 8) : Math.max(34, radialWidth - 8);
 
       return {
@@ -911,23 +904,106 @@
       });
     }
 
-    function updateLayout(){
-      const stageRect = wheelStage.getBoundingClientRect();
-      const wheelRect = wheelShell.getBoundingClientRect();
-      if (wheelRect.width && stageRect.width) {
-        const arrowW = Math.max(36, Math.min(62, wheelRect.width * 0.092));
-        const arrowH = Math.max(22, Math.min(38, wheelRect.width * 0.056));
-        const arrowLeft = wheelRect.left - stageRect.left - arrowW - Math.max(4, wheelRect.width * 0.010);
-        wheelPage.style.setProperty("--arrow-left", `${Math.max(2, arrowLeft)}px`);
-        wheelPage.style.setProperty("--arrow-w", `${arrowW}px`);
-        wheelPage.style.setProperty("--arrow-h", `${arrowH}px`);
-      }
 
+    function readNumber(value, fallback){
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
+    function computeLayoutGeometry(){
+      const viewportH = updateVisualViewportHeight();
+      const viewportW = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 0);
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+
+      const controlsHeight = Math.max(
+        isLandscape ? 36 : 44,
+        fixedControls ? fixedControls.offsetHeight || 0 : 0
+      );
+
+      const safeBottomApprox = Math.max(0, viewportH - (window.visualViewport ? window.visualViewport.height : viewportH));
+      const controlBottomGap = isLandscape ? 8 : 12;
+      const controlsTop = viewportH - controlsHeight - controlBottomGap;
+
+      /*
+        مصدر هندسي واحد:
+        العجلة والسهم وحساب الاختيار يعتمدون على هذه القيم فقط.
+        لا نستخدم getBoundingClientRect للعجلة بعد الزوم حتى لا يغيّر الزوم موضع السهم أو النصوص.
+      */
+      const topReserve = isLandscape ? 10 : 58;
+      const bottomReserve = isLandscape ? 10 : 14;
+      const availableTop = topReserve;
+      const availableBottom = Math.max(availableTop + 260, controlsTop - bottomReserve);
+      const availableH = Math.max(260, availableBottom - availableTop);
+
+      const maxByWidth = isLandscape ? viewportW * 0.56 : viewportW * 0.88;
+      const maxByHeight = availableH * (isLandscape ? 0.88 : 0.82);
+      const maxAbsolute = isLandscape ? 700 : 430;
+      const minSize = Math.min(320, viewportW * 0.82, availableH * 0.78);
+      const size = Math.round(clamp(Math.min(maxByWidth, maxByHeight, maxAbsolute), Math.max(260, minSize), maxAbsolute));
+
+      const left = Math.round((viewportW - size) / 2);
+      const top = Math.round(availableTop + (availableH - size) / 2);
+      const centerX = left + size / 2;
+      const centerY = top + size / 2;
+
+      const arrowW = Math.round(clamp(size * 0.092, 36, 62));
+      const arrowH = Math.round(clamp(size * 0.056, 22, 38));
+      const arrowGap = Math.max(4, size * 0.010);
+      const arrowLeft = Math.max(2, Math.round(left - arrowW - arrowGap));
+      const arrowTop = Math.round(centerY);
+
+      return { size, left, top, centerX, centerY, arrowLeft, arrowTop, arrowW, arrowH, viewportW, viewportH, controlsTop };
+    }
+
+    function applyLayoutGeometry(geometry){
+      layoutGeometry = geometry;
+      wheelPage.style.setProperty("--wheel-size", `${geometry.size}px`);
+      wheelPage.style.setProperty("--wheel-left", `${geometry.left}px`);
+      wheelPage.style.setProperty("--wheel-top", `${geometry.top}px`);
+      wheelPage.style.setProperty("--arrow-left", `${geometry.arrowLeft}px`);
+      wheelPage.style.setProperty("--arrow-top", `${geometry.arrowTop}px`);
+      wheelPage.style.setProperty("--arrow-w", `${geometry.arrowW}px`);
+      wheelPage.style.setProperty("--arrow-h", `${geometry.arrowH}px`);
+    }
+
+    function configureZoom(geometry = layoutGeometry){
+      const size = geometry.size || wheelShell.offsetWidth || 0;
+      if (!size) return;
+
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      const desiredScale = isLandscape ? 1.10 : 1.10;
+      const desiredX = Math.max(4, Math.min(size * 0.060, (geometry.viewportW || window.innerWidth) * 0.045));
+      const margin = Math.max(8, size * 0.018);
+
+      const maxHorizontalScale = (2 * Math.min(
+        geometry.centerX + desiredX - margin,
+        (geometry.viewportW || window.innerWidth) - margin - (geometry.centerX + desiredX)
+      )) / size;
+
+      const maxVerticalScale = (2 * Math.min(
+        geometry.centerY - margin,
+        (geometry.viewportH || window.innerHeight) - margin - geometry.centerY
+      )) / size;
+
+      const scale = clamp(Math.min(desiredScale, maxHorizontalScale, maxVerticalScale), 1.02, desiredScale);
+      const minX = margin + (size * scale) / 2 - geometry.centerX;
+      const maxX = (geometry.viewportW || window.innerWidth) - margin - (size * scale) / 2 - geometry.centerX;
+      const safeX = clamp(desiredX, minX, maxX);
+
+      wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
+      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
+      wheelPage.style.setProperty("--zoom-x", `${safeX.toFixed(2)}px`);
+    }
+
+    function updateLayout(){
+      const geometry = computeLayoutGeometry();
+      applyLayoutGeometry(geometry);
+      configureZoom(geometry);
       positionLabels();
     }
 
     function positionLabels(){
-      const size = wheelShell.getBoundingClientRect().width || wheelShell.clientWidth || 0;
+      const size = layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 0;
       if (!size || !labelNodes.length) return;
 
       const items = getItems();
@@ -1008,6 +1084,7 @@
 
     function applyFocus(){
       requestAnimationFrame(()=>{
+        configureZoom(layoutGeometry);
         wheelShell.classList.add("zoom");
         collapseSafariBars();
       });
@@ -1054,8 +1131,6 @@
       const start = rotation;
       const change = targetRotation - start;
       const startTime = performance.now();
-      let focusStarted = false;
-
       resetFocus();
       selectedResult.textContent = "";
 
@@ -1064,11 +1139,6 @@
         const eased = easeOutQuint(progress);
 
         setRotation(start + change * eased);
-
-        if (!focusStarted && progress >= 0.68) {
-          focusStarted = true;
-          applyFocus();
-        }
 
         if (progress < 1) {
           animationId = requestAnimationFrame(frame);
@@ -1189,19 +1259,17 @@
       if (document.referrer && document.referrer !== location.href) {
         history.back();
       } else {
-        window.location.href = "index-7.html#wheelSetup";
+        window.location.href = "index-6.html#wheelSetup";
       }
     });
 
     window.addEventListener("resize", ()=> {
-      updateVisualViewportHeight();
       requestAnimationFrame(updateLayout);
       requestAnimationFrame(fitCenterText);
     }, { passive:true });
 
     window.addEventListener("orientationchange", ()=> {
       setTimeout(()=>{
-        updateVisualViewportHeight();
         updateLayout();
         fitCenterText();
         collapseSafariBars();
@@ -1209,19 +1277,12 @@
     }, { passive:true });
 
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", ()=> {
-        updateVisualViewportHeight();
-        requestAnimationFrame(updateLayout);
-      }, { passive:true });
-      window.visualViewport.addEventListener("scroll", ()=> {
-        updateVisualViewportHeight();
-        requestAnimationFrame(updateLayout);
-      }, { passive:true });
+      window.visualViewport.addEventListener("resize", ()=> requestAnimationFrame(updateLayout), { passive:true });
+      window.visualViewport.addEventListener("scroll", ()=> requestAnimationFrame(updateLayout), { passive:true });
     }
 
     document.addEventListener("touchend", collapseSafariBars, { passive:true });
 
-    updateVisualViewportHeight();
     buildWheel();
     updateLayout();
     fitCenterText();
