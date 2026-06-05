@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - mobile-fix-1</title>
+  <title>العجلة الدوارة - wheel-mobile-fix-2</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --app-h:100dvh;
       --ink:#111;
       --yellow:#efd553;
       --red:#f05d5b;
@@ -29,33 +28,36 @@
     html,body{
       margin:0;
       width:100%;
-      min-height:calc(var(--app-h, 100dvh) + 120px);
+      height:100%;
+      min-height:100%;
       background:#fff;
       color:#222;
-      overflow-x:hidden;
-      overflow-y:auto;
-      overscroll-behavior-y:none;
-      -webkit-overflow-scrolling:touch;
+      overflow:hidden;
+      overscroll-behavior:none;
+      -webkit-overflow-scrolling:auto;
       -webkit-text-size-adjust:100%;
     }
 
     body::after{
-      content:"";
-      display:block;
-      height:120px;
-      pointer-events:none;
+      content:none;
+      display:none;
     }
 
     /*
-      --app-h is set by JS to window.visualViewport.height before first paint.
-      On iOS Safari, 100dvh can equal window.innerHeight (full screen) instead
-      of the actual visible area, pushing content too high.
-      Using var(--app-h) ensures the container height always matches the real
-      visible viewport that JS uses for layout calculations.
+      Mobile layout fix:
+      The old page used a scrollable body + sticky game container + extra spacer
+      to collapse Safari bars. On iPhone this made the playable area shorter than
+      the real screen, so the wheel and buttons appeared lifted with a large
+      white space below.
+
+      The game is now a true fixed viewport page. JS sets --app-h from the
+      largest reliable viewport height and all wheel/button geometry is computed
+      inside that same fixed viewport. This removes the blank bottom area and
+      keeps the buttons at the real bottom.
     */
     .wheel-page{
-      position:sticky;
-      top:0;
+      position:fixed;
+      inset:0;
       width:100vw;
       height:var(--app-h, 100dvh);
       min-height:var(--app-h, 100dvh);
@@ -680,15 +682,10 @@
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
-      if (!isIosWebKit()) return;
-
-      [0, 80, 220, 520, 900].forEach((delay)=>{
+      // The page is fixed to the viewport now, so scrolling the body is no
+      // longer used. Recalculate after touch/orientation changes instead.
+      [0, 80, 220, 520].forEach((delay)=>{
         safariTimers.push(setTimeout(()=>{
-          try {
-            window.scrollTo({ top:76, left:0, behavior:"auto" });
-          } catch (_) {
-            window.scrollTo(0, 76);
-          }
           requestAnimationFrame(updateLayout);
         }, delay));
       });
@@ -913,24 +910,22 @@
     }
 
     /*
-      FIX: Mobile vertical layout.
-
-      The previous implementation trusted visualViewport.height alone. On iOS
-      Safari this can temporarily report the reduced browser-toolbar viewport
-      while the page is displayed inside the larger layout viewport. That makes
-      .wheel-page too short, so the wheel and controls are positioned in the
-      top part of the screen and a large empty area remains below.
-
-      Use the largest reliable viewport value (visualViewport / innerHeight /
-      clientHeight) as the page height. This keeps the fullscreen game surface
-      at the real visible/layout height and preserves the existing Safari scroll
-      spacer used by collapseSafariBars().
+      Fixed viewport height for iPhone/Safari.
+      We intentionally use the largest reliable viewport value, not visualViewport
+      alone. visualViewport can shrink when Safari UI is involved, which makes
+      the fixed game container too short and creates a large blank area below.
     */
     function updateVisualViewportHeight(){
       const vvH = window.visualViewport ? Math.round(window.visualViewport.height || 0) : 0;
+      const vvOffsetTop = window.visualViewport ? Math.round(window.visualViewport.offsetTop || 0) : 0;
       const innerH = Math.round(window.innerHeight || 0);
       const clientH = Math.round(document.documentElement.clientHeight || 0);
-      const h = Math.max(320, vvH, innerH, clientH);
+      const screenH = window.screen ? Math.round(Math.min(window.screen.height || 0, window.screen.availHeight || window.screen.height || 0)) : 0;
+
+      // In normal browsers innerHeight/clientHeight are correct. On iOS Safari,
+      // visualViewport alone may be too small; using the max prevents the page
+      // from being visually lifted upward with empty space below.
+      const h = Math.max(320, vvH + vvOffsetTop, innerH, clientH, Math.min(screenH || 0, innerH || screenH || 0));
 
       document.documentElement.style.setProperty("--app-h", `${h}px`);
       return h;
@@ -940,39 +935,46 @@
       const viewportH = updateVisualViewportHeight();
       const viewportW = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 0);
       const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      const isNarrow = viewportW <= 600;
 
       const controlsHeight = Math.max(
         isLandscape ? 36 : 44,
         fixedControls ? fixedControls.offsetHeight || 0 : 0
       );
 
-      /* Use the real rendered top of the button bar when available. This keeps
-         the wheel area above the actual controls, including safe-area bottom. */
+      // The controls are absolutely fixed to the bottom of .wheel-page.
+      // Do not read their current getBoundingClientRect() as a layout source;
+      // that creates feedback loops when viewport height changes.
       const controlBottomGap = isLandscape ? 8 : 12;
-      const controlsRect = fixedControls ? fixedControls.getBoundingClientRect() : null;
-      const controlsTop = controlsRect && controlsRect.height
-        ? Math.min(viewportH - controlBottomGap, Math.max(0, controlsRect.top))
-        : viewportH - controlsHeight - controlBottomGap;
+      const controlsTop = viewportH - controlsHeight - controlBottomGap;
 
       /*
-        مصدر هندسي واحد:
-        العجلة والسهم وحساب الاختيار يعتمدون على هذه القيم فقط.
-        لا نستخدم getBoundingClientRect للعجلة بعد الزوم حتى لا يغيّر الزوم موضع السهم أو النصوص.
+        One geometry source only.
+        Wheel, arrow, and selected-sector math all use these values.
+        Mobile gets a slightly lower visual center so the page no longer feels
+        lifted upward, while desktop remains effectively unchanged.
       */
-      const topReserve = isLandscape ? 10 : 48;
-      const bottomReserve = isLandscape ? 10 : 18;
+      const topReserve = isLandscape ? 8 : (isNarrow ? 44 : 58);
+      const bottomReserve = isLandscape ? 12 : (isNarrow ? 24 : 14);
       const availableTop = topReserve;
       const availableBottom = Math.max(availableTop + 260, controlsTop - bottomReserve);
       const availableH = Math.max(260, availableBottom - availableTop);
 
       const maxByWidth = isLandscape ? viewportW * 0.56 : viewportW * 0.88;
-      const maxByHeight = availableH * (isLandscape ? 0.88 : 0.82);
+      const maxByHeight = availableH * (isLandscape ? 0.86 : 0.80);
       const maxAbsolute = isLandscape ? 700 : 430;
-      const minSize = Math.min(320, viewportW * 0.82, availableH * 0.78);
+      const minSize = Math.min(320, viewportW * 0.82, availableH * 0.76);
       const size = Math.round(clamp(Math.min(maxByWidth, maxByHeight, maxAbsolute), Math.max(260, minSize), maxAbsolute));
 
       const left = Math.round((viewportW - size) / 2);
-      const top = Math.round(availableTop + (availableH - size) / 2);
+
+      // Center in the stage above buttons. On phones, nudge downward a little
+      // because the original visual result was consistently too high.
+      const mobileDownShift = isLandscape ? Math.round(Math.min(44, availableH * 0.055)) : (isNarrow ? Math.round(Math.min(54, availableH * 0.060)) : 0);
+      const maxTop = Math.max(availableTop, availableBottom - size);
+      const centeredTop = availableTop + (availableH - size) / 2 + mobileDownShift;
+      const top = Math.round(clamp(centeredTop, availableTop, maxTop));
+
       const centerX = left + size / 2;
       const centerY = top + size / 2;
 
