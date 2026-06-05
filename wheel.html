@@ -904,16 +904,15 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
-    /* Returns the height of .wheel-page as rendered by CSS (100dvh).
-       Reading offsetHeight directly from the element means JS and CSS
-       always use the exact same height — no visualViewport mismatch. */
+    /* Returns the real visual-viewport height and writes --vvh so CSS can use it.
+       Must be called before any layout geometry is computed. */
     function updateVisualViewportHeight(){
-      const fromElement = wheelPage.offsetHeight || wheelPage.clientHeight;
-      const h = Math.max(200, fromElement || Math.round(
+      const h = Math.max(200, Math.round(
         window.visualViewport
           ? window.visualViewport.height
           : (window.innerHeight || document.documentElement.clientHeight || 640)
       ));
+      wheelPage.style.setProperty("--vvh", `${h}px`);
       return h;
     }
 
