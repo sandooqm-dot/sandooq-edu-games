@@ -45,6 +45,13 @@
       pointer-events:none;
     }
 
+    /*
+      --app-h is set by JS to window.visualViewport.height before first paint.
+      On iOS Safari, 100dvh can equal window.innerHeight (full screen) instead
+      of the actual visible area, pushing content too high.
+      Using var(--app-h) ensures the container height always matches the real
+      visible viewport that JS uses for layout calculations.
+    */
     .wheel-page{
       position:sticky;
       top:0;
@@ -904,10 +911,23 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
-    /* Reads window.visualViewport.height (the actual visible area, not the full
-       layout viewport).  Sets --app-h on <html> so CSS .wheel-page always has
-       the same height that JS uses for layout — fixes the "too high" offset on
-       iOS Safari where 100dvh can equal innerHeight instead of the visual area. */
+    /*
+      FIX: Mobile vertical layout — "page too high" on iOS Safari.
+
+      Root cause: CSS height:100dvh on .wheel-page can resolve to
+      window.innerHeight (full screen) on some iOS Safari versions instead of
+      window.visualViewport.height (the actual visible area). When that happens,
+      .wheel-page is taller than the visible screen, so JS positions the wheel
+      and buttons for the full-screen height while the user only sees the top
+      portion — making everything appear "lifted" with empty space below.
+
+      Fix: set --app-h = window.visualViewport.height on <html> before first
+      paint. CSS .wheel-page uses var(--app-h, 100dvh) so both CSS and JS
+      always work from the same real visible height.
+
+      Desktop is unaffected: on desktop visualViewport.height === innerHeight
+      === 100dvh, so --app-h produces the identical value.
+    */
     function updateVisualViewportHeight(){
       const h = Math.max(200, Math.round(
         window.visualViewport
