@@ -49,9 +49,9 @@
       position:sticky;
       top:0;
       width:100vw;
-      height:100dvh;
-      min-height:100dvh;
-      max-height:100dvh;
+      height:var(--app-h, 100dvh);
+      min-height:var(--app-h, 100dvh);
+      max-height:var(--app-h, 100dvh);
       overflow:hidden;
       background:#fff;
       user-select:none;
@@ -904,15 +904,17 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
-    /* Returns the real visual-viewport height and writes --vvh so CSS can use it.
-       Must be called before any layout geometry is computed. */
+    /* Reads window.visualViewport.height (the actual visible area, not the full
+       layout viewport).  Sets --app-h on <html> so CSS .wheel-page always has
+       the same height that JS uses for layout — fixes the "too high" offset on
+       iOS Safari where 100dvh can equal innerHeight instead of the visual area. */
     function updateVisualViewportHeight(){
       const h = Math.max(200, Math.round(
         window.visualViewport
           ? window.visualViewport.height
           : (window.innerHeight || document.documentElement.clientHeight || 640)
       ));
-      wheelPage.style.setProperty("--vvh", `${h}px`);
+      document.documentElement.style.setProperty("--app-h", `${h}px`);
       return h;
     }
 
