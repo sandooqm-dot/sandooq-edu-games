@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-9</title>
+  <title>العجلة الدوارة - mobile-fix-1</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --app-h:100dvh;
       --ink:#111;
       --yellow:#efd553;
       --red:#f05d5b;
@@ -28,7 +29,7 @@
     html,body{
       margin:0;
       width:100%;
-      min-height:calc(100dvh + 120px);
+      min-height:calc(var(--app-h, 100dvh) + 120px);
       background:#fff;
       color:#222;
       overflow-x:hidden;
@@ -912,28 +913,25 @@
     }
 
     /*
-      FIX: Mobile vertical layout — "page too high" on iOS Safari.
+      FIX: Mobile vertical layout.
 
-      Root cause: CSS height:100dvh on .wheel-page can resolve to
-      window.innerHeight (full screen) on some iOS Safari versions instead of
-      window.visualViewport.height (the actual visible area). When that happens,
-      .wheel-page is taller than the visible screen, so JS positions the wheel
-      and buttons for the full-screen height while the user only sees the top
-      portion — making everything appear "lifted" with empty space below.
+      The previous implementation trusted visualViewport.height alone. On iOS
+      Safari this can temporarily report the reduced browser-toolbar viewport
+      while the page is displayed inside the larger layout viewport. That makes
+      .wheel-page too short, so the wheel and controls are positioned in the
+      top part of the screen and a large empty area remains below.
 
-      Fix: set --app-h = window.visualViewport.height on <html> before first
-      paint. CSS .wheel-page uses var(--app-h, 100dvh) so both CSS and JS
-      always work from the same real visible height.
-
-      Desktop is unaffected: on desktop visualViewport.height === innerHeight
-      === 100dvh, so --app-h produces the identical value.
+      Use the largest reliable viewport value (visualViewport / innerHeight /
+      clientHeight) as the page height. This keeps the fullscreen game surface
+      at the real visible/layout height and preserves the existing Safari scroll
+      spacer used by collapseSafariBars().
     */
     function updateVisualViewportHeight(){
-      const h = Math.max(200, Math.round(
-        window.visualViewport
-          ? window.visualViewport.height
-          : (window.innerHeight || document.documentElement.clientHeight || 640)
-      ));
+      const vvH = window.visualViewport ? Math.round(window.visualViewport.height || 0) : 0;
+      const innerH = Math.round(window.innerHeight || 0);
+      const clientH = Math.round(document.documentElement.clientHeight || 0);
+      const h = Math.max(320, vvH, innerH, clientH);
+
       document.documentElement.style.setProperty("--app-h", `${h}px`);
       return h;
     }
@@ -948,17 +946,21 @@
         fixedControls ? fixedControls.offsetHeight || 0 : 0
       );
 
-      const safeBottomApprox = Math.max(0, viewportH - (window.visualViewport ? window.visualViewport.height : viewportH));
+      /* Use the real rendered top of the button bar when available. This keeps
+         the wheel area above the actual controls, including safe-area bottom. */
       const controlBottomGap = isLandscape ? 8 : 12;
-      const controlsTop = viewportH - controlsHeight - controlBottomGap;
+      const controlsRect = fixedControls ? fixedControls.getBoundingClientRect() : null;
+      const controlsTop = controlsRect && controlsRect.height
+        ? Math.min(viewportH - controlBottomGap, Math.max(0, controlsRect.top))
+        : viewportH - controlsHeight - controlBottomGap;
 
       /*
         مصدر هندسي واحد:
         العجلة والسهم وحساب الاختيار يعتمدون على هذه القيم فقط.
         لا نستخدم getBoundingClientRect للعجلة بعد الزوم حتى لا يغيّر الزوم موضع السهم أو النصوص.
       */
-      const topReserve = isLandscape ? 10 : 58;
-      const bottomReserve = isLandscape ? 10 : 14;
+      const topReserve = isLandscape ? 10 : 48;
+      const bottomReserve = isLandscape ? 10 : 18;
       const availableTop = topReserve;
       const availableBottom = Math.max(availableTop + 260, controlsTop - bottomReserve);
       const availableH = Math.max(260, availableBottom - availableTop);
