@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-no-persistent-test-v29 -->
+  <!-- version: wheel-image-only-layout-v30 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-no-persistent-test-v29</title>
+  <title>العجلة الدوارة - wheel-image-only-layout-v30</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -999,34 +999,67 @@
         };
       }
 
-      const radialWidth = clamp(
-        available * (imageOnly ? 0.70 : 0.82),
-        size * (count <= 5 ? 0.145 : count <= 8 ? 0.115 : count <= 12 ? 0.090 : 0.070),
-        available * 0.86
-      );
+      /*
+        wheel-11:
+        Image-only mode gets its own layout.
+        The image is larger and placed closer to the outside of each sector, like the reference.
+      */
+      const imageOnlyInnerEdge = centerRadius + size * (count <= 5 ? 0.050 : count <= 8 ? 0.046 : count <= 12 ? 0.040 : 0.034);
+      const imageOnlyOuterEdge = rimRadius - size * (count <= 5 ? 0.034 : count <= 8 ? 0.030 : count <= 12 ? 0.026 : 0.022);
+      const imageOnlyAvailable = Math.max(size * 0.12, imageOnlyOuterEdge - imageOnlyInnerEdge);
 
-      const midRadius = innerEdge + available * (imageOnly ? 0.52 : 0.56);
+      const radialWidth = imageOnly
+        ? clamp(
+            imageOnlyAvailable * (count <= 5 ? 0.760 : count <= 8 ? 0.740 : count <= 12 ? 0.700 : 0.660),
+            size * (count <= 5 ? 0.170 : count <= 8 ? 0.136 : count <= 12 ? 0.106 : 0.082),
+            imageOnlyAvailable * 0.88
+          )
+        : clamp(
+            available * 0.82,
+            size * (count <= 5 ? 0.145 : count <= 8 ? 0.115 : count <= 12 ? 0.090 : 0.070),
+            available * 0.86
+          );
+
+      const midRadius = imageOnly
+        ? clamp(
+            imageOnlyInnerEdge + imageOnlyAvailable * (count <= 5 ? 0.675 : count <= 8 ? 0.665 : count <= 12 ? 0.650 : 0.635),
+            imageOnlyInnerEdge + radialWidth / 2,
+            imageOnlyOuterEdge - radialWidth * 0.12
+          )
+        : innerEdge + available * 0.56;
+
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
       const heightRatio = imageOnly
-        ? (count <= 5 ? 0.50 : count <= 8 ? 0.42 : count <= 12 ? 0.34 : 0.28)
+        ? (count <= 5 ? 0.700 : count <= 8 ? 0.600 : count <= 12 ? 0.500 : 0.420)
         : (count <= 5 ? 0.46 : count <= 8 ? 0.38 : count <= 12 ? 0.31 : 0.25);
 
       const labelHeight = clamp(
         arcAtMiddle * heightRatio,
-        size * (imageOnly ? (count <= 5 ? 0.072 : count <= 8 ? 0.058 : 0.046) : (count <= 5 ? 0.064 : count <= 8 ? 0.052 : 0.042)),
-        size * (imageOnly ? (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.088 : 0.066) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
+        size * (imageOnly ? (count <= 5 ? 0.092 : count <= 8 ? 0.074 : count <= 12 ? 0.060 : 0.050) : (count <= 5 ? 0.064 : count <= 8 ? 0.052 : 0.042)),
+        size * (imageOnly ? (count <= 5 ? 0.190 : count <= 8 ? 0.148 : count <= 12 ? 0.118 : 0.096) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
       );
 
       const imageSize = hasImage
-        ? clamp(
-            labelHeight * 0.94,
-            size * 0.052,
-            Math.min(
-              radialWidth * 0.54,
-              labelHeight * 0.98,
-              size * (count <= 5 ? 0.132 : count <= 8 ? 0.102 : count <= 12 ? 0.078 : 0.058)
+        ? (imageOnly
+          ? clamp(
+              Math.min(
+                radialWidth * 0.74,
+                labelHeight * 0.96,
+                arcAtMiddle * (count <= 5 ? 0.420 : count <= 8 ? 0.355 : count <= 12 ? 0.300 : 0.255),
+                size * (count <= 5 ? 0.155 : count <= 8 ? 0.126 : count <= 12 ? 0.102 : 0.082)
+              ),
+              size * (count <= 5 ? 0.082 : count <= 8 ? 0.066 : count <= 12 ? 0.054 : 0.046),
+              size * (count <= 5 ? 0.170 : count <= 8 ? 0.136 : count <= 12 ? 0.110 : 0.088)
             )
-          )
+          : clamp(
+              labelHeight * 0.94,
+              size * 0.052,
+              Math.min(
+                radialWidth * 0.54,
+                labelHeight * 0.98,
+                size * (count <= 5 ? 0.132 : count <= 8 ? 0.102 : count <= 12 ? 0.078 : 0.058)
+              )
+            ))
         : 0;
 
       let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022);
