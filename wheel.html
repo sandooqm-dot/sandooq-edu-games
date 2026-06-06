@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-fixed-section-colors-v4 -->
+  <!-- version: wheel-resume-zoom-v5 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-fixed-section-colors-v4</title>
+  <title>العجلة الدوارة - wheel-resume-zoom-v5</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -373,10 +373,13 @@
     }
 
     .after-spin.show{
-      display:block;
+      display:flex;
+      align-items:center;
+      gap:clamp(8px, 1.2vw, 14px);
     }
 
     .spin-btn,
+    .resume-btn,
     .remove-btn{
       min-width:0;
       width:auto;
@@ -403,12 +406,18 @@
       background:linear-gradient(180deg, #ff8548 0%, #f3703b 52%, #e85f2f 100%);
     }
 
+    .resume-btn{
+      min-width:clamp(86px, 9vw, 128px);
+      background:#1688d3;
+    }
+
     .remove-btn{
       min-width:clamp(86px, 9vw, 128px);
       background:#f05d5b;
     }
 
     .spin-btn:active,
+    .resume-btn:active,
     .remove-btn:active,
     .back-btn:active{
       transform:translateY(2px);
@@ -449,6 +458,7 @@
 
       .back-btn,
       .spin-btn,
+      .resume-btn,
       .remove-btn{
         height:clamp(32px, 8vh, 42px);
         border-width:2px;
@@ -471,6 +481,11 @@
       .spin-btn{
         min-width:clamp(92px, 12vw, 142px);
         padding:0 clamp(14px, 2.2vw, 24px);
+      }
+
+      .resume-btn{
+        min-width:clamp(66px, 8vw, 96px);
+        padding:0 clamp(12px, 1.8vw, 20px);
       }
 
       .remove-btn{
@@ -509,6 +524,7 @@
       }
 
       .spin-btn,
+      .resume-btn,
       .remove-btn{
         height:40px;
         border-radius:11px;
@@ -522,6 +538,11 @@
 
       .remove-btn{
         min-width:62px;
+        padding:0 14px;
+      }
+
+      .resume-btn{
+        min-width:74px;
         padding:0 14px;
       }
 
@@ -557,6 +578,7 @@
 
       <div class="right-actions">
         <div class="after-spin" id="afterSpin">
+          <button class="resume-btn" type="button" id="resumeBtn">استئناف</button>
           <button class="remove-btn" type="button" id="removeBtn">حذف</button>
         </div>
         <button class="spin-btn" type="button" id="spinBtn">تدوير</button>
@@ -1099,6 +1121,11 @@
       clearSelected();
     }
 
+    function resumeWheelZoomOnly(){
+      wheelShell.classList.remove("zoom");
+      collapseSafariBars();
+    }
+
     function applyFocus(){
       requestAnimationFrame(()=>{
         configureZoom(layoutGeometry);
@@ -1249,6 +1276,8 @@
     wheelShell.addEventListener("pointercancel", endDrag);
 
     document.getElementById("spinBtn").addEventListener("click", ()=> spinRandom(1));
+
+    document.getElementById("resumeBtn").addEventListener("click", resumeWheelZoomOnly);
 
     document.getElementById("removeBtn").addEventListener("click", ()=>{
       if (selectedIndex < 0) return;
