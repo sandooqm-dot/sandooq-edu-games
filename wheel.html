@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-text-slightly-smaller-v26 -->
+  <!-- version: wheel-zoom-content-scale-v27 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-text-slightly-smaller-v26</title>
+  <title>العجلة الدوارة - wheel-zoom-content-scale-v27</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -902,7 +902,7 @@
           - Bigger wheel + smaller center gives each sector more usable area.
           - Text and image stay separate, each with its own radius.
           - Content sizes are based on the real sector arc at each radius.
-          - Zoom remains neutralized by --visual-label-zoom, so text/images keep their visual size.
+          - Zoom mode lets text/images scale with the selected wheel view so they stay readable in focus.
         */
         const mixedInnerEdge = centerRadius + size * (count <= 5 ? 0.040 : count <= 8 ? 0.036 : count <= 12 ? 0.032 : 0.028);
         const mixedOuterEdge = rimRadius - size * (count <= 5 ? 0.018 : count <= 8 ? 0.016 : count <= 12 ? 0.014 : 0.012);
@@ -1276,10 +1276,16 @@
     function setVisualZoomScale(scale){
       const safeScale = Math.max(1, Number(scale) || 1);
       const inverseScale = 1 / safeScale;
+      /*
+        wheel-8:
+        Keep the center circle compensated, but let text/images scale with the focused wheel.
+        This makes the zoomed result readable while preserving the normal layout sizes.
+      */
+      const labelScale = safeScale > 1.001 ? 1 : inverseScale;
       visualZoomScale = safeScale;
       wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
       wheelPage.style.setProperty("--visual-zoom-inverse", inverseScale.toFixed(5));
-      wheelPage.style.setProperty("--visual-label-zoom", inverseScale.toFixed(5));
+      wheelPage.style.setProperty("--visual-label-zoom", labelScale.toFixed(5));
     }
 
     function cancelZoomAnimation(){
