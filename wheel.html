@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-fixed-content-v9 -->
+  <!-- version: wheel-fixed-content-lock-v10 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-fixed-content-v9</title>
+  <title>العجلة الدوارة - wheel-fixed-content-lock-v10</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -256,16 +256,16 @@
 
     .wheel-label.text-only .wheel-label-content{
       padding:0 6px;
-      justify-content:flex-start;
+      justify-content:flex-end;
     }
 
     .wheel-label.mixed .wheel-label-content{
       justify-content:space-between;
-      flex-direction:row;
+      flex-direction:row-reverse;
     }
 
     .wheel-label.image-only .wheel-label-content{
-      justify-content:flex-end;
+      justify-content:flex-start;
     }
 
     .wheel-text{
@@ -1099,7 +1099,7 @@
 
     function updateLabelDirections(){
       labelNodes.forEach((node)=>{
-        const labelAngle = node.baseAngle;
+        const labelAngle = node.baseAngle + 180;
         node.label.style.setProperty("--label-angle", `${labelAngle.toFixed(3)}deg`);
         node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
       });
@@ -1108,7 +1108,6 @@
     function setRotation(degrees){
       rotation = degrees;
       wheelRotor.style.transform = `rotate(${degrees}deg)`;
-      labelLayer.style.transform = `rotate(${degrees}deg)`;
     }
 
     function fitCenterText(){
