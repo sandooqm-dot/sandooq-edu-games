@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-wordwall-zoom-v6 -->
+  <!-- version: wheel-eliminate-merge-v7 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-wordwall-zoom-v6</title>
+  <title>العجلة الدوارة - wheel-eliminate-merge-v7</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -169,8 +169,35 @@
     }
 
     .wheel-sector.selected{
-      animation:sectorPulse .72s ease-in-out 0s 2;
+      animation:sectorSettle .58s cubic-bezier(.18,.82,.18,1), sectorPulse .72s ease-in-out .12s 2;
       filter:brightness(1.13) saturate(1.05);
+      transform-box:fill-box;
+      transform-origin:center;
+    }
+
+    .wheel-sector.eliminating{
+      animation:sectorEliminate .42s ease-in forwards;
+      transform-box:fill-box;
+      transform-origin:center;
+    }
+
+    .wheel-label.eliminating{
+      animation:labelEliminate .42s ease-in forwards;
+    }
+
+    .wheel-shell.settle-shake{
+      animation:wheelSettleShake .44s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .wheel-shell.merging{
+      animation:wheelMergeSettle .46s cubic-bezier(.22,.82,.18,1);
+    }
+
+    @keyframes sectorSettle{
+      0%{ transform:scale(1); }
+      34%{ transform:scale(.985); }
+      68%{ transform:scale(1.012); }
+      100%{ transform:scale(1); }
     }
 
     @keyframes sectorPulse{
@@ -178,6 +205,30 @@
       35%{ opacity:.72; }
       70%{ opacity:1; }
       100%{ opacity:1; }
+    }
+
+    @keyframes sectorEliminate{
+      0%{ opacity:1; transform:scale(1); filter:brightness(1.12) saturate(1.08); }
+      100%{ opacity:0; transform:scale(.78); filter:brightness(1.28) saturate(.85); }
+    }
+
+    @keyframes labelEliminate{
+      0%{ opacity:1; transform:translate(-50%, -50%) rotate(var(--label-angle, 0deg)) scale(1); }
+      100%{ opacity:0; transform:translate(-50%, -50%) rotate(var(--label-angle, 0deg)) scale(.78); }
+    }
+
+    @keyframes wheelSettleShake{
+      0%{ transform:scale(var(--zoom-scale, 1.82)); }
+      24%{ transform:scale(var(--zoom-scale, 1.82)) rotate(-.55deg); }
+      52%{ transform:scale(var(--zoom-scale, 1.82)) rotate(.38deg); }
+      78%{ transform:scale(var(--zoom-scale, 1.82)) rotate(-.16deg); }
+      100%{ transform:scale(var(--zoom-scale, 1.82)); }
+    }
+
+    @keyframes wheelMergeSettle{
+      0%{ filter:drop-shadow(0 5px 14px rgba(0,0,0,.16)) saturate(1.08); }
+      45%{ filter:drop-shadow(0 7px 16px rgba(0,0,0,.18)) saturate(1.18); }
+      100%{ filter:drop-shadow(0 5px 14px rgba(0,0,0,.16)) saturate(1); }
     }
 
     .label-layer{
@@ -616,6 +667,8 @@
     let dragState = null;
     let labelNodes = [];
     let safariTimers = [];
+    let settleTimer = null;
+    let isRemoving = false;
     let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:52, arrowH:28 };
 
     const wheelPage = document.getElementById("wheelPage");
@@ -1067,6 +1120,7 @@
         const flipped = finalAngle > 90 && finalAngle < 270;
         const labelAngle = node.baseAngle + (flipped ? 180 : 0);
         node.label.classList.toggle("flipped", flipped);
+        node.label.style.setProperty("--label-angle", `${labelAngle.toFixed(3)}deg`);
         node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
       });
     }
@@ -1095,6 +1149,12 @@
       document.querySelectorAll(".wheel-sector.selected").forEach((sector)=>{
         sector.classList.remove("selected");
       });
+      document.querySelectorAll(".wheel-sector.eliminating").forEach((sector)=>{
+        sector.classList.remove("eliminating");
+      });
+      document.querySelectorAll(".wheel-label.eliminating").forEach((label)=>{
+        label.classList.remove("eliminating");
+      });
     }
 
     function highlightSelected(index){
@@ -1107,9 +1167,33 @@
     }
 
     function resetFocus(){
+      if (settleTimer) {
+        clearTimeout(settleTimer);
+        settleTimer = null;
+      }
       wheelShell.classList.remove("zoom");
+      wheelShell.classList.remove("settle-shake");
+      wheelShell.classList.remove("merging");
       afterSpin.classList.remove("show");
       clearSelected();
+    }
+
+    function playSettleShake(){
+      if (settleTimer) clearTimeout(settleTimer);
+      wheelShell.classList.remove("settle-shake");
+      void wheelShell.offsetWidth;
+      wheelShell.classList.add("settle-shake");
+      settleTimer = setTimeout(()=>{
+        wheelShell.classList.remove("settle-shake");
+        settleTimer = null;
+      }, 520);
+    }
+
+    function playMergeSettle(){
+      wheelShell.classList.remove("merging");
+      void wheelShell.offsetWidth;
+      wheelShell.classList.add("merging");
+      setTimeout(()=> wheelShell.classList.remove("merging"), 520);
     }
 
     function resumeWheelZoomOnly(){
@@ -1148,6 +1232,7 @@
       afterSpin.classList.add("show");
       highlightSelected(index);
       applyFocus();
+      setTimeout(playSettleShake, 120);
     }
 
     function easeOutQuint(t){
@@ -1159,6 +1244,46 @@
         cancelAnimationFrame(animationId);
         animationId = null;
       }
+    }
+
+    function delay(ms){
+      return new Promise((resolve)=> setTimeout(resolve, ms));
+    }
+
+    async function eliminateSelectedSection(){
+      if (isRemoving || selectedIndex < 0) return;
+
+      const items = getItems();
+      if (!items.length) return;
+
+      isRemoving = true;
+      afterSpin.classList.remove("show");
+
+      const sector = document.querySelector(`.wheel-sector[data-index="${selectedIndex}"]`);
+      const label = labelNodes[selectedIndex]?.label || null;
+
+      if (sector) sector.classList.add("eliminating");
+      if (label) label.classList.add("eliminating");
+
+      await delay(430);
+
+      payload.entries = items.slice();
+      payload.entries.splice(selectedIndex, 1);
+
+      if (!payload.entries.length) {
+        payload.entries = defaultWheelEntries.map((entry, index)=> ({
+          ...entry,
+          color: normalizeEntryColor(entry.color, index)
+        }));
+      }
+
+      selectedIndex = -1;
+      rotation = 0;
+      resetFocus();
+      persistPayload();
+      buildWheel();
+      playMergeSettle();
+      isRemoving = false;
     }
 
     function animateTo(targetRotation, duration = 5200, targetIndex = null){
@@ -1189,6 +1314,8 @@
     }
 
     function spinRandom(direction = 1){
+      if (isRemoving) return;
+
       const items = getItems();
       const count = Math.max(items.length, 1);
       const step = 360 / count;
@@ -1220,6 +1347,8 @@
     }
 
     wheelShell.addEventListener("pointerdown", (event)=>{
+      if (isRemoving) return;
+
       cancelAnimation();
       resetFocus();
       wheelShell.setPointerCapture?.(event.pointerId);
@@ -1274,29 +1403,7 @@
 
     document.getElementById("resumeBtn").addEventListener("click", resumeWheelZoomOnly);
 
-    document.getElementById("removeBtn").addEventListener("click", ()=>{
-      if (selectedIndex < 0) return;
-      afterSpin.classList.remove("show");
-
-      const items = getItems();
-      if (!items.length) return;
-
-      payload.entries = items.slice();
-      payload.entries.splice(selectedIndex, 1);
-
-      if (!payload.entries.length) {
-        payload.entries = defaultWheelEntries.map((entry, index)=> ({
-          ...entry,
-          color: normalizeEntryColor(entry.color, index)
-        }));
-      }
-
-      selectedIndex = -1;
-      rotation = 0;
-      resetFocus();
-      persistPayload();
-      buildWheel();
-    });
+    document.getElementById("removeBtn").addEventListener("click", eliminateSelectedSection);
 
     document.getElementById("backBtn").addEventListener("click", ()=>{
       persistPayload();
