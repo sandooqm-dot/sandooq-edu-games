@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-image-text-zoom-v11 -->
+  <!-- version: wheel-content-fixed-zoom-v12 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-image-text-zoom-v11</title>
+  <title>العجلة الدوارة - wheel-content-fixed-zoom-v12</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -130,14 +130,14 @@
       transform:scale(var(--zoom-scale, 1.82));
     }
 
-    .wheel-shell.zoom .wheel-label-content,
-    .wheel-shell.zoom .wheel-image{
-      transform:none;
+    .wheel-shell.zoom .wheel-label-content{
+      transform:scale(var(--zoom-inverse, 1));
       transform-origin:center center;
     }
 
+    .wheel-shell.zoom .wheel-image,
     .wheel-shell.zoom .wheel-text{
-      transform:scale(var(--zoom-inverse, 1));
+      transform:none;
       transform-origin:center center;
     }
 
@@ -257,6 +257,10 @@
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
+      transform:scale(1);
+      transform-origin:center center;
+      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
+      will-change:transform;
     }
 
     .wheel-label.text-only .wheel-label-content{
