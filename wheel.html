@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-zoom-content-boost-v28 -->
+  <!-- version: wheel-no-persistent-test-v29 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-zoom-content-boost-v28</title>
+  <title>العجلة الدوارة - wheel-no-persistent-test-v29</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -654,16 +654,7 @@
     const DRAFT_KEY = "sandooq_wheel_draft_v1";
     const SVG_NS = "http://www.w3.org/2000/svg";
 
-    const defaultWheelEntries = [
-      { text:"اتغدى" },
-      { text:"انام" },
-      { text:"اشتغل" },
-      { text:"اروح" },
-      { text:"اكعد" },
-      { text:"احجي" },
-      { text:"اقرأ" },
-      { text:"العب" }
-    ];
+    const defaultWheelEntries = [];
 
     const wheelColors = [
       "#e91e63", "#0097a7", "#f4511e", "#8e24aa",
@@ -708,13 +699,17 @@
         } catch (_) {}
       });
 
+      // wheel-10: one-time test payload only.
+      // Read data coming from index, then clear it immediately so old tests never remain.
+      clearWheelRuntimeStorage();
+
       if (candidates.length) {
         return candidates.sort((a, b)=> b.entries.length - a.entries.length)[0];
       }
 
       return normalizePayload({
         type:"text",
-        entries: defaultWheelEntries,
+        entries: [],
         centerQuestionEnabled:false,
         centerQuestion:""
       });
@@ -725,9 +720,7 @@
       const sourceEntries = firstArray(data.entries, data.items, data.wheelEntries, data.images, data.cards);
       const normalized = sourceEntries.map((entry, index)=> normalizeWheelEntry(entry, index));
       const filled = normalized.filter((entry)=> isEntryFilledForType(entry, type));
-      const entries = filled.length
-        ? filled
-        : defaultWheelEntries.map((entry, index)=> normalizeWheelEntry(entry, index));
+      const entries = filled.length ? filled : [];
 
       return {
         version: 1,
@@ -778,18 +771,19 @@
       return wheelColors[index % wheelColors.length];
     }
 
-    function persistPayload(){
+    function clearWheelRuntimeStorage(){
       try {
-        sessionStorage.setItem(PAYLOAD_KEY, JSON.stringify(payload));
-        sessionStorage.setItem(DRAFT_KEY, JSON.stringify({
-          version: 1,
-          type: payload.type,
-          entries: payload.entries,
-          centerQuestionEnabled: payload.centerQuestionEnabled,
-          centerQuestion: payload.centerQuestion,
-          updatedAt: Date.now()
-        }));
+        sessionStorage.removeItem(PAYLOAD_KEY);
+        sessionStorage.removeItem(DRAFT_KEY);
+        localStorage.removeItem(PAYLOAD_KEY);
+        localStorage.removeItem(DRAFT_KEY);
       } catch (_) {}
+    }
+
+    function persistPayload(){
+      // wheel-10: saving is disabled during testing.
+      // Actual saved games will be built later from index.
+      clearWheelRuntimeStorage();
     }
 
     function isIosWebKit(){
@@ -815,7 +809,7 @@
     }
 
     function getItems(){
-      return payload.entries && payload.entries.length ? payload.entries : defaultWheelEntries;
+      return payload.entries && payload.entries.length ? payload.entries : [];
     }
 
     function textForEntry(entry, index){
@@ -824,7 +818,7 @@
       if (payload.type !== "text") return "";
       const imageName = String(entry.imageName || "").trim();
       if (imageName) return imageName.replace(/\.[^.]+$/, "");
-      return `عنصر ${index + 1}`;
+      return "";
     }
 
     function normalizeAngle(angle){
