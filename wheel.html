@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-frame-locked-labels-v16 -->
+  <!-- version: wheel-zoom-readable-labels-v17 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-frame-locked-labels-v16</title>
+  <title>العجلة الدوارة - wheel-zoom-readable-labels-v17</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -246,7 +246,7 @@
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
-      transform:scale(var(--visual-zoom-inverse, 1));
+      transform:scale(var(--visual-label-zoom, 1));
       transform-origin:center center;
       will-change:transform;
     }
@@ -1077,9 +1077,11 @@
 
     function setVisualZoomScale(scale){
       const safeScale = Math.max(1, Number(scale) || 1);
+      const labelBoost = safeScale > 1.001 ? 1.32 : 1;
       visualZoomScale = safeScale;
       wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
       wheelPage.style.setProperty("--visual-zoom-inverse", (1 / safeScale).toFixed(5));
+      wheelPage.style.setProperty("--visual-label-zoom", (labelBoost / safeScale).toFixed(5));
     }
 
     function cancelZoomAnimation(){
