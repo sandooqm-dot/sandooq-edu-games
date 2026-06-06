@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-safe-balanced-content-v19 -->
+  <!-- version: wheel-text-image-layout-v20 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-safe-balanced-content-v19</title>
+  <title>العجلة الدوارة - wheel-text-image-layout-v20</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -259,6 +259,18 @@
     .wheel-label.mixed .wheel-label-content{
       justify-content:center;
       flex-direction:row-reverse;
+      gap:var(--label-gap, 12px);
+      padding:0 6px;
+    }
+
+    .wheel-label.mixed .wheel-text{
+      flex:0 1 var(--text-max, 120px);
+      width:var(--text-max, 120px);
+      max-width:var(--text-max, 120px);
+    }
+
+    .wheel-label.mixed .wheel-image{
+      flex:0 0 var(--image-size, 72px);
     }
 
     .wheel-label.image-only .wheel-label-content{
@@ -867,55 +879,96 @@
       const outerEdge = rimRadius - size * (count <= 5 ? 0.052 : count <= 8 ? 0.044 : count <= 12 ? 0.036 : 0.030);
       const available = Math.max(size * 0.12, outerEdge - innerEdge);
 
-      const radialWidth = clamp(
-        available * (mixed ? 0.78 : imageOnly ? 0.70 : 0.82),
-        size * (count <= 5 ? 0.145 : count <= 8 ? 0.115 : count <= 12 ? 0.090 : 0.070),
-        available * 0.86
-      );
+      let radialWidth;
+      let midRadius;
 
-      const midRadius = innerEdge + available * (imageOnly ? 0.52 : mixed ? 0.54 : 0.56);
+      if (mixed) {
+        // Mixed layout is radial: text sits toward the wheel center, image sits toward the outer rim.
+        // The old balanced formula made the whole block too narrow, which forced tiny text/images and caused crowding.
+        radialWidth = clamp(
+          size * (count <= 5 ? 0.350 : count <= 8 ? 0.292 : count <= 12 ? 0.238 : 0.190),
+          size * (count <= 5 ? 0.292 : count <= 8 ? 0.240 : count <= 12 ? 0.194 : 0.154),
+          size * (count <= 5 ? 0.392 : count <= 8 ? 0.332 : count <= 12 ? 0.272 : 0.218)
+        );
+
+        midRadius = innerEdge + available * (count <= 5 ? 0.50 : count <= 8 ? 0.52 : 0.54);
+      } else {
+        radialWidth = clamp(
+          available * (imageOnly ? 0.70 : 0.82),
+          size * (count <= 5 ? 0.145 : count <= 8 ? 0.115 : count <= 12 ? 0.090 : 0.070),
+          available * 0.86
+        );
+
+        midRadius = innerEdge + available * (imageOnly ? 0.52 : 0.56);
+      }
+
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
 
-      const heightRatio = imageOnly
-        ? (count <= 5 ? 0.50 : count <= 8 ? 0.42 : count <= 12 ? 0.34 : 0.28)
-        : mixed
-          ? (count <= 5 ? 0.34 : count <= 8 ? 0.30 : count <= 12 ? 0.25 : 0.20)
+      let labelHeight;
+      if (mixed) {
+        labelHeight = clamp(
+          arcAtMiddle * (count <= 5 ? 0.420 : count <= 8 ? 0.350 : count <= 12 ? 0.285 : 0.230),
+          size * (count <= 5 ? 0.086 : count <= 8 ? 0.070 : count <= 12 ? 0.056 : 0.044),
+          size * (count <= 5 ? 0.166 : count <= 8 ? 0.130 : count <= 12 ? 0.100 : 0.076)
+        );
+      } else {
+        const heightRatio = imageOnly
+          ? (count <= 5 ? 0.50 : count <= 8 ? 0.42 : count <= 12 ? 0.34 : 0.28)
           : (count <= 5 ? 0.46 : count <= 8 ? 0.38 : count <= 12 ? 0.31 : 0.25);
 
-      const labelHeight = clamp(
-        arcAtMiddle * heightRatio,
-        size * (imageOnly ? (count <= 5 ? 0.072 : count <= 8 ? 0.058 : 0.046) : mixed ? (count <= 5 ? 0.056 : count <= 8 ? 0.046 : 0.038) : (count <= 5 ? 0.064 : count <= 8 ? 0.052 : 0.042)),
-        size * (imageOnly ? (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.088 : 0.066) : mixed ? (count <= 5 ? 0.112 : count <= 8 ? 0.086 : count <= 12 ? 0.066 : 0.050) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
-      );
+        labelHeight = clamp(
+          arcAtMiddle * heightRatio,
+          size * (imageOnly ? (count <= 5 ? 0.072 : count <= 8 ? 0.058 : 0.046) : (count <= 5 ? 0.064 : count <= 8 ? 0.052 : 0.042)),
+          size * (imageOnly ? (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.088 : 0.066) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
+        );
+      }
 
       const imageSize = hasImage
-        ? clamp(
-            labelHeight * (imageOnly ? 0.94 : 0.76),
-            size * (imageOnly ? 0.052 : 0.040),
-            Math.min(
-              radialWidth * (imageOnly ? 0.54 : 0.34),
-              labelHeight * (imageOnly ? 0.98 : 0.82),
-              size * (imageOnly ? (count <= 5 ? 0.132 : count <= 8 ? 0.102 : count <= 12 ? 0.078 : 0.058) : (count <= 5 ? 0.086 : count <= 8 ? 0.070 : count <= 12 ? 0.054 : 0.042))
+        ? mixed
+          ? clamp(
+              labelHeight * 0.88,
+              size * (count <= 5 ? 0.066 : count <= 8 ? 0.054 : count <= 12 ? 0.044 : 0.034),
+              Math.min(
+                radialWidth * (count <= 5 ? 0.385 : count <= 8 ? 0.360 : 0.335),
+                labelHeight * 0.96,
+                size * (count <= 5 ? 0.132 : count <= 8 ? 0.106 : count <= 12 ? 0.082 : 0.062)
+              )
             )
-          )
+          : clamp(
+              labelHeight * 0.94,
+              size * 0.052,
+              Math.min(
+                radialWidth * 0.54,
+                labelHeight * 0.98,
+                size * (count <= 5 ? 0.132 : count <= 8 ? 0.102 : count <= 12 ? 0.078 : 0.058)
+              )
+            )
         : 0;
 
-      let maxFont = size * (mixed ? (count <= 5 ? 0.041 : count <= 8 ? 0.032 : count <= 12 ? 0.024 : 0.018) : (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022));
+      let maxFont = size * (mixed ? (count <= 5 ? 0.058 : count <= 8 ? 0.046 : count <= 12 ? 0.035 : 0.027) : (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022));
+      let fontSize = Math.min(labelHeight * (mixed ? 0.48 : 0.48), maxFont);
 
-      let fontSize = Math.min(labelHeight * (mixed ? 0.34 : 0.48), maxFont);
+      if (textLength > 58) fontSize *= mixed ? 0.78 : 0.72;
+      else if (textLength > 42) fontSize *= mixed ? 0.86 : 0.82;
+      else if (textLength > 26) fontSize *= mixed ? 0.94 : 0.92;
 
-      if (textLength > 58) fontSize *= 0.72;
-      else if (textLength > 42) fontSize *= 0.82;
-      else if (textLength > 26) fontSize *= 0.92;
+      if (!hasMultipleWords && textLength > 14) fontSize *= mixed ? 0.74 : 0.64;
+      else if (!hasMultipleWords && textLength > 10) fontSize *= mixed ? 0.84 : 0.78;
 
-      if (!hasMultipleWords && textLength > 14) fontSize *= 0.64;
-      else if (!hasMultipleWords && textLength > 10) fontSize *= 0.78;
+      fontSize = clamp(
+        fontSize,
+        mixed ? (count <= 5 ? 18 : count <= 8 ? 14 : count <= 12 ? 11 : 9) : count <= 8 ? 10.5 : count <= 12 ? 8.5 : 7,
+        maxFont
+      );
 
-      fontSize = clamp(fontSize, mixed ? (count <= 8 ? 9 : 7.5) : count <= 8 ? 10.5 : count <= 12 ? 8.5 : 7, maxFont);
-
-      const gap = clamp(size * (mixed ? 0.012 : 0.014), 5, 10);
+      const gap = mixed ? clamp(size * 0.020, 10, 18) : clamp(size * 0.014, 5, 10);
       const lines = mixed ? (count <= 8 ? 3 : 2) : count <= 8 ? 4 : count <= 12 ? 3 : 3;
-      const textMax = hasImage ? Math.max(size * 0.060, radialWidth - imageSize - gap - 10) : Math.max(size * 0.100, radialWidth - 10);
+      const availableTextWidth = Math.max(0, radialWidth - imageSize - gap - (mixed ? 12 : 10));
+      const textMax = hasImage
+        ? mixed
+          ? Math.max(size * (count <= 5 ? 0.112 : count <= 8 ? 0.088 : count <= 12 ? 0.070 : 0.054), availableTextWidth)
+          : Math.max(size * 0.060, availableTextWidth)
+        : Math.max(size * 0.100, radialWidth - 10);
 
       return {
         midRadius,
