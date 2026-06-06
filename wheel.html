@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-wordwall-layout-v23 -->
+  <!-- version: wheel-text-safe-visible-v24 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-wordwall-layout-v23</title>
+  <title>العجلة الدوارة - wheel-text-safe-visible-v24</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -265,10 +265,25 @@
       padding:0;
     }
 
+    .wheel-label.mixed-text-label{
+      overflow:visible;
+    }
+
+    .wheel-label.mixed-text-label .wheel-label-content{
+      overflow:visible;
+      padding:2px 3px;
+    }
+
     .wheel-label.mixed-text-label .wheel-text{
+      display:block;
+      -webkit-line-clamp:unset;
+      line-clamp:unset;
       flex:0 0 var(--text-max, 116px);
       width:var(--text-max, 116px);
       max-width:var(--text-max, 116px);
+      overflow:visible;
+      line-height:1.16;
+      padding:2px 3px;
     }
 
     .wheel-label.mixed-image-label .wheel-image{
@@ -289,7 +304,7 @@
       color:#fff;
       font-size:var(--font-size, 18px);
       font-weight:900;
-      line-height:1.02;
+      line-height:1.12;
       text-align:center;
       direction:rtl;
       unicode-bidi:plaintext;
@@ -590,7 +605,7 @@
       }
 
       .wheel-text{
-        line-height:1.04;
+        line-height:1.12;
       }
     }
   </style>
@@ -915,7 +930,7 @@
         );
         const imageInnerLimit = imageMidRadius - imageSize / 2;
 
-        const textInnerLimit = safeInnerEdge;
+        const textInnerLimit = safeInnerEdge + size * (count <= 5 ? 0.018 : count <= 8 ? 0.014 : 0.010);
         const textOuterLimit = Math.max(
           textInnerLimit + size * (count <= 5 ? 0.110 : count <= 8 ? 0.086 : 0.066),
           imageInnerLimit - gap
@@ -929,7 +944,7 @@
         const textMidRadius = textInnerLimit + textLabelWidth / 2;
 
         const textArc = (2 * Math.PI * Math.max(textMidRadius, safeInnerEdge + 1)) * (step / 360);
-        const textLabelHeight = clamp(
+        let textLabelHeight = clamp(
           textArc * (count <= 5 ? 0.470 : count <= 8 ? 0.400 : count <= 12 ? 0.330 : 0.270),
           size * (count <= 5 ? 0.082 : count <= 8 ? 0.064 : count <= 12 ? 0.050 : 0.040),
           size * (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.090 : 0.070)
@@ -955,6 +970,21 @@
           maxFont
         );
 
+        const visibleLines = textLength > 24
+          ? (count <= 8 ? 4 : 3)
+          : textLength > 12
+            ? (count <= 8 ? 3 : 2)
+            : 2;
+        const requiredTextHeight = fontSize * 1.16 * visibleLines + size * (count <= 5 ? 0.030 : count <= 8 ? 0.024 : 0.018);
+        textLabelHeight = Math.max(textLabelHeight, requiredTextHeight);
+        textLabelHeight = Math.min(
+          textLabelHeight,
+          Math.min(
+            textArc * (count <= 5 ? 0.640 : count <= 8 ? 0.560 : count <= 12 ? 0.470 : 0.390),
+            size * (count <= 5 ? 0.230 : count <= 8 ? 0.180 : count <= 12 ? 0.138 : 0.108)
+          )
+        );
+
         return {
           splitMixed: true,
           textMidRadius,
@@ -965,7 +995,7 @@
           imageSize,
           fontSize,
           gap,
-          lines: count <= 8 ? 3 : 2,
+          lines: visibleLines,
           textMax: Math.max(22, textLabelWidth)
         };
       }
