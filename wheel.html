@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-pre-stop-shake-v8 -->
+  <!-- version: wheel-fixed-content-v9 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-pre-stop-shake-v8</title>
+  <title>العجلة الدوارة - wheel-fixed-content-v9</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -222,6 +222,8 @@
       pointer-events:none;
       z-index:4;
       direction:ltr;
+      transform-origin:50% 50%;
+      will-change:transform;
     }
 
     .wheel-label{
@@ -254,7 +256,7 @@
 
     .wheel-label.text-only .wheel-label-content{
       padding:0 6px;
-      justify-content:center;
+      justify-content:flex-start;
     }
 
     .wheel-label.mixed .wheel-label-content{
@@ -262,12 +264,8 @@
       flex-direction:row;
     }
 
-    .wheel-label.mixed.flipped .wheel-label-content{
-      flex-direction:row-reverse;
-    }
-
     .wheel-label.image-only .wheel-label-content{
-      justify-content:center;
+      justify-content:flex-end;
     }
 
     .wheel-text{
@@ -283,8 +281,9 @@
       text-align:center;
       direction:rtl;
       unicode-bidi:plaintext;
-      overflow-wrap:anywhere;
-      word-break:normal;
+      white-space:normal;
+      overflow-wrap:normal;
+      word-break:keep-all;
       text-shadow:0 1px 2px rgba(0,0,0,.25);
       flex:1 1 auto;
       min-width:0;
@@ -817,6 +816,7 @@
       const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
       const text = textForEntry(entry, 0);
       const textLength = String(text || "").trim().length;
+      const hasMultipleWords = /\s/.test(String(text || "").trim());
 
       const centerRect = wheelCenter.getBoundingClientRect();
       const centerSize = centerRect.width || size * (payload.centerQuestionEnabled ? 0.255 : 0.185);
@@ -854,6 +854,9 @@
       if (textLength > 46) fontSize *= 0.72;
       else if (textLength > 32) fontSize *= 0.80;
       else if (textLength > 20) fontSize *= 0.90;
+
+      if (!hasMultipleWords && textLength > 14) fontSize *= 0.64;
+      else if (!hasMultipleWords && textLength > 10) fontSize *= 0.78;
 
       fontSize = clamp(fontSize, count <= 12 ? 8 : 6.5, maxFont);
 
@@ -1096,10 +1099,7 @@
 
     function updateLabelDirections(){
       labelNodes.forEach((node)=>{
-        const finalAngle = normalizeAngle(node.baseAngle + rotation);
-        const flipped = finalAngle > 90 && finalAngle < 270;
-        const labelAngle = node.baseAngle + (flipped ? 180 : 0);
-        node.label.classList.toggle("flipped", flipped);
+        const labelAngle = node.baseAngle;
         node.label.style.setProperty("--label-angle", `${labelAngle.toFixed(3)}deg`);
         node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
       });
@@ -1108,7 +1108,7 @@
     function setRotation(degrees){
       rotation = degrees;
       wheelRotor.style.transform = `rotate(${degrees}deg)`;
-      updateLabelDirections();
+      labelLayer.style.transform = `rotate(${degrees}deg)`;
     }
 
     function fitCenterText(){
