@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-safari-scroll-v2 -->
+  <!-- version: wheel-no-selected-label-v3 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-safari-scroll-v2</title>
+  <title>العجلة الدوارة - wheel-no-selected-label-v3</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -312,20 +312,7 @@
     }
 
     .selected-result{
-      position:absolute;
-      left:0;
-      right:0;
-      bottom:calc(58px + var(--safe-bottom));
-      min-height:32px;
-      text-align:center;
-      font-size:clamp(18px, 2.8vw, 30px);
-      font-weight:900;
-      line-height:1.1;
-      color:#222;
-      padding:0 12px 4px;
-      direction:rtl;
-      z-index:70;
-      pointer-events:none;
+      display:none !important;
     }
 
     .fixed-controls{
@@ -1127,7 +1114,7 @@
         : getSelectedIndexAtArrow();
 
       selectedIndex = index;
-      selectedResult.textContent = textForEntry(items[index], index);
+      selectedResult.textContent = "";
       afterSpin.classList.add("show");
       highlightSelected(index);
       applyFocus();
