@@ -1,13 +1,16 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
+  <!-- version: wheel-barcode-display-v1 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-mobile-fix-2</title>
+  <title>العجلة الدوارة - wheel-barcode-display-v1</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --footer-space-p: 98px;
+      --footer-space-l: 28px;
       --ink:#111;
       --yellow:#efd553;
       --red:#f05d5b;
@@ -28,13 +31,14 @@
     html,body{
       margin:0;
       width:100%;
-      height:100%;
       min-height:100%;
       background:#fff;
       color:#222;
-      overflow:hidden;
-      overscroll-behavior:none;
-      -webkit-overflow-scrolling:auto;
+    }
+
+    body{
+      min-height:100vh;
+      overflow-x:hidden;
       -webkit-text-size-adjust:100%;
     }
 
@@ -43,26 +47,14 @@
       display:none;
     }
 
-    /*
-      Mobile layout fix:
-      The old page used a scrollable body + sticky game container + extra spacer
-      to collapse Safari bars. On iPhone this made the playable area shorter than
-      the real screen, so the wheel and buttons appeared lifted with a large
-      white space below.
-
-      The game is now a true fixed viewport page. JS sets --app-h from the
-      largest reliable viewport height and all wheel/button geometry is computed
-      inside that same fixed viewport. This removes the blank bottom area and
-      keeps the buttons at the real bottom.
-    */
+    /* wheel-barcode-display-v1: نفس طريقة صفحة barcode، صفحة عادية بارتفاع 100dvh بدون fixed viewport أو visualViewport */
     .wheel-page{
-      position:fixed;
-      inset:0;
-      width:100vw;
-      height:var(--app-h, 100dvh);
-      min-height:var(--app-h, 100dvh);
-      max-height:var(--app-h, 100dvh);
-      overflow:hidden;
+      position:relative;
+      width:100%;
+      min-height:100dvh;
+      height:100dvh;
+      overflow-x:hidden;
+      overflow-y:auto;
       background:#fff;
       user-select:none;
       touch-action:none;
@@ -682,8 +674,6 @@
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
-      // The page is fixed to the viewport now, so scrolling the body is no
-      // longer used. Recalculate after touch/orientation changes instead.
       [0, 80, 220, 520].forEach((delay)=>{
         safariTimers.push(setTimeout(()=>{
           requestAnimationFrame(updateLayout);
@@ -910,29 +900,20 @@
     }
 
     /*
-      Fixed viewport height for iPhone/Safari.
-      We intentionally use the largest reliable viewport value, not visualViewport
-      alone. visualViewport can shrink when Safari UI is involved, which makes
-      the fixed game container too short and creates a large blank area below.
+      wheel-barcode-display-v1:
+      نفس طريقة barcode: نعتمد على صفحة عادية min-height:100dvh، ولا نبني
+      ارتفاع اللعبة على visualViewport حتى لا يتغير حجم المشهد مع شريط Safari.
     */
-    function updateVisualViewportHeight(){
-      const vvH = window.visualViewport ? Math.round(window.visualViewport.height || 0) : 0;
-      const vvOffsetTop = window.visualViewport ? Math.round(window.visualViewport.offsetTop || 0) : 0;
+    function getBarcodeStyleViewportHeight(){
+      const pageH = wheelPage ? Math.round(wheelPage.clientHeight || 0) : 0;
       const innerH = Math.round(window.innerHeight || 0);
       const clientH = Math.round(document.documentElement.clientHeight || 0);
-      const screenH = window.screen ? Math.round(Math.min(window.screen.height || 0, window.screen.availHeight || window.screen.height || 0)) : 0;
 
-      // In normal browsers innerHeight/clientHeight are correct. On iOS Safari,
-      // visualViewport alone may be too small; using the max prevents the page
-      // from being visually lifted upward with empty space below.
-      const h = Math.max(320, vvH + vvOffsetTop, innerH, clientH, Math.min(screenH || 0, innerH || screenH || 0));
-
-      document.documentElement.style.setProperty("--app-h", `${h}px`);
-      return h;
+      return Math.max(320, pageH, innerH, clientH);
     }
 
     function computeLayoutGeometry(){
-      const viewportH = updateVisualViewportHeight();
+      const viewportH = getBarcodeStyleViewportHeight();
       const viewportW = Math.max(320, window.innerWidth || document.documentElement.clientWidth || 0);
       const isLandscape = window.matchMedia("(orientation: landscape)").matches;
       const isNarrow = viewportW <= 600;
@@ -1302,11 +1283,6 @@
         collapseSafariBars();
       }, 120);
     }, { passive:true });
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", ()=> requestAnimationFrame(updateLayout), { passive:true });
-      window.visualViewport.addEventListener("scroll", ()=> requestAnimationFrame(updateLayout), { passive:true });
-    }
 
     document.addEventListener("touchend", collapseSafariBars, { passive:true });
 
