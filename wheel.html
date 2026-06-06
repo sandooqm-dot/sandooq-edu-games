@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-content-fixed-zoom-v12 -->
+  <!-- version: wheel-labels-outside-zoom-v13 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-content-fixed-zoom-v12</title>
+  <title>العجلة الدوارة - wheel-labels-outside-zoom-v13</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -119,6 +119,7 @@
       touch-action:none;
       cursor:grab;
       background:transparent;
+      z-index:10;
     }
 
     .wheel-shell:active{
@@ -128,17 +129,6 @@
     /* Wordwall-style zoom: keep arrow side anchored and let the wheel crop outside the stage */
     .wheel-shell.zoom{
       transform:scale(var(--zoom-scale, 1.82));
-    }
-
-    .wheel-shell.zoom .wheel-label-content{
-      transform:scale(var(--zoom-inverse, 1));
-      transform-origin:center center;
-    }
-
-    .wheel-shell.zoom .wheel-image,
-    .wheel-shell.zoom .wheel-text{
-      transform:none;
-      transform-origin:center center;
     }
 
     .wheel-shell.zoom .wheel-center{
@@ -219,15 +209,17 @@
 
     .label-layer{
       position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
+      left:var(--wheel-left);
+      top:var(--wheel-top);
+      width:var(--wheel-size);
+      height:var(--wheel-size);
       border-radius:50%;
       overflow:hidden;
       pointer-events:none;
-      z-index:4;
+      z-index:20;
       direction:ltr;
       transform-origin:50% 50%;
+      transform:rotate(0deg);
       will-change:transform;
     }
 
@@ -257,10 +249,6 @@
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
-      transform:scale(1);
-      transform-origin:center center;
-      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
-      will-change:transform;
     }
 
     .wheel-label.text-only .wheel-label-content{
@@ -604,11 +592,12 @@
           <svg class="wheel-svg" viewBox="-250 -250 500 500" aria-label="العجلة الدوارة">
             <g id="sectorLayer"></g>
           </svg>
-          <div class="label-layer" id="labelLayer" aria-hidden="true"></div>
         </div>
 
         <div class="wheel-center" id="wheelCenter"></div>
       </div>
+
+      <div class="label-layer" id="labelLayer" aria-hidden="true"></div>
     </div>
 
     <div class="selected-result" id="selectedResult" aria-live="polite"></div>
@@ -1078,7 +1067,6 @@
       const scale = desiredScale;
 
       wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
-      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
     }
 
     function updateLayout(){
@@ -1128,6 +1116,7 @@
     function setRotation(degrees){
       rotation = degrees;
       wheelRotor.style.transform = `rotate(${degrees}deg)`;
+      labelLayer.style.transform = `rotate(${degrees}deg)`;
     }
 
     function fitCenterText(){
