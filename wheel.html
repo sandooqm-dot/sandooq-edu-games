@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-label-stamp-zoom-v14 -->
+  <!-- version: wheel-no-label-zoom-transform-v15 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-label-stamp-zoom-v14</title>
+  <title>العجلة الدوارة - wheel-no-label-zoom-transform-v15</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -130,10 +130,6 @@
       transform:scale(var(--zoom-scale, 1.82));
     }
 
-    .wheel-shell.zoom .wheel-label{
-      --label-scale:var(--zoom-inverse, 1);
-    }
-
     .wheel-shell.zoom .wheel-center{
       transform:translate(-50%,-50%);
       transform-origin:center center;
@@ -200,7 +196,7 @@
     }
 
     @keyframes labelEliminate{
-      0%{ opacity:1; transform:translate(-50%, -50%) rotate(var(--label-angle, 0deg)) scale(var(--label-scale, 1)); }
+      0%{ opacity:1; transform:translate(-50%, -50%) rotate(var(--label-angle, 0deg)) scale(1); }
       100%{ opacity:0; transform:translate(-50%, -50%) rotate(var(--label-angle, 0deg)) scale(.78); }
     }
 
@@ -237,9 +233,6 @@
       pointer-events:none;
       overflow:visible;
       z-index:5;
-      --label-scale:1;
-      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
-      will-change:transform;
     }
 
     .wheel-label-content{
@@ -1070,7 +1063,6 @@
       const scale = desiredScale;
 
       wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
-      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
     }
 
     function updateLayout(){
@@ -1113,7 +1105,7 @@
       labelNodes.forEach((node)=>{
         const labelAngle = node.baseAngle + 180;
         node.label.style.setProperty("--label-angle", `${labelAngle.toFixed(3)}deg`);
-        node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg) scale(var(--label-scale, 1))`;
+        node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
       });
     }
 
