@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-no-label-zoom-transform-v15 -->
+  <!-- version: wheel-frame-locked-labels-v16 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-no-label-zoom-transform-v15</title>
+  <title>العجلة الدوارة - wheel-frame-locked-labels-v16</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -113,12 +113,12 @@
       border-radius:50%;
       /* transform-origin fixed at left-center (arrow contact point) so zoom never shifts the wheel away from the arrow */
       transform-origin:left center;
-      transform:scale(1);
-      transition:transform 1500ms cubic-bezier(.16,.78,.18,1);
+      transform:scale(var(--visual-zoom, 1));
       filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
       touch-action:none;
       cursor:grab;
       background:transparent;
+      will-change:transform;
     }
 
     .wheel-shell:active{
@@ -127,11 +127,11 @@
 
     /* Wordwall-style zoom: keep arrow side anchored and let the wheel crop outside the stage */
     .wheel-shell.zoom{
-      transform:scale(var(--zoom-scale, 1.82));
+      transform:scale(var(--visual-zoom, 1));
     }
 
     .wheel-shell.zoom .wheel-center{
-      transform:translate(-50%,-50%);
+      transform:translate(-50%,-50%) scale(var(--visual-zoom-inverse, 1));
       transform-origin:center center;
     }
 
@@ -246,6 +246,9 @@
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
+      transform:scale(var(--visual-zoom-inverse, 1));
+      transform-origin:center center;
+      will-change:transform;
     }
 
     .wheel-label.text-only .wheel-label-content{
@@ -305,7 +308,7 @@
       position:absolute;
       left:50%;
       top:50%;
-      transform:translate(-50%,-50%);
+      transform:translate(-50%,-50%) scale(var(--visual-zoom-inverse, 1));
       width:18.5%;
       aspect-ratio:1/1;
       border-radius:50%;
@@ -638,6 +641,8 @@
     let rotation = 0;
     let selectedIndex = -1;
     let animationId = null;
+    let zoomAnimationId = null;
+    let visualZoomScale = 1;
     let dragState = null;
     let labelNodes = [];
     let safariTimers = [];
@@ -1065,6 +1070,57 @@
       wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
     }
 
+    function getConfiguredZoomScale(){
+      const scale = parseFloat(getComputedStyle(wheelPage).getPropertyValue("--zoom-scale"));
+      return Number.isFinite(scale) && scale > 0 ? scale : 1;
+    }
+
+    function setVisualZoomScale(scale){
+      const safeScale = Math.max(1, Number(scale) || 1);
+      visualZoomScale = safeScale;
+      wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
+      wheelPage.style.setProperty("--visual-zoom-inverse", (1 / safeScale).toFixed(5));
+    }
+
+    function cancelZoomAnimation(){
+      if (zoomAnimationId) {
+        cancelAnimationFrame(zoomAnimationId);
+        zoomAnimationId = null;
+      }
+    }
+
+    function animateVisualZoom(targetScale, duration = 1500){
+      cancelZoomAnimation();
+
+      const start = visualZoomScale;
+      const target = Math.max(1, Number(targetScale) || 1);
+      const change = target - start;
+
+      if (!duration || Math.abs(change) < 0.0001) {
+        setVisualZoomScale(target);
+        return;
+      }
+
+      const startTime = performance.now();
+
+      function frame(now){
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = easeOutQuint(progress);
+        const scale = start + change * eased;
+
+        setVisualZoomScale(scale);
+
+        if (progress < 1) {
+          zoomAnimationId = requestAnimationFrame(frame);
+        } else {
+          zoomAnimationId = null;
+          setVisualZoomScale(target);
+        }
+      }
+
+      zoomAnimationId = requestAnimationFrame(frame);
+    }
+
     function updateLayout(){
       const geometry = computeLayoutGeometry();
       applyLayoutGeometry(geometry);
@@ -1154,6 +1210,7 @@
       wheelShell.classList.remove("merging");
       afterSpin.classList.remove("show");
       clearSelected();
+      animateVisualZoom(1, 420);
     }
 
     function playMergeSettle(){
@@ -1166,6 +1223,7 @@
     function resumeWheelZoomOnly(){
       wheelShell.classList.remove("zoom");
       afterSpin.classList.remove("show");
+      animateVisualZoom(1, 420);
       collapseSafariBars();
     }
 
@@ -1173,6 +1231,7 @@
       requestAnimationFrame(()=>{
         configureZoom(layoutGeometry);
         wheelShell.classList.add("zoom");
+        animateVisualZoom(getConfiguredZoomScale(), 1500);
         collapseSafariBars();
       });
     }
@@ -1409,6 +1468,7 @@
 
     document.addEventListener("touchend", collapseSafariBars, { passive:true });
 
+    setVisualZoomScale(1);
     buildWheel();
     updateLayout();
     fitCenterText();
