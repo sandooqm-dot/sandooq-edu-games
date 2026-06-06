@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-zoom-readable-labels-v17 -->
+  <!-- version: wheel-readable-content-v18 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-zoom-readable-labels-v17</title>
+  <title>العجلة الدوارة - wheel-readable-content-v18</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -242,7 +242,7 @@
       align-items:center;
       justify-content:center;
       gap:var(--label-gap, 8px);
-      overflow:hidden;
+      overflow:visible;
       pointer-events:none;
       padding:0 4px;
       direction:ltr;
@@ -268,13 +268,14 @@
     .wheel-text{
       display:-webkit-box;
       -webkit-box-orient:vertical;
-      -webkit-line-clamp:var(--line-clamp, 3);
+      -webkit-line-clamp:var(--line-clamp, 4);
       max-width:var(--text-max, 100%);
+      width:var(--text-max, auto);
       overflow:hidden;
       color:#fff;
       font-size:var(--font-size, 18px);
       font-weight:900;
-      line-height:1.08;
+      line-height:1.02;
       text-align:center;
       direction:rtl;
       unicode-bidi:plaintext;
@@ -282,7 +283,7 @@
       overflow-wrap:normal;
       word-break:keep-all;
       text-shadow:0 1px 2px rgba(0,0,0,.25);
-      flex:1 1 auto;
+      flex:0 1 var(--text-max, auto);
       min-width:0;
     }
 
@@ -661,35 +662,38 @@
     const fixedControls = document.querySelector(".fixed-controls");
 
     function readPayload(){
-      try {
-        const raw = sessionStorage.getItem(PAYLOAD_KEY);
-        if (!raw) throw new Error("NO_PAYLOAD");
-        const data = JSON.parse(raw);
-        if (!data || typeof data !== "object") throw new Error("BAD_PAYLOAD");
-        return normalizePayload(data);
-      } catch (_) {
-        return normalizePayload({
-          type:"text",
-          entries: defaultWheelEntries,
-          centerQuestionEnabled:false,
-          centerQuestion:""
-        });
+      const candidates = [];
+
+      [PAYLOAD_KEY, DRAFT_KEY].forEach((key)=>{
+        try {
+          const raw = sessionStorage.getItem(key);
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          if (!data || typeof data !== "object") return;
+          candidates.push(normalizePayload(data));
+        } catch (_) {}
+      });
+
+      if (candidates.length) {
+        return candidates.sort((a, b)=> b.entries.length - a.entries.length)[0];
       }
+
+      return normalizePayload({
+        type:"text",
+        entries: defaultWheelEntries,
+        centerQuestionEnabled:false,
+        centerQuestion:""
+      });
     }
 
     function normalizePayload(data){
-      const type = ["text","images","mixed"].includes(data.type) ? data.type : "text";
-      const entries = Array.isArray(data.entries) && data.entries.length
-        ? data.entries.map((entry, index)=> ({
-            text: String(entry.text || ""),
-            imageName: String(entry.imageName || ""),
-            imageData: String(entry.imageData || ""),
-            color: normalizeEntryColor(entry.color, index)
-          }))
-        : defaultWheelEntries.map((entry, index)=> ({
-            ...entry,
-            color: normalizeEntryColor(entry.color, index)
-          }));
+      const type = normalizeWheelType(data.type);
+      const sourceEntries = firstArray(data.entries, data.items, data.wheelEntries, data.images, data.cards);
+      const normalized = sourceEntries.map((entry, index)=> normalizeWheelEntry(entry, index));
+      const filled = normalized.filter((entry)=> isEntryFilledForType(entry, type));
+      const entries = filled.length
+        ? filled
+        : defaultWheelEntries.map((entry, index)=> normalizeWheelEntry(entry, index));
 
       return {
         version: 1,
@@ -698,6 +702,40 @@
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
         centerQuestion: String(data.centerQuestion || "")
       };
+    }
+
+    function normalizeWheelType(type){
+      const value = String(type || "").trim().toLowerCase();
+      if (["images", "image", "photos", "pictures"].includes(value)) return "images";
+      if (["mixed", "both", "text-image", "image-text"].includes(value)) return "mixed";
+      return "text";
+    }
+
+    function firstArray(...values){
+      const found = values.find((value)=> Array.isArray(value));
+      return found || [];
+    }
+
+    function firstString(...values){
+      const found = values.find((value)=> typeof value === "string" && value.trim());
+      return found ? String(found).trim() : "";
+    }
+
+    function normalizeWheelEntry(entry, index){
+      const item = entry && typeof entry === "object" ? entry : { text: entry };
+
+      return {
+        text: firstString(item.text, item.label, item.title, item.question, item.name),
+        imageName: firstString(item.imageName, item.fileName, item.filename, item.name),
+        imageData: firstString(item.imageData, item.dataUrl, item.dataURL, item.image, item.src, item.url, item.href),
+        color: normalizeEntryColor(item.color, index)
+      };
+    }
+
+    function isEntryFilledForType(entry, type){
+      if (type === "images") return Boolean(entry.imageData || entry.imageName);
+      if (type === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
+      return Boolean(entry.text);
     }
 
     function normalizeEntryColor(color, index){
@@ -749,6 +787,7 @@
     function textForEntry(entry, index){
       const text = String(entry.text || "").trim();
       if (text) return text;
+      if (payload.type !== "text") return "";
       const imageName = String(entry.imageName || "").trim();
       if (imageName) return imageName.replace(/\.[^.]+$/, "");
       return `عنصر ${index + 1}`;
@@ -823,56 +862,60 @@
       const centerRadius = centerSize / 2;
 
       const rimRadius = size * 0.448;
-      const innerEdge = centerRadius + size * (count <= 5 ? 0.070 : count <= 8 ? 0.064 : count <= 12 ? 0.056 : 0.050);
-      const outerEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.026 : count <= 12 ? 0.023 : 0.020);
+      const innerEdge = centerRadius + size * (count <= 5 ? 0.050 : count <= 8 ? 0.048 : count <= 12 ? 0.044 : 0.040);
+      const outerEdge = rimRadius - size * (count <= 5 ? 0.016 : count <= 8 ? 0.014 : count <= 12 ? 0.013 : 0.012);
       const available = Math.max(size * 0.12, outerEdge - innerEdge);
 
       const radialWidth = clamp(
-        available * (count <= 5 ? 0.96 : count <= 8 ? 0.92 : count <= 12 ? 0.86 : 0.80),
-        size * (count <= 5 ? 0.18 : count <= 8 ? 0.14 : count <= 12 ? 0.105 : 0.078),
+        available * (count <= 5 ? 0.98 : count <= 8 ? 0.96 : count <= 12 ? 0.92 : 0.86),
+        size * (count <= 5 ? 0.24 : count <= 8 ? 0.18 : count <= 12 ? 0.135 : 0.096),
         available
       );
 
-      const midRadius = innerEdge + available * (count <= 5 ? 0.58 : count <= 8 ? 0.57 : count <= 12 ? 0.55 : 0.53);
+      const midRadius = innerEdge + available * (imageOnly ? 0.62 : count <= 5 ? 0.60 : count <= 8 ? 0.58 : count <= 12 ? 0.56 : 0.54);
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
 
       const labelHeight = imageOnly
         ? clamp(
-            arcAtMiddle * (count <= 5 ? 0.58 : count <= 8 ? 0.50 : count <= 12 ? 0.42 : 0.34),
-            size * (count <= 5 ? 0.090 : count <= 8 ? 0.066 : count <= 12 ? 0.050 : 0.040),
-            size * (count <= 5 ? 0.190 : count <= 8 ? 0.135 : count <= 12 ? 0.092 : 0.068)
+            arcAtMiddle * (count <= 5 ? 0.70 : count <= 8 ? 0.60 : count <= 12 ? 0.50 : 0.40),
+            size * (count <= 5 ? 0.125 : count <= 8 ? 0.092 : count <= 12 ? 0.066 : 0.050),
+            size * (count <= 5 ? 0.245 : count <= 8 ? 0.170 : count <= 12 ? 0.118 : 0.084)
           )
         : clamp(
-            arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
-            size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
-            size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
+            arcAtMiddle * (count <= 5 ? 0.60 : count <= 8 ? 0.52 : count <= 12 ? 0.43 : 0.34),
+            size * (count <= 5 ? 0.105 : count <= 8 ? 0.078 : count <= 12 ? 0.058 : 0.044),
+            size * (count <= 5 ? 0.220 : count <= 8 ? 0.152 : count <= 12 ? 0.106 : 0.076)
           );
 
       const imageSize = hasImage
         ? clamp(
-            labelHeight * (imageOnly ? 0.94 : 0.82),
-            size * (imageOnly ? 0.046 : 0.030),
-            Math.min(labelHeight * 0.98, size * (imageOnly ? (count <= 5 ? 0.178 : count <= 8 ? 0.124 : count <= 12 ? 0.084 : 0.062) : (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040)))
+            labelHeight * (imageOnly ? 1.04 : 0.88),
+            size * (imageOnly ? 0.078 : 0.050),
+            Math.min(
+              radialWidth * (imageOnly ? 0.78 : 0.42),
+              labelHeight * (imageOnly ? 1.12 : 0.96),
+              size * (imageOnly ? (count <= 5 ? 0.220 : count <= 8 ? 0.155 : count <= 12 ? 0.106 : 0.078) : (count <= 5 ? 0.125 : count <= 8 ? 0.092 : count <= 12 ? 0.066 : 0.050))
+            )
           )
         : 0;
 
-      let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019);
-      if (hasImage && hasText) maxFont *= 0.72;
+      let maxFont = size * (count <= 5 ? 0.072 : count <= 8 ? 0.052 : count <= 12 ? 0.036 : 0.026);
+      if (hasImage && hasText) maxFont *= 0.88;
 
-      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.30 : 0.42), maxFont);
+      let fontSize = Math.min(labelHeight * (hasImage && hasText ? 0.44 : 0.54), maxFont);
 
-      if (textLength > 46) fontSize *= 0.72;
-      else if (textLength > 32) fontSize *= 0.80;
-      else if (textLength > 20) fontSize *= 0.90;
+      if (textLength > 58) fontSize *= 0.72;
+      else if (textLength > 42) fontSize *= 0.82;
+      else if (textLength > 26) fontSize *= 0.92;
 
       if (!hasMultipleWords && textLength > 14) fontSize *= 0.64;
       else if (!hasMultipleWords && textLength > 10) fontSize *= 0.78;
 
-      fontSize = clamp(fontSize, count <= 12 ? 8 : 6.5, maxFont);
+      fontSize = clamp(fontSize, count <= 8 ? 12 : count <= 12 ? 9.5 : 7.5, maxFont);
 
-      const gap = clamp(size * 0.014, 4, 10);
-      const lines = count <= 6 ? 4 : count <= 12 ? 3 : 5;
-      const textMax = hasImage ? Math.max(24, radialWidth - imageSize - gap - 8) : Math.max(34, radialWidth - 8);
+      const gap = clamp(size * 0.018, 6, 14);
+      const lines = count <= 8 ? 5 : count <= 12 ? 4 : 3;
+      const textMax = hasImage ? Math.max(size * 0.070, radialWidth - imageSize - gap - 6) : Math.max(size * 0.110, radialWidth - 8);
 
       return {
         midRadius,
