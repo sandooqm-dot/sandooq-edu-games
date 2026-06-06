@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-image-only-layout-v30 -->
+  <!-- version: wheel-image-only-manual-tuning-v31 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-image-only-layout-v30</title>
+  <title>العجلة الدوارة - wheel-image-only-manual-tuning-v31</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -295,8 +295,14 @@
       overflow:visible;
     }
 
+    .wheel-label.image-only,
+    .wheel-label.image-only .wheel-label-content{
+      overflow:visible;
+    }
+
     .wheel-label.image-only .wheel-label-content{
       justify-content:center;
+      padding:0;
     }
 
     .wheel-text{
@@ -663,6 +669,25 @@
       "#7cb342", "#039be5", "#fb8c00", "#ec407a"
     ];
 
+    /*
+      إعدادات صور نمط "صورة فقط"
+      عدّل الأرقام هنا فقط:
+      sizeScale   = حجم الصورة. 1.00 طبيعي، 1.15 أكبر، 0.90 أصغر.
+      radialShift = تحريك داخل القسم نحو طرف العجلة أو المركز. موجب للخارج، سالب للداخل.
+                    مثال: 0.04 للخارج قليلًا، -0.04 للداخل قليلًا.
+      sideShift   = تحريك داخل القسم باتجاه جانبي القطاع. موجب جهة، سالب الجهة المقابلة.
+                    مثال: 0.03 أو -0.03.
+      screenX     = تحريك أفقي مباشر لكل الصور بالبكسل. موجب يمين، سالب يسار.
+      screenY     = تحريك عمودي مباشر لكل الصور بالبكسل. موجب أسفل، سالب أعلى.
+    */
+    const IMAGE_ONLY_TUNING = {
+      sizeScale: 1.00,
+      radialShift: 0.00,
+      sideShift: 0.00,
+      screenX: 0,
+      screenY: 0
+    };
+
     let payload = readPayload();
     let rotation = 0;
     let selectedIndex = -1;
@@ -895,6 +920,12 @@
       const outerEdge = rimRadius - size * (count <= 5 ? 0.052 : count <= 8 ? 0.044 : count <= 12 ? 0.036 : 0.030);
       const available = Math.max(size * 0.12, outerEdge - innerEdge);
 
+      const imageOnlySizeScale = imageOnly ? clamp(Number(IMAGE_ONLY_TUNING.sizeScale) || 1, 0.25, 3.0) : 1;
+      const imageOnlyRadialShiftPx = imageOnly ? size * clamp(Number(IMAGE_ONLY_TUNING.radialShift) || 0, -0.18, 0.18) : 0;
+      const imageOnlySideShiftPx = imageOnly ? size * clamp(Number(IMAGE_ONLY_TUNING.sideShift) || 0, -0.18, 0.18) : 0;
+      const imageOnlyScreenX = imageOnly ? clamp(Number(IMAGE_ONLY_TUNING.screenX) || 0, -260, 260) : 0;
+      const imageOnlyScreenY = imageOnly ? clamp(Number(IMAGE_ONLY_TUNING.screenY) || 0, -260, 260) : 0;
+
       if (mixed) {
         /*
           Wordwall-like split layout v26:
@@ -1020,13 +1051,21 @@
             available * 0.86
           );
 
-      const midRadius = imageOnly
+      let midRadius = imageOnly
         ? clamp(
             imageOnlyInnerEdge + imageOnlyAvailable * (count <= 5 ? 0.675 : count <= 8 ? 0.665 : count <= 12 ? 0.650 : 0.635),
             imageOnlyInnerEdge + radialWidth / 2,
             imageOnlyOuterEdge - radialWidth * 0.12
           )
         : innerEdge + available * 0.56;
+
+      if (imageOnly) {
+        midRadius = clamp(
+          midRadius + imageOnlyRadialShiftPx,
+          imageOnlyInnerEdge + radialWidth / 2,
+          imageOnlyOuterEdge - radialWidth * 0.12
+        );
+      }
 
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
       const heightRatio = imageOnly
@@ -1039,7 +1078,7 @@
         size * (imageOnly ? (count <= 5 ? 0.190 : count <= 8 ? 0.148 : count <= 12 ? 0.118 : 0.096) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
       );
 
-      const imageSize = hasImage
+      let imageSize = hasImage
         ? (imageOnly
           ? clamp(
               Math.min(
@@ -1061,6 +1100,14 @@
               )
             ))
         : 0;
+
+      if (imageOnly && imageSize) {
+        imageSize = clamp(
+          imageSize * imageOnlySizeScale,
+          size * (count <= 5 ? 0.052 : count <= 8 ? 0.044 : count <= 12 ? 0.036 : 0.030),
+          size * (count <= 5 ? 0.240 : count <= 8 ? 0.190 : count <= 12 ? 0.150 : 0.120)
+        );
+      }
 
       let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022);
       let fontSize = Math.min(labelHeight * 0.48, maxFont);
@@ -1086,7 +1133,11 @@
         fontSize,
         gap,
         lines,
-        textMax
+        textMax,
+        imageOnly,
+        imageOnlySideShiftPx,
+        imageOnlyScreenX,
+        imageOnlyScreenY
       };
     }
 
@@ -1411,6 +1462,11 @@
         if (!label) return;
 
         const p = polarToCartesian(metrics.midRadius, baseAngle);
+        if (metrics.imageOnly) {
+          const sidePoint = polarToCartesian(metrics.imageOnlySideShiftPx || 0, baseAngle + 90);
+          p.x += sidePoint.x + (metrics.imageOnlyScreenX || 0);
+          p.y += sidePoint.y + (metrics.imageOnlyScreenY || 0);
+        }
         label.style.left = `${center + p.x}px`;
         label.style.top = `${center + p.y}px`;
         label.style.setProperty("--label-w", `${metrics.radialWidth}px`);
