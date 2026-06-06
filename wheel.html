@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-text-balanced-position-v25 -->
+  <!-- version: wheel-text-slightly-smaller-v26 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-text-balanced-position-v25</title>
+  <title>العجلة الدوارة - wheel-text-slightly-smaller-v26</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -898,7 +898,7 @@
 
       if (mixed) {
         /*
-          Wordwall-like split layout v25:
+          Wordwall-like split layout v26:
           - Bigger wheel + smaller center gives each sector more usable area.
           - Text and image stay separate, each with its own radius.
           - Content sizes are based on the real sector arc at each radius.
@@ -950,11 +950,11 @@
           size * (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.090 : 0.070)
         );
 
-        let maxFont = size * (count <= 5 ? 0.046 : count <= 8 ? 0.037 : count <= 12 ? 0.029 : 0.023);
-        let fontSize = Math.min(textLabelHeight * 0.500, maxFont);
+        let maxFont = size * (count <= 5 ? 0.043 : count <= 8 ? 0.035 : count <= 12 ? 0.0275 : 0.022);
+        let fontSize = Math.min(textLabelHeight * 0.470, maxFont);
 
         if (textLabelWidth > 0) {
-          fontSize = Math.min(fontSize, textLabelWidth * (textLength > 22 ? 0.44 : textLength > 12 ? 0.56 : 0.72));
+          fontSize = Math.min(fontSize, textLabelWidth * (textLength > 22 ? 0.42 : textLength > 12 ? 0.535 : 0.69));
         }
 
         if (textLength > 58) fontSize *= 0.74;
@@ -966,7 +966,7 @@
 
         fontSize = clamp(
           fontSize,
-          count <= 5 ? 13.5 : count <= 8 ? 11 : count <= 12 ? 9 : 7.5,
+          count <= 5 ? 12.5 : count <= 8 ? 10.2 : count <= 12 ? 8.4 : 7.1,
           maxFont
         );
 
