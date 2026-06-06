@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-text-image-safe-bounds-v21 -->
+  <!-- version: wheel-text-image-separated-layout-v22 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-text-image-safe-bounds-v21</title>
+  <title>العجلة الدوارة - wheel-text-image-separated-layout-v22</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -256,21 +256,23 @@
       justify-content:flex-end;
     }
 
-    .wheel-label.mixed .wheel-label-content{
-      justify-content:space-between;
-      flex-direction:row-reverse;
-      gap:var(--label-gap, 10px);
-      padding:0 6px;
+    /* Split layout for text + image: separate elements, same sector angle, different radii. */
+    .wheel-label.mixed-text-label .wheel-label-content,
+    .wheel-label.mixed-image-label .wheel-label-content{
+      justify-content:center;
+      flex-direction:row;
+      gap:0;
+      padding:0;
     }
 
-    .wheel-label.mixed .wheel-text{
-      flex:0 1 var(--text-max, 120px);
-      width:var(--text-max, 120px);
-      max-width:var(--text-max, 120px);
+    .wheel-label.mixed-text-label .wheel-text{
+      flex:0 0 var(--text-max, 116px);
+      width:var(--text-max, 116px);
+      max-width:var(--text-max, 116px);
     }
 
-    .wheel-label.mixed .wheel-image{
-      flex:0 0 var(--image-size, 72px);
+    .wheel-label.mixed-image-label .wheel-image{
+      flex:0 0 var(--image-size, 62px);
     }
 
     .wheel-label.image-only .wheel-label-content{
@@ -879,77 +881,105 @@
       const outerEdge = rimRadius - size * (count <= 5 ? 0.052 : count <= 8 ? 0.044 : count <= 12 ? 0.036 : 0.030);
       const available = Math.max(size * 0.12, outerEdge - innerEdge);
 
-      let radialWidth;
-      let midRadius;
-
       if (mixed) {
         /*
-          Safe-bounds layout for text + image:
-          - Text remains toward the wheel center.
-          - Image remains toward the outside rim.
-          - The whole label block is clamped inside the real radial band so images never escape the wheel.
+          Wordwall-like split layout:
+          - Text and image are no longer inside one flex row.
+          - Text has an independent inner radius.
+          - Image has an independent outer radius.
+          - Zoom is neutralized through --visual-label-zoom, so text/images keep their visual size while the wheel zooms.
         */
-        const safeInnerEdge = innerEdge + size * (count <= 5 ? 0.006 : count <= 8 ? 0.005 : 0.004);
-        const safeOuterEdge = outerEdge - size * (count <= 5 ? 0.012 : count <= 8 ? 0.010 : 0.008);
-        const safeAvailable = Math.max(size * 0.090, safeOuterEdge - safeInnerEdge);
-        const maxRadialByBounds = Math.max(size * 0.070, safeAvailable * 0.985);
-        const minRadialByCount = Math.min(
-          maxRadialByBounds,
-          size * (count <= 5 ? 0.170 : count <= 8 ? 0.135 : count <= 12 ? 0.108 : 0.086)
+        const safeInnerEdge = innerEdge + size * (count <= 5 ? 0.010 : count <= 8 ? 0.008 : 0.006);
+        const safeOuterEdge = outerEdge - size * (count <= 5 ? 0.018 : count <= 8 ? 0.015 : 0.012);
+        const radialBand = Math.max(size * 0.120, safeOuterEdge - safeInnerEdge);
+
+        const imageArcRadius = safeInnerEdge + radialBand * (count <= 5 ? 0.765 : count <= 8 ? 0.755 : 0.745);
+        const imageArc = (2 * Math.PI * imageArcRadius) * (step / 360);
+        let imageSize = clamp(
+          Math.min(
+            size * (count <= 5 ? 0.104 : count <= 8 ? 0.086 : count <= 12 ? 0.068 : 0.052),
+            imageArc * (count <= 5 ? 0.34 : count <= 8 ? 0.30 : 0.26),
+            radialBand * (count <= 5 ? 0.360 : count <= 8 ? 0.325 : 0.295)
+          ),
+          size * (count <= 5 ? 0.064 : count <= 8 ? 0.052 : count <= 12 ? 0.042 : 0.034),
+          size * (count <= 5 ? 0.112 : count <= 8 ? 0.092 : count <= 12 ? 0.074 : 0.058)
         );
 
-        radialWidth = clamp(
-          safeAvailable * (count <= 5 ? 0.965 : count <= 8 ? 0.940 : count <= 12 ? 0.915 : 0.890),
-          minRadialByCount,
-          maxRadialByBounds
+        const gap = clamp(size * (count <= 5 ? 0.022 : count <= 8 ? 0.018 : 0.014), 8, 14);
+        const imageOuterLimit = safeOuterEdge - imageSize / 2;
+        const imageMidRadius = clamp(imageArcRadius, safeInnerEdge + radialBand * 0.60, imageOuterLimit);
+        const imageInnerLimit = imageMidRadius - imageSize / 2;
+
+        const textInnerLimit = safeInnerEdge;
+        const textOuterLimit = Math.max(textInnerLimit + size * 0.070, imageInnerLimit - gap);
+        const textBand = Math.max(size * 0.070, textOuterLimit - textInnerLimit);
+        const textLabelWidth = clamp(
+          textBand * (count <= 5 ? 0.92 : count <= 8 ? 0.90 : 0.86),
+          Math.min(textBand, size * (count <= 5 ? 0.100 : count <= 8 ? 0.080 : 0.062)),
+          textBand * 0.98
+        );
+        const textMidRadius = textOuterLimit - textLabelWidth / 2;
+        const textArc = (2 * Math.PI * Math.max(textMidRadius, safeInnerEdge + 1)) * (step / 360);
+        const textLabelHeight = clamp(
+          textArc * (count <= 5 ? 0.360 : count <= 8 ? 0.310 : count <= 12 ? 0.260 : 0.220),
+          size * (count <= 5 ? 0.072 : count <= 8 ? 0.058 : count <= 12 ? 0.046 : 0.038),
+          size * (count <= 5 ? 0.124 : count <= 8 ? 0.098 : count <= 12 ? 0.078 : 0.062)
         );
 
-        midRadius = safeOuterEdge - radialWidth / 2;
-      } else {
-        radialWidth = clamp(
-          available * (imageOnly ? 0.70 : 0.82),
-          size * (count <= 5 ? 0.145 : count <= 8 ? 0.115 : count <= 12 ? 0.090 : 0.070),
-          available * 0.86
+        let maxFont = size * (count <= 5 ? 0.046 : count <= 8 ? 0.037 : count <= 12 ? 0.029 : 0.023);
+        let fontSize = Math.min(textLabelHeight * 0.54, maxFont);
+        if (textLabelWidth > 0) {
+          fontSize = Math.min(fontSize, textLabelWidth * (textLength > 22 ? 0.46 : textLength > 12 ? 0.58 : 0.74));
+        }
+
+        if (textLength > 58) fontSize *= 0.74;
+        else if (textLength > 42) fontSize *= 0.82;
+        else if (textLength > 26) fontSize *= 0.90;
+
+        if (!hasMultipleWords && textLength > 14) fontSize *= 0.72;
+        else if (!hasMultipleWords && textLength > 10) fontSize *= 0.82;
+
+        fontSize = clamp(
+          fontSize,
+          count <= 5 ? 13.5 : count <= 8 ? 11 : count <= 12 ? 9.2 : 8,
+          maxFont
         );
 
-        midRadius = innerEdge + available * (imageOnly ? 0.52 : 0.56);
+        return {
+          splitMixed: true,
+          textMidRadius,
+          imageMidRadius,
+          textLabelWidth,
+          textLabelHeight,
+          imageLabelSize: imageSize,
+          imageSize,
+          fontSize,
+          gap,
+          lines: count <= 8 ? 3 : 2,
+          textMax: Math.max(18, textLabelWidth)
+        };
       }
 
+      const radialWidth = clamp(
+        available * (imageOnly ? 0.70 : 0.82),
+        size * (count <= 5 ? 0.145 : count <= 8 ? 0.115 : count <= 12 ? 0.090 : 0.070),
+        available * 0.86
+      );
+
+      const midRadius = innerEdge + available * (imageOnly ? 0.52 : 0.56);
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
+      const heightRatio = imageOnly
+        ? (count <= 5 ? 0.50 : count <= 8 ? 0.42 : count <= 12 ? 0.34 : 0.28)
+        : (count <= 5 ? 0.46 : count <= 8 ? 0.38 : count <= 12 ? 0.31 : 0.25);
 
-      let labelHeight;
-      if (mixed) {
-        labelHeight = clamp(
-          arcAtMiddle * (count <= 5 ? 0.390 : count <= 8 ? 0.330 : count <= 12 ? 0.270 : 0.220),
-          size * (count <= 5 ? 0.080 : count <= 8 ? 0.066 : count <= 12 ? 0.052 : 0.042),
-          size * (count <= 5 ? 0.148 : count <= 8 ? 0.116 : count <= 12 ? 0.090 : 0.070)
-        );
-      } else {
-        const heightRatio = imageOnly
-          ? (count <= 5 ? 0.50 : count <= 8 ? 0.42 : count <= 12 ? 0.34 : 0.28)
-          : (count <= 5 ? 0.46 : count <= 8 ? 0.38 : count <= 12 ? 0.31 : 0.25);
+      const labelHeight = clamp(
+        arcAtMiddle * heightRatio,
+        size * (imageOnly ? (count <= 5 ? 0.072 : count <= 8 ? 0.058 : 0.046) : (count <= 5 ? 0.064 : count <= 8 ? 0.052 : 0.042)),
+        size * (imageOnly ? (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.088 : 0.066) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
+      );
 
-        labelHeight = clamp(
-          arcAtMiddle * heightRatio,
-          size * (imageOnly ? (count <= 5 ? 0.072 : count <= 8 ? 0.058 : 0.046) : (count <= 5 ? 0.064 : count <= 8 ? 0.052 : 0.042)),
-          size * (imageOnly ? (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.088 : 0.066) : (count <= 5 ? 0.142 : count <= 8 ? 0.108 : count <= 12 ? 0.082 : 0.062))
-        );
-      }
-
-      let imageSize = 0;
-      if (hasImage) {
-        if (mixed) {
-          imageSize = clamp(
-            Math.min(labelHeight * 0.84, radialWidth * (count <= 5 ? 0.470 : count <= 8 ? 0.445 : 0.420)),
-            size * (count <= 5 ? 0.055 : count <= 8 ? 0.046 : count <= 12 ? 0.038 : 0.030),
-            Math.min(
-              radialWidth * (count <= 5 ? 0.500 : count <= 8 ? 0.470 : 0.440),
-              labelHeight * 0.92,
-              size * (count <= 5 ? 0.112 : count <= 8 ? 0.092 : count <= 12 ? 0.072 : 0.056)
-            )
-          );
-        } else {
-          imageSize = clamp(
+      const imageSize = hasImage
+        ? clamp(
             labelHeight * 0.94,
             size * 0.052,
             Math.min(
@@ -957,45 +987,24 @@
               labelHeight * 0.98,
               size * (count <= 5 ? 0.132 : count <= 8 ? 0.102 : count <= 12 ? 0.078 : 0.058)
             )
-          );
-        }
-      }
+          )
+        : 0;
 
-      let gap = mixed ? clamp(size * 0.014, 7, 13) : clamp(size * 0.014, 5, 10);
-      let availableTextWidth = Math.max(0, radialWidth - imageSize - gap - (mixed ? 14 : 10));
+      let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022);
+      let fontSize = Math.min(labelHeight * 0.48, maxFont);
 
-      if (mixed && availableTextWidth < size * (count <= 5 ? 0.060 : 0.046)) {
-        imageSize = Math.max(size * 0.038, Math.min(imageSize, radialWidth * (count <= 5 ? 0.430 : 0.400)));
-        gap = clamp(size * 0.011, 6, 10);
-        availableTextWidth = Math.max(0, radialWidth - imageSize - gap - 14);
-      }
+      if (textLength > 58) fontSize *= 0.72;
+      else if (textLength > 42) fontSize *= 0.82;
+      else if (textLength > 26) fontSize *= 0.92;
 
-      let maxFont = size * (mixed ? (count <= 5 ? 0.046 : count <= 8 ? 0.037 : count <= 12 ? 0.029 : 0.023) : (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022));
-      let fontSize = Math.min(labelHeight * (mixed ? 0.410 : 0.48), maxFont);
+      if (!hasMultipleWords && textLength > 14) fontSize *= 0.64;
+      else if (!hasMultipleWords && textLength > 10) fontSize *= 0.78;
 
-      if (mixed && availableTextWidth > 0) {
-        fontSize = Math.min(fontSize, availableTextWidth * (textLength > 22 ? 0.58 : textLength > 12 ? 0.66 : 0.78));
-      }
+      fontSize = clamp(fontSize, count <= 8 ? 10.5 : count <= 12 ? 8.5 : 7, maxFont);
 
-      if (textLength > 58) fontSize *= mixed ? 0.76 : 0.72;
-      else if (textLength > 42) fontSize *= mixed ? 0.84 : 0.82;
-      else if (textLength > 26) fontSize *= mixed ? 0.92 : 0.92;
-
-      if (!hasMultipleWords && textLength > 14) fontSize *= mixed ? 0.72 : 0.64;
-      else if (!hasMultipleWords && textLength > 10) fontSize *= mixed ? 0.82 : 0.78;
-
-      fontSize = clamp(
-        fontSize,
-        mixed ? (count <= 5 ? 14 : count <= 8 ? 11.5 : count <= 12 ? 9.5 : 8) : count <= 8 ? 10.5 : count <= 12 ? 8.5 : 7,
-        maxFont
-      );
-
-      const lines = mixed ? (count <= 8 ? 3 : 2) : count <= 8 ? 4 : count <= 12 ? 3 : 3;
-      const textMax = hasImage
-        ? mixed
-          ? Math.max(18, availableTextWidth)
-          : Math.max(size * 0.060, radialWidth - imageSize - gap - 10)
-        : Math.max(size * 0.100, radialWidth - 10);
+      const gap = clamp(size * 0.014, 5, 10);
+      const lines = count <= 8 ? 4 : count <= 12 ? 3 : 3;
+      const textMax = hasImage ? Math.max(size * 0.060, radialWidth - imageSize - gap - 10) : Math.max(size * 0.100, radialWidth - 10);
 
       return {
         midRadius,
@@ -1022,6 +1031,37 @@
 
       const radius = 224;
 
+      function createTextElement(entry, index){
+        const textEl = document.createElement("div");
+        textEl.className = "wheel-text";
+        textEl.setAttribute("dir", "rtl");
+        textEl.textContent = textForEntry(entry, index);
+        return textEl;
+      }
+
+      function createImageElement(entry){
+        const img = document.createElement("img");
+        img.className = "wheel-image";
+        img.alt = "";
+        img.draggable = false;
+        img.src = entry.imageData;
+        return img;
+      }
+
+      function createLabel(className, baseAngle, child){
+        const label = document.createElement("div");
+        label.className = className;
+        label.dataset.baseAngle = String(baseAngle);
+
+        const content = document.createElement("div");
+        content.className = "wheel-label-content";
+        content.appendChild(child);
+
+        label.appendChild(content);
+        labelLayer.appendChild(label);
+        return { label, content };
+      }
+
       items.forEach((entry, index)=>{
         const start = -90 + index * step;
         const end = start + step;
@@ -1047,36 +1087,30 @@
         }) : null;
         if (rim) sectorLayer.appendChild(rim);
 
-        const label = document.createElement("div");
         const isDark = colorBrightness(color) > 168;
+        const toneClass = isDark ? "dark" : "light";
         const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
         const hasText = Boolean(payload.type !== "images" && textForEntry(entry, index));
-        label.className = `wheel-label ${isDark ? "dark" : "light"} ${hasImage && hasText ? "mixed" : hasImage ? "image-only" : "text-only"}`;
-        label.dataset.baseAngle = String(mid);
+        const node = { baseAngle: mid, entry, labels: [] };
 
-        const content = document.createElement("div");
-        content.className = "wheel-label-content";
-
-        if (hasText) {
-          const textEl = document.createElement("div");
-          textEl.className = "wheel-text";
-          textEl.setAttribute("dir", "rtl");
-          textEl.textContent = textForEntry(entry, index);
-          content.appendChild(textEl);
+        if (hasImage && hasText) {
+          const textPart = createLabel(`wheel-label ${toneClass} mixed-text-label`, mid, createTextElement(entry, index));
+          const imagePart = createLabel(`wheel-label ${toneClass} mixed-image-label`, mid, createImageElement(entry));
+          node.textLabel = textPart.label;
+          node.textContent = textPart.content;
+          node.imageLabel = imagePart.label;
+          node.imageContent = imagePart.content;
+          node.labels.push(textPart.label, imagePart.label);
+        } else {
+          const className = `wheel-label ${toneClass} ${hasImage ? "image-only" : "text-only"}`;
+          const child = hasImage ? createImageElement(entry) : createTextElement(entry, index);
+          const single = createLabel(className, mid, child);
+          node.label = single.label;
+          node.content = single.content;
+          node.labels.push(single.label);
         }
 
-        if (hasImage) {
-          const img = document.createElement("img");
-          img.className = "wheel-image";
-          img.alt = "";
-          img.draggable = false;
-          img.src = entry.imageData;
-          content.appendChild(img);
-        }
-
-        label.appendChild(content);
-        labelLayer.appendChild(label);
-        labelNodes.push({ label, content, baseAngle: mid, entry });
+        labelNodes.push(node);
       });
 
       const centerText = payload.centerQuestionEnabled ? (payload.centerQuestion || "السؤال") : "";
@@ -1201,11 +1235,11 @@
 
     function setVisualZoomScale(scale){
       const safeScale = Math.max(1, Number(scale) || 1);
-      const labelBoost = safeScale > 1.001 ? 1.32 : 1;
+      const inverseScale = 1 / safeScale;
       visualZoomScale = safeScale;
       wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
-      wheelPage.style.setProperty("--visual-zoom-inverse", (1 / safeScale).toFixed(5));
-      wheelPage.style.setProperty("--visual-label-zoom", (labelBoost / safeScale).toFixed(5));
+      wheelPage.style.setProperty("--visual-zoom-inverse", inverseScale.toFixed(5));
+      wheelPage.style.setProperty("--visual-label-zoom", inverseScale.toFixed(5));
     }
 
     function cancelZoomAnimation(){
@@ -1263,21 +1297,45 @@
       const step = 360 / count;
       const center = size / 2;
 
+      function applyCommonStyles(label, metrics){
+        label.style.setProperty("--font-size", `${metrics.fontSize}px`);
+        label.style.setProperty("--image-size", `${metrics.imageSize}px`);
+        label.style.setProperty("--line-clamp", String(metrics.lines));
+        label.style.setProperty("--text-max", `${metrics.textMax}px`);
+        label.style.setProperty("--label-gap", `${metrics.gap || 0}px`);
+      }
+
       labelNodes.forEach((node, index)=>{
         const entry = items[index] || {};
         const metrics = labelMetrics(count, entry);
         const baseAngle = node.baseAngle || (-90 + index * step + step / 2);
-        const p = polarToCartesian(metrics.midRadius, baseAngle);
 
-        node.label.style.left = `${center + p.x}px`;
-        node.label.style.top = `${center + p.y}px`;
-        node.label.style.setProperty("--label-w", `${metrics.radialWidth}px`);
-        node.label.style.setProperty("--label-h", `${metrics.labelHeight}px`);
-        node.label.style.setProperty("--label-gap", `${metrics.gap}px`);
-        node.label.style.setProperty("--font-size", `${metrics.fontSize}px`);
-        node.label.style.setProperty("--image-size", `${metrics.imageSize}px`);
-        node.label.style.setProperty("--line-clamp", String(metrics.lines));
-        node.label.style.setProperty("--text-max", `${metrics.textMax}px`);
+        if (metrics.splitMixed && node.textLabel && node.imageLabel) {
+          const textPoint = polarToCartesian(metrics.textMidRadius, baseAngle);
+          node.textLabel.style.left = `${center + textPoint.x}px`;
+          node.textLabel.style.top = `${center + textPoint.y}px`;
+          node.textLabel.style.setProperty("--label-w", `${metrics.textLabelWidth}px`);
+          node.textLabel.style.setProperty("--label-h", `${metrics.textLabelHeight}px`);
+          applyCommonStyles(node.textLabel, metrics);
+
+          const imagePoint = polarToCartesian(metrics.imageMidRadius, baseAngle);
+          node.imageLabel.style.left = `${center + imagePoint.x}px`;
+          node.imageLabel.style.top = `${center + imagePoint.y}px`;
+          node.imageLabel.style.setProperty("--label-w", `${metrics.imageLabelSize}px`);
+          node.imageLabel.style.setProperty("--label-h", `${metrics.imageLabelSize}px`);
+          applyCommonStyles(node.imageLabel, metrics);
+          return;
+        }
+
+        const label = node.label || (node.labels && node.labels[0]);
+        if (!label) return;
+
+        const p = polarToCartesian(metrics.midRadius, baseAngle);
+        label.style.left = `${center + p.x}px`;
+        label.style.top = `${center + p.y}px`;
+        label.style.setProperty("--label-w", `${metrics.radialWidth}px`);
+        label.style.setProperty("--label-h", `${metrics.labelHeight}px`);
+        applyCommonStyles(label, metrics);
       });
 
       updateLabelDirections();
@@ -1286,8 +1344,11 @@
     function updateLabelDirections(){
       labelNodes.forEach((node)=>{
         const labelAngle = node.baseAngle + 180;
-        node.label.style.setProperty("--label-angle", `${labelAngle.toFixed(3)}deg`);
-        node.label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
+        const labels = node.labels && node.labels.length ? node.labels : [node.label].filter(Boolean);
+        labels.forEach((label)=>{
+          label.style.setProperty("--label-angle", `${labelAngle.toFixed(3)}deg`);
+          label.style.transform = `translate(-50%, -50%) rotate(${labelAngle.toFixed(3)}deg)`;
+        });
       });
     }
 
@@ -1422,10 +1483,11 @@
       afterSpin.classList.remove("show");
 
       const sector = document.querySelector(`.wheel-sector[data-index="${selectedIndex}"]`);
-      const label = labelNodes[selectedIndex]?.label || null;
+      const selectedNode = labelNodes[selectedIndex] || null;
+      const labels = selectedNode?.labels && selectedNode.labels.length ? selectedNode.labels : [selectedNode?.label].filter(Boolean);
 
       if (sector) sector.classList.add("eliminating");
-      if (label) label.classList.add("eliminating");
+      labels.forEach((label)=> label.classList.add("eliminating"));
 
       await delay(430);
 
