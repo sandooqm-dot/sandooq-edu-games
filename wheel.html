@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-fixed-content-lock-v10 -->
+  <!-- version: wheel-image-text-zoom-v11 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-fixed-content-lock-v10</title>
+  <title>العجلة الدوارة - wheel-image-text-zoom-v11</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -133,6 +133,11 @@
     .wheel-shell.zoom .wheel-label-content,
     .wheel-shell.zoom .wheel-image{
       transform:none;
+      transform-origin:center center;
+    }
+
+    .wheel-shell.zoom .wheel-text{
+      transform:scale(var(--zoom-inverse, 1));
       transform-origin:center center;
     }
 
@@ -814,6 +819,7 @@
       const step = 360 / Math.max(count, 1);
       const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
       const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
+      const imageOnly = hasImage && !hasText;
       const text = textForEntry(entry, 0);
       const textLength = String(text || "").trim().length;
       const hasMultipleWords = /\s/.test(String(text || "").trim());
@@ -836,14 +842,24 @@
       const midRadius = innerEdge + available * (count <= 5 ? 0.58 : count <= 8 ? 0.57 : count <= 12 ? 0.55 : 0.53);
       const arcAtMiddle = (2 * Math.PI * midRadius) * (step / 360);
 
-      const labelHeight = clamp(
-        arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
-        size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
-        size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
-      );
+      const labelHeight = imageOnly
+        ? clamp(
+            arcAtMiddle * (count <= 5 ? 0.58 : count <= 8 ? 0.50 : count <= 12 ? 0.42 : 0.34),
+            size * (count <= 5 ? 0.090 : count <= 8 ? 0.066 : count <= 12 ? 0.050 : 0.040),
+            size * (count <= 5 ? 0.190 : count <= 8 ? 0.135 : count <= 12 ? 0.092 : 0.068)
+          )
+        : clamp(
+            arcAtMiddle * (count <= 5 ? 0.46 : count <= 8 ? 0.40 : count <= 12 ? 0.34 : 0.28),
+            size * (count <= 5 ? 0.070 : count <= 8 ? 0.052 : count <= 12 ? 0.040 : 0.032),
+            size * (count <= 5 ? 0.148 : count <= 8 ? 0.108 : count <= 12 ? 0.076 : 0.056)
+          );
 
       const imageSize = hasImage
-        ? clamp(labelHeight * 0.82, size * 0.030, size * (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040))
+        ? clamp(
+            labelHeight * (imageOnly ? 0.94 : 0.82),
+            size * (imageOnly ? 0.046 : 0.030),
+            Math.min(labelHeight * 0.98, size * (imageOnly ? (count <= 5 ? 0.178 : count <= 8 ? 0.124 : count <= 12 ? 0.084 : 0.062) : (count <= 5 ? 0.095 : count <= 8 ? 0.070 : count <= 12 ? 0.052 : 0.040)))
+          )
         : 0;
 
       let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.038 : count <= 12 ? 0.027 : 0.019);
@@ -1058,7 +1074,7 @@
       const scale = desiredScale;
 
       wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
-      wheelPage.style.setProperty("--zoom-inverse", "1");
+      wheelPage.style.setProperty("--zoom-inverse", (1 / scale).toFixed(4));
     }
 
     function updateLayout(){
