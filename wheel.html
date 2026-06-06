@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-no-selected-label-v3 -->
+  <!-- version: wheel-fixed-section-colors-v4 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-no-selected-label-v3</title>
+  <title>العجلة الدوارة - wheel-fixed-section-colors-v4</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -627,12 +627,16 @@
     function normalizePayload(data){
       const type = ["text","images","mixed"].includes(data.type) ? data.type : "text";
       const entries = Array.isArray(data.entries) && data.entries.length
-        ? data.entries.map((entry)=> ({
+        ? data.entries.map((entry, index)=> ({
             text: String(entry.text || ""),
             imageName: String(entry.imageName || ""),
-            imageData: String(entry.imageData || "")
+            imageData: String(entry.imageData || ""),
+            color: normalizeEntryColor(entry.color, index)
           }))
-        : defaultWheelEntries.map((entry)=> ({ ...entry }));
+        : defaultWheelEntries.map((entry, index)=> ({
+            ...entry,
+            color: normalizeEntryColor(entry.color, index)
+          }));
 
       return {
         version: 1,
@@ -641,6 +645,12 @@
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
         centerQuestion: String(data.centerQuestion || "")
       };
+    }
+
+    function normalizeEntryColor(color, index){
+      const value = String(color || "").trim();
+      if (/^#[0-9a-f]{6}$/i.test(value)) return value;
+      return wheelColors[index % wheelColors.length];
     }
 
     function persistPayload(){
@@ -824,7 +834,8 @@
         const start = -90 + index * step;
         const end = start + step;
         const mid = start + step / 2;
-        const color = wheelColors[index % wheelColors.length];
+        const color = normalizeEntryColor(entry.color, index);
+        entry.color = color;
 
         const sector = createSvgElement("path", {
           d: sectorPath(start, end, radius),
@@ -1249,7 +1260,10 @@
       payload.entries.splice(selectedIndex, 1);
 
       if (!payload.entries.length) {
-        payload.entries = defaultWheelEntries.map((entry)=> ({ ...entry }));
+        payload.entries = defaultWheelEntries.map((entry, index)=> ({
+          ...entry,
+          color: normalizeEntryColor(entry.color, index)
+        }));
       }
 
       selectedIndex = -1;
