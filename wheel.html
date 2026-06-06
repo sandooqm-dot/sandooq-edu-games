@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-zoom-content-scale-v27 -->
+  <!-- version: wheel-zoom-content-boost-v28 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-zoom-content-scale-v27</title>
+  <title>العجلة الدوارة - wheel-zoom-content-boost-v28</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -288,6 +288,11 @@
 
     .wheel-label.mixed-image-label .wheel-image{
       flex:0 0 var(--image-size, 62px);
+    }
+
+    .wheel-shell.zoom .wheel-label,
+    .wheel-shell.zoom .wheel-label-content{
+      overflow:visible;
     }
 
     .wheel-label.image-only .wheel-label-content{
@@ -1277,11 +1282,13 @@
       const safeScale = Math.max(1, Number(scale) || 1);
       const inverseScale = 1 / safeScale;
       /*
-        wheel-8:
-        Keep the center circle compensated, but let text/images scale with the focused wheel.
-        This makes the zoomed result readable while preserving the normal layout sizes.
+        wheel-9:
+        Normal mode keeps the old compensated size.
+        Focus/zoom mode gives text and images an extra readable boost inside the enlarged sector.
       */
-      const labelScale = safeScale > 1.001 ? 1 : inverseScale;
+      const focusProgress = clamp((safeScale - 1) / 0.86, 0, 1);
+      const zoomContentBoost = 1 + focusProgress * 0.48;
+      const labelScale = safeScale > 1.001 ? zoomContentBoost : inverseScale;
       visualZoomScale = safeScale;
       wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
       wheelPage.style.setProperty("--visual-zoom-inverse", inverseScale.toFixed(5));
