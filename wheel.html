@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-barcode-display-v1 -->
+  <!-- version: wheel-safari-scroll-v2 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-barcode-display-v1</title>
+  <title>العجلة الدوارة - wheel-safari-scroll-v2</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -37,24 +37,30 @@
     }
 
     body{
-      min-height:100vh;
+      min-height:calc(100dvh + 160px);
       overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
       -webkit-text-size-adjust:100%;
     }
 
     body::after{
-      content:none;
-      display:none;
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
     }
 
-    /* wheel-barcode-display-v1: نفس طريقة صفحة barcode، صفحة عادية بارتفاع 100dvh بدون fixed viewport أو visualViewport */
+    /* wheel-safari-scroll-v2: نفس فكرة barcode مع مساحة تمرير بسيطة حتى يطوي Safari الشريط */
     .wheel-page{
-      position:relative;
+      position:sticky;
+      top:0;
       width:100%;
       min-height:100dvh;
       height:100dvh;
       overflow-x:hidden;
-      overflow-y:auto;
+      overflow-y:hidden;
       background:#fff;
       user-select:none;
       touch-action:none;
@@ -674,8 +680,13 @@
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
-      [0, 80, 220, 520].forEach((delay)=>{
+      [0, 80, 220, 520, 900].forEach((delay)=>{
         safariTimers.push(setTimeout(()=>{
+          try {
+            window.scrollTo({ top:80, left:0, behavior:"auto" });
+          } catch (_) {
+            window.scrollTo(0, 80);
+          }
           requestAnimationFrame(updateLayout);
         }, delay));
       });
@@ -900,7 +911,7 @@
     }
 
     /*
-      wheel-barcode-display-v1:
+      wheel-safari-scroll-v2:
       نفس طريقة barcode: نعتمد على صفحة عادية min-height:100dvh، ولا نبني
       ارتفاع اللعبة على visualViewport حتى لا يتغير حجم المشهد مع شريط Safari.
     */
