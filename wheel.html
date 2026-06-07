@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-image-only-manual-tuning-v31 -->
+  <!-- version: wheel-stable-content-size-v32 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-image-only-manual-tuning-v31</title>
+  <title>العجلة الدوارة - wheel-stable-content-size-v32</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -681,14 +681,17 @@
       screenY     = تحريك عمودي مباشر لكل الصور بالبكسل. موجب أسفل، سالب أعلى.
     */
     const IMAGE_ONLY_TUNING = {
-  sizeScale: 1.20,
-  radialPosition: 0.66,
-  sideShift: 0.00
-};
+      sizeScale: 1.00,
+      radialShift: 0.00,
+      sideShift: 0.00,
+      screenX: 0,
+      screenY: 0
+    };
 
     let payload = readPayload();
     let rotation = 0;
     let selectedIndex = -1;
+    let initialLayoutCount = 0;
     let animationId = null;
     let zoomAnimationId = null;
     let visualZoomScale = 1;
@@ -1142,6 +1145,14 @@
 
     function buildWheel(){
       const items = getItems();
+
+      // wheel-13:
+      // Keep the original content count for text/image sizing.
+      // Deleting sectors changes the wheel shape, but must not inflate text/images.
+      if (!initialLayoutCount && items.length) {
+        initialLayoutCount = items.length;
+      }
+
       const count = Math.max(items.length, 1);
       const step = 360 / count;
 
@@ -1423,6 +1434,7 @@
 
       const items = getItems();
       const count = Math.max(items.length, 1);
+      const metricCount = Math.max(count, initialLayoutCount || count);
       const step = 360 / count;
       const center = size / 2;
 
@@ -1436,7 +1448,7 @@
 
       labelNodes.forEach((node, index)=>{
         const entry = items[index] || {};
-        const metrics = labelMetrics(count, entry);
+        const metrics = labelMetrics(metricCount, entry);
         const baseAngle = node.baseAngle || (-90 + index * step + step / 2);
 
         if (metrics.splitMixed && node.textLabel && node.imageLabel) {
