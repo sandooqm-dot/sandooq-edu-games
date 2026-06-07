@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-stable-content-size-v32 -->
+  <!-- version: wheel-text-clarity-boost-v33 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-stable-content-size-v32</title>
+  <title>العجلة الدوارة - wheel-text-clarity-boost-v33</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -982,7 +982,8 @@
         );
 
         let maxFont = size * (count <= 5 ? 0.043 : count <= 8 ? 0.035 : count <= 12 ? 0.0275 : 0.022);
-        let fontSize = Math.min(textLabelHeight * 0.470, maxFont);
+        maxFont *= 1.08;
+        let fontSize = Math.min(textLabelHeight * 0.495, maxFont);
 
         if (textLabelWidth > 0) {
           fontSize = Math.min(fontSize, textLabelWidth * (textLength > 22 ? 0.42 : textLength > 12 ? 0.535 : 0.69));
@@ -994,6 +995,9 @@
 
         if (!hasMultipleWords && textLength > 14) fontSize *= 0.74;
         else if (!hasMultipleWords && textLength > 10) fontSize *= 0.84;
+
+        // wheel-14: small clarity boost. Long text stays controlled.
+        fontSize *= textLength > 42 ? 1.00 : textLength > 26 ? 1.03 : textLength > 14 ? 1.06 : 1.08;
 
         fontSize = clamp(
           fontSize,
@@ -1111,7 +1115,8 @@
       }
 
       let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022);
-      let fontSize = Math.min(labelHeight * 0.48, maxFont);
+      maxFont *= 1.08;
+      let fontSize = Math.min(labelHeight * 0.505, maxFont);
 
       if (textLength > 58) fontSize *= 0.72;
       else if (textLength > 42) fontSize *= 0.82;
@@ -1119,6 +1124,9 @@
 
       if (!hasMultipleWords && textLength > 14) fontSize *= 0.64;
       else if (!hasMultipleWords && textLength > 10) fontSize *= 0.78;
+
+      // wheel-14: boost short and medium text only, while long text remains smaller.
+      fontSize *= textLength > 42 ? 1.00 : textLength > 26 ? 1.03 : textLength > 14 ? 1.06 : 1.08;
 
       fontSize = clamp(fontSize, count <= 8 ? 10.5 : count <= 12 ? 8.5 : 7, maxFont);
 
