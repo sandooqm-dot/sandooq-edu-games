@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-sector-safe-content-fit-v39 -->
+  <!-- version: wheel-center-question-zoom-v40 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-sector-safe-content-fit-v39</title>
+  <title>العجلة الدوارة - wheel-center-question-zoom-v40</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -133,6 +133,10 @@
     .wheel-shell.zoom .wheel-center{
       transform:translate(-50%,-50%) scale(var(--visual-zoom-inverse, 1));
       transform-origin:center center;
+    }
+
+    .wheel-shell.zoom .wheel-center.has-question{
+      transform:translate(-50%,-50%) scale(var(--center-question-zoom, 1));
     }
 
     .wheel-rotor{
@@ -378,10 +382,12 @@
     }
 
     .wheel-center.has-question{
-      width:22%;
-      font-size:clamp(12px, 2.45vmin, 24px);
-      line-height:1.2;
-      padding:clamp(8px, 1.5vmin, 16px);
+      width:26%;
+      font-size:clamp(15px, 3.10vmin, 34px);
+      line-height:1.16;
+      padding:clamp(10px, 1.85vmin, 20px);
+      border-width:5px;
+      box-shadow:0 0 0 4px rgba(255,255,255,.92), 0 3px 10px rgba(0,0,0,.14);
       overflow-wrap:anywhere;
       word-break:normal;
     }
@@ -734,7 +740,9 @@
       }
 
       .wheel-center.has-question{
-        font-size:clamp(10px, 2.1vmin, 20px);
+        width:25.5%;
+        font-size:clamp(13px, 3.25vmin, 30px);
+        padding:clamp(8px, 1.8vmin, 18px);
       }
 
       .selected-result{
@@ -1925,10 +1933,21 @@
       const focusProgress = clamp((safeScale - 1) / 0.86, 0, 1);
       const zoomContentBoost = 0.90 + focusProgress * 0.15;
       const labelScale = safeScale > 1.001 ? zoomContentBoost : inverseScale;
+
+      /*
+        wheel-21:
+        The center circle is a question area when enabled, so it must not shrink like an empty hub.
+        Effective screen size at max zoom becomes about 1.34x instead of staying tiny.
+      */
+      const centerQuestionScale = safeScale > 1.001
+        ? inverseScale * (1 + focusProgress * 0.34)
+        : 1;
+
       visualZoomScale = safeScale;
       wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
       wheelPage.style.setProperty("--visual-zoom-inverse", inverseScale.toFixed(5));
       wheelPage.style.setProperty("--visual-label-zoom", labelScale.toFixed(5));
+      wheelPage.style.setProperty("--center-question-zoom", centerQuestionScale.toFixed(5));
     }
 
     function cancelZoomAnimation(){
@@ -2057,13 +2076,24 @@
     function fitCenterText(){
       if (!wheelCenter.classList.contains("has-question")) return;
 
+      const question = String(wheelCenter.textContent || "").trim();
+      const length = question.length;
       wheelCenter.style.fontSize = "";
-      let size = parseFloat(getComputedStyle(wheelCenter).fontSize || "18");
 
-      for (let i = 0; i < 14; i++) {
+      let size = parseFloat(getComputedStyle(wheelCenter).fontSize || "20");
+      const maxSize = size;
+      const minSize = length > 52 ? 9 : length > 34 ? 10 : 11;
+
+      // Short center questions should look important, like Wordwall.
+      if (length && length <= 18) {
+        size = Math.min(maxSize * 1.08, maxSize + 3);
+        wheelCenter.style.fontSize = `${size}px`;
+      }
+
+      for (let i = 0; i < 20; i++) {
         if (wheelCenter.scrollWidth <= wheelCenter.clientWidth + 2 && wheelCenter.scrollHeight <= wheelCenter.clientHeight + 2) break;
         size -= 1;
-        if (size < 8) break;
+        if (size < minSize) break;
         wheelCenter.style.fontSize = `${size}px`;
       }
     }
