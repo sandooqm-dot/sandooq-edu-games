@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-home-to-index-v35 -->
+  <!-- version: wheel-home-navigation-fix-v36 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-home-to-index-v35</title>
+  <title>العجلة الدوارة - wheel-home-navigation-fix-v36</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1161,9 +1161,33 @@
       });
     }
 
-    function goHomePage(){
+    let isGoingHome = false;
+
+    function goHomePage(event){
+      if (event) {
+        event.preventDefault?.();
+        event.stopPropagation?.();
+      }
+
+      if (isGoingHome) return;
+      isGoingHome = true;
+
       persistPayload();
-      window.location.href = "index.html";
+
+      const homeUrl = new URL("index.html", window.location.href).href;
+
+      try {
+        window.location.assign(homeUrl);
+      } catch (_) {
+        window.location.href = homeUrl;
+      }
+
+      // Safari fallback if the first navigation does not fire immediately.
+      setTimeout(()=>{
+        if (location.href !== homeUrl) {
+          window.location.href = homeUrl;
+        }
+      }, 120);
     }
 
     function isIosWebKit(){
@@ -2143,6 +2167,11 @@
 
     restartBtn?.addEventListener("click", restartActivity);
     homeBtn?.addEventListener("click", goHomePage);
+    homeBtn?.addEventListener("pointerup", (event)=>{
+      if (event.pointerType === "touch" || event.pointerType === "pen") {
+        goHomePage(event);
+      }
+    });
 
     document.getElementById("backBtn").addEventListener("click", ()=>{
       persistPayload();
