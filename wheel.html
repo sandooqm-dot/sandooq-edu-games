@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-text-only-wordwall-fit-v37 -->
+  <!-- version: wheel-sector-safe-image-fit-v38 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-text-only-wordwall-fit-v37</title>
+  <title>العجلة الدوارة - wheel-sector-safe-image-fit-v38</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -337,8 +337,10 @@
     }
 
     .wheel-image{
-      width:var(--image-size, 48px);
-      height:var(--image-size, 48px);
+      width:var(--image-w, var(--image-size, 48px));
+      height:var(--image-h, var(--image-size, 48px));
+      max-width:100%;
+      max-height:100%;
       object-fit:contain;
       display:block;
       flex:0 0 auto;
@@ -1283,9 +1285,10 @@
       return Math.max(min, Math.min(max, value));
     }
 
-    function labelMetrics(count, entry){
+    function labelMetrics(count, entry, liveCount = count){
       const size = Math.max(260, layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 360);
-      const step = 360 / Math.max(count, 1);
+      const sectorCount = Math.max(liveCount || count, 1);
+      const step = 360 / sectorCount;
       const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
       const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
       const imageOnly = hasImage && !hasText;
@@ -1408,8 +1411,12 @@
           imageMidRadius,
           textLabelWidth,
           textLabelHeight,
-          imageLabelSize: imageSize,
+          imageLabelSize: imageSize * 1.16,
+          imageLabelWidth: imageSize * 1.20,
+          imageLabelHeight: imageSize * 1.16,
           imageSize,
+          imageWidth: imageSize * 1.20,
+          imageHeight: imageSize * 1.16,
           fontSize,
           gap,
           lines: visibleLines,
@@ -1498,6 +1505,69 @@
           imageOnlySideShiftPx: 0,
           imageOnlyScreenX: 0,
           imageOnlyScreenY: 0
+        };
+      }
+
+      if (imageOnly) {
+        /*
+          wheel-19:
+          Sector Safe Box for image-only mode.
+          The image uses the current real sector space, so it grows when sections are fewer
+          and shrinks when sections are many, without touching the center, rim, or sector borders.
+        */
+        const liveSmall = sectorCount <= 5;
+        const liveMedium = sectorCount <= 8;
+        const liveLarge = sectorCount <= 12;
+
+        const safeInnerEdge = centerRadius + size * (liveSmall ? 0.042 : liveMedium ? 0.038 : liveLarge ? 0.034 : 0.030);
+        const safeOuterEdge = rimRadius - size * (liveSmall ? 0.026 : liveMedium ? 0.024 : liveLarge ? 0.022 : 0.020);
+        const safeRadialBand = Math.max(size * 0.13, safeOuterEdge - safeInnerEdge);
+
+        let midRadius = safeInnerEdge + safeRadialBand * (liveSmall ? 0.575 : liveMedium ? 0.590 : liveLarge ? 0.610 : 0.625);
+        const imageSafeMargin = size * (liveSmall ? 0.015 : liveMedium ? 0.013 : 0.010);
+
+        const arcAtMiddle = (2 * Math.PI * Math.max(midRadius, safeInnerEdge + 1)) * (step / 360);
+        const radialLimit = Math.max(size * 0.08, safeRadialBand - imageSafeMargin * 2);
+        const tangentLimit = Math.max(size * 0.06, arcAtMiddle * (liveSmall ? 0.780 : liveMedium ? 0.700 : liveLarge ? 0.610 : 0.520));
+
+        let imageBoxW = clamp(
+          radialLimit * (liveSmall ? 0.920 : liveMedium ? 0.890 : liveLarge ? 0.850 : 0.800),
+          size * (liveSmall ? 0.110 : liveMedium ? 0.088 : liveLarge ? 0.066 : 0.050),
+          size * (liveSmall ? 0.270 : liveMedium ? 0.225 : liveLarge ? 0.175 : 0.135)
+        );
+
+        let imageBoxH = clamp(
+          tangentLimit,
+          size * (liveSmall ? 0.110 : liveMedium ? 0.088 : liveLarge ? 0.066 : 0.050),
+          size * (liveSmall ? 0.285 : liveMedium ? 0.235 : liveLarge ? 0.182 : 0.140)
+        );
+
+        imageBoxW = clamp(imageBoxW * imageOnlySizeScale, size * 0.045, radialLimit);
+        imageBoxH = clamp(imageBoxH * imageOnlySizeScale, size * 0.045, Math.max(size * 0.055, arcAtMiddle * 0.82));
+
+        midRadius = clamp(
+          midRadius + imageOnlyRadialShiftPx,
+          safeInnerEdge + imageBoxW / 2,
+          safeOuterEdge - imageBoxW / 2
+        );
+
+        const imageSize = Math.min(imageBoxW, imageBoxH);
+
+        return {
+          midRadius,
+          radialWidth: imageBoxW,
+          labelHeight: imageBoxH,
+          imageSize,
+          imageWidth: imageBoxW,
+          imageHeight: imageBoxH,
+          fontSize: 0,
+          gap: 0,
+          lines: 1,
+          textMax: 0,
+          imageOnly: true,
+          imageOnlySideShiftPx,
+          imageOnlyScreenX,
+          imageOnlyScreenY
         };
       }
 
@@ -1915,6 +1985,8 @@
       function applyCommonStyles(label, metrics){
         label.style.setProperty("--font-size", `${metrics.fontSize}px`);
         label.style.setProperty("--image-size", `${metrics.imageSize}px`);
+        label.style.setProperty("--image-w", `${metrics.imageWidth || metrics.imageSize || 0}px`);
+        label.style.setProperty("--image-h", `${metrics.imageHeight || metrics.imageSize || 0}px`);
         label.style.setProperty("--line-clamp", String(metrics.lines));
         label.style.setProperty("--text-max", `${metrics.textMax}px`);
         label.style.setProperty("--label-gap", `${metrics.gap || 0}px`);
@@ -1922,7 +1994,7 @@
 
       labelNodes.forEach((node, index)=>{
         const entry = items[index] || {};
-        const metrics = labelMetrics(metricCount, entry);
+        const metrics = labelMetrics(metricCount, entry, count);
         const baseAngle = node.baseAngle || (-90 + index * step + step / 2);
 
         if (metrics.splitMixed && node.textLabel && node.imageLabel) {
@@ -1936,8 +2008,8 @@
           const imagePoint = polarToCartesian(metrics.imageMidRadius, baseAngle);
           node.imageLabel.style.left = `${center + imagePoint.x}px`;
           node.imageLabel.style.top = `${center + imagePoint.y}px`;
-          node.imageLabel.style.setProperty("--label-w", `${metrics.imageLabelSize}px`);
-          node.imageLabel.style.setProperty("--label-h", `${metrics.imageLabelSize}px`);
+          node.imageLabel.style.setProperty("--label-w", `${metrics.imageLabelWidth || metrics.imageLabelSize}px`);
+          node.imageLabel.style.setProperty("--label-h", `${metrics.imageLabelHeight || metrics.imageLabelSize}px`);
           applyCommonStyles(node.imageLabel, metrics);
           return;
         }
