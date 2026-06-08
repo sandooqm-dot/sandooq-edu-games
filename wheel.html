@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-sector-safe-image-fit-v38 -->
+  <!-- version: wheel-sector-safe-content-fit-v39 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-sector-safe-image-fit-v38</title>
+  <title>العجلة الدوارة - wheel-sector-safe-content-fit-v39</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1285,6 +1285,37 @@
       return Math.max(min, Math.min(max, value));
     }
 
+    function fitWheelTextBox(boxWidth, boxHeight, textLength, hasMultipleWords, options = {}){
+      const length = Math.max(1, Number(textLength) || 1);
+      const maxFont = Number(options.maxFont) || 18;
+      const minFont = Number(options.minFont) || 7;
+      const requestedMaxLines = Math.max(1, Math.round(Number(options.maxLines) || 3));
+      const maxLines = hasMultipleWords ? requestedMaxLines : 1;
+      const lineHeight = Number(options.lineHeight) || 1.10;
+      const charFactor = hasMultipleWords ? 0.56 : 0.66;
+
+      let best = { lines:1, fontSize:minFont, score:minFont };
+
+      for (let lines = 1; lines <= maxLines; lines += 1) {
+        const charsPerLine = hasMultipleWords ? Math.ceil(length / lines) : length;
+        const widthFit = boxWidth / Math.max(1, charsPerLine * charFactor);
+        const heightFit = boxHeight / Math.max(1, lines * lineHeight);
+        let fontSize = Math.min(maxFont, widthFit, heightFit);
+
+        if (length <= 8 && lines > 1) fontSize *= 0.82;
+        if (length <= 16 && lines > 2) fontSize *= 0.88;
+        if (length > 38 && lines < 3 && hasMultipleWords) fontSize *= 0.72;
+
+        const score = fontSize - (lines - 1) * (length <= 16 ? 0.85 : 0.25);
+        if (score > best.score) best = { lines, fontSize, score };
+      }
+
+      return {
+        lines: best.lines,
+        fontSize: clamp(best.fontSize, minFont, maxFont)
+      };
+    }
+
     function labelMetrics(count, entry, liveCount = count){
       const size = Math.max(260, layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 360);
       const sectorCount = Math.max(liveCount || count, 1);
@@ -1314,96 +1345,79 @@
 
       if (mixed) {
         /*
-          Wordwall-like split layout v26:
-          - Bigger wheel + smaller center gives each sector more usable area.
-          - Text and image stay separate, each with its own radius.
-          - Content sizes are based on the real sector arc at each radius.
-          - Zoom mode lets text/images scale with the selected wheel view so they stay readable in focus.
+          wheel-20:
+          Sector Safe Box for text + image.
+          The image and text each get a safe area. Short text grows; long text shrinks and wraps.
         */
-        const mixedInnerEdge = centerRadius + size * (count <= 5 ? 0.040 : count <= 8 ? 0.036 : count <= 12 ? 0.032 : 0.028);
-        const mixedOuterEdge = rimRadius - size * (count <= 5 ? 0.018 : count <= 8 ? 0.016 : count <= 12 ? 0.014 : 0.012);
-        const safeInnerEdge = mixedInnerEdge + size * (count <= 5 ? 0.004 : count <= 8 ? 0.004 : 0.003);
-        const safeOuterEdge = mixedOuterEdge - size * (count <= 5 ? 0.008 : count <= 8 ? 0.007 : 0.006);
-        const radialBand = Math.max(size * 0.175, safeOuterEdge - safeInnerEdge);
+        const liveSmall = sectorCount <= 5;
+        const liveMedium = sectorCount <= 8;
+        const liveLarge = sectorCount <= 12;
 
-        const imageWantedRadius = safeInnerEdge + radialBand * (count <= 5 ? 0.790 : count <= 8 ? 0.775 : 0.760);
-        const imageArc = (2 * Math.PI * imageWantedRadius) * (step / 360);
-        let imageSize = clamp(
-          Math.min(
-            size * (count <= 5 ? 0.128 : count <= 8 ? 0.106 : count <= 12 ? 0.084 : 0.064),
-            imageArc * (count <= 5 ? 0.355 : count <= 8 ? 0.320 : 0.280),
-            radialBand * (count <= 5 ? 0.360 : count <= 8 ? 0.340 : 0.315)
-          ),
-          size * (count <= 5 ? 0.072 : count <= 8 ? 0.058 : count <= 12 ? 0.046 : 0.036),
-          size * (count <= 5 ? 0.138 : count <= 8 ? 0.112 : count <= 12 ? 0.088 : 0.068)
+        const safeInnerEdge = centerRadius + size * (liveSmall ? 0.036 : liveMedium ? 0.033 : liveLarge ? 0.030 : 0.027);
+        const safeOuterEdge = rimRadius - size * (liveSmall ? 0.020 : liveMedium ? 0.018 : liveLarge ? 0.016 : 0.014);
+        const radialBand = Math.max(size * 0.16, safeOuterEdge - safeInnerEdge);
+        const gap = clamp(size * (liveSmall ? 0.020 : liveMedium ? 0.017 : 0.014), 7, 15);
+
+        const imageRadialBox = clamp(
+          radialBand * (liveSmall ? 0.395 : liveMedium ? 0.370 : liveLarge ? 0.335 : 0.300),
+          size * (liveSmall ? 0.086 : liveMedium ? 0.070 : liveLarge ? 0.054 : 0.042),
+          size * (liveSmall ? 0.175 : liveMedium ? 0.145 : liveLarge ? 0.112 : 0.086)
         );
 
-        const gap = clamp(size * (count <= 5 ? 0.018 : count <= 8 ? 0.015 : 0.012), 7, 13);
-        const imageMidRadius = clamp(
-          imageWantedRadius,
-          safeInnerEdge + radialBand * 0.610,
-          safeOuterEdge - imageSize / 2
+        const imageMidRadius = safeOuterEdge - imageRadialBox / 2;
+        const imageArc = (2 * Math.PI * Math.max(imageMidRadius, safeInnerEdge + 1)) * (step / 360);
+        const imageTangentialBox = clamp(
+          imageArc * (liveSmall ? 0.520 : liveMedium ? 0.470 : liveLarge ? 0.410 : 0.350),
+          size * (liveSmall ? 0.080 : liveMedium ? 0.064 : liveLarge ? 0.050 : 0.040),
+          size * (liveSmall ? 0.190 : liveMedium ? 0.155 : liveLarge ? 0.120 : 0.092)
         );
-        const imageInnerLimit = imageMidRadius - imageSize / 2;
 
-        const textInnerLimit = safeInnerEdge + size * (count <= 5 ? 0.008 : count <= 8 ? 0.007 : 0.005);
+        const imageWidth = imageRadialBox;
+        const imageHeight = imageTangentialBox;
+        const imageSize = Math.min(imageWidth, imageHeight);
+
+        const textInnerLimit = safeInnerEdge + size * (liveSmall ? 0.006 : liveMedium ? 0.005 : 0.004);
         const textOuterLimit = Math.max(
-          textInnerLimit + size * (count <= 5 ? 0.110 : count <= 8 ? 0.086 : 0.066),
-          imageInnerLimit - gap
+          textInnerLimit + size * (liveSmall ? 0.118 : liveMedium ? 0.092 : liveLarge ? 0.070 : 0.052),
+          imageMidRadius - imageRadialBox / 2 - gap
         );
-        const textBand = Math.max(size * (count <= 5 ? 0.100 : count <= 8 ? 0.080 : 0.060), textOuterLimit - textInnerLimit);
+
         const textLabelWidth = clamp(
-          textBand * (count <= 5 ? 0.920 : count <= 8 ? 0.900 : 0.870),
-          Math.min(textBand, size * (count <= 5 ? 0.122 : count <= 8 ? 0.094 : 0.070)),
-          textBand * 0.940
+          textOuterLimit - textInnerLimit,
+          size * (liveSmall ? 0.104 : liveMedium ? 0.082 : liveLarge ? 0.062 : 0.048),
+          radialBand * (liveSmall ? 0.610 : liveMedium ? 0.580 : liveLarge ? 0.540 : 0.500)
         );
+
         const textMidRadius = textInnerLimit + textLabelWidth / 2;
-
         const textArc = (2 * Math.PI * Math.max(textMidRadius, safeInnerEdge + 1)) * (step / 360);
+
         let textLabelHeight = clamp(
-          textArc * (count <= 5 ? 0.470 : count <= 8 ? 0.400 : count <= 12 ? 0.330 : 0.270),
-          size * (count <= 5 ? 0.082 : count <= 8 ? 0.064 : count <= 12 ? 0.050 : 0.040),
-          size * (count <= 5 ? 0.150 : count <= 8 ? 0.116 : count <= 12 ? 0.090 : 0.070)
+          textArc * (liveSmall ? 0.660 : liveMedium ? 0.560 : liveLarge ? 0.455 : 0.360),
+          size * (liveSmall ? 0.088 : liveMedium ? 0.070 : liveLarge ? 0.052 : 0.040),
+          size * (liveSmall ? 0.218 : liveMedium ? 0.172 : liveLarge ? 0.132 : 0.100)
         );
 
-        let maxFont = size * (count <= 5 ? 0.043 : count <= 8 ? 0.035 : count <= 12 ? 0.0275 : 0.022);
-        maxFont *= 1.08;
-        let fontSize = Math.min(textLabelHeight * 0.495, maxFont);
+        let lines = textLength <= 8 ? 1 : textLength <= 20 ? 2 : textLength <= 38 ? 3 : 4;
+        lines = clamp(lines, 1, liveMedium ? 4 : 3);
 
-        if (textLabelWidth > 0) {
-          fontSize = Math.min(fontSize, textLabelWidth * (textLength > 22 ? 0.42 : textLength > 12 ? 0.535 : 0.69));
-        }
+        const maxFont = size * (
+          liveSmall ? 0.054 :
+          liveMedium ? 0.043 :
+          liveLarge ? 0.032 :
+          0.024
+        ) * (textLength <= 8 ? 1.08 : textLength > 38 ? 0.94 : 1);
 
-        if (textLength > 58) fontSize *= 0.74;
-        else if (textLength > 42) fontSize *= 0.82;
-        else if (textLength > 26) fontSize *= 0.91;
+        const fit = fitWheelTextBox(textLabelWidth * 0.96, textLabelHeight * 0.96, textLength, hasMultipleWords, {
+          maxFont,
+          minFont: liveSmall ? 10.4 : liveMedium ? 8.8 : liveLarge ? 7.2 : 6.4,
+          maxLines: lines,
+          lineHeight: 1.13
+        });
 
-        if (!hasMultipleWords && textLength > 14) fontSize *= 0.74;
-        else if (!hasMultipleWords && textLength > 10) fontSize *= 0.84;
-
-        // wheel-14: small clarity boost. Long text stays controlled.
-        fontSize *= textLength > 42 ? 1.00 : textLength > 26 ? 1.03 : textLength > 14 ? 1.06 : 1.08;
-
-        fontSize = clamp(
-          fontSize,
-          count <= 5 ? 12.5 : count <= 8 ? 10.2 : count <= 12 ? 8.4 : 7.1,
-          maxFont
-        );
-
-        const visibleLines = textLength > 24
-          ? (count <= 8 ? 4 : 3)
-          : textLength > 12
-            ? (count <= 8 ? 3 : 2)
-            : 2;
-        const requiredTextHeight = fontSize * 1.14 * visibleLines + size * (count <= 5 ? 0.018 : count <= 8 ? 0.016 : 0.012);
+        lines = fit.lines;
+        const fontSize = fit.fontSize;
+        const requiredTextHeight = fontSize * 1.12 * lines + size * (liveSmall ? 0.012 : liveMedium ? 0.010 : 0.008);
         textLabelHeight = Math.max(textLabelHeight, requiredTextHeight);
-        textLabelHeight = Math.min(
-          textLabelHeight,
-          Math.min(
-            textArc * (count <= 5 ? 0.640 : count <= 8 ? 0.560 : count <= 12 ? 0.470 : 0.390),
-            size * (count <= 5 ? 0.230 : count <= 8 ? 0.180 : count <= 12 ? 0.138 : 0.108)
-          )
-        );
 
         return {
           splitMixed: true,
@@ -1411,34 +1425,37 @@
           imageMidRadius,
           textLabelWidth,
           textLabelHeight,
-          imageLabelSize: imageSize * 1.16,
-          imageLabelWidth: imageSize * 1.20,
-          imageLabelHeight: imageSize * 1.16,
+          imageLabelSize: imageSize,
+          imageLabelWidth: imageWidth,
+          imageLabelHeight: imageHeight,
           imageSize,
-          imageWidth: imageSize * 1.20,
-          imageHeight: imageSize * 1.16,
+          imageWidth,
+          imageHeight,
           fontSize,
           gap,
-          lines: visibleLines,
-          textMax: Math.max(22, textLabelWidth)
+          lines,
+          textMax: Math.max(26, textLabelWidth)
         };
       }
 
       if (hasText && !hasImage) {
         /*
-          wheel-18:
-          Wordwall-like adaptive text-only layout.
-          Short text stays large. Longer sentences wrap into 2-4 compact lines
-          and shrink only as needed so the full text remains visible.
+          wheel-20:
+          Sector Safe Box for text-only mode.
+          Same Wordwall-like behavior: short text grows, long text wraps and shrinks safely.
         */
-        const textInnerEdge = centerRadius + size * (count <= 5 ? 0.054 : count <= 8 ? 0.050 : count <= 12 ? 0.044 : 0.038);
-        const textOuterEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.028 : count <= 12 ? 0.025 : 0.022);
+        const liveSmall = sectorCount <= 5;
+        const liveMedium = sectorCount <= 8;
+        const liveLarge = sectorCount <= 12;
+
+        const textInnerEdge = centerRadius + size * (liveSmall ? 0.050 : liveMedium ? 0.046 : liveLarge ? 0.040 : 0.036);
+        const textOuterEdge = rimRadius - size * (liveSmall ? 0.024 : liveMedium ? 0.022 : liveLarge ? 0.020 : 0.018);
         const textAvailable = Math.max(size * 0.14, textOuterEdge - textInnerEdge);
 
         const radialWidth = clamp(
-          textAvailable * (count <= 5 ? 0.940 : count <= 8 ? 0.910 : count <= 12 ? 0.860 : 0.800),
-          size * (count <= 5 ? 0.165 : count <= 8 ? 0.132 : count <= 12 ? 0.104 : 0.078),
-          textAvailable * 0.970
+          textAvailable * (liveSmall ? 0.970 : liveMedium ? 0.945 : liveLarge ? 0.900 : 0.830),
+          size * (liveSmall ? 0.170 : liveMedium ? 0.136 : liveLarge ? 0.106 : 0.078),
+          textAvailable * 0.985
         );
 
         const midRadius = textInnerEdge + radialWidth / 2;
@@ -1451,56 +1468,44 @@
             : textLength <= 38
               ? 3
               : 4;
-
-        const maxLines = count <= 8 ? 4 : 3;
-        lines = clamp(lines, 1, maxLines);
+        lines = clamp(lines, 1, liveMedium ? 4 : 3);
 
         let labelHeight = clamp(
-          textArc * (count <= 5 ? 0.700 : count <= 8 ? 0.570 : count <= 12 ? 0.450 : 0.340),
-          size * (count <= 5 ? 0.086 : count <= 8 ? 0.068 : count <= 12 ? 0.052 : 0.040),
-          size * (count <= 5 ? 0.230 : count <= 8 ? 0.176 : count <= 12 ? 0.132 : 0.098)
+          textArc * (liveSmall ? 0.760 : liveMedium ? 0.640 : liveLarge ? 0.515 : 0.405),
+          size * (liveSmall ? 0.092 : liveMedium ? 0.072 : liveLarge ? 0.054 : 0.042),
+          size * (liveSmall ? 0.265 : liveMedium ? 0.205 : liveLarge ? 0.154 : 0.116)
         );
 
-        let maxFont = size * (count <= 5 ? 0.054 : count <= 8 ? 0.042 : count <= 12 ? 0.031 : 0.023);
-        if (textLength <= 8) maxFont *= 1.08;
-        else if (textLength > 38) maxFont *= 0.92;
+        const maxFont = size * (
+          liveSmall ? 0.060 :
+          liveMedium ? 0.047 :
+          liveLarge ? 0.035 :
+          0.026
+        ) * (textLength <= 8 ? 1.10 : textLength > 44 ? 0.92 : 1);
 
-        const charsPerLine = Math.max(1, Math.ceil(textLength / lines));
-        let fontSize = Math.min(
+        const fit = fitWheelTextBox(radialWidth * 0.96, labelHeight * 0.96, textLength, hasMultipleWords, {
           maxFont,
-          radialWidth / (charsPerLine * (hasMultipleWords ? 0.61 : 0.68)),
-          labelHeight / (lines * 1.15)
-        );
+          minFont: liveSmall ? 10.2 : liveMedium ? 8.6 : liveLarge ? 7.2 : 6.4,
+          maxLines: lines,
+          lineHeight: 1.10
+        });
 
-        if (!hasMultipleWords && textLength > 12) {
-          fontSize = Math.min(fontSize, radialWidth / (textLength * 0.66));
-        }
-
-        fontSize = clamp(
-          fontSize,
-          count <= 5 ? 10.2 : count <= 8 ? 8.6 : count <= 12 ? 7.2 : 6.4,
-          maxFont
-        );
-
-        const requiredHeight = fontSize * 1.10 * lines + size * (count <= 5 ? 0.015 : count <= 8 ? 0.012 : 0.010);
+        lines = fit.lines;
+        const fontSize = fit.fontSize;
+        const requiredHeight = fontSize * 1.10 * lines + size * (liveSmall ? 0.014 : liveMedium ? 0.011 : 0.009);
         labelHeight = Math.max(labelHeight, requiredHeight);
-        labelHeight = Math.min(
-          labelHeight,
-          Math.min(
-            textArc * (count <= 5 ? 0.780 : count <= 8 ? 0.650 : count <= 12 ? 0.520 : 0.410),
-            size * (count <= 5 ? 0.260 : count <= 8 ? 0.196 : count <= 12 ? 0.148 : 0.112)
-          )
-        );
 
         return {
           midRadius,
           radialWidth,
           labelHeight,
           imageSize: 0,
+          imageWidth: 0,
+          imageHeight: 0,
           fontSize,
           gap: 0,
           lines,
-          textMax: Math.max(28, radialWidth),
+          textMax: Math.max(30, radialWidth),
           imageOnly: false,
           imageOnlySideShiftPx: 0,
           imageOnlyScreenX: 0,
