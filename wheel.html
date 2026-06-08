@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-home-navigation-fix-v36 -->
+  <!-- version: wheel-text-only-wordwall-fit-v37 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-home-navigation-fix-v36</title>
+  <title>العجلة الدوارة - wheel-text-only-wordwall-fit-v37</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -254,6 +254,10 @@
     .wheel-label.text-only .wheel-label-content{
       padding:0 6px;
       justify-content:flex-end;
+    }
+
+    .wheel-label.text-only .wheel-text{
+      line-height:1.08;
     }
 
     /* Split layout for text + image: separate elements, same sector angle, different radii. */
@@ -1410,6 +1414,90 @@
           gap,
           lines: visibleLines,
           textMax: Math.max(22, textLabelWidth)
+        };
+      }
+
+      if (hasText && !hasImage) {
+        /*
+          wheel-18:
+          Wordwall-like adaptive text-only layout.
+          Short text stays large. Longer sentences wrap into 2-4 compact lines
+          and shrink only as needed so the full text remains visible.
+        */
+        const textInnerEdge = centerRadius + size * (count <= 5 ? 0.054 : count <= 8 ? 0.050 : count <= 12 ? 0.044 : 0.038);
+        const textOuterEdge = rimRadius - size * (count <= 5 ? 0.030 : count <= 8 ? 0.028 : count <= 12 ? 0.025 : 0.022);
+        const textAvailable = Math.max(size * 0.14, textOuterEdge - textInnerEdge);
+
+        const radialWidth = clamp(
+          textAvailable * (count <= 5 ? 0.940 : count <= 8 ? 0.910 : count <= 12 ? 0.860 : 0.800),
+          size * (count <= 5 ? 0.165 : count <= 8 ? 0.132 : count <= 12 ? 0.104 : 0.078),
+          textAvailable * 0.970
+        );
+
+        const midRadius = textInnerEdge + radialWidth / 2;
+        const textArc = (2 * Math.PI * Math.max(midRadius, textInnerEdge + 1)) * (step / 360);
+
+        let lines = textLength <= 8
+          ? 1
+          : textLength <= 20
+            ? 2
+            : textLength <= 38
+              ? 3
+              : 4;
+
+        const maxLines = count <= 8 ? 4 : 3;
+        lines = clamp(lines, 1, maxLines);
+
+        let labelHeight = clamp(
+          textArc * (count <= 5 ? 0.700 : count <= 8 ? 0.570 : count <= 12 ? 0.450 : 0.340),
+          size * (count <= 5 ? 0.086 : count <= 8 ? 0.068 : count <= 12 ? 0.052 : 0.040),
+          size * (count <= 5 ? 0.230 : count <= 8 ? 0.176 : count <= 12 ? 0.132 : 0.098)
+        );
+
+        let maxFont = size * (count <= 5 ? 0.054 : count <= 8 ? 0.042 : count <= 12 ? 0.031 : 0.023);
+        if (textLength <= 8) maxFont *= 1.08;
+        else if (textLength > 38) maxFont *= 0.92;
+
+        const charsPerLine = Math.max(1, Math.ceil(textLength / lines));
+        let fontSize = Math.min(
+          maxFont,
+          radialWidth / (charsPerLine * (hasMultipleWords ? 0.61 : 0.68)),
+          labelHeight / (lines * 1.15)
+        );
+
+        if (!hasMultipleWords && textLength > 12) {
+          fontSize = Math.min(fontSize, radialWidth / (textLength * 0.66));
+        }
+
+        fontSize = clamp(
+          fontSize,
+          count <= 5 ? 10.2 : count <= 8 ? 8.6 : count <= 12 ? 7.2 : 6.4,
+          maxFont
+        );
+
+        const requiredHeight = fontSize * 1.10 * lines + size * (count <= 5 ? 0.015 : count <= 8 ? 0.012 : 0.010);
+        labelHeight = Math.max(labelHeight, requiredHeight);
+        labelHeight = Math.min(
+          labelHeight,
+          Math.min(
+            textArc * (count <= 5 ? 0.780 : count <= 8 ? 0.650 : count <= 12 ? 0.520 : 0.410),
+            size * (count <= 5 ? 0.260 : count <= 8 ? 0.196 : count <= 12 ? 0.148 : 0.112)
+          )
+        );
+
+        return {
+          midRadius,
+          radialWidth,
+          labelHeight,
+          imageSize: 0,
+          fontSize,
+          gap: 0,
+          lines,
+          textMax: Math.max(28, radialWidth),
+          imageOnly: false,
+          imageOnlySideShiftPx: 0,
+          imageOnlyScreenX: 0,
+          imageOnlyScreenY: 0
         };
       }
 
