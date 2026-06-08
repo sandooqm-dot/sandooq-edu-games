@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-text-clarity-boost-v33 -->
+  <!-- version: wheel-end-celebration-v34 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-text-clarity-boost-v33</title>
+  <title>العجلة الدوارة - wheel-end-celebration-v34</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -493,6 +493,224 @@
       box-shadow:0 2px 0 rgba(0,0,0,.20);
     }
 
+
+    .wheel-page.ended .wheel-shell,
+    .wheel-page.ended .wheel-arrow,
+    .wheel-page.ended .fixed-controls,
+    .wheel-page.ended .selected-result{
+      display:none !important;
+    }
+
+    .end-celebration{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:120;
+      pointer-events:none;
+      overflow:hidden;
+      padding:clamp(18px, 4vw, 44px);
+      direction:rtl;
+    }
+
+    .wheel-page.ended .end-celebration{
+      display:flex;
+    }
+
+    .celebration-card{
+      position:relative;
+      width:min(520px, 86vw);
+      min-height:clamp(260px, 44vh, 420px);
+      border:2px solid rgba(255,255,255,.86);
+      border-radius:28px;
+      background:rgba(255,255,255,.74);
+      -webkit-backdrop-filter:blur(9px);
+      backdrop-filter:blur(9px);
+      box-shadow:0 18px 45px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.72);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:clamp(22px, 4.6vw, 44px);
+      pointer-events:auto;
+      animation:celebrationPop .62s cubic-bezier(.2,1.12,.22,1) both;
+      overflow:hidden;
+    }
+
+    .celebration-card::before{
+      content:"";
+      position:absolute;
+      width:92%;
+      aspect-ratio:1/1;
+      left:50%;
+      top:45%;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(239,213,83,.32) 0%, rgba(239,213,83,.14) 34%, rgba(255,255,255,0) 68%);
+      animation:celebrationGlow 2.4s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .celebration-icon{
+      position:relative;
+      width:clamp(92px, 17vw, 144px);
+      height:clamp(92px, 17vw, 144px);
+      margin-bottom:clamp(12px, 2.6vw, 20px);
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.15));
+      animation:celebrationIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s;
+      z-index:1;
+    }
+
+    .celebration-title{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:#102b57;
+      font-size:clamp(34px, 6.2vw, 64px);
+      line-height:1.05;
+      font-weight:900;
+      text-shadow:0 2px 0 rgba(255,255,255,.70);
+    }
+
+    .celebration-subtitle{
+      position:relative;
+      z-index:1;
+      margin:clamp(8px, 1.7vw, 14px) 0 0;
+      color:#26364a;
+      font-size:clamp(17px, 2.7vw, 28px);
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .celebration-actions{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(12px, 2.2vw, 20px);
+      margin-top:clamp(22px, 4vw, 34px);
+      flex-wrap:wrap;
+    }
+
+    .celebration-actions button{
+      min-width:clamp(118px, 18vw, 178px);
+      height:clamp(44px, 6.4vh, 58px);
+      border:3px solid #111;
+      border-radius:15px;
+      font-size:clamp(17px, 2.5vw, 25px);
+      font-weight:900;
+      line-height:1;
+      padding:0 clamp(20px, 3vw, 32px);
+      box-shadow:0 5px 0 rgba(0,0,0,.22);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .celebration-actions button:active{
+      transform:translateY(2px);
+      box-shadow:0 3px 0 rgba(0,0,0,.22);
+    }
+
+    .restart-btn{
+      background:linear-gradient(180deg, #2fa7f2 0%, #1688d3 56%, #0d6fb4 100%);
+      color:#fff;
+    }
+
+    .home-btn{
+      background:linear-gradient(180deg, #ffe56d 0%, #efd553 58%, #dfc13f 100%);
+      color:#111;
+    }
+
+    .celebration-confetti{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+
+    .celebration-confetti span{
+      position:absolute;
+      top:-12vh;
+      width:clamp(8px, 1.2vw, 14px);
+      height:clamp(14px, 2vw, 24px);
+      border-radius:4px;
+      background:var(--confetti-color, #efd553);
+      opacity:.9;
+      transform:rotate(var(--confetti-rotate, 0deg));
+      animation:confettiFall var(--confetti-duration, 4.4s) linear infinite;
+      animation-delay:var(--confetti-delay, 0s);
+    }
+
+    .celebration-spark{
+      position:absolute;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 0 0 4px rgba(255,255,255,.28), 0 0 18px rgba(239,213,83,.86);
+      animation:sparkTwinkle 1.8s ease-in-out infinite;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .spark-one{ left:18%; top:26%; animation-delay:.1s; }
+    .spark-two{ right:17%; top:31%; animation-delay:.55s; }
+    .spark-three{ left:24%; bottom:24%; animation-delay:.85s; }
+    .spark-four{ right:23%; bottom:27%; animation-delay:1.15s; }
+
+    @keyframes celebrationPop{
+      0%{ opacity:0; transform:scale(.82) translateY(20px); }
+      70%{ opacity:1; transform:scale(1.035) translateY(0); }
+      100%{ opacity:1; transform:scale(1) translateY(0); }
+    }
+
+    @keyframes celebrationIconPop{
+      0%{ opacity:0; transform:scale(.5) rotate(-12deg); }
+      72%{ opacity:1; transform:scale(1.12) rotate(3deg); }
+      100%{ opacity:1; transform:scale(1) rotate(0); }
+    }
+
+    @keyframes celebrationGlow{
+      0%,100%{ opacity:.72; transform:translate(-50%,-50%) scale(.92); }
+      50%{ opacity:1; transform:translate(-50%,-50%) scale(1.04); }
+    }
+
+    @keyframes confettiFall{
+      0%{ transform:translate3d(0,-12vh,0) rotate(var(--confetti-rotate,0deg)); opacity:0; }
+      9%{ opacity:.95; }
+      100%{ transform:translate3d(var(--confetti-drift, 0px),112vh,0) rotate(calc(var(--confetti-rotate,0deg) + 680deg)); opacity:0; }
+    }
+
+    @keyframes sparkTwinkle{
+      0%,100%{ opacity:.25; transform:scale(.72); }
+      45%{ opacity:1; transform:scale(1.22); }
+    }
+
+
+    @media (max-width:430px){
+      .celebration-card{
+        width:min(360px, 88vw);
+        min-height:clamp(250px, 42vh, 360px);
+        border-radius:24px;
+      }
+
+      .celebration-actions{
+        gap:10px;
+      }
+
+      .celebration-actions button{
+        min-width:118px;
+        height:42px;
+        font-size:16px;
+        border-radius:12px;
+        padding:0 18px;
+      }
+    }
+
     @media (orientation:landscape){
       :root{
         --wheel-size:min(64vw, calc(100dvh - 38px), 90dvh, 780px);
@@ -653,6 +871,76 @@
         <button class="spin-btn" type="button" id="spinBtn">تدوير</button>
       </div>
     </div>
+
+    <section class="end-celebration" id="endCelebration" aria-hidden="true">
+      <div class="celebration-confetti" aria-hidden="true">
+        <span style="left:9%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-0.23s; --confetti-drift:-36px; --confetti-rotate:31deg"></span>
+        <span style="left:16%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-0.46s; --confetti-drift:-18px; --confetti-rotate:62deg"></span>
+        <span style="left:23%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-0.69s; --confetti-drift:0px; --confetti-rotate:93deg"></span>
+        <span style="left:30%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.92s; --confetti-drift:18px; --confetti-rotate:124deg"></span>
+        <span style="left:37%; --confetti-color:#8e24aa; --confetti-duration:5.25s; --confetti-delay:-1.15s; --confetti-drift:36px; --confetti-rotate:155deg"></span>
+        <span style="left:44%; --confetti-color:#ffd166; --confetti-duration:3.60s; --confetti-delay:-1.38s; --confetti-drift:54px; --confetti-rotate:6deg"></span>
+        <span style="left:51%; --confetti-color:#06b6d4; --confetti-duration:3.93s; --confetti-delay:-1.61s; --confetti-drift:-54px; --confetti-rotate:37deg"></span>
+        <span style="left:58%; --confetti-color:#efd553; --confetti-duration:4.26s; --confetti-delay:-1.84s; --confetti-drift:-36px; --confetti-rotate:68deg"></span>
+        <span style="left:65%; --confetti-color:#1688d3; --confetti-duration:4.59s; --confetti-delay:-2.07s; --confetti-drift:-18px; --confetti-rotate:99deg"></span>
+        <span style="left:72%; --confetti-color:#f47a45; --confetti-duration:4.92s; --confetti-delay:-2.30s; --confetti-drift:0px; --confetti-rotate:130deg"></span>
+        <span style="left:79%; --confetti-color:#e91e63; --confetti-duration:5.25s; --confetti-delay:-2.53s; --confetti-drift:18px; --confetti-rotate:161deg"></span>
+        <span style="left:86%; --confetti-color:#43a047; --confetti-duration:3.60s; --confetti-delay:-2.76s; --confetti-drift:36px; --confetti-rotate:12deg"></span>
+        <span style="left:93%; --confetti-color:#8e24aa; --confetti-duration:3.93s; --confetti-delay:-2.99s; --confetti-drift:54px; --confetti-rotate:43deg"></span>
+        <span style="left:4%; --confetti-color:#ffd166; --confetti-duration:4.26s; --confetti-delay:-0.02s; --confetti-drift:-54px; --confetti-rotate:74deg"></span>
+        <span style="left:11%; --confetti-color:#06b6d4; --confetti-duration:4.59s; --confetti-delay:-0.25s; --confetti-drift:-36px; --confetti-rotate:105deg"></span>
+        <span style="left:18%; --confetti-color:#efd553; --confetti-duration:4.92s; --confetti-delay:-0.48s; --confetti-drift:-18px; --confetti-rotate:136deg"></span>
+        <span style="left:25%; --confetti-color:#1688d3; --confetti-duration:5.25s; --confetti-delay:-0.71s; --confetti-drift:0px; --confetti-rotate:167deg"></span>
+        <span style="left:32%; --confetti-color:#f47a45; --confetti-duration:3.60s; --confetti-delay:-0.94s; --confetti-drift:18px; --confetti-rotate:18deg"></span>
+        <span style="left:39%; --confetti-color:#e91e63; --confetti-duration:3.93s; --confetti-delay:-1.17s; --confetti-drift:36px; --confetti-rotate:49deg"></span>
+        <span style="left:46%; --confetti-color:#43a047; --confetti-duration:4.26s; --confetti-delay:-1.40s; --confetti-drift:54px; --confetti-rotate:80deg"></span>
+        <span style="left:53%; --confetti-color:#8e24aa; --confetti-duration:4.59s; --confetti-delay:-1.63s; --confetti-drift:-54px; --confetti-rotate:111deg"></span>
+        <span style="left:60%; --confetti-color:#ffd166; --confetti-duration:4.92s; --confetti-delay:-1.86s; --confetti-drift:-36px; --confetti-rotate:142deg"></span>
+        <span style="left:67%; --confetti-color:#06b6d4; --confetti-duration:5.25s; --confetti-delay:-2.09s; --confetti-drift:-18px; --confetti-rotate:173deg"></span>
+        <span style="left:74%; --confetti-color:#efd553; --confetti-duration:3.60s; --confetti-delay:-2.32s; --confetti-drift:0px; --confetti-rotate:24deg"></span>
+        <span style="left:81%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-2.55s; --confetti-drift:18px; --confetti-rotate:55deg"></span>
+        <span style="left:88%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-2.78s; --confetti-drift:36px; --confetti-rotate:86deg"></span>
+        <span style="left:95%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-3.01s; --confetti-drift:54px; --confetti-rotate:117deg"></span>
+        <span style="left:6%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.04s; --confetti-drift:-54px; --confetti-rotate:148deg"></span>
+      </div>
+
+      <div class="celebration-card" role="status" aria-live="polite">
+        <span class="celebration-spark spark-one" aria-hidden="true"></span>
+        <span class="celebration-spark spark-two" aria-hidden="true"></span>
+        <span class="celebration-spark spark-three" aria-hidden="true"></span>
+        <span class="celebration-spark spark-four" aria-hidden="true"></span>
+
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="cupGold" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#fff08a"/>
+              <stop offset="45%" stop-color="#efd553"/>
+              <stop offset="100%" stop-color="#f4a51f"/>
+            </linearGradient>
+            <linearGradient id="cupBlue" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#24a6ef"/>
+              <stop offset="100%" stop-color="#116eb5"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.72)" stroke="rgba(255,255,255,.90)" stroke-width="5"/>
+          <path d="M38 26h44v13c0 22-8 35-22 38C46 74 38 61 38 39V26z" fill="url(#cupGold)" stroke="#111" stroke-opacity=".16" stroke-width="2"/>
+          <path d="M38 36H23c1 17 9 28 22 30" fill="none" stroke="url(#cupGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M82 36h15c-1 17-9 28-22 30" fill="none" stroke="url(#cupGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M55 76h10v13H55z" fill="#e7a51d"/>
+          <path d="M42 89h36v10H42z" fill="url(#cupBlue)" rx="5"/>
+          <path d="M36 99h48v8H36z" fill="#102b57" opacity=".92"/>
+          <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
+        </svg>
+
+        <h1 class="celebration-title">أحسنتم!</h1>
+        <p class="celebration-subtitle">انتهى النشاط بنجاح</p>
+
+        <div class="celebration-actions">
+          <button class="restart-btn" type="button" id="restartBtn">إعادة</button>
+          <button class="home-btn" type="button" id="homeBtn">الصفحة الرئيسية</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -689,6 +977,8 @@
     };
 
     let payload = readPayload();
+    let initialPayloadSnapshot = clonePayload(payload);
+    let activityEnded = false;
     let rotation = 0;
     let selectedIndex = -1;
     let initialLayoutCount = 0;
@@ -710,6 +1000,9 @@
     const wheelCenter = document.getElementById("wheelCenter");
     const selectedResult = document.getElementById("selectedResult");
     const afterSpin = document.getElementById("afterSpin");
+    const endCelebration = document.getElementById("endCelebration");
+    const restartBtn = document.getElementById("restartBtn");
+    const homeBtn = document.getElementById("homeBtn");
     const fixedControls = document.querySelector(".fixed-controls");
 
     function readPayload(){
@@ -810,6 +1103,67 @@
       // wheel-10: saving is disabled during testing.
       // Actual saved games will be built later from index.
       clearWheelRuntimeStorage();
+    }
+
+    function clonePayload(source){
+      const data = source && typeof source === "object" ? source : {};
+      return {
+        version: 1,
+        type: normalizeWheelType(data.type),
+        entries: Array.isArray(data.entries)
+          ? data.entries.map((entry, index)=> ({
+              text: String(entry?.text || ""),
+              imageName: String(entry?.imageName || ""),
+              imageData: String(entry?.imageData || ""),
+              color: normalizeEntryColor(entry?.color, index)
+            }))
+          : [],
+        centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
+        centerQuestion: String(data.centerQuestion || "")
+      };
+    }
+
+    function showEndCelebration(){
+      activityEnded = true;
+      cancelAnimation();
+      cancelZoomAnimation();
+      dragState = null;
+      selectedIndex = -1;
+      isRemoving = false;
+      afterSpin.classList.remove("show");
+      wheelShell.classList.remove("zoom", "merging");
+      clearSelected();
+      setVisualZoomScale(1);
+      wheelPage.classList.add("ended");
+      endCelebration?.setAttribute("aria-hidden", "false");
+      collapseSafariBars();
+    }
+
+    function hideEndCelebration(){
+      activityEnded = false;
+      wheelPage.classList.remove("ended");
+      endCelebration?.setAttribute("aria-hidden", "true");
+    }
+
+    function restartActivity(){
+      payload = clonePayload(initialPayloadSnapshot);
+      rotation = 0;
+      selectedIndex = -1;
+      initialLayoutCount = 0;
+      isRemoving = false;
+      hideEndCelebration();
+      resetFocus();
+      buildWheel();
+      requestAnimationFrame(()=>{
+        updateLayout();
+        fitCenterText();
+        collapseSafariBars();
+      });
+    }
+
+    function goHomePage(){
+      persistPayload();
+      window.location.href = "index-6.html";
     }
 
     function isIosWebKit(){
@@ -1588,6 +1942,7 @@
     }
 
     function showSelected(forcedIndex = null){
+      if (activityEnded) return;
       const items = getItems();
       const count = Math.max(items.length, 1);
       const index = Number.isInteger(forcedIndex)
@@ -1649,10 +2004,11 @@
       payload.entries.splice(selectedIndex, 1);
 
       if (!payload.entries.length) {
-        payload.entries = defaultWheelEntries.map((entry, index)=> ({
-          ...entry,
-          color: normalizeEntryColor(entry.color, index)
-        }));
+        selectedIndex = -1;
+        rotation = 0;
+        persistPayload();
+        showEndCelebration();
+        return;
       }
 
       selectedIndex = -1;
@@ -1694,7 +2050,7 @@
     }
 
     function spinRandom(direction = 1){
-      if (isRemoving) return;
+      if (isRemoving || activityEnded) return;
 
       const items = getItems();
       const count = Math.max(items.length, 1);
@@ -1727,7 +2083,7 @@
     }
 
     wheelShell.addEventListener("pointerdown", (event)=>{
-      if (isRemoving) return;
+      if (isRemoving || activityEnded) return;
 
       cancelAnimation();
       resetFocus();
@@ -1784,6 +2140,9 @@
     document.getElementById("resumeBtn").addEventListener("click", resumeWheelZoomOnly);
 
     document.getElementById("removeBtn").addEventListener("click", eliminateSelectedSection);
+
+    restartBtn?.addEventListener("click", restartActivity);
+    homeBtn?.addEventListener("click", goHomePage);
 
     document.getElementById("backBtn").addEventListener("click", ()=>{
       persistPayload();
