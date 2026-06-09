@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-closer-zoom-portrait-arrow-v45 -->
+  <!-- version: wheel-arrow-focus-tuning-v46 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-closer-zoom-portrait-arrow-v45</title>
+  <title>العجلة الدوارة - wheel-arrow-focus-tuning-v46</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -18,8 +18,10 @@
       --orange-dark:#e85f2f;
       --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
       --arrow-left:8px;
-      --arrow-w:112px;
-      --arrow-h:86px;
+      --arrow-w:104px;
+      --arrow-h:80px;
+      --arrow-focus-scale:1;
+      --arrow-focus-x:0px;
     }
 
     *{
@@ -90,7 +92,8 @@
       position:absolute;
       left:var(--arrow-left);
       top:var(--arrow-top, 50%);
-      transform:translateY(-50%);
+      transform:translateY(-50%) translateX(var(--arrow-focus-x, 0px)) scale(var(--arrow-focus-scale, 1));
+      transform-origin:right center;
       width:var(--arrow-w);
       height:var(--arrow-h);
       background:#111;
@@ -1002,7 +1005,7 @@
     let labelNodes = [];
     let safariTimers = [];
     let isRemoving = false;
-    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:112, arrowH:86 };
+    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:104, arrowH:80 };
 
     const wheelPage = document.getElementById("wheelPage");
     const wheelStage = document.getElementById("wheelStage");
@@ -1906,15 +1909,20 @@
       const centerX = left + size / 2;
       const centerY = top + size / 2;
 
-      const arrowW = Math.round(clamp(size * 0.155, 74, 118));
-      const arrowH = Math.round(clamp(size * 0.118, 56, 92));
+      /*
+        wheel-27:
+        Normal mode arrow is slightly smaller and closer to the wheel.
+        Focus/zoom mode gets its own CSS scale/shift in setVisualZoomScale().
+      */
+      const arrowW = Math.round(clamp(size * 0.145, 68, 108));
+      const arrowH = Math.round(clamp(size * 0.108, 52, 84));
 
       /*
         Keep the arrow outside the wheel.
         Negative left is allowed so the arrow can be partially clipped by the screen edge while its tip
         stays before the wheel rim, exactly like the Wordwall portrait behavior.
       */
-      const arrowGap = Math.max(isLandscape ? 5 : 7, size * (isLandscape ? 0.010 : 0.018));
+      const arrowGap = Math.max(isLandscape ? 3 : 4, size * (isLandscape ? 0.006 : 0.010));
       const arrowLeft = Math.round(left - arrowW - arrowGap);
       const arrowTop = Math.round(centerY);
 
@@ -1977,11 +1985,16 @@
         ? inverseScale * (1 + focusProgress * 0.34)
         : 1;
 
+      const arrowFocusScale = 1 + focusProgress * 0.16;
+      const arrowFocusX = focusProgress * Math.max(5, (layoutGeometry.size || 360) * 0.014);
+
       visualZoomScale = safeScale;
       wheelPage.style.setProperty("--visual-zoom", safeScale.toFixed(5));
       wheelPage.style.setProperty("--visual-zoom-inverse", inverseScale.toFixed(5));
       wheelPage.style.setProperty("--visual-label-zoom", labelScale.toFixed(5));
       wheelPage.style.setProperty("--center-question-zoom", centerQuestionScale.toFixed(5));
+      wheelPage.style.setProperty("--arrow-focus-scale", arrowFocusScale.toFixed(5));
+      wheelPage.style.setProperty("--arrow-focus-x", `${arrowFocusX.toFixed(2)}px`);
     }
 
     function cancelZoomAnimation(){
