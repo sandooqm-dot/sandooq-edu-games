@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-refresh-session-keep-v47 -->
+  <!-- version: wheel-theme-background-v29 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-refresh-session-keep-v47</title>
+  <title>العجلة الدوارة - wheel-theme-background-v29</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -67,6 +67,15 @@
       user-select:none;
       touch-action:none;
       direction:ltr;
+    }
+
+    /* wheel-29: خلفيات الثيمات */
+    .wheel-page.wheel-theme-original{
+      background:#fff;
+    }
+
+    .wheel-page.wheel-theme-classroom{
+      background:#fff url("theme-original-bg.webp") center center / cover no-repeat;
     }
 
     .wheel-logo{
@@ -1021,6 +1030,13 @@
     const homeBtn = document.getElementById("homeBtn");
     const fixedControls = document.querySelector(".fixed-controls");
 
+    function applyWheelTheme(theme){
+      if (!wheelPage) return;
+      const normalizedTheme = normalizeWheelTheme(theme);
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom");
+      wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
+    }
+
     function readPayload(){
       const candidates = [];
 
@@ -1048,6 +1064,7 @@
 
       return normalizePayload({
         type:"text",
+        theme:"original",
         entries: [],
         centerQuestionEnabled:false,
         centerQuestion:""
@@ -1056,6 +1073,7 @@
 
     function normalizePayload(data){
       const type = normalizeWheelType(data.type);
+      const theme = normalizeWheelTheme(data.theme || data.wheelTheme || data.selectedTheme);
       const sourceEntries = firstArray(data.entries, data.items, data.wheelEntries, data.images, data.cards);
       const normalized = sourceEntries.map((entry, index)=> normalizeWheelEntry(entry, index));
       const filled = normalized.filter((entry)=> isEntryFilledForType(entry, type));
@@ -1064,10 +1082,30 @@
       return {
         version: 1,
         type,
+        theme,
         entries,
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
         centerQuestion: String(data.centerQuestion || "")
       };
+    }
+
+    function normalizeWheelTheme(theme){
+      const value = String(theme || "").trim().toLowerCase();
+      if ([
+        "classroom",
+        "school",
+        "school-classroom",
+        "classroom-school",
+        "theme-classroom",
+        "theme-school",
+        "فصل",
+        "فصل مدرسة",
+        "الفصل",
+        "المدرسة"
+      ].includes(value)) {
+        return "classroom";
+      }
+      return "original";
     }
 
     function normalizeWheelType(type){
@@ -1131,6 +1169,7 @@
       return {
         version: 1,
         type: normalizeWheelType(data.type),
+        theme: normalizeWheelTheme(data.theme || data.wheelTheme || data.selectedTheme),
         entries: Array.isArray(data.entries)
           ? data.entries.map((entry, index)=> ({
               text: String(entry?.text || ""),
@@ -1168,6 +1207,7 @@
 
     function restartActivity(){
       payload = clonePayload(initialPayloadSnapshot);
+      applyWheelTheme(payload.theme);
       rotation = 0;
       selectedIndex = -1;
       initialLayoutCount = 0;
@@ -2446,6 +2486,7 @@
 
     document.addEventListener("touchend", collapseSafariBars, { passive:true });
 
+    applyWheelTheme(payload.theme);
     setVisualZoomScale(1);
     buildWheel();
     updateLayout();
