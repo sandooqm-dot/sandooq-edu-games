@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-arrow-logo-style-v42 -->
+  <!-- version: wheel-arrow-logo-style-v43 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-arrow-logo-style-v42</title>
+  <title>العجلة الدوارة - wheel-arrow-logo-style-v43</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -18,8 +18,8 @@
       --orange-dark:#e85f2f;
       --wheel-size:min(84vw, calc(100dvh - 168px), 640px);
       --arrow-left:8px;
-      --arrow-w:76px;
-      --arrow-h:58px;
+      --arrow-w:112px;
+      --arrow-h:86px;
     }
 
     *{
@@ -71,9 +71,9 @@
       position:absolute;
       top:clamp(14px, 2.4vw, 30px);
       left:clamp(16px, 2.8vw, 38px);
-      width:clamp(80px, 10.25vw, 150px);
+      width:clamp(120px, 15.4vw, 225px);
       height:auto;
-      max-height:clamp(65px, 10vw, 120px);
+      max-height:clamp(98px, 15vw, 180px);
       object-fit:contain;
       z-index:80;
       pointer-events:none;
@@ -94,7 +94,7 @@
       width:var(--arrow-w);
       height:var(--arrow-h);
       background:#111;
-      clip-path:polygon(0 34%, 56% 34%, 56% 0, 100% 50%, 56% 100%, 56% 66%, 0 66%);
+      clip-path:polygon(0 37%, 58% 37%, 58% 13%, 100% 50%, 58% 87%, 58% 63%, 0 63%);
       filter:drop-shadow(0 1px 0 rgba(0,0,0,.22));
       z-index:30;
       pointer-events:none;
@@ -734,8 +734,8 @@
       .wheel-logo{
         top:clamp(10px, 2.2vh, 18px);
         left:clamp(14px, 2vw, 28px);
-        width:clamp(68px, 8.75vw, 115px);
-        max-height:clamp(55px, 12.5vh, 88px);
+        width:clamp(102px, 13.1vw, 173px);
+        max-height:clamp(83px, 18.8vh, 132px);
       }
 
       .wheel-center.has-question{
@@ -802,7 +802,7 @@
       .wheel-logo{
         top:12px;
         left:14px;
-        width:80px;
+        width:120px;
       }
 
       .fixed-controls{
@@ -1002,7 +1002,7 @@
     let labelNodes = [];
     let safariTimers = [];
     let isRemoving = false;
-    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:76, arrowH:58 };
+    let layoutGeometry = { size:0, left:0, top:0, centerX:0, centerY:0, arrowLeft:8, arrowTop:0, arrowW:112, arrowH:86 };
 
     const wheelPage = document.getElementById("wheelPage");
     const wheelStage = document.getElementById("wheelStage");
@@ -1884,10 +1884,10 @@
       const centerX = left + size / 2;
       const centerY = top + size / 2;
 
-      const arrowW = Math.round(clamp(size * 0.092, 36, 62));
-      const arrowH = Math.round(clamp(size * 0.056, 22, 38));
-      const arrowGap = Math.max(4, size * 0.010);
-      const arrowLeft = Math.max(2, Math.round(left - arrowW - arrowGap));
+      const arrowW = Math.round(clamp(size * 0.155, 74, 118));
+      const arrowH = Math.round(clamp(size * 0.118, 56, 92));
+      const arrowOverlap = Math.max(2, size * 0.006);
+      const arrowLeft = Math.max(2, Math.round(left - arrowW + arrowOverlap));
       const arrowTop = Math.round(centerY);
 
       return { size, left, top, centerX, centerY, arrowLeft, arrowTop, arrowW, arrowH, viewportW, viewportH, controlsTop };
