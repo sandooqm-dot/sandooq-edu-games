@@ -4227,6 +4227,295 @@
       }
     }
 
+  
+    /* index-5: ترتيب صفحة إعداد العجلة + اختيار الثيم الجديد */
+    .wheel-setup-title{
+      margin:0 0 2px !important;
+      text-align:center !important;
+      font-size:clamp(20px, 2.05vw, 30px) !important;
+      line-height:1.15 !important;
+      font-weight:900 !important;
+    }
+
+    .theme-picker-panel{
+      border:3px solid var(--ink) !important;
+      border-radius:22px !important;
+      background:#f8f8f8 !important;
+      padding:clamp(14px, 1.7vw, 20px) !important;
+      display:grid !important;
+      gap:12px !important;
+    }
+
+    .theme-current-card{
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      min-height:clamp(102px, 12vw, 142px);
+      padding:clamp(12px, 1.6vw, 18px);
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) auto clamp(130px, 24vw, 250px);
+      gap:clamp(10px, 1.8vw, 18px);
+      align-items:center;
+    }
+
+    .theme-current-card .theme-title{
+      margin:0 !important;
+      text-align:right !important;
+      font-size:clamp(21px, 2.35vw, 34px) !important;
+      font-weight:900 !important;
+      line-height:1.1 !important;
+      color:#111 !important;
+      justify-self:start;
+    }
+
+    .theme-current-name{
+      display:none !important;
+    }
+
+    .theme-current-media{
+      display:contents !important;
+    }
+
+    .theme-current-preview{
+      width:100%;
+      aspect-ratio:16/9;
+      border:3px solid var(--ink);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+      display:block;
+      justify-self:stretch;
+    }
+
+    .theme-change-btn{
+      min-width:96px;
+      height:40px;
+      border:3px solid var(--ink);
+      border-radius:14px;
+      background:var(--title-yellow);
+      color:#111;
+      font-size:clamp(14px, 1.45vw, 18px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.16);
+      justify-self:center;
+      align-self:center;
+    }
+
+    .theme-list{
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      padding:10px;
+      display:grid;
+      gap:10px;
+    }
+
+    .theme-list[hidden]{
+      display:none !important;
+    }
+
+    .theme-list .theme-card{
+      border:3px solid var(--ink) !important;
+      border-radius:16px !important;
+      background:#f8f8f8 !important;
+      padding:10px 12px !important;
+      min-height:86px !important;
+      display:grid !important;
+      grid-template-columns:minmax(0, 1fr) clamp(126px, 22vw, 230px) auto !important;
+      gap:12px !important;
+      align-items:center !important;
+      justify-items:stretch !important;
+      text-align:right !important;
+      transition:.16s ease !important;
+      box-shadow:none !important;
+      transform:none !important;
+    }
+
+    .theme-list .theme-card.active{
+      background:var(--title-yellow) !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.16) !important;
+      transform:none !important;
+    }
+
+    .theme-list .theme-name{
+      color:#111 !important;
+      font-size:clamp(18px, 2vw, 28px) !important;
+      font-weight:900 !important;
+      line-height:1.1 !important;
+      text-align:right !important;
+      align-self:center !important;
+    }
+
+    .theme-list-preview{
+      width:100%;
+      aspect-ratio:16/9;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      display:block;
+    }
+
+    .theme-activate-btn{
+      min-width:82px;
+      height:38px;
+      border:3px solid var(--ink);
+      border-radius:13px;
+      background:#58b7ff;
+      color:#fff;
+      font-size:clamp(14px, 1.45vw, 18px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.16);
+    }
+
+    :root{
+      --theme-classic-img: url("theme-classic.png");
+      --theme-colors-img: url("theme-colors.png");
+      --theme-boys-img: url("theme-boys.png");
+      --theme-girls-img: url("theme-girls.png");
+    }
+
+    .theme-art{
+      position:relative;
+      overflow:hidden;
+      background-color:#fff;
+      background-size:cover, cover;
+      background-position:center, center;
+      background-repeat:no-repeat;
+    }
+
+    .theme-art::before,
+    .theme-art::after{
+      display:none !important;
+      content:none !important;
+    }
+
+    .theme-art.classic{
+      background-image:
+        var(--theme-classic-img),
+        radial-gradient(circle at 50% 50%, #fff 0 10%, transparent 11%),
+        conic-gradient(#8e24aa 0 25%, #ec174f 25% 50%, #ff4b1f 50% 75%, #0a9aa3 75% 100%);
+    }
+
+    .theme-art.colors{
+      background-image:
+        var(--theme-colors-img),
+        radial-gradient(circle at 50% 50%, #fff 0 9%, transparent 10%),
+        conic-gradient(#f94144 0 12.5%, #f3722c 12.5% 25%, #f9c74f 25% 37.5%, #90be6d 37.5% 50%, #43aa8b 50% 62.5%, #577590 62.5% 75%, #277da1 75% 87.5%, #9b5de5 87.5% 100%);
+    }
+
+    .theme-art.boys{
+      background-image:
+        var(--theme-boys-img),
+        linear-gradient(180deg, #bfe7ff 0 50%, #d8f3dc 50% 100%);
+    }
+
+    .theme-art.girls{
+      background-image:
+        var(--theme-girls-img),
+        linear-gradient(180deg, #ffe1f0 0 50%, #fff7fb 50% 100%);
+    }
+
+    .add-item-btn{
+      width:54px !important;
+      height:54px !important;
+      font-size:36px !important;
+      margin-top:12px !important;
+    }
+
+    @media (max-width:760px){
+      .wheel-setup-title{
+        font-size:clamp(18px, 4.8vw, 24px) !important;
+        margin:0 !important;
+      }
+
+      .theme-picker-panel{
+        padding:12px !important;
+        border-radius:18px !important;
+        gap:10px !important;
+      }
+
+      .theme-current-card{
+        min-height:92px;
+        border-radius:16px;
+        padding:10px;
+        grid-template-columns:minmax(0, 1fr) 76px 118px;
+        gap:8px;
+      }
+
+      .theme-current-card .theme-title{
+        font-size:clamp(18px, 4.6vw, 22px) !important;
+      }
+
+      .theme-current-preview{
+        border-radius:11px;
+      }
+
+      .theme-change-btn{
+        min-width:70px;
+        height:34px;
+        font-size:14px;
+        border-radius:12px;
+      }
+
+      .theme-list{
+        padding:8px;
+        gap:8px;
+        border-radius:16px;
+      }
+
+      .theme-list .theme-card{
+        grid-template-columns:minmax(0, 1fr) 110px 62px !important;
+        min-height:72px !important;
+        padding:8px 9px !important;
+        border-radius:14px !important;
+        gap:8px !important;
+      }
+
+      .theme-list .theme-name{
+        font-size:clamp(16px, 4.1vw, 20px) !important;
+      }
+
+      .theme-list-preview{
+        border-radius:10px;
+      }
+
+      .theme-activate-btn{
+        min-width:58px;
+        height:32px;
+        border-radius:11px;
+        font-size:13px;
+      }
+
+      .add-item-btn{
+        width:46px !important;
+        height:46px !important;
+        font-size:31px !important;
+        margin-top:10px !important;
+      }
+    }
+
+    @media (max-width:390px){
+      .theme-current-card{
+        grid-template-columns:minmax(0, 1fr) 66px 98px;
+      }
+
+      .theme-current-card .theme-title{
+        font-size:17px !important;
+      }
+
+      .theme-list .theme-card{
+        grid-template-columns:minmax(0, 1fr) 96px 56px !important;
+      }
+
+      .theme-activate-btn{
+        min-width:54px;
+        font-size:12px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -4354,8 +4643,39 @@
   </div>
   <input class="game-name-input" id="wheelGameNameInput" maxlength="60" placeholder="مثال: درس الضمائر" type="text"/>
 </div>
-<h2 class="screen-title wheel-setup-title">اختر طريقة عرض محتويات العجلة</h2>
+
 <div class="wheel-setup-body">
+<div class="theme-panel theme-picker-panel">
+  <div class="theme-current-card">
+    <h3 class="theme-title">اختر ثيم اللعبة</h3>
+    <button class="theme-change-btn" id="toggleThemeListBtn" type="button">تغيير</button>
+    <span aria-hidden="true" class="theme-current-preview theme-art classic" id="currentThemePreview"></span>
+  </div>
+  <div aria-label="قائمة الثيمات" class="theme-list" hidden id="themeListPanel">
+    <div class="theme-card active" data-theme-name="كلاسيك" data-wheel-theme="classic">
+      <span class="theme-name">كلاسيك</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art classic"></span>
+      <button class="theme-activate-btn" type="button">تفعيل</button>
+    </div>
+    <div class="theme-card" data-theme-name="ألوان" data-wheel-theme="colors">
+      <span class="theme-name">ألوان</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art colors"></span>
+      <button class="theme-activate-btn" type="button">تفعيل</button>
+    </div>
+    <div class="theme-card" data-theme-name="أولاد" data-wheel-theme="boys">
+      <span class="theme-name">أولاد</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art boys"></span>
+      <button class="theme-activate-btn" type="button">تفعيل</button>
+    </div>
+    <div class="theme-card" data-theme-name="بنات" data-wheel-theme="girls">
+      <span class="theme-name">بنات</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art girls"></span>
+      <button class="theme-activate-btn" type="button">تفعيل</button>
+    </div>
+  </div>
+</div>
+
+<h2 class="screen-title wheel-setup-title">اختر طريقة عرض محتويات العجلة</h2>
 <div aria-label="نوع محتوى العجلة" class="wheel-options">
 <button class="wheel-type active" data-wheel-type="text" type="button">
 <strong>نصوص فقط</strong>
@@ -4370,36 +4690,7 @@
 <span>صورة ومعها نص مختصر</span>
 </button>
 </div>
-<div class="theme-panel theme-picker-panel">
-  <div class="theme-current-card">
-    <div class="theme-current-text">
-      <h3 class="theme-title">اختر ثيم اللعبة</h3>
-      <span class="theme-current-name" id="currentThemeName">كلاسيك</span>
-    </div>
-    <div class="theme-current-media">
-      <span aria-hidden="true" class="theme-current-preview theme-art classic" id="currentThemePreview"></span>
-      <button class="theme-change-btn" id="toggleThemeListBtn" type="button">تغيير</button>
-    </div>
-  </div>
-  <div aria-label="قائمة الثيمات" class="theme-list" hidden id="themeListPanel">
-    <button class="theme-card active" data-theme-name="كلاسيك" data-wheel-theme="classic" type="button">
-      <span class="theme-name">كلاسيك</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art classic"></span>
-    </button>
-    <button class="theme-card" data-theme-name="ألوان" data-wheel-theme="colors" type="button">
-      <span class="theme-name">ألوان</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art colors"></span>
-    </button>
-    <button class="theme-card" data-theme-name="أولاد" data-wheel-theme="boys" type="button">
-      <span class="theme-name">أولاد</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art boys"></span>
-    </button>
-    <button class="theme-card" data-theme-name="بنات" data-wheel-theme="girls" type="button">
-      <span class="theme-name">بنات</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art girls"></span>
-    </button>
-  </div>
-</div>
+
 <div class="question-panel" id="questionPanel">
 <div class="question-row">
 <h3 class="question-title">سؤال في منتصف العجلة</h3>
@@ -4410,6 +4701,7 @@
 </div>
 <input class="center-question-input" id="centerQuestionInput" maxlength="45" placeholder="اكتب السؤال الذي يظهر في منتصف العجلة" type="text"/>
 </div>
+
 <div class="items-panel">
 <div class="items-head">
 <h3 id="itemsTitle">عناصر العجلة</h3>
@@ -4418,6 +4710,7 @@
 <div class="wheel-items-editor" id="wheelItemsEditor"></div>
 <button aria-label="إضافة عنصر" class="add-item-btn" id="addWheelItemBtn" type="button">+</button>
 </div>
+
 <div class="wheel-actions">
 <button class="test-btn" id="testWheelBtn" type="button">اختبار اللعبة</button>
 <button class="save-btn" id="saveWheelBtn" type="button">حفظ اللعبة</button>
@@ -4459,7 +4752,6 @@
   const wheelGameNameInput = document.getElementById("wheelGameNameInput");
   const themeListPanel = document.getElementById("themeListPanel");
   const toggleThemeListBtn = document.getElementById("toggleThemeListBtn");
-  const currentThemeName = document.getElementById("currentThemeName");
   const currentThemePreview = document.getElementById("currentThemePreview");
   const THEME_LABELS = {
     classic: "كلاسيك",
@@ -4583,6 +4875,10 @@
   function renderWheelEntries(){
     if (!wheelItemsEditor) return;
 
+    if (!wheelEntries.length) {
+      wheelEntries = [createEntry()];
+    }
+
     if (itemsHint) itemsHint.textContent = entryHint();
     wheelItemsEditor.innerHTML = "";
 
@@ -4677,9 +4973,9 @@
 
   function updateThemeSummary(){
     const theme = wheelTheme || "classic";
-    if (currentThemeName) currentThemeName.textContent = THEME_LABELS[theme] || "كلاسيك";
     if (currentThemePreview) {
       currentThemePreview.className = `theme-current-preview theme-art ${theme}`;
+      currentThemePreview.setAttribute("aria-label", THEME_LABELS[theme] || "كلاسيك");
     }
   }
 
@@ -4746,9 +5042,11 @@
     themeListPanel.hidden = !themeListPanel.hidden;
   });
 
-  document.querySelectorAll(".theme-card").forEach((btn)=>{
+  document.querySelectorAll(".theme-activate-btn").forEach((btn)=>{
     btn.addEventListener("click", ()=>{
-      setWheelTheme(btn.getAttribute("data-wheel-theme") || "classic", true);
+      const card = btn.closest(".theme-card");
+      if (!card) return;
+      setWheelTheme(card.getAttribute("data-wheel-theme") || "classic", true);
       saveDraft();
     });
   });
