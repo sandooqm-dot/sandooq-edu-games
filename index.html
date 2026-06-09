@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-theme-classroom-v10 -->
+<!-- version: index-theme-classroom-v11 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -4372,11 +4372,15 @@
     }
 
     :root{
-      --theme-classic-img: url("theme-original.webp");
+      --theme-classic-img: url("theme-original.webp?v=31");
       --theme-colors-img: url("theme-colors.png");
       --theme-boys-img: url("theme-boys.png");
       --theme-girls-img: url("theme-girls.png");
-      --theme-classroom-img: url("theme-original-bg.webp");
+      --theme-classroom-img:
+        url("theme-original-bg.webp?v=31"),
+        url("theme-original-bg.png?v=31"),
+        url("theme-original.webp?v=31"),
+        url("theme-original.png?v=31");
     }
 
     .theme-art{
@@ -5286,6 +5290,8 @@
 
     saveDraft();
 
+    const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+
     const payload = {
       type: wheelContentType,
       theme: wheelTheme,
@@ -5293,15 +5299,27 @@
       entries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
       centerQuestion: String(centerQuestionInput?.value || "").trim(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
+      payloadId
     };
 
     try {
+      Object.keys(sessionStorage).forEach((key)=>{
+        if (key.startsWith(`${WHEEL_PAYLOAD_KEY}_`)) {
+          sessionStorage.removeItem(key);
+        }
+      });
       sessionStorage.removeItem(WHEEL_PAYLOAD_KEY);
+      sessionStorage.setItem(`${WHEEL_PAYLOAD_KEY}_${payloadId}`, JSON.stringify(payload));
       sessionStorage.setItem(WHEEL_PAYLOAD_KEY, JSON.stringify(payload));
     } catch (_) {}
 
-    window.location.href = "wheel.html";
+    const url = new URL("wheel.html", window.location.href);
+    url.searchParams.set("payloadId", payloadId);
+    url.searchParams.set("theme", wheelTheme || "classic");
+    url.searchParams.set("v", String(Date.now()));
+
+    window.location.href = `${url.pathname}${url.search}`;
   }
 
   document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
