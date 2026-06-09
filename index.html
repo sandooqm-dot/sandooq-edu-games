@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-theme-classroom-v9 -->
+<!-- version: index-theme-classroom-v10 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5292,10 +5292,15 @@
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
-      centerQuestion: String(centerQuestionInput?.value || "").trim()
+      centerQuestion: String(centerQuestionInput?.value || "").trim(),
+      updatedAt: Date.now()
     };
 
-    try { sessionStorage.setItem(WHEEL_PAYLOAD_KEY, JSON.stringify(payload)); } catch (_) {}
+    try {
+      sessionStorage.removeItem(WHEEL_PAYLOAD_KEY);
+      sessionStorage.setItem(WHEEL_PAYLOAD_KEY, JSON.stringify(payload));
+    } catch (_) {}
+
     window.location.href = "wheel.html";
   }
 

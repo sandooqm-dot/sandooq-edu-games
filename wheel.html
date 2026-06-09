@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-background-v29 -->
+  <!-- version: wheel-theme-background-v30 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-background-v29</title>
+  <title>العجلة الدوارة - wheel-theme-background-v30</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1038,29 +1038,31 @@
     }
 
     function readPayload(){
-      const candidates = [];
-
-      [PAYLOAD_KEY, DRAFT_KEY].forEach((key)=>{
-        try {
-          const raw = sessionStorage.getItem(key);
-          if (!raw) return;
-          const data = JSON.parse(raw);
-          if (!data || typeof data !== "object") return;
-          candidates.push(normalizePayload(data));
-        } catch (_) {}
-      });
-
       /*
-        wheel-28:
-        Keep the current activity data in sessionStorage after reading it.
-        This fixes the refresh problem: pressing browser refresh should reload the same activity
-        during the same session instead of showing an empty wheel.
-        Permanent saved games are still not enabled; data is still cleared when going home.
+        wheel-30:
+        بيانات زر "اختبار اللعبة" لها الأولوية دائمًا.
+        لا نختار حسب عدد العناصر حتى لا تظهر تجربة قديمة أو ثيم قديم.
+        هذا التعديل لا يغير العجلة ولا الزوم ولا أحجام النصوص/الصور؛ فقط يضمن وصول الثيم الحالي.
       */
+      try {
+        const raw = sessionStorage.getItem(PAYLOAD_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && typeof data === "object") {
+            return normalizePayload(data);
+          }
+        }
+      } catch (_) {}
 
-      if (candidates.length) {
-        return candidates.sort((a, b)=> b.entries.length - a.entries.length)[0];
-      }
+      try {
+        const raw = sessionStorage.getItem(DRAFT_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data && typeof data === "object") {
+            return normalizePayload(data);
+          }
+        }
+      } catch (_) {}
 
       return normalizePayload({
         type:"text",
