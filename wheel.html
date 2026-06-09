@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-arrow-logo-style-v43 -->
+  <!-- version: wheel-mixed-radial-zones-v44 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-arrow-logo-style-v43</title>
+  <title>العجلة الدوارة - wheel-mixed-radial-zones-v44</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1355,68 +1355,81 @@
 
       if (mixed) {
         /*
-          wheel-22:
-          Mixed mode now uses one real sector safe box, then separates image/text tangentially.
-          This lets both the image and text share the available sector space instead of the image stealing
-          the radial band and forcing the text to become tiny.
+          wheel-25:
+          Mixed mode uses two invisible radial zones inside every sector:
+          - inner zone near the center for text
+          - outer zone near the wheel rim for image
+          This matches the Wordwall-style layout and uses the sector space better.
         */
         const liveSmall = sectorCount <= 5;
         const liveMedium = sectorCount <= 8;
         const liveLarge = sectorCount <= 12;
 
-        const safeInnerEdge = centerRadius + size * (liveSmall ? 0.026 : liveMedium ? 0.024 : liveLarge ? 0.022 : 0.020);
-        const safeOuterEdge = rimRadius - size * (liveSmall ? 0.018 : liveMedium ? 0.016 : liveLarge ? 0.014 : 0.012);
+        const safeInnerEdge = centerRadius + size * (liveSmall ? 0.030 : liveMedium ? 0.028 : liveLarge ? 0.025 : 0.022);
+        const safeOuterEdge = rimRadius - size * (liveSmall ? 0.020 : liveMedium ? 0.018 : liveLarge ? 0.016 : 0.014);
         const radialBand = Math.max(size * 0.18, safeOuterEdge - safeInnerEdge);
 
-        const contentMidRadius = safeInnerEdge + radialBand * (liveSmall ? 0.585 : liveMedium ? 0.595 : liveLarge ? 0.610 : 0.625);
-        const sectorArc = (2 * Math.PI * Math.max(contentMidRadius, safeInnerEdge + 1)) * (step / 360);
-
-        const safeTangent = sectorArc * (liveSmall ? 0.860 : liveMedium ? 0.760 : liveLarge ? 0.640 : 0.540);
-        const sideSpread = clamp(
-          safeTangent * (liveSmall ? 0.245 : liveMedium ? 0.220 : liveLarge ? 0.185 : 0.150),
-          size * (liveSmall ? 0.040 : liveMedium ? 0.034 : liveLarge ? 0.028 : 0.022),
-          size * (liveSmall ? 0.105 : liveMedium ? 0.088 : liveLarge ? 0.068 : 0.052)
+        const radialGap = clamp(
+          radialBand * (liveSmall ? 0.055 : liveMedium ? 0.050 : liveLarge ? 0.045 : 0.040),
+          size * 0.006,
+          size * 0.020
         );
 
-        const imageWidth = clamp(
-          radialBand * (liveSmall ? 0.610 : liveMedium ? 0.570 : liveLarge ? 0.505 : 0.445),
-          size * (liveSmall ? 0.112 : liveMedium ? 0.090 : liveLarge ? 0.070 : 0.052),
-          size * (liveSmall ? 0.250 : liveMedium ? 0.205 : liveLarge ? 0.158 : 0.120)
-        );
+        const textRatio = liveSmall ? 0.480 : liveMedium ? 0.460 : liveLarge ? 0.430 : 0.400;
 
-        const imageHeight = clamp(
-          safeTangent * (liveSmall ? 0.430 : liveMedium ? 0.385 : liveLarge ? 0.325 : 0.275),
-          size * (liveSmall ? 0.108 : liveMedium ? 0.086 : liveLarge ? 0.066 : 0.050),
-          size * (liveSmall ? 0.250 : liveMedium ? 0.205 : liveLarge ? 0.158 : 0.120)
-        );
+        const textInner = safeInnerEdge;
+        const textOuter = safeInnerEdge + radialBand * textRatio;
+        const imageInner = textOuter + radialGap;
+        const imageOuter = safeOuterEdge;
 
-        const imageSize = Math.min(imageWidth, imageHeight);
+        const textRadialBox = Math.max(size * 0.045, textOuter - textInner);
+        const imageRadialBox = Math.max(size * 0.052, imageOuter - imageInner);
+
+        const textMidRadius = textInner + textRadialBox / 2;
+        const imageMidRadius = imageInner + imageRadialBox / 2;
+
+        const textArc = (2 * Math.PI * Math.max(textMidRadius, safeInnerEdge + 1)) * (step / 360);
+        const imageArc = (2 * Math.PI * Math.max(imageMidRadius, safeInnerEdge + 1)) * (step / 360);
 
         const textLabelWidth = clamp(
-          radialBand * (liveSmall ? 0.660 : liveMedium ? 0.625 : liveLarge ? 0.560 : 0.500),
-          size * (liveSmall ? 0.125 : liveMedium ? 0.100 : liveLarge ? 0.078 : 0.058),
-          size * (liveSmall ? 0.285 : liveMedium ? 0.232 : liveLarge ? 0.178 : 0.136)
+          textRadialBox * (liveSmall ? 1.02 : liveMedium ? 1.00 : liveLarge ? 0.98 : 0.96),
+          size * (liveSmall ? 0.100 : liveMedium ? 0.080 : liveLarge ? 0.062 : 0.046),
+          radialBand * (liveSmall ? 0.500 : liveMedium ? 0.480 : liveLarge ? 0.450 : 0.420)
         );
 
         let textLabelHeight = clamp(
-          safeTangent * (liveSmall ? 0.460 : liveMedium ? 0.410 : liveLarge ? 0.350 : 0.295),
-          size * (liveSmall ? 0.104 : liveMedium ? 0.082 : liveLarge ? 0.062 : 0.048),
-          size * (liveSmall ? 0.270 : liveMedium ? 0.215 : liveLarge ? 0.165 : 0.126)
+          textArc * (liveSmall ? 0.900 : liveMedium ? 0.800 : liveLarge ? 0.680 : 0.560),
+          size * (liveSmall ? 0.092 : liveMedium ? 0.074 : liveLarge ? 0.056 : 0.044),
+          size * (liveSmall ? 0.270 : liveMedium ? 0.220 : liveLarge ? 0.170 : 0.130)
         );
+
+        const imageWidth = clamp(
+          imageRadialBox * (liveSmall ? 0.980 : liveMedium ? 0.960 : liveLarge ? 0.930 : 0.900),
+          size * (liveSmall ? 0.110 : liveMedium ? 0.088 : liveLarge ? 0.068 : 0.052),
+          size * (liveSmall ? 0.265 : liveMedium ? 0.220 : liveLarge ? 0.170 : 0.132)
+        );
+
+        const imageHeight = clamp(
+          imageArc * (liveSmall ? 0.850 : liveMedium ? 0.760 : liveLarge ? 0.640 : 0.540),
+          size * (liveSmall ? 0.108 : liveMedium ? 0.086 : liveLarge ? 0.066 : 0.050),
+          size * (liveSmall ? 0.285 : liveMedium ? 0.235 : liveLarge ? 0.182 : 0.140)
+        );
+
+        const imageSize = Math.min(imageWidth, imageHeight);
 
         let lines = textLength <= 8 ? 1 : textLength <= 18 ? 2 : textLength <= 34 ? 3 : 4;
         lines = clamp(lines, 1, liveMedium ? 4 : 3);
 
         const maxFont = size * (
-          liveSmall ? 0.068 :
-          liveMedium ? 0.053 :
+          liveSmall ? 0.066 :
+          liveMedium ? 0.052 :
           liveLarge ? 0.039 :
           0.029
-        ) * (textLength <= 8 ? 1.08 : textLength > 38 ? 0.92 : 1);
+        ) * (textLength <= 8 ? 1.10 : textLength > 38 ? 0.92 : 1);
 
         const fit = fitWheelTextBox(textLabelWidth * 0.98, textLabelHeight * 0.98, textLength, hasMultipleWords, {
           maxFont,
-          minFont: liveSmall ? 12.0 : liveMedium ? 9.8 : liveLarge ? 7.8 : 6.8,
+          minFont: liveSmall ? 11.6 : liveMedium ? 9.4 : liveLarge ? 7.6 : 6.6,
           maxLines: lines,
           lineHeight: 1.10
         });
@@ -1428,10 +1441,8 @@
 
         return {
           splitMixed: true,
-          textMidRadius: contentMidRadius,
-          imageMidRadius: contentMidRadius,
-          mixedTextSideShiftPx: -sideSpread,
-          mixedImageSideShiftPx: sideSpread,
+          textMidRadius,
+          imageMidRadius,
           textLabelWidth,
           textLabelHeight,
           imageLabelSize: imageSize,
@@ -2023,10 +2034,8 @@
         const baseAngle = node.baseAngle || (-90 + index * step + step / 2);
 
         if (metrics.splitMixed && node.textLabel && node.imageLabel) {
+          // wheel-25: fixed radial zones. Text is near the center; image is near the outer rim.
           const textPoint = polarToCartesian(metrics.textMidRadius, baseAngle);
-          const textSidePoint = polarToCartesian(metrics.mixedTextSideShiftPx || 0, baseAngle + 90);
-          textPoint.x += textSidePoint.x;
-          textPoint.y += textSidePoint.y;
           node.textLabel.style.left = `${center + textPoint.x}px`;
           node.textLabel.style.top = `${center + textPoint.y}px`;
           node.textLabel.style.setProperty("--label-w", `${metrics.textLabelWidth}px`);
@@ -2034,9 +2043,6 @@
           applyCommonStyles(node.textLabel, metrics);
 
           const imagePoint = polarToCartesian(metrics.imageMidRadius, baseAngle);
-          const imageSidePoint = polarToCartesian(metrics.mixedImageSideShiftPx || 0, baseAngle + 90);
-          imagePoint.x += imageSidePoint.x;
-          imagePoint.y += imageSidePoint.y;
           node.imageLabel.style.left = `${center + imagePoint.x}px`;
           node.imageLabel.style.top = `${center + imagePoint.y}px`;
           node.imageLabel.style.setProperty("--label-w", `${metrics.imageLabelWidth || metrics.imageLabelSize}px`);
