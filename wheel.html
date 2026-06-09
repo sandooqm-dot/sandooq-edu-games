@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-arrow-focus-tuning-v46 -->
+  <!-- version: wheel-refresh-session-keep-v47 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-arrow-focus-tuning-v46</title>
+  <title>العجلة الدوارة - wheel-refresh-session-keep-v47</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1034,9 +1034,13 @@
         } catch (_) {}
       });
 
-      // wheel-10: one-time test payload only.
-      // Read data coming from index, then clear it immediately so old tests never remain.
-      clearWheelRuntimeStorage();
+      /*
+        wheel-28:
+        Keep the current activity data in sessionStorage after reading it.
+        This fixes the refresh problem: pressing browser refresh should reload the same activity
+        during the same session instead of showing an empty wheel.
+        Permanent saved games are still not enabled; data is still cleared when going home.
+      */
 
       if (candidates.length) {
         return candidates.sort((a, b)=> b.entries.length - a.entries.length)[0];
@@ -1116,8 +1120,9 @@
     }
 
     function persistPayload(){
-      // wheel-10: saving is disabled during testing.
-      // Actual saved games will be built later from index.
+      // Permanent saved games are disabled for now.
+      // We clear the temporary wheel session only when leaving the wheel/home navigation.
+      // Browser refresh does not call this function, so the activity stays visible after refresh.
       clearWheelRuntimeStorage();
     }
 
