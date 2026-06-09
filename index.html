@@ -3967,6 +3967,266 @@
       }
     }
 
+  
+    /* index-4: طريقة اختيار الثيم الجديدة */
+    .theme-picker-panel{
+      border:3px solid var(--ink) !important;
+      border-radius:22px !important;
+      background:#f8f8f8 !important;
+      padding:clamp(14px, 1.7vw, 20px) !important;
+      display:grid !important;
+      gap:12px !important;
+    }
+
+    .theme-current-card{
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      min-height:clamp(116px, 13vw, 160px);
+      padding:clamp(12px, 1.7vw, 18px);
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) clamp(120px, 22vw, 220px);
+      gap:clamp(12px, 2vw, 22px);
+      align-items:center;
+    }
+
+    .theme-current-text{
+      display:grid;
+      gap:8px;
+      align-content:center;
+      justify-items:start;
+      text-align:right;
+    }
+
+    .theme-current-text .theme-title{
+      margin:0 !important;
+      text-align:right !important;
+      font-size:clamp(22px, 2.45vw, 34px) !important;
+      font-weight:900 !important;
+      line-height:1.1 !important;
+      color:#111 !important;
+    }
+
+    .theme-current-name{
+      color:#444;
+      font-size:clamp(14px, 1.45vw, 18px);
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .theme-current-media{
+      display:grid;
+      gap:8px;
+      justify-items:center;
+      align-items:center;
+    }
+
+    .theme-current-preview{
+      width:100%;
+      aspect-ratio:16/9;
+      border:3px solid var(--ink);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+      display:block;
+    }
+
+    .theme-change-btn{
+      min-width:112px;
+      height:38px;
+      border:3px solid var(--ink);
+      border-radius:14px;
+      background:var(--title-yellow);
+      color:#111;
+      font-size:clamp(14px, 1.45vw, 18px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.16);
+    }
+
+    .theme-list{
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      padding:10px;
+      display:grid;
+      gap:10px;
+    }
+
+    .theme-list[hidden]{
+      display:none !important;
+    }
+
+    .theme-list .theme-card{
+      border:3px solid var(--ink) !important;
+      border-radius:16px !important;
+      background:#f8f8f8 !important;
+      padding:10px 12px !important;
+      min-height:86px !important;
+      display:grid !important;
+      grid-template-columns:minmax(0, 1fr) clamp(120px, 22vw, 230px) !important;
+      gap:12px !important;
+      align-items:center !important;
+      justify-items:stretch !important;
+      text-align:right !important;
+      cursor:pointer !important;
+      transition:.16s ease !important;
+      box-shadow:none !important;
+      transform:none !important;
+    }
+
+    .theme-list .theme-card.active{
+      background:var(--title-yellow) !important;
+      box-shadow:0 4px 0 rgba(0,0,0,.16) !important;
+      transform:none !important;
+    }
+
+    .theme-list .theme-name{
+      color:#111 !important;
+      font-size:clamp(18px, 2vw, 28px) !important;
+      font-weight:900 !important;
+      line-height:1.1 !important;
+      text-align:right !important;
+      align-self:center !important;
+    }
+
+    .theme-list-preview{
+      width:100%;
+      aspect-ratio:16/9;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      overflow:hidden;
+      background:#fff;
+      display:block;
+    }
+
+    .theme-art{
+      position:relative;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .theme-art::before,
+    .theme-art::after{
+      content:"";
+      position:absolute;
+      inset:0;
+    }
+
+    .theme-art.classic::before{
+      background:
+        radial-gradient(circle at 50% 50%, #fff 0 12%, transparent 13%),
+        conic-gradient(#ec174f 0 25%, #0a9aa3 25% 50%, #ff4b1f 50% 75%, #8e24aa 75% 100%);
+    }
+
+    .theme-art.colors::before{
+      background:
+        radial-gradient(circle at 50% 50%, #fff 0 10%, transparent 11%),
+        conic-gradient(#f94144 0 12.5%, #f3722c 12.5% 25%, #f9c74f 25% 37.5%, #90be6d 37.5% 50%, #43aa8b 50% 62.5%, #577590 62.5% 75%, #277da1 75% 87.5%, #9b5de5 87.5% 100%);
+    }
+
+    .theme-art.boys::before{
+      background:
+        linear-gradient(180deg, #bfe7ff 0 50%, #d8f3dc 50% 100%);
+    }
+
+    .theme-art.boys::after{
+      width:34%;
+      height:54%;
+      left:33%;
+      top:22%;
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 22%, #ffe0bd 0 13%, transparent 14%),
+        linear-gradient(90deg, transparent 0 36%, #2563eb 37% 63%, transparent 64% 100%);
+      transform:rotate(-10deg);
+    }
+
+    .theme-art.girls::before{
+      background:
+        linear-gradient(180deg, #ffe1f0 0 48%, #fff7fb 48% 100%);
+    }
+
+    .theme-art.girls::after{
+      width:38%;
+      height:56%;
+      left:31%;
+      top:20%;
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 20%, #ffd6a5 0 13%, transparent 14%),
+        linear-gradient(90deg, transparent 0 34%, #ec4899 35% 65%, transparent 66% 100%);
+      transform:rotate(8deg);
+    }
+
+    @media (max-width:760px){
+      .theme-picker-panel{
+        padding:12px !important;
+        border-radius:18px !important;
+        gap:10px !important;
+      }
+
+      .theme-current-card{
+        min-height:96px;
+        border-radius:16px;
+        padding:10px;
+        grid-template-columns:minmax(0, 1fr) 118px;
+        gap:10px;
+      }
+
+      .theme-current-text .theme-title{
+        font-size:clamp(18px, 4.8vw, 23px) !important;
+      }
+
+      .theme-current-name{
+        font-size:12px;
+      }
+
+      .theme-current-preview{
+        border-radius:11px;
+      }
+
+      .theme-change-btn{
+        min-width:86px;
+        height:34px;
+        font-size:14px;
+        border-radius:12px;
+      }
+
+      .theme-list{
+        padding:8px;
+        gap:8px;
+        border-radius:16px;
+      }
+
+      .theme-list .theme-card{
+        grid-template-columns:minmax(0, 1fr) 122px !important;
+        min-height:74px !important;
+        padding:8px 10px !important;
+        border-radius:14px !important;
+        gap:10px !important;
+      }
+
+      .theme-list .theme-name{
+        font-size:clamp(16px, 4.3vw, 21px) !important;
+      }
+
+      .theme-list-preview{
+        border-radius:10px;
+      }
+    }
+
+    @media (max-width:390px){
+      .theme-current-card,
+      .theme-list .theme-card{
+        grid-template-columns:minmax(0, 1fr) 104px !important;
+      }
+
+      .theme-current-text .theme-title{
+        font-size:18px !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -4110,24 +4370,33 @@
 <span>صورة ومعها نص مختصر</span>
 </button>
 </div>
-<div class="theme-panel">
-  <h3 class="theme-title">اختر ثيم العجلة</h3>
-  <div aria-label="ثيم العجلة" class="theme-grid">
-    <button class="theme-card active" data-wheel-theme="classic" type="button">
-      <span aria-hidden="true" class="theme-preview classic"></span>
+<div class="theme-panel theme-picker-panel">
+  <div class="theme-current-card">
+    <div class="theme-current-text">
+      <h3 class="theme-title">اختر ثيم اللعبة</h3>
+      <span class="theme-current-name" id="currentThemeName">كلاسيك</span>
+    </div>
+    <div class="theme-current-media">
+      <span aria-hidden="true" class="theme-current-preview theme-art classic" id="currentThemePreview"></span>
+      <button class="theme-change-btn" id="toggleThemeListBtn" type="button">تغيير</button>
+    </div>
+  </div>
+  <div aria-label="قائمة الثيمات" class="theme-list" hidden id="themeListPanel">
+    <button class="theme-card active" data-theme-name="كلاسيك" data-wheel-theme="classic" type="button">
       <span class="theme-name">كلاسيك</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art classic"></span>
     </button>
-    <button class="theme-card" data-wheel-theme="colors" type="button">
-      <span aria-hidden="true" class="theme-preview colors"></span>
+    <button class="theme-card" data-theme-name="ألوان" data-wheel-theme="colors" type="button">
       <span class="theme-name">ألوان</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art colors"></span>
     </button>
-    <button class="theme-card" data-wheel-theme="boys" type="button">
-      <span aria-hidden="true" class="theme-preview boys"></span>
+    <button class="theme-card" data-theme-name="أولاد" data-wheel-theme="boys" type="button">
       <span class="theme-name">أولاد</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art boys"></span>
     </button>
-    <button class="theme-card" data-wheel-theme="girls" type="button">
-      <span aria-hidden="true" class="theme-preview girls"></span>
+    <button class="theme-card" data-theme-name="بنات" data-wheel-theme="girls" type="button">
       <span class="theme-name">بنات</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art girls"></span>
     </button>
   </div>
 </div>
@@ -4188,6 +4457,16 @@
   const questionPanel = document.getElementById("questionPanel");
   const centerQuestionInput = document.getElementById("centerQuestionInput");
   const wheelGameNameInput = document.getElementById("wheelGameNameInput");
+  const themeListPanel = document.getElementById("themeListPanel");
+  const toggleThemeListBtn = document.getElementById("toggleThemeListBtn");
+  const currentThemeName = document.getElementById("currentThemeName");
+  const currentThemePreview = document.getElementById("currentThemePreview");
+  const THEME_LABELS = {
+    classic: "كلاسيك",
+    colors: "ألوان",
+    boys: "أولاد",
+    girls: "بنات"
+  };
 
   let wheelContentType = "text";
   let wheelTheme = "classic";
@@ -4263,6 +4542,7 @@
       document.querySelectorAll(".theme-card").forEach((btn)=>{
         btn.classList.toggle("active", btn.getAttribute("data-wheel-theme") === wheelTheme);
       });
+      updateThemeSummary();
 
       document.querySelectorAll(".wheel-type").forEach((btn)=>{
         btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
@@ -4395,11 +4675,21 @@
     });
   }
 
-  function setWheelTheme(theme){
+  function updateThemeSummary(){
+    const theme = wheelTheme || "classic";
+    if (currentThemeName) currentThemeName.textContent = THEME_LABELS[theme] || "كلاسيك";
+    if (currentThemePreview) {
+      currentThemePreview.className = `theme-current-preview theme-art ${theme}`;
+    }
+  }
+
+  function setWheelTheme(theme, closeList = true){
     wheelTheme = theme || "classic";
     document.querySelectorAll(".theme-card").forEach((btn)=>{
       btn.classList.toggle("active", btn.getAttribute("data-wheel-theme") === wheelTheme);
     });
+    updateThemeSummary();
+    if (closeList && themeListPanel) themeListPanel.hidden = true;
   }
 
   function openWheelPage(){
@@ -4451,12 +4741,19 @@
     });
   });
 
+  toggleThemeListBtn?.addEventListener("click", ()=>{
+    if (!themeListPanel) return;
+    themeListPanel.hidden = !themeListPanel.hidden;
+  });
+
   document.querySelectorAll(".theme-card").forEach((btn)=>{
     btn.addEventListener("click", ()=>{
-      setWheelTheme(btn.getAttribute("data-wheel-theme") || "classic");
+      setWheelTheme(btn.getAttribute("data-wheel-theme") || "classic", true);
       saveDraft();
     });
   });
+
+  updateThemeSummary();
 
   addWheelItemBtn?.addEventListener("click", ()=>{
     syncWheelEntriesFromDom();
