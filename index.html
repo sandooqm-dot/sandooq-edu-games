@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-theme-original-v8 -->
+<!-- version: index-theme-classroom-v9 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -4376,6 +4376,7 @@
       --theme-colors-img: url("theme-colors.png");
       --theme-boys-img: url("theme-boys.png");
       --theme-girls-img: url("theme-girls.png");
+      --theme-classroom-img: url("theme-original-bg.webp");
     }
 
     .theme-art{
@@ -4417,6 +4418,14 @@
       background-image:
         var(--theme-girls-img),
         linear-gradient(180deg, #ffe1f0 0 50%, #fff7fb 50% 100%);
+    }
+
+    .theme-art.classroom{
+      background-image:
+        var(--theme-classroom-img),
+        linear-gradient(180deg, #eef6ef 0 55%, #d8c6a1 55% 100%);
+      background-size:cover, cover;
+      background-position:center, center;
     }
 
     .add-item-btn{
@@ -4929,6 +4938,11 @@
       <span aria-hidden="true" class="theme-list-preview theme-art classic"></span>
       <button class="theme-activate-btn" type="button">تفعيل</button>
     </div>
+    <div class="theme-card" data-theme-name="فصل مدرسة" data-wheel-theme="classroom">
+      <span class="theme-name">فصل مدرسة</span>
+      <span aria-hidden="true" class="theme-list-preview theme-art classroom"></span>
+      <button class="theme-activate-btn" type="button">تفعيل</button>
+    </div>
     <div class="theme-card" data-theme-name="ألوان" data-wheel-theme="colors">
       <span class="theme-name">ألوان</span>
       <span aria-hidden="true" class="theme-list-preview theme-art colors"></span>
@@ -5029,7 +5043,8 @@
     classic: "الأصل",
     colors: "ألوان",
     boys: "أولاد",
-    girls: "بنات"
+    girls: "بنات",
+    classroom: "فصل مدرسة"
   };
 
   let wheelContentType = "text";
@@ -5247,7 +5262,7 @@
     const theme = wheelTheme || "classic";
     if (currentThemePreview) {
       currentThemePreview.className = `theme-current-preview theme-art ${theme}`;
-      currentThemePreview.setAttribute("aria-label", THEME_LABELS[theme] || "كلاسيك");
+      currentThemePreview.setAttribute("aria-label", THEME_LABELS[theme] || "الأصل");
     }
   }
 
