@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-mixed-radial-zones-v44 -->
+  <!-- version: wheel-closer-zoom-portrait-arrow-v45 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-mixed-radial-zones-v44</title>
+  <title>العجلة الدوارة - wheel-closer-zoom-portrait-arrow-v45</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1877,11 +1877,22 @@
       const availableBottom = Math.max(availableTop + 260, controlsTop - bottomReserve);
       const availableH = Math.max(260, availableBottom - availableTop);
 
-      const maxByWidth = isLandscape ? viewportW * 0.64 : viewportW * 0.94;
+      /*
+        wheel-26:
+        On narrow portrait screens, leave real space for the Wordwall-style arrow outside the wheel.
+        The previous portrait wheel was too wide, forcing the arrow to sit on top of the wheel.
+      */
+      const portraitWidthFactor = isLandscape ? 0.64 : (isNarrow ? 0.74 : 0.94);
+      const maxByWidth = viewportW * portraitWidthFactor;
       const maxByHeight = availableH * (isLandscape ? 0.94 : 0.86);
       const maxAbsolute = isLandscape ? 780 : 480;
-      const minSize = Math.min(isLandscape ? 360 : 330, viewportW * 0.84, availableH * 0.80);
-      const size = Math.round(clamp(Math.min(maxByWidth, maxByHeight, maxAbsolute), Math.max(280, minSize), maxAbsolute));
+      const minSize = Math.min(
+        isLandscape ? 360 : (isNarrow ? 238 : 330),
+        viewportW * (isNarrow && !isLandscape ? 0.66 : 0.84),
+        availableH * 0.80
+      );
+      const lowerBound = isNarrow && !isLandscape ? Math.max(230, minSize) : Math.max(280, minSize);
+      const size = Math.round(clamp(Math.min(maxByWidth, maxByHeight, maxAbsolute), lowerBound, maxAbsolute));
 
       const left = Math.round((viewportW - size) / 2);
 
@@ -1897,8 +1908,14 @@
 
       const arrowW = Math.round(clamp(size * 0.155, 74, 118));
       const arrowH = Math.round(clamp(size * 0.118, 56, 92));
-      const arrowOverlap = Math.max(2, size * 0.006);
-      const arrowLeft = Math.max(2, Math.round(left - arrowW + arrowOverlap));
+
+      /*
+        Keep the arrow outside the wheel.
+        Negative left is allowed so the arrow can be partially clipped by the screen edge while its tip
+        stays before the wheel rim, exactly like the Wordwall portrait behavior.
+      */
+      const arrowGap = Math.max(isLandscape ? 5 : 7, size * (isLandscape ? 0.010 : 0.018));
+      const arrowLeft = Math.round(left - arrowW - arrowGap);
       const arrowTop = Math.round(centerY);
 
       return { size, left, top, centerX, centerY, arrowLeft, arrowTop, arrowW, arrowH, viewportW, viewportH, controlsTop };
@@ -1923,7 +1940,12 @@
       if (!size) return;
 
       const isLandscape = (geometry.viewportW || window.innerWidth || 0) > (geometry.viewportH || window.innerHeight || 0);
-      const desiredScale = isLandscape ? 1.86 : 1.72;
+      /*
+        wheel-26:
+        Stronger Wordwall-style focus zoom.
+        The selected sector becomes closer and clearer while keeping existing label compensation.
+      */
+      const desiredScale = isLandscape ? 2.36 : 2.24;
       const scale = desiredScale;
 
       wheelPage.style.setProperty("--zoom-scale", scale.toFixed(4));
