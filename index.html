@@ -4193,17 +4193,6 @@
   let wheelTheme = "classic";
   let wheelEntries = [];
 
-  const defaultWheelEntries = [
-    { text:"اتغدى" },
-    { text:"انام" },
-    { text:"اشتغل" },
-    { text:"اروح" },
-    { text:"اكعد" },
-    { text:"احجي" },
-    { text:"اقرأ" },
-    { text:"العب" }
-  ];
-
   function openScreen(id){
     const isSubpage = Boolean(id);
     document.body.classList.toggle("subpage", isSubpage);
@@ -4236,13 +4225,11 @@
   }
 
   function getFilledEntries(){
-    const filled = wheelEntries.filter(isEntryFilled).map((entry)=> ({
+    return wheelEntries.filter(isEntryFilled).map((entry)=> ({
       text: String(entry.text || "").trim(),
       imageName: entry.imageName || "",
       imageData: entry.imageData || ""
     }));
-
-    return filled.length ? filled : defaultWheelEntries;
   }
 
   function saveDraft(){
@@ -4416,13 +4403,21 @@
   }
 
   function openWheelPage(){
+    syncWheelEntriesFromDom();
+
+    const entries = getFilledEntries();
+    if (!entries.length) {
+      alert("يرجى ادخال محتويات العجلة اولاً");
+      return;
+    }
+
     saveDraft();
 
     const payload = {
       type: wheelContentType,
       theme: wheelTheme,
       gameName: String(wheelGameNameInput?.value || "").trim(),
-      entries: getFilledEntries(),
+      entries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
       centerQuestion: String(centerQuestionInput?.value || "").trim()
     };
