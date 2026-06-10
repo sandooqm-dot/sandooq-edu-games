@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-background-v31 -->
+  <!-- version: wheel-theme-sky-clouds-v32 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-background-v31</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v32</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -103,6 +103,62 @@
       position:absolute;
       inset:0;
       overflow:hidden;
+    }
+
+    /* wheel-32: حركة افتتاحية جمالية فقط قبل بداية اللعب */
+    .wheel-page.intro-playing .fixed-controls{
+      opacity:0;
+      transform:translateY(10px);
+      pointer-events:none;
+    }
+
+    .wheel-page.intro-playing .wheel-shell{
+      transform-origin:center center;
+      animation:introWheelEnter 1.25s cubic-bezier(.18,.82,.22,1) both;
+    }
+
+    .wheel-page.intro-playing .wheel-arrow{
+      opacity:0;
+      animation:introArrowEnter .52s ease-out .82s both;
+    }
+
+    .wheel-page.intro-playing .wheel-logo{
+      animation:introLogoFade .75s ease-out both;
+    }
+
+    @keyframes introWheelEnter{
+      0%{
+        opacity:.88;
+        transform:translateY(14px) scale(.70);
+        filter:drop-shadow(0 4px 10px rgba(0,0,0,.10));
+      }
+      58%{
+        opacity:1;
+        transform:translateY(0) scale(1.035);
+      }
+      100%{
+        opacity:1;
+        transform:translateY(0) scale(var(--visual-zoom, 1));
+        filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
+      }
+    }
+
+    @keyframes introArrowEnter{
+      0%{ opacity:0; transform:translateY(-50%) translateX(-14px) scale(.92); }
+      100%{ opacity:1; transform:translateY(-50%) translateX(var(--arrow-focus-x, 0px)) scale(var(--arrow-focus-scale, 1)); }
+    }
+
+    @keyframes introLogoFade{
+      0%{ opacity:0; transform:translateY(-8px); }
+      100%{ opacity:1; transform:translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .wheel-page.intro-playing .wheel-shell,
+      .wheel-page.intro-playing .wheel-arrow,
+      .wheel-page.intro-playing .wheel-logo{
+        animation:none !important;
+      }
     }
 
     .wheel-arrow{
@@ -873,7 +929,7 @@
   </style>
 </head>
 <body>
-  <main class="wheel-page" id="wheelPage">
+  <main class="wheel-page intro-playing" id="wheelPage">
     <img class="wheel-logo" src="logo.PNG" alt="" aria-hidden="true" />
 
     <div class="wheel-stage" id="wheelStage">
@@ -1041,7 +1097,7 @@
     function applyWheelTheme(theme){
       if (!wheelPage) return;
       const normalizedTheme = normalizeWheelTheme(theme);
-      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom");
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds");
       wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
     }
 
@@ -1138,6 +1194,22 @@
       ].includes(value)) {
         return "classroom";
       }
+
+      if ([
+        "sky",
+        "clouds",
+        "sky-clouds",
+        "sky_clouds",
+        "theme-sky",
+        "theme-sky-clouds",
+        "سماء",
+        "غيوم",
+        "سماء وغيوم",
+        "سماء و غيوم"
+      ].includes(value)) {
+        return "sky-clouds";
+      }
+
       return "original";
     }
 
@@ -2525,6 +2597,7 @@
     updateLayout();
     fitCenterText();
     collapseSafariBars();
+    finishIntroAnimation();
   </script>
 </body>
 </html>
