@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-sky-clouds-v33 -->
+  <!-- version: wheel-theme-sky-clouds-v34 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-sky-clouds-v33</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v34</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -145,13 +145,18 @@
       pointer-events:none;
     }
 
-    .wheel-page.intro-playing .wheel-shell{
+    /*
+      wheel-34:
+      الانترو صار كاميرا مؤقتة على المشهد كامل، وليس على العجلة نفسها.
+      لا نضع أي transform مباشر على wheel-shell حتى لا يثبت الزوم الكبير بعد الانترو.
+    */
+    .wheel-page.intro-playing .wheel-stage{
       transform-origin:center center;
-      animation:introWheelEnter 2.15s cubic-bezier(.18,.82,.22,1) both;
+      animation:introCameraEnter 2.25s cubic-bezier(.18,.82,.22,1) both;
     }
 
     .wheel-page.intro-playing .theme-background{
-      animation:introBackgroundEnter 2.15s cubic-bezier(.18,.82,.22,1) both;
+      animation:introBackgroundSettle 2.25s cubic-bezier(.18,.82,.22,1) both;
     }
 
     .wheel-page.intro-playing .wheel-arrow{
@@ -163,25 +168,29 @@
       animation:introLogoFade .75s ease-out both;
     }
 
-    @keyframes introBackgroundEnter{
-      0%{ transform:scale(1.08); filter:saturate(1.04); }
-      100%{ transform:scale(1); filter:saturate(1); }
+    @keyframes introBackgroundSettle{
+      0%{
+        transform:scale(1);
+        filter:saturate(1.04);
+      }
+      100%{
+        transform:scale(1);
+        filter:saturate(1);
+      }
     }
 
-    @keyframes introWheelEnter{
+    @keyframes introCameraEnter{
       0%{
-        opacity:.90;
-        transform:translateY(18px) scale(.62);
-        filter:drop-shadow(0 4px 10px rgba(0,0,0,.10));
+        opacity:.96;
+        transform:scale(.64);
       }
       72%{
         opacity:1;
-        transform:translateY(0) scale(1.025);
+        transform:scale(1.018);
       }
       100%{
         opacity:1;
-        transform:translateY(0) scale(var(--visual-zoom, 1));
-        filter:drop-shadow(0 5px 14px rgba(0,0,0,.16));
+        transform:scale(1);
       }
     }
 
@@ -196,7 +205,7 @@
     }
 
     @media (prefers-reduced-motion: reduce){
-      .wheel-page.intro-playing .wheel-shell,
+      .wheel-page.intro-playing .wheel-stage,
       .wheel-page.intro-playing .wheel-arrow,
       .wheel-page.intro-playing .wheel-logo,
       .wheel-page.intro-playing .theme-background{
