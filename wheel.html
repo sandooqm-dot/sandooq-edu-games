@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-sky-clouds-v35 -->
+  <!-- version: wheel-theme-sky-clouds-v36 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-sky-clouds-v35</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v36</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -98,20 +98,20 @@
       opacity:1;
       background-color:#fff;
       background-image:
-        url("theme-original-bg.webp?v=35"),
-        url("theme-original-bg.png?v=35"),
-        url("theme-original.webp?v=35"),
-        url("theme-original.png?v=35");
+        url("theme-original-bg.webp?v=36"),
+        url("theme-original-bg.png?v=36"),
+        url("theme-original.webp?v=36"),
+        url("theme-original.png?v=36");
     }
 
     .wheel-page.wheel-theme-sky-clouds .theme-background{
       opacity:1;
       background-color:#58c7f3;
       background-image:
-        url("theme-sky-clouds-bg.webp?v=35"),
-        url("theme-sky-clouds-bg.png?v=35"),
-        url("theme-sky-clouds.webp?v=35"),
-        url("theme-sky-clouds.png?v=35");
+        url("theme-sky-clouds-bg.webp?v=36"),
+        url("theme-sky-clouds-bg.png?v=36"),
+        url("theme-sky-clouds.webp?v=36"),
+        url("theme-sky-clouds.png?v=36");
     }
 
     .wheel-logo{
@@ -146,14 +146,14 @@
     }
 
     /*
-      wheel-35:
-      Camera Zoom In / Ken Burns intro.
+      wheel-36:
+      Camera Zoom In / Ken Burns intro مع وقفة بداية وحركة أبطأ.
       البداية: الخلفية تظهر كمشهد واسع + العجلة بعيدة.
       النهاية: الخلفية تكبر فتختفي الأطراف + العجلة تصل للحجم الطبيعي.
       بعد الانترو تظهر الأزرار وتبدأ اللعبة طبيعي.
     */
     :root{
-      --intro-duration:2.25s;
+      --intro-duration:4.15s;
       --intro-bg-final-scale:1.18;
     }
 
@@ -172,7 +172,7 @@
 
     .wheel-page.intro-playing .wheel-arrow{
       opacity:0;
-      animation:introArrowEnter .55s ease-out 1.68s both;
+      animation:introArrowEnter .55s ease-out 3.28s both;
     }
 
     .wheel-page.intro-playing .wheel-logo{
@@ -181,6 +181,10 @@
 
     @keyframes introBackgroundCameraIn{
       0%{
+        transform:scale(1);
+        filter:saturate(1.04);
+      }
+      18%{
         transform:scale(1);
         filter:saturate(1.04);
       }
@@ -195,9 +199,13 @@
         opacity:.96;
         transform:scale(.62);
       }
-      68%{
+      18%{
+        opacity:.96;
+        transform:scale(.62);
+      }
+      82%{
         opacity:1;
-        transform:scale(1.015);
+        transform:scale(1.012);
       }
       100%{
         opacity:1;
@@ -1177,20 +1185,20 @@
         if (normalizedTheme === "classroom") {
           themeBackground.style.backgroundColor = "#fff";
           themeBackground.style.backgroundImage = [
-            'url("theme-original-bg.webp?v=35")',
-            'url("theme-original-bg.png?v=35")',
-            'url("theme-original.webp?v=35")',
-            'url("theme-original.png?v=35")'
+            'url("theme-original-bg.webp?v=36")',
+            'url("theme-original-bg.png?v=36")',
+            'url("theme-original.webp?v=36")',
+            'url("theme-original.png?v=36")'
           ].join(", ");
         }
 
         if (normalizedTheme === "sky-clouds") {
           themeBackground.style.backgroundColor = "#58c7f3";
           themeBackground.style.backgroundImage = [
-            'url("theme-sky-clouds-bg.webp?v=35")',
-            'url("theme-sky-clouds-bg.png?v=35")',
-            'url("theme-sky-clouds.webp?v=35")',
-            'url("theme-sky-clouds.png?v=35")'
+            'url("theme-sky-clouds-bg.webp?v=36")',
+            'url("theme-sky-clouds-bg.png?v=36")',
+            'url("theme-sky-clouds.webp?v=36")',
+            'url("theme-sky-clouds.png?v=36")'
           ].join(", ");
         }
       }
@@ -2708,7 +2716,7 @@
         }
       };
 
-      setTimeout(endIntro, 2320);
+      setTimeout(endIntro, 4300);
     }
 
     applyWheelTheme(payload.theme);
