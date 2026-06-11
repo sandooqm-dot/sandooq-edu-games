@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v2 -->
+  <!-- version: open-box-v3 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -11,10 +11,9 @@
       --safe-bottom: env(safe-area-inset-bottom, 0px);
       --ink:#111;
       --yellow:#efd553;
-      --red:#f05d5b;
       --blue:#1688d3;
-      --box-size:min(21vw, 174px);
-      --gap:min(3.1vw, 34px);
+      --box-size:150px;
+      --gap:24px;
       --logo-w:clamp(120px, 15.4vw, 225px);
       --bottom-space:calc(72px + var(--safe-bottom));
     }
@@ -35,9 +34,7 @@
       -webkit-text-size-adjust:100%;
     }
 
-    body{
-      min-height:100dvh;
-    }
+    body{ min-height:100dvh; }
 
     .box-page{
       position:relative;
@@ -148,19 +145,19 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:clamp(12px, 2vw, 28px);
+      padding:clamp(10px, 2vw, 28px);
       direction:ltr;
     }
 
     .boxes-grid{
-      width:min(92vw, 1220px);
+      width:min(94vw, 1280px);
       max-height:100%;
       display:grid;
       grid-template-columns:repeat(var(--cols, 4), var(--box-size));
       justify-content:center;
       align-content:center;
       gap:var(--gap);
-      perspective:1300px;
+      perspective:1500px;
     }
 
     .box-card{
@@ -172,60 +169,155 @@
       padding:0;
       margin:0;
       cursor:pointer;
-      perspective:1000px;
+      perspective:1200px;
       touch-action:manipulation;
       appearance:none;
       -webkit-appearance:none;
     }
 
-    .box-inner{
+    .box-shell{
       display:block;
       position:relative;
       width:100%;
       height:100%;
       transform-style:preserve-3d;
-      transition:transform .58s cubic-bezier(.18,.78,.16,1);
+      filter:drop-shadow(0 14px 18px rgba(0,0,0,.10));
     }
 
-    .box-card.opened .box-inner{
-      transform:rotateY(180deg);
+    .box-cavity{
+      position:absolute;
+      inset:5%;
+      border-radius:12px;
+      overflow:hidden;
+      border:clamp(3px, .55vw, 7px) solid var(--box-border, rgba(0,0,0,.16));
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.14) 0%, transparent 28%),
+        radial-gradient(circle at 50% 38%, var(--box-light) 0%, var(--box-color) 43%, var(--box-dark) 100%);
+      box-shadow:
+        inset 0 16px 22px rgba(0,0,0,.22),
+        inset 0 -14px 18px rgba(255,255,255,.10),
+        inset 12px 0 20px rgba(0,0,0,.12),
+        inset -12px 0 20px rgba(0,0,0,.10);
+      z-index:1;
     }
 
-    .box-face{
+    .box-cavity::before{
+      content:"";
+      position:absolute;
+      left:0;
+      right:0;
+      top:0;
+      height:23%;
+      background:linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0));
+      pointer-events:none;
+    }
+
+    .box-cavity::after{
+      content:"";
+      position:absolute;
+      left:8%;
+      right:8%;
+      bottom:6%;
+      height:13%;
+      border-radius:50%;
+      background:rgba(0,0,0,.12);
+      filter:blur(4px);
+      pointer-events:none;
+    }
+
+    .box-content{
+      position:absolute;
+      inset:12%;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      opacity:0;
+      transform:translateY(8px) scale(.88);
+      transition:opacity .22s ease .17s, transform .28s ease .17s;
+      direction:rtl;
+      text-align:center;
+      pointer-events:none;
+    }
+
+    .box-card.opened .box-content{
+      opacity:1;
+      transform:translateY(0) scale(1);
+    }
+
+    .box-lid{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
+      z-index:8;
       border-radius:14px;
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-      overflow:hidden;
+      border:clamp(4px, .7vw, 8px) solid var(--box-border, rgba(0,0,0,.16));
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.04) 30%, transparent 45%),
+        linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 58%, var(--box-dark) 100%);
+      box-shadow:
+        inset 0 -12px 0 rgba(0,0,0,.13),
+        inset 0 9px 0 rgba(255,255,255,.18),
+        0 10px 20px rgba(0,0,0,.10);
       display:flex;
       align-items:center;
       justify-content:center;
-      border:clamp(4px, .7vw, 8px) solid var(--box-border, rgba(0,0,0,.16));
+      transform-origin:top center;
+      transform:translateY(0) rotateX(0deg) scaleY(1);
+      transition:transform .62s cubic-bezier(.15,.82,.20,1), filter .45s ease, box-shadow .45s ease;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      transform-style:preserve-3d;
+    }
+
+    .box-card.opened .box-lid{
+      transform:translateY(-37%) rotateX(68deg) scaleY(.36);
+      filter:brightness(1.08);
       box-shadow:
-        inset 0 -10px 0 rgba(0,0,0,.10),
-        inset 0 9px 0 rgba(255,255,255,.18),
-        0 10px 20px rgba(0,0,0,.10);
+        inset 0 -7px 0 rgba(0,0,0,.13),
+        inset 0 5px 0 rgba(255,255,255,.22),
+        0 9px 14px rgba(0,0,0,.11);
     }
 
-    .box-front{
-      background:linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 58%, var(--box-dark) 100%);
+    .box-lid::before{
+      content:"";
+      position:absolute;
+      inset:8%;
+      border-radius:9px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.12), transparent 55%),
+        rgba(255,255,255,.04);
+      box-shadow:inset 0 -8px 0 rgba(0,0,0,.10);
+      pointer-events:none;
+    }
+
+    .box-lid::after{
+      content:"";
+      position:absolute;
+      left:10%;
+      right:10%;
+      top:7%;
+      height:12%;
+      border-radius:999px;
+      background:rgba(255,255,255,.12);
+      pointer-events:none;
+    }
+
+    .box-number{
+      position:relative;
+      z-index:2;
       color:#fff;
-      text-shadow:0 2px 3px rgba(0,0,0,.22);
-      font-size:clamp(26px, 5.4vw, 58px);
-      font-weight:800;
+      text-shadow:0 2px 4px rgba(0,0,0,.26);
+      font-size:clamp(24px, calc(var(--box-size) * .34), 64px);
+      font-weight:900;
+      line-height:1;
+      transition:opacity .16s ease, transform .2s ease;
     }
 
-    .box-back{
-      transform:rotateY(180deg);
-      background:#fff;
-      border-color:var(--box-border, #1ba6e8);
-      padding:clamp(8px, 1.4vw, 14px);
-      color:#111;
-      direction:rtl;
-      text-align:center;
+    .box-card.opened .box-number{
+      opacity:0;
+      transform:scale(.8);
     }
 
     .result-text{
@@ -235,11 +327,12 @@
       align-items:center;
       justify-content:center;
       text-align:center;
-      color:#111;
-      font-size:clamp(17px, 3.2vw, 34px);
-      line-height:1.25;
+      color:#fff;
+      font-size:clamp(14px, calc(var(--box-size) * .18), 34px);
+      line-height:1.18;
       font-weight:900;
       overflow-wrap:anywhere;
+      text-shadow:0 2px 4px rgba(0,0,0,.28);
     }
 
     .result-image{
@@ -249,6 +342,7 @@
       display:block;
       border-radius:8px;
       background:#fff;
+      box-shadow:0 4px 12px rgba(0,0,0,.14);
     }
 
     .result-mixed{
@@ -268,9 +362,9 @@
 
     .result-mixed .result-text{
       height:auto;
-      font-size:clamp(13px, 2.2vw, 24px);
-      line-height:1.15;
-      min-height:1.2em;
+      min-height:1.1em;
+      font-size:clamp(11px, calc(var(--box-size) * .12), 22px);
+      line-height:1.12;
     }
 
     .fixed-controls{
@@ -324,26 +418,13 @@
     }
 
     @media (orientation:portrait){
-      :root{
-        --box-size:min(36vw, 156px);
-        --gap:min(4vw, 24px);
-      }
-
       .stage{
-        inset:calc(94px + var(--safe-top)) 0 var(--bottom-space) 0;
-      }
-
-      .boxes-grid{
-        grid-template-columns:repeat(var(--cols-p, 2), var(--box-size));
+        inset:calc(92px + var(--safe-top)) 0 var(--bottom-space) 0;
       }
     }
 
     @media (max-width:560px){
-      :root{
-        --box-size:min(38vw, 140px);
-        --gap:14px;
-        --logo-w:120px;
-      }
+      :root{ --logo-w:120px; }
 
       .game-logo{
         top:calc(12px + var(--safe-top));
@@ -351,11 +432,12 @@
       }
 
       .stage{
-        inset:calc(90px + var(--safe-top)) 0 calc(78px + var(--safe-bottom)) 0;
+        inset:calc(88px + var(--safe-top)) 0 calc(78px + var(--safe-bottom)) 0;
         padding:12px;
       }
 
-      .box-face{
+      .box-lid,
+      .box-cavity{
         border-radius:12px;
       }
 
@@ -370,11 +452,7 @@
     }
 
     @media (max-height:520px) and (orientation:landscape){
-      :root{
-        --box-size:min(18vw, 128px);
-        --gap:min(2.2vw, 20px);
-        --bottom-space:calc(58px + var(--safe-bottom));
-      }
+      :root{ --bottom-space:calc(58px + var(--safe-bottom)); }
 
       .stage{
         inset:calc(54px + var(--safe-top)) 0 var(--bottom-space) 0;
@@ -405,7 +483,7 @@
     <div class="theme-background" id="themeBackground"></div>
     <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
 
-    <section class="stage">
+    <section class="stage" id="stage">
       <div class="boxes-grid" id="boxesGrid" aria-label="صناديق اللعبة"></div>
     </section>
 
@@ -455,6 +533,7 @@
     ];
 
     const page = document.getElementById("boxPage");
+    const stage = document.getElementById("stage");
     const grid = document.getElementById("boxesGrid");
     const resetBtn = document.getElementById("resetBtn");
     const backBtn = document.getElementById("backBtn");
@@ -527,7 +606,8 @@
             imageData: entry.imageData || entry.image || "",
             imageName: entry.imageName || ""
           }))
-          .filter((entry)=> entry.text || entry.imageData || entry.imageName);
+          .filter((entry)=> entry.text || entry.imageData || entry.imageName)
+          .slice(0, 50);
 
         if (payload.theme) currentTheme = normalizeTheme(payload.theme);
         return clean.length ? clean : DEMO_ITEMS;
@@ -542,23 +622,66 @@
       try { sessionStorage.setItem("sandooq_edu_box_theme_v1", currentTheme); } catch (_) {}
     }
 
-    function getGridColumns(count){
-      if (window.matchMedia("(orientation: portrait)").matches) {
-        if (count <= 4) return 2;
-        if (count <= 9) return 3;
-        return 4;
+    function calculateLayout(count){
+      const rect = stage.getBoundingClientRect();
+      const width = Math.max(280, rect.width - 24);
+      const height = Math.max(260, rect.height - 24);
+      const ratio = width / height;
+      let cols;
+
+      if (count <= 4) {
+        cols = window.matchMedia("(orientation: portrait)").matches ? 2 : count;
+      } else if (count <= 8) {
+        cols = window.matchMedia("(orientation: portrait)").matches ? 2 : 4;
+      } else {
+        cols = Math.ceil(Math.sqrt(count * ratio));
+        cols = Math.max(3, Math.min(10, cols));
       }
-      if (count <= 4) return count;
-      if (count <= 8) return 4;
-      if (count <= 15) return 5;
-      return Math.min(10, Math.ceil(Math.sqrt(count * 1.6)));
+
+      let rows = Math.ceil(count / cols);
+      let gap = count > 30 ? 8 : count > 20 ? 10 : count > 12 ? 14 : 24;
+      let size = Math.min(
+        174,
+        Math.floor((width - gap * (cols - 1)) / cols),
+        Math.floor((height - gap * (rows - 1)) / rows)
+      );
+
+      const minSize = count > 40 ? 42 : count > 30 ? 48 : count > 20 ? 58 : 78;
+
+      while (size < minSize && cols < 10) {
+        cols += 1;
+        rows = Math.ceil(count / cols);
+        size = Math.min(
+          174,
+          Math.floor((width - gap * (cols - 1)) / cols),
+          Math.floor((height - gap * (rows - 1)) / rows)
+        );
+      }
+
+      if (size < minSize) {
+        gap = Math.max(5, Math.floor(gap * 0.72));
+        size = Math.min(
+          174,
+          Math.floor((width - gap * (cols - 1)) / cols),
+          Math.floor((height - gap * (rows - 1)) / rows)
+        );
+      }
+
+      size = Math.max(34, size);
+      return { cols, gap, size };
+    }
+
+    function applyLayout(){
+      const layout = calculateLayout(items.length);
+      grid.style.setProperty("--cols", String(layout.cols));
+      grid.style.setProperty("--gap", `${layout.gap}px`);
+      grid.style.setProperty("--box-size", `${layout.size}px`);
+      document.documentElement.style.setProperty("--gap", `${layout.gap}px`);
+      document.documentElement.style.setProperty("--box-size", `${layout.size}px`);
     }
 
     function renderBoxes(){
-      const cols = getGridColumns(items.length);
-      const colsPortrait = items.length <= 4 ? 2 : (items.length <= 9 ? 3 : 4);
-      grid.style.setProperty("--cols", String(cols));
-      grid.style.setProperty("--cols-p", String(colsPortrait));
+      applyLayout();
       grid.innerHTML = "";
 
       items.forEach((entry, index)=>{
@@ -575,23 +698,31 @@
         button.style.setProperty("--box-dark", color.d);
         button.style.setProperty("--box-border", color.b);
 
-        const inner = document.createElement("span");
-        inner.className = "box-inner";
+        const shell = document.createElement("span");
+        shell.className = "box-shell";
 
-        const front = document.createElement("span");
-        front.className = "box-face box-front";
-        front.textContent = String(index + 1);
+        const cavity = document.createElement("span");
+        cavity.className = "box-cavity";
 
-        const back = document.createElement("span");
-        back.className = "box-face box-back";
-        back.appendChild(createResultContent(entry));
+        const content = document.createElement("span");
+        content.className = "box-content";
+        content.appendChild(createResultContent(entry));
 
-        inner.appendChild(front);
-        inner.appendChild(back);
-        button.appendChild(inner);
+        const lid = document.createElement("span");
+        lid.className = "box-lid";
+
+        const number = document.createElement("span");
+        number.className = "box-number";
+        number.textContent = String(index + 1);
+
+        lid.appendChild(number);
+        shell.appendChild(cavity);
+        shell.appendChild(content);
+        shell.appendChild(lid);
+        button.appendChild(shell);
 
         button.addEventListener("click", ()=>{
-          toggleBox(button, index);
+          openBox(button, index);
         });
 
         grid.appendChild(button);
@@ -634,14 +765,8 @@
       return text;
     }
 
-    function toggleBox(button, index){
-      if (opened.has(index)) {
-        opened.delete(index);
-        button.classList.remove("opened");
-        button.setAttribute("aria-pressed", "false");
-        return;
-      }
-
+    function openBox(button, index){
+      if (opened.has(index)) return;
       opened.add(index);
       button.classList.add("opened");
       button.setAttribute("aria-pressed", "true");
@@ -669,10 +794,11 @@
     backBtn.addEventListener("click", goBack);
 
     window.addEventListener("resize", ()=>{
-      const cols = getGridColumns(items.length);
-      const colsPortrait = items.length <= 4 ? 2 : (items.length <= 9 ? 3 : 4);
-      grid.style.setProperty("--cols", String(cols));
-      grid.style.setProperty("--cols-p", String(colsPortrait));
+      applyLayout();
+    }, { passive:true });
+
+    window.addEventListener("orientationchange", ()=>{
+      window.setTimeout(applyLayout, 160);
     }, { passive:true });
 
     applyTheme(currentTheme);
