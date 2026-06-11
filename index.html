@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-theme-national-day-v22 -->
+<!-- version: index-sound-system-v23 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -4851,7 +4851,114 @@
       }
     }
 
-  </style>
+  
+
+    /* v23: لوحة الأصوات للعجلة - أصوات داخلية لا تعمل تلقائياً */
+    .sound-panel{
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#f8f8f8;
+      padding:clamp(14px, 1.7vw, 20px);
+    }
+
+    .sound-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+
+    .sound-title{
+      margin:0;
+      font-size:clamp(18px, 2vw, 28px);
+      font-weight:800;
+      line-height:1.2;
+    }
+
+    .sound-note{
+      margin:6px 0 0;
+      color:#555;
+      font-size:clamp(13px, 1.35vw, 17px);
+      font-weight:700;
+      line-height:1.6;
+    }
+
+    .sound-list{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .sound-card{
+      min-height:70px;
+      border:2px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px;
+    }
+
+    .sound-card strong{
+      display:block;
+      font-size:clamp(15px, 1.55vw, 21px);
+      font-weight:900;
+      line-height:1.25;
+    }
+
+    .sound-card span{
+      display:block;
+      color:#666;
+      font-size:clamp(11px, 1.1vw, 14px);
+      font-weight:700;
+      margin-top:3px;
+      line-height:1.35;
+    }
+
+    .sound-preview-btn{
+      flex:0 0 auto;
+      min-width:82px;
+      height:38px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      background:var(--title-yellow);
+      color:#111;
+      font-size:15px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    @media (max-width: 760px){
+      .sound-panel{
+        padding:12px;
+        border-radius:18px;
+      }
+
+      .sound-list{
+        grid-template-columns:1fr;
+        gap:9px;
+      }
+
+      .sound-card{
+        min-height:62px;
+        border-radius:16px;
+        padding:10px;
+      }
+
+      .sound-preview-btn{
+        min-width:74px;
+        height:35px;
+        border-radius:12px;
+        font-size:14px;
+      }
+    }
+
+</style>
 </head>
 <body>
 <main class="page">
@@ -5072,6 +5179,37 @@
 <input class="center-question-input" id="centerQuestionInput" maxlength="45" placeholder="اكتب السؤال الذي يظهر في منتصف العجلة" type="text"/>
 </div>
 
+<div class="sound-panel" id="soundPanel">
+<div class="sound-head">
+<div>
+<h3 class="sound-title">الأصوات</h3>
+<p class="sound-note">أصوات داخلية خفيفة لا تعمل تلقائياً، وتشتغل فقط بعد ضغط المستخدم داخل اللعبة.</p>
+</div>
+<div aria-label="تشغيل أصوات العجلة" class="toggle sound-toggle">
+<button data-sound-toggle="off" type="button">كتم</button>
+<button class="active" data-sound-toggle="on" type="button">تشغيل</button>
+</div>
+</div>
+<div class="sound-list" aria-label="تجربة أصوات العجلة">
+<div class="sound-card">
+<div><strong>الأزرار</strong><span>صوت لمس خفيف للأزرار</span></div>
+<button class="sound-preview-btn" data-sound-preview="button" type="button">تجربة</button>
+</div>
+<div class="sound-card">
+<div><strong>مرور الأقسام</strong><span>تك تك أثناء دوران العجلة</span></div>
+<button class="sound-preview-btn" data-sound-preview="tick" type="button">تجربة</button>
+</div>
+<div class="sound-card">
+<div><strong>ثبات القسم</strong><span>صوت اختيار ناعم عند التوقف</span></div>
+<button class="sound-preview-btn" data-sound-preview="select" type="button">تجربة</button>
+</div>
+<div class="sound-card">
+<div><strong>الحذف</strong><span>صوت قصير عند حذف القسم</span></div>
+<button class="sound-preview-btn" data-sound-preview="remove" type="button">تجربة</button>
+</div>
+</div>
+</div>
+
 <div class="items-panel">
 <div class="items-head">
 <h3 id="itemsTitle">عناصر العجلة</h3>
@@ -5119,6 +5257,7 @@
   const itemsHint = document.getElementById("itemsHint");
   const questionPanel = document.getElementById("questionPanel");
   const centerQuestionInput = document.getElementById("centerQuestionInput");
+  const soundPanel = document.getElementById("soundPanel");
   const wheelGameNameInput = document.getElementById("wheelGameNameInput");
   const themeListPanel = document.getElementById("themeListPanel");
   const toggleThemeListBtn = document.getElementById("toggleThemeListBtn");
@@ -5140,6 +5279,7 @@
   let wheelContentType = "text";
   let wheelTheme = "classic";
   let wheelEntries = [];
+  let wheelSoundEnabled = true;
 
   function openScreen(id){
     const isSubpage = Boolean(id);
@@ -5158,6 +5298,82 @@
     if (wheelContentType === "images") return "أضف الصور التي تظهر داخل أقسام العجلة.";
     if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
     return "أضف كلمات أو أسئلة قصيرة.";
+  }
+
+
+  const soundPreviewEngine = (()=>{
+    let ctx = null;
+    let master = null;
+
+    function ensure(){
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        if (!ctx) {
+          ctx = new AudioCtx();
+          master = ctx.createGain();
+          master.gain.value = 0.22;
+          master.connect(ctx.destination);
+        }
+        if (ctx.state === "suspended") ctx.resume().catch(()=>{});
+        return ctx;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.16, delay = 0){
+      if (!wheelSoundEnabled) return;
+      const audio = ensure();
+      if (!audio || !master) return;
+
+      const now = audio.currentTime + Math.max(0, delay);
+      const osc = audio.createOscillator();
+      const gain = audio.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), now + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc.connect(gain);
+      gain.connect(master);
+      osc.start(now);
+      osc.stop(now + duration + 0.025);
+    }
+
+    function play(name){
+      if (name === "button") {
+        tone(520, 0.055, "triangle", 0.13);
+        tone(760, 0.045, "sine", 0.07, 0.018);
+        return;
+      }
+      if (name === "tick") {
+        tone(880, 0.035, "square", 0.08);
+        return;
+      }
+      if (name === "select") {
+        tone(640, 0.10, "sine", 0.13);
+        tone(920, 0.12, "sine", 0.11, 0.09);
+        return;
+      }
+      if (name === "remove") {
+        tone(320, 0.08, "sawtooth", 0.10);
+        tone(190, 0.10, "triangle", 0.08, 0.06);
+      }
+    }
+
+    return { play };
+  })();
+
+  function syncSoundUi(){
+    document.querySelectorAll("[data-sound-toggle]").forEach((btn)=>{
+      const enabled = btn.getAttribute("data-sound-toggle") === "on";
+      btn.classList.toggle("active", enabled === wheelSoundEnabled);
+    });
+
+    if (soundPanel) {
+      soundPanel.classList.toggle("sound-disabled", !wheelSoundEnabled);
+    }
   }
 
   function createEntry(){
@@ -5189,7 +5405,12 @@
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries: wheelEntries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
-      centerQuestion: String(centerQuestionInput?.value || "").trim()
+      centerQuestion: String(centerQuestionInput?.value || "").trim(),
+      soundEnabled: wheelSoundEnabled,
+      sounds: {
+        enabled: wheelSoundEnabled,
+        mode: "built-in"
+      }
     };
 
     try { sessionStorage.setItem(WHEEL_DRAFT_KEY, JSON.stringify(payload)); } catch (_) {}
@@ -5205,6 +5426,8 @@
       wheelContentType = draft.type || "text";
       wheelTheme = draft.theme || "classic";
       wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
+      wheelSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
+      syncSoundUi();
 
       if (wheelGameNameInput) wheelGameNameInput.value = draft.gameName || "";
 
@@ -5212,6 +5435,7 @@
         btn.classList.toggle("active", btn.getAttribute("data-wheel-theme") === wheelTheme);
       });
       updateThemeSummary();
+  syncSoundUi();
 
       document.querySelectorAll(".wheel-type").forEach((btn)=>{
         btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
@@ -5385,6 +5609,11 @@
       entries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
       centerQuestion: String(centerQuestionInput?.value || "").trim(),
+      soundEnabled: wheelSoundEnabled,
+      sounds: {
+        enabled: wheelSoundEnabled,
+        mode: "built-in"
+      },
       updatedAt: Date.now(),
       payloadId
     };
@@ -5473,6 +5702,27 @@
       questionPanel?.classList.toggle("enabled", enabled);
       if (enabled) centerQuestionInput?.focus();
       saveDraft();
+    });
+  });
+
+
+  document.querySelectorAll("[data-sound-toggle]").forEach((btn)=>{
+    btn.addEventListener("click", ()=>{
+      wheelSoundEnabled = btn.getAttribute("data-sound-toggle") === "on";
+      syncSoundUi();
+      if (wheelSoundEnabled) soundPreviewEngine.play("button");
+      saveDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-sound-preview]").forEach((btn)=>{
+    btn.addEventListener("click", ()=>{
+      if (!wheelSoundEnabled) {
+        wheelSoundEnabled = true;
+        syncSoundUi();
+        saveDraft();
+      }
+      soundPreviewEngine.play(btn.getAttribute("data-sound-preview") || "button");
     });
   });
 

@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-national-day-v55 -->
+  <!-- version: wheel-sound-system-v56 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-national-day-v55</title>
+  <title>العجلة الدوارة - wheel-sound-system-v56</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1158,6 +1158,151 @@
       ]
     };
 
+
+    /*
+      wheel-56: نظام صوت داخلي مرتب بدون ملفات خارجية.
+      - لا يعمل تلقائياً عند فتح الصفحة.
+      - يعمل فقط بعد تفاعل المستخدم.
+      - يمنع تداخل صوت مرور الأقسام عبر throttle وتتبع القسم الحالي.
+      - مناسب للجوال وسفاري لأن الأصوات قصيرة ومولدة بـ Web Audio API.
+    */
+    const wheelAudio = (()=>{
+      let ctx = null;
+      let master = null;
+      let enabled = true;
+      let tickingActive = false;
+      let lastTickIndex = -1;
+      let lastTickAt = 0;
+
+      function readEnabled(){
+        try {
+          return payload?.soundEnabled !== false && (!payload?.sounds || payload.sounds.enabled !== false);
+        } catch (_) {
+          return true;
+        }
+      }
+
+      function ensure(){
+        if (!readEnabled() || enabled === false) return null;
+
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return null;
+
+          if (!ctx) {
+            ctx = new AudioCtx();
+            master = ctx.createGain();
+            master.gain.value = 0.22;
+            master.connect(ctx.destination);
+          }
+
+          if (ctx.state === "suspended") {
+            ctx.resume().catch(()=>{});
+          }
+
+          return ctx;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.12, delay = 0){
+        const audio = ensure();
+        if (!audio || !master) return;
+
+        const now = audio.currentTime + Math.max(0, Number(delay) || 0);
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), now + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(0.025, duration));
+
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now);
+        osc.stop(now + Math.max(0.03, duration) + 0.035);
+      }
+
+      function playButton(){
+        tone(520, 0.055, "triangle", 0.12);
+        tone(760, 0.045, "sine", 0.065, 0.018);
+      }
+
+      function playTick(index = 0){
+        if (!tickingActive) return;
+        if (index === lastTickIndex) return;
+
+        const now = performance.now();
+        if (now - lastTickAt < 38) return;
+
+        lastTickIndex = index;
+        lastTickAt = now;
+        tone(840 + (index % 4) * 24, 0.032, "square", 0.055);
+      }
+
+      function playSelect(){
+        tone(620, 0.10, "sine", 0.13);
+        tone(880, 0.13, "sine", 0.10, 0.085);
+      }
+
+      function playRemove(){
+        tone(330, 0.08, "sawtooth", 0.095);
+        tone(185, 0.12, "triangle", 0.075, 0.06);
+      }
+
+      function beginTicks(){
+        ensure();
+        tickingActive = true;
+        lastTickIndex = -1;
+        lastTickAt = 0;
+      }
+
+      function endTicks(){
+        tickingActive = false;
+        lastTickIndex = -1;
+      }
+
+      function unlock(){
+        ensure();
+      }
+
+      function setEnabled(value){
+        enabled = value !== false;
+      }
+
+      return {
+        unlock,
+        setEnabled,
+        beginTicks,
+        endTicks,
+        playButton,
+        playTick,
+        playSelect,
+        playRemove
+      };
+    })();
+
+    function normalizeSoundEnabled(data){
+      if (!data || typeof data !== "object") return true;
+      if (data.soundEnabled === false) return false;
+      if (data.sounds && typeof data.sounds === "object" && data.sounds.enabled === false) return false;
+      return true;
+    }
+
+    function currentSectorIndexForRotation(degrees){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      if (!count) return -1;
+      const step = 360 / count;
+      const localAngleAtArrow = normalizeAngle(180 - normalizeAngle(degrees));
+      const relative = normalizeAngle(localAngleAtArrow - (-90));
+      const nearestCenterIndex = Math.round((relative - step / 2) / step);
+      return ((nearestCenterIndex % count) + count) % count;
+    }
+
     /*
       إعدادات صور نمط "صورة فقط"
       عدّل الأرقام هنا فقط:
@@ -1339,7 +1484,9 @@
         theme:"original",
         entries: [],
         centerQuestionEnabled:false,
-        centerQuestion:""
+        centerQuestion:"",
+        soundEnabled:true,
+        sounds:{ enabled:true, mode:"built-in" }
       }));
     }
 
@@ -1357,7 +1504,12 @@
         theme,
         entries,
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
-        centerQuestion: String(data.centerQuestion || "")
+        centerQuestion: String(data.centerQuestion || ""),
+        soundEnabled: normalizeSoundEnabled(data),
+        sounds: {
+          enabled: normalizeSoundEnabled(data),
+          mode: "built-in"
+        }
       };
     }
 
@@ -1540,7 +1692,12 @@
             }))
           : [],
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
-        centerQuestion: String(data.centerQuestion || "")
+        centerQuestion: String(data.centerQuestion || ""),
+        soundEnabled: normalizeSoundEnabled(data),
+        sounds: {
+          enabled: normalizeSoundEnabled(data),
+          mode: "built-in"
+        }
       };
     }
 
@@ -2538,6 +2695,7 @@
     function setRotation(degrees){
       rotation = degrees;
       wheelRotor.style.transform = `rotate(${degrees}deg)`;
+      wheelAudio.playTick(currentSectorIndexForRotation(degrees));
     }
 
     function fitCenterText(){
@@ -2636,6 +2794,8 @@
         : getSelectedIndexAtArrow();
 
       selectedIndex = index;
+      wheelAudio.endTicks();
+      wheelAudio.playSelect();
       selectedResult.textContent = "";
       afterSpin.classList.add("show");
       highlightSelected(index);
@@ -2773,6 +2933,8 @@
       await animateVisualZoom(1, 1050);
       await delay(120);
 
+      wheelAudio.playRemove();
+
       const sector = document.querySelector(`.wheel-sector[data-index="${removeIndex}"]`);
       const selectedNode = labelNodes[removeIndex] || null;
       const labels = selectedNode?.labels && selectedNode.labels.length ? selectedNode.labels : [selectedNode?.label].filter(Boolean);
@@ -2809,6 +2971,7 @@
 
     function animateTo(targetRotation, duration = 5200, targetIndex = null){
       cancelAnimation();
+      wheelAudio.beginTicks();
 
       const start = rotation;
       const change = targetRotation - start;
@@ -2872,6 +3035,8 @@
     wheelShell.addEventListener("pointerdown", (event)=>{
       if (isRemoving || activityEnded) return;
 
+      wheelAudio.unlock();
+      wheelAudio.beginTicks();
       cancelAnimation();
       resetFocus();
       wheelShell.setPointerCapture?.(event.pointerId);
@@ -2920,16 +3085,34 @@
     wheelShell.addEventListener("pointercancel", endDrag);
 
     document.getElementById("spinBtn").addEventListener("click", ()=>{
+      wheelAudio.unlock();
+      wheelAudio.playButton();
       afterSpin.classList.remove("show");
       spinRandom(1);
     });
 
-    document.getElementById("resumeBtn").addEventListener("click", resumeWheelZoomOnly);
+    document.getElementById("resumeBtn").addEventListener("click", ()=>{
+      wheelAudio.unlock();
+      wheelAudio.playButton();
+      resumeWheelZoomOnly();
+    });
 
-    document.getElementById("removeBtn").addEventListener("click", eliminateSelectedSection);
+    document.getElementById("removeBtn").addEventListener("click", ()=>{
+      wheelAudio.unlock();
+      wheelAudio.playButton();
+      eliminateSelectedSection();
+    });
 
-    restartBtn?.addEventListener("click", restartActivity);
-    homeBtn?.addEventListener("click", goHomePage);
+    restartBtn?.addEventListener("click", ()=>{
+      wheelAudio.unlock();
+      wheelAudio.playButton();
+      restartActivity();
+    });
+    homeBtn?.addEventListener("click", (event)=>{
+      wheelAudio.unlock();
+      wheelAudio.playButton();
+      goHomePage(event);
+    });
     homeBtn?.addEventListener("pointerup", (event)=>{
       if (event.pointerType === "touch" || event.pointerType === "pen") {
         goHomePage(event);
@@ -2937,6 +3120,8 @@
     });
 
     document.getElementById("backBtn").addEventListener("click", ()=>{
+      wheelAudio.unlock();
+      wheelAudio.playButton();
       persistPayload();
 
       if (document.referrer && document.referrer !== location.href) {
@@ -3059,6 +3244,7 @@
       introFrame = requestAnimationFrame(animate);
     }
 
+    wheelAudio.setEnabled(payload.soundEnabled !== false);
     applyWheelTheme(payload.theme);
     setVisualZoomScale(1);
     buildWheel();
