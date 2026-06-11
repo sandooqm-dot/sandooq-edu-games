@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-themes-clean-v30 -->
+<!-- version: index-buttons-fix-v31 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5573,17 +5573,6 @@
       if (enabled) centerQuestionInput?.focus();
       saveDraft();
     });
-  });
-
-
-  document.querySelectorAll("[data-sound-toggle]").forEach((btn)=>{
-    btn.addEventListener("click", ()=>{
-      wheelSoundEnabled = btn.getAttribute("data-sound-toggle") === "on";
-      syncSoundUi();
-      if (wheelSoundEnabled) soundPreviewEngine.play("button");
-      saveDraft();
-    });
-  });
   });
 
   centerQuestionInput?.addEventListener("input", saveDraft);
