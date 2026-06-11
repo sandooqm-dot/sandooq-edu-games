@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-audio-files-v27 -->
+<!-- version: index-audio-files-v28 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5307,12 +5307,12 @@
 
   const soundPreviewEngine = (()=>{
     const SOUND_FILES = {
-      button: "sounds/wheel-button.mp3?v=60",
-      tick: "sounds/wheel-tick.mp3?v=60",
-      select: "sounds/wheel-select.mp3?v=60",
-      remove: "sounds/wheel-remove.mp3?v=60",
-      win: "sounds/wheel-win.mp3?v=60",
-      intro: "sounds/wheel-intro.mp3?v=60"
+      button: "sounds/wheel-button.mp3?v=63",
+      tick: "sounds/wheel-tick.mp3?v=63",
+      select: "sounds/wheel-select.mp3?v=63",
+      remove: "sounds/wheel-remove.mp3?v=63",
+      win: "sounds/wheel-win.mp3?v=63",
+      intro: "sounds/wheel-intro.mp3?v=63"
     };
 
     const cache = {};
@@ -5326,7 +5326,7 @@
       if (!cache[name]) {
         const audio = new Audio(src);
         audio.preload = "auto";
-        audio.volume = name === "tick" ? 0.92 : 0.98;
+        audio.volume = name === "tick" ? 1.0 : 0.98;
         cache[name] = audio;
       }
 
@@ -5354,7 +5354,7 @@
         audio.loop = false;
         audio.pause();
         audio.currentTime = 0;
-        audio.volume = name === "tick" ? 0.92 : 0.98;
+        audio.volume = name === "tick" ? 1.0 : 0.98;
         const promise = audio.play();
         if (promise && typeof promise.catch === "function") {
           promise.catch(()=> fallbackPlay(name));
@@ -5373,7 +5373,7 @@
         if (!ctx) {
           ctx = new AudioCtx();
           master = ctx.createGain();
-          master.gain.value = 0.42;
+          master.gain.value = 0.46;
           master.connect(ctx.destination);
         }
         if (ctx.state === "suspended") ctx.resume().catch(()=>{});
@@ -5394,7 +5394,7 @@
       osc.type = type;
       osc.frequency.setValueAtTime(freq, now);
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.008);
+      gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.006);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
       osc.connect(gain);
       gain.connect(master);
@@ -5408,9 +5408,7 @@
         return;
       }
       if (name === "tick") {
-        tone(560, 0.055, "triangle", 0.13);
-        tone(620, 0.055, "triangle", 0.10, 0.055);
-        tone(560, 0.055, "triangle", 0.13, 0.110);
+        tone(620, 0.052, "triangle", 0.18);
         return;
       }
       if (name === "select" || name === "win") {

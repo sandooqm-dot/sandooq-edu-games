@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-audio-files-v60 -->
+  <!-- version: wheel-audio-files-v61 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-audio-files-v60</title>
+  <title>العجلة الدوارة - wheel-audio-files-v61</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1168,27 +1168,27 @@
     */
     const wheelAudio = (()=>{
       const SOUND_FILES = {
-        button: "sounds/wheel-button.mp3?v=60",
-        tick: "sounds/wheel-tick.mp3?v=60",
-        select: "sounds/wheel-select.mp3?v=60",
-        remove: "sounds/wheel-remove.mp3?v=60",
-        intro: "sounds/wheel-intro.mp3?v=60",
-        win: "sounds/wheel-win.mp3?v=60"
+        button: "sounds/wheel-button.mp3?v=63",
+        tick: "sounds/wheel-tick.mp3?v=63",
+        select: "sounds/wheel-select.mp3?v=63",
+        remove: "sounds/wheel-remove.mp3?v=63",
+        intro: "sounds/wheel-intro.mp3?v=63",
+        win: "sounds/wheel-win.mp3?v=63"
       };
 
       let enabled = true;
       let tickingActive = false;
       let lastTickIndex = -1;
-      let lastTickAt = 0;
+      let lastTickBin = null;
       let tickPoolIndex = 0;
       const cache = {};
       const tickPool = [];
 
-      // Web Audio للـ tick فقط حتى يطلع "تك تك تك" سريع ونظيف بدون تقطيع.
+      // Web Audio للـ tick: أدق وأسرع من HTMLAudio عند التكرار السريع.
       let ctx = null;
       let master = null;
       let tickBuffer = null;
-      let tickBufferLoading = false;
+      let tickBufferPromise = null;
 
       function readEnabled(){
         try {
@@ -1221,7 +1221,7 @@
         if (!src) return null;
 
         if (!tickPool.length) {
-          for (let i = 0; i < 8; i += 1) {
+          for (let i = 0; i < 14; i += 1) {
             const audio = new Audio(src);
             audio.preload = "auto";
             audio.volume = 1.0;
@@ -1244,7 +1244,7 @@
           if (!ctx) {
             ctx = new AudioCtx();
             master = ctx.createGain();
-            master.gain.value = 0.98;
+            master.gain.value = 1.0;
             master.connect(ctx.destination);
           }
 
@@ -1258,35 +1258,50 @@
         }
       }
 
-      async function loadTickBuffer(){
+      function loadTickBuffer(){
         const audio = ensureAudioContext();
-        if (!audio || tickBuffer || tickBufferLoading) return;
+        if (!audio) return Promise.resolve(null);
+        if (tickBuffer) return Promise.resolve(tickBuffer);
+        if (tickBufferPromise) return tickBufferPromise;
 
-        tickBufferLoading = true;
-        try {
-          const response = await fetch(SOUND_FILES.tick, { cache: "force-cache" });
-          const arrayBuffer = await response.arrayBuffer();
-          tickBuffer = await audio.decodeAudioData(arrayBuffer);
-        } catch (_) {
-          tickBuffer = null;
-        } finally {
-          tickBufferLoading = false;
-        }
+        tickBufferPromise = fetch(SOUND_FILES.tick, { cache: "reload" })
+          .then((response)=> response.arrayBuffer())
+          .then((arrayBuffer)=> audio.decodeAudioData(arrayBuffer))
+          .then((buffer)=>{
+            tickBuffer = buffer;
+            return tickBuffer;
+          })
+          .catch(()=>{
+            tickBuffer = null;
+            return null;
+          })
+          .finally(()=>{
+            tickBufferPromise = null;
+          });
+
+        return tickBufferPromise;
       }
 
-      function playTickBuffer(playbackRate = 1){
+      function playTickBufferBurst(count = 1){
         const audio = ensureAudioContext();
         if (!audio || !master || !tickBuffer) return false;
 
         try {
-          const source = audio.createBufferSource();
-          const gain = audio.createGain();
-          source.buffer = tickBuffer;
-          source.playbackRate.value = playbackRate;
-          gain.gain.value = 1.0;
-          source.connect(gain);
-          gain.connect(master);
-          source.start(audio.currentTime);
+          const safeCount = Math.max(1, Math.min(18, count));
+          const startAt = audio.currentTime;
+          const spacing = safeCount > 5 ? 0.010 : 0.014;
+
+          for (let i = 0; i < safeCount; i += 1) {
+            const source = audio.createBufferSource();
+            const gain = audio.createGain();
+            source.buffer = tickBuffer;
+            source.playbackRate.value = 1 + ((i % 3) - 1) * 0.012;
+            gain.gain.value = 1.0;
+            source.connect(gain);
+            gain.connect(master);
+            source.start(startAt + i * spacing);
+          }
+
           return true;
         } catch (_) {
           return false;
@@ -1319,48 +1334,80 @@
         }
       }
 
-      function fallbackTone(freq = 560, duration = 0.035, type = "triangle", volume = 0.16){
+      function fallbackToneBurst(count = 1){
         const audio = ensureAudioContext();
         if (!audio || !master) return;
 
-        const now = audio.currentTime;
-        const osc = audio.createOscillator();
-        const gain = audio.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now);
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(volume, now + 0.004);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-        osc.connect(gain);
-        gain.connect(master);
-        osc.start(now);
-        osc.stop(now + duration + 0.025);
+        const safeCount = Math.max(1, Math.min(18, count));
+        const startAt = audio.currentTime;
+        const spacing = safeCount > 5 ? 0.010 : 0.014;
+
+        for (let i = 0; i < safeCount; i += 1) {
+          const now = startAt + i * spacing;
+          const osc = audio.createOscillator();
+          const gain = audio.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(610 + (i % 2) * 35, now);
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.linearRampToValueAtTime(0.18, now + 0.003);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.045);
+          osc.connect(gain);
+          gain.connect(master);
+          osc.start(now);
+          osc.stop(now + 0.065);
+        }
+      }
+
+      function playTickBurst(count = 1){
+        if (playTickBufferBurst(count)) return;
+
+        const safeCount = Math.max(1, Math.min(10, count));
+        for (let i = 0; i < safeCount; i += 1) {
+          window.setTimeout(()=>{
+            const audio = getTickAudio();
+            const ok = playAudioElement(audio, {
+              volume: 1.0,
+              playbackRate: 1 + ((i % 3) - 1) * 0.012
+            });
+            if (!ok) fallbackToneBurst(1);
+          }, i * 10);
+        }
       }
 
       function playNamed(name){
         const ok = playAudioElement(getAudio(name), { volume: name === "button" ? 0.92 : 0.98 });
-        if (!ok && name === "tick") fallbackTone();
+        if (!ok && name === "tick") fallbackToneBurst(1);
       }
 
       function playButton(){
         playNamed("button");
       }
 
-      function playTick(index = 0){
+      function playTick(index = 0, tickPosition = null){
         if (!tickingActive) return;
-        if (index === lastTickIndex) return;
 
-        const now = performance.now();
-        if (now - lastTickAt < 22) return;
+        const currentBin = Number.isFinite(tickPosition)
+          ? Math.floor(tickPosition)
+          : Number(index);
 
+        if (!Number.isFinite(currentBin)) return;
+
+        if (lastTickBin === null) {
+          lastTickBin = currentBin;
+          lastTickIndex = index;
+          return;
+        }
+
+        if (currentBin === lastTickBin) {
+          lastTickIndex = index;
+          return;
+        }
+
+        const crossed = Math.abs(currentBin - lastTickBin);
+        lastTickBin = currentBin;
         lastTickIndex = index;
-        lastTickAt = now;
 
-        const playbackRate = 0.98 + (Math.abs(index) % 3) * 0.018;
-        if (playTickBuffer(playbackRate)) return;
-
-        const ok = playAudioElement(getTickAudio(), { volume: 1.0, playbackRate });
-        if (!ok) fallbackTone(560 + (Math.abs(index) % 2) * 32, 0.035, "triangle", 0.16);
+        playTickBurst(crossed);
       }
 
       function playSelect(){
@@ -1383,12 +1430,13 @@
         preload();
         tickingActive = true;
         lastTickIndex = -1;
-        lastTickAt = 0;
+        lastTickBin = null;
       }
 
       function endTicks(){
         tickingActive = false;
         lastTickIndex = -1;
+        lastTickBin = null;
       }
 
       function preload(){
@@ -1403,6 +1451,7 @@
       function unlock(){
         preload();
         ensureAudioContext();
+        return loadTickBuffer();
       }
 
       function setEnabled(value){
@@ -2832,10 +2881,20 @@
       });
     }
 
+    function tickPositionForRotation(degrees){
+      const items = getItems();
+      const count = Math.max(items.length, 1);
+      const step = 360 / count;
+      return (270 - degrees) / step;
+    }
+
     function setRotation(degrees){
       rotation = degrees;
       wheelRotor.style.transform = `rotate(${degrees}deg)`;
-      wheelAudio.playTick(currentSectorIndexForRotation(degrees));
+      wheelAudio.playTick(
+        currentSectorIndexForRotation(degrees),
+        tickPositionForRotation(degrees)
+      );
     }
 
     function fitCenterText(){
@@ -3224,8 +3283,8 @@
     wheelShell.addEventListener("pointerup", endDrag);
     wheelShell.addEventListener("pointercancel", endDrag);
 
-    document.getElementById("spinBtn").addEventListener("click", ()=>{
-      wheelAudio.unlock();
+    document.getElementById("spinBtn").addEventListener("click", async ()=>{
+      await wheelAudio.unlock();
       wheelAudio.playButton();
       afterSpin.classList.remove("show");
       spinRandom(1);
