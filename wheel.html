@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-forest-v44 -->
+  <!-- version: wheel-theme-math-v45 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-forest-v44</title>
+  <title>العجلة الدوارة - wheel-theme-math-v45</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -98,28 +98,36 @@
       opacity:1;
       background-color:#fff;
       background-image:
-        url("theme-original-bg.webp?v=44"),
-        url("theme-original-bg.png?v=44"),
-        url("theme-original.webp?v=44"),
-        url("theme-original.png?v=44");
+        url("theme-original-bg.webp?v=45"),
+        url("theme-original-bg.png?v=45"),
+        url("theme-original.webp?v=45"),
+        url("theme-original.png?v=45");
     }
 
     .wheel-page.wheel-theme-sky-clouds .theme-background{
       opacity:1;
       background-color:#58c7f3;
       background-image:
-        url("theme-sky-clouds-bg.webp?v=44"),
-        url("theme-sky-clouds-bg.png?v=44"),
-        url("theme-sky-clouds.webp?v=44"),
-        url("theme-sky-clouds.png?v=44");
+        url("theme-sky-clouds-bg.webp?v=45"),
+        url("theme-sky-clouds-bg.png?v=45"),
+        url("theme-sky-clouds.webp?v=45"),
+        url("theme-sky-clouds.png?v=45");
     }
 
     .wheel-page.wheel-theme-forest .theme-background{
       opacity:1;
       background-color:#6ec9ee;
       background-image:
-        url("theme-forest-bg.webp?v=44"),
+        url("theme-forest-bg.webp?v=45"),
         linear-gradient(180deg, #7bd2f3 0%, #7eb64b 100%);
+    }
+
+    .wheel-page.wheel-theme-math .theme-background{
+      opacity:1;
+      background-color:#f5f4e7;
+      background-image:
+        url("theme-math-bg.webp?v=45"),
+        linear-gradient(180deg, #f5f4e7 0%, #dfe7ef 100%);
     }
 
     .wheel-logo{
@@ -1148,7 +1156,7 @@
     function applyWheelTheme(theme){
       if (!wheelPage) return;
       const normalizedTheme = normalizeWheelTheme(theme);
-      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest");
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math");
       wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
 
       /*
@@ -1163,28 +1171,36 @@
         if (normalizedTheme === "classroom") {
           themeBackground.style.backgroundColor = "#fff";
           themeBackground.style.backgroundImage = [
-            'url("theme-original-bg.webp?v=44")',
-            'url("theme-original-bg.png?v=44")',
-            'url("theme-original.webp?v=44")',
-            'url("theme-original.png?v=44")'
+            'url("theme-original-bg.webp?v=45")',
+            'url("theme-original-bg.png?v=45")',
+            'url("theme-original.webp?v=45")',
+            'url("theme-original.png?v=45")'
           ].join(", ");
         }
 
         if (normalizedTheme === "sky-clouds") {
           themeBackground.style.backgroundColor = "#58c7f3";
           themeBackground.style.backgroundImage = [
-            'url("theme-sky-clouds-bg.webp?v=44")',
-            'url("theme-sky-clouds-bg.png?v=44")',
-            'url("theme-sky-clouds.webp?v=44")',
-            'url("theme-sky-clouds.png?v=44")'
+            'url("theme-sky-clouds-bg.webp?v=45")',
+            'url("theme-sky-clouds-bg.png?v=45")',
+            'url("theme-sky-clouds.webp?v=45")',
+            'url("theme-sky-clouds.png?v=45")'
           ].join(", ");
         }
 
         if (normalizedTheme === "forest") {
           themeBackground.style.backgroundColor = "#6ec9ee";
           themeBackground.style.backgroundImage = [
-            'url("theme-forest-bg.webp?v=44")',
+            'url("theme-forest-bg.webp?v=45")',
             'linear-gradient(180deg, #7bd2f3 0%, #7eb64b 100%)'
+          ].join(", ");
+        }
+
+        if (normalizedTheme === "math") {
+          themeBackground.style.backgroundColor = "#f5f4e7";
+          themeBackground.style.backgroundImage = [
+            'url("theme-math-bg.webp?v=45")',
+            'linear-gradient(180deg, #f5f4e7 0%, #dfe7ef 100%)'
           ].join(", ");
         }
       }
@@ -1307,6 +1323,17 @@
         "الغابة"
       ].includes(value)) {
         return "forest";
+      }
+
+      if ([
+        "math",
+        "maths",
+        "mathematics",
+        "theme-math",
+        "رياضيات",
+        "الرياضيات"
+      ].includes(value)) {
+        return "math";
       }
 
       return "original";
