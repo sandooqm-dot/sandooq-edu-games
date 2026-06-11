@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-sky-clouds-v38 -->
+  <!-- version: wheel-theme-sky-clouds-v39 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-sky-clouds-v38</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v39</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -98,20 +98,20 @@
       opacity:1;
       background-color:#fff;
       background-image:
-        url("theme-original-bg.webp?v=38"),
-        url("theme-original-bg.png?v=38"),
-        url("theme-original.webp?v=38"),
-        url("theme-original.png?v=38");
+        url("theme-original-bg.webp?v=39"),
+        url("theme-original-bg.png?v=39"),
+        url("theme-original.webp?v=39"),
+        url("theme-original.png?v=39");
     }
 
     .wheel-page.wheel-theme-sky-clouds .theme-background{
       opacity:1;
       background-color:#58c7f3;
       background-image:
-        url("theme-sky-clouds-bg.webp?v=38"),
-        url("theme-sky-clouds-bg.png?v=38"),
-        url("theme-sky-clouds.webp?v=38"),
-        url("theme-sky-clouds.png?v=38");
+        url("theme-sky-clouds-bg.webp?v=39"),
+        url("theme-sky-clouds-bg.png?v=39"),
+        url("theme-sky-clouds.webp?v=39"),
+        url("theme-sky-clouds.png?v=39");
     }
 
     .wheel-logo{
@@ -146,24 +146,24 @@
     }
 
     /*
-      wheel-38:
-      Camera Zoom In / Ken Burns intro مع عجلة أبعد وأصغر في البداية.
+      wheel-39:
+      Camera Zoom In / Ken Burns intro بحركة عجلة أبطأ وأنعم جدًا.
       البداية: الخلفية تظهر كمشهد واسع + العجلة بعيدة.
       النهاية: الخلفية تكبر فتختفي الأطراف + العجلة تصل للحجم الطبيعي.
       بعد الانترو تظهر الأزرار وتبدأ اللعبة طبيعي.
     */
     :root{
-      --intro-duration:7.20s;
+      --intro-duration:8.60s;
       --intro-bg-final-scale:1.18;
     }
 
     .wheel-page.intro-playing .wheel-stage{
       transform-origin:center center;
-      animation:introWheelCameraIn var(--intro-duration) cubic-bezier(.12,.70,.18,1) both;
+      animation:introWheelCameraIn var(--intro-duration) cubic-bezier(.08,.42,.16,1) both;
     }
 
     .wheel-page.intro-playing .theme-background{
-      animation:introBackgroundCameraIn var(--intro-duration) cubic-bezier(.12,.70,.18,1) both;
+      animation:introBackgroundCameraIn var(--intro-duration) cubic-bezier(.08,.42,.16,1) both;
     }
 
     .wheel-page.intro-done .theme-background{
@@ -172,7 +172,7 @@
 
     .wheel-page.intro-playing .wheel-arrow{
       opacity:0;
-      animation:introArrowEnter .70s ease-out 6.35s both;
+      animation:introArrowEnter .75s ease-out 7.55s both;
     }
 
     .wheel-page.intro-playing .wheel-logo{
@@ -184,9 +184,17 @@
         transform:scale(1);
         filter:saturate(1.04);
       }
-      30%{
+      28%{
         transform:scale(1);
         filter:saturate(1.04);
+      }
+      52%{
+        transform:scale(1.045);
+        filter:saturate(1.03);
+      }
+      76%{
+        transform:scale(1.105);
+        filter:saturate(1.015);
       }
       100%{
         transform:scale(var(--intro-bg-final-scale));
@@ -199,13 +207,33 @@
         opacity:.94;
         transform:scale(.42);
       }
-      30%{
+      28%{
         opacity:.94;
         transform:scale(.42);
       }
+      40%{
+        opacity:.96;
+        transform:scale(.48);
+      }
+      52%{
+        opacity:.98;
+        transform:scale(.58);
+      }
+      64%{
+        opacity:1;
+        transform:scale(.70);
+      }
+      76%{
+        opacity:1;
+        transform:scale(.82);
+      }
       88%{
         opacity:1;
-        transform:scale(1.010);
+        transform:scale(.93);
+      }
+      96%{
+        opacity:1;
+        transform:scale(.985);
       }
       100%{
         opacity:1;
@@ -1185,20 +1213,20 @@
         if (normalizedTheme === "classroom") {
           themeBackground.style.backgroundColor = "#fff";
           themeBackground.style.backgroundImage = [
-            'url("theme-original-bg.webp?v=38")',
-            'url("theme-original-bg.png?v=38")',
-            'url("theme-original.webp?v=38")',
-            'url("theme-original.png?v=38")'
+            'url("theme-original-bg.webp?v=39")',
+            'url("theme-original-bg.png?v=39")',
+            'url("theme-original.webp?v=39")',
+            'url("theme-original.png?v=39")'
           ].join(", ");
         }
 
         if (normalizedTheme === "sky-clouds") {
           themeBackground.style.backgroundColor = "#58c7f3";
           themeBackground.style.backgroundImage = [
-            'url("theme-sky-clouds-bg.webp?v=38")',
-            'url("theme-sky-clouds-bg.png?v=38")',
-            'url("theme-sky-clouds.webp?v=38")',
-            'url("theme-sky-clouds.png?v=38")'
+            'url("theme-sky-clouds-bg.webp?v=39")',
+            'url("theme-sky-clouds-bg.png?v=39")',
+            'url("theme-sky-clouds.webp?v=39")',
+            'url("theme-sky-clouds.png?v=39")'
           ].join(", ");
         }
       }
@@ -2716,7 +2744,7 @@
         }
       };
 
-      setTimeout(endIntro, 7550);
+      setTimeout(endIntro, 8950);
     }
 
     applyWheelTheme(payload.theme);
