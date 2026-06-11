@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-english-v46 -->
+  <!-- version: wheel-theme-flowers-v47 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-english-v46</title>
+  <title>العجلة الدوارة - wheel-theme-flowers-v47</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -136,6 +136,14 @@
       background-image:
         url("theme-english-bg.webp?v=46"),
         linear-gradient(180deg, #72d0d2 0%, #72d0d2 100%);
+    }
+
+    .wheel-page.wheel-theme-flowers .theme-background{
+      opacity:1;
+      background-color:#f8edf3;
+      background-image:
+        url("theme-flowers-bg.webp?v=47"),
+        linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%);
     }
 
     .wheel-logo{
@@ -1164,7 +1172,7 @@
     function applyWheelTheme(theme){
       if (!wheelPage) return;
       const normalizedTheme = normalizeWheelTheme(theme);
-      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english");
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english", "wheel-theme-flowers");
       wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
 
       /*
@@ -1217,6 +1225,14 @@
           themeBackground.style.backgroundImage = [
             'url("theme-english-bg.webp?v=46")',
             'linear-gradient(180deg, #72d0d2 0%, #72d0d2 100%)'
+          ].join(", ");
+        }
+
+        if (normalizedTheme === "flowers") {
+          themeBackground.style.backgroundColor = "#f8edf3";
+          themeBackground.style.backgroundImage = [
+            'url("theme-flowers-bg.webp?v=47")',
+            'linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%)'
           ].join(", ");
         }
       }
@@ -1363,6 +1379,21 @@
         "الإنجليزي"
       ].includes(value)) {
         return "english";
+      }
+
+      if ([
+        "flowers",
+        "flower",
+        "floral",
+        "theme-flowers",
+        "ازهار وورود",
+        "أزهار وورود",
+        "ازهار",
+        "أزهار",
+        "ورود",
+        "الورود"
+      ].includes(value)) {
+        return "flowers";
       }
 
       return "original";
