@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v4 -->
+  <!-- version: open-box-v5 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -14,8 +14,8 @@
       --blue:#1688d3;
       --box-size:150px;
       --gap:24px;
-      --logo-w:clamp(120px, 15.4vw, 225px);
-      --bottom-space:calc(72px + var(--safe-bottom));
+      --logo-w:clamp(86px, 9.2vw, 148px);
+      --bottom-space:calc(60px + var(--safe-bottom));
     }
 
     *{
@@ -126,11 +126,11 @@
 
     .game-logo{
       position:absolute;
-      top:clamp(14px, 2.4vw, 30px);
-      left:clamp(16px, 2.8vw, 38px);
+      top:clamp(10px, 1.7vw, 22px);
+      left:clamp(12px, 2vw, 30px);
       width:var(--logo-w);
       height:auto;
-      max-height:clamp(98px, 15vw, 180px);
+      max-height:clamp(68px, 9vw, 120px);
       object-fit:contain;
       z-index:80;
       pointer-events:none;
@@ -140,17 +140,17 @@
 
     .stage{
       position:absolute;
-      inset:calc(74px + var(--safe-top)) 0 var(--bottom-space) 0;
+      inset:calc(46px + var(--safe-top)) 0 var(--bottom-space) 0;
       z-index:2;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:clamp(10px, 2vw, 28px);
+      padding:clamp(8px, 1.5vw, 20px);
       direction:ltr;
     }
 
     .boxes-grid{
-      width:min(94vw, 1280px);
+      width:min(93vw, 1180px);
       max-height:100%;
       display:grid;
       grid-template-columns:repeat(var(--cols, 4), var(--box-size));
@@ -181,21 +181,21 @@
       width:100%;
       height:100%;
       transform-style:preserve-3d;
-      filter:drop-shadow(0 16px 20px rgba(0,0,0,.12));
+      filter:drop-shadow(0 10px 14px rgba(0,0,0,.10));
     }
 
     .box-base{
       position:absolute;
-      inset:8% 5% 5%;
+      inset:6% 4% 4%;
       z-index:1;
-      border-radius:13px;
+      border-radius:11px;
       background:
         linear-gradient(145deg, rgba(255,255,255,.20) 0%, transparent 26%),
         linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 50%, var(--box-dark) 100%);
-      border:clamp(3px, .55vw, 7px) solid var(--box-border, rgba(0,0,0,.16));
+      border:clamp(2px, .36vw, 5px) solid var(--box-border, rgba(0,0,0,.16));
       box-shadow:
-        inset 0 13px 22px rgba(255,255,255,.15),
-        inset 0 -16px 0 rgba(0,0,0,.17),
+        inset 0 9px 16px rgba(255,255,255,.13),
+        inset 0 -7px 0 rgba(0,0,0,.12),
         0 8px 16px rgba(0,0,0,.08);
       overflow:hidden;
     }
@@ -203,15 +203,15 @@
     .box-base::before{
       content:"";
       position:absolute;
-      inset:8% 8% 15%;
-      border-radius:10px;
+      inset:6% 6% 8%;
+      border-radius:9px;
       background:
         radial-gradient(circle at 50% 35%, var(--box-light) 0%, var(--box-color) 42%, var(--box-dark) 100%);
       box-shadow:
-        inset 0 20px 28px rgba(0,0,0,.32),
-        inset 13px 0 20px rgba(0,0,0,.17),
-        inset -13px 0 20px rgba(255,255,255,.06),
-        inset 0 -18px 18px rgba(0,0,0,.16);
+        inset 0 14px 22px rgba(0,0,0,.28),
+        inset 9px 0 14px rgba(0,0,0,.13),
+        inset -9px 0 14px rgba(255,255,255,.06),
+        inset 0 -9px 12px rgba(0,0,0,.12);
       opacity:.96;
     }
 
@@ -220,8 +220,8 @@
       position:absolute;
       left:10%;
       right:10%;
-      bottom:7%;
-      height:13%;
+      bottom:4%;
+      height:7%;
       border-radius:50%;
       background:rgba(0,0,0,.16);
       filter:blur(5px);
@@ -230,25 +230,25 @@
 
     .box-hinge{
       position:absolute;
-      left:6.5%;
-      right:6.5%;
-      top:3%;
-      height:10%;
+      left:7%;
+      right:7%;
+      top:3.5%;
+      height:6%;
       z-index:12;
       border-radius:999px;
       background:
         linear-gradient(180deg, rgba(255,255,255,.36), rgba(255,255,255,.02) 45%, rgba(0,0,0,.18)),
         linear-gradient(90deg, var(--box-dark), var(--box-color) 18%, var(--box-light) 50%, var(--box-color) 82%, var(--box-dark));
-      border:clamp(2px, .35vw, 4px) solid var(--box-border);
+      border:clamp(1.5px, .26vw, 3px) solid var(--box-border);
       box-shadow:
-        0 3px 5px rgba(0,0,0,.15),
-        inset 0 -4px 0 rgba(0,0,0,.12);
+        0 2px 4px rgba(0,0,0,.12),
+        inset 0 -2px 0 rgba(0,0,0,.10);
       pointer-events:none;
     }
 
     .box-content{
       position:absolute;
-      inset:19% 13% 17%;
+      inset:12% 8% 10%;
       z-index:4;
       display:flex;
       align-items:center;
@@ -268,20 +268,20 @@
 
     .box-lid{
       position:absolute;
-      left:3%;
-      right:3%;
-      top:4%;
-      height:88%;
+      left:3.5%;
+      right:3.5%;
+      top:4.5%;
+      height:87%;
       z-index:10;
-      border-radius:14px;
-      border:clamp(4px, .7vw, 8px) solid var(--box-border, rgba(0,0,0,.16));
+      border-radius:11px;
+      border:clamp(2px, .42vw, 5px) solid var(--box-border, rgba(0,0,0,.16));
       background:
         linear-gradient(180deg, rgba(255,255,255,.24) 0%, rgba(255,255,255,.06) 28%, transparent 45%),
         linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 58%, var(--box-dark) 100%);
       box-shadow:
-        inset 0 -14px 0 rgba(0,0,0,.15),
-        inset 0 10px 0 rgba(255,255,255,.20),
-        0 10px 20px rgba(0,0,0,.10);
+        inset 0 -7px 0 rgba(0,0,0,.13),
+        inset 0 6px 0 rgba(255,255,255,.18),
+        0 8px 14px rgba(0,0,0,.08);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -309,12 +309,12 @@
     .box-lid::before{
       content:"";
       position:absolute;
-      inset:8%;
+      inset:5%;
       border-radius:10px;
       background:
         linear-gradient(180deg, rgba(255,255,255,.12), transparent 55%),
         rgba(255,255,255,.04);
-      box-shadow:inset 0 -9px 0 rgba(0,0,0,.10);
+      box-shadow:inset 0 -4px 0 rgba(0,0,0,.08);
       pointer-events:none;
     }
 
@@ -324,7 +324,7 @@
       left:11%;
       right:11%;
       top:7%;
-      height:12%;
+      height:7%;
       border-radius:999px;
       background:rgba(255,255,255,.13);
       box-shadow:0 1px 4px rgba(255,255,255,.12);
@@ -333,19 +333,19 @@
 
     .box-front-lip{
       position:absolute;
-      left:5%;
-      right:5%;
+      left:6%;
+      right:6%;
       bottom:3%;
-      height:16%;
+      height:7%;
       z-index:9;
-      border-radius:0 0 13px 13px;
+      border-radius:0 0 10px 10px;
       background:
         linear-gradient(180deg, var(--box-color), var(--box-dark));
-      border:clamp(3px, .55vw, 6px) solid var(--box-border);
+      border:clamp(1.5px, .3vw, 4px) solid var(--box-border);
       box-shadow:
-        inset 0 8px 0 rgba(255,255,255,.12),
-        inset 0 -7px 0 rgba(0,0,0,.18),
-        0 4px 10px rgba(0,0,0,.12);
+        inset 0 3px 0 rgba(255,255,255,.10),
+        inset 0 -3px 0 rgba(0,0,0,.14),
+        0 3px 8px rgba(0,0,0,.10);
       pointer-events:none;
       opacity:0;
       transform:translateY(18%);
@@ -381,7 +381,7 @@
       justify-content:center;
       text-align:center;
       color:#fff;
-      font-size:clamp(14px, calc(var(--box-size) * .18), 34px);
+      font-size:clamp(15px, calc(var(--box-size) * .20), 36px);
       line-height:1.18;
       font-weight:900;
       overflow-wrap:anywhere;
@@ -416,7 +416,7 @@
     .result-mixed .result-text{
       height:auto;
       min-height:1.1em;
-      font-size:clamp(11px, calc(var(--box-size) * .12), 22px);
+      font-size:clamp(12px, calc(var(--box-size) * .13), 24px);
       line-height:1.12;
     }
 
@@ -435,17 +435,17 @@
       pointer-events:auto;
       position:absolute;
       bottom:0;
-      height:clamp(40px, 5.5vh, 52px);
-      border:3px solid #111;
-      border-radius:13px;
+      height:clamp(34px, 4.8vh, 44px);
+      border:2.5px solid #111;
+      border-radius:11px;
       color:#111;
-      font-size:clamp(16px, 2vw, 23px);
+      font-size:clamp(14px, 1.7vw, 19px);
       font-weight:900;
       line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:0 clamp(18px, 2.6vw, 32px);
+      padding:0 clamp(15px, 2vw, 24px);
       box-shadow:0 4px 0 rgba(0,0,0,.18);
       cursor:pointer;
       white-space:nowrap;
@@ -454,14 +454,14 @@
     .back-btn{
       left:clamp(16px, 2.6vw, 34px);
       background:#efd553;
-      min-width:clamp(88px, 9.5vw, 126px);
+      min-width:clamp(78px, 8vw, 108px);
     }
 
     .reset-btn{
       right:clamp(16px, 2.8vw, 42px);
       background:#1688d3;
       color:#fff;
-      min-width:clamp(88px, 9.5vw, 128px);
+      min-width:clamp(78px, 8vw, 110px);
     }
 
     .back-btn:active,
@@ -477,15 +477,15 @@
     }
 
     @media (max-width:560px){
-      :root{ --logo-w:120px; }
+      :root{ --logo-w:92px; }
 
       .game-logo{
-        top:calc(12px + var(--safe-top));
-        left:14px;
+        top:calc(10px + var(--safe-top));
+        left:12px;
       }
 
       .stage{
-        inset:calc(88px + var(--safe-top)) 0 calc(78px + var(--safe-bottom)) 0;
+        inset:calc(64px + var(--safe-top)) 0 calc(66px + var(--safe-bottom)) 0;
         padding:12px;
       }
 
@@ -496,11 +496,11 @@
 
       .back-btn,
       .reset-btn{
-        height:42px;
-        border-width:2.5px;
-        border-radius:11px;
-        font-size:16px;
-        padding:0 16px;
+        height:38px;
+        border-width:2px;
+        border-radius:10px;
+        font-size:15px;
+        padding:0 14px;
       }
     }
 
@@ -512,7 +512,7 @@
       }
 
       .game-logo{
-        width:clamp(102px, 13.1vw, 173px);
+        width:clamp(78px, 8.8vw, 130px);
         top:calc(10px + var(--safe-top));
       }
 
@@ -694,7 +694,7 @@
       let rows = Math.ceil(count / cols);
       let gap = count > 30 ? 8 : count > 20 ? 10 : count > 12 ? 14 : 24;
       let size = Math.min(
-        174,
+        158,
         Math.floor((width - gap * (cols - 1)) / cols),
         Math.floor((height - gap * (rows - 1)) / rows)
       );
@@ -705,7 +705,7 @@
         cols += 1;
         rows = Math.ceil(count / cols);
         size = Math.min(
-          174,
+          158,
           Math.floor((width - gap * (cols - 1)) / cols),
           Math.floor((height - gap * (rows - 1)) / rows)
         );
@@ -714,7 +714,7 @@
       if (size < minSize) {
         gap = Math.max(5, Math.floor(gap * 0.72));
         size = Math.min(
-          174,
+          158,
           Math.floor((width - gap * (cols - 1)) / cols),
           Math.floor((height - gap * (rows - 1)) / rows)
         );
