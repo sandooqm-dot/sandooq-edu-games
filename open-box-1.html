@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- version: open-box-v1 -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
+  <style>
+    :root{
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --ink:#111;
+      --yellow:#efd553;
+      --red:#f05d5b;
+      --blue:#5e88db;
+      --panel:#ffffff;
+      --box-size:min(22vw, 178px);
+      --gap:min(3.2vw, 34px);
+      --top-h:86px;
+      --bottom-h:76px;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+    }
+
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:100%;
+      background:#fff;
+      color:var(--ink);
+      overflow:hidden;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{
+      min-height:100dvh;
+    }
+
+    .box-page{
+      position:relative;
+      width:100%;
+      height:100dvh;
+      overflow:hidden;
+      background:#fff;
+      direction:ltr;
+      user-select:none;
+    }
+
+    .theme-background{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background:#fff;
+      background-position:center center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      transform:scale(1.04);
+    }
+
+    .box-page.theme-white .theme-background{
+      background:#fff;
+      background-image:none;
+    }
+
+    .box-page.theme-classroom .theme-background{
+      background-color:#fff;
+      background-image:
+        url("theme-original-bg.webp?v=45"),
+        url("theme-original-bg.png?v=45"),
+        linear-gradient(180deg, #eef6ef 0%, #d8c6a1 100%);
+    }
+
+    .box-page.theme-sky-clouds .theme-background{
+      background-color:#58c7f3;
+      background-image:
+        url("theme-sky-clouds-bg.webp?v=45"),
+        url("theme-sky-clouds-bg.png?v=45"),
+        linear-gradient(180deg, #bfefff 0%, #5cc5f2 100%);
+    }
+
+    .box-page.theme-forest .theme-background{
+      background-color:#6ec9ee;
+      background-image:
+        url("theme-forest-bg.webp?v=45"),
+        linear-gradient(180deg, #7bd2f3 0%, #7eb64b 100%);
+    }
+
+    .box-page.theme-math .theme-background{
+      background-color:#f5f4e7;
+      background-image:
+        url("theme-math-bg.webp?v=45"),
+        linear-gradient(180deg, #f5f4e7 0%, #dfe7ef 100%);
+    }
+
+    .box-page.theme-english .theme-background{
+      background-color:#72d0d2;
+      background-image:
+        url("theme-english-bg.webp?v=46"),
+        linear-gradient(180deg, #72d0d2 0%, #72d0d2 100%);
+    }
+
+    .box-page.theme-flowers .theme-background{
+      background-color:#f8edf3;
+      background-image:
+        url("theme-flowers-bg.webp?v=48"),
+        linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%);
+    }
+
+    .box-page.theme-national-day .theme-background{
+      background-color:#165f55;
+      background-image:
+        url("theme-national-day-v2-bg.webp?v=53"),
+        linear-gradient(180deg, #165f55 0%, #0f4f46 100%);
+    }
+
+    .box-page.theme-founding-day .theme-background{
+      background-color:#d7c9b1;
+      background-image:
+        url("theme-founding-day-bg.webp?v=1"),
+        linear-gradient(180deg, #d9ccb5 0%, #c9baa2 100%);
+    }
+
+    .top-bar{
+      position:absolute;
+      top:calc(14px + var(--safe-top));
+      left:clamp(14px, 3vw, 42px);
+      right:clamp(14px, 3vw, 42px);
+      z-index:5;
+      display:grid;
+      grid-template-columns:120px 1fr 120px;
+      align-items:center;
+      min-height:58px;
+      pointer-events:none;
+    }
+
+    .timer{
+      direction:ltr;
+      justify-self:start;
+      color:#222;
+      font-size:clamp(28px, 4.2vw, 56px);
+      font-weight:800;
+      letter-spacing:.5px;
+      opacity:.9;
+      pointer-events:auto;
+    }
+
+    .title{
+      justify-self:center;
+      text-align:center;
+      color:rgba(20,20,20,.72);
+      font-size:clamp(25px, 4.4vw, 58px);
+      font-weight:800;
+      line-height:1.08;
+      direction:rtl;
+    }
+
+    .theme-pill{
+      justify-self:end;
+      direction:rtl;
+      background:rgba(255,255,255,.78);
+      border:2px solid rgba(17,17,17,.16);
+      border-radius:999px;
+      padding:8px 14px;
+      color:#333;
+      font-size:clamp(13px, 1.8vw, 18px);
+      font-weight:800;
+      white-space:nowrap;
+      pointer-events:none;
+    }
+
+    .stage{
+      position:absolute;
+      inset:calc(var(--top-h) + var(--safe-top)) 0 calc(var(--bottom-h) + var(--safe-bottom)) 0;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(12px, 2vw, 24px);
+      direction:ltr;
+    }
+
+    .boxes-grid{
+      width:min(92vw, 1220px);
+      max-height:100%;
+      display:grid;
+      grid-template-columns:repeat(var(--cols, 4), var(--box-size));
+      justify-content:center;
+      align-content:center;
+      gap:var(--gap);
+      perspective:1200px;
+    }
+
+    .box-card{
+      width:var(--box-size);
+      height:var(--box-size);
+      border:none;
+      background:transparent;
+      padding:0;
+      cursor:pointer;
+      perspective:1000px;
+      touch-action:manipulation;
+    }
+
+    .box-inner{
+      position:relative;
+      width:100%;
+      height:100%;
+      transform-style:preserve-3d;
+      transition:transform .58s cubic-bezier(.18,.78,.16,1);
+    }
+
+    .box-card.opened .box-inner{
+      transform:rotateY(180deg);
+    }
+
+    .box-face{
+      position:absolute;
+      inset:0;
+      border-radius:14px;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:clamp(4px, .7vw, 8px) solid var(--box-border, rgba(0,0,0,.16));
+      box-shadow:
+        inset 0 -10px 0 rgba(0,0,0,.10),
+        inset 0 9px 0 rgba(255,255,255,.18),
+        0 10px 20px rgba(0,0,0,.10);
+    }
+
+    .box-front{
+      background:linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 58%, var(--box-dark) 100%);
+      color:#fff;
+      text-shadow:0 2px 3px rgba(0,0,0,.22);
+      font-size:clamp(26px, 5.4vw, 58px);
+      font-weight:800;
+    }
+
+    .box-back{
+      transform:rotateY(180deg);
+      background:#fff;
+      border-color:var(--box-border, #1ba6e8);
+      padding:clamp(8px, 1.4vw, 14px);
+      color:#111;
+      direction:rtl;
+      text-align:center;
+    }
+
+    .result-text{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:#111;
+      font-size:clamp(17px, 3.2vw, 34px);
+      line-height:1.25;
+      font-weight:900;
+      overflow-wrap:anywhere;
+    }
+
+    .result-image{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      border-radius:8px;
+      background:#fff;
+    }
+
+    .result-mixed{
+      width:100%;
+      height:100%;
+      display:grid;
+      grid-template-rows:minmax(0, 1fr) auto;
+      gap:6px;
+      align-items:center;
+      justify-items:center;
+    }
+
+    .result-mixed .result-image{
+      min-height:0;
+      max-height:100%;
+    }
+
+    .result-mixed .result-text{
+      font-size:clamp(13px, 2.2vw, 24px);
+      line-height:1.15;
+      min-height:1.2em;
+    }
+
+    .bottom-controls{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(14px + var(--safe-bottom));
+      height:54px;
+      z-index:8;
+      pointer-events:none;
+    }
+
+    .icon-btn,
+    .back-btn,
+    .reset-btn{
+      pointer-events:auto;
+      border:3px solid #111;
+      background:rgba(255,255,255,.80);
+      color:#111;
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+      cursor:pointer;
+      font-weight:900;
+    }
+
+    .menu-btn{
+      position:absolute;
+      left:clamp(16px, 3vw, 44px);
+      bottom:0;
+      width:clamp(48px, 6.8vw, 64px);
+      height:clamp(48px, 6.8vw, 64px);
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+    }
+
+    .menu-btn span,
+    .menu-btn span::before,
+    .menu-btn span::after{
+      display:block;
+      width:26px;
+      height:4px;
+      border-radius:99px;
+      background:#111;
+      content:"";
+    }
+
+    .menu-btn span{
+      position:relative;
+    }
+
+    .menu-btn span::before{
+      position:absolute;
+      top:-9px;
+      left:0;
+    }
+
+    .menu-btn span::after{
+      position:absolute;
+      top:9px;
+      left:0;
+    }
+
+    .right-actions{
+      position:absolute;
+      right:clamp(16px, 3vw, 44px);
+      bottom:0;
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+
+    .back-btn,
+    .reset-btn{
+      height:clamp(44px, 6vw, 54px);
+      border-radius:13px;
+      padding:0 clamp(16px, 2.8vw, 26px);
+      font-size:clamp(15px, 2.2vw, 22px);
+    }
+
+    .back-btn{
+      background:#efd553;
+    }
+
+    .reset-btn{
+      background:#fff;
+    }
+
+    .panel{
+      position:absolute;
+      left:clamp(16px, 3vw, 44px);
+      bottom:calc(76px + var(--safe-bottom));
+      width:min(310px, 84vw);
+      background:rgba(255,255,255,.94);
+      border:3px solid #111;
+      border-radius:18px;
+      z-index:20;
+      padding:14px;
+      direction:rtl;
+      box-shadow:0 14px 36px rgba(0,0,0,.18);
+      display:none;
+    }
+
+    .panel.show{
+      display:block;
+    }
+
+    .panel-title{
+      margin:0 0 10px;
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .panel-row{
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+
+    .panel-row button{
+      height:42px;
+      border:2px solid #111;
+      border-radius:12px;
+      background:#f6f6f6;
+      color:#111;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    @media (orientation:portrait){
+      :root{
+        --box-size:min(38vw, 160px);
+        --gap:min(4vw, 24px);
+        --top-h:116px;
+      }
+
+      .top-bar{
+        grid-template-columns:82px 1fr 82px;
+      }
+
+      .theme-pill{
+        display:none;
+      }
+
+      .boxes-grid{
+        grid-template-columns:repeat(var(--cols-p, 2), var(--box-size));
+      }
+    }
+
+    @media (max-width:560px){
+      :root{
+        --box-size:min(39vw, 142px);
+        --gap:14px;
+      }
+
+      .top-bar{
+        top:calc(10px + var(--safe-top));
+        left:12px;
+        right:12px;
+        grid-template-columns:70px 1fr 70px;
+      }
+
+      .timer{
+        font-size:31px;
+      }
+
+      .title{
+        font-size:26px;
+      }
+
+      .stage{
+        inset:calc(var(--top-h) + var(--safe-top)) 0 calc(78px + var(--safe-bottom)) 0;
+      }
+
+      .box-face{
+        border-radius:12px;
+      }
+
+      .right-actions{
+        gap:8px;
+      }
+
+      .back-btn,
+      .reset-btn{
+        padding:0 12px;
+        font-size:15px;
+      }
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      :root{
+        --box-size:min(18vw, 128px);
+        --gap:min(2.2vw, 20px);
+        --top-h:70px;
+        --bottom-h:58px;
+      }
+
+      .top-bar{
+        top:calc(8px + var(--safe-top));
+        min-height:44px;
+      }
+
+      .timer{
+        font-size:32px;
+      }
+
+      .title{
+        font-size:32px;
+      }
+
+      .bottom-controls{
+        bottom:calc(8px + var(--safe-bottom));
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="box-page theme-white" id="boxPage">
+    <div class="theme-background" id="themeBackground"></div>
+
+    <header class="top-bar">
+      <div class="timer" id="timerText">0:30</div>
+      <h1 class="title" id="pageTitle">اضغط صندوقًا لفتحه</h1>
+      <div class="theme-pill" id="themeName">خلفية بيضاء</div>
+    </header>
+
+    <section class="stage">
+      <div class="boxes-grid" id="boxesGrid" aria-label="صناديق اللعبة"></div>
+    </section>
+
+    <aside class="panel" id="menuPanel">
+      <h2 class="panel-title">خيارات سريعة</h2>
+      <div class="panel-row">
+        <button type="button" id="panelResetBtn">إغلاق كل الصناديق</button>
+        <button type="button" id="panelThemeBtn">تبديل الثيم للتجربة</button>
+      </div>
+    </aside>
+
+    <footer class="bottom-controls">
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="القائمة"><span></span></button>
+      <div class="right-actions">
+        <button class="reset-btn" id="resetBtn" type="button">إعادة</button>
+        <button class="back-btn" id="backBtn" type="button">رجوع</button>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const DEMO_ITEMS = [
+      { text:"القمر" },
+      { text:"الشمس" },
+      { text:"الرياض" },
+      { text:"الماء" },
+      { text:"الصلاة" },
+      { text:"كتاب" },
+      { text:"مدرسة" },
+      { text:"نخلة" }
+    ];
+
+    const THEMES = [
+      { id:"white", label:"خلفية بيضاء" },
+      { id:"classroom", label:"فصل مدرسي" },
+      { id:"sky-clouds", label:"سماء وغيوم" },
+      { id:"forest", label:"غابة" },
+      { id:"math", label:"رياضيات" },
+      { id:"english", label:"انجليزي" },
+      { id:"flowers", label:"ازهار وورود" },
+      { id:"national-day", label:"اليوم الوطني" },
+      { id:"founding-day", label:"يوم التأسيس" }
+    ];
+
+    const BOX_COLORS = [
+      { c:"#1e9be0", l:"#33b4f4", d:"#0786c9", b:"#2ab5f5" },
+      { c:"#d71e3b", l:"#ea2a48", d:"#b9122d", b:"#f05268" },
+      { c:"#ff790b", l:"#ff8a1d", d:"#f15a00", b:"#ff9a35" },
+      { c:"#21864a", l:"#2b9b5a", d:"#14743b", b:"#35a965" },
+      { c:"#c84dd4", l:"#dc62e7", d:"#ad34bb", b:"#e878ee" },
+      { c:"#283bd4", l:"#394ce6", d:"#1d27bd", b:"#5264ff" },
+      { c:"#44bf8f", l:"#58d4a5", d:"#2ea978", b:"#6be0b4" },
+      { c:"#ef310b", l:"#ff4218", d:"#d61d00", b:"#ff6842" },
+      { c:"#f0b429", l:"#ffd05b", d:"#d89812", b:"#ffde82" },
+      { c:"#7357d6", l:"#8a70ee", d:"#5c42bd", b:"#a491ff" },
+      { c:"#0097a7", l:"#16b5c6", d:"#007c88", b:"#31cbd8" },
+      { c:"#f06292", l:"#ff7baa", d:"#dd3d77", b:"#ff99bf" }
+    ];
+
+    const page = document.getElementById("boxPage");
+    const grid = document.getElementById("boxesGrid");
+    const pageTitle = document.getElementById("pageTitle");
+    const timerText = document.getElementById("timerText");
+    const themeName = document.getElementById("themeName");
+    const menuBtn = document.getElementById("menuBtn");
+    const menuPanel = document.getElementById("menuPanel");
+    const resetBtn = document.getElementById("resetBtn");
+    const backBtn = document.getElementById("backBtn");
+    const panelResetBtn = document.getElementById("panelResetBtn");
+    const panelThemeBtn = document.getElementById("panelThemeBtn");
+
+    let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
+    let items = loadItems();
+    let opened = new Set();
+    let seconds = Number(getUrlParam("time") || 30);
+    let timer = null;
+
+    function getUrlParam(name){
+      try {
+        return new URLSearchParams(window.location.search || "").get(name) || "";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function getSavedTheme(){
+      try {
+        return sessionStorage.getItem("sandooq_edu_box_theme_v1") || "";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function normalizeTheme(value){
+      const raw = String(value || "").trim().toLowerCase();
+      const map = {
+        "classic":"white",
+        "original":"white",
+        "خلفية بيضاء":"white",
+        "ابيض":"white",
+        "أبيض":"white",
+        "white":"white",
+        "classroom":"classroom",
+        "فصل مدرسة":"classroom",
+        "فصل مدرسي":"classroom",
+        "sky-clouds":"sky-clouds",
+        "سماء وغيوم":"sky-clouds",
+        "forest":"forest",
+        "غابة":"forest",
+        "math":"math",
+        "رياضيات":"math",
+        "english":"english",
+        "انجليزي":"english",
+        "flowers":"flowers",
+        "ازهار وورود":"flowers",
+        "أزهار وورود":"flowers",
+        "national-day":"national-day",
+        "اليوم الوطني":"national-day",
+        "founding-day":"founding-day",
+        "يوم التأسيس":"founding-day"
+      };
+      return map[raw] || THEMES.some((theme)=> theme.id === raw) ? (map[raw] || raw) : "white";
+    }
+
+    function loadItems(){
+      try {
+        const raw =
+          sessionStorage.getItem("sandooq_open_box_payload_v1") ||
+          sessionStorage.getItem("sandooq_open_box_draft_v1") ||
+          "";
+        if (!raw) return DEMO_ITEMS;
+        const payload = JSON.parse(raw);
+        const source = Array.isArray(payload) ? payload : payload.entries || payload.items || [];
+        const clean = source
+          .map((entry)=> ({
+            text: String(entry.text || entry.title || entry.answer || "").trim(),
+            imageData: entry.imageData || entry.image || "",
+            imageName: entry.imageName || ""
+          }))
+          .filter((entry)=> entry.text || entry.imageData || entry.imageName);
+        if (payload.theme) currentTheme = normalizeTheme(payload.theme);
+        if (payload.title) pageTitle.textContent = String(payload.title).trim();
+        if (Number.isFinite(Number(payload.time))) seconds = Number(payload.time);
+        return clean.length ? clean : DEMO_ITEMS;
+      } catch (_) {
+        return DEMO_ITEMS;
+      }
+    }
+
+    function applyTheme(themeId){
+      currentTheme = normalizeTheme(themeId);
+      page.className = `box-page theme-${currentTheme}`;
+      const theme = THEMES.find((item)=> item.id === currentTheme) || THEMES[0];
+      themeName.textContent = theme.label;
+      try { sessionStorage.setItem("sandooq_edu_box_theme_v1", currentTheme); } catch (_) {}
+    }
+
+    function getGridColumns(count){
+      if (window.matchMedia("(orientation: portrait)").matches) {
+        if (count <= 4) return 2;
+        if (count <= 9) return 3;
+        return 4;
+      }
+      if (count <= 4) return count;
+      if (count <= 8) return 4;
+      if (count <= 15) return 5;
+      return Math.min(10, Math.ceil(Math.sqrt(count * 1.6)));
+    }
+
+    function renderBoxes(){
+      const cols = getGridColumns(items.length);
+      const colsPortrait = items.length <= 4 ? 2 : (items.length <= 9 ? 3 : 4);
+      grid.style.setProperty("--cols", String(cols));
+      grid.style.setProperty("--cols-p", String(colsPortrait));
+      grid.innerHTML = "";
+
+      items.forEach((entry, index)=>{
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "box-card";
+        button.setAttribute("aria-label", `صندوق رقم ${index + 1}`);
+        button.dataset.index = String(index);
+
+        const color = BOX_COLORS[index % BOX_COLORS.length];
+        button.style.setProperty("--box-color", color.c);
+        button.style.setProperty("--box-light", color.l);
+        button.style.setProperty("--box-dark", color.d);
+        button.style.setProperty("--box-border", color.b);
+
+        const inner = document.createElement("span");
+        inner.className = "box-inner";
+
+        const front = document.createElement("span");
+        front.className = "box-face box-front";
+        front.textContent = String(index + 1);
+
+        const back = document.createElement("span");
+        back.className = "box-face box-back";
+        back.appendChild(createResultContent(entry));
+
+        inner.appendChild(front);
+        inner.appendChild(back);
+        button.appendChild(inner);
+
+        button.addEventListener("click", ()=>{
+          toggleBox(button, index);
+        });
+
+        grid.appendChild(button);
+      });
+    }
+
+    function createResultContent(entry){
+      const hasImage = Boolean(entry.imageData || entry.imageName);
+      const hasText = Boolean(entry.text);
+
+      if (hasImage && hasText) {
+        const wrap = document.createElement("span");
+        wrap.className = "result-mixed";
+
+        const img = document.createElement("img");
+        img.className = "result-image";
+        img.alt = "";
+        img.src = entry.imageData || entry.imageName;
+        wrap.appendChild(img);
+
+        const text = document.createElement("span");
+        text.className = "result-text";
+        text.textContent = entry.text;
+        wrap.appendChild(text);
+
+        return wrap;
+      }
+
+      if (hasImage) {
+        const img = document.createElement("img");
+        img.className = "result-image";
+        img.alt = "";
+        img.src = entry.imageData || entry.imageName;
+        return img;
+      }
+
+      const text = document.createElement("span");
+      text.className = "result-text";
+      text.textContent = entry.text || "—";
+      return text;
+    }
+
+    function toggleBox(button, index){
+      if (opened.has(index)) {
+        opened.delete(index);
+        button.classList.remove("opened");
+        button.setAttribute("aria-pressed", "false");
+        return;
+      }
+
+      opened.add(index);
+      button.classList.add("opened");
+      button.setAttribute("aria-pressed", "true");
+    }
+
+    function resetBoxes(){
+      opened.clear();
+      document.querySelectorAll(".box-card.opened").forEach((card)=>{
+        card.classList.remove("opened");
+        card.setAttribute("aria-pressed", "false");
+      });
+    }
+
+    function formatTime(total){
+      const safe = Math.max(0, Math.floor(total));
+      const m = Math.floor(safe / 60);
+      const s = safe % 60;
+      return `${m}:${String(s).padStart(2, "0")}`;
+    }
+
+    function startTimer(){
+      timerText.textContent = formatTime(seconds);
+      if (!Number.isFinite(seconds) || seconds <= 0) return;
+
+      window.clearInterval(timer);
+      timer = window.setInterval(()=>{
+        seconds -= 1;
+        timerText.textContent = formatTime(seconds);
+        if (seconds <= 0) {
+          window.clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    function toggleMenu(){
+      menuPanel.classList.toggle("show");
+    }
+
+    function cycleTheme(){
+      const currentIndex = THEMES.findIndex((theme)=> theme.id === currentTheme);
+      const next = THEMES[(currentIndex + 1 + THEMES.length) % THEMES.length];
+      applyTheme(next.id);
+      menuPanel.classList.remove("show");
+    }
+
+    function goBack(){
+      try {
+        if (history.length > 1) {
+          history.back();
+          return;
+        }
+      } catch (_) {}
+      window.location.href = "index.html";
+    }
+
+    menuBtn.addEventListener("click", toggleMenu);
+    resetBtn.addEventListener("click", resetBoxes);
+    panelResetBtn.addEventListener("click", ()=>{
+      resetBoxes();
+      menuPanel.classList.remove("show");
+    });
+    panelThemeBtn.addEventListener("click", cycleTheme);
+    backBtn.addEventListener("click", goBack);
+
+    window.addEventListener("resize", ()=>{
+      const cols = getGridColumns(items.length);
+      const colsPortrait = items.length <= 4 ? 2 : (items.length <= 9 ? 3 : 4);
+      grid.style.setProperty("--cols", String(cols));
+      grid.style.setProperty("--cols-p", String(colsPortrait));
+    }, { passive:true });
+
+    document.addEventListener("click", (event)=>{
+      if (!menuPanel.classList.contains("show")) return;
+      if (menuPanel.contains(event.target) || menuBtn.contains(event.target)) return;
+      menuPanel.classList.remove("show");
+    });
+
+    applyTheme(currentTheme);
+    renderBoxes();
+    startTimer();
+  </script>
+</body>
+</html>
