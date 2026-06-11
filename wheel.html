@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-sky-clouds-v40 -->
+  <!-- version: wheel-theme-sky-clouds-v41 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-sky-clouds-v40</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v41</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -98,20 +98,20 @@
       opacity:1;
       background-color:#fff;
       background-image:
-        url("theme-original-bg.webp?v=40"),
-        url("theme-original-bg.png?v=40"),
-        url("theme-original.webp?v=40"),
-        url("theme-original.png?v=40");
+        url("theme-original-bg.webp?v=41"),
+        url("theme-original-bg.png?v=41"),
+        url("theme-original.webp?v=41"),
+        url("theme-original.png?v=41");
     }
 
     .wheel-page.wheel-theme-sky-clouds .theme-background{
       opacity:1;
       background-color:#58c7f3;
       background-image:
-        url("theme-sky-clouds-bg.webp?v=40"),
-        url("theme-sky-clouds-bg.png?v=40"),
-        url("theme-sky-clouds.webp?v=40"),
-        url("theme-sky-clouds.png?v=40");
+        url("theme-sky-clouds-bg.webp?v=41"),
+        url("theme-sky-clouds-bg.png?v=41"),
+        url("theme-sky-clouds.webp?v=41"),
+        url("theme-sky-clouds.png?v=41");
     }
 
     .wheel-logo{
@@ -146,8 +146,8 @@
     }
 
     /*
-      wheel-40:
-      Camera Zoom In / Ken Burns intro بحركة JavaScript مستمرة بدون توقفات.
+      wheel-41:
+      Camera Zoom In / Ken Burns intro + زوم القسم المختار أبطأ وأنعم.
       البداية: الخلفية تظهر كمشهد واسع + العجلة بعيدة.
       النهاية: الخلفية تكبر فتختفي الأطراف + العجلة تصل للحجم الطبيعي.
       بعد الانترو تظهر الأزرار وتبدأ اللعبة طبيعي.
@@ -1152,20 +1152,20 @@
         if (normalizedTheme === "classroom") {
           themeBackground.style.backgroundColor = "#fff";
           themeBackground.style.backgroundImage = [
-            'url("theme-original-bg.webp?v=40")',
-            'url("theme-original-bg.png?v=40")',
-            'url("theme-original.webp?v=40")',
-            'url("theme-original.png?v=40")'
+            'url("theme-original-bg.webp?v=41")',
+            'url("theme-original-bg.png?v=41")',
+            'url("theme-original.webp?v=41")',
+            'url("theme-original.png?v=41")'
           ].join(", ");
         }
 
         if (normalizedTheme === "sky-clouds") {
           themeBackground.style.backgroundColor = "#58c7f3";
           themeBackground.style.backgroundImage = [
-            'url("theme-sky-clouds-bg.webp?v=40")',
-            'url("theme-sky-clouds-bg.png?v=40")',
-            'url("theme-sky-clouds.webp?v=40")',
-            'url("theme-sky-clouds.png?v=40")'
+            'url("theme-sky-clouds-bg.webp?v=41")',
+            'url("theme-sky-clouds-bg.png?v=41")',
+            'url("theme-sky-clouds.webp?v=41")',
+            'url("theme-sky-clouds.png?v=41")'
           ].join(", ");
         }
       }
@@ -2238,9 +2238,20 @@
 
       const startTime = performance.now();
 
+      /*
+        wheel-41:
+        زوم القسم المختار صار أبطأ وأنعم.
+        استبدلنا easeOutQuint لأنه يندفع بسرعة في البداية،
+        بمنحنى easeInOutSine عشان يبدأ بهدوء ويكمل بسلاسة وينتهي بهدوء.
+      */
+      function easeInOutSine(t){
+        const p = Math.max(0, Math.min(1, t));
+        return -(Math.cos(Math.PI * p) - 1) / 2;
+      }
+
       function frame(now){
         const progress = Math.min(1, (now - startTime) / duration);
-        const eased = easeOutQuint(progress);
+        const eased = easeInOutSine(progress);
         const scale = start + change * eased;
 
         setVisualZoomScale(scale);
@@ -2413,7 +2424,7 @@
       requestAnimationFrame(()=>{
         configureZoom(layoutGeometry);
         wheelShell.classList.add("zoom");
-        animateVisualZoom(getConfiguredZoomScale(), 1500);
+        animateVisualZoom(getConfiguredZoomScale(), 2400);
         collapseSafariBars();
       });
     }
