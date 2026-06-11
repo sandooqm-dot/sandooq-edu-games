@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-audio-files-v59 -->
+  <!-- version: wheel-audio-files-v60 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-audio-files-v59</title>
+  <title>العجلة الدوارة - wheel-audio-files-v60</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1168,23 +1168,27 @@
     */
     const wheelAudio = (()=>{
       const SOUND_FILES = {
-        button: "sounds/wheel-button.mp3?v=59",
-        spin: "sounds/wheel-spin.mp3?v=59",
-        tick: "sounds/wheel-tick.mp3?v=59",
-        select: "sounds/wheel-select.mp3?v=59",
-        remove: "sounds/wheel-remove.mp3?v=59",
-        intro: "sounds/wheel-intro.mp3?v=59",
-        win: "sounds/wheel-win.mp3?v=59"
+        button: "sounds/wheel-button.mp3?v=60",
+        tick: "sounds/wheel-tick.mp3?v=60",
+        select: "sounds/wheel-select.mp3?v=60",
+        remove: "sounds/wheel-remove.mp3?v=60",
+        intro: "sounds/wheel-intro.mp3?v=60",
+        win: "sounds/wheel-win.mp3?v=60"
       };
 
       let enabled = true;
       let tickingActive = false;
-      let spinFadeTimer = null;
+      let lastTickIndex = -1;
+      let lastTickAt = 0;
+      let tickPoolIndex = 0;
       const cache = {};
+      const tickPool = [];
 
-      // fallback بسيط فقط إذا لم تُرفع ملفات الصوت في المستودع.
+      // Web Audio للـ tick فقط حتى يطلع "تك تك تك" سريع ونظيف بدون تقطيع.
       let ctx = null;
       let master = null;
+      let tickBuffer = null;
+      let tickBufferLoading = false;
 
       function readEnabled(){
         try {
@@ -1205,97 +1209,34 @@
         if (!cache[name]) {
           const audio = new Audio(src);
           audio.preload = "auto";
-          audio.volume = name === "spin" ? 0.94 : 1.0;
+          audio.volume = name === "tick" ? 1.0 : 0.98;
           cache[name] = audio;
         }
 
         return cache[name];
       }
 
-      function clearSpinFade(){
-        if (spinFadeTimer) {
-          clearInterval(spinFadeTimer);
-          spinFadeTimer = null;
-        }
-      }
+      function getTickAudio(){
+        const src = SOUND_FILES.tick;
+        if (!src) return null;
 
-      function playAudioElement(audio, options = {}){
-        if (!audio || !canPlay()) return false;
-        try {
-          const reset = options.reset !== false;
-          const volume = Number.isFinite(options.volume) ? options.volume : 1;
-          const loop = Boolean(options.loop);
-          const playbackRate = Number.isFinite(options.playbackRate) ? options.playbackRate : 1;
-
-          if (reset) {
-            audio.pause();
-            audio.currentTime = 0;
+        if (!tickPool.length) {
+          for (let i = 0; i < 8; i += 1) {
+            const audio = new Audio(src);
+            audio.preload = "auto";
+            audio.volume = 1.0;
+            tickPool.push(audio);
           }
-
-          audio.loop = loop;
-          audio.volume = Math.max(0, Math.min(1, volume));
-          audio.playbackRate = playbackRate;
-
-          const promise = audio.play();
-          if (promise && typeof promise.catch === "function") {
-            promise.catch(()=>{});
-          }
-          return true;
-        } catch (_) {
-          return false;
-        }
-      }
-
-      function stopSpinLoop(){
-        const audio = getAudio("spin");
-        if (!audio) return;
-
-        clearSpinFade();
-        const startVolume = Math.max(0, audio.volume || 0.94);
-        const startedAt = performance.now();
-        const duration = 260;
-
-        spinFadeTimer = setInterval(()=>{
-          const progress = Math.min(1, (performance.now() - startedAt) / duration);
-          audio.volume = startVolume * (1 - progress);
-
-          if (progress >= 1) {
-            clearSpinFade();
-            try {
-              audio.pause();
-              audio.currentTime = 0;
-              audio.volume = 0.94;
-            } catch (_) {}
-          }
-        }, 24);
-      }
-
-      function startSpinLoop(){
-        const audio = getAudio("spin");
-        if (!audio || !canPlay()) {
-          fallbackPlay("tick");
-          return;
         }
 
-        clearSpinFade();
-        audio.loop = true;
-        audio.volume = 0.94;
-
-        try {
-          if (audio.paused) {
-            audio.currentTime = 0;
-          }
-          const promise = audio.play();
-          if (promise && typeof promise.catch === "function") {
-            promise.catch(()=> fallbackPlay("tick"));
-          }
-        } catch (_) {
-          fallbackPlay("tick");
-        }
+        const audio = tickPool[tickPoolIndex % tickPool.length];
+        tickPoolIndex += 1;
+        return audio;
       }
 
-      function ensureFallback(){
+      function ensureAudioContext(){
         if (!canPlay()) return null;
+
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           if (!AudioCtx) return null;
@@ -1303,7 +1244,7 @@
           if (!ctx) {
             ctx = new AudioCtx();
             master = ctx.createGain();
-            master.gain.value = 0.42;
+            master.gain.value = 0.98;
             master.connect(ctx.destination);
           }
 
@@ -1317,62 +1258,109 @@
         }
       }
 
-      function fallbackTone(freq = 520, duration = 0.08, type = "sine", volume = 0.13, delay = 0){
-        const audio = ensureFallback();
+      async function loadTickBuffer(){
+        const audio = ensureAudioContext();
+        if (!audio || tickBuffer || tickBufferLoading) return;
+
+        tickBufferLoading = true;
+        try {
+          const response = await fetch(SOUND_FILES.tick, { cache: "force-cache" });
+          const arrayBuffer = await response.arrayBuffer();
+          tickBuffer = await audio.decodeAudioData(arrayBuffer);
+        } catch (_) {
+          tickBuffer = null;
+        } finally {
+          tickBufferLoading = false;
+        }
+      }
+
+      function playTickBuffer(playbackRate = 1){
+        const audio = ensureAudioContext();
+        if (!audio || !master || !tickBuffer) return false;
+
+        try {
+          const source = audio.createBufferSource();
+          const gain = audio.createGain();
+          source.buffer = tickBuffer;
+          source.playbackRate.value = playbackRate;
+          gain.gain.value = 1.0;
+          source.connect(gain);
+          gain.connect(master);
+          source.start(audio.currentTime);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function playAudioElement(audio, options = {}){
+        if (!audio || !canPlay()) return false;
+        try {
+          const reset = options.reset !== false;
+          const volume = Number.isFinite(options.volume) ? options.volume : 0.98;
+          const playbackRate = Number.isFinite(options.playbackRate) ? options.playbackRate : 1;
+
+          if (reset) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+
+          audio.loop = false;
+          audio.volume = Math.max(0, Math.min(1, volume));
+          audio.playbackRate = playbackRate;
+
+          const promise = audio.play();
+          if (promise && typeof promise.catch === "function") {
+            promise.catch(()=>{});
+          }
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function fallbackTone(freq = 560, duration = 0.035, type = "triangle", volume = 0.16){
+        const audio = ensureAudioContext();
         if (!audio || !master) return;
 
-        const now = audio.currentTime + Math.max(0, Number(delay) || 0);
-        const dur = Math.max(0.025, Number(duration) || 0.08);
+        const now = audio.currentTime;
         const osc = audio.createOscillator();
         const gain = audio.createGain();
-
         osc.type = type;
-        osc.frequency.setValueAtTime(Math.max(20, Number(freq) || 520), now);
+        osc.frequency.setValueAtTime(freq, now);
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(Math.max(0.0002, Number(volume) || 0.13), now + 0.008);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
+        gain.gain.linearRampToValueAtTime(volume, now + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
         osc.connect(gain);
         gain.connect(master);
         osc.start(now);
-        osc.stop(now + dur + 0.035);
+        osc.stop(now + duration + 0.025);
       }
 
-      function fallbackPlay(name){
-        if (name === "button") {
-          fallbackTone(820, 0.075, "triangle", 0.12);
-          return;
-        }
-        if (name === "tick" || name === "spin") {
-          fallbackTone(560, 0.055, "triangle", 0.13);
-          fallbackTone(620, 0.055, "triangle", 0.10, 0.055);
-          fallbackTone(560, 0.055, "triangle", 0.13, 0.110);
-          return;
-        }
-        if (name === "select" || name === "win") {
-          fallbackTone(660, 0.14, "sine", 0.16);
-          fallbackTone(880, 0.15, "sine", 0.14, 0.09);
-          return;
-        }
-        if (name === "remove") {
-          fallbackTone(784, 0.15, "sine", 0.15);
-          fallbackTone(988, 0.15, "sine", 0.13, 0.09);
-          fallbackTone(430, 0.18, "triangle", 0.12, 0.18);
-        }
-      }
-
-      function playNamed(name, options = {}){
-        const ok = playAudioElement(getAudio(name), options);
-        if (!ok) fallbackPlay(name);
+      function playNamed(name){
+        const ok = playAudioElement(getAudio(name), { volume: name === "button" ? 0.92 : 0.98 });
+        if (!ok && name === "tick") fallbackTone();
       }
 
       function playButton(){
         playNamed("button");
       }
 
-      function playTick(){
-        // لا نشغل مقطع جديد لكل قسم حتى لا يتقطع الصوت.
-        // صوت الدوران المستمر يعمل من beginTicks إلى endTicks.
+      function playTick(index = 0){
+        if (!tickingActive) return;
+        if (index === lastTickIndex) return;
+
+        const now = performance.now();
+        if (now - lastTickAt < 22) return;
+
+        lastTickIndex = index;
+        lastTickAt = now;
+
+        const playbackRate = 0.98 + (Math.abs(index) % 3) * 0.018;
+        if (playTickBuffer(playbackRate)) return;
+
+        const ok = playAudioElement(getTickAudio(), { volume: 1.0, playbackRate });
+        if (!ok) fallbackTone(560 + (Math.abs(index) % 2) * 32, 0.035, "triangle", 0.16);
       }
 
       function playSelect(){
@@ -1383,21 +1371,24 @@
         playNamed("remove");
       }
 
+      function playIntro(){
+        playNamed("intro");
+      }
+
       function playWin(){
         playNamed("win");
       }
 
       function beginTicks(){
         preload();
-        if (tickingActive) return;
         tickingActive = true;
-        startSpinLoop();
+        lastTickIndex = -1;
+        lastTickAt = 0;
       }
 
       function endTicks(){
-        if (!tickingActive) return;
         tickingActive = false;
-        stopSpinLoop();
+        lastTickIndex = -1;
       }
 
       function preload(){
@@ -1405,16 +1396,18 @@
           const audio = getAudio(name);
           try { audio?.load?.(); } catch (_) {}
         });
+        getTickAudio();
+        loadTickBuffer();
       }
 
       function unlock(){
         preload();
-        ensureFallback();
+        ensureAudioContext();
       }
 
       function setEnabled(value){
         enabled = value !== false;
-        if (!enabled) stopSpinLoop();
+        if (!enabled) endTicks();
       }
 
       return {
@@ -1426,6 +1419,7 @@
         playTick,
         playSelect,
         playRemove,
+        playIntro,
         playWin
       };
     })();
