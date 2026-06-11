@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-math-v45 -->
+  <!-- version: wheel-theme-english-v46 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-math-v45</title>
+  <title>العجلة الدوارة - wheel-theme-english-v46</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -128,6 +128,14 @@
       background-image:
         url("theme-math-bg.webp?v=45"),
         linear-gradient(180deg, #f5f4e7 0%, #dfe7ef 100%);
+    }
+
+    .wheel-page.wheel-theme-english .theme-background{
+      opacity:1;
+      background-color:#72d0d2;
+      background-image:
+        url("theme-english-bg.webp?v=46"),
+        linear-gradient(180deg, #72d0d2 0%, #72d0d2 100%);
     }
 
     .wheel-logo{
@@ -1156,7 +1164,7 @@
     function applyWheelTheme(theme){
       if (!wheelPage) return;
       const normalizedTheme = normalizeWheelTheme(theme);
-      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math");
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english");
       wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
 
       /*
@@ -1201,6 +1209,14 @@
           themeBackground.style.backgroundImage = [
             'url("theme-math-bg.webp?v=45")',
             'linear-gradient(180deg, #f5f4e7 0%, #dfe7ef 100%)'
+          ].join(", ");
+        }
+
+        if (normalizedTheme === "english") {
+          themeBackground.style.backgroundColor = "#72d0d2";
+          themeBackground.style.backgroundImage = [
+            'url("theme-english-bg.webp?v=46")',
+            'linear-gradient(180deg, #72d0d2 0%, #72d0d2 100%)'
           ].join(", ");
         }
       }
@@ -1334,6 +1350,19 @@
         "الرياضيات"
       ].includes(value)) {
         return "math";
+      }
+
+      if ([
+        "english",
+        "eng",
+        "english-language",
+        "theme-english",
+        "انجليزي",
+        "الانجليزي",
+        "إنجليزي",
+        "الإنجليزي"
+      ].includes(value)) {
+        return "english";
       }
 
       return "original";
