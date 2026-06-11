@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-flowers-v47 -->
+  <!-- version: wheel-theme-palettes-v48 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-flowers-v47</title>
+  <title>العجلة الدوارة - wheel-theme-palettes-v48</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -142,7 +142,7 @@
       opacity:1;
       background-color:#f8edf3;
       background-image:
-        url("theme-flowers-bg.webp?v=47"),
+        url("theme-flowers-bg.webp?v=48"),
         linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%);
     }
 
@@ -1121,6 +1121,27 @@
     ];
 
     /*
+      wheel-48:
+      ألوان عجلة خاصة ببعض الثيمات.
+      - سماء وغيوم: لونان أزرقان بالتناوب مثل مرجع Wordwall.
+      - ازهار وورود: درجات وردية متناسقة مع الخلفية.
+      باقي الثيمات تبقى على ألوانها السابقة بدون تغيير.
+    */
+    const themeWheelColors = {
+      "sky-clouds": [
+        "#2F55C7",
+        "#5F85DE"
+      ],
+      flowers: [
+        "#C94582",
+        "#E85C9A",
+        "#F48AB8",
+        "#B95BAE",
+        "#F3B7D1"
+      ]
+    };
+
+    /*
       إعدادات صور نمط "صورة فقط"
       عدّل الأرقام هنا فقط:
       sizeScale   = حجم الصورة. 1.00 طبيعي، 1.15 أكبر، 0.90 أصغر.
@@ -1231,7 +1252,7 @@
         if (normalizedTheme === "flowers") {
           themeBackground.style.backgroundColor = "#f8edf3";
           themeBackground.style.backgroundImage = [
-            'url("theme-flowers-bg.webp?v=47")',
+            'url("theme-flowers-bg.webp?v=48")',
             'linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%)'
           ].join(", ");
         }
@@ -1437,6 +1458,17 @@
       const value = String(color || "").trim();
       if (/^#[0-9a-f]{6}$/i.test(value)) return value;
       return wheelColors[index % wheelColors.length];
+    }
+
+    function getThemeEntryColor(index, fallbackColor){
+      const theme = normalizeWheelTheme(payload?.theme || "");
+      const palette = themeWheelColors[theme];
+
+      if (palette && palette.length) {
+        return palette[index % palette.length];
+      }
+
+      return normalizeEntryColor(fallbackColor, index);
     }
 
     function clearWheelRuntimeStorage(){
@@ -2106,7 +2138,7 @@
         const start = -90 + index * step;
         const end = start + step;
         const mid = start + step / 2;
-        const color = normalizeEntryColor(entry.color, index);
+        const color = getThemeEntryColor(index, entry.color);
         entry.color = color;
 
         const sector = createSvgElement("path", {
