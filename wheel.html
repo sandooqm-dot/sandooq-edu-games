@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-sky-clouds-v42 -->
+  <!-- version: wheel-theme-sky-clouds-v43 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-sky-clouds-v42</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v43</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -98,20 +98,20 @@
       opacity:1;
       background-color:#fff;
       background-image:
-        url("theme-original-bg.webp?v=42"),
-        url("theme-original-bg.png?v=42"),
-        url("theme-original.webp?v=42"),
-        url("theme-original.png?v=42");
+        url("theme-original-bg.webp?v=43"),
+        url("theme-original-bg.png?v=43"),
+        url("theme-original.webp?v=43"),
+        url("theme-original.png?v=43");
     }
 
     .wheel-page.wheel-theme-sky-clouds .theme-background{
       opacity:1;
       background-color:#58c7f3;
       background-image:
-        url("theme-sky-clouds-bg.webp?v=42"),
-        url("theme-sky-clouds-bg.png?v=42"),
-        url("theme-sky-clouds.webp?v=42"),
-        url("theme-sky-clouds.png?v=42");
+        url("theme-sky-clouds-bg.webp?v=43"),
+        url("theme-sky-clouds-bg.png?v=43"),
+        url("theme-sky-clouds.webp?v=43"),
+        url("theme-sky-clouds.png?v=43");
     }
 
     .wheel-logo{
@@ -146,8 +146,8 @@
     }
 
     /*
-      wheel-42:
-      Camera Zoom In / Ken Burns intro + عودة زوم أهدأ + حذف يلتئم بصريًا.
+      wheel-43:
+      Camera Zoom In / Ken Burns intro + الحذف يتم بعد رجوع العجلة للوضع الطبيعي.
       البداية: الخلفية تظهر كمشهد واسع + العجلة بعيدة.
       النهاية: الخلفية تكبر فتختفي الأطراف + العجلة تصل للحجم الطبيعي.
       بعد الانترو تظهر الأزرار وتبدأ اللعبة طبيعي.
@@ -1155,20 +1155,20 @@
         if (normalizedTheme === "classroom") {
           themeBackground.style.backgroundColor = "#fff";
           themeBackground.style.backgroundImage = [
-            'url("theme-original-bg.webp?v=42")',
-            'url("theme-original-bg.png?v=42")',
-            'url("theme-original.webp?v=42")',
-            'url("theme-original.png?v=42")'
+            'url("theme-original-bg.webp?v=43")',
+            'url("theme-original-bg.png?v=43")',
+            'url("theme-original.webp?v=43")',
+            'url("theme-original.png?v=43")'
           ].join(", ");
         }
 
         if (normalizedTheme === "sky-clouds") {
           themeBackground.style.backgroundColor = "#58c7f3";
           themeBackground.style.backgroundImage = [
-            'url("theme-sky-clouds-bg.webp?v=42")',
-            'url("theme-sky-clouds-bg.png?v=42")',
-            'url("theme-sky-clouds.webp?v=42")',
-            'url("theme-sky-clouds.png?v=42")'
+            'url("theme-sky-clouds-bg.webp?v=43")',
+            'url("theme-sky-clouds-bg.png?v=43")',
+            'url("theme-sky-clouds.webp?v=43")',
+            'url("theme-sky-clouds.png?v=43")'
           ].join(", ");
         }
       }
@@ -2236,38 +2236,40 @@
 
       if (!duration || Math.abs(change) < 0.0001) {
         setVisualZoomScale(target);
-        return;
+        return Promise.resolve();
       }
 
       const startTime = performance.now();
 
       /*
-        wheel-41:
-        زوم القسم المختار صار أبطأ وأنعم.
-        استبدلنا easeOutQuint لأنه يندفع بسرعة في البداية،
-        بمنحنى easeInOutSine عشان يبدأ بهدوء ويكمل بسلاسة وينتهي بهدوء.
+        wheel-43:
+        الدالة ترجع Promise الآن حتى نقدر ننتظر عودة الزوم
+        قبل تنفيذ حذف القسم وحركة الالتئام.
       */
       function easeInOutSine(t){
         const p = Math.max(0, Math.min(1, t));
         return -(Math.cos(Math.PI * p) - 1) / 2;
       }
 
-      function frame(now){
-        const progress = Math.min(1, (now - startTime) / duration);
-        const eased = easeInOutSine(progress);
-        const scale = start + change * eased;
+      return new Promise((resolve)=>{
+        function frame(now){
+          const progress = Math.min(1, (now - startTime) / duration);
+          const eased = easeInOutSine(progress);
+          const scale = start + change * eased;
 
-        setVisualZoomScale(scale);
+          setVisualZoomScale(scale);
 
-        if (progress < 1) {
-          zoomAnimationId = requestAnimationFrame(frame);
-        } else {
-          zoomAnimationId = null;
-          setVisualZoomScale(target);
+          if (progress < 1) {
+            zoomAnimationId = requestAnimationFrame(frame);
+          } else {
+            zoomAnimationId = null;
+            setVisualZoomScale(target);
+            resolve();
+          }
         }
-      }
 
-      zoomAnimationId = requestAnimationFrame(frame);
+        zoomAnimationId = requestAnimationFrame(frame);
+      });
     }
 
     function updateLayout(){
@@ -2578,6 +2580,16 @@
       afterSpin.classList.remove("show");
 
       const removeIndex = selectedIndex;
+
+      /*
+        wheel-43:
+        الحذف لا يبدأ داخل الزوم.
+        نرجع العجلة أولًا للوضع الطبيعي، ثم ننفذ اختفاء القسم والالتئام.
+      */
+      wheelShell.classList.remove("zoom");
+      await animateVisualZoom(1, 1050);
+      await delay(120);
+
       const sector = document.querySelector(`.wheel-sector[data-index="${removeIndex}"]`);
       const selectedNode = labelNodes[removeIndex] || null;
       const labels = selectedNode?.labels && selectedNode.labels.length ? selectedNode.labels : [selectedNode?.label].filter(Boolean);
@@ -2585,7 +2597,7 @@
       if (sector) sector.classList.add("eliminating");
       labels.forEach((label)=> label.classList.add("eliminating"));
 
-      // اختفاء أبطأ قليلًا للقسم قبل الالتئام
+      // اختفاء أبطأ قليلًا للقسم بعد رجوع العجلة كاملة
       await delay(720);
 
       // تحريك الأقسام المحيطة بصريًا حتى تغلق مكان القسم المحذوف
@@ -2605,7 +2617,7 @@
 
       selectedIndex = -1;
       rotation = 0;
-      resetFocus(1250);
+      resetFocus(520);
       persistPayload();
       buildWheel();
       playMergeSettle();
