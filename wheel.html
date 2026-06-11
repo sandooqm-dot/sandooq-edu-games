@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-palettes-v49 -->
+  <!-- version: wheel-theme-national-day-v50 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-palettes-v49</title>
+  <title>العجلة الدوارة - wheel-theme-national-day-v50</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -144,6 +144,13 @@
       background-image:
         url("theme-flowers-bg.webp?v=48"),
         linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%);
+    }
+
+    .wheel-page.wheel-theme-national-day .theme-background{
+      background-color:#165f55;
+      background-image:
+        url("theme-national-day-bg.webp?v=50"),
+        linear-gradient(180deg, #165f55 0%, #0f4f46 100%);
     }
 
     .wheel-logo{
@@ -1126,6 +1133,7 @@
       - سماء وغيوم: لونان أزرقان بالتناوب مثل مرجع Wordwall.
       - ازهار وورود: درجات وردية متناسقة مع الخلفية.
       باقي الثيمات تبقى على ألوانها السابقة بدون تغيير.
+      - اليوم الوطني: يستخدم الخلفية الوطنية، وتبقى ألوان العجلة الافتراضية حالياً.
     */
     const themeWheelColors = {
       "sky-clouds": [
@@ -1192,7 +1200,7 @@
     function applyWheelTheme(theme){
       if (!wheelPage) return;
       const normalizedTheme = normalizeWheelTheme(theme);
-      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english", "wheel-theme-flowers");
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english", "wheel-theme-flowers", "wheel-theme-national-day");
       wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
 
       /*
@@ -1253,6 +1261,14 @@
           themeBackground.style.backgroundImage = [
             'url("theme-flowers-bg.webp?v=48")',
             'linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%)'
+          ].join(", ");
+        }
+
+        if (normalizedTheme === "national-day") {
+          themeBackground.style.backgroundColor = "#165f55";
+          themeBackground.style.backgroundImage = [
+            'url("theme-national-day-bg.webp?v=50")',
+            'linear-gradient(180deg, #165f55 0%, #0f4f46 100%)'
           ].join(", ");
         }
       }
@@ -1414,6 +1430,19 @@
         "الورود"
       ].includes(value)) {
         return "flowers";
+      }
+
+      if ([
+        "national-day",
+        "national_day",
+        "nationalday",
+        "saudi-national-day",
+        "theme-national-day",
+        "اليوم الوطني",
+        "يوم وطني",
+        "الوطني"
+      ].includes(value)) {
+        return "national-day";
       }
 
       return "original";
