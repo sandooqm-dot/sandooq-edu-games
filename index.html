@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-audio-files-v25 -->
+<!-- version: index-audio-files-v26 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5183,7 +5183,7 @@
 <div class="sound-head">
 <div>
 <h3 class="sound-title">الأصوات</h3>
-<p class="sound-note">أصوات داخلية خفيفة لا تعمل تلقائياً، وتشتغل فقط بعد ضغط المستخدم داخل اللعبة.</p>
+<p class="sound-note">أصوات فعلية من ملفك، لا تتداخل، وتعمل فقط بعد ضغط المستخدم داخل اللعبة.</p>
 </div>
 <div aria-label="تشغيل أصوات العجلة" class="toggle sound-toggle">
 <button data-sound-toggle="off" type="button">كتم</button>
@@ -5196,7 +5196,7 @@
 <button class="sound-preview-btn" data-sound-preview="button" type="button">تجربة</button>
 </div>
 <div class="sound-card">
-<div><strong>مرور الأقسام</strong><span>تك تك أثناء دوران العجلة</span></div>
+<div><strong>دوران العجلة</strong><span>صوت تك تك مستمر أثناء الحركة</span></div>
 <button class="sound-preview-btn" data-sound-preview="tick" type="button">تجربة</button>
 </div>
 <div class="sound-card">
@@ -5204,8 +5204,12 @@
 <button class="sound-preview-btn" data-sound-preview="select" type="button">تجربة</button>
 </div>
 <div class="sound-card">
-<div><strong>الحذف</strong><span>صوت قصير عند حذف القسم</span></div>
+<div><strong>الحذف</strong><span>الصوت المركب من ملفك</span></div>
 <button class="sound-preview-btn" data-sound-preview="remove" type="button">تجربة</button>
+</div>
+<div class="sound-card">
+<div><strong>النهاية</strong><span>صوت ختامي من ملفك</span></div>
+<button class="sound-preview-btn" data-sound-preview="win" type="button">تجربة</button>
 </div>
 </div>
 </div>
@@ -5303,10 +5307,12 @@
 
   const soundPreviewEngine = (()=>{
     const SOUND_FILES = {
-      button: "sounds/wheel-button.mp3?v=58",
-      tick: "sounds/wheel-tick.mp3?v=58",
-      select: "sounds/wheel-select.mp3?v=58",
-      remove: "sounds/wheel-remove.mp3?v=58"
+      button: "sounds/wheel-button.mp3?v=59",
+      tick: "sounds/wheel-spin.mp3?v=59",
+      select: "sounds/wheel-select.mp3?v=59",
+      remove: "sounds/wheel-remove.mp3?v=59",
+      win: "sounds/wheel-win.mp3?v=59",
+      intro: "sounds/wheel-intro.mp3?v=59"
     };
 
     const cache = {};
@@ -5320,11 +5326,21 @@
       if (!cache[name]) {
         const audio = new Audio(src);
         audio.preload = "auto";
-        audio.volume = name === "tick" ? 0.90 : 0.96;
+        audio.volume = name === "tick" ? 0.92 : 0.98;
         cache[name] = audio;
       }
 
       return cache[name];
+    }
+
+    function stopAll(exceptName = ""){
+      Object.entries(cache).forEach(([name, audio])=>{
+        if (name === exceptName) return;
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (_) {}
+      });
     }
 
     function playFile(name){
@@ -5334,8 +5350,11 @@
       if (!audio) return false;
 
       try {
+        stopAll(name);
+        audio.loop = false;
         audio.pause();
         audio.currentTime = 0;
+        audio.volume = name === "tick" ? 0.92 : 0.98;
         const promise = audio.play();
         if (promise && typeof promise.catch === "function") {
           promise.catch(()=> fallbackPlay(name));
@@ -5389,10 +5408,12 @@
         return;
       }
       if (name === "tick") {
-        tone(560, 0.035, "triangle", 0.12);
+        tone(560, 0.055, "triangle", 0.13);
+        tone(620, 0.055, "triangle", 0.10, 0.055);
+        tone(560, 0.055, "triangle", 0.13, 0.110);
         return;
       }
-      if (name === "select") {
+      if (name === "select" || name === "win") {
         tone(660, 0.14, "sine", 0.16);
         tone(880, 0.15, "sine", 0.14, 0.09);
         return;
@@ -5455,7 +5476,7 @@
       soundEnabled: wheelSoundEnabled,
       sounds: {
         enabled: wheelSoundEnabled,
-        mode: "built-in"
+        mode: "files"
       }
     };
 
@@ -5658,7 +5679,7 @@
       soundEnabled: wheelSoundEnabled,
       sounds: {
         enabled: wheelSoundEnabled,
-        mode: "built-in"
+        mode: "files"
       },
       updatedAt: Date.now(),
       payloadId

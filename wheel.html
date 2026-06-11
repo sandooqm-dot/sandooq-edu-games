@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-audio-files-v58 -->
+  <!-- version: wheel-audio-files-v59 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-audio-files-v58</title>
+  <title>العجلة الدوارة - wheel-audio-files-v59</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1168,23 +1168,21 @@
     */
     const wheelAudio = (()=>{
       const SOUND_FILES = {
-        button: "sounds/wheel-button.mp3?v=58",
-        tick: "sounds/wheel-tick.mp3?v=58",
-        select: "sounds/wheel-select.mp3?v=58",
-        remove: "sounds/wheel-remove.mp3?v=58"
+        button: "sounds/wheel-button.mp3?v=59",
+        spin: "sounds/wheel-spin.mp3?v=59",
+        tick: "sounds/wheel-tick.mp3?v=59",
+        select: "sounds/wheel-select.mp3?v=59",
+        remove: "sounds/wheel-remove.mp3?v=59",
+        intro: "sounds/wheel-intro.mp3?v=59",
+        win: "sounds/wheel-win.mp3?v=59"
       };
 
       let enabled = true;
       let tickingActive = false;
-      let lastTickIndex = -1;
-      let lastTickAt = 0;
-      let tickPoolIndex = 0;
+      let spinFadeTimer = null;
       const cache = {};
-      const pools = {
-        tick: []
-      };
 
-      // fallback خفيف فقط إذا لم تُرفع ملفات الصوت في المستودع.
+      // fallback بسيط فقط إذا لم تُرفع ملفات الصوت في المستودع.
       let ctx = null;
       let master = null;
 
@@ -1207,37 +1205,37 @@
         if (!cache[name]) {
           const audio = new Audio(src);
           audio.preload = "auto";
-          audio.volume = name === "tick" ? 0.94 : 1.0;
+          audio.volume = name === "spin" ? 0.94 : 1.0;
           cache[name] = audio;
         }
 
         return cache[name];
       }
 
-      function getTickAudio(){
-        const src = SOUND_FILES.tick;
-        if (!src) return null;
-
-        if (!pools.tick.length) {
-          for (let i = 0; i < 5; i += 1) {
-            const audio = new Audio(src);
-            audio.preload = "auto";
-            audio.volume = 0.94;
-            pools.tick.push(audio);
-          }
+      function clearSpinFade(){
+        if (spinFadeTimer) {
+          clearInterval(spinFadeTimer);
+          spinFadeTimer = null;
         }
-
-        const audio = pools.tick[tickPoolIndex % pools.tick.length];
-        tickPoolIndex += 1;
-        return audio;
       }
 
-      function playAudioElement(audio, playbackRate = 1){
+      function playAudioElement(audio, options = {}){
         if (!audio || !canPlay()) return false;
         try {
-          audio.pause();
-          audio.currentTime = 0;
+          const reset = options.reset !== false;
+          const volume = Number.isFinite(options.volume) ? options.volume : 1;
+          const loop = Boolean(options.loop);
+          const playbackRate = Number.isFinite(options.playbackRate) ? options.playbackRate : 1;
+
+          if (reset) {
+            audio.pause();
+            audio.currentTime = 0;
+          }
+
+          audio.loop = loop;
+          audio.volume = Math.max(0, Math.min(1, volume));
           audio.playbackRate = playbackRate;
+
           const promise = audio.play();
           if (promise && typeof promise.catch === "function") {
             promise.catch(()=>{});
@@ -1245,6 +1243,54 @@
           return true;
         } catch (_) {
           return false;
+        }
+      }
+
+      function stopSpinLoop(){
+        const audio = getAudio("spin");
+        if (!audio) return;
+
+        clearSpinFade();
+        const startVolume = Math.max(0, audio.volume || 0.94);
+        const startedAt = performance.now();
+        const duration = 260;
+
+        spinFadeTimer = setInterval(()=>{
+          const progress = Math.min(1, (performance.now() - startedAt) / duration);
+          audio.volume = startVolume * (1 - progress);
+
+          if (progress >= 1) {
+            clearSpinFade();
+            try {
+              audio.pause();
+              audio.currentTime = 0;
+              audio.volume = 0.94;
+            } catch (_) {}
+          }
+        }, 24);
+      }
+
+      function startSpinLoop(){
+        const audio = getAudio("spin");
+        if (!audio || !canPlay()) {
+          fallbackPlay("tick");
+          return;
+        }
+
+        clearSpinFade();
+        audio.loop = true;
+        audio.volume = 0.94;
+
+        try {
+          if (audio.paused) {
+            audio.currentTime = 0;
+          }
+          const promise = audio.play();
+          if (promise && typeof promise.catch === "function") {
+            promise.catch(()=> fallbackPlay("tick"));
+          }
+        } catch (_) {
+          fallbackPlay("tick");
         }
       }
 
@@ -1297,11 +1343,13 @@
           fallbackTone(820, 0.075, "triangle", 0.12);
           return;
         }
-        if (name === "tick") {
-          fallbackTone(560, 0.035, "triangle", 0.12);
+        if (name === "tick" || name === "spin") {
+          fallbackTone(560, 0.055, "triangle", 0.13);
+          fallbackTone(620, 0.055, "triangle", 0.10, 0.055);
+          fallbackTone(560, 0.055, "triangle", 0.13, 0.110);
           return;
         }
-        if (name === "select") {
+        if (name === "select" || name === "win") {
           fallbackTone(660, 0.14, "sine", 0.16);
           fallbackTone(880, 0.15, "sine", 0.14, 0.09);
           return;
@@ -1313,8 +1361,8 @@
         }
       }
 
-      function playNamed(name){
-        const ok = playAudioElement(getAudio(name));
+      function playNamed(name, options = {}){
+        const ok = playAudioElement(getAudio(name), options);
         if (!ok) fallbackPlay(name);
       }
 
@@ -1322,20 +1370,9 @@
         playNamed("button");
       }
 
-      function playTick(index = 0){
-        if (!tickingActive) return;
-        if (index === lastTickIndex) return;
-
-        const now = performance.now();
-        if (now - lastTickAt < 30) return;
-
-        lastTickIndex = index;
-        lastTickAt = now;
-
-        const audio = getTickAudio();
-        const rate = 0.98 + (Math.abs(index) % 3) * 0.025;
-        const ok = playAudioElement(audio, rate);
-        if (!ok) fallbackPlay("tick");
+      function playTick(){
+        // لا نشغل مقطع جديد لكل قسم حتى لا يتقطع الصوت.
+        // صوت الدوران المستمر يعمل من beginTicks إلى endTicks.
       }
 
       function playSelect(){
@@ -1346,16 +1383,21 @@
         playNamed("remove");
       }
 
+      function playWin(){
+        playNamed("win");
+      }
+
       function beginTicks(){
         preload();
+        if (tickingActive) return;
         tickingActive = true;
-        lastTickIndex = -1;
-        lastTickAt = 0;
+        startSpinLoop();
       }
 
       function endTicks(){
+        if (!tickingActive) return;
         tickingActive = false;
-        lastTickIndex = -1;
+        stopSpinLoop();
       }
 
       function preload(){
@@ -1363,7 +1405,6 @@
           const audio = getAudio(name);
           try { audio?.load?.(); } catch (_) {}
         });
-        getTickAudio();
       }
 
       function unlock(){
@@ -1373,6 +1414,7 @@
 
       function setEnabled(value){
         enabled = value !== false;
+        if (!enabled) stopSpinLoop();
       }
 
       return {
@@ -1383,7 +1425,8 @@
         playButton,
         playTick,
         playSelect,
-        playRemove
+        playRemove,
+        playWin
       };
     })();
 
@@ -1588,7 +1631,7 @@
         centerQuestionEnabled:false,
         centerQuestion:"",
         soundEnabled:true,
-        sounds:{ enabled:true, mode:"built-in" }
+        sounds:{ enabled:true, mode:"files" }
       }));
     }
 
@@ -1610,7 +1653,7 @@
         soundEnabled: normalizeSoundEnabled(data),
         sounds: {
           enabled: normalizeSoundEnabled(data),
-          mode: "built-in"
+          mode: "files"
         }
       };
     }
@@ -1798,7 +1841,7 @@
         soundEnabled: normalizeSoundEnabled(data),
         sounds: {
           enabled: normalizeSoundEnabled(data),
-          mode: "built-in"
+          mode: "files"
         }
       };
     }
@@ -1816,6 +1859,7 @@
       setVisualZoomScale(1);
       wheelPage.classList.add("ended");
       endCelebration?.setAttribute("aria-hidden", "false");
+      wheelAudio.playWin();
       collapseSafariBars();
     }
 
