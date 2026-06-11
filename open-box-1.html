@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v3 -->
+  <!-- version: open-box-v4 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -157,7 +157,7 @@
       justify-content:center;
       align-content:center;
       gap:var(--gap);
-      perspective:1500px;
+      perspective:1600px;
     }
 
     .box-card{
@@ -181,60 +181,81 @@
       width:100%;
       height:100%;
       transform-style:preserve-3d;
-      filter:drop-shadow(0 14px 18px rgba(0,0,0,.10));
+      filter:drop-shadow(0 16px 20px rgba(0,0,0,.12));
     }
 
-    .box-cavity{
+    .box-base{
       position:absolute;
-      inset:5%;
-      border-radius:12px;
-      overflow:hidden;
-      border:clamp(3px, .55vw, 7px) solid var(--box-border, rgba(0,0,0,.16));
-      background:
-        linear-gradient(145deg, rgba(255,255,255,.14) 0%, transparent 28%),
-        radial-gradient(circle at 50% 38%, var(--box-light) 0%, var(--box-color) 43%, var(--box-dark) 100%);
-      box-shadow:
-        inset 0 16px 22px rgba(0,0,0,.22),
-        inset 0 -14px 18px rgba(255,255,255,.10),
-        inset 12px 0 20px rgba(0,0,0,.12),
-        inset -12px 0 20px rgba(0,0,0,.10);
+      inset:8% 5% 5%;
       z-index:1;
+      border-radius:13px;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.20) 0%, transparent 26%),
+        linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 50%, var(--box-dark) 100%);
+      border:clamp(3px, .55vw, 7px) solid var(--box-border, rgba(0,0,0,.16));
+      box-shadow:
+        inset 0 13px 22px rgba(255,255,255,.15),
+        inset 0 -16px 0 rgba(0,0,0,.17),
+        0 8px 16px rgba(0,0,0,.08);
+      overflow:hidden;
     }
 
-    .box-cavity::before{
+    .box-base::before{
       content:"";
       position:absolute;
-      left:0;
-      right:0;
-      top:0;
-      height:23%;
-      background:linear-gradient(180deg, rgba(0,0,0,.28), rgba(0,0,0,0));
+      inset:8% 8% 15%;
+      border-radius:10px;
+      background:
+        radial-gradient(circle at 50% 35%, var(--box-light) 0%, var(--box-color) 42%, var(--box-dark) 100%);
+      box-shadow:
+        inset 0 20px 28px rgba(0,0,0,.32),
+        inset 13px 0 20px rgba(0,0,0,.17),
+        inset -13px 0 20px rgba(255,255,255,.06),
+        inset 0 -18px 18px rgba(0,0,0,.16);
+      opacity:.96;
+    }
+
+    .box-base::after{
+      content:"";
+      position:absolute;
+      left:10%;
+      right:10%;
+      bottom:7%;
+      height:13%;
+      border-radius:50%;
+      background:rgba(0,0,0,.16);
+      filter:blur(5px);
       pointer-events:none;
     }
 
-    .box-cavity::after{
-      content:"";
+    .box-hinge{
       position:absolute;
-      left:8%;
-      right:8%;
-      bottom:6%;
-      height:13%;
-      border-radius:50%;
-      background:rgba(0,0,0,.12);
-      filter:blur(4px);
+      left:6.5%;
+      right:6.5%;
+      top:3%;
+      height:10%;
+      z-index:12;
+      border-radius:999px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.36), rgba(255,255,255,.02) 45%, rgba(0,0,0,.18)),
+        linear-gradient(90deg, var(--box-dark), var(--box-color) 18%, var(--box-light) 50%, var(--box-color) 82%, var(--box-dark));
+      border:clamp(2px, .35vw, 4px) solid var(--box-border);
+      box-shadow:
+        0 3px 5px rgba(0,0,0,.15),
+        inset 0 -4px 0 rgba(0,0,0,.12);
       pointer-events:none;
     }
 
     .box-content{
       position:absolute;
-      inset:12%;
-      z-index:3;
+      inset:19% 13% 17%;
+      z-index:4;
       display:flex;
       align-items:center;
       justify-content:center;
       opacity:0;
-      transform:translateY(8px) scale(.88);
-      transition:opacity .22s ease .17s, transform .28s ease .17s;
+      transform:translateY(10px) scale(.88);
+      transition:opacity .24s ease .22s, transform .32s ease .22s;
       direction:rtl;
       text-align:center;
       pointer-events:none;
@@ -247,77 +268,109 @@
 
     .box-lid{
       position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      z-index:8;
+      left:3%;
+      right:3%;
+      top:4%;
+      height:88%;
+      z-index:10;
       border-radius:14px;
       border:clamp(4px, .7vw, 8px) solid var(--box-border, rgba(0,0,0,.16));
       background:
-        linear-gradient(180deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.04) 30%, transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,.24) 0%, rgba(255,255,255,.06) 28%, transparent 45%),
         linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 58%, var(--box-dark) 100%);
       box-shadow:
-        inset 0 -12px 0 rgba(0,0,0,.13),
-        inset 0 9px 0 rgba(255,255,255,.18),
+        inset 0 -14px 0 rgba(0,0,0,.15),
+        inset 0 10px 0 rgba(255,255,255,.20),
         0 10px 20px rgba(0,0,0,.10);
       display:flex;
       align-items:center;
       justify-content:center;
-      transform-origin:top center;
-      transform:translateY(0) rotateX(0deg) scaleY(1);
-      transition:transform .62s cubic-bezier(.15,.82,.20,1), filter .45s ease, box-shadow .45s ease;
+      transform-origin:50% 6%;
+      transform:rotateX(0deg) translateY(0) translateZ(2px);
+      transition:
+        transform .78s cubic-bezier(.15,.82,.20,1),
+        filter .45s ease,
+        box-shadow .45s ease;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       transform-style:preserve-3d;
+      overflow:hidden;
     }
 
     .box-card.opened .box-lid{
-      transform:translateY(-37%) rotateX(68deg) scaleY(.36);
-      filter:brightness(1.08);
+      transform:rotateX(82deg) translateY(-2%) translateZ(8px);
+      filter:brightness(1.06);
       box-shadow:
-        inset 0 -7px 0 rgba(0,0,0,.13),
+        inset 0 -8px 0 rgba(0,0,0,.16),
         inset 0 5px 0 rgba(255,255,255,.22),
-        0 9px 14px rgba(0,0,0,.11);
+        0 16px 18px rgba(0,0,0,.12);
     }
 
     .box-lid::before{
       content:"";
       position:absolute;
       inset:8%;
-      border-radius:9px;
+      border-radius:10px;
       background:
         linear-gradient(180deg, rgba(255,255,255,.12), transparent 55%),
         rgba(255,255,255,.04);
-      box-shadow:inset 0 -8px 0 rgba(0,0,0,.10);
+      box-shadow:inset 0 -9px 0 rgba(0,0,0,.10);
       pointer-events:none;
     }
 
     .box-lid::after{
       content:"";
       position:absolute;
-      left:10%;
-      right:10%;
+      left:11%;
+      right:11%;
       top:7%;
       height:12%;
       border-radius:999px;
-      background:rgba(255,255,255,.12);
+      background:rgba(255,255,255,.13);
+      box-shadow:0 1px 4px rgba(255,255,255,.12);
       pointer-events:none;
+    }
+
+    .box-front-lip{
+      position:absolute;
+      left:5%;
+      right:5%;
+      bottom:3%;
+      height:16%;
+      z-index:9;
+      border-radius:0 0 13px 13px;
+      background:
+        linear-gradient(180deg, var(--box-color), var(--box-dark));
+      border:clamp(3px, .55vw, 6px) solid var(--box-border);
+      box-shadow:
+        inset 0 8px 0 rgba(255,255,255,.12),
+        inset 0 -7px 0 rgba(0,0,0,.18),
+        0 4px 10px rgba(0,0,0,.12);
+      pointer-events:none;
+      opacity:0;
+      transform:translateY(18%);
+      transition:opacity .18s ease .20s, transform .24s ease .20s;
+    }
+
+    .box-card.opened .box-front-lip{
+      opacity:1;
+      transform:translateY(0);
     }
 
     .box-number{
       position:relative;
       z-index:2;
       color:#fff;
-      text-shadow:0 2px 4px rgba(0,0,0,.26);
+      text-shadow:0 2px 5px rgba(0,0,0,.28);
       font-size:clamp(24px, calc(var(--box-size) * .34), 64px);
       font-weight:900;
       line-height:1;
-      transition:opacity .16s ease, transform .2s ease;
+      transition:opacity .18s ease, transform .22s ease;
     }
 
     .box-card.opened .box-number{
       opacity:0;
-      transform:scale(.8);
+      transform:scale(.82) translateY(-8px);
     }
 
     .result-text{
@@ -332,7 +385,7 @@
       line-height:1.18;
       font-weight:900;
       overflow-wrap:anywhere;
-      text-shadow:0 2px 4px rgba(0,0,0,.28);
+      text-shadow:0 2px 5px rgba(0,0,0,.32);
     }
 
     .result-image{
@@ -342,7 +395,7 @@
       display:block;
       border-radius:8px;
       background:#fff;
-      box-shadow:0 4px 12px rgba(0,0,0,.14);
+      box-shadow:0 4px 12px rgba(0,0,0,.16);
     }
 
     .result-mixed{
@@ -437,7 +490,7 @@
       }
 
       .box-lid,
-      .box-cavity{
+      .box-base{
         border-radius:12px;
       }
 
@@ -701,8 +754,8 @@
         const shell = document.createElement("span");
         shell.className = "box-shell";
 
-        const cavity = document.createElement("span");
-        cavity.className = "box-cavity";
+        const base = document.createElement("span");
+        base.className = "box-base";
 
         const content = document.createElement("span");
         content.className = "box-content";
@@ -715,10 +768,18 @@
         number.className = "box-number";
         number.textContent = String(index + 1);
 
+        const hinge = document.createElement("span");
+        hinge.className = "box-hinge";
+
+        const frontLip = document.createElement("span");
+        frontLip.className = "box-front-lip";
+
         lid.appendChild(number);
-        shell.appendChild(cavity);
+        shell.appendChild(base);
         shell.appendChild(content);
         shell.appendChild(lid);
+        shell.appendChild(hinge);
+        shell.appendChild(frontLip);
         button.appendChild(shell);
 
         button.addEventListener("click", ()=>{
