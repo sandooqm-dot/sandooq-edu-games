@@ -153,6 +153,13 @@
         linear-gradient(180deg, #165f55 0%, #0f4f46 100%);
     }
 
+    .wheel-page.wheel-theme-founding-day .theme-background{
+      background-color:#d7c9b1;
+      background-image:
+        url("theme-founding-day-bg.webp?v=1"),
+        linear-gradient(180deg, #d9ccb5 0%, #c9baa2 100%);
+    }
+
     .wheel-logo{
       position:absolute;
       top:clamp(14px, 2.4vw, 30px);
@@ -321,6 +328,11 @@
     .wheel-page.wheel-theme-national-day .wheel-sector{
       stroke:#083D2B;
       stroke-width:3;
+    }
+
+    .wheel-page.wheel-theme-founding-day .wheel-sector{
+      stroke:#6E5A43;
+      stroke-width:2.8;
     }
 
     .wheel-sector.selected{
@@ -1155,6 +1167,12 @@
       "national-day": [
         "#1E8A57",
         "#F4FFF7"
+      ],
+      "founding-day": [
+        "#8D715B",
+        "#DCCCB5",
+        "#B49579",
+        "#F1E6D5"
       ]
     };
 
@@ -1543,7 +1561,7 @@
     function applyWheelTheme(theme){
       if (!wheelPage) return;
       const normalizedTheme = normalizeWheelTheme(theme);
-      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english", "wheel-theme-flowers", "wheel-theme-national-day");
+      wheelPage.classList.remove("wheel-theme-original", "wheel-theme-classroom", "wheel-theme-sky-clouds", "wheel-theme-forest", "wheel-theme-math", "wheel-theme-english", "wheel-theme-flowers", "wheel-theme-national-day", "wheel-theme-founding-day");
       wheelPage.classList.add(`wheel-theme-${normalizedTheme}`);
 
       /*
@@ -1612,6 +1630,14 @@
           themeBackground.style.backgroundImage = [
             'url("theme-national-day-v2-bg.webp?v=53")',
             'linear-gradient(180deg, #165f55 0%, #0f4f46 100%)'
+          ].join(", ");
+        }
+
+        if (normalizedTheme === "founding-day") {
+          themeBackground.style.backgroundColor = "#d7c9b1";
+          themeBackground.style.backgroundImage = [
+            'url("theme-founding-day-bg.webp?v=1")',
+            'linear-gradient(180deg, #d9ccb5 0%, #c9baa2 100%)'
           ].join(", ");
         }
       }
@@ -1793,6 +1819,20 @@
         "الوطني"
       ].includes(value)) {
         return "national-day";
+      }
+
+      if ([
+        "founding-day",
+        "founding_day",
+        "foundingday",
+        "saudi-founding-day",
+        "theme-founding-day",
+        "يوم التأسيس",
+        "التأسيس",
+        "يوم التاسيس",
+        "تأسيس"
+      ].includes(value)) {
+        return "founding-day";
       }
 
       return "original";
