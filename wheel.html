@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-theme-sky-clouds-v39 -->
+  <!-- version: wheel-theme-sky-clouds-v40 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-theme-sky-clouds-v39</title>
+  <title>العجلة الدوارة - wheel-theme-sky-clouds-v40</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -98,20 +98,20 @@
       opacity:1;
       background-color:#fff;
       background-image:
-        url("theme-original-bg.webp?v=39"),
-        url("theme-original-bg.png?v=39"),
-        url("theme-original.webp?v=39"),
-        url("theme-original.png?v=39");
+        url("theme-original-bg.webp?v=40"),
+        url("theme-original-bg.png?v=40"),
+        url("theme-original.webp?v=40"),
+        url("theme-original.png?v=40");
     }
 
     .wheel-page.wheel-theme-sky-clouds .theme-background{
       opacity:1;
       background-color:#58c7f3;
       background-image:
-        url("theme-sky-clouds-bg.webp?v=39"),
-        url("theme-sky-clouds-bg.png?v=39"),
-        url("theme-sky-clouds.webp?v=39"),
-        url("theme-sky-clouds.png?v=39");
+        url("theme-sky-clouds-bg.webp?v=40"),
+        url("theme-sky-clouds-bg.png?v=40"),
+        url("theme-sky-clouds.webp?v=40"),
+        url("theme-sky-clouds.png?v=40");
     }
 
     .wheel-logo{
@@ -146,8 +146,8 @@
     }
 
     /*
-      wheel-39:
-      Camera Zoom In / Ken Burns intro بحركة عجلة أبطأ وأنعم جدًا.
+      wheel-40:
+      Camera Zoom In / Ken Burns intro بحركة JavaScript مستمرة بدون توقفات.
       البداية: الخلفية تظهر كمشهد واسع + العجلة بعيدة.
       النهاية: الخلفية تكبر فتختفي الأطراف + العجلة تصل للحجم الطبيعي.
       بعد الانترو تظهر الأزرار وتبدأ اللعبة طبيعي.
@@ -159,11 +159,13 @@
 
     .wheel-page.intro-playing .wheel-stage{
       transform-origin:center center;
-      animation:introWheelCameraIn var(--intro-duration) cubic-bezier(.08,.42,.16,1) both;
+      transform:scale(.42);
+      will-change:transform, opacity;
     }
 
     .wheel-page.intro-playing .theme-background{
-      animation:introBackgroundCameraIn var(--intro-duration) cubic-bezier(.08,.42,.16,1) both;
+      transform:scale(1);
+      will-change:transform, filter;
     }
 
     .wheel-page.intro-done .theme-background{
@@ -172,73 +174,10 @@
 
     .wheel-page.intro-playing .wheel-arrow{
       opacity:0;
-      animation:introArrowEnter .75s ease-out 7.55s both;
     }
 
     .wheel-page.intro-playing .wheel-logo{
       animation:introLogoFade .75s ease-out both;
-    }
-
-    @keyframes introBackgroundCameraIn{
-      0%{
-        transform:scale(1);
-        filter:saturate(1.04);
-      }
-      28%{
-        transform:scale(1);
-        filter:saturate(1.04);
-      }
-      52%{
-        transform:scale(1.045);
-        filter:saturate(1.03);
-      }
-      76%{
-        transform:scale(1.105);
-        filter:saturate(1.015);
-      }
-      100%{
-        transform:scale(var(--intro-bg-final-scale));
-        filter:saturate(1);
-      }
-    }
-
-    @keyframes introWheelCameraIn{
-      0%{
-        opacity:.94;
-        transform:scale(.42);
-      }
-      28%{
-        opacity:.94;
-        transform:scale(.42);
-      }
-      40%{
-        opacity:.96;
-        transform:scale(.48);
-      }
-      52%{
-        opacity:.98;
-        transform:scale(.58);
-      }
-      64%{
-        opacity:1;
-        transform:scale(.70);
-      }
-      76%{
-        opacity:1;
-        transform:scale(.82);
-      }
-      88%{
-        opacity:1;
-        transform:scale(.93);
-      }
-      96%{
-        opacity:1;
-        transform:scale(.985);
-      }
-      100%{
-        opacity:1;
-        transform:scale(1);
-      }
     }
 
     @keyframes introArrowEnter{
@@ -1213,20 +1152,20 @@
         if (normalizedTheme === "classroom") {
           themeBackground.style.backgroundColor = "#fff";
           themeBackground.style.backgroundImage = [
-            'url("theme-original-bg.webp?v=39")',
-            'url("theme-original-bg.png?v=39")',
-            'url("theme-original.webp?v=39")',
-            'url("theme-original.png?v=39")'
+            'url("theme-original-bg.webp?v=40")',
+            'url("theme-original-bg.png?v=40")',
+            'url("theme-original.webp?v=40")',
+            'url("theme-original.png?v=40")'
           ].join(", ");
         }
 
         if (normalizedTheme === "sky-clouds") {
           themeBackground.style.backgroundColor = "#58c7f3";
           themeBackground.style.backgroundImage = [
-            'url("theme-sky-clouds-bg.webp?v=39")',
-            'url("theme-sky-clouds-bg.png?v=39")',
-            'url("theme-sky-clouds.webp?v=39")',
-            'url("theme-sky-clouds.png?v=39")'
+            'url("theme-sky-clouds-bg.webp?v=40")',
+            'url("theme-sky-clouds-bg.png?v=40")',
+            'url("theme-sky-clouds.webp?v=40")',
+            'url("theme-sky-clouds.png?v=40")'
           ].join(", ");
         }
       }
@@ -2728,13 +2667,57 @@
 
       wheelPage.classList.remove("intro-done");
 
+      /*
+        wheel-40:
+        حركة كاميرا مستمرة بدون keyframe stops.
+        - وقفة بداية بسيطة.
+        - بعدها تكبير مستمر كل فريم باستخدام requestAnimationFrame.
+        - لا توجد محطات وسطية، لذلك لا يحدث إحساس "تكبر ثم توقف".
+      */
+      const holdMs = 2200;
+      const zoomMs = 7600;
+      const startWheelScale = 0.42;
+      const endWheelScale = 1;
+      const startBgScale = 1;
+      const endBgScale = Number(getComputedStyle(wheelPage).getPropertyValue("--intro-bg-final-scale")) || 1.18;
+
+      let introFrame = null;
+      let startTime = null;
+
+      const easeInOutSine = (t)=> {
+        const p = Math.max(0, Math.min(1, t));
+        return -(Math.cos(Math.PI * p) - 1) / 2;
+      };
+
+      const setIntroFrame = (wheelScale, bgScale)=> {
+        if (wheelStage) {
+          wheelStage.style.transform = `scale(${wheelScale})`;
+          wheelStage.style.animation = "none";
+        }
+
+        if (themeBackground) {
+          themeBackground.style.transform = `scale(${bgScale})`;
+          themeBackground.style.animation = "none";
+          const saturation = 1.04 - ((bgScale - startBgScale) / Math.max(0.001, endBgScale - startBgScale)) * 0.04;
+          themeBackground.style.filter = `saturate(${Math.max(1, Math.min(1.04, saturation))})`;
+        }
+      };
+
       const endIntro = ()=> {
+        if (introFrame) cancelAnimationFrame(introFrame);
+
         wheelPage.classList.remove("intro-playing");
         wheelPage.classList.add("intro-done");
 
         if (wheelStage) {
           wheelStage.style.transform = "";
           wheelStage.style.animation = "";
+        }
+
+        if (themeBackground) {
+          themeBackground.style.transform = `scale(${endBgScale})`;
+          themeBackground.style.animation = "";
+          themeBackground.style.filter = "";
         }
 
         if (fixedControls) {
@@ -2744,7 +2727,36 @@
         }
       };
 
-      setTimeout(endIntro, 8950);
+      setIntroFrame(startWheelScale, startBgScale);
+
+      const animate = (now)=> {
+        if (startTime === null) startTime = now;
+        const elapsed = now - startTime;
+
+        if (elapsed < holdMs) {
+          setIntroFrame(startWheelScale, startBgScale);
+          introFrame = requestAnimationFrame(animate);
+          return;
+        }
+
+        const rawProgress = (elapsed - holdMs) / zoomMs;
+        const progress = Math.max(0, Math.min(1, rawProgress));
+        const eased = easeInOutSine(progress);
+
+        const wheelScale = startWheelScale + (endWheelScale - startWheelScale) * eased;
+        const bgScale = startBgScale + (endBgScale - startBgScale) * eased;
+
+        setIntroFrame(wheelScale.toFixed(5), bgScale.toFixed(5));
+
+        if (progress < 1) {
+          introFrame = requestAnimationFrame(animate);
+          return;
+        }
+
+        setTimeout(endIntro, 220);
+      };
+
+      introFrame = requestAnimationFrame(animate);
     }
 
     applyWheelTheme(payload.theme);
