@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-audio-files-v28 -->
+<!-- version: index-themes-clean-v30 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -4373,10 +4373,7 @@
 
     :root{
       --theme-classic-img: url("theme-original.webp?v=31");
-      --theme-colors-img: url("theme-colors.png");
-      --theme-boys-img: url("theme-boys.png");
-      --theme-girls-img: url("theme-girls.png");
-      --theme-classroom-img: url("theme-classroom-preview.webp?v=12");
+--theme-classroom-img: url("theme-classroom-preview-v30.webp?v=30");
       --theme-sky-clouds-img: url("theme-sky-clouds-preview.webp?v=16");
       --theme-forest-img: url("theme-forest-preview.webp?v=16");
       --theme-math-img: url("theme-math-preview.webp?v=16");
@@ -4402,31 +4399,11 @@
     }
 
     .theme-art.classic{
-      background-image:
-        var(--theme-classic-img),
-        radial-gradient(circle at 50% 50%, #fff 0 10%, transparent 11%),
-        conic-gradient(#8e24aa 0 25%, #ec174f 25% 50%, #ff4b1f 50% 75%, #0a9aa3 75% 100%);
+      background:#fff !important;
+      background-image:none !important;
+      background-size:cover;
+      background-position:center;
     }
-
-    .theme-art.colors{
-      background-image:
-        var(--theme-colors-img),
-        radial-gradient(circle at 50% 50%, #fff 0 9%, transparent 10%),
-        conic-gradient(#f94144 0 12.5%, #f3722c 12.5% 25%, #f9c74f 25% 37.5%, #90be6d 37.5% 50%, #43aa8b 50% 62.5%, #577590 62.5% 75%, #277da1 75% 87.5%, #9b5de5 87.5% 100%);
-    }
-
-    .theme-art.boys{
-      background-image:
-        var(--theme-boys-img),
-        linear-gradient(180deg, #bfe7ff 0 50%, #d8f3dc 50% 100%);
-    }
-
-    .theme-art.girls{
-      background-image:
-        var(--theme-girls-img),
-        linear-gradient(180deg, #ffe1f0 0 50%, #fff7fb 50% 100%);
-    }
-
     .theme-art.classroom{
       background-image:
         var(--theme-classroom-img),
@@ -5103,13 +5080,13 @@
     <span aria-hidden="true" class="theme-current-preview theme-art classic" id="currentThemePreview"></span>
   </div>
   <div aria-label="قائمة الثيمات" class="theme-list" hidden id="themeListPanel">
-    <div class="theme-card active" data-theme-name="الأصل" data-wheel-theme="classic">
-      <span class="theme-name">الأصل</span>
+    <div class="theme-card active" data-theme-name="خلفية بيضاء" data-wheel-theme="classic">
+      <span class="theme-name">خلفية بيضاء</span>
       <span aria-hidden="true" class="theme-list-preview theme-art classic"></span>
       <button class="theme-activate-btn" type="button">تفعيل</button>
     </div>
-    <div class="theme-card" data-theme-name="فصل مدرسة" data-wheel-theme="classroom">
-      <span class="theme-name">فصل مدرسة</span>
+    <div class="theme-card" data-theme-name="فصل مدرسي" data-wheel-theme="classroom">
+      <span class="theme-name">فصل مدرسي</span>
       <span aria-hidden="true" class="theme-list-preview theme-art classroom"></span>
       <button class="theme-activate-btn" type="button">تفعيل</button>
     </div>
@@ -5148,22 +5125,7 @@
       <span aria-hidden="true" class="theme-list-preview theme-art founding-day"></span>
       <button class="theme-activate-btn" type="button">تفعيل</button>
     </div>
-    <div class="theme-card" data-theme-name="ألوان" data-wheel-theme="colors">
-      <span class="theme-name">ألوان</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art colors"></span>
-      <button class="theme-activate-btn" type="button">تفعيل</button>
-    </div>
-    <div class="theme-card" data-theme-name="أولاد" data-wheel-theme="boys">
-      <span class="theme-name">أولاد</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art boys"></span>
-      <button class="theme-activate-btn" type="button">تفعيل</button>
-    </div>
-    <div class="theme-card" data-theme-name="بنات" data-wheel-theme="girls">
-      <span class="theme-name">بنات</span>
-      <span aria-hidden="true" class="theme-list-preview theme-art girls"></span>
-      <button class="theme-activate-btn" type="button">تفعيل</button>
-    </div>
-  </div>
+</div>
 </div>
 
 <h2 class="screen-title wheel-setup-title">اختر طريقة عرض محتويات العجلة</h2>
@@ -5191,41 +5153,6 @@
 </div>
 </div>
 <input class="center-question-input" id="centerQuestionInput" maxlength="45" placeholder="اكتب السؤال الذي يظهر في منتصف العجلة" type="text"/>
-</div>
-
-<div class="sound-panel" id="soundPanel">
-<div class="sound-head">
-<div>
-<h3 class="sound-title">الأصوات</h3>
-<p class="sound-note">أصوات فعلية من ملفك، لا تتداخل، وتعمل فقط بعد ضغط المستخدم داخل اللعبة.</p>
-</div>
-<div aria-label="تشغيل أصوات العجلة" class="toggle sound-toggle">
-<button data-sound-toggle="off" type="button">كتم</button>
-<button class="active" data-sound-toggle="on" type="button">تشغيل</button>
-</div>
-</div>
-<div class="sound-list" aria-label="تجربة أصوات العجلة">
-<div class="sound-card">
-<div><strong>الأزرار</strong><span>صوت لمس خفيف للأزرار</span></div>
-<button class="sound-preview-btn" data-sound-preview="button" type="button">تجربة</button>
-</div>
-<div class="sound-card">
-<div><strong>دوران العجلة</strong><span>صوت تك تك مستمر أثناء الحركة</span></div>
-<button class="sound-preview-btn" data-sound-preview="tick" type="button">تجربة</button>
-</div>
-<div class="sound-card">
-<div><strong>ثبات القسم</strong><span>صوت اختيار ناعم عند التوقف</span></div>
-<button class="sound-preview-btn" data-sound-preview="select" type="button">تجربة</button>
-</div>
-<div class="sound-card">
-<div><strong>الحذف</strong><span>الصوت المركب من ملفك</span></div>
-<button class="sound-preview-btn" data-sound-preview="remove" type="button">تجربة</button>
-</div>
-<div class="sound-card">
-<div><strong>النهاية</strong><span>صوت ختامي من ملفك</span></div>
-<button class="sound-preview-btn" data-sound-preview="win" type="button">تجربة</button>
-</div>
-</div>
 </div>
 
 <div class="items-panel">
@@ -5275,17 +5202,13 @@
   const itemsHint = document.getElementById("itemsHint");
   const questionPanel = document.getElementById("questionPanel");
   const centerQuestionInput = document.getElementById("centerQuestionInput");
-  const soundPanel = document.getElementById("soundPanel");
   const wheelGameNameInput = document.getElementById("wheelGameNameInput");
   const themeListPanel = document.getElementById("themeListPanel");
   const toggleThemeListBtn = document.getElementById("toggleThemeListBtn");
   const currentThemePreview = document.getElementById("currentThemePreview");
   const THEME_LABELS = {
-    classic: "الأصل",
-    colors: "ألوان",
-    boys: "أولاد",
-    girls: "بنات",
-    classroom: "فصل مدرسة",
+    classic: "خلفية بيضاء",
+    classroom: "فصل مدرسي",
     "sky-clouds": "سماء وغيوم",
     forest: "غابة",
     math: "رياضيات",
@@ -5319,141 +5242,7 @@
     return "أضف كلمات أو أسئلة قصيرة.";
   }
 
-
-  const soundPreviewEngine = (()=>{
-    const SOUND_FILES = {
-      button: "sounds/wheel-button.mp3?v=63",
-      tick: "sounds/wheel-tick.mp3?v=63",
-      select: "sounds/wheel-select.mp3?v=63",
-      remove: "sounds/wheel-remove.mp3?v=63",
-      win: "sounds/wheel-win.mp3?v=63",
-      intro: "sounds/wheel-intro.mp3?v=63"
-    };
-
-    const cache = {};
-    let ctx = null;
-    let master = null;
-
-    function getAudio(name){
-      const src = SOUND_FILES[name];
-      if (!src) return null;
-
-      if (!cache[name]) {
-        const audio = new Audio(src);
-        audio.preload = "auto";
-        audio.volume = name === "tick" ? 1.0 : 0.98;
-        cache[name] = audio;
-      }
-
-      return cache[name];
-    }
-
-    function stopAll(exceptName = ""){
-      Object.entries(cache).forEach(([name, audio])=>{
-        if (name === exceptName) return;
-        try {
-          audio.pause();
-          audio.currentTime = 0;
-        } catch (_) {}
-      });
-    }
-
-    function playFile(name){
-      if (!wheelSoundEnabled) return false;
-
-      const audio = getAudio(name);
-      if (!audio) return false;
-
-      try {
-        stopAll(name);
-        audio.loop = false;
-        audio.pause();
-        audio.currentTime = 0;
-        audio.volume = name === "tick" ? 1.0 : 0.98;
-        const promise = audio.play();
-        if (promise && typeof promise.catch === "function") {
-          promise.catch(()=> fallbackPlay(name));
-        }
-        return true;
-      } catch (_) {
-        fallbackPlay(name);
-        return false;
-      }
-    }
-
-    function ensureFallback(){
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return null;
-        if (!ctx) {
-          ctx = new AudioCtx();
-          master = ctx.createGain();
-          master.gain.value = 0.46;
-          master.connect(ctx.destination);
-        }
-        if (ctx.state === "suspended") ctx.resume().catch(()=>{});
-        return ctx;
-      } catch (_) {
-        return null;
-      }
-    }
-
-    function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.14, delay = 0){
-      if (!wheelSoundEnabled) return;
-      const audio = ensureFallback();
-      if (!audio || !master) return;
-
-      const now = audio.currentTime + Math.max(0, delay);
-      const osc = audio.createOscillator();
-      const gain = audio.createGain();
-      osc.type = type;
-      osc.frequency.setValueAtTime(freq, now);
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.006);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-      osc.connect(gain);
-      gain.connect(master);
-      osc.start(now);
-      osc.stop(now + duration + 0.035);
-    }
-
-    function fallbackPlay(name){
-      if (name === "button") {
-        tone(820, 0.075, "triangle", 0.12);
-        return;
-      }
-      if (name === "tick") {
-        tone(620, 0.052, "triangle", 0.18);
-        return;
-      }
-      if (name === "select" || name === "win") {
-        tone(660, 0.14, "sine", 0.16);
-        tone(880, 0.15, "sine", 0.14, 0.09);
-        return;
-      }
-      if (name === "remove") {
-        tone(784, 0.15, "sine", 0.15);
-        tone(988, 0.15, "sine", 0.13, 0.09);
-        tone(430, 0.18, "triangle", 0.12, 0.18);
-      }
-    }
-
-    function play(name){
-      playFile(name);
-    }
-
-    return { play };
-  })();
-
   function syncSoundUi(){
-    document.querySelectorAll("[data-sound-toggle]").forEach((btn)=>{
-      const enabled = btn.getAttribute("data-sound-toggle") === "on";
-      btn.classList.toggle("active", enabled === wheelSoundEnabled);
-    });
-
-    if (soundPanel) {
-      soundPanel.classList.toggle("sound-disabled", !wheelSoundEnabled);
-    }
   }
 
   function createEntry(){
@@ -5656,12 +5445,13 @@
     const theme = wheelTheme || "classic";
     if (currentThemePreview) {
       currentThemePreview.className = `theme-current-preview theme-art ${theme}`;
-      currentThemePreview.setAttribute("aria-label", THEME_LABELS[theme] || "الأصل");
+      currentThemePreview.setAttribute("aria-label", THEME_LABELS[theme] || "خلفية بيضاء");
     }
   }
 
   function setWheelTheme(theme, closeList = true){
-    wheelTheme = theme || "classic";
+    const allowedThemes = new Set(["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"]);
+    wheelTheme = allowedThemes.has(theme) ? theme : "classic";
     document.querySelectorAll(".theme-card").forEach((btn)=>{
       btn.classList.toggle("active", btn.getAttribute("data-wheel-theme") === wheelTheme);
     });
@@ -5794,16 +5584,6 @@
       saveDraft();
     });
   });
-
-  document.querySelectorAll("[data-sound-preview]").forEach((btn)=>{
-    btn.addEventListener("click", ()=>{
-      if (!wheelSoundEnabled) {
-        wheelSoundEnabled = true;
-        syncSoundUi();
-        saveDraft();
-      }
-      soundPreviewEngine.play(btn.getAttribute("data-sound-preview") || "button");
-    });
   });
 
   centerQuestionInput?.addEventListener("input", saveDraft);
