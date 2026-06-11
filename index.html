@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-sound-system-v24 -->
+<!-- version: index-audio-files-v25 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5302,28 +5302,60 @@
 
 
   const soundPreviewEngine = (()=>{
+    const SOUND_FILES = {
+      button: "sounds/wheel-button.mp3?v=58",
+      tick: "sounds/wheel-tick.mp3?v=58",
+      select: "sounds/wheel-select.mp3?v=58",
+      remove: "sounds/wheel-remove.mp3?v=58"
+    };
+
+    const cache = {};
     let ctx = null;
     let master = null;
-    let compressor = null;
 
-    function ensure(){
+    function getAudio(name){
+      const src = SOUND_FILES[name];
+      if (!src) return null;
+
+      if (!cache[name]) {
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        audio.volume = name === "tick" ? 0.90 : 0.96;
+        cache[name] = audio;
+      }
+
+      return cache[name];
+    }
+
+    function playFile(name){
+      if (!wheelSoundEnabled) return false;
+
+      const audio = getAudio(name);
+      if (!audio) return false;
+
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+        const promise = audio.play();
+        if (promise && typeof promise.catch === "function") {
+          promise.catch(()=> fallbackPlay(name));
+        }
+        return true;
+      } catch (_) {
+        fallbackPlay(name);
+        return false;
+      }
+    }
+
+    function ensureFallback(){
       try {
         const AudioCtx = window.AudioContext || window.webkitAudioContext;
         if (!AudioCtx) return null;
         if (!ctx) {
           ctx = new AudioCtx();
-
-          compressor = ctx.createDynamicsCompressor();
-          compressor.threshold.value = -12;
-          compressor.knee.value = 20;
-          compressor.ratio.value = 3;
-          compressor.attack.value = 0.003;
-          compressor.release.value = 0.16;
-
           master = ctx.createGain();
-          master.gain.value = 0.58;
-          master.connect(compressor);
-          compressor.connect(ctx.destination);
+          master.gain.value = 0.42;
+          master.connect(ctx.destination);
         }
         if (ctx.state === "suspended") ctx.resume().catch(()=>{});
         return ctx;
@@ -5332,124 +5364,48 @@
       }
     }
 
-    function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.16, delay = 0, attack = 0.008){
+    function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.14, delay = 0){
       if (!wheelSoundEnabled) return;
-      const audio = ensure();
+      const audio = ensureFallback();
       if (!audio || !master) return;
 
-      const now = audio.currentTime + Math.max(0, Number(delay) || 0);
-      const dur = Math.max(0.025, Number(duration) || 0.08);
-      const atk = Math.min(Math.max(0.003, Number(attack) || 0.008), dur * 0.45);
+      const now = audio.currentTime + Math.max(0, delay);
       const osc = audio.createOscillator();
       const gain = audio.createGain();
-
       osc.type = type;
-      osc.frequency.setValueAtTime(Math.max(20, Number(freq) || 520), now);
-
+      osc.frequency.setValueAtTime(freq, now);
       gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(Math.max(0.0002, Number(volume) || 0.16), now + atk);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
+      gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
       osc.connect(gain);
       gain.connect(master);
       osc.start(now);
-      osc.stop(now + dur + 0.045);
+      osc.stop(now + duration + 0.035);
     }
 
-    function sweep(from = 700, to = 320, duration = 0.20, type = "triangle", volume = 0.12, delay = 0){
-      if (!wheelSoundEnabled) return;
-      const audio = ensure();
-      if (!audio || !master) return;
-
-      const now = audio.currentTime + Math.max(0, Number(delay) || 0);
-      const dur = Math.max(0.04, Number(duration) || 0.2);
-      const osc = audio.createOscillator();
-      const gain = audio.createGain();
-
-      osc.type = type;
-      osc.frequency.setValueAtTime(Math.max(20, from), now);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(20, to), now + dur);
-
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-      osc.connect(gain);
-      gain.connect(master);
-      osc.start(now);
-      osc.stop(now + dur + 0.05);
-    }
-
-    function noiseBurst(duration = 0.025, volume = 0.16, delay = 0, filterFreq = 1800, filterType = "bandpass", q = 8){
-      if (!wheelSoundEnabled) return;
-      const audio = ensure();
-      if (!audio || !master) return;
-
-      const now = audio.currentTime + Math.max(0, Number(delay) || 0);
-      const dur = Math.max(0.012, Number(duration) || 0.025);
-      const sampleCount = Math.max(1, Math.floor(audio.sampleRate * dur));
-      const buffer = audio.createBuffer(1, sampleCount, audio.sampleRate);
-      const data = buffer.getChannelData(0);
-
-      for (let i = 0; i < sampleCount; i += 1) {
-        const t = i / sampleCount;
-        const envelope = Math.pow(1 - t, 2.4);
-        data[i] = (Math.random() * 2 - 1) * envelope;
+    function fallbackPlay(name){
+      if (name === "button") {
+        tone(820, 0.075, "triangle", 0.12);
+        return;
       }
-
-      const source = audio.createBufferSource();
-      const filter = audio.createBiquadFilter();
-      const gain = audio.createGain();
-
-      source.buffer = buffer;
-      filter.type = filterType;
-      filter.frequency.setValueAtTime(Math.max(80, filterFreq), now);
-      filter.Q.setValueAtTime(Math.max(0.1, q), now);
-
-      gain.gain.setValueAtTime(0.0001, now);
-      gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-      source.connect(filter);
-      filter.connect(gain);
-      gain.connect(master);
-      source.start(now);
-      source.stop(now + dur + 0.02);
-    }
-
-    function bell(freq, delay = 0, volume = 0.18){
-      tone(freq, 0.18, "sine", volume, delay, 0.006);
-      tone(freq * 2.01, 0.13, "triangle", volume * 0.32, delay + 0.004, 0.004);
-      tone(freq * 3.02, 0.09, "sine", volume * 0.14, delay + 0.008, 0.003);
+      if (name === "tick") {
+        tone(560, 0.035, "triangle", 0.12);
+        return;
+      }
+      if (name === "select") {
+        tone(660, 0.14, "sine", 0.16);
+        tone(880, 0.15, "sine", 0.14, 0.09);
+        return;
+      }
+      if (name === "remove") {
+        tone(784, 0.15, "sine", 0.15);
+        tone(988, 0.15, "sine", 0.13, 0.09);
+        tone(430, 0.18, "triangle", 0.12, 0.18);
+      }
     }
 
     function play(name){
-      if (name === "button") {
-        noiseBurst(0.024, 0.18, 0, 1650, "bandpass", 5);
-        bell(820, 0.006, 0.10);
-        return;
-      }
-
-      if (name === "tick") {
-        noiseBurst(0.018, 0.24, 0, 2300, "bandpass", 9);
-        tone(540, 0.026, "triangle", 0.075, 0.003, 0.003);
-        return;
-      }
-
-      if (name === "select") {
-        bell(660, 0.000, 0.18);
-        bell(880, 0.080, 0.16);
-        bell(1174, 0.165, 0.13);
-        return;
-      }
-
-      if (name === "remove") {
-        bell(784, 0.000, 0.16);
-        bell(988, 0.085, 0.14);
-        sweep(760, 360, 0.22, "triangle", 0.15, 0.180);
-        bell(1046, 0.270, 0.10);
-        noiseBurst(0.075, 0.14, 0.175, 1250, "bandpass", 4);
-      }
+      playFile(name);
     }
 
     return { play };

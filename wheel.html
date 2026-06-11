@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-sound-system-v57 -->
+  <!-- version: wheel-audio-files-v58 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-sound-system-v57</title>
+  <title>العجلة الدوارة - wheel-audio-files-v58</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1167,13 +1167,26 @@
       - مناسب للجوال وسفاري لأن الأصوات قصيرة ومولدة بـ Web Audio API.
     */
     const wheelAudio = (()=>{
-      let ctx = null;
-      let master = null;
-      let compressor = null;
+      const SOUND_FILES = {
+        button: "sounds/wheel-button.mp3?v=58",
+        tick: "sounds/wheel-tick.mp3?v=58",
+        select: "sounds/wheel-select.mp3?v=58",
+        remove: "sounds/wheel-remove.mp3?v=58"
+      };
+
       let enabled = true;
       let tickingActive = false;
       let lastTickIndex = -1;
       let lastTickAt = 0;
+      let tickPoolIndex = 0;
+      const cache = {};
+      const pools = {
+        tick: []
+      };
+
+      // fallback خفيف فقط إذا لم تُرفع ملفات الصوت في المستودع.
+      let ctx = null;
+      let master = null;
 
       function readEnabled(){
         try {
@@ -1183,27 +1196,69 @@
         }
       }
 
-      function ensure(){
-        if (!readEnabled() || enabled === false) return null;
+      function canPlay(){
+        return readEnabled() && enabled !== false;
+      }
 
+      function getAudio(name){
+        const src = SOUND_FILES[name];
+        if (!src) return null;
+
+        if (!cache[name]) {
+          const audio = new Audio(src);
+          audio.preload = "auto";
+          audio.volume = name === "tick" ? 0.94 : 1.0;
+          cache[name] = audio;
+        }
+
+        return cache[name];
+      }
+
+      function getTickAudio(){
+        const src = SOUND_FILES.tick;
+        if (!src) return null;
+
+        if (!pools.tick.length) {
+          for (let i = 0; i < 5; i += 1) {
+            const audio = new Audio(src);
+            audio.preload = "auto";
+            audio.volume = 0.94;
+            pools.tick.push(audio);
+          }
+        }
+
+        const audio = pools.tick[tickPoolIndex % pools.tick.length];
+        tickPoolIndex += 1;
+        return audio;
+      }
+
+      function playAudioElement(audio, playbackRate = 1){
+        if (!audio || !canPlay()) return false;
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.playbackRate = playbackRate;
+          const promise = audio.play();
+          if (promise && typeof promise.catch === "function") {
+            promise.catch(()=>{});
+          }
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function ensureFallback(){
+        if (!canPlay()) return null;
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           if (!AudioCtx) return null;
 
           if (!ctx) {
             ctx = new AudioCtx();
-
-            compressor = ctx.createDynamicsCompressor();
-            compressor.threshold.value = -12;
-            compressor.knee.value = 20;
-            compressor.ratio.value = 3;
-            compressor.attack.value = 0.003;
-            compressor.release.value = 0.16;
-
             master = ctx.createGain();
-            master.gain.value = 0.58;
-            master.connect(compressor);
-            compressor.connect(ctx.destination);
+            master.gain.value = 0.42;
+            master.connect(ctx.destination);
           }
 
           if (ctx.state === "suspended") {
@@ -1216,97 +1271,55 @@
         }
       }
 
-      function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.16, delay = 0, attack = 0.008){
-        const audio = ensure();
+      function fallbackTone(freq = 520, duration = 0.08, type = "sine", volume = 0.13, delay = 0){
+        const audio = ensureFallback();
         if (!audio || !master) return;
 
         const now = audio.currentTime + Math.max(0, Number(delay) || 0);
         const dur = Math.max(0.025, Number(duration) || 0.08);
-        const atk = Math.min(Math.max(0.003, Number(attack) || 0.008), dur * 0.45);
         const osc = audio.createOscillator();
         const gain = audio.createGain();
 
         osc.type = type;
         osc.frequency.setValueAtTime(Math.max(20, Number(freq) || 520), now);
-
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(Math.max(0.0002, Number(volume) || 0.16), now + atk);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0002, Number(volume) || 0.13), now + 0.008);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
         osc.connect(gain);
         gain.connect(master);
         osc.start(now);
-        osc.stop(now + dur + 0.045);
+        osc.stop(now + dur + 0.035);
       }
 
-      function sweep(from = 700, to = 320, duration = 0.20, type = "triangle", volume = 0.12, delay = 0){
-        const audio = ensure();
-        if (!audio || !master) return;
-
-        const now = audio.currentTime + Math.max(0, Number(delay) || 0);
-        const dur = Math.max(0.04, Number(duration) || 0.20);
-        const osc = audio.createOscillator();
-        const gain = audio.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(Math.max(20, from), now);
-        osc.frequency.exponentialRampToValueAtTime(Math.max(20, to), now + dur);
-
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.010);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-        osc.connect(gain);
-        gain.connect(master);
-        osc.start(now);
-        osc.stop(now + dur + 0.05);
-      }
-
-      function noiseBurst(duration = 0.025, volume = 0.16, delay = 0, filterFreq = 1800, filterType = "bandpass", q = 8){
-        const audio = ensure();
-        if (!audio || !master) return;
-
-        const now = audio.currentTime + Math.max(0, Number(delay) || 0);
-        const dur = Math.max(0.012, Number(duration) || 0.025);
-        const sampleCount = Math.max(1, Math.floor(audio.sampleRate * dur));
-        const buffer = audio.createBuffer(1, sampleCount, audio.sampleRate);
-        const data = buffer.getChannelData(0);
-
-        for (let i = 0; i < sampleCount; i += 1) {
-          const t = i / sampleCount;
-          const envelope = Math.pow(1 - t, 2.4);
-          data[i] = (Math.random() * 2 - 1) * envelope;
+      function fallbackPlay(name){
+        if (name === "button") {
+          fallbackTone(820, 0.075, "triangle", 0.12);
+          return;
         }
-
-        const source = audio.createBufferSource();
-        const filter = audio.createBiquadFilter();
-        const gain = audio.createGain();
-
-        source.buffer = buffer;
-        filter.type = filterType;
-        filter.frequency.setValueAtTime(Math.max(80, filterFreq), now);
-        filter.Q.setValueAtTime(Math.max(0.1, q), now);
-
-        gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.004);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-
-        source.connect(filter);
-        filter.connect(gain);
-        gain.connect(master);
-        source.start(now);
-        source.stop(now + dur + 0.02);
+        if (name === "tick") {
+          fallbackTone(560, 0.035, "triangle", 0.12);
+          return;
+        }
+        if (name === "select") {
+          fallbackTone(660, 0.14, "sine", 0.16);
+          fallbackTone(880, 0.15, "sine", 0.14, 0.09);
+          return;
+        }
+        if (name === "remove") {
+          fallbackTone(784, 0.15, "sine", 0.15);
+          fallbackTone(988, 0.15, "sine", 0.13, 0.09);
+          fallbackTone(430, 0.18, "triangle", 0.12, 0.18);
+        }
       }
 
-      function bell(freq, delay = 0, volume = 0.18){
-        tone(freq, 0.18, "sine", volume, delay, 0.006);
-        tone(freq * 2.01, 0.13, "triangle", volume * 0.32, delay + 0.004, 0.004);
-        tone(freq * 3.02, 0.09, "sine", volume * 0.14, delay + 0.008, 0.003);
+      function playNamed(name){
+        const ok = playAudioElement(getAudio(name));
+        if (!ok) fallbackPlay(name);
       }
 
       function playButton(){
-        noiseBurst(0.024, 0.18, 0, 1650, "bandpass", 5);
-        bell(820, 0.006, 0.10);
+        playNamed("button");
       }
 
       function playTick(index = 0){
@@ -1314,32 +1327,27 @@
         if (index === lastTickIndex) return;
 
         const now = performance.now();
-        if (now - lastTickAt < 28) return;
+        if (now - lastTickAt < 30) return;
 
         lastTickIndex = index;
         lastTickAt = now;
 
-        const accent = index % 2;
-        noiseBurst(0.018, 0.24, 0, 2250 + accent * 180, "bandpass", 9);
-        tone(520 + accent * 70, 0.026, "triangle", 0.075, 0.003, 0.003);
+        const audio = getTickAudio();
+        const rate = 0.98 + (Math.abs(index) % 3) * 0.025;
+        const ok = playAudioElement(audio, rate);
+        if (!ok) fallbackPlay("tick");
       }
 
       function playSelect(){
-        bell(660, 0.000, 0.18);
-        bell(880, 0.080, 0.16);
-        bell(1174, 0.165, 0.13);
+        playNamed("select");
       }
 
       function playRemove(){
-        bell(784, 0.000, 0.16);
-        bell(988, 0.085, 0.14);
-        sweep(760, 360, 0.22, "triangle", 0.15, 0.180);
-        bell(1046, 0.270, 0.10);
-        noiseBurst(0.075, 0.14, 0.175, 1250, "bandpass", 4);
+        playNamed("remove");
       }
 
       function beginTicks(){
-        ensure();
+        preload();
         tickingActive = true;
         lastTickIndex = -1;
         lastTickAt = 0;
@@ -1350,8 +1358,17 @@
         lastTickIndex = -1;
       }
 
+      function preload(){
+        Object.keys(SOUND_FILES).forEach((name)=>{
+          const audio = getAudio(name);
+          try { audio?.load?.(); } catch (_) {}
+        });
+        getTickAudio();
+      }
+
       function unlock(){
-        ensure();
+        preload();
+        ensureFallback();
       }
 
       function setEnabled(value){
