@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-sound-system-v56 -->
+  <!-- version: wheel-sound-system-v57 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-sound-system-v56</title>
+  <title>العجلة الدوارة - wheel-sound-system-v57</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -1169,6 +1169,7 @@
     const wheelAudio = (()=>{
       let ctx = null;
       let master = null;
+      let compressor = null;
       let enabled = true;
       let tickingActive = false;
       let lastTickIndex = -1;
@@ -1191,9 +1192,18 @@
 
           if (!ctx) {
             ctx = new AudioCtx();
+
+            compressor = ctx.createDynamicsCompressor();
+            compressor.threshold.value = -12;
+            compressor.knee.value = 20;
+            compressor.ratio.value = 3;
+            compressor.attack.value = 0.003;
+            compressor.release.value = 0.16;
+
             master = ctx.createGain();
-            master.gain.value = 0.22;
-            master.connect(ctx.destination);
+            master.gain.value = 0.58;
+            master.connect(compressor);
+            compressor.connect(ctx.destination);
           }
 
           if (ctx.state === "suspended") {
@@ -1206,29 +1216,97 @@
         }
       }
 
-      function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.12, delay = 0){
+      function tone(freq = 520, duration = 0.08, type = "sine", volume = 0.16, delay = 0, attack = 0.008){
         const audio = ensure();
         if (!audio || !master) return;
 
         const now = audio.currentTime + Math.max(0, Number(delay) || 0);
+        const dur = Math.max(0.025, Number(duration) || 0.08);
+        const atk = Math.min(Math.max(0.003, Number(attack) || 0.008), dur * 0.45);
         const osc = audio.createOscillator();
         const gain = audio.createGain();
 
         osc.type = type;
-        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.setValueAtTime(Math.max(20, Number(freq) || 520), now);
+
         gain.gain.setValueAtTime(0.0001, now);
-        gain.gain.exponentialRampToValueAtTime(Math.max(0.0002, volume), now + 0.012);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + Math.max(0.025, duration));
+        gain.gain.linearRampToValueAtTime(Math.max(0.0002, Number(volume) || 0.16), now + atk);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
         osc.connect(gain);
         gain.connect(master);
         osc.start(now);
-        osc.stop(now + Math.max(0.03, duration) + 0.035);
+        osc.stop(now + dur + 0.045);
+      }
+
+      function sweep(from = 700, to = 320, duration = 0.20, type = "triangle", volume = 0.12, delay = 0){
+        const audio = ensure();
+        if (!audio || !master) return;
+
+        const now = audio.currentTime + Math.max(0, Number(delay) || 0);
+        const dur = Math.max(0.04, Number(duration) || 0.20);
+        const osc = audio.createOscillator();
+        const gain = audio.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(Math.max(20, from), now);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(20, to), now + dur);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.010);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now);
+        osc.stop(now + dur + 0.05);
+      }
+
+      function noiseBurst(duration = 0.025, volume = 0.16, delay = 0, filterFreq = 1800, filterType = "bandpass", q = 8){
+        const audio = ensure();
+        if (!audio || !master) return;
+
+        const now = audio.currentTime + Math.max(0, Number(delay) || 0);
+        const dur = Math.max(0.012, Number(duration) || 0.025);
+        const sampleCount = Math.max(1, Math.floor(audio.sampleRate * dur));
+        const buffer = audio.createBuffer(1, sampleCount, audio.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < sampleCount; i += 1) {
+          const t = i / sampleCount;
+          const envelope = Math.pow(1 - t, 2.4);
+          data[i] = (Math.random() * 2 - 1) * envelope;
+        }
+
+        const source = audio.createBufferSource();
+        const filter = audio.createBiquadFilter();
+        const gain = audio.createGain();
+
+        source.buffer = buffer;
+        filter.type = filterType;
+        filter.frequency.setValueAtTime(Math.max(80, filterFreq), now);
+        filter.Q.setValueAtTime(Math.max(0.1, q), now);
+
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.linearRampToValueAtTime(Math.max(0.0002, volume), now + 0.004);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(master);
+        source.start(now);
+        source.stop(now + dur + 0.02);
+      }
+
+      function bell(freq, delay = 0, volume = 0.18){
+        tone(freq, 0.18, "sine", volume, delay, 0.006);
+        tone(freq * 2.01, 0.13, "triangle", volume * 0.32, delay + 0.004, 0.004);
+        tone(freq * 3.02, 0.09, "sine", volume * 0.14, delay + 0.008, 0.003);
       }
 
       function playButton(){
-        tone(520, 0.055, "triangle", 0.12);
-        tone(760, 0.045, "sine", 0.065, 0.018);
+        noiseBurst(0.024, 0.18, 0, 1650, "bandpass", 5);
+        bell(820, 0.006, 0.10);
       }
 
       function playTick(index = 0){
@@ -1236,21 +1314,28 @@
         if (index === lastTickIndex) return;
 
         const now = performance.now();
-        if (now - lastTickAt < 38) return;
+        if (now - lastTickAt < 28) return;
 
         lastTickIndex = index;
         lastTickAt = now;
-        tone(840 + (index % 4) * 24, 0.032, "square", 0.055);
+
+        const accent = index % 2;
+        noiseBurst(0.018, 0.24, 0, 2250 + accent * 180, "bandpass", 9);
+        tone(520 + accent * 70, 0.026, "triangle", 0.075, 0.003, 0.003);
       }
 
       function playSelect(){
-        tone(620, 0.10, "sine", 0.13);
-        tone(880, 0.13, "sine", 0.10, 0.085);
+        bell(660, 0.000, 0.18);
+        bell(880, 0.080, 0.16);
+        bell(1174, 0.165, 0.13);
       }
 
       function playRemove(){
-        tone(330, 0.08, "sawtooth", 0.095);
-        tone(185, 0.12, "triangle", 0.075, 0.06);
+        bell(784, 0.000, 0.16);
+        bell(988, 0.085, 0.14);
+        sweep(760, 360, 0.22, "triangle", 0.15, 0.180);
+        bell(1046, 0.270, 0.10);
+        noiseBurst(0.075, 0.14, 0.175, 1250, "bandpass", 4);
       }
 
       function beginTicks(){
