@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v11-rebuilt-box-shape -->
+  <!-- version: open-box-v12-gift-box-rebuild -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -190,10 +190,10 @@
     }
 
     /*
-      open-box-v11:
-      إعادة بناء كاملة للشكل، بدون الاعتماد على فكرة الصندوق القديمة.
-      الحالة المغلقة: مربع بسيط مع قلب ورقم.
-      الحالة المفتوحة: صندوق مفتوح فعليًا بشكل قريب من التصميم المرجعي.
+      open-box-v12:
+      حذف تصميم الصناديق السابق بالكامل وإعادة بناء شكل Gift Box حسب التصميم المرفق.
+      المغلق: هدية مربعة بورق تغليف + شريط + رقم.
+      المفتوح: غطاء علوي من نفس ورق التغليف + صندوق داخلي مكشوف.
     */
     .box-shell{
       display:block;
@@ -201,40 +201,105 @@
       width:100%;
       height:100%;
       overflow:visible;
-      filter:drop-shadow(0 7px 10px rgba(0,0,0,.12));
+      filter:drop-shadow(0 7px 8px rgba(0,0,0,.12));
       transform:translateZ(0);
+    }
+
+    .box-card{
+      --paper-a:#2498d8;
+      --paper-b:#6fc8f4;
+      --paper-c:#2d6ed8;
+      --ribbon-a:#7551d8;
+      --ribbon-b:#5a37bf;
+      --inside-a:#eef8fb;
+      --inside-b:#96d6ca;
+      --inside-c:#7b5533;
+    }
+
+    .box-card.pattern-blue{
+      --paper-a:#2397d4;
+      --paper-b:#78d0f8;
+      --paper-c:#1159ad;
+      --ribbon-a:#8358dc;
+      --ribbon-b:#6843c6;
+      --inside-a:#e9f8ff;
+      --inside-b:#9fd7e4;
+      --pattern-kind:blue;
+    }
+
+    .box-card.pattern-green{
+      --paper-a:#25a96a;
+      --paper-b:#d5fff0;
+      --paper-c:#0d8c50;
+      --ribbon-a:#ff4f86;
+      --ribbon-b:#e7326e;
+      --inside-a:#effaf2;
+      --inside-b:#9cdac2;
+      --pattern-kind:green;
+    }
+
+    .box-card.pattern-yellow{
+      --paper-a:#f0bb24;
+      --paper-b:#ffd84b;
+      --paper-c:#d98615;
+      --ribbon-a:#f47726;
+      --ribbon-b:#df5e13;
+      --inside-a:#fff6d2;
+      --inside-b:#e5c486;
+      --pattern-kind:yellow;
+    }
+
+    .box-card.pattern-purple{
+      --paper-a:#6f35d5;
+      --paper-b:#8e56ff;
+      --paper-c:#5525b5;
+      --ribbon-a:#c8ae45;
+      --ribbon-b:#a88c2f;
+      --inside-a:#f0e8ff;
+      --inside-b:#c4aee8;
+      --pattern-kind:purple;
+    }
+
+    .box-card.pattern-red{
+      --paper-a:#eb2744;
+      --paper-b:#ff405d;
+      --paper-c:#bc1730;
+      --ribbon-a:#f3c634;
+      --ribbon-b:#d89a16;
+      --inside-a:#ffe8e5;
+      --inside-b:#d99b87;
+      --pattern-kind:red;
     }
 
     .box-base{
       position:absolute;
       left:0;
       right:0;
-      top:15.5%;
+      top:25.5%;
       bottom:0;
       z-index:2;
       opacity:0;
-      transform:translateY(8%) scale(.96);
-      border-radius:0 0 3.8% 3.8%;
+      transform:translateY(5%) scale(.98);
       border:clamp(1.8px, .32vw, 3px) solid rgba(255,255,255,.95);
       border-top:0;
+      border-radius:0 0 2% 2%;
       background:
         linear-gradient(90deg,
-          rgba(0,0,0,.24) 0%,
-          rgba(255,255,255,.04) 12%,
-          rgba(255,255,255,.03) 88%,
-          rgba(0,0,0,.22) 100%),
-        radial-gradient(circle at 50% 48%,
-          var(--box-color) 0%,
-          color-mix(in srgb, var(--box-color) 78%, #000 22%) 58%,
-          var(--box-dark) 100%);
+          rgba(77,40,15,.80) 0%,
+          rgba(122,75,31,.75) 8%,
+          rgba(238,214,163,.80) 18%,
+          rgba(245,226,182,.75) 50%,
+          rgba(238,214,163,.80) 82%,
+          rgba(122,75,31,.75) 92%,
+          rgba(77,40,15,.80) 100%);
       box-shadow:
-        inset 0 18px 20px rgba(0,0,0,.24),
-        inset 0 -9px 14px rgba(0,0,0,.16),
-        0 5px 10px rgba(0,0,0,.09);
+        inset 0 18px 18px rgba(0,0,0,.25),
+        inset 0 -11px 12px rgba(92,45,16,.28),
+        0 5px 8px rgba(0,0,0,.10);
       overflow:hidden;
       transition:
-        opacity .24s ease .34s,
-        transform .48s cubic-bezier(.18,.78,.18,1) .34s;
+        opacity .18s ease .20s,
+        transform .38s cubic-bezier(.18,.78,.18,1) .20s;
     }
 
     .box-card.opened .box-base{
@@ -245,31 +310,22 @@
     .box-base::before{
       content:"";
       position:absolute;
-      left:7%;
-      right:7%;
-      top:9%;
-      bottom:8%;
-      border-radius:3.5%;
+      left:8%;
+      right:8%;
+      top:10%;
+      bottom:9%;
+      border-radius:1.5%;
       background:
-        linear-gradient(90deg,
-          rgba(0,0,0,.34) 0%,
-          transparent 14%,
-          transparent 86%,
-          rgba(0,0,0,.30) 100%),
-        linear-gradient(180deg,
-          rgba(0,0,0,.18) 0%,
-          transparent 24%,
-          rgba(0,0,0,.11) 100%),
-        radial-gradient(circle at 50% 46%,
-          color-mix(in srgb, var(--box-color) 92%, #fff 8%) 0%,
-          var(--box-color) 48%,
-          var(--box-dark) 100%);
+        radial-gradient(circle at 52% 48%,
+          color-mix(in srgb, var(--inside-a) 70%, var(--paper-a) 30%) 0%,
+          color-mix(in srgb, var(--inside-b) 60%, var(--paper-a) 40%) 48%,
+          color-mix(in srgb, var(--paper-c) 82%, #000 18%) 100%);
       box-shadow:
-        inset 0 18px 24px rgba(0,0,0,.36),
-        inset 12px 0 20px rgba(0,0,0,.26),
-        inset -12px 0 20px rgba(255,255,255,.045),
-        inset 0 -13px 17px rgba(0,0,0,.18);
-      opacity:.99;
+        inset 0 19px 23px rgba(0,0,0,.34),
+        inset 14px 0 22px rgba(69,35,14,.42),
+        inset -14px 0 22px rgba(69,35,14,.34),
+        inset 0 -15px 18px rgba(68,34,12,.30);
+      opacity:.985;
     }
 
     .box-base::after{
@@ -278,9 +334,9 @@
       left:0;
       right:0;
       top:0;
-      height:1px;
+      height:2px;
       background:rgba(255,255,255,.92);
-      box-shadow:0 1px 0 rgba(0,0,0,.12);
+      box-shadow:0 1px 0 rgba(0,0,0,.14);
       pointer-events:none;
     }
 
@@ -288,17 +344,17 @@
       position:absolute;
       left:10%;
       right:10%;
-      top:25%;
+      top:34%;
       bottom:9%;
-      z-index:4;
+      z-index:5;
       display:flex;
       align-items:center;
       justify-content:center;
       opacity:0;
-      transform:translateY(10px) scale(.94);
+      transform:translateY(8px) scale(.94);
       transition:
-        opacity .34s ease .64s,
-        transform .46s cubic-bezier(.18,.78,.18,1) .64s;
+        opacity .30s ease .42s,
+        transform .40s cubic-bezier(.18,.78,.18,1) .42s;
       direction:rtl;
       text-align:center;
       pointer-events:none;
@@ -316,137 +372,136 @@
       top:0;
       height:100%;
       z-index:10;
-      border-radius:2.2%;
-      border:0;
+      overflow:hidden;
+      border:clamp(1.8px, .32vw, 3px) solid rgba(255,255,255,.95);
+      border-radius:1.5%;
       background:
-        linear-gradient(180deg,
-          rgba(255,255,255,.18) 0%,
-          rgba(255,255,255,.05) 24%,
-          transparent 44%),
-        linear-gradient(180deg,
-          var(--box-light) 0%,
-          var(--box-color) 55%,
-          var(--box-dark) 100%);
+        linear-gradient(180deg, rgba(255,255,255,.12), transparent 42%),
+        var(--gift-pattern, linear-gradient(180deg, var(--paper-b), var(--paper-a) 55%, var(--paper-c)));
       box-shadow:
-        inset 0 -5px 0 rgba(0,0,0,.14),
-        inset 0 5px 0 rgba(255,255,255,.16),
-        0 5px 9px rgba(0,0,0,.10);
+        inset 0 -4px 0 rgba(0,0,0,.12),
+        inset 0 4px 0 rgba(255,255,255,.14),
+        0 4px 8px rgba(0,0,0,.08);
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:hidden;
-      transform:translateZ(2px);
       transition:
-        top 1.08s cubic-bezier(.16,.78,.14,1),
-        height 1.08s cubic-bezier(.16,.78,.14,1),
-        border-radius .88s ease,
-        box-shadow .88s ease,
-        filter .88s ease;
-      will-change:top, height;
+        top .64s cubic-bezier(.16,.78,.14,1),
+        height .64s cubic-bezier(.16,.78,.14,1),
+        border-radius .54s ease,
+        box-shadow .54s ease,
+        filter .54s ease;
+      will-change:height, top;
+    }
+
+    .box-card.pattern-blue .box-lid{
+      --gift-pattern:
+        linear-gradient(90deg, transparent 0 27%, var(--ribbon-a) 28% 45%, transparent 46% 100%),
+        linear-gradient(0deg, transparent 0 45%, var(--ribbon-b) 46% 62%, transparent 63% 100%),
+        repeating-linear-gradient(45deg, var(--paper-a) 0 13px, var(--paper-b) 14px 25px);
+    }
+
+    .box-card.pattern-green .box-lid{
+      --gift-pattern:
+        linear-gradient(90deg, transparent 0 42%, var(--ribbon-a) 43% 58%, transparent 59% 100%),
+        linear-gradient(0deg, transparent 0 43%, var(--ribbon-b) 44% 60%, transparent 61% 100%),
+        repeating-linear-gradient(90deg, var(--paper-a) 0 9px, var(--paper-b) 10px 17px);
+    }
+
+    .box-card.pattern-yellow .box-lid{
+      --gift-pattern:
+        linear-gradient(135deg, transparent 0 40%, var(--ribbon-a) 41% 52%, transparent 53% 100%),
+        radial-gradient(circle at 22% 24%, rgba(213,113,37,.55) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 72% 64%, rgba(213,113,37,.50) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 38% 76%, rgba(213,113,37,.42) 0 6%, transparent 6.5%),
+        linear-gradient(180deg, var(--paper-b), var(--paper-a));
+    }
+
+    .box-card.pattern-purple .box-lid{
+      --gift-pattern:
+        linear-gradient(135deg, transparent 0 41%, var(--ribbon-a) 42% 52%, transparent 53% 100%),
+        linear-gradient(45deg, transparent 0 39%, var(--ribbon-b) 40% 48%, transparent 49% 100%),
+        repeating-radial-gradient(ellipse at 12% 30%, rgba(255,255,255,.08) 0 3px, transparent 4px 14px),
+        linear-gradient(180deg, var(--paper-b), var(--paper-a) 60%, var(--paper-c));
+    }
+
+    .box-card.pattern-red .box-lid{
+      --gift-pattern:
+        linear-gradient(135deg, transparent 0 42%, var(--ribbon-a) 43% 53%, transparent 54% 100%),
+        radial-gradient(circle at 25% 25%, rgba(244,178,43,.58) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 72% 62%, rgba(244,178,43,.55) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 42% 78%, rgba(244,178,43,.44) 0 6%, transparent 6.5%),
+        linear-gradient(180deg, var(--paper-b), var(--paper-a) 60%, var(--paper-c));
     }
 
     .box-card.opened .box-lid{
       top:0;
-      height:15.5%;
+      height:25.5%;
       border-radius:0;
       filter:brightness(1.035);
       box-shadow:
         inset 0 -3px 0 rgba(0,0,0,.20),
-        inset 0 3px 0 rgba(255,255,255,.17),
-        0 5px 8px rgba(0,0,0,.10);
+        inset 0 3px 0 rgba(255,255,255,.14),
+        0 5px 7px rgba(0,0,0,.12);
     }
 
-    /* القلب في الحالة المغلقة */
-    .box-lid::before{
-      content:"♥";
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:rgba(91, 0, 28, .20);
-      font-family:Georgia, "Times New Roman", serif;
-      font-size:calc(var(--box-size) * .66);
-      font-weight:900;
-      line-height:1;
-      transform:translateY(3%);
-      pointer-events:none;
-      transition:
-        opacity .20s ease,
-        transform .26s ease;
-    }
-
-    .box-card.opened .box-lid::before{
-      content:"";
-      left:11%;
-      right:11%;
-      top:33%;
-      bottom:auto;
-      height:22%;
-      border-radius:999px;
-      background:
-        linear-gradient(90deg,
-          transparent 0 43%,
-          rgba(255,255,255,.93) 48% 55%,
-          transparent 60% 100%),
-        rgba(0,0,0,.22);
-      box-shadow:
-        inset 0 2px 3px rgba(0,0,0,.20),
-        0 1px 0 rgba(255,255,255,.12);
-      opacity:.78;
-      transform:none;
-      display:block;
-      font-size:0;
-    }
-
+    .box-lid::before,
     .box-lid::after{
       content:"";
       position:absolute;
-      left:9%;
-      right:9%;
+      pointer-events:none;
+    }
+
+    /* حافة بيضاء خفيفة مثل التصميم المرفق */
+    .box-lid::before{
+      left:0;
+      right:0;
+      bottom:-2px;
+      height:2px;
+      background:rgba(255,255,255,.88);
+      box-shadow:0 1px 0 rgba(0,0,0,.12);
+      opacity:0;
+      transition:opacity .54s ease;
+    }
+
+    .box-card.opened .box-lid::before{
+      opacity:1;
+    }
+
+    /* لمعة بسيطة أعلى التغليف */
+    .box-lid::after{
+      left:10%;
+      right:10%;
       top:7%;
       height:8%;
       border-radius:999px;
-      background:rgba(255,255,255,.16);
+      background:rgba(255,255,255,.14);
       box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
-      pointer-events:none;
-      transition:
-        left .85s ease,
-        right .85s ease,
-        top .85s ease,
-        height .85s ease,
-        background .85s ease,
-        opacity .85s ease;
-    }
-
-    .box-card.opened .box-lid::after{
-      left:0;
-      right:0;
-      top:auto;
-      bottom:-2px;
-      height:2px;
-      border-radius:0;
-      background:rgba(255,255,255,.90);
-      box-shadow:0 1px 0 rgba(0,0,0,.10);
-      opacity:.95;
+      opacity:.75;
     }
 
     .box-number{
       position:relative;
       z-index:2;
       color:#fff;
-      text-shadow:0 2px 5px rgba(0,0,0,.30);
-      font-size:clamp(24px, calc(var(--box-size) * .36), 64px);
+      -webkit-text-stroke:clamp(1.1px, .18vw, 2.2px) rgba(0,0,0,.76);
+      paint-order:stroke fill;
+      text-shadow:
+        0 2px 2px rgba(0,0,0,.45),
+        0 0 1px rgba(0,0,0,.75);
+      font-size:clamp(24px, calc(var(--box-size) * .34), 64px);
       font-weight:900;
       line-height:1;
+      font-style:italic;
+      transform:rotate(-3deg);
       transition:
-        opacity .18s ease,
+        opacity .14s ease,
         transform .22s ease;
     }
 
     .box-card.opened .box-number{
       opacity:0;
-      transform:translateY(-5px) scale(.6);
+      transform:translateY(-5px) scale(.62) rotate(-3deg);
     }
 
     .box-hinge,
@@ -462,7 +517,9 @@
       justify-content:center;
       text-align:center;
       color:#fff;
-      font-size:clamp(19px, calc(var(--box-size) * .27), 46px);
+      -webkit-text-stroke:clamp(.7px, .13vw, 1.7px) rgba(0,0,0,.36);
+      paint-order:stroke fill;
+      font-size:clamp(18px, calc(var(--box-size) * .22), 42px);
       line-height:1.12;
       font-weight:900;
       overflow-wrap:anywhere;
@@ -497,7 +554,7 @@
     .result-mixed .result-text{
       height:auto;
       min-height:1.1em;
-      font-size:clamp(12px, calc(var(--box-size) * .145), 25px);
+      font-size:clamp(11px, calc(var(--box-size) * .12), 22px);
       line-height:1.1;
     }
 
@@ -822,6 +879,8 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "box-card";
+        const patternClasses = ["pattern-blue", "pattern-green", "pattern-yellow", "pattern-purple", "pattern-red"];
+        button.classList.add(patternClasses[index % patternClasses.length]);
         button.setAttribute("aria-label", `صندوق رقم ${index + 1}`);
         button.setAttribute("aria-pressed", "false");
         button.dataset.index = String(index);
