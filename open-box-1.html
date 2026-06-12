@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v28-color-match-slower-lid -->
+  <!-- version: open-box-v29-smooth-full-lid-rise -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -461,11 +461,11 @@
 
 
 
-    /* v28:
-       - توحيد لون الغطاء مع جسم الصندوق المفتوح عبر tint واحد للصندوق كامل.
-       - حركة الغطاء أصبحت أبطأ وأوضح: يبدأ من أسفل الصندوق ثم يرتفع ويستقر بالأعلى.
-       - تجهيز الحركة لاحقاً لتناسق صوت الفتح.
-       - الإبقاء على ضبط المحتوى الذكي من v27.
+    /* v29:
+       - الغطاء يرتفع بالحجم الطبيعي بدون تصغير أو ضغط.
+       - حركة الغطاء أصبحت سلسلة ومستمرة بدون توقفات بينية.
+       - يبدأ الغطاء من أسفل الصندوق ثم يصعد للأعلى ويثبت بنفس شكله الحالي.
+       - الإبقاء على مطابقة ألوان الغطاء مع جسم الصندوق وضبط المحتوى الذكي.
     */
     .box-card{
       --asset-tint:#a8c474;
@@ -491,7 +491,7 @@
     .cavity-box{
       opacity:0;
       transform:scale(.985);
-      transition:opacity .34s ease .16s, transform .68s cubic-bezier(.18,.78,.18,1) .08s;
+      transition:opacity .42s ease .10s, transform .72s cubic-bezier(.20,.82,.18,1) .08s;
     }
 
     .box-card.opened .cavity-box{
@@ -549,35 +549,20 @@
       background-blend-mode:color;
       filter:brightness(var(--asset-lid-brightness)) saturate(var(--asset-saturation));
       pointer-events:none;
-      transform:translateY(780%) scaleX(.82) scaleY(1.12);
+      transform:translateY(760%) scale(1);
       transform-origin:50% 50%;
+      will-change:transform, opacity;
     }
 
     .box-card.opened .box-wrap::after{
       opacity:1;
-      animation:assetLidOpen 1.18s cubic-bezier(.18,.78,.16,1) both;
+      animation:assetLidOpen 1.18s cubic-bezier(.20,.82,.18,1) both;
     }
 
     @keyframes assetLidOpen{
       0%{
-        opacity:0;
-        transform:translateY(780%) scaleX(.82) scaleY(1.12);
-      }
-      10%{
         opacity:1;
-        transform:translateY(720%) scaleX(.84) scaleY(1.10);
-      }
-      42%{
-        opacity:1;
-        transform:translateY(360%) scaleX(.92) scaleY(1.06);
-      }
-      72%{
-        opacity:1;
-        transform:translateY(72%) scaleX(.99) scaleY(1.01);
-      }
-      88%{
-        opacity:1;
-        transform:translateY(-18%) scaleX(1.02) scaleY(.97);
+        transform:translateY(760%) scale(1);
       }
       100%{
         opacity:1;
