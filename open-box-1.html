@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v15-user-box-design -->
+  <!-- version: open-box-v16-flat-to-box-rebuild -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -71,60 +71,15 @@
       transform-origin:center center;
     }
 
-    .theme-white .theme-background{
-      background:#fff;
-      transform:scale(1);
-    }
-
-    .theme-classroom .theme-background{
-      background-image:
-        url("theme-original-bg.webp?v=45"),
-        url("theme-original-bg.png?v=45"),
-        linear-gradient(180deg,#eef6ef 0%,#d8c6a1 100%);
-    }
-
-    .theme-sky-clouds .theme-background{
-      background-image:
-        url("theme-sky-clouds-bg.webp?v=45"),
-        url("theme-sky-clouds-bg.png?v=45"),
-        linear-gradient(180deg,#bfefff 0%,#5cc5f2 100%);
-    }
-
-    .theme-forest .theme-background{
-      background-image:
-        url("theme-forest-bg.webp?v=45"),
-        linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%);
-    }
-
-    .theme-math .theme-background{
-      background-image:
-        url("theme-math-bg.webp?v=45"),
-        linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%);
-    }
-
-    .theme-english .theme-background{
-      background-image:
-        url("theme-english-bg.webp?v=46"),
-        linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%);
-    }
-
-    .theme-flowers .theme-background{
-      background-image:
-        url("theme-flowers-bg.webp?v=48"),
-        linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%);
-    }
-
-    .theme-national-day .theme-background{
-      background-image:
-        url("theme-national-day-v2-bg.webp?v=53"),
-        linear-gradient(180deg,#165f55 0%,#0f4f46 100%);
-    }
-
-    .theme-founding-day .theme-background{
-      background-image:
-        url("theme-founding-day-bg.webp?v=1"),
-        linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
-    }
+    .theme-white .theme-background{ background:#fff; transform:scale(1); }
+    .theme-classroom .theme-background{ background-image:url("theme-original-bg.webp?v=45"), url("theme-original-bg.png?v=45"), linear-gradient(180deg,#eef6ef 0%,#d8c6a1 100%); }
+    .theme-sky-clouds .theme-background{ background-image:url("theme-sky-clouds-bg.webp?v=45"), url("theme-sky-clouds-bg.png?v=45"), linear-gradient(180deg,#bfefff 0%,#5cc5f2 100%); }
+    .theme-forest .theme-background{ background-image:url("theme-forest-bg.webp?v=45"), linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%); }
+    .theme-math .theme-background{ background-image:url("theme-math-bg.webp?v=45"), linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%); }
+    .theme-english .theme-background{ background-image:url("theme-english-bg.webp?v=46"), linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%); }
+    .theme-flowers .theme-background{ background-image:url("theme-flowers-bg.webp?v=48"), linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%); }
+    .theme-national-day .theme-background{ background-image:url("theme-national-day-v2-bg.webp?v=53"), linear-gradient(180deg,#165f55 0%,#0f4f46 100%); }
+    .theme-founding-day .theme-background{ background-image:url("theme-founding-day-bg.webp?v=1"), linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%); }
 
     .game-logo{
       position:absolute;
@@ -162,109 +117,77 @@
     }
 
     /*
-      open-box-v15:
-      تنفيذ صندوق المستخدم نفسه:
-      - صندوق ثابت بإطار خارجي ملوّن.
-      - داخل ثلاثي الأبعاد أبيض/رمادي واسع.
-      - الغطاء مستقل فوق الصندوق ويفتح للأعلى.
-      - نغيّر الألوان فقط لكل صندوق.
+      open-box-v16
+      إعادة بناء كاملة للصندوق حسب المرجع الجديد:
+      - الوضع المغلق: بطاقة مربعة مستديرة بلون واحد ورقم أبيض كبير.
+      - الوضع المفتوح: صندوق داخلي ثلاثي الأبعاد بنفس اللون، مع غطاء يفتح للأعلى.
+      - لا نحتفظ بأي هيكل من تصميمات الهدايا/الصناديق القديمة.
     */
     .box-card{
-      --frame:#087c32;
-      --frame-dark:#045921;
-      --frame-light:#10a34b;
-      --lid:#087c32;
-      --lid-dark:#045921;
-      --lid-light:#16ad55;
-      --inner:#f5f5f5;
-      --bevel1:#ffffff;
-      --bevel2:#dcdcdc;
+      --panel:#e03a64;
+      --panel-light:#ef6e8d;
+      --panel-dark:#b91f49;
+      --frame:#c53a5b;
+      --frame-light:#de5f80;
+      --frame-dark:#98213e;
+      --cavity:#921f3a;
+      --cavity-light:#af3551;
+      --cavity-dark:#7f1730;
       --shadow:rgba(0,0,0,.14);
 
       display:block;
       width:var(--tile-size);
       height:var(--tile-size);
-      border:0;
       padding:0;
       margin:0;
+      border:0;
       background:transparent;
       appearance:none;
       -webkit-appearance:none;
       cursor:pointer;
       touch-action:manipulation;
-      perspective:900px;
+      perspective:1200px;
     }
 
+    .box-pink{
+      --panel:#de3762; --panel-light:#ef6e8d; --panel-dark:#bb244c;
+      --frame:#c33359; --frame-light:#da587b; --frame-dark:#9e2144;
+      --cavity:#931f3b; --cavity-light:#af3654; --cavity-dark:#7c1730;
+    }
+    .box-lime{
+      --panel:#a9c476; --panel-light:#bfd98e; --panel-dark:#87a75b;
+      --frame:#9ebd68; --frame-light:#b7d981; --frame-dark:#7e9d49;
+      --cavity:#5a973f; --cavity-light:#74ac56; --cavity-dark:#488133;
+    }
     .box-blue{
-      --frame:#0b7fc4;
-      --frame-dark:#075b91;
-      --frame-light:#16a8ea;
-      --lid:#0b7fc4;
-      --lid-dark:#075b91;
-      --lid-light:#25b7f2;
+      --panel:#5ba6de; --panel-light:#88c2ed; --panel-dark:#3d82c0;
+      --frame:#4d98d1; --frame-light:#7db8e7; --frame-dark:#367bb6;
+      --cavity:#3d7bb0; --cavity-light:#5895ca; --cavity-dark:#2d6391;
     }
-
-    .box-red{
-      --frame:#c71938;
-      --frame-dark:#8f1026;
-      --frame-light:#ef3658;
-      --lid:#c71938;
-      --lid-dark:#8f1026;
-      --lid-light:#ff4967;
-    }
-
-    .box-orange{
-      --frame:#e9790b;
-      --frame-dark:#b75100;
-      --frame-light:#ff992a;
-      --lid:#e9790b;
-      --lid-dark:#b75100;
-      --lid-light:#ff9f32;
-    }
-
     .box-green{
-      --frame:#087c32;
-      --frame-dark:#045921;
-      --frame-light:#10a34b;
-      --lid:#087c32;
-      --lid-dark:#045921;
-      --lid-light:#16ad55;
+      --panel:#63b56b; --panel-light:#86cb8d; --panel-dark:#46954f;
+      --frame:#56aa5e; --frame-light:#79c080; --frame-dark:#3c8744;
+      --cavity:#3b7c40; --cavity-light:#57985c; --cavity-dark:#2e6233;
     }
-
+    .box-orange{
+      --panel:#e79b4d; --panel-light:#f2ba78; --panel-dark:#ca7f33;
+      --frame:#d98d40; --frame-light:#efac64; --frame-dark:#bb722c;
+      --cavity:#a0702c; --cavity-light:#bd8a46; --cavity-dark:#865a1f;
+    }
     .box-purple{
-      --frame:#8e31c7;
-      --frame-dark:#65208f;
-      --frame-light:#c052ea;
-      --lid:#8e31c7;
-      --lid-dark:#65208f;
-      --lid-light:#c85ef0;
+      --panel:#8d70d9; --panel-light:#a892eb; --panel-dark:#6e52b8;
+      --frame:#8063d0; --frame-light:#9a84e5; --frame-dark:#6549ae;
+      --cavity:#6b57a6; --cavity-light:#8873c3; --cavity-dark:#56428a;
     }
-
-    .box-navy{
-      --frame:#283bd4;
-      --frame-dark:#1923a3;
-      --frame-light:#4d63ff;
-      --lid:#283bd4;
-      --lid-dark:#1923a3;
-      --lid-light:#5c70ff;
+    .box-red{
+      --panel:#dc4c60; --panel-light:#ef7786; --panel-dark:#bc3146;
+      --frame:#cd3d52; --frame-light:#e06474; --frame-dark:#ac2438;
+      --cavity:#8e2d39; --cavity-light:#ab4854; --cavity-dark:#75202d;
     }
-
-    .box-mint{
-      --frame:#23a876;
-      --frame-dark:#167654;
-      --frame-light:#58d0a3;
-      --lid:#23a876;
-      --lid-dark:#167654;
-      --lid-light:#65d8ad;
-    }
-
-    .box-coral{
-      --frame:#ee3a16;
-      --frame-dark:#ba2106;
-      --frame-light:#ff6744;
-      --lid:#ee3a16;
-      --lid-dark:#ba2106;
-      --lid-light:#ff7051;
+    .box-teal{
+      --panel:#61b8a7; --panel-light:#86d1c3; --panel-dark:#439788;
+      --frame:#52ab9a; --frame-light:#74c5b5; --frame-dark:#398475;
+      --cavity:#3f7d73; --cavity-light:#58978c; --cavity-dark:#31625a;
     }
 
     .box-wrap{
@@ -273,68 +196,89 @@
       width:100%;
       height:100%;
       overflow:visible;
-      filter:drop-shadow(0 5px 8px var(--shadow));
+      filter:drop-shadow(0 6px 10px var(--shadow));
       transform:translateZ(0);
     }
 
-    .real-box{
+    .box-shell,
+    .closed-panel{
       position:absolute;
       inset:0;
-      display:block;
-      background:var(--frame);
-      border:clamp(3px, .55vw, 6px) solid var(--frame);
+    }
+
+    .box-shell{
+      opacity:0;
+      transform:scale(.96);
+      transition:opacity .28s ease, transform .9s cubic-bezier(.19,.82,.18,1);
+      pointer-events:none;
+    }
+
+    .box-card.opened .box-shell{
+      opacity:1;
+      transform:scale(1);
+    }
+
+    .box-frame{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,var(--frame-light), var(--frame) 58%, var(--frame-dark));
+      border-radius:10px;
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.14),
-        0 4px 8px rgba(0,0,0,.08);
+        inset 0 0 0 1px rgba(255,255,255,.18),
+        0 2px 2px rgba(255,255,255,.34),
+        0 6px 10px rgba(0,0,0,.08);
       overflow:hidden;
     }
 
-    /* مساحة الداخل البيضاء بنفس تصميم المستخدم */
     .box-well{
       position:absolute;
-      left:clamp(10px, 9%, 16px);
-      right:clamp(10px, 9%, 16px);
-      top:clamp(10px, 9%, 16px);
-      bottom:clamp(10px, 9%, 16px);
-      background:var(--inner);
+      left:9.5%;
+      right:9.5%;
+      top:13%;
+      bottom:9.5%;
       overflow:hidden;
+      background:var(--cavity);
       box-shadow:
-        inset 0 0 0 1px rgba(0,0,0,.04),
-        inset 0 11px 18px rgba(255,255,255,.78),
-        inset 0 -13px 20px rgba(0,0,0,.08);
+        inset 0 0 0 1px rgba(255,255,255,.08),
+        inset 0 16px 20px rgba(255,255,255,.06),
+        inset 0 -18px 20px rgba(0,0,0,.12);
     }
 
+    /* جوانب العمق */
     .box-well::before,
     .box-well::after{
       content:"";
       position:absolute;
       inset:0;
       pointer-events:none;
-      z-index:1;
     }
 
-    /* حواف العمق الداخلية */
     .box-well::before{
       background:
-        linear-gradient(135deg, transparent 0 12%, rgba(0,0,0,.08) 12.5% 21%, transparent 21.5%),
-        linear-gradient(225deg, transparent 0 12%, rgba(0,0,0,.08) 12.5% 21%, transparent 21.5%),
-        linear-gradient(315deg, transparent 0 12%, rgba(0,0,0,.09) 12.5% 21%, transparent 21.5%),
-        linear-gradient(45deg, transparent 0 12%, rgba(0,0,0,.07) 12.5% 21%, transparent 21.5%);
+        linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 24%),
+        linear-gradient(90deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 12%),
+        linear-gradient(270deg, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 12%),
+        linear-gradient(0deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 14%);
+      mix-blend-mode:normal;
+      opacity:.9;
     }
 
     .box-well::after{
       background:
-        linear-gradient(180deg, rgba(255,255,255,.80), transparent 22%, transparent 78%, rgba(0,0,0,.08)),
-        linear-gradient(90deg, rgba(0,0,0,.08), transparent 22%, transparent 78%, rgba(0,0,0,.08));
-      opacity:.72;
+        linear-gradient(135deg, rgba(255,255,255,.28) 0 10%, transparent 10.2%),
+        linear-gradient(225deg, rgba(0,0,0,.11) 0 9%, transparent 9.2%),
+        linear-gradient(315deg, rgba(0,0,0,.16) 0 10%, transparent 10.2%),
+        linear-gradient(45deg, rgba(255,255,255,.14) 0 9%, transparent 9.2%),
+        radial-gradient(circle at 50% 42%, var(--cavity-light) 0%, var(--cavity) 58%, var(--cavity-dark) 100%);
+      opacity:1;
     }
 
     .box-content{
       position:absolute;
-      left:18%;
-      right:18%;
-      top:17%;
-      bottom:14%;
+      left:13%;
+      right:13%;
+      top:20%;
+      bottom:16%;
       z-index:5;
       display:flex;
       align-items:center;
@@ -342,102 +286,93 @@
       direction:rtl;
       text-align:center;
       opacity:0;
-      transform:scale(.96);
-      transition:opacity .22s ease .42s, transform .32s ease .42s;
+      transform:translateY(8px);
+      transition:opacity .24s ease .34s, transform .38s ease .34s;
       pointer-events:none;
     }
 
     .box-card.opened .box-content{
       opacity:1;
-      transform:scale(1);
+      transform:translateY(0);
     }
 
-    .box-lid{
-      position:absolute;
-      left:0;
-      right:0;
-      top:0;
-      height:100%;
-      z-index:12;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.18), transparent 35%),
-        linear-gradient(180deg, var(--lid-light), var(--lid) 58%, var(--lid-dark));
-      border:clamp(3px, .55vw, 6px) solid var(--lid);
+    .closed-panel{
+      z-index:15;
+      border-radius:clamp(12px, 12%, 22px);
+      background:linear-gradient(180deg,var(--panel-light), var(--panel) 46%, var(--panel-dark));
       box-shadow:
-        inset 0 5px 0 rgba(255,255,255,.16),
-        inset 0 -7px 0 rgba(0,0,0,.16),
-        0 4px 8px rgba(0,0,0,.10);
+        inset 0 1px 0 rgba(255,255,255,.14),
+        0 5px 8px rgba(0,0,0,.10);
+      transition:
+        top .95s cubic-bezier(.17,.84,.17,1),
+        left .95s cubic-bezier(.17,.84,.17,1),
+        right .95s cubic-bezier(.17,.84,.17,1),
+        height .95s cubic-bezier(.17,.84,.17,1),
+        border-radius .95s cubic-bezier(.17,.84,.17,1),
+        transform .95s cubic-bezier(.17,.84,.17,1),
+        box-shadow .6s ease;
+      overflow:hidden;
       display:flex;
       align-items:center;
       justify-content:center;
       transform-origin:50% 0%;
-      transition:
-        transform 1.05s cubic-bezier(.15,.82,.16,1),
-        height 1.05s cubic-bezier(.15,.82,.16,1),
-        top 1.05s cubic-bezier(.15,.82,.16,1),
-        box-shadow .75s ease,
-        filter .75s ease;
-      will-change:transform, height, top;
-      backface-visibility:visible;
-      -webkit-backface-visibility:visible;
-      overflow:hidden;
     }
 
-    .box-card.opened .box-lid{
-      top:-14%;
-      height:22%;
-      transform:rotateX(64deg) translateZ(18px);
-      filter:brightness(1.07);
-      box-shadow:
-        inset 0 3px 0 rgba(255,255,255,.18),
-        inset 0 -4px 0 rgba(0,0,0,.16),
-        0 7px 9px rgba(0,0,0,.12);
-    }
-
-    .box-lid::after{
+    .closed-panel::before{
       content:"";
       position:absolute;
-      left:12%;
-      right:12%;
-      top:9%;
-      height:9%;
+      left:10%;
+      right:10%;
+      top:8%;
+      height:8%;
       border-radius:999px;
       background:rgba(255,255,255,.22);
-      box-shadow:inset 0 -2px 0 rgba(0,0,0,.09);
-      pointer-events:none;
+      opacity:.42;
     }
 
-    .box-number{
+    .box-card.opened .closed-panel{
+      left:-1.5%;
+      right:-1.5%;
+      top:-2.5%;
+      height:16%;
+      border-radius:2px;
+      transform:translateY(0) rotateX(0deg);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.18),
+        0 2px 5px rgba(0,0,0,.08);
+    }
+
+    .panel-number{
       position:relative;
       z-index:2;
       color:#fff;
-      font-size:clamp(24px, calc(var(--tile-size) * .34), 64px);
+      font-size:clamp(22px, calc(var(--tile-size) * .52), 78px);
       line-height:1;
       font-weight:900;
-      text-shadow:0 2px 5px rgba(0,0,0,.34);
-      transition:opacity .18s ease, transform .26s ease;
+      text-shadow:0 3px 8px rgba(0,0,0,.20);
+      transition:opacity .18s ease, transform .24s ease;
       pointer-events:none;
     }
 
-    .box-card.opened .box-number{
+    .box-card.opened .panel-number{
       opacity:0;
-      transform:scale(.72) translateY(-6px);
+      transform:scale(.82) translateY(-5px);
     }
 
     .result-text{
       width:100%;
       height:100%;
       display:flex;
-      align-items:flex-end;
+      align-items:center;
       justify-content:center;
       text-align:center;
-      color:#111;
-      font-size:clamp(15px, calc(var(--tile-size) * .23), 40px);
-      line-height:1.05;
+      color:#fff;
+      font-size:clamp(15px, calc(var(--tile-size) * .22), 38px);
+      line-height:1.08;
       font-weight:900;
       overflow-wrap:anywhere;
-      text-shadow:none;
-      padding-bottom:2%;
+      text-shadow:0 2px 5px rgba(0,0,0,.24);
+      padding:0;
     }
 
     .result-image{
@@ -446,6 +381,7 @@
       object-fit:contain;
       display:block;
       background:transparent;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.18));
     }
 
     .result-mixed{
@@ -458,18 +394,12 @@
       justify-items:center;
     }
 
-    .result-mixed .result-image{
-      min-height:0;
-      max-height:100%;
-    }
-
+    .result-mixed .result-image{ min-height:0; max-height:100%; }
     .result-mixed .result-text{
       height:auto;
       min-height:1.05em;
-      font-size:clamp(12px, calc(var(--tile-size) * .18), 30px);
-      line-height:1;
-      align-items:center;
-      padding-bottom:0;
+      font-size:clamp(12px, calc(var(--tile-size) * .16), 28px);
+      line-height:1.02;
     }
 
     .fixed-controls{
@@ -503,78 +433,31 @@
       white-space:nowrap;
     }
 
-    .back-btn{
-      left:clamp(16px, 2.6vw, 34px);
-      background:#efd553;
-      min-width:clamp(78px, 8vw, 108px);
-    }
-
-    .reset-btn{
-      right:clamp(16px, 2.8vw, 42px);
-      background:#1688d3;
-      color:#fff;
-      min-width:clamp(78px, 8vw, 110px);
-    }
+    .back-btn{ left:clamp(16px, 2.6vw, 34px); background:#efd553; min-width:clamp(78px, 8vw, 108px); }
+    .reset-btn{ right:clamp(16px, 2.8vw, 42px); background:#1688d3; color:#fff; min-width:clamp(78px, 8vw, 110px); }
 
     .back-btn:active,
-    .reset-btn:active{
-      transform:translateY(2px);
-      box-shadow:0 2px 0 rgba(0,0,0,.20);
-    }
+    .reset-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.20); }
 
     @media (orientation:portrait){
-      .stage{
-        inset:calc(92px + var(--safe-top)) 0 var(--bottom-space) 0;
-      }
+      .stage{ inset:calc(92px + var(--safe-top)) 0 var(--bottom-space) 0; }
     }
 
     @media (max-width:560px){
       :root{ --logo-w:92px; }
-
-      .game-logo{
-        top:calc(10px + var(--safe-top));
-        left:12px;
-      }
-
-      .stage{
-        inset:calc(64px + var(--safe-top)) 0 calc(66px + var(--safe-bottom)) 0;
-        padding:12px;
-      }
-
+      .game-logo{ top:calc(10px + var(--safe-top)); left:12px; }
+      .stage{ inset:calc(64px + var(--safe-top)) 0 calc(66px + var(--safe-bottom)) 0; padding:12px; }
       .back-btn,
-      .reset-btn{
-        height:38px;
-        border-width:2px;
-        border-radius:10px;
-        font-size:15px;
-        padding:0 14px;
-      }
+      .reset-btn{ height:38px; border-width:2px; border-radius:10px; font-size:15px; padding:0 14px; }
     }
 
     @media (max-height:520px) and (orientation:landscape){
       :root{ --bottom-space:calc(58px + var(--safe-bottom)); }
-
-      .stage{
-        inset:calc(54px + var(--safe-top)) 0 var(--bottom-space) 0;
-      }
-
-      .game-logo{
-        width:clamp(78px, 8.8vw, 130px);
-        top:calc(10px + var(--safe-top));
-      }
-
-      .fixed-controls{
-        bottom:calc(8px + var(--safe-bottom));
-      }
-
+      .stage{ inset:calc(54px + var(--safe-top)) 0 var(--bottom-space) 0; }
+      .game-logo{ width:clamp(78px, 8.8vw, 130px); top:calc(10px + var(--safe-top)); }
+      .fixed-controls{ bottom:calc(8px + var(--safe-bottom)); }
       .back-btn,
-      .reset-btn{
-        height:clamp(32px, 8vh, 42px);
-        border-width:2px;
-        border-radius:10px;
-        font-size:clamp(14px, 3.3vh, 20px);
-        box-shadow:0 3px 0 rgba(0,0,0,.18);
-      }
+      .reset-btn{ height:clamp(32px, 8vh, 42px); border-width:2px; border-radius:10px; font-size:clamp(14px, 3.3vh, 20px); box-shadow:0 3px 0 rgba(0,0,0,.18); }
     }
   </style>
 </head>
@@ -628,48 +511,27 @@
     let opened = new Set();
 
     function getUrlParam(name){
-      try {
-        return new URLSearchParams(window.location.search || "").get(name) || "";
-      } catch (_) {
-        return "";
-      }
+      try { return new URLSearchParams(window.location.search || "").get(name) || ""; }
+      catch (_) { return ""; }
     }
 
     function getSavedTheme(){
-      try {
-        return sessionStorage.getItem("sandooq_edu_box_theme_v1") || "";
-      } catch (_) {
-        return "";
-      }
+      try { return sessionStorage.getItem("sandooq_edu_box_theme_v1") || ""; }
+      catch (_) { return ""; }
     }
 
     function normalizeTheme(value){
       const raw = String(value || "").trim().toLowerCase();
       const map = {
-        "classic":"white",
-        "original":"white",
-        "خلفية بيضاء":"white",
-        "ابيض":"white",
-        "أبيض":"white",
-        "white":"white",
-        "classroom":"classroom",
-        "فصل مدرسة":"classroom",
-        "فصل مدرسي":"classroom",
-        "sky-clouds":"sky-clouds",
-        "سماء وغيوم":"sky-clouds",
-        "forest":"forest",
-        "غابة":"forest",
-        "math":"math",
-        "رياضيات":"math",
-        "english":"english",
-        "انجليزي":"english",
-        "flowers":"flowers",
-        "ازهار وورود":"flowers",
-        "أزهار وورود":"flowers",
-        "national-day":"national-day",
-        "اليوم الوطني":"national-day",
-        "founding-day":"founding-day",
-        "يوم التأسيس":"founding-day"
+        "classic":"white","original":"white","خلفية بيضاء":"white","ابيض":"white","أبيض":"white","white":"white",
+        "classroom":"classroom","فصل مدرسة":"classroom","فصل مدرسي":"classroom",
+        "sky-clouds":"sky-clouds","سماء وغيوم":"sky-clouds",
+        "forest":"forest","غابة":"forest",
+        "math":"math","رياضيات":"math",
+        "english":"english","انجليزي":"english",
+        "flowers":"flowers","ازهار وورود":"flowers","أزهار وورود":"flowers",
+        "national-day":"national-day","اليوم الوطني":"national-day",
+        "founding-day":"founding-day","يوم التأسيس":"founding-day"
       };
       if (map[raw]) return map[raw];
       return THEMES.some((theme)=> theme.id === raw) ? raw : "white";
@@ -714,11 +576,9 @@
       const ratio = width / height;
       let cols;
 
-      if (count <= 4) {
-        cols = window.matchMedia("(orientation: portrait)").matches ? 2 : count;
-      } else if (count <= 8) {
-        cols = window.matchMedia("(orientation: portrait)").matches ? 2 : 4;
-      } else {
+      if (count <= 4) cols = window.matchMedia("(orientation: portrait)").matches ? 2 : count;
+      else if (count <= 8) cols = window.matchMedia("(orientation: portrait)").matches ? 2 : 4;
+      else {
         cols = Math.ceil(Math.sqrt(count * ratio));
         cols = Math.max(3, Math.min(10, cols));
       }
@@ -768,12 +628,12 @@
       applyLayout();
       grid.innerHTML = "";
 
+      const colorClasses = ["box-pink","box-lime","box-blue","box-green","box-orange","box-purple","box-red","box-teal"];
+
       items.forEach((entry, index)=>{
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "box-card";
-        const colorClasses = ["box-blue", "box-red", "box-orange", "box-green", "box-purple", "box-navy", "box-mint", "box-coral"];
-        button.classList.add(colorClasses[index % colorClasses.length]);
+        button.className = `box-card ${colorClasses[index % colorClasses.length]}`;
         button.setAttribute("aria-label", `صندوق رقم ${index + 1}`);
         button.setAttribute("aria-pressed", "false");
         button.dataset.index = String(index);
@@ -781,8 +641,11 @@
         const wrap = document.createElement("span");
         wrap.className = "box-wrap";
 
-        const realBox = document.createElement("span");
-        realBox.className = "real-box";
+        const shell = document.createElement("span");
+        shell.className = "box-shell";
+
+        const frame = document.createElement("span");
+        frame.className = "box-frame";
 
         const well = document.createElement("span");
         well.className = "box-well";
@@ -791,24 +654,23 @@
         content.className = "box-content";
         content.appendChild(createResultContent(entry));
 
-        const lid = document.createElement("span");
-        lid.className = "box-lid";
+        well.appendChild(content);
+        frame.appendChild(well);
+        shell.appendChild(frame);
+
+        const panel = document.createElement("span");
+        panel.className = "closed-panel";
 
         const number = document.createElement("span");
-        number.className = "box-number";
+        number.className = "panel-number";
         number.textContent = String(index + 1);
+        panel.appendChild(number);
 
-        lid.appendChild(number);
-        realBox.appendChild(well);
-        realBox.appendChild(content);
-        wrap.appendChild(realBox);
-        wrap.appendChild(lid);
+        wrap.appendChild(shell);
+        wrap.appendChild(panel);
         button.appendChild(wrap);
 
-        button.addEventListener("click", ()=>{
-          openBox(button, index);
-        });
-
+        button.addEventListener("click", ()=> openBox(button, index));
         grid.appendChild(button);
       });
     }
@@ -831,7 +693,6 @@
         text.className = "result-text";
         text.textContent = entry.text;
         wrap.appendChild(text);
-
         return wrap;
       }
 
@@ -865,22 +726,15 @@
     }
 
     function goBack(){
-      try {
-        if (history.length > 1) {
-          history.back();
-          return;
-        }
-      } catch (_) {}
+      try { if (history.length > 1) return history.back(); }
+      catch (_) {}
       window.location.href = "index.html";
     }
 
     resetBtn.addEventListener("click", resetBoxes);
     backBtn.addEventListener("click", goBack);
-
     window.addEventListener("resize", applyLayout, { passive:true });
-    window.addEventListener("orientationchange", ()=>{
-      window.setTimeout(applyLayout, 160);
-    }, { passive:true });
+    window.addEventListener("orientationchange", ()=> window.setTimeout(applyLayout, 160), { passive:true });
 
     applyTheme(currentTheme);
     renderBoxes();
