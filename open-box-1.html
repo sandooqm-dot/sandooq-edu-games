@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v8 -->
+  <!-- version: open-box-v9 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -196,81 +196,78 @@
       width:100%;
       height:100%;
       transform-style:preserve-3d;
-      filter:drop-shadow(0 8px 12px rgba(0,0,0,.09));
+      filter:drop-shadow(0 8px 13px rgba(0,0,0,.10));
+      overflow:visible;
     }
 
     .box-base{
       position:absolute;
-      inset:5% 3.5% 3.5%;
+      left:5%;
+      right:5%;
+      top:17%;
+      bottom:3%;
       z-index:1;
-      border-radius:10px;
+      border-radius:3px 3px 9px 9px;
       background:
-        linear-gradient(145deg, rgba(255,255,255,.16) 0%, transparent 24%),
-        linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 50%, var(--box-dark) 100%);
-      border:clamp(1.5px, .28vw, 4px) solid var(--box-border, rgba(0,0,0,.16));
+        linear-gradient(90deg, rgba(0,0,0,.22), rgba(255,255,255,.08) 12%, rgba(255,255,255,.05) 88%, rgba(0,0,0,.18)),
+        radial-gradient(circle at 50% 38%, var(--box-light) 0%, var(--box-color) 43%, var(--box-dark) 100%);
+      border:2.2px solid rgba(255,255,255,.94);
       box-shadow:
-        inset 0 7px 12px rgba(255,255,255,.12),
-        inset 0 -3px 0 rgba(0,0,0,.08),
-        0 8px 16px rgba(0,0,0,.08);
+        inset 0 14px 20px rgba(0,0,0,.20),
+        inset 0 -8px 10px rgba(0,0,0,.14),
+        0 8px 13px rgba(0,0,0,.08);
       overflow:hidden;
     }
 
     .box-base::before{
       content:"";
       position:absolute;
-      inset:6% 4.2% 5%;
-      border-radius:8px;
+      left:8%;
+      right:8%;
+      top:12%;
+      bottom:9%;
+      border-radius:7px;
       background:
-        radial-gradient(circle at 50% 35%, var(--box-light) 0%, var(--box-color) 42%, var(--box-dark) 100%);
+        linear-gradient(90deg, rgba(0,0,0,.28), transparent 13%, transparent 87%, rgba(0,0,0,.25)),
+        linear-gradient(180deg, rgba(0,0,0,.16), transparent 18%, rgba(0,0,0,.10) 100%),
+        radial-gradient(circle at 50% 48%, var(--box-color) 0%, var(--box-dark) 100%);
       box-shadow:
-        inset 0 15px 18px rgba(0,0,0,.26),
-        inset 6px 0 10px rgba(0,0,0,.10),
-        inset -6px 0 10px rgba(255,255,255,.05),
-        inset 0 -5px 8px rgba(0,0,0,.08);
-      opacity:.96;
+        inset 0 18px 22px rgba(0,0,0,.34),
+        inset 10px 0 18px rgba(0,0,0,.22),
+        inset -10px 0 18px rgba(255,255,255,.05),
+        inset 0 -12px 15px rgba(0,0,0,.18);
+      opacity:.98;
     }
 
     .box-base::after{
       content:"";
       position:absolute;
-      left:10%;
-      right:10%;
+      left:5%;
+      right:5%;
       bottom:2%;
-      height:4%;
-      border-radius:50%;
-      background:rgba(0,0,0,.16);
-      filter:blur(5px);
+      height:3px;
+      border-radius:999px;
+      background:rgba(0,0,0,.12);
       pointer-events:none;
     }
 
     .box-hinge{
-      position:absolute;
-      left:6%;
-      right:6%;
-      top:2%;
-      height:3.4%;
-      z-index:13;
-      border-radius:999px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.36), rgba(255,255,255,.02) 45%, rgba(0,0,0,.18)),
-        linear-gradient(90deg, var(--box-dark), var(--box-color) 18%, var(--box-light) 50%, var(--box-color) 82%, var(--box-dark));
-      border:clamp(1px, .20vw, 2.5px) solid var(--box-border);
-      box-shadow:
-        0 2px 4px rgba(0,0,0,.12),
-        inset 0 -2px 0 rgba(0,0,0,.10);
-      pointer-events:none;
+      display:none;
     }
 
     .box-content{
       position:absolute;
-      inset:9% 5.2% 5.8%;
+      left:12%;
+      right:12%;
+      top:28%;
+      bottom:12%;
       z-index:4;
       display:flex;
       align-items:center;
       justify-content:center;
       opacity:0;
-      transform:translateY(10px) scale(.88);
-      transition:opacity .38s ease .62s, transform .48s ease .62s;
+      transform:translateY(8px) scale(.94);
+      transition:opacity .38s ease .58s, transform .48s ease .58s;
       direction:rtl;
       text-align:center;
       pointer-events:none;
@@ -283,123 +280,119 @@
 
     .box-lid{
       position:absolute;
-      left:3%;
-      right:3%;
-      top:3.8%;
-      height:89%;
+      left:5%;
+      right:5%;
+      top:5%;
+      height:88%;
       z-index:10;
-      border-radius:10px;
-      border:clamp(1.5px, .30vw, 4px) solid var(--box-border, rgba(0,0,0,.16));
+      border-radius:12px;
+      border:0;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.24) 0%, rgba(255,255,255,.06) 28%, transparent 45%),
-        linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 58%, var(--box-dark) 100%);
+        linear-gradient(180deg, rgba(255,255,255,.25) 0%, rgba(255,255,255,.08) 22%, transparent 42%),
+        linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 55%, var(--box-dark) 100%);
       box-shadow:
-        inset 0 -4px 0 rgba(0,0,0,.10),
-        inset 0 4px 0 rgba(255,255,255,.15),
-        0 6px 10px rgba(0,0,0,.07);
+        inset 0 -5px 0 rgba(0,0,0,.12),
+        inset 0 5px 0 rgba(255,255,255,.16),
+        0 6px 12px rgba(0,0,0,.08);
       display:flex;
       align-items:center;
       justify-content:center;
       transform-origin:50% 0%;
       transform:translateY(0) translateZ(2px);
       transition:
-        top 1.35s cubic-bezier(.14,.78,.12,1),
-        height 1.35s cubic-bezier(.14,.78,.12,1),
-        transform 1.35s cubic-bezier(.14,.78,.12,1),
+        top 1.28s cubic-bezier(.14,.78,.12,1),
+        height 1.28s cubic-bezier(.14,.78,.12,1),
+        left 1.28s cubic-bezier(.14,.78,.12,1),
+        right 1.28s cubic-bezier(.14,.78,.12,1),
+        border-radius 1.05s ease,
+        transform 1.28s cubic-bezier(.14,.78,.12,1),
         filter 1.05s ease,
-        box-shadow 1.05s ease,
-        border-radius 1.05s ease;
+        box-shadow 1.05s ease;
       backface-visibility:visible;
       -webkit-backface-visibility:visible;
       transform-style:preserve-3d;
-      overflow:hidden;
+      overflow:visible;
       will-change:top, height, transform;
     }
 
     .box-card.opened .box-lid{
       /*
-        open-box-v8:
-        نفس طريقة المرجع: الغطاء يتحول إلى شريط علوي ثابت فوق الصندوق،
-        لا يختفي ولا يرتفع بعيدًا، ويبقى الرقم ظاهرًا على الغطاء.
+        open-box-v9:
+        مرجع الصندوق المفتوح: غطاء أفقي علوي مسطح، قريب من جسم الصندوق،
+        بدون حواف جانبية ضخمة، والرقم صغير على الغطاء.
       */
-      top:-4%;
-      height:18%;
-      transform:translateY(0) translateZ(18px);
-      border-radius:12px 12px 6px 6px;
-      filter:brightness(1.08);
+      left:4%;
+      right:4%;
+      top:4.5%;
+      height:15.5%;
+      transform:translateY(0) translateZ(16px);
+      border-radius:4px 4px 1px 1px;
+      filter:brightness(1.04);
       box-shadow:
-        inset 0 -3px 0 rgba(0,0,0,.14),
-        inset 0 4px 0 rgba(255,255,255,.20),
-        0 8px 12px rgba(0,0,0,.10);
+        inset 0 -3px 0 rgba(0,0,0,.18),
+        inset 0 3px 0 rgba(255,255,255,.18),
+        0 6px 9px rgba(0,0,0,.09);
     }
 
     .box-lid::before{
       content:"";
       position:absolute;
-      inset:3.8%;
-      border-radius:10px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.12), transparent 55%),
-        rgba(255,255,255,.04);
-      box-shadow:inset 0 -2px 0 rgba(0,0,0,.06);
+      left:9%;
+      right:9%;
+      top:7%;
+      height:10%;
+      border-radius:999px;
+      background:rgba(255,255,255,.15);
+      box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
       pointer-events:none;
+      transition:all 1.05s ease;
     }
 
     .box-card.opened .box-lid::before{
-      inset:18% 9% 30%;
+      left:9%;
+      right:9%;
+      top:24%;
+      height:18%;
       border-radius:999px;
-      background:rgba(0,0,0,.16);
+      background:rgba(0,0,0,.20);
       box-shadow:
         inset 0 2px 3px rgba(0,0,0,.18),
-        0 1px 0 rgba(255,255,255,.16);
-      opacity:.55;
+        0 1px 0 rgba(255,255,255,.14);
+      opacity:.62;
     }
 
     .box-lid::after{
       content:"";
       position:absolute;
-      left:11%;
-      right:11%;
-      top:7%;
-      height:7%;
-      border-radius:999px;
-      background:rgba(255,255,255,.13);
-      box-shadow:0 1px 4px rgba(255,255,255,.12);
+      left:2%;
+      right:2%;
+      bottom:-2px;
+      height:2px;
+      background:rgba(255,255,255,.75);
+      box-shadow:0 1px 0 rgba(0,0,0,.08);
       pointer-events:none;
+      opacity:0;
+      transition:opacity 1.05s ease;
+    }
+
+    .box-card.opened .box-lid::after{
+      opacity:.9;
     }
 
     .box-front-lip{
-      position:absolute;
-      left:6%;
-      right:6%;
-      bottom:3%;
-      height:2.5%;
-      z-index:9;
-      border-radius:0 0 8px 8px;
-      background:
-        linear-gradient(180deg, var(--box-color), var(--box-dark));
-      border:none;
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.08),
-        inset 0 -1px 0 rgba(0,0,0,.10),
-        0 2px 5px rgba(0,0,0,.08);
-      pointer-events:none;
-      opacity:0;
-      transform:translateY(18%);
-      transition:opacity .18s ease .20s, transform .24s ease .20s;
+      display:none;
     }
 
     .box-card.opened .box-front-lip{
-      opacity:1;
-      transform:translateY(0);
+      display:none;
     }
 
 
     .box-card.opened .box-base{
       box-shadow:
-        inset 0 6px 10px rgba(255,255,255,.10),
-        inset 0 -3px 0 rgba(0,0,0,.08),
-        0 8px 14px rgba(0,0,0,.07);
+        inset 0 12px 18px rgba(0,0,0,.20),
+        inset 0 -6px 8px rgba(0,0,0,.12),
+        0 8px 13px rgba(0,0,0,.08);
     }
 
     .box-card.opened .box-hinge{
@@ -419,9 +412,9 @@
 
     .box-card.opened .box-number{
       opacity:1;
-      font-size:clamp(11px, calc(var(--box-size) * .095), 20px);
-      transform:translateY(-1px) scale(.92);
-      text-shadow:0 1px 3px rgba(0,0,0,.26);
+      font-size:clamp(10px, calc(var(--box-size) * .085), 18px);
+      transform:translateY(-2px) scale(.84);
+      text-shadow:0 1px 2px rgba(0,0,0,.30);
     }
 
     .result-text{
@@ -432,7 +425,7 @@
       justify-content:center;
       text-align:center;
       color:#fff;
-      font-size:clamp(16px, calc(var(--box-size) * .22), 38px);
+      font-size:clamp(18px, calc(var(--box-size) * .245), 42px);
       line-height:1.18;
       font-weight:900;
       overflow-wrap:anywhere;
@@ -444,9 +437,9 @@
       height:100%;
       object-fit:contain;
       display:block;
-      border-radius:8px;
+      border-radius:4px;
       background:#fff;
-      box-shadow:0 4px 12px rgba(0,0,0,.16);
+      box-shadow:0 2px 8px rgba(0,0,0,.12);
     }
 
     .result-mixed{
