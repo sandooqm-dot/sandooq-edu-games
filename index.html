@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-open-box-link-v37-open-box-limit-30 -->
+<!-- version: index-open-box-link-v38-open-box-indexeddb -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5251,7 +5251,7 @@
   const WHEEL_DRAFT_KEY = "sandooq_wheel_draft_v1";
   const OPEN_BOX_PAYLOAD_KEY = "sandooq_open_box_payload_v1";
   const OPEN_BOX_DRAFT_KEY = "sandooq_open_box_draft_v1";
-  const OPEN_BOX_PAGE_URL = "open-box-2.html";
+  const OPEN_BOX_PAGE_URL = "open-box-3.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
   const screens = ["createScreen", "wheelSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
@@ -5445,9 +5445,81 @@
 
   function readFileAsDataURL(file, callback){
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = () => callback(String(reader.result || ""));
+
+    reader.onload = () => {
+      const rawDataUrl = String(reader.result || "");
+
+      if (!file.type || !file.type.startsWith("image/")) {
+        callback(rawDataUrl);
+        return;
+      }
+
+      const img = new Image();
+
+      img.onload = () => {
+        try {
+          const maxSide = 900;
+          const sourceWidth = Math.max(1, img.naturalWidth || img.width || 1);
+          const sourceHeight = Math.max(1, img.naturalHeight || img.height || 1);
+          const ratio = Math.min(1, maxSide / Math.max(sourceWidth, sourceHeight));
+          const width = Math.max(1, Math.round(sourceWidth * ratio));
+          const height = Math.max(1, Math.round(sourceHeight * ratio));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d", { alpha:false });
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressed = canvas.toDataURL("image/jpeg", 0.76);
+          callback(compressed || rawDataUrl);
+        } catch (_) {
+          callback(rawDataUrl);
+        }
+      };
+
+      img.onerror = () => callback(rawDataUrl);
+      img.src = rawDataUrl;
+    };
+
+    reader.onerror = () => callback("");
     reader.readAsDataURL(file);
+  }
+
+  function openEduGamesDb(){
+    return new Promise((resolve, reject)=>{
+      const request = indexedDB.open("sandooq_edu_games_v1", 1);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        if (!db.objectStoreNames.contains("payloads")) {
+          db.createObjectStore("payloads", { keyPath:"key" });
+        }
+      };
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error("indexedDB failed"));
+    });
+  }
+
+  async function savePayloadToIndexedDB(key, payload){
+    const db = await openEduGamesDb();
+
+    return new Promise((resolve, reject)=>{
+      const tx = db.transaction("payloads", "readwrite");
+      tx.objectStore("payloads").put({
+        key,
+        payload,
+        updatedAt:Date.now()
+      });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error || new Error("payload save failed"));
+    });
   }
 
   function applySetupMode(){
@@ -5746,7 +5818,7 @@
   }
 
 
-  function openOpenBoxPage(){
+  async function openOpenBoxPage(){
     syncWheelEntriesFromDom();
 
     const entries = getFilledEntries().slice(0, OPEN_BOX_MAX_ITEMS);
@@ -5782,6 +5854,10 @@
       sessionStorage.setItem(OPEN_BOX_PAYLOAD_KEY, JSON.stringify(payload));
       sessionStorage.setItem(OPEN_BOX_DRAFT_KEY, JSON.stringify(payload));
       sessionStorage.setItem("sandooq_edu_box_theme_v1", wheelTheme || "classic");
+    } catch (_) {}
+
+    try {
+      await savePayloadToIndexedDB(`open-box:${payloadId}`, payload);
     } catch (_) {}
 
     const url = new URL(OPEN_BOX_PAGE_URL, window.location.href);
