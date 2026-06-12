@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v13-full-rebuild-from-video -->
+  <!-- version: open-box-v14-clean-rebuild -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -12,8 +12,8 @@
       --ink:#111;
       --yellow:#efd553;
       --blue:#1688d3;
-      --box-size:150px;
-      --gap:24px;
+      --tile-size:150px;
+      --tile-gap:24px;
       --logo-w:clamp(86px, 9.2vw, 148px);
       --bottom-space:calc(60px + var(--safe-bottom));
     }
@@ -48,13 +48,12 @@
       pointer-events:none;
     }
 
-    /* open-box-safari-scroll-v1: نفس تكتيك صفحة العجلة لإخفاء شريط Safari */
-    .box-page{
+    .game-page{
       position:sticky;
       top:0;
       width:100%;
-      min-height:100dvh;
       height:100dvh;
+      min-height:100dvh;
       overflow:hidden;
       background:#fff;
       direction:ltr;
@@ -67,76 +66,64 @@
       inset:0;
       z-index:0;
       pointer-events:none;
-      background:#fff;
-      background-position:center center;
-      background-size:cover;
-      background-repeat:no-repeat;
+      background:#fff center/cover no-repeat;
       transform:scale(1.04);
       transform-origin:center center;
     }
 
-    .box-page.theme-white .theme-background{
+    .theme-white .theme-background{
       background:#fff;
-      background-image:none;
       transform:scale(1);
     }
 
-    .box-page.theme-classroom .theme-background{
-      background-color:#fff;
+    .theme-classroom .theme-background{
       background-image:
         url("theme-original-bg.webp?v=45"),
         url("theme-original-bg.png?v=45"),
-        linear-gradient(180deg, #eef6ef 0%, #d8c6a1 100%);
+        linear-gradient(180deg,#eef6ef 0%,#d8c6a1 100%);
     }
 
-    .box-page.theme-sky-clouds .theme-background{
-      background-color:#58c7f3;
+    .theme-sky-clouds .theme-background{
       background-image:
         url("theme-sky-clouds-bg.webp?v=45"),
         url("theme-sky-clouds-bg.png?v=45"),
-        linear-gradient(180deg, #bfefff 0%, #5cc5f2 100%);
+        linear-gradient(180deg,#bfefff 0%,#5cc5f2 100%);
     }
 
-    .box-page.theme-forest .theme-background{
-      background-color:#6ec9ee;
+    .theme-forest .theme-background{
       background-image:
         url("theme-forest-bg.webp?v=45"),
-        linear-gradient(180deg, #7bd2f3 0%, #7eb64b 100%);
+        linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%);
     }
 
-    .box-page.theme-math .theme-background{
-      background-color:#f5f4e7;
+    .theme-math .theme-background{
       background-image:
         url("theme-math-bg.webp?v=45"),
-        linear-gradient(180deg, #f5f4e7 0%, #dfe7ef 100%);
+        linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%);
     }
 
-    .box-page.theme-english .theme-background{
-      background-color:#72d0d2;
+    .theme-english .theme-background{
       background-image:
         url("theme-english-bg.webp?v=46"),
-        linear-gradient(180deg, #72d0d2 0%, #72d0d2 100%);
+        linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%);
     }
 
-    .box-page.theme-flowers .theme-background{
-      background-color:#f8edf3;
+    .theme-flowers .theme-background{
       background-image:
         url("theme-flowers-bg.webp?v=48"),
-        linear-gradient(180deg, #f8edf3 0%, #f3dce7 100%);
+        linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%);
     }
 
-    .box-page.theme-national-day .theme-background{
-      background-color:#165f55;
+    .theme-national-day .theme-background{
       background-image:
         url("theme-national-day-v2-bg.webp?v=53"),
-        linear-gradient(180deg, #165f55 0%, #0f4f46 100%);
+        linear-gradient(180deg,#165f55 0%,#0f4f46 100%);
     }
 
-    .box-page.theme-founding-day .theme-background{
-      background-color:#d7c9b1;
+    .theme-founding-day .theme-background{
       background-image:
         url("theme-founding-day-bg.webp?v=1"),
-        linear-gradient(180deg, #d9ccb5 0%, #c9baa2 100%);
+        linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
     }
 
     .game-logo{
@@ -164,176 +151,314 @@
       direction:ltr;
     }
 
-    .boxes-grid{
+    .gift-grid{
       width:min(93vw, 1180px);
       max-height:100%;
       display:grid;
-      grid-template-columns:repeat(var(--cols, 4), var(--box-size));
+      grid-template-columns:repeat(var(--cols, 4), var(--tile-size));
       justify-content:center;
       align-content:center;
-      gap:var(--gap);
-      perspective:1600px;
-    }
-
-    .box-card{
-      display:block;
-      width:var(--box-size);
-      height:var(--box-size);
-      border:none;
-      background:transparent;
-      padding:0;
-      margin:0;
-      cursor:pointer;
-      touch-action:manipulation;
-      appearance:none;
-      -webkit-appearance:none;
+      gap:var(--tile-gap);
     }
 
     /*
-      open-box-v13:
-      إعادة بناء فعلية من الصفر حسب تصميم Boxes.mp4.
-      لا يوجد box-base / box-lid / box-hinge / front-lip.
-      المكوّن الجديد:
-      gift-cover = الغلاف المغلق ويتحوّل إلى الغطاء العلوي.
-      gift-body  = جسم الصندوق المفتوح.
-      gift-content = النتيجة داخل الصندوق.
+      بناء جديد بالكامل:
+      - لا يوجد العناصر القديمة.
+      - يوجد حالتان منفصلتان: .present-closed و .present-open.
+      - الضغط لا يصغر نفس الصندوق القديم؛ بل يبدّل بين تصميمين مستقلين.
     */
-    .gift-shell{
+    .present{
+      --paper-main:#2aa2df;
+      --paper-light:#8ad7f7;
+      --paper-dark:#0e67b2;
+      --ribbon:#7551d8;
+      --ribbon-dark:#6040ba;
+      --well-light:#c6f2f4;
+      --well-mid:#78c9c5;
+      --well-dark:#426b57;
+      --wood-side:#855326;
+      --wood-dark:#4f2b12;
+      --white-edge:#fff;
+
       display:block;
+      width:var(--tile-size);
+      height:var(--tile-size);
+      border:0;
+      padding:0;
+      margin:0;
+      background:transparent;
+      appearance:none;
+      -webkit-appearance:none;
+      cursor:pointer;
+      touch-action:manipulation;
+    }
+
+    .gift-blue{
+      --paper-main:#2298d8;
+      --paper-light:#8bdcf9;
+      --paper-dark:#0e62ad;
+      --ribbon:#7c56d9;
+      --ribbon-dark:#613bbd;
+      --well-light:#d6fbff;
+      --well-mid:#79ccdc;
+      --well-dark:#3d6d76;
+      --pattern:blue;
+    }
+
+    .gift-green{
+      --paper-main:#22a769;
+      --paper-light:#f3fff5;
+      --paper-dark:#0c804d;
+      --ribbon:#ff4b86;
+      --ribbon-dark:#e43270;
+      --well-light:#e8fff2;
+      --well-mid:#73d0a5;
+      --well-dark:#315d47;
+      --pattern:green;
+    }
+
+    .gift-yellow{
+      --paper-main:#f1bd24;
+      --paper-light:#ffe360;
+      --paper-dark:#d28613;
+      --ribbon:#f47627;
+      --ribbon-dark:#df5d14;
+      --well-light:#fff6cd;
+      --well-mid:#d4b568;
+      --well-dark:#725115;
+      --pattern:yellow;
+    }
+
+    .gift-purple{
+      --paper-main:#7134d6;
+      --paper-light:#925bff;
+      --paper-dark:#5125ac;
+      --ribbon:#c8ad45;
+      --ribbon-dark:#a98e31;
+      --well-light:#eee4ff;
+      --well-mid:#b396df;
+      --well-dark:#574087;
+      --pattern:purple;
+    }
+
+    .gift-red{
+      --paper-main:#ee2546;
+      --paper-light:#ff4260;
+      --paper-dark:#bb172f;
+      --ribbon:#f3cf43;
+      --ribbon-dark:#dfa516;
+      --well-light:#ffe4e2;
+      --well-mid:#d8897c;
+      --well-dark:#78302e;
+      --pattern:red;
+    }
+
+    .present-wrap{
       position:relative;
+      display:block;
       width:100%;
       height:100%;
       overflow:visible;
-      filter:drop-shadow(0 5px 8px rgba(0,0,0,.16));
-      transform:translateZ(0);
+      filter:drop-shadow(0 5px 7px rgba(0,0,0,.18));
     }
 
-    .box-card{
-      --paper-a:#2aa2df;
-      --paper-b:#8ad7f7;
-      --paper-c:#0e67b2;
-      --ribbon-a:#7e59dd;
-      --ribbon-b:#6740c6;
-      --well-a:#baf2eb;
-      --well-b:#54b99e;
-      --well-c:#2e6e55;
-      --side-a:#875226;
-      --side-b:#4f2d14;
-      --stroke:#fff;
-      --ink-stroke:#1d1d1d;
+    .present-closed,
+    .present-open{
+      position:absolute;
+      inset:0;
+      display:block;
+      width:100%;
+      height:100%;
+      transition:
+        opacity .18s ease,
+        transform .34s cubic-bezier(.2,.8,.2,1);
     }
 
-    .box-card.gift-blue{
-      --paper-a:#249bdb;
-      --paper-b:#8bdcf9;
-      --paper-c:#155fae;
-      --ribbon-a:#8057dc;
-      --ribbon-b:#6844c5;
-      --well-a:#d9fbff;
-      --well-b:#7fcad9;
-      --well-c:#326c7a;
+    .present-closed{
+      z-index:5;
+      opacity:1;
+      transform:scale(1);
     }
 
-    .box-card.gift-green{
-      --paper-a:#22a96c;
-      --paper-b:#f5fff3;
-      --paper-c:#0c814d;
-      --ribbon-a:#ff4b86;
-      --ribbon-b:#e63272;
-      --well-a:#e5fff0;
-      --well-b:#77d5a9;
-      --well-c:#315f47;
+    .present.opened .present-closed{
+      opacity:0;
+      transform:scale(.96);
+      pointer-events:none;
     }
 
-    .box-card.gift-yellow{
-      --paper-a:#f1bd25;
-      --paper-b:#ffe35c;
-      --paper-c:#d48a13;
-      --ribbon-a:#f57628;
-      --ribbon-b:#e36015;
-      --well-a:#fff8ce;
-      --well-b:#d7b56a;
-      --well-c:#735115;
+    .present-open{
+      z-index:6;
+      opacity:0;
+      transform:scale(.96) translateY(4px);
+      pointer-events:none;
     }
 
-    .box-card.gift-purple{
-      --paper-a:#7135d7;
-      --paper-b:#925cff;
-      --paper-c:#5127ac;
-      --ribbon-a:#c8ad45;
-      --ribbon-b:#aa9031;
-      --well-a:#efe3ff;
-      --well-b:#b396df;
-      --well-c:#5b428e;
+    .present.opened .present-open{
+      opacity:1;
+      transform:scale(1) translateY(0);
     }
 
-    .box-card.gift-red{
-      --paper-a:#ee2546;
-      --paper-b:#ff4360;
-      --paper-c:#bb182e;
-      --ribbon-a:#f3d043;
-      --ribbon-b:#dfa516;
-      --well-a:#ffe4e3;
-      --well-b:#d8897d;
-      --well-c:#7a2d2c;
+    .gift-cover{
+      position:absolute;
+      inset:0;
+      border:clamp(2px, .34vw, 3.4px) solid var(--white-edge);
+      border-radius:2px;
+      overflow:hidden;
+      background:var(--closed-pattern);
+      box-shadow:
+        inset 0 -4px 0 rgba(0,0,0,.16),
+        inset 0 4px 0 rgba(255,255,255,.14),
+        0 4px 7px rgba(0,0,0,.08);
     }
 
-    .gift-body{
+    .gift-blue .gift-cover{
+      --closed-pattern:
+        linear-gradient(90deg, transparent 0 27%, var(--ribbon) 28% 45%, transparent 46% 100%),
+        linear-gradient(0deg, transparent 0 45%, var(--ribbon-dark) 46% 62%, transparent 63% 100%),
+        repeating-linear-gradient(45deg, var(--paper-main) 0 13px, var(--paper-light) 14px 25px);
+    }
+
+    .gift-green .gift-cover{
+      --closed-pattern:
+        linear-gradient(90deg, transparent 0 42%, var(--ribbon) 43% 58%, transparent 59% 100%),
+        linear-gradient(0deg, transparent 0 43%, var(--ribbon-dark) 44% 60%, transparent 61% 100%),
+        repeating-linear-gradient(90deg, var(--paper-main) 0 9px, var(--paper-light) 10px 17px);
+    }
+
+    .gift-yellow .gift-cover{
+      --closed-pattern:
+        linear-gradient(135deg, transparent 0 39%, var(--ribbon) 40% 51%, transparent 52% 100%),
+        radial-gradient(circle at 24% 25%, rgba(215,118,37,.58) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 72% 64%, rgba(215,118,37,.54) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 38% 78%, rgba(215,118,37,.45) 0 6%, transparent 6.5%),
+        linear-gradient(180deg, var(--paper-light), var(--paper-main) 62%, var(--paper-dark));
+    }
+
+    .gift-purple .gift-cover{
+      --closed-pattern:
+        linear-gradient(135deg, transparent 0 41%, var(--ribbon) 42% 52%, transparent 53% 100%),
+        linear-gradient(45deg, transparent 0 39%, var(--ribbon-dark) 40% 48%, transparent 49% 100%),
+        repeating-radial-gradient(ellipse at 18% 34%, rgba(255,255,255,.08) 0 3px, transparent 4px 15px),
+        linear-gradient(180deg, var(--paper-light), var(--paper-main) 60%, var(--paper-dark));
+    }
+
+    .gift-red .gift-cover{
+      --closed-pattern:
+        linear-gradient(135deg, transparent 0 41%, var(--ribbon) 42% 52%, transparent 53% 100%),
+        radial-gradient(circle at 25% 25%, rgba(244,178,43,.58) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 72% 62%, rgba(244,178,43,.55) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 42% 78%, rgba(244,178,43,.45) 0 6%, transparent 6.5%),
+        linear-gradient(180deg, var(--paper-light), var(--paper-main) 62%, var(--paper-dark));
+    }
+
+    .gift-cover::after{
+      content:"";
+      position:absolute;
+      left:10%;
+      right:10%;
+      top:7%;
+      height:8%;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
+      pointer-events:none;
+    }
+
+    .present-number{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      -webkit-text-stroke:clamp(1.1px, .18vw, 2.3px) #151515;
+      paint-order:stroke fill;
+      text-shadow:
+        0 2px 2px rgba(0,0,0,.55),
+        0 0 1px rgba(0,0,0,.85);
+      font-size:clamp(24px, calc(var(--tile-size) * .34), 64px);
+      font-weight:900;
+      font-style:italic;
+      line-height:1;
+      transform:rotate(-3deg);
+      pointer-events:none;
+    }
+
+    .open-lid{
+      position:absolute;
+      left:0;
+      right:0;
+      top:0;
+      height:25%;
+      z-index:6;
+      border:clamp(2px, .34vw, 3.4px) solid var(--white-edge);
+      border-radius:1px 1px 0 0;
+      overflow:hidden;
+      background:var(--closed-pattern);
+      box-shadow:
+        inset 0 -3px 0 rgba(0,0,0,.22),
+        inset 0 3px 0 rgba(255,255,255,.14),
+        0 4px 7px rgba(0,0,0,.12);
+    }
+
+    .open-lid::after{
+      content:"";
+      position:absolute;
+      left:10%;
+      right:10%;
+      top:7%;
+      height:8%;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
+      pointer-events:none;
+    }
+
+    .open-body{
       position:absolute;
       left:0;
       right:0;
       top:25%;
       bottom:0;
-      z-index:2;
-      opacity:0;
-      transform:translateY(-1%) scaleY(.92);
-      transform-origin:top center;
-      border:clamp(1.8px, .32vw, 3px) solid var(--stroke);
-      border-top:none;
+      z-index:3;
+      border:clamp(2px, .34vw, 3.4px) solid var(--white-edge);
+      border-top:0;
       border-radius:0 0 2px 2px;
+      overflow:hidden;
       background:
         linear-gradient(90deg,
-          var(--side-b) 0%,
-          var(--side-a) 8%,
-          rgba(221,184,124,.88) 15%,
-          rgba(245,220,167,.78) 50%,
-          rgba(221,184,124,.88) 85%,
-          var(--side-a) 92%,
-          var(--side-b) 100%);
+          #4a260f 0%,
+          #865223 8%,
+          rgba(230,196,133,.88) 16%,
+          rgba(247,225,178,.78) 50%,
+          rgba(230,196,133,.88) 84%,
+          #865223 92%,
+          #4a260f 100%);
       box-shadow:
-        inset 0 13px 14px rgba(0,0,0,.26),
-        inset 0 -9px 10px rgba(70,34,10,.26),
-        0 4px 7px rgba(0,0,0,.11);
-      overflow:hidden;
-      transition:
-        opacity .18s ease .20s,
-        transform .36s cubic-bezier(.18,.78,.18,1) .20s;
+        inset 0 15px 17px rgba(0,0,0,.28),
+        inset 0 -9px 11px rgba(70,34,10,.25),
+        0 5px 8px rgba(0,0,0,.10);
     }
 
-    .box-card.opened .gift-body{
-      opacity:1;
-      transform:translateY(0) scaleY(1);
-    }
-
-    .gift-body::before{
+    .open-body::before{
       content:"";
       position:absolute;
-      left:7.4%;
-      right:7.4%;
-      top:10%;
+      left:7.2%;
+      right:7.2%;
+      top:9%;
       bottom:8%;
       border-radius:1px;
       background:
-        radial-gradient(circle at 52% 46%, var(--well-a) 0%, var(--well-b) 44%, var(--well-c) 100%);
+        radial-gradient(circle at 52% 46%, var(--well-light) 0%, var(--well-mid) 44%, var(--well-dark) 100%);
       box-shadow:
-        inset 0 17px 21px rgba(0,0,0,.34),
-        inset 12px 0 20px rgba(74,35,12,.42),
-        inset -12px 0 20px rgba(74,35,12,.30),
+        inset 0 18px 23px rgba(0,0,0,.36),
+        inset 13px 0 20px rgba(74,35,12,.42),
+        inset -13px 0 20px rgba(74,35,12,.30),
         inset 0 -13px 16px rgba(48,23,9,.24);
-      opacity:.99;
     }
 
-    .gift-body::after{
+    .open-body::after{
       content:"";
       position:absolute;
       left:0;
@@ -344,165 +469,19 @@
       box-shadow:0 1px 0 rgba(0,0,0,.12);
     }
 
-    .gift-content{
+    .present-content{
       position:absolute;
       left:9.5%;
       right:9.5%;
       top:32%;
       bottom:8.5%;
-      z-index:5;
+      z-index:8;
       display:flex;
       align-items:center;
       justify-content:center;
       direction:rtl;
       text-align:center;
       pointer-events:none;
-      opacity:0;
-      transform:translateY(7px) scale(.94);
-      transition:
-        opacity .28s ease .43s,
-        transform .38s cubic-bezier(.18,.78,.18,1) .43s;
-    }
-
-    .box-card.opened .gift-content{
-      opacity:1;
-      transform:translateY(0) scale(1);
-    }
-
-    .gift-cover{
-      position:absolute;
-      left:0;
-      right:0;
-      top:0;
-      height:100%;
-      z-index:10;
-      overflow:hidden;
-      border:clamp(1.8px, .32vw, 3px) solid var(--stroke);
-      border-radius:2px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.12), transparent 44%),
-        var(--gift-pattern, linear-gradient(180deg, var(--paper-b), var(--paper-a) 58%, var(--paper-c)));
-      box-shadow:
-        inset 0 -4px 0 rgba(0,0,0,.14),
-        inset 0 4px 0 rgba(255,255,255,.14),
-        0 4px 7px rgba(0,0,0,.10);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      transition:
-        height .62s cubic-bezier(.16,.78,.14,1),
-        border-radius .48s ease,
-        box-shadow .48s ease,
-        filter .48s ease;
-      will-change:height;
-    }
-
-    .box-card.opened .gift-cover{
-      height:25%;
-      border-radius:0;
-      filter:brightness(1.035);
-      box-shadow:
-        inset 0 -3px 0 rgba(0,0,0,.22),
-        inset 0 3px 0 rgba(255,255,255,.14),
-        0 4px 7px rgba(0,0,0,.13);
-    }
-
-    .box-card.gift-blue .gift-cover{
-      --gift-pattern:
-        linear-gradient(90deg, transparent 0 27%, var(--ribbon-a) 28% 46%, transparent 47% 100%),
-        linear-gradient(0deg, transparent 0 45%, var(--ribbon-b) 46% 62%, transparent 63% 100%),
-        repeating-linear-gradient(45deg, var(--paper-a) 0 13px, var(--paper-b) 14px 25px);
-    }
-
-    .box-card.gift-green .gift-cover{
-      --gift-pattern:
-        linear-gradient(90deg, transparent 0 42%, var(--ribbon-a) 43% 58%, transparent 59% 100%),
-        linear-gradient(0deg, transparent 0 43%, var(--ribbon-b) 44% 60%, transparent 61% 100%),
-        repeating-linear-gradient(90deg, var(--paper-a) 0 9px, var(--paper-b) 10px 17px);
-    }
-
-    .box-card.gift-yellow .gift-cover{
-      --gift-pattern:
-        linear-gradient(135deg, transparent 0 39%, var(--ribbon-a) 40% 51%, transparent 52% 100%),
-        radial-gradient(circle at 24% 25%, rgba(215,118,37,.58) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 72% 64%, rgba(215,118,37,.54) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 38% 78%, rgba(215,118,37,.45) 0 6%, transparent 6.5%),
-        linear-gradient(180deg, var(--paper-b), var(--paper-a) 62%, var(--paper-c));
-    }
-
-    .box-card.gift-purple .gift-cover{
-      --gift-pattern:
-        linear-gradient(135deg, transparent 0 41%, var(--ribbon-a) 42% 52%, transparent 53% 100%),
-        linear-gradient(45deg, transparent 0 39%, var(--ribbon-b) 40% 48%, transparent 49% 100%),
-        repeating-radial-gradient(ellipse at 18% 34%, rgba(255,255,255,.08) 0 3px, transparent 4px 15px),
-        linear-gradient(180deg, var(--paper-b), var(--paper-a) 60%, var(--paper-c));
-    }
-
-    .box-card.gift-red .gift-cover{
-      --gift-pattern:
-        linear-gradient(135deg, transparent 0 41%, var(--ribbon-a) 42% 52%, transparent 53% 100%),
-        radial-gradient(circle at 25% 25%, rgba(244,178,43,.58) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 72% 62%, rgba(244,178,43,.55) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 42% 78%, rgba(244,178,43,.45) 0 6%, transparent 6.5%),
-        linear-gradient(180deg, var(--paper-b), var(--paper-a) 62%, var(--paper-c));
-    }
-
-    .gift-cover::before,
-    .gift-cover::after{
-      content:"";
-      position:absolute;
-      pointer-events:none;
-    }
-
-    .gift-cover::before{
-      left:0;
-      right:0;
-      bottom:-2px;
-      height:2px;
-      background:rgba(255,255,255,.92);
-      box-shadow:0 1px 0 rgba(0,0,0,.13);
-      opacity:0;
-      transition:opacity .48s ease;
-    }
-
-    .box-card.opened .gift-cover::before{
-      opacity:1;
-    }
-
-    .gift-cover::after{
-      left:10%;
-      right:10%;
-      top:7%;
-      height:8%;
-      border-radius:999px;
-      background:rgba(255,255,255,.14);
-      box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
-      opacity:.75;
-    }
-
-    .gift-number{
-      position:relative;
-      z-index:3;
-      color:#fff;
-      -webkit-text-stroke:clamp(1.1px, .18vw, 2.2px) var(--ink-stroke);
-      paint-order:stroke fill;
-      text-shadow:
-        0 2px 2px rgba(0,0,0,.52),
-        0 0 1px rgba(0,0,0,.80);
-      font-size:clamp(24px, calc(var(--box-size) * .34), 64px);
-      font-weight:900;
-      line-height:1;
-      font-style:italic;
-      transform:rotate(-3deg);
-      transition:
-        opacity .14s ease,
-        transform .18s ease,
-        font-size .34s ease;
-    }
-
-    .box-card.opened .gift-number{
-      opacity:0;
-      transform:translateY(-6px) scale(.58) rotate(-3deg);
     }
 
     .result-text{
@@ -515,7 +494,7 @@
       color:#fff;
       -webkit-text-stroke:clamp(.65px, .12vw, 1.6px) rgba(0,0,0,.38);
       paint-order:stroke fill;
-      font-size:clamp(18px, calc(var(--box-size) * .22), 42px);
+      font-size:clamp(18px, calc(var(--tile-size) * .22), 42px);
       line-height:1.08;
       font-weight:900;
       overflow-wrap:anywhere;
@@ -550,7 +529,7 @@
     .result-mixed .result-text{
       height:auto;
       min-height:1.1em;
-      font-size:clamp(11px, calc(var(--box-size) * .12), 22px);
+      font-size:clamp(11px, calc(var(--tile-size) * .12), 22px);
       line-height:1.08;
     }
 
@@ -623,11 +602,6 @@
         padding:12px;
       }
 
-      .gift-cover,
-      .gift-body{
-        border-radius:2px;
-      }
-
       .back-btn,
       .reset-btn{
         height:38px;
@@ -666,12 +640,12 @@
   </style>
 </head>
 <body>
-  <main class="box-page theme-white" id="boxPage">
-    <div class="theme-background" id="themeBackground"></div>
+  <main class="game-page theme-white" id="gamePage">
+    <div class="theme-background"></div>
     <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
 
     <section class="stage" id="stage">
-      <div class="boxes-grid" id="boxesGrid" aria-label="صناديق اللعبة"></div>
+      <div class="gift-grid" id="giftGrid" aria-label="صناديق اللعبة"></div>
     </section>
 
     <footer class="fixed-controls">
@@ -704,9 +678,9 @@
       { id:"founding-day", label:"يوم التأسيس" }
     ];
 
-    const page = document.getElementById("boxPage");
+    const page = document.getElementById("gamePage");
     const stage = document.getElementById("stage");
-    const grid = document.getElementById("boxesGrid");
+    const grid = document.getElementById("giftGrid");
     const resetBtn = document.getElementById("resetBtn");
     const backBtn = document.getElementById("backBtn");
 
@@ -790,7 +764,7 @@
 
     function applyTheme(themeId){
       currentTheme = normalizeTheme(themeId);
-      page.className = `box-page theme-${currentTheme}`;
+      page.className = `game-page theme-${currentTheme}`;
       try { sessionStorage.setItem("sandooq_edu_box_theme_v1", currentTheme); } catch (_) {}
     }
 
@@ -831,7 +805,7 @@
       }
 
       if (size < minSize) {
-        gap = Math.max(5, Math.floor(gap * 0.72));
+        gap = Math.max(5, Math.floor(gap * .72));
         size = Math.min(
           158,
           Math.floor((width - gap * (cols - 1)) / cols),
@@ -839,17 +813,16 @@
         );
       }
 
-      size = Math.max(34, size);
-      return { cols, gap, size };
+      return { cols, gap, size:Math.max(34, size) };
     }
 
     function applyLayout(){
       const layout = calculateLayout(items.length);
       grid.style.setProperty("--cols", String(layout.cols));
-      grid.style.setProperty("--gap", `${layout.gap}px`);
-      grid.style.setProperty("--box-size", `${layout.size}px`);
-      document.documentElement.style.setProperty("--gap", `${layout.gap}px`);
-      document.documentElement.style.setProperty("--box-size", `${layout.size}px`);
+      grid.style.setProperty("--tile-gap", `${layout.gap}px`);
+      grid.style.setProperty("--tile-size", `${layout.size}px`);
+      document.documentElement.style.setProperty("--tile-gap", `${layout.gap}px`);
+      document.documentElement.style.setProperty("--tile-size", `${layout.size}px`);
     }
 
     function renderBoxes(){
@@ -859,37 +832,49 @@
       items.forEach((entry, index)=>{
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "box-card";
-
+        button.className = "present";
         const giftClasses = ["gift-blue", "gift-green", "gift-yellow", "gift-purple", "gift-red"];
         button.classList.add(giftClasses[index % giftClasses.length]);
-
         button.setAttribute("aria-label", `صندوق رقم ${index + 1}`);
         button.setAttribute("aria-pressed", "false");
         button.dataset.index = String(index);
 
-        const shell = document.createElement("span");
-        shell.className = "gift-shell";
+        const wrap = document.createElement("span");
+        wrap.className = "present-wrap";
 
-        const body = document.createElement("span");
-        body.className = "gift-body";
-
-        const content = document.createElement("span");
-        content.className = "gift-content";
-        content.appendChild(createResultContent(entry));
+        const closed = document.createElement("span");
+        closed.className = "present-closed";
 
         const cover = document.createElement("span");
         cover.className = "gift-cover";
 
-        const number = document.createElement("span");
-        number.className = "gift-number";
-        number.textContent = String(index + 1);
+        const closedNumber = document.createElement("span");
+        closedNumber.className = "present-number";
+        closedNumber.textContent = String(index + 1);
 
-        cover.appendChild(number);
-        shell.appendChild(body);
-        shell.appendChild(content);
-        shell.appendChild(cover);
-        button.appendChild(shell);
+        cover.appendChild(closedNumber);
+        closed.appendChild(cover);
+
+        const open = document.createElement("span");
+        open.className = "present-open";
+
+        const lid = document.createElement("span");
+        lid.className = "open-lid";
+
+        const body = document.createElement("span");
+        body.className = "open-body";
+
+        const content = document.createElement("span");
+        content.className = "present-content";
+        content.appendChild(createResultContent(entry));
+
+        open.appendChild(lid);
+        open.appendChild(body);
+        open.appendChild(content);
+
+        wrap.appendChild(closed);
+        wrap.appendChild(open);
+        button.appendChild(wrap);
 
         button.addEventListener("click", ()=>{
           openBox(button, index);
@@ -944,7 +929,7 @@
 
     function resetBoxes(){
       opened.clear();
-      document.querySelectorAll(".box-card.opened").forEach((card)=>{
+      document.querySelectorAll(".present.opened").forEach((card)=>{
         card.classList.remove("opened");
         card.setAttribute("aria-pressed", "false");
       });
@@ -963,10 +948,7 @@
     resetBtn.addEventListener("click", resetBoxes);
     backBtn.addEventListener("click", goBack);
 
-    window.addEventListener("resize", ()=>{
-      applyLayout();
-    }, { passive:true });
-
+    window.addEventListener("resize", applyLayout, { passive:true });
     window.addEventListener("orientationchange", ()=>{
       window.setTimeout(applyLayout, 160);
     }, { passive:true });
