@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v6 -->
+  <!-- version: open-box-v7 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -30,15 +30,30 @@
       min-height:100%;
       background:#fff;
       color:var(--ink);
-      overflow:hidden;
       -webkit-text-size-adjust:100%;
     }
 
-    body{ min-height:100dvh; }
+    body{
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+    }
 
+    body::after{
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
+    }
+
+    /* open-box-safari-scroll-v1: نفس تكتيك صفحة العجلة لإخفاء شريط Safari */
     .box-page{
-      position:relative;
+      position:sticky;
+      top:0;
       width:100%;
+      min-height:100dvh;
       height:100dvh;
       overflow:hidden;
       background:#fff;
@@ -255,7 +270,7 @@
       justify-content:center;
       opacity:0;
       transform:translateY(10px) scale(.88);
-      transition:opacity .24s ease .22s, transform .32s ease .22s;
+      transition:opacity .38s ease .78s, transform .48s ease .78s;
       direction:rtl;
       text-align:center;
       pointer-events:none;
@@ -288,22 +303,28 @@
       transform-origin:50% 0%;
       transform:rotateX(0deg) translateY(0) translateZ(2px);
       transition:
-        transform .78s cubic-bezier(.15,.82,.20,1),
-        filter .45s ease,
-        box-shadow .45s ease;
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
+        transform 1.55s cubic-bezier(.12,.74,.12,1),
+        filter 1.15s ease,
+        box-shadow 1.15s ease;
+      backface-visibility:visible;
+      -webkit-backface-visibility:visible;
       transform-style:preserve-3d;
       overflow:hidden;
+      will-change:transform;
     }
 
     .box-card.opened .box-lid{
-      transform:translateY(-10%) rotateX(112deg) translateZ(18px);
-      filter:brightness(1.06);
+      /*
+        فتح أبطأ وواقعي:
+        لا نتجاوز 90deg حتى لا يختفي الغطاء في Safari بسبب backface.
+        يتحرك للأعلى ويثبت كغطاء مفتوح فوق الصندوق.
+      */
+      transform:translateY(-52%) rotateX(76deg) translateZ(20px);
+      filter:brightness(1.08);
       box-shadow:
-        inset 0 -3px 0 rgba(0,0,0,.12),
+        inset 0 -3px 0 rgba(0,0,0,.10),
         inset 0 3px 0 rgba(255,255,255,.18),
-        0 8px 10px rgba(0,0,0,.09);
+        0 10px 14px rgba(0,0,0,.10);
     }
 
     .box-lid::before{
@@ -366,7 +387,8 @@
     }
 
     .box-card.opened .box-hinge{
-      filter:brightness(1.04);
+      filter:brightness(1.06);
+      z-index:13;
     }
 
     .box-number{
