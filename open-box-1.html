@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v29-smooth-full-lid-rise -->
+  <!-- version: open-box-v30-full-lid-clip-rise -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -410,6 +410,7 @@
     .box-card.opened .panel-number{
       opacity:0;
       transform:scale(.82) translateY(-5px);
+      transition-duration:.10s;
     }
 
     .result-text{
@@ -461,11 +462,11 @@
 
 
 
-    /* v29:
-       - الغطاء يرتفع بالحجم الطبيعي بدون تصغير أو ضغط.
-       - حركة الغطاء أصبحت سلسلة ومستمرة بدون توقفات بينية.
-       - يبدأ الغطاء من أسفل الصندوق ثم يصعد للأعلى ويثبت بنفس شكله الحالي.
-       - الإبقاء على مطابقة ألوان الغطاء مع جسم الصندوق وضبط المحتوى الذكي.
+    /* v30:
+       - الغطاء يتحرك كقطعة كاملة في بداية الفتح.
+       - أثناء الصعود يتم قص الجزء السفلي تدريجياً حتى يبقى شريط الغطاء النهائي.
+       - الحركة أبطأ قليلاً وسلسة بدون توقفات.
+       - الإبقاء على مطابقة الألوان وضبط المحتوى الذكي.
     */
     .box-card{
       --asset-tint:#a8c474;
@@ -540,33 +541,28 @@
       height:8.9%;
       z-index:18;
       opacity:0;
-      background-image:
-        linear-gradient(var(--asset-tint), var(--asset-tint)),
-        var(--asset-open-lid);
-      background-repeat:no-repeat, no-repeat;
-      background-position:center, center;
-      background-size:100% 100%, 100% 100%;
-      background-blend-mode:color;
-      filter:brightness(var(--asset-lid-brightness)) saturate(var(--asset-saturation));
       pointer-events:none;
-      transform:translateY(760%) scale(1);
-      transform-origin:50% 50%;
-      will-change:transform, opacity;
     }
 
     .box-card.opened .box-wrap::after{
-      opacity:1;
-      animation:assetLidOpen 1.18s cubic-bezier(.20,.82,.18,1) both;
+      opacity:0;
     }
 
     @keyframes assetLidOpen{
       0%{
         opacity:1;
-        transform:translateY(760%) scale(1);
+        transform:translateY(0) scale(1);
+        clip-path:inset(0 0 0 0 round clamp(11px, 11%, 20px));
+      }
+      64%{
+        opacity:1;
+        transform:translateY(-8%) scale(1);
+        clip-path:inset(0 0 72% 0 round 8px);
       }
       100%{
         opacity:1;
         transform:translateY(0) scale(1);
+        clip-path:inset(0 0 91.1% 0 round 2px);
       }
     }
 
@@ -576,16 +572,23 @@
       top:0;
       height:100%;
       border-radius:clamp(11px, 11%, 20px);
-      opacity:0;
-      transform:scale(.96);
-      box-shadow:none;
+      opacity:1;
+      transform:scale(1);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.14),
+        0 1px 2px rgba(0,0,0,.05);
       pointer-events:none;
-      transition:opacity .32s ease, transform .34s ease;
+      overflow:hidden;
+      animation:assetLidOpen 1.42s cubic-bezier(.20,.82,.18,1) both;
+      will-change:transform, clip-path;
     }
 
-    .box-card.opened .front-panel::before,
+    .box-card.opened .front-panel::before{
+      opacity:.42;
+    }
+
     .box-card.opened .front-panel::after{
-      opacity:0;
+      opacity:.8;
     }
 
     .box-content{
