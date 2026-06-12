@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v36-revert-to-v34-adopted -->
+  <!-- version: open-box-v37-wheel-style-focus-zoom -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -116,6 +116,19 @@
       justify-content:center;
       align-content:center;
       gap:var(--tile-gap);
+      transform-origin:0 0;
+      transform:translate3d(var(--box-focus-x, 0px), var(--box-focus-y, 0px), 0) scale(var(--box-focus-scale, 1));
+      will-change:transform;
+    }
+
+    /* v37: زوم بأسلوب العجلة: المتغيرات تتحرك بـ requestAnimationFrame وليس transition */
+    .stage{
+      overflow:hidden;
+    }
+
+    .box-grid.zooming,
+    .box-grid.zoomed{
+      transform:translate3d(var(--box-focus-x, 0px), var(--box-focus-y, 0px), 0) scale(var(--box-focus-scale, 1));
     }
 
     /*
@@ -832,6 +845,9 @@
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
     let opened = new Set();
+    let focusedIndex = -1;
+    let boxZoomAnimationId = null;
+    let boxFocusState = { scale:1, x:0, y:0 };
 
     function getUrlParam(name){
       try {
@@ -1130,11 +1146,118 @@
       el.style.fontSize = `${Math.floor(best * 10) / 10}px`;
     }
 
+    function clamp(value, min, max){
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function setBoxFocusState(scale, x, y){
+      boxFocusState = { scale, x, y };
+      grid.style.setProperty("--box-focus-scale", scale.toFixed(5));
+      grid.style.setProperty("--box-focus-x", `${x.toFixed(2)}px`);
+      grid.style.setProperty("--box-focus-y", `${y.toFixed(2)}px`);
+      grid.classList.toggle("zoomed", scale > 1.001);
+    }
+
+    function cancelBoxZoomAnimation(){
+      if (boxZoomAnimationId) {
+        cancelAnimationFrame(boxZoomAnimationId);
+        boxZoomAnimationId = null;
+      }
+    }
+
+    function easeInOutSine(t){
+      const p = clamp(t, 0, 1);
+      return -(Math.cos(Math.PI * p) - 1) / 2;
+    }
+
+    function animateBoxZoom(target, duration = 1500){
+      cancelBoxZoomAnimation();
+
+      const start = { ...boxFocusState };
+      const end = {
+        scale:Math.max(1, Number(target.scale) || 1),
+        x:Number(target.x) || 0,
+        y:Number(target.y) || 0
+      };
+
+      if (!duration) {
+        setBoxFocusState(end.scale, end.x, end.y);
+        return Promise.resolve();
+      }
+
+      grid.classList.add("zooming");
+      const startTime = performance.now();
+
+      return new Promise((resolve)=>{
+        function frame(now){
+          const progress = Math.min(1, (now - startTime) / duration);
+          const eased = easeInOutSine(progress);
+          const scale = start.scale + (end.scale - start.scale) * eased;
+          const x = start.x + (end.x - start.x) * eased;
+          const y = start.y + (end.y - start.y) * eased;
+
+          setBoxFocusState(scale, x, y);
+
+          if (progress < 1) {
+            boxZoomAnimationId = requestAnimationFrame(frame);
+          } else {
+            boxZoomAnimationId = null;
+            grid.classList.remove("zooming");
+            setBoxFocusState(end.scale, end.x, end.y);
+            resolve();
+          }
+        }
+
+        boxZoomAnimationId = requestAnimationFrame(frame);
+      });
+    }
+
+    function getBoxZoomTarget(button){
+      const stageRect = stage.getBoundingClientRect();
+      const stageW = Math.max(1, stage.clientWidth || stageRect.width);
+      const stageH = Math.max(1, stage.clientHeight || stageRect.height);
+      const isLandscape = window.innerWidth > window.innerHeight;
+      const tile = Math.max(1, button.offsetWidth || parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tile-size")) || 150);
+
+      const desiredTile = isLandscape
+        ? Math.min(stageW * .25, stageH * .46, tile * 1.62)
+        : Math.min(stageW * .58, stageH * .34, tile * 1.78);
+      const maxScale = isLandscape ? 1.62 : 1.78;
+      const scale = clamp(desiredTile / tile, 1.18, maxScale);
+
+      const cardCenterX = grid.offsetLeft + button.offsetLeft + button.offsetWidth / 2;
+      const cardCenterY = grid.offsetTop + button.offsetTop + button.offsetHeight / 2;
+      const focusX = stageW * .50;
+      const focusY = stageH * (isLandscape ? .50 : .53);
+
+      return {
+        scale,
+        x:focusX - cardCenterX * scale,
+        y:focusY - cardCenterY * scale
+      };
+    }
+
+    function focusBox(button, duration = 2400){
+      if (!button) return;
+      focusedIndex = Number(button.dataset.index || -1);
+      const target = getBoxZoomTarget(button);
+      animateBoxZoom(target, duration).then(()=> requestAnimationFrame(fitAllBoxText));
+    }
+
+    function resetBoxZoom(duration = 1450){
+      focusedIndex = -1;
+      return animateBoxZoom({ scale:1, x:0, y:0 }, duration);
+    }
+
     function openBox(button, index){
-      if (opened.has(index)) return;
+      if (opened.has(index)) {
+        focusBox(button, 1450);
+        return;
+      }
       opened.add(index);
       button.classList.add("opened");
       button.setAttribute("aria-pressed", "true");
+      requestAnimationFrame(()=> focusBox(button, 2400));
     }
 
     function resetBoxes(){
@@ -1143,6 +1266,7 @@
         card.classList.remove("opened");
         card.setAttribute("aria-pressed", "false");
       });
+      resetBoxZoom(1450);
     }
 
     function goBack(){
@@ -1160,12 +1284,24 @@
 
     window.addEventListener("resize", ()=>{
       applyLayout();
-      requestAnimationFrame(fitAllBoxText);
+      requestAnimationFrame(()=>{
+        if (focusedIndex >= 0) {
+          const button = grid.querySelector(`.box-card[data-index="${focusedIndex}"]`);
+          if (button) focusBox(button, 420);
+        } else {
+          fitAllBoxText();
+        }
+      });
     }, { passive:true });
     window.addEventListener("orientationchange", ()=>{
       window.setTimeout(()=>{
         applyLayout();
-        fitAllBoxText();
+        if (focusedIndex >= 0) {
+          const button = grid.querySelector(`.box-card[data-index="${focusedIndex}"]`);
+          if (button) focusBox(button, 520);
+        } else {
+          fitAllBoxText();
+        }
       }, 160);
     }, { passive:true });
 
