@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-open-box-link-v36-open-box-1 -->
+<!-- version: index-open-box-link-v37-open-box-limit-30 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -1429,6 +1429,11 @@
       cursor:pointer;
       box-shadow:0 5px 0 rgba(0,0,0,.18);
     }
+
+    .add-item-btn.is-hidden{
+      display:none !important;
+    }
+
 
     .wheel-actions{
       display:grid;
@@ -5246,7 +5251,8 @@
   const WHEEL_DRAFT_KEY = "sandooq_wheel_draft_v1";
   const OPEN_BOX_PAYLOAD_KEY = "sandooq_open_box_payload_v1";
   const OPEN_BOX_DRAFT_KEY = "sandooq_open_box_draft_v1";
-  const OPEN_BOX_PAGE_URL = "open-box-1.html";
+  const OPEN_BOX_PAGE_URL = "open-box-2.html";
+  const OPEN_BOX_MAX_ITEMS = 30;
 
   const screens = ["createScreen", "wheelSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
   const homeShell = document.getElementById("homeShell");
@@ -5317,6 +5323,16 @@
   }
 
   function isEntryFilled(entry){
+    if (currentGameTemplate === "open-box") {
+      return Boolean(
+        entry.text ||
+        entry.imageData ||
+        entry.imageName ||
+        entry.coverText ||
+        entry.coverImageData ||
+        entry.coverImageName
+      );
+    }
     if (wheelContentType === "images") return Boolean(entry.imageData || entry.imageName);
     if (wheelContentType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
     return Boolean(entry.text);
@@ -5371,6 +5387,17 @@
       wheelContentType = draft.type || "text";
       wheelTheme = draft.theme || "classic";
       wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
+      if (currentGameTemplate === "open-box") {
+        wheelEntries = wheelEntries.slice(0, OPEN_BOX_MAX_ITEMS);
+      }
+      wheelEntries = wheelEntries.map((entry)=> ({
+        text: entry.text || "",
+        imageName: entry.imageName || "",
+        imageData: entry.imageData || "",
+        coverText: entry.coverText || "",
+        coverImageName: entry.coverImageName || "",
+        coverImageData: entry.coverImageData || ""
+      }));
       wheelSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
       boxCoverMode = draft.coverMode || "disabled";
       if (!["disabled","text","image"].includes(boxCoverMode)) boxCoverMode = "disabled";
@@ -5535,11 +5562,27 @@
   function renderWheelEntries(){
     if (!wheelItemsEditor) return;
 
+    if (currentGameTemplate === "open-box" && wheelEntries.length > OPEN_BOX_MAX_ITEMS) {
+      wheelEntries = wheelEntries.slice(0, OPEN_BOX_MAX_ITEMS);
+    }
+
     if (!wheelEntries.length) {
       wheelEntries = [createEntry()];
     }
 
-    if (itemsHint) itemsHint.textContent = entryHint();
+    const reachedOpenBoxLimit = currentGameTemplate === "open-box" && wheelEntries.length >= OPEN_BOX_MAX_ITEMS;
+    addWheelItemBtn?.classList.toggle("is-hidden", reachedOpenBoxLimit);
+    if (addWheelItemBtn) {
+      addWheelItemBtn.disabled = reachedOpenBoxLimit;
+      addWheelItemBtn.setAttribute("aria-hidden", reachedOpenBoxLimit ? "true" : "false");
+      addWheelItemBtn.title = reachedOpenBoxLimit ? "تم الوصول إلى الحد الأعلى ٣٠ صندوق" : "";
+    }
+
+    if (itemsHint) {
+      itemsHint.textContent = currentGameTemplate === "open-box"
+        ? `${entryHint()} الحد الأعلى ٣٠ صندوق.`
+        : entryHint();
+    }
     wheelItemsEditor.innerHTML = "";
 
     wheelEntries.forEach((entry, index)=>{
@@ -5553,6 +5596,7 @@
       remove.setAttribute("aria-label", "حذف العنصر");
       remove.addEventListener("click", ()=>{
         wheelEntries.splice(index, 1);
+        if (!wheelEntries.length) wheelEntries = [createEntry()];
         renderWheelEntries();
         saveDraft();
       });
@@ -5705,7 +5749,7 @@
   function openOpenBoxPage(){
     syncWheelEntriesFromDom();
 
-    const entries = getFilledEntries();
+    const entries = getFilledEntries().slice(0, OPEN_BOX_MAX_ITEMS);
     if (!entries.length) {
       alert("يرجى ادخال عناصر الصندوق اولاً");
       return;
@@ -5816,6 +5860,12 @@
 
   addWheelItemBtn?.addEventListener("click", ()=>{
     syncWheelEntriesFromDom();
+
+    if (currentGameTemplate === "open-box" && wheelEntries.length >= OPEN_BOX_MAX_ITEMS) {
+      renderWheelEntries();
+      return;
+    }
+
     wheelEntries.push(createEntry());
     renderWheelEntries();
     saveDraft();
