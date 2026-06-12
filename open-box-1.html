@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v32-smooth-continuous-cover -->
+  <!-- version: open-box-v33-fast-hide-sharp-cover -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -392,7 +392,7 @@
     }
 
     .box-card.opened .front-panel::after{
-      opacity:.8;
+      opacity:0;
     }
 
     .panel-number{
@@ -462,11 +462,11 @@
 
 
 
-    /* v32:
-       - الغطاء العلوي الثابت كما هو.
-       - الغطاء المتحرك المؤقت صار بحركة واحدة مستمرة بدون توقفات بينية.
-       - أزلنا keyframes المتعددة التي كانت تسبب الإحساس بالتقطيع.
-       - الحركة أبطأ قليلًا وسلسة، مع الإبقاء على مطابقة الألوان وضبط المحتوى الذكي.
+    /* v33:
+       - إزالة البقعة/اللمعة الظاهرة على الغطاء المتحرك أثناء الرفع.
+       - الغطاء المتحرك يختفي مباشرة عند وصوله إلى حافة الغطاء العلوي الثابت.
+       - تسريع حركة الرفع قليلًا مع الحفاظ على السلاسة.
+       - جعل زوايا الغطاء المتحرك حادة أثناء الفتح.
     */
     .box-card{
       --asset-tint:#a8c474;
@@ -562,17 +562,22 @@
       0%{
         opacity:1;
         transform:translateY(0) scale(1);
-        clip-path:inset(0 0 0 0 round clamp(11px, 11%, 20px));
+        clip-path:inset(0 0 0 0 round 0);
       }
-      96%{
+      84%{
         opacity:1;
-        transform:translateY(-2.5%) scale(1);
-        clip-path:inset(0 0 91.1% 0 round 2px);
+        transform:translateY(-2.2%) scale(1);
+        clip-path:inset(0 0 91.1% 0 round 0);
+      }
+      84.1%{
+        opacity:0;
+        transform:translateY(-2.2%) scale(1);
+        clip-path:inset(0 0 91.1% 0 round 0);
       }
       100%{
         opacity:0;
-        transform:translateY(-2.5%) scale(1);
-        clip-path:inset(0 0 91.1% 0 round 2px);
+        transform:translateY(-2.2%) scale(1);
+        clip-path:inset(0 0 91.1% 0 round 0);
       }
     }
 
@@ -582,20 +587,20 @@
       top:0;
       height:100%;
       z-index:21;
-      border-radius:clamp(11px, 11%, 20px);
+      border-radius:0;
       opacity:1;
       transform:scale(1);
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,.14),
-        0 1px 2px rgba(0,0,0,.05);
+        inset 0 1px 0 rgba(255,255,255,.10),
+        0 1px 2px rgba(0,0,0,.04);
       pointer-events:none;
       overflow:hidden;
-      animation:assetMovingCover 1.86s linear both;
+      animation:assetMovingCover 1.32s linear both;
       will-change:transform, clip-path, opacity;
     }
 
     .box-card.opened .front-panel::before{
-      opacity:.42;
+      opacity:.26;
     }
 
     .box-card.opened .front-panel::after{
