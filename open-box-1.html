@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v33-fast-hide-sharp-cover -->
+  <!-- version: open-box-v34-remove-cover-pills -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -352,31 +352,10 @@
       transform-origin:50% 0%;
     }
 
-    .front-panel::before{
-      content:"";
-      position:absolute;
-      left:10%;
-      right:10%;
-      top:8%;
-      height:8%;
-      border-radius:999px;
-      background:rgba(255,255,255,.22);
-      opacity:.42;
-    }
-
+    .front-panel::before,
     .front-panel::after{
-      content:"";
-      position:absolute;
-      left:27%;
-      right:27%;
-      top:26%;
-      height:16%;
-      border-radius:999px;
-      background:
-        linear-gradient(90deg, transparent 0 42%, rgba(255,255,255,.75) 47% 55%, transparent 62% 100%),
-        rgba(0,0,0,.10);
-      opacity:0;
-      transition:opacity .25s ease .42s;
+      content:none;
+      display:none;
     }
 
     .box-card.opened .front-panel{
@@ -389,10 +368,6 @@
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.14),
         0 1px 2px rgba(0,0,0,.05);
-    }
-
-    .box-card.opened .front-panel::after{
-      opacity:0;
     }
 
     .panel-number{
@@ -462,11 +437,10 @@
 
 
 
-    /* v33:
-       - إزالة البقعة/اللمعة الظاهرة على الغطاء المتحرك أثناء الرفع.
-       - الغطاء المتحرك يختفي مباشرة عند وصوله إلى حافة الغطاء العلوي الثابت.
-       - تسريع حركة الرفع قليلًا مع الحفاظ على السلاسة.
-       - جعل زوايا الغطاء المتحرك حادة أثناء الفتح.
+    /* v34:
+       - إزالة الدوائر/البقع الشفافة من الغطاء بالكامل.
+       - إزالة اللمعة البيضاوية من الصناديق المغلقة والغطاء المتحرك.
+       - الإبقاء على حركة الغطاء والغطاء العلوي الثابت كما في الإصدار السابق.
     */
     .box-card{
       --asset-tint:#a8c474;
@@ -597,14 +571,6 @@
       overflow:hidden;
       animation:assetMovingCover 1.32s linear both;
       will-change:transform, clip-path, opacity;
-    }
-
-    .box-card.opened .front-panel::before{
-      opacity:.26;
-    }
-
-    .box-card.opened .front-panel::after{
-      opacity:.8;
     }
 
     .box-content{
