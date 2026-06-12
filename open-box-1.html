@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v22-match-user-reference -->
+  <!-- version: open-box-v23-exact-reference-cavity -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -117,13 +117,13 @@
     }
 
     /*
-      open-box-v22:
-      مطابق أكثر للصورتين المرجعيتين:
-      - الصندوق المفتوح شبه مطابق للقالب المرسل من المستخدم.
-      - الجوانب الداخلية أنحف جداً.
-      - المساحة الخلفية الداخلية أكبر.
-      - الغطاء العلوي أنحف ومسطح أكثر.
-      - إزالة الإحساس بأنه إطار خارجي.
+      open-box-v23:
+      إعادة ضبط الصندوق المفتوح حسب مرجع المستخدم:
+      - الغطاء العلوي شريط مستقل فوق الصندوق.
+      - الوجه العلوي الداخلي ظاهر أسفل الغطاء وليس مخفيًا تحته.
+      - الجوانب اليمنى واليسرى نحيفة.
+      - الوسط الداخلي كبير وواضح.
+      - نفس القالب يتلون حسب لون الصندوق.
     */
     .box-card{
       --panel:#df3a64;
@@ -222,15 +222,15 @@
 
     .box-back{
       position:absolute;
-      left:7.2%;
-      right:7.2%;
-      top:9.8%;
-      bottom:8.9%;
+      left:7.6%;
+      right:7.6%;
+      top:18.2%;
+      bottom:10.6%;
       z-index:1;
       background:var(--back-face);
       box-shadow:
-        inset 0 6px 10px rgba(255,255,255,.04),
-        inset 0 -5px 8px rgba(0,0,0,.08);
+        inset 0 5px 9px rgba(255,255,255,.035),
+        inset 0 -4px 7px rgba(0,0,0,.075);
     }
 
     .wall{
@@ -242,45 +242,45 @@
     .wall-top{
       left:0;
       right:0;
-      top:0;
-      height:9.8%;
+      top:5.8%;
+      height:12.4%;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.10) 52%, rgba(0,0,0,.02)),
+        linear-gradient(180deg, rgba(255,255,255,.30), rgba(255,255,255,.12) 48%, rgba(0,0,0,.018)),
         var(--top-wall);
-      clip-path:polygon(0 0, 100% 0, 92.8% 100%, 7.2% 100%);
+      clip-path:polygon(0 0, 100% 0, 92.4% 100%, 7.6% 100%);
     }
 
     .wall-bottom{
       left:0;
       right:0;
       bottom:0;
-      height:8.9%;
+      height:10.6%;
       background:
-        linear-gradient(0deg, rgba(0,0,0,.11), rgba(255,255,255,.045) 60%, rgba(255,255,255,.11)),
+        linear-gradient(0deg, rgba(0,0,0,.10), rgba(255,255,255,.045) 58%, rgba(255,255,255,.12)),
         var(--bottom-wall);
-      clip-path:polygon(7.2% 0, 92.8% 0, 100% 100%, 0 100%);
+      clip-path:polygon(7.6% 0, 92.4% 0, 100% 100%, 0 100%);
     }
 
     .wall-left{
       left:0;
-      top:0;
+      top:5.8%;
       bottom:0;
-      width:7.2%;
+      width:7.6%;
       background:
-        linear-gradient(90deg, rgba(0,0,0,.10), rgba(255,255,255,.10) 72%, rgba(255,255,255,.03)),
+        linear-gradient(90deg, rgba(0,0,0,.10), rgba(255,255,255,.10) 70%, rgba(255,255,255,.025)),
         var(--left-wall);
-      clip-path:polygon(0 0, 100% 9.8%, 100% 91.1%, 0 100%);
+      clip-path:polygon(0 0, 100% 13.2%, 100% 88.8%, 0 100%);
     }
 
     .wall-right{
       right:0;
-      top:0;
+      top:5.8%;
       bottom:0;
-      width:7.2%;
+      width:7.6%;
       background:
-        linear-gradient(270deg, rgba(0,0,0,.14), rgba(255,255,255,.07) 66%, rgba(255,255,255,.025)),
+        linear-gradient(270deg, rgba(0,0,0,.13), rgba(255,255,255,.07) 66%, rgba(255,255,255,.025)),
         var(--right-wall);
-      clip-path:polygon(0 9.8%, 100% 0, 100% 100%, 0 91.1%);
+      clip-path:polygon(0 13.2%, 100% 0, 100% 100%, 0 88.8%);
     }
 
     .cavity-box::after{
@@ -295,10 +295,10 @@
 
     .box-content{
       position:absolute;
-      left:12.5%;
-      right:12.5%;
-      top:15.2%;
-      bottom:13%;
+      left:12.8%;
+      right:12.8%;
+      top:23%;
+      bottom:15%;
       z-index:5;
       display:flex;
       align-items:center;
@@ -306,7 +306,7 @@
       direction:rtl;
       text-align:center;
       opacity:0;
-      transform:translateY(6px);
+      transform:translateY(5px);
       transition:opacity .22s ease .36s, transform .34s ease .36s;
       pointer-events:none;
     }
@@ -368,15 +368,15 @@
     }
 
     .box-card.opened .front-panel{
-      left:0;
-      right:0;
-      top:-.2%;
-      height:6%;
+      left:-.4%;
+      right:-.4%;
+      top:0;
+      height:5.8%;
       border-radius:1px;
       transform:translateY(0);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.18),
-        0 1px 4px rgba(0,0,0,.08);
+        0 1px 3px rgba(0,0,0,.07);
     }
 
     .box-card.opened .front-panel::after{
