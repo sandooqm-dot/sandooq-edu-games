@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-buttons-fix-v31 -->
+<!-- version: index-open-box-link-v35 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -1058,6 +1058,50 @@
     .question-panel.enabled .center-question-input{
       display:block;
     }
+    .cover-type-panel{
+      display:none;
+      margin-top:14px;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      padding:12px;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+
+    .cover-type-title{
+      font-size:clamp(15px, 1.55vw, 20px);
+      font-weight:900;
+      color:#111;
+    }
+
+    body[data-setup-template="open-box"] .question-panel.enabled .center-question-input{
+      display:none !important;
+    }
+
+    body[data-setup-template="open-box"] .question-panel.enabled .cover-type-panel{
+      display:flex;
+    }
+
+    .wheel-entry-label{
+      color:#222;
+      font-size:clamp(13px, 1.35vw, 17px);
+      font-weight:900;
+      line-height:1.35;
+      margin-bottom:-3px;
+    }
+
+    .cover-entry-group{
+      display:grid;
+      gap:8px;
+      border:2px dashed rgba(17,17,17,.32);
+      border-radius:16px;
+      padding:10px;
+      background:#fffdf2;
+    }
+
 
     .wheel-actions{
       display:grid;
@@ -5128,7 +5172,7 @@
 </div>
 </div>
 
-<h2 class="screen-title wheel-setup-title">اختر طريقة عرض محتويات العجلة</h2>
+<h2 class="screen-title wheel-setup-title" id="setupContentTitle">اختر طريقة عرض محتويات العجلة</h2>
 <div aria-label="نوع محتوى العجلة" class="wheel-options">
 <button class="wheel-type active" data-wheel-type="text" type="button">
 <strong>نصوص فقط</strong>
@@ -5146,13 +5190,20 @@
 
 <div class="question-panel" id="questionPanel">
 <div class="question-row">
-<h3 class="question-title">سؤال في منتصف العجلة</h3>
+<h3 class="question-title" id="specialPanelTitle">سؤال في منتصف العجلة</h3>
 <div aria-label="تشغيل سؤال المنتصف" class="toggle">
 <button class="active" data-question-toggle="off" type="button">تعطيل</button>
 <button data-question-toggle="on" type="button">تشغيل</button>
 </div>
 </div>
 <input class="center-question-input" id="centerQuestionInput" maxlength="45" placeholder="اكتب السؤال الذي يظهر في منتصف العجلة" type="text"/>
+<div class="cover-type-panel" id="coverTypePanel">
+  <span class="cover-type-title">اختر نوع محتوى الغلاف</span>
+  <div aria-label="نوع محتوى الغلاف" class="toggle">
+    <button class="active" data-cover-type="text" type="button">نص</button>
+    <button data-cover-type="image" type="button">صورة</button>
+  </div>
+</div>
 </div>
 
 <div class="items-panel">
@@ -5193,6 +5244,9 @@
   const WEBSITE_HOME_URL = "https://sandooq-games.com/";
   const WHEEL_PAYLOAD_KEY = "sandooq_wheel_payload_v1";
   const WHEEL_DRAFT_KEY = "sandooq_wheel_draft_v1";
+  const OPEN_BOX_PAYLOAD_KEY = "sandooq_open_box_payload_v1";
+  const OPEN_BOX_DRAFT_KEY = "sandooq_open_box_draft_v1";
+  const OPEN_BOX_PAGE_URL = "open-box-41.html";
 
   const screens = ["createScreen", "wheelSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
   const homeShell = document.getElementById("homeShell");
@@ -5206,6 +5260,10 @@
   const themeListPanel = document.getElementById("themeListPanel");
   const toggleThemeListBtn = document.getElementById("toggleThemeListBtn");
   const currentThemePreview = document.getElementById("currentThemePreview");
+  const setupContentTitle = document.getElementById("setupContentTitle");
+  const specialPanelTitle = document.getElementById("specialPanelTitle");
+  const coverTypePanel = document.getElementById("coverTypePanel");
+  const itemsTitle = document.getElementById("itemsTitle");
   const THEME_LABELS = {
     classic: "خلفية بيضاء",
     classroom: "فصل مدرسي",
@@ -5218,10 +5276,12 @@
     "founding-day": "يوم التأسيس"
   };
 
+  let currentGameTemplate = "wheel";
   let wheelContentType = "text";
   let wheelTheme = "classic";
   let wheelEntries = [];
   let wheelSoundEnabled = true;
+  let boxCoverMode = "disabled";
 
   function openScreen(id){
     const isSubpage = Boolean(id);
@@ -5237,18 +5297,23 @@
   }
 
   function entryHint(){
-    if (wheelContentType === "images") return "أضف الصور التي تظهر داخل أقسام العجلة.";
+    const target = currentGameTemplate === "open-box" ? "الصناديق" : "أقسام العجلة";
+    if (wheelContentType === "images") return `أضف الصور التي تظهر داخل ${target}.`;
     if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
-    return "أضف كلمات أو أسئلة قصيرة.";
+    return currentGameTemplate === "open-box" ? "أضف الكلمات أو الأسئلة التي تظهر بعد فتح الصندوق." : "أضف كلمات أو أسئلة قصيرة.";
   }
 
   function syncSoundUi(){
   }
 
   function createEntry(){
-    if (wheelContentType === "images") return { imageName:"", imageData:"" };
-    if (wheelContentType === "mixed") return { text:"", imageName:"", imageData:"" };
-    return { text:"" };
+    const base = { text:"", imageName:"", imageData:"", coverText:"", coverImageName:"", coverImageData:"" };
+    if (wheelContentType === "images") base.text = "";
+    if (wheelContentType === "text") {
+      base.imageName = "";
+      base.imageData = "";
+    }
+    return base;
   }
 
   function isEntryFilled(entry){
@@ -5261,7 +5326,10 @@
     return wheelEntries.filter(isEntryFilled).map((entry)=> ({
       text: String(entry.text || "").trim(),
       imageName: entry.imageName || "",
-      imageData: entry.imageData || ""
+      imageData: entry.imageData || "",
+      coverText: String(entry.coverText || "").trim(),
+      coverImageName: entry.coverImageName || "",
+      coverImageData: entry.coverImageData || ""
     }));
   }
 
@@ -5269,12 +5337,14 @@
     syncWheelEntriesFromDom();
 
     const payload = {
+      gameTemplate: currentGameTemplate,
       type: wheelContentType,
       theme: wheelTheme,
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries: wheelEntries,
-      centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
-      centerQuestion: String(centerQuestionInput?.value || "").trim(),
+      centerQuestionEnabled: currentGameTemplate === "wheel" ? Boolean(questionPanel?.classList.contains("enabled")) : false,
+      centerQuestion: currentGameTemplate === "wheel" ? String(centerQuestionInput?.value || "").trim() : "",
+      coverMode: currentGameTemplate === "open-box" ? boxCoverMode : "disabled",
       soundEnabled: wheelSoundEnabled,
       sounds: {
         enabled: wheelSoundEnabled,
@@ -5282,7 +5352,12 @@
       }
     };
 
-    try { sessionStorage.setItem(WHEEL_DRAFT_KEY, JSON.stringify(payload)); } catch (_) {}
+    try {
+      sessionStorage.setItem(WHEEL_DRAFT_KEY, JSON.stringify(payload));
+      if (currentGameTemplate === "open-box") {
+        sessionStorage.setItem(OPEN_BOX_DRAFT_KEY, JSON.stringify(payload));
+      }
+    } catch (_) {}
   }
 
   function loadDraft(){
@@ -5292,10 +5367,13 @@
       const draft = JSON.parse(raw);
       if (!draft || typeof draft !== "object") return false;
 
+      currentGameTemplate = draft.gameTemplate === "open-box" || draft.template === "open-box" ? "open-box" : "wheel";
       wheelContentType = draft.type || "text";
       wheelTheme = draft.theme || "classic";
       wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
       wheelSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
+      boxCoverMode = draft.coverMode || "disabled";
+      if (!["disabled","text","image"].includes(boxCoverMode)) boxCoverMode = "disabled";
       syncSoundUi();
 
       if (wheelGameNameInput) wheelGameNameInput.value = draft.gameName || "";
@@ -5310,13 +5388,14 @@
         btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
       });
 
-      const enabled = Boolean(draft.centerQuestionEnabled);
+      const enabled = currentGameTemplate === "open-box" ? boxCoverMode !== "disabled" : Boolean(draft.centerQuestionEnabled);
       questionPanel?.classList.toggle("enabled", enabled);
       document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
         btn.classList.toggle("active", btn.getAttribute("data-question-toggle") === (enabled ? "on" : "off"));
       });
       if (centerQuestionInput) centerQuestionInput.value = draft.centerQuestion || "";
 
+      applySetupMode();
       renderWheelEntries();
       return true;
     } catch (_) {
@@ -5331,7 +5410,9 @@
     wheelItemsEditor.querySelectorAll(".wheel-entry-input[data-entry-index]").forEach((input)=>{
       const index = Number(input.getAttribute("data-entry-index"));
       if (!Number.isFinite(index) || !wheelEntries[index]) return;
-      wheelEntries[index].text = input.value || "";
+      const field = input.getAttribute("data-entry-field") || "text";
+      if (field === "coverText") wheelEntries[index].coverText = input.value || "";
+      else wheelEntries[index].text = input.value || "";
     });
   }
 
@@ -5340,6 +5421,115 @@
     const reader = new FileReader();
     reader.onload = () => callback(String(reader.result || ""));
     reader.readAsDataURL(file);
+  }
+
+  function applySetupMode(){
+    document.body.dataset.setupTemplate = currentGameTemplate;
+    const isBox = currentGameTemplate === "open-box";
+
+    if (setupContentTitle) setupContentTitle.textContent = isBox ? "اختر طريقة عرض محتويات الصندوق" : "اختر طريقة عرض محتويات العجلة";
+    if (specialPanelTitle) specialPanelTitle.textContent = isBox ? "وضع نص او صورة على غلاف الصندوق" : "سؤال في منتصف العجلة";
+    if (itemsTitle) itemsTitle.textContent = isBox ? "عناصر الصندوق" : "عناصر العجلة";
+
+    document.querySelectorAll(".wheel-type").forEach((btn)=>{
+      const type = btn.getAttribute("data-wheel-type");
+      const span = btn.querySelector("span");
+      if (!span) return;
+      if (type === "text") span.textContent = isBox ? "نصوص تظهر بعد فتح الصندوق" : "كلمات أو أسئلة قصيرة";
+      if (type === "images") span.textContent = isBox ? "صور تظهر بعد فتح الصندوق" : "صور داخل أقسام العجلة";
+      if (type === "mixed") span.textContent = "صورة ومعها نص مختصر";
+    });
+
+    const enabled = isBox ? boxCoverMode !== "disabled" : Boolean(questionPanel?.classList.contains("enabled"));
+    questionPanel?.classList.toggle("enabled", enabled);
+    if (coverTypePanel) coverTypePanel.hidden = !isBox || !enabled;
+    document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
+      btn.classList.toggle("active", btn.getAttribute("data-question-toggle") === (enabled ? "on" : "off"));
+    });
+    document.querySelectorAll("[data-cover-type]").forEach((btn)=>{
+      btn.classList.toggle("active", btn.getAttribute("data-cover-type") === (boxCoverMode === "image" ? "image" : "text"));
+    });
+  }
+
+  function makeFileStatus(entry, fieldPrefix){
+    const imageDataKey = fieldPrefix === "cover" ? "coverImageData" : "imageData";
+    const imageNameKey = fieldPrefix === "cover" ? "coverImageName" : "imageName";
+    if (!entry[imageNameKey] && !entry[imageDataKey]) return null;
+
+    const status = document.createElement("div");
+    status.className = "wheel-file-status";
+
+    if (entry[imageDataKey]) {
+      const img = document.createElement("img");
+      img.className = "wheel-file-thumb";
+      img.alt = "";
+      img.src = entry[imageDataKey];
+      status.appendChild(img);
+    }
+
+    const name = document.createElement("span");
+    name.className = "wheel-file-name";
+    name.textContent = entry[imageNameKey] ? `الصورة المختارة: ${entry[imageNameKey]}` : "تم اختيار صورة";
+    status.appendChild(name);
+    return status;
+  }
+
+  function addCoverFields(box, entry, index){
+    if (currentGameTemplate !== "open-box" || boxCoverMode === "disabled") return;
+
+    const group = document.createElement("div");
+    group.className = "cover-entry-group";
+
+    const label = document.createElement("div");
+    label.className = "wheel-entry-label";
+    label.textContent = boxCoverMode === "image" ? "ارفق صورة الغلاف" : "ادخل نص الغلاف";
+    group.appendChild(label);
+
+    if (boxCoverMode === "image") {
+      const file = document.createElement("input");
+      file.className = "wheel-entry-file";
+      file.type = "file";
+      file.accept = "image/*";
+      file.setAttribute("data-entry-index", String(index));
+      file.addEventListener("change", ()=>{
+        const selectedFile = file.files && file.files[0] ? file.files[0] : null;
+
+        if (!selectedFile) {
+          wheelEntries[index].coverImageName = "";
+          wheelEntries[index].coverImageData = "";
+          saveDraft();
+          renderWheelEntries();
+          return;
+        }
+
+        wheelEntries[index].coverImageName = selectedFile.name;
+        readFileAsDataURL(selectedFile, (dataUrl)=>{
+          wheelEntries[index].coverImageData = dataUrl;
+          saveDraft();
+          renderWheelEntries();
+        });
+      });
+      group.appendChild(file);
+
+      const status = makeFileStatus(entry, "cover");
+      if (status) group.appendChild(status);
+    } else {
+      const input = document.createElement("input");
+      input.className = "wheel-entry-input";
+      input.type = "text";
+      input.maxLength = 40;
+      input.placeholder = "ادخل نص الغلاف";
+      input.value = entry.coverText || "";
+      input.setAttribute("data-entry-index", String(index));
+      input.setAttribute("data-entry-field", "coverText");
+      input.addEventListener("input", ()=>{
+        wheelEntries[index].coverText = input.value;
+        saveDraft();
+      });
+      group.appendChild(input);
+    }
+
+    box.appendChild(group);
   }
 
   function renderWheelEntries(){
@@ -5367,6 +5557,8 @@
         saveDraft();
       });
       box.appendChild(remove);
+
+      addCoverFields(box, entry, index);
 
       if (wheelContentType === "text" || wheelContentType === "mixed") {
         const input = document.createElement("input");
@@ -5439,6 +5631,7 @@
     document.querySelectorAll(".wheel-type").forEach((btn)=>{
       btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
     });
+    applySetupMode();
   }
 
   function updateThemeSummary(){
@@ -5508,14 +5701,83 @@
     window.location.href = `${url.pathname}${url.search}`;
   }
 
+
+  function openOpenBoxPage(){
+    syncWheelEntriesFromDom();
+
+    const entries = getFilledEntries();
+    if (!entries.length) {
+      alert("يرجى ادخال عناصر الصندوق اولاً");
+      return;
+    }
+
+    saveDraft();
+
+    const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+
+    const payload = {
+      gameTemplate: "open-box",
+      type: wheelContentType,
+      contentType: wheelContentType,
+      theme: wheelTheme,
+      gameName: String(wheelGameNameInput?.value || "").trim(),
+      entries,
+      coverMode: boxCoverMode,
+      updatedAt: Date.now(),
+      payloadId
+    };
+
+    try {
+      Object.keys(sessionStorage).forEach((key)=>{
+        if (key.startsWith(`${OPEN_BOX_PAYLOAD_KEY}_`)) {
+          sessionStorage.removeItem(key);
+        }
+      });
+      sessionStorage.removeItem(OPEN_BOX_PAYLOAD_KEY);
+      sessionStorage.setItem(`${OPEN_BOX_PAYLOAD_KEY}_${payloadId}`, JSON.stringify(payload));
+      sessionStorage.setItem(OPEN_BOX_PAYLOAD_KEY, JSON.stringify(payload));
+      sessionStorage.setItem(OPEN_BOX_DRAFT_KEY, JSON.stringify(payload));
+      sessionStorage.setItem("sandooq_edu_box_theme_v1", wheelTheme || "classic");
+    } catch (_) {}
+
+    const url = new URL(OPEN_BOX_PAGE_URL, window.location.href);
+    url.searchParams.set("payloadId", payloadId);
+    url.searchParams.set("theme", wheelTheme || "classic");
+    url.searchParams.set("v", String(Date.now()));
+
+    window.location.href = `${url.pathname}${url.search}`;
+  }
+
+  function openCurrentGamePage(){
+    if (currentGameTemplate === "open-box") {
+      openOpenBoxPage();
+      return;
+    }
+    openWheelPage();
+  }
+
   document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
     btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
   });
 
   document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
     btn.addEventListener("click", ()=> {
+      currentGameTemplate = "wheel";
+      applySetupMode();
       openScreen("wheelSetupScreen");
       renderWheelEntries();
+      saveDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-template='open-box']").forEach((btn)=>{
+    btn.addEventListener("click", ()=> {
+      currentGameTemplate = "open-box";
+      if (boxCoverMode !== "image" && boxCoverMode !== "text") boxCoverMode = "disabled";
+      applySetupMode();
+      openScreen("wheelSetupScreen");
+      renderWheelEntries();
+      saveDraft();
     });
   });
 
@@ -5526,7 +5788,10 @@
       wheelEntries = wheelEntries.map((entry)=>({
         text: wheelContentType === "images" ? "" : (entry.text || ""),
         imageName: wheelContentType === "text" ? "" : (entry.imageName || ""),
-        imageData: wheelContentType === "text" ? "" : (entry.imageData || "")
+        imageData: wheelContentType === "text" ? "" : (entry.imageData || ""),
+        coverText: entry.coverText || "",
+        coverImageName: entry.coverImageName || "",
+        coverImageData: entry.coverImageData || ""
       }));
       renderWheelEntries();
       saveDraft();
@@ -5569,8 +5834,26 @@
       document.querySelectorAll("[data-question-toggle]").forEach((item)=> item.classList.remove("active"));
       btn.classList.add("active");
 
+      if (currentGameTemplate === "open-box") {
+        boxCoverMode = enabled ? (boxCoverMode === "image" ? "image" : "text") : "disabled";
+        applySetupMode();
+        renderWheelEntries();
+        saveDraft();
+        return;
+      }
+
       questionPanel?.classList.toggle("enabled", enabled);
       if (enabled) centerQuestionInput?.focus();
+      saveDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-cover-type]").forEach((btn)=>{
+    btn.addEventListener("click", ()=>{
+      if (currentGameTemplate !== "open-box") return;
+      boxCoverMode = btn.getAttribute("data-cover-type") === "image" ? "image" : "text";
+      applySetupMode();
+      renderWheelEntries();
       saveDraft();
     });
   });
@@ -5578,8 +5861,8 @@
   centerQuestionInput?.addEventListener("input", saveDraft);
   wheelGameNameInput?.addEventListener("input", saveDraft);
 
-  document.getElementById("testWheelBtn")?.addEventListener("click", openWheelPage);
-  document.querySelector(".start-btn")?.addEventListener("click", openWheelPage);
+  document.getElementById("testWheelBtn")?.addEventListener("click", openCurrentGamePage);
+  document.querySelector(".start-btn")?.addEventListener("click", openCurrentGamePage);
 
   document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
     saveDraft();
@@ -5600,6 +5883,7 @@
   });
 
   if (!loadDraft()) {
+    applySetupMode();
     renderWheelEntries();
   }
 
