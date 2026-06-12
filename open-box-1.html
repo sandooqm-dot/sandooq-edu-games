@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v35-video-lid-motion -->
+  <!-- version: open-box-v36-revert-to-v34-adopted -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -437,10 +437,10 @@
 
 
 
-    /* v35:
-       - تغيير حركة رفع الغطاء فقط لتطابق حركة الفيديو المرفق.
-       - الغطاء يرتفع للأعلى أثناء انكماش الجزء السفلي بسلاسة.
-       - لا تغيير على شكل الصندوق أو النصوص أو الألوان.
+    /* v34:
+       - إزالة الدوائر/البقع الشفافة من الغطاء بالكامل.
+       - إزالة اللمعة البيضاوية من الصناديق المغلقة والغطاء المتحرك.
+       - الإبقاء على حركة الغطاء والغطاء العلوي الثابت كما في الإصدار السابق.
     */
     .box-card{
       --asset-tint:#a8c474;
@@ -538,24 +538,19 @@
         transform:translateY(0) scale(1);
         clip-path:inset(0 0 0 0 round 0);
       }
-      42%{
+      84%{
         opacity:1;
-        transform:translateY(-14%) scale(1);
-        clip-path:inset(0 0 42% 0 round 0);
+        transform:translateY(-2.2%) scale(1);
+        clip-path:inset(0 0 91.1% 0 round 0);
       }
-      74%{
-        opacity:1;
-        transform:translateY(-25%) scale(1);
-        clip-path:inset(0 0 76% 0 round 0);
-      }
-      94%{
-        opacity:1;
-        transform:translateY(-30%) scale(1);
+      84.1%{
+        opacity:0;
+        transform:translateY(-2.2%) scale(1);
         clip-path:inset(0 0 91.1% 0 round 0);
       }
       100%{
         opacity:0;
-        transform:translateY(-30%) scale(1);
+        transform:translateY(-2.2%) scale(1);
         clip-path:inset(0 0 91.1% 0 round 0);
       }
     }
@@ -574,7 +569,7 @@
         0 1px 2px rgba(0,0,0,.04);
       pointer-events:none;
       overflow:hidden;
-      animation:assetMovingCover .76s cubic-bezier(.18,.82,.22,1) both;
+      animation:assetMovingCover 1.32s linear both;
       will-change:transform, clip-path, opacity;
     }
 
