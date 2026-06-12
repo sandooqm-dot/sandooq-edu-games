@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v10-wordwall-style -->
+  <!-- version: open-box-v11-rebuilt-box-shape -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -184,39 +184,62 @@
       padding:0;
       margin:0;
       cursor:pointer;
-      perspective:1200px;
       touch-action:manipulation;
       appearance:none;
       -webkit-appearance:none;
     }
 
+    /*
+      open-box-v11:
+      إعادة بناء كاملة للشكل، بدون الاعتماد على فكرة الصندوق القديمة.
+      الحالة المغلقة: مربع بسيط مع قلب ورقم.
+      الحالة المفتوحة: صندوق مفتوح فعليًا بشكل قريب من التصميم المرجعي.
+    */
     .box-shell{
       display:block;
       position:relative;
       width:100%;
       height:100%;
-      transform-style:preserve-3d;
-      filter:drop-shadow(0 8px 13px rgba(0,0,0,.10));
       overflow:visible;
+      filter:drop-shadow(0 7px 10px rgba(0,0,0,.12));
+      transform:translateZ(0);
     }
 
     .box-base{
       position:absolute;
-      left:2.5%;
-      right:2.5%;
-      top:17%;
-      bottom:2.5%;
-      z-index:1;
-      border-radius:1px 1px 8px 8px;
+      left:0;
+      right:0;
+      top:15.5%;
+      bottom:0;
+      z-index:2;
+      opacity:0;
+      transform:translateY(8%) scale(.96);
+      border-radius:0 0 3.8% 3.8%;
+      border:clamp(1.8px, .32vw, 3px) solid rgba(255,255,255,.95);
+      border-top:0;
       background:
-        linear-gradient(90deg, rgba(0,0,0,.24), rgba(255,255,255,.06) 13%, rgba(255,255,255,.04) 87%, rgba(0,0,0,.22)),
-        radial-gradient(circle at 50% 45%, var(--box-color) 0%, var(--box-dark) 100%);
-      border:2px solid rgba(255,255,255,.96);
+        linear-gradient(90deg,
+          rgba(0,0,0,.24) 0%,
+          rgba(255,255,255,.04) 12%,
+          rgba(255,255,255,.03) 88%,
+          rgba(0,0,0,.22) 100%),
+        radial-gradient(circle at 50% 48%,
+          var(--box-color) 0%,
+          color-mix(in srgb, var(--box-color) 78%, #000 22%) 58%,
+          var(--box-dark) 100%);
       box-shadow:
-        inset 0 18px 21px rgba(0,0,0,.22),
-        inset 0 -8px 12px rgba(0,0,0,.15),
-        0 7px 12px rgba(0,0,0,.08);
+        inset 0 18px 20px rgba(0,0,0,.24),
+        inset 0 -9px 14px rgba(0,0,0,.16),
+        0 5px 10px rgba(0,0,0,.09);
       overflow:hidden;
+      transition:
+        opacity .24s ease .34s,
+        transform .48s cubic-bezier(.18,.78,.18,1) .34s;
+    }
+
+    .box-card.opened .box-base{
+      opacity:1;
+      transform:translateY(0) scale(1);
     }
 
     .box-base::before{
@@ -224,50 +247,58 @@
       position:absolute;
       left:7%;
       right:7%;
-      top:12%;
+      top:9%;
       bottom:8%;
-      border-radius:5px;
+      border-radius:3.5%;
       background:
-        linear-gradient(90deg, rgba(0,0,0,.30), transparent 13%, transparent 87%, rgba(0,0,0,.28)),
-        linear-gradient(180deg, rgba(0,0,0,.18), transparent 20%, rgba(0,0,0,.10) 100%),
-        radial-gradient(circle at 50% 50%, var(--box-color) 0%, var(--box-dark) 100%);
+        linear-gradient(90deg,
+          rgba(0,0,0,.34) 0%,
+          transparent 14%,
+          transparent 86%,
+          rgba(0,0,0,.30) 100%),
+        linear-gradient(180deg,
+          rgba(0,0,0,.18) 0%,
+          transparent 24%,
+          rgba(0,0,0,.11) 100%),
+        radial-gradient(circle at 50% 46%,
+          color-mix(in srgb, var(--box-color) 92%, #fff 8%) 0%,
+          var(--box-color) 48%,
+          var(--box-dark) 100%);
       box-shadow:
-        inset 0 19px 25px rgba(0,0,0,.35),
-        inset 12px 0 22px rgba(0,0,0,.24),
-        inset -12px 0 22px rgba(255,255,255,.04),
+        inset 0 18px 24px rgba(0,0,0,.36),
+        inset 12px 0 20px rgba(0,0,0,.26),
+        inset -12px 0 20px rgba(255,255,255,.045),
         inset 0 -13px 17px rgba(0,0,0,.18);
-      opacity:.985;
+      opacity:.99;
     }
 
     .box-base::after{
       content:"";
       position:absolute;
-      left:4%;
-      right:4%;
-      bottom:1.5%;
+      left:0;
+      right:0;
+      top:0;
       height:1px;
-      border-radius:999px;
-      background:rgba(255,255,255,.22);
+      background:rgba(255,255,255,.92);
+      box-shadow:0 1px 0 rgba(0,0,0,.12);
       pointer-events:none;
-    }
-
-    .box-hinge{
-      display:none;
     }
 
     .box-content{
       position:absolute;
       left:10%;
       right:10%;
-      top:28%;
-      bottom:10%;
+      top:25%;
+      bottom:9%;
       z-index:4;
       display:flex;
       align-items:center;
       justify-content:center;
       opacity:0;
-      transform:translateY(8px) scale(.94);
-      transition:opacity .36s ease .55s, transform .46s ease .55s;
+      transform:translateY(10px) scale(.94);
+      transition:
+        opacity .34s ease .64s,
+        transform .46s cubic-bezier(.18,.78,.18,1) .64s;
       direction:rtl;
       text-align:center;
       pointer-events:none;
@@ -280,141 +311,147 @@
 
     .box-lid{
       position:absolute;
-      left:3.5%;
-      right:3.5%;
-      top:5%;
-      height:88%;
+      left:0;
+      right:0;
+      top:0;
+      height:100%;
       z-index:10;
-      border-radius:12px;
+      border-radius:2.2%;
       border:0;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.07) 21%, transparent 42%),
-        linear-gradient(180deg, var(--box-light) 0%, var(--box-color) 55%, var(--box-dark) 100%);
+        linear-gradient(180deg,
+          rgba(255,255,255,.18) 0%,
+          rgba(255,255,255,.05) 24%,
+          transparent 44%),
+        linear-gradient(180deg,
+          var(--box-light) 0%,
+          var(--box-color) 55%,
+          var(--box-dark) 100%);
       box-shadow:
-        inset 0 -5px 0 rgba(0,0,0,.13),
+        inset 0 -5px 0 rgba(0,0,0,.14),
         inset 0 5px 0 rgba(255,255,255,.16),
-        0 6px 12px rgba(0,0,0,.08);
+        0 5px 9px rgba(0,0,0,.10);
       display:flex;
       align-items:center;
       justify-content:center;
-      transform-origin:50% 0%;
-      transform:translateY(0) translateZ(2px);
+      overflow:hidden;
+      transform:translateZ(2px);
       transition:
-        top 1.28s cubic-bezier(.14,.78,.12,1),
-        height 1.28s cubic-bezier(.14,.78,.12,1),
-        left 1.28s cubic-bezier(.14,.78,.12,1),
-        right 1.28s cubic-bezier(.14,.78,.12,1),
-        border-radius 1.05s ease,
-        transform 1.28s cubic-bezier(.14,.78,.12,1),
-        filter 1.05s ease,
-        box-shadow 1.05s ease;
-      backface-visibility:visible;
-      -webkit-backface-visibility:visible;
-      transform-style:preserve-3d;
-      overflow:visible;
-      will-change:top, height, transform;
+        top 1.08s cubic-bezier(.16,.78,.14,1),
+        height 1.08s cubic-bezier(.16,.78,.14,1),
+        border-radius .88s ease,
+        box-shadow .88s ease,
+        filter .88s ease;
+      will-change:top, height;
     }
 
     .box-card.opened .box-lid{
-      /*
-        open-box-v10:
-        شكل Wordwall المرجعي: شريط علوي مستطيل ممتد، قريب من جسم الصندوق،
-        لا رقم ظاهر بعد الفتح، فقط لمعة/فتحة صغيرة في منتصف الغطاء.
-      */
-      left:0%;
-      right:0%;
-      top:4.5%;
+      top:0;
       height:15.5%;
-      transform:translateY(0) translateZ(16px);
       border-radius:0;
       filter:brightness(1.035);
       box-shadow:
-        inset 0 -3px 0 rgba(0,0,0,.18),
-        inset 0 3px 0 rgba(255,255,255,.16),
-        0 5px 8px rgba(0,0,0,.09);
+        inset 0 -3px 0 rgba(0,0,0,.20),
+        inset 0 3px 0 rgba(255,255,255,.17),
+        0 5px 8px rgba(0,0,0,.10);
     }
 
+    /* القلب في الحالة المغلقة */
     .box-lid::before{
-      content:"";
+      content:"♥";
       position:absolute;
-      left:10%;
-      right:10%;
-      top:8%;
-      height:9%;
-      border-radius:999px;
-      background:rgba(255,255,255,.14);
-      box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:rgba(91, 0, 28, .20);
+      font-family:Georgia, "Times New Roman", serif;
+      font-size:calc(var(--box-size) * .66);
+      font-weight:900;
+      line-height:1;
+      transform:translateY(3%);
       pointer-events:none;
-      transition:all 1.05s ease;
+      transition:
+        opacity .20s ease,
+        transform .26s ease;
     }
 
     .box-card.opened .box-lid::before{
+      content:"";
       left:11%;
       right:11%;
-      top:32%;
+      top:33%;
+      bottom:auto;
       height:22%;
       border-radius:999px;
       background:
-        linear-gradient(90deg, transparent 0 43%, rgba(255,255,255,.92) 48% 55%, transparent 60% 100%),
-        rgba(0,0,0,.20);
+        linear-gradient(90deg,
+          transparent 0 43%,
+          rgba(255,255,255,.93) 48% 55%,
+          transparent 60% 100%),
+        rgba(0,0,0,.22);
       box-shadow:
-        inset 0 2px 3px rgba(0,0,0,.18),
+        inset 0 2px 3px rgba(0,0,0,.20),
         0 1px 0 rgba(255,255,255,.12);
-      opacity:.72;
+      opacity:.78;
+      transform:none;
+      display:block;
+      font-size:0;
     }
 
     .box-lid::after{
       content:"";
       position:absolute;
-      left:0;
-      right:0;
-      bottom:-2px;
-      height:2px;
-      background:rgba(255,255,255,.88);
-      box-shadow:0 1px 0 rgba(0,0,0,.08);
+      left:9%;
+      right:9%;
+      top:7%;
+      height:8%;
+      border-radius:999px;
+      background:rgba(255,255,255,.16);
+      box-shadow:inset 0 -2px 0 rgba(0,0,0,.07);
       pointer-events:none;
-      opacity:0;
-      transition:opacity 1.05s ease;
+      transition:
+        left .85s ease,
+        right .85s ease,
+        top .85s ease,
+        height .85s ease,
+        background .85s ease,
+        opacity .85s ease;
     }
 
     .box-card.opened .box-lid::after{
+      left:0;
+      right:0;
+      top:auto;
+      bottom:-2px;
+      height:2px;
+      border-radius:0;
+      background:rgba(255,255,255,.90);
+      box-shadow:0 1px 0 rgba(0,0,0,.10);
       opacity:.95;
-    }
-
-    .box-front-lip{
-      display:none;
-    }
-
-    .box-card.opened .box-front-lip{
-      display:none;
-    }
-
-
-    .box-card.opened .box-base{
-      box-shadow:
-        inset 0 12px 18px rgba(0,0,0,.20),
-        inset 0 -6px 8px rgba(0,0,0,.12),
-        0 8px 13px rgba(0,0,0,.08);
-    }
-
-    .box-card.opened .box-hinge{
-      filter:brightness(1.06);
     }
 
     .box-number{
       position:relative;
       z-index:2;
       color:#fff;
-      text-shadow:0 2px 5px rgba(0,0,0,.28);
-      font-size:clamp(24px, calc(var(--box-size) * .34), 64px);
+      text-shadow:0 2px 5px rgba(0,0,0,.30);
+      font-size:clamp(24px, calc(var(--box-size) * .36), 64px);
       font-weight:900;
       line-height:1;
-      transition:opacity .18s ease, transform .22s ease;
+      transition:
+        opacity .18s ease,
+        transform .22s ease;
     }
 
     .box-card.opened .box-number{
       opacity:0;
-      transform:translateY(-4px) scale(.65);
+      transform:translateY(-5px) scale(.6);
+    }
+
+    .box-hinge,
+    .box-front-lip{
+      display:none;
     }
 
     .result-text{
@@ -426,10 +463,10 @@
       text-align:center;
       color:#fff;
       font-size:clamp(19px, calc(var(--box-size) * .27), 46px);
-      line-height:1.18;
+      line-height:1.12;
       font-weight:900;
       overflow-wrap:anywhere;
-      text-shadow:0 2px 5px rgba(0,0,0,.32);
+      text-shadow:0 2px 5px rgba(0,0,0,.34);
     }
 
     .result-image{
@@ -447,7 +484,7 @@
       height:100%;
       display:grid;
       grid-template-rows:minmax(0, 1fr) auto;
-      gap:6px;
+      gap:5px;
       align-items:center;
       justify-items:center;
     }
@@ -461,7 +498,7 @@
       height:auto;
       min-height:1.1em;
       font-size:clamp(12px, calc(var(--box-size) * .145), 25px);
-      line-height:1.12;
+      line-height:1.1;
     }
 
     .fixed-controls{
