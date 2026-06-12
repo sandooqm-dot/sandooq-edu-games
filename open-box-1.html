@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v31-fixed-lid-plus-moving-cover -->
+  <!-- version: open-box-v32-smooth-continuous-cover -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -462,11 +462,11 @@
 
 
 
-    /* v31:
-       - رجعنا الغطاء العلوي الثابت كطبقة مستقلة فوق الصندوق المفتوح.
-       - أضفنا غطاء متحرك مؤقت: يبدأ كاملًا، ثم يختفي الجزء السفلي تدريجيًا.
-       - عند وصول الغطاء المتحرك لمكان الغطاء الثابت يختفي، ويبقى الغطاء الثابت كما هو.
-       - الحركة أبطأ وسلسة، مع الإبقاء على مطابقة الألوان وضبط المحتوى الذكي.
+    /* v32:
+       - الغطاء العلوي الثابت كما هو.
+       - الغطاء المتحرك المؤقت صار بحركة واحدة مستمرة بدون توقفات بينية.
+       - أزلنا keyframes المتعددة التي كانت تسبب الإحساس بالتقطيع.
+       - الحركة أبطأ قليلًا وسلسة، مع الإبقاء على مطابقة الألوان وضبط المحتوى الذكي.
     */
     .box-card{
       --asset-tint:#a8c474;
@@ -564,24 +564,14 @@
         transform:translateY(0) scale(1);
         clip-path:inset(0 0 0 0 round clamp(11px, 11%, 20px));
       }
-      44%{
+      96%{
         opacity:1;
-        transform:translateY(-3%) scale(1);
-        clip-path:inset(0 0 42% 0 round 10px);
-      }
-      78%{
-        opacity:1;
-        transform:translateY(-1%) scale(1);
-        clip-path:inset(0 0 82% 0 round 4px);
-      }
-      92%{
-        opacity:1;
-        transform:translateY(0) scale(1);
+        transform:translateY(-2.5%) scale(1);
         clip-path:inset(0 0 91.1% 0 round 2px);
       }
       100%{
         opacity:0;
-        transform:translateY(0) scale(1);
+        transform:translateY(-2.5%) scale(1);
         clip-path:inset(0 0 91.1% 0 round 2px);
       }
     }
@@ -600,7 +590,7 @@
         0 1px 2px rgba(0,0,0,.05);
       pointer-events:none;
       overflow:hidden;
-      animation:assetMovingCover 1.62s cubic-bezier(.20,.82,.18,1) both;
+      animation:assetMovingCover 1.86s linear both;
       will-change:transform, clip-path, opacity;
     }
 
