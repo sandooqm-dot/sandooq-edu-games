@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v26-asset-based-lid -->
+  <!-- version: open-box-v27-smart-content-fit -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -461,7 +461,13 @@
 
 
 
-    /* v26: صندوق مبني على صورة مرجعية فعلية، وليس رسم CSS للجوانب */
+    /* v27:
+       ضبط عرض المحتوى داخل الصندوق:
+       - النص القصير يبقى في المنتصف وبنفس حجمه الحالي.
+       - النص الطويل يتم تصغيره وتقسيمه على سطور ليستفيد من مساحة الصندوق.
+       - الصورة تستفيد من كامل مساحة الصندوق الداخلية بدون خروج.
+       - الصورة مع النص بتوزيع مشابه لمنطق العجلة: صورة كبيرة + نص مضبوط.
+    */
     .box-card{
       --asset-filter:none;
     }
@@ -590,6 +596,98 @@
     .box-card.opened .box-content{
       opacity:1;
       transform:translateY(0);
+    }
+
+
+    /* v27: مساحة محتوى كبيرة داخل جسم الصندوق مع هامش أمان للغطاء */
+    .box-content{
+      left:7.4% !important;
+      right:7.4% !important;
+      top:13.8% !important;
+      bottom:7.8% !important;
+      z-index:6 !important;
+      overflow:hidden !important;
+      padding:clamp(4px, calc(var(--tile-size) * .035), 8px) !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    .box-content.content-text{
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    .box-content.content-image,
+    .box-content.content-mixed{
+      align-items:stretch !important;
+      justify-content:stretch !important;
+    }
+
+    .result-text{
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      text-align:center !important;
+      color:#fff !important;
+      font-size:clamp(12px, calc(var(--tile-size) * .18), 32px) !important;
+      line-height:1.08 !important;
+      font-weight:900 !important;
+      overflow:hidden !important;
+      overflow-wrap:anywhere !important;
+      word-break:normal !important;
+      white-space:normal !important;
+      text-shadow:0 2px 5px rgba(0,0,0,.24) !important;
+      padding:0 !important;
+    }
+
+    .result-text.fit-long-text{
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    .result-image{
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      object-fit:contain !important;
+      display:block !important;
+      background:transparent !important;
+      filter:drop-shadow(0 2px 3px rgba(0,0,0,.14)) !important;
+    }
+
+    .result-mixed{
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      display:grid !important;
+      grid-template-rows:minmax(0, 1fr) auto !important;
+      gap:clamp(3px, calc(var(--tile-size) * .035), 7px) !important;
+      align-items:center !important;
+      justify-items:center !important;
+      overflow:hidden !important;
+    }
+
+    .result-mixed .result-image{
+      min-height:0 !important;
+      width:100% !important;
+      height:100% !important;
+      object-fit:contain !important;
+    }
+
+    .result-mixed .result-text{
+      height:auto !important;
+      min-height:1.08em !important;
+      max-height:35% !important;
+      font-size:clamp(10px, calc(var(--tile-size) * .13), 22px) !important;
+      line-height:1.05 !important;
+      padding:0 2% !important;
     }
 
     .fixed-controls{
@@ -920,8 +1018,9 @@
         leftWall.className = "wall wall-left";
 
         const content = document.createElement("span");
-        content.className = "box-content";
-        content.appendChild(createResultContent(entry));
+        const contentKind = getEntryKind(entry);
+        content.className = `box-content content-${contentKind}`;
+        content.appendChild(createResultContent(entry, contentKind));
 
         cavity.appendChild(back);
         cavity.appendChild(topWall);
@@ -948,11 +1047,22 @@
 
         grid.appendChild(button);
       });
+
+      requestAnimationFrame(fitAllBoxText);
     }
 
-    function createResultContent(entry){
+    function getEntryKind(entry){
       const hasImage = Boolean(entry.imageData || entry.imageName);
-      const hasText = Boolean(entry.text);
+      const hasText = Boolean(String(entry.text || "").trim());
+      if (hasImage && hasText) return "mixed";
+      if (hasImage) return "image";
+      return "text";
+    }
+
+    function createResultContent(entry, kind){
+      const hasImage = Boolean(entry.imageData || entry.imageName);
+      const cleanText = String(entry.text || "").trim();
+      const hasText = Boolean(cleanText);
 
       if (hasImage && hasText) {
         const wrap = document.createElement("span");
@@ -965,8 +1075,9 @@
         wrap.appendChild(img);
 
         const text = document.createElement("span");
-        text.className = "result-text";
-        text.textContent = entry.text;
+        text.className = "result-text fit-text";
+        text.dataset.fitText = "mixed";
+        text.textContent = cleanText;
         wrap.appendChild(text);
 
         return wrap;
@@ -981,9 +1092,54 @@
       }
 
       const text = document.createElement("span");
-      text.className = "result-text";
-      text.textContent = entry.text || "—";
+      const isShort = cleanText.length <= 12 && !cleanText.includes("\n");
+      text.className = isShort ? "result-text" : "result-text fit-text fit-long-text";
+      if (!isShort) text.dataset.fitText = "text";
+      text.textContent = cleanText || "—";
       return text;
+    }
+
+    function fitAllBoxText(){
+      document.querySelectorAll(".result-text.fit-text").forEach((el)=> fitTextInsideBox(el));
+    }
+
+    function fitTextInsideBox(el){
+      const box = el.closest(".box-content");
+      if (!box) return;
+
+      const boxRect = box.getBoundingClientRect();
+      if (!boxRect.width || !boxRect.height) return;
+
+      const mode = el.dataset.fitText || "text";
+      const tile = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tile-size")) || boxRect.width;
+      const maxFont = mode === "mixed"
+        ? Math.min(tile * .15, boxRect.width * .16, 23)
+        : Math.min(tile * .32, boxRect.width * .24, boxRect.height * .34, 48);
+      const minFont = Math.max(9, Math.min(tile * .075, 13));
+
+      el.style.fontSize = `${maxFont}px`;
+      el.style.lineHeight = mode === "mixed" ? "1.05" : "1.08";
+
+      let low = minFont;
+      let high = maxFont;
+      let best = minFont;
+
+      for (let i = 0; i < 14; i += 1) {
+        const mid = (low + high) / 2;
+        el.style.fontSize = `${mid}px`;
+
+        const fitsWidth = el.scrollWidth <= el.clientWidth + 1;
+        const fitsHeight = el.scrollHeight <= el.clientHeight + 1;
+
+        if (fitsWidth && fitsHeight) {
+          best = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+
+      el.style.fontSize = `${Math.floor(best * 10) / 10}px`;
     }
 
     function openBox(button, index){
@@ -1014,9 +1170,15 @@
     resetBtn.addEventListener("click", resetBoxes);
     backBtn.addEventListener("click", goBack);
 
-    window.addEventListener("resize", applyLayout, { passive:true });
+    window.addEventListener("resize", ()=>{
+      applyLayout();
+      requestAnimationFrame(fitAllBoxText);
+    }, { passive:true });
     window.addEventListener("orientationchange", ()=>{
-      window.setTimeout(applyLayout, 160);
+      window.setTimeout(()=>{
+        applyLayout();
+        fitAllBoxText();
+      }, 160);
     }, { passive:true });
 
     applyTheme(currentTheme);
