@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v12-gift-box-rebuild -->
+  <!-- version: open-box-v13-full-rebuild-from-video -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -190,182 +190,186 @@
     }
 
     /*
-      open-box-v12:
-      حذف تصميم الصناديق السابق بالكامل وإعادة بناء شكل Gift Box حسب التصميم المرفق.
-      المغلق: هدية مربعة بورق تغليف + شريط + رقم.
-      المفتوح: غطاء علوي من نفس ورق التغليف + صندوق داخلي مكشوف.
+      open-box-v13:
+      إعادة بناء فعلية من الصفر حسب تصميم Boxes.mp4.
+      لا يوجد box-base / box-lid / box-hinge / front-lip.
+      المكوّن الجديد:
+      gift-cover = الغلاف المغلق ويتحوّل إلى الغطاء العلوي.
+      gift-body  = جسم الصندوق المفتوح.
+      gift-content = النتيجة داخل الصندوق.
     */
-    .box-shell{
+    .gift-shell{
       display:block;
       position:relative;
       width:100%;
       height:100%;
       overflow:visible;
-      filter:drop-shadow(0 7px 8px rgba(0,0,0,.12));
+      filter:drop-shadow(0 5px 8px rgba(0,0,0,.16));
       transform:translateZ(0);
     }
 
     .box-card{
-      --paper-a:#2498d8;
-      --paper-b:#6fc8f4;
-      --paper-c:#2d6ed8;
-      --ribbon-a:#7551d8;
-      --ribbon-b:#5a37bf;
-      --inside-a:#eef8fb;
-      --inside-b:#96d6ca;
-      --inside-c:#7b5533;
+      --paper-a:#2aa2df;
+      --paper-b:#8ad7f7;
+      --paper-c:#0e67b2;
+      --ribbon-a:#7e59dd;
+      --ribbon-b:#6740c6;
+      --well-a:#baf2eb;
+      --well-b:#54b99e;
+      --well-c:#2e6e55;
+      --side-a:#875226;
+      --side-b:#4f2d14;
+      --stroke:#fff;
+      --ink-stroke:#1d1d1d;
     }
 
-    .box-card.pattern-blue{
-      --paper-a:#2397d4;
-      --paper-b:#78d0f8;
-      --paper-c:#1159ad;
-      --ribbon-a:#8358dc;
-      --ribbon-b:#6843c6;
-      --inside-a:#e9f8ff;
-      --inside-b:#9fd7e4;
-      --pattern-kind:blue;
+    .box-card.gift-blue{
+      --paper-a:#249bdb;
+      --paper-b:#8bdcf9;
+      --paper-c:#155fae;
+      --ribbon-a:#8057dc;
+      --ribbon-b:#6844c5;
+      --well-a:#d9fbff;
+      --well-b:#7fcad9;
+      --well-c:#326c7a;
     }
 
-    .box-card.pattern-green{
-      --paper-a:#25a96a;
-      --paper-b:#d5fff0;
-      --paper-c:#0d8c50;
-      --ribbon-a:#ff4f86;
-      --ribbon-b:#e7326e;
-      --inside-a:#effaf2;
-      --inside-b:#9cdac2;
-      --pattern-kind:green;
+    .box-card.gift-green{
+      --paper-a:#22a96c;
+      --paper-b:#f5fff3;
+      --paper-c:#0c814d;
+      --ribbon-a:#ff4b86;
+      --ribbon-b:#e63272;
+      --well-a:#e5fff0;
+      --well-b:#77d5a9;
+      --well-c:#315f47;
     }
 
-    .box-card.pattern-yellow{
-      --paper-a:#f0bb24;
-      --paper-b:#ffd84b;
-      --paper-c:#d98615;
-      --ribbon-a:#f47726;
-      --ribbon-b:#df5e13;
-      --inside-a:#fff6d2;
-      --inside-b:#e5c486;
-      --pattern-kind:yellow;
+    .box-card.gift-yellow{
+      --paper-a:#f1bd25;
+      --paper-b:#ffe35c;
+      --paper-c:#d48a13;
+      --ribbon-a:#f57628;
+      --ribbon-b:#e36015;
+      --well-a:#fff8ce;
+      --well-b:#d7b56a;
+      --well-c:#735115;
     }
 
-    .box-card.pattern-purple{
-      --paper-a:#6f35d5;
-      --paper-b:#8e56ff;
-      --paper-c:#5525b5;
-      --ribbon-a:#c8ae45;
-      --ribbon-b:#a88c2f;
-      --inside-a:#f0e8ff;
-      --inside-b:#c4aee8;
-      --pattern-kind:purple;
+    .box-card.gift-purple{
+      --paper-a:#7135d7;
+      --paper-b:#925cff;
+      --paper-c:#5127ac;
+      --ribbon-a:#c8ad45;
+      --ribbon-b:#aa9031;
+      --well-a:#efe3ff;
+      --well-b:#b396df;
+      --well-c:#5b428e;
     }
 
-    .box-card.pattern-red{
-      --paper-a:#eb2744;
-      --paper-b:#ff405d;
-      --paper-c:#bc1730;
-      --ribbon-a:#f3c634;
-      --ribbon-b:#d89a16;
-      --inside-a:#ffe8e5;
-      --inside-b:#d99b87;
-      --pattern-kind:red;
+    .box-card.gift-red{
+      --paper-a:#ee2546;
+      --paper-b:#ff4360;
+      --paper-c:#bb182e;
+      --ribbon-a:#f3d043;
+      --ribbon-b:#dfa516;
+      --well-a:#ffe4e3;
+      --well-b:#d8897d;
+      --well-c:#7a2d2c;
     }
 
-    .box-base{
+    .gift-body{
       position:absolute;
       left:0;
       right:0;
-      top:25.5%;
+      top:25%;
       bottom:0;
       z-index:2;
       opacity:0;
-      transform:translateY(5%) scale(.98);
-      border:clamp(1.8px, .32vw, 3px) solid rgba(255,255,255,.95);
-      border-top:0;
-      border-radius:0 0 2% 2%;
+      transform:translateY(-1%) scaleY(.92);
+      transform-origin:top center;
+      border:clamp(1.8px, .32vw, 3px) solid var(--stroke);
+      border-top:none;
+      border-radius:0 0 2px 2px;
       background:
         linear-gradient(90deg,
-          rgba(77,40,15,.80) 0%,
-          rgba(122,75,31,.75) 8%,
-          rgba(238,214,163,.80) 18%,
-          rgba(245,226,182,.75) 50%,
-          rgba(238,214,163,.80) 82%,
-          rgba(122,75,31,.75) 92%,
-          rgba(77,40,15,.80) 100%);
+          var(--side-b) 0%,
+          var(--side-a) 8%,
+          rgba(221,184,124,.88) 15%,
+          rgba(245,220,167,.78) 50%,
+          rgba(221,184,124,.88) 85%,
+          var(--side-a) 92%,
+          var(--side-b) 100%);
       box-shadow:
-        inset 0 18px 18px rgba(0,0,0,.25),
-        inset 0 -11px 12px rgba(92,45,16,.28),
-        0 5px 8px rgba(0,0,0,.10);
+        inset 0 13px 14px rgba(0,0,0,.26),
+        inset 0 -9px 10px rgba(70,34,10,.26),
+        0 4px 7px rgba(0,0,0,.11);
       overflow:hidden;
       transition:
         opacity .18s ease .20s,
-        transform .38s cubic-bezier(.18,.78,.18,1) .20s;
+        transform .36s cubic-bezier(.18,.78,.18,1) .20s;
     }
 
-    .box-card.opened .box-base{
+    .box-card.opened .gift-body{
       opacity:1;
-      transform:translateY(0) scale(1);
+      transform:translateY(0) scaleY(1);
     }
 
-    .box-base::before{
+    .gift-body::before{
       content:"";
       position:absolute;
-      left:8%;
-      right:8%;
+      left:7.4%;
+      right:7.4%;
       top:10%;
-      bottom:9%;
-      border-radius:1.5%;
+      bottom:8%;
+      border-radius:1px;
       background:
-        radial-gradient(circle at 52% 48%,
-          color-mix(in srgb, var(--inside-a) 70%, var(--paper-a) 30%) 0%,
-          color-mix(in srgb, var(--inside-b) 60%, var(--paper-a) 40%) 48%,
-          color-mix(in srgb, var(--paper-c) 82%, #000 18%) 100%);
+        radial-gradient(circle at 52% 46%, var(--well-a) 0%, var(--well-b) 44%, var(--well-c) 100%);
       box-shadow:
-        inset 0 19px 23px rgba(0,0,0,.34),
-        inset 14px 0 22px rgba(69,35,14,.42),
-        inset -14px 0 22px rgba(69,35,14,.34),
-        inset 0 -15px 18px rgba(68,34,12,.30);
-      opacity:.985;
+        inset 0 17px 21px rgba(0,0,0,.34),
+        inset 12px 0 20px rgba(74,35,12,.42),
+        inset -12px 0 20px rgba(74,35,12,.30),
+        inset 0 -13px 16px rgba(48,23,9,.24);
+      opacity:.99;
     }
 
-    .box-base::after{
+    .gift-body::after{
       content:"";
       position:absolute;
       left:0;
       right:0;
       top:0;
       height:2px;
-      background:rgba(255,255,255,.92);
-      box-shadow:0 1px 0 rgba(0,0,0,.14);
-      pointer-events:none;
+      background:rgba(255,255,255,.95);
+      box-shadow:0 1px 0 rgba(0,0,0,.12);
     }
 
-    .box-content{
+    .gift-content{
       position:absolute;
-      left:10%;
-      right:10%;
-      top:34%;
-      bottom:9%;
+      left:9.5%;
+      right:9.5%;
+      top:32%;
+      bottom:8.5%;
       z-index:5;
       display:flex;
       align-items:center;
       justify-content:center;
-      opacity:0;
-      transform:translateY(8px) scale(.94);
-      transition:
-        opacity .30s ease .42s,
-        transform .40s cubic-bezier(.18,.78,.18,1) .42s;
       direction:rtl;
       text-align:center;
       pointer-events:none;
+      opacity:0;
+      transform:translateY(7px) scale(.94);
+      transition:
+        opacity .28s ease .43s,
+        transform .38s cubic-bezier(.18,.78,.18,1) .43s;
     }
 
-    .box-card.opened .box-content{
+    .box-card.opened .gift-content{
       opacity:1;
       transform:translateY(0) scale(1);
     }
 
-    .box-lid{
+    .gift-cover{
       position:absolute;
       left:0;
       right:0;
@@ -373,103 +377,99 @@
       height:100%;
       z-index:10;
       overflow:hidden;
-      border:clamp(1.8px, .32vw, 3px) solid rgba(255,255,255,.95);
-      border-radius:1.5%;
+      border:clamp(1.8px, .32vw, 3px) solid var(--stroke);
+      border-radius:2px;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.12), transparent 42%),
-        var(--gift-pattern, linear-gradient(180deg, var(--paper-b), var(--paper-a) 55%, var(--paper-c)));
+        linear-gradient(180deg, rgba(255,255,255,.12), transparent 44%),
+        var(--gift-pattern, linear-gradient(180deg, var(--paper-b), var(--paper-a) 58%, var(--paper-c)));
       box-shadow:
-        inset 0 -4px 0 rgba(0,0,0,.12),
+        inset 0 -4px 0 rgba(0,0,0,.14),
         inset 0 4px 0 rgba(255,255,255,.14),
-        0 4px 8px rgba(0,0,0,.08);
+        0 4px 7px rgba(0,0,0,.10);
       display:flex;
       align-items:center;
       justify-content:center;
       transition:
-        top .64s cubic-bezier(.16,.78,.14,1),
-        height .64s cubic-bezier(.16,.78,.14,1),
-        border-radius .54s ease,
-        box-shadow .54s ease,
-        filter .54s ease;
-      will-change:height, top;
+        height .62s cubic-bezier(.16,.78,.14,1),
+        border-radius .48s ease,
+        box-shadow .48s ease,
+        filter .48s ease;
+      will-change:height;
     }
 
-    .box-card.pattern-blue .box-lid{
+    .box-card.opened .gift-cover{
+      height:25%;
+      border-radius:0;
+      filter:brightness(1.035);
+      box-shadow:
+        inset 0 -3px 0 rgba(0,0,0,.22),
+        inset 0 3px 0 rgba(255,255,255,.14),
+        0 4px 7px rgba(0,0,0,.13);
+    }
+
+    .box-card.gift-blue .gift-cover{
       --gift-pattern:
-        linear-gradient(90deg, transparent 0 27%, var(--ribbon-a) 28% 45%, transparent 46% 100%),
+        linear-gradient(90deg, transparent 0 27%, var(--ribbon-a) 28% 46%, transparent 47% 100%),
         linear-gradient(0deg, transparent 0 45%, var(--ribbon-b) 46% 62%, transparent 63% 100%),
         repeating-linear-gradient(45deg, var(--paper-a) 0 13px, var(--paper-b) 14px 25px);
     }
 
-    .box-card.pattern-green .box-lid{
+    .box-card.gift-green .gift-cover{
       --gift-pattern:
         linear-gradient(90deg, transparent 0 42%, var(--ribbon-a) 43% 58%, transparent 59% 100%),
         linear-gradient(0deg, transparent 0 43%, var(--ribbon-b) 44% 60%, transparent 61% 100%),
         repeating-linear-gradient(90deg, var(--paper-a) 0 9px, var(--paper-b) 10px 17px);
     }
 
-    .box-card.pattern-yellow .box-lid{
+    .box-card.gift-yellow .gift-cover{
       --gift-pattern:
-        linear-gradient(135deg, transparent 0 40%, var(--ribbon-a) 41% 52%, transparent 53% 100%),
-        radial-gradient(circle at 22% 24%, rgba(213,113,37,.55) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 72% 64%, rgba(213,113,37,.50) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 38% 76%, rgba(213,113,37,.42) 0 6%, transparent 6.5%),
-        linear-gradient(180deg, var(--paper-b), var(--paper-a));
+        linear-gradient(135deg, transparent 0 39%, var(--ribbon-a) 40% 51%, transparent 52% 100%),
+        radial-gradient(circle at 24% 25%, rgba(215,118,37,.58) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 72% 64%, rgba(215,118,37,.54) 0 7%, transparent 7.5%),
+        radial-gradient(circle at 38% 78%, rgba(215,118,37,.45) 0 6%, transparent 6.5%),
+        linear-gradient(180deg, var(--paper-b), var(--paper-a) 62%, var(--paper-c));
     }
 
-    .box-card.pattern-purple .box-lid{
+    .box-card.gift-purple .gift-cover{
       --gift-pattern:
         linear-gradient(135deg, transparent 0 41%, var(--ribbon-a) 42% 52%, transparent 53% 100%),
         linear-gradient(45deg, transparent 0 39%, var(--ribbon-b) 40% 48%, transparent 49% 100%),
-        repeating-radial-gradient(ellipse at 12% 30%, rgba(255,255,255,.08) 0 3px, transparent 4px 14px),
+        repeating-radial-gradient(ellipse at 18% 34%, rgba(255,255,255,.08) 0 3px, transparent 4px 15px),
         linear-gradient(180deg, var(--paper-b), var(--paper-a) 60%, var(--paper-c));
     }
 
-    .box-card.pattern-red .box-lid{
+    .box-card.gift-red .gift-cover{
       --gift-pattern:
-        linear-gradient(135deg, transparent 0 42%, var(--ribbon-a) 43% 53%, transparent 54% 100%),
+        linear-gradient(135deg, transparent 0 41%, var(--ribbon-a) 42% 52%, transparent 53% 100%),
         radial-gradient(circle at 25% 25%, rgba(244,178,43,.58) 0 7%, transparent 7.5%),
         radial-gradient(circle at 72% 62%, rgba(244,178,43,.55) 0 7%, transparent 7.5%),
-        radial-gradient(circle at 42% 78%, rgba(244,178,43,.44) 0 6%, transparent 6.5%),
-        linear-gradient(180deg, var(--paper-b), var(--paper-a) 60%, var(--paper-c));
+        radial-gradient(circle at 42% 78%, rgba(244,178,43,.45) 0 6%, transparent 6.5%),
+        linear-gradient(180deg, var(--paper-b), var(--paper-a) 62%, var(--paper-c));
     }
 
-    .box-card.opened .box-lid{
-      top:0;
-      height:25.5%;
-      border-radius:0;
-      filter:brightness(1.035);
-      box-shadow:
-        inset 0 -3px 0 rgba(0,0,0,.20),
-        inset 0 3px 0 rgba(255,255,255,.14),
-        0 5px 7px rgba(0,0,0,.12);
-    }
-
-    .box-lid::before,
-    .box-lid::after{
+    .gift-cover::before,
+    .gift-cover::after{
       content:"";
       position:absolute;
       pointer-events:none;
     }
 
-    /* حافة بيضاء خفيفة مثل التصميم المرفق */
-    .box-lid::before{
+    .gift-cover::before{
       left:0;
       right:0;
       bottom:-2px;
       height:2px;
-      background:rgba(255,255,255,.88);
-      box-shadow:0 1px 0 rgba(0,0,0,.12);
+      background:rgba(255,255,255,.92);
+      box-shadow:0 1px 0 rgba(0,0,0,.13);
       opacity:0;
-      transition:opacity .54s ease;
+      transition:opacity .48s ease;
     }
 
-    .box-card.opened .box-lid::before{
+    .box-card.opened .gift-cover::before{
       opacity:1;
     }
 
-    /* لمعة بسيطة أعلى التغليف */
-    .box-lid::after{
+    .gift-cover::after{
       left:10%;
       right:10%;
       top:7%;
@@ -480,15 +480,15 @@
       opacity:.75;
     }
 
-    .box-number{
+    .gift-number{
       position:relative;
-      z-index:2;
+      z-index:3;
       color:#fff;
-      -webkit-text-stroke:clamp(1.1px, .18vw, 2.2px) rgba(0,0,0,.76);
+      -webkit-text-stroke:clamp(1.1px, .18vw, 2.2px) var(--ink-stroke);
       paint-order:stroke fill;
       text-shadow:
-        0 2px 2px rgba(0,0,0,.45),
-        0 0 1px rgba(0,0,0,.75);
+        0 2px 2px rgba(0,0,0,.52),
+        0 0 1px rgba(0,0,0,.80);
       font-size:clamp(24px, calc(var(--box-size) * .34), 64px);
       font-weight:900;
       line-height:1;
@@ -496,17 +496,13 @@
       transform:rotate(-3deg);
       transition:
         opacity .14s ease,
-        transform .22s ease;
+        transform .18s ease,
+        font-size .34s ease;
     }
 
-    .box-card.opened .box-number{
+    .box-card.opened .gift-number{
       opacity:0;
-      transform:translateY(-5px) scale(.62) rotate(-3deg);
-    }
-
-    .box-hinge,
-    .box-front-lip{
-      display:none;
+      transform:translateY(-6px) scale(.58) rotate(-3deg);
     }
 
     .result-text{
@@ -517,13 +513,13 @@
       justify-content:center;
       text-align:center;
       color:#fff;
-      -webkit-text-stroke:clamp(.7px, .13vw, 1.7px) rgba(0,0,0,.36);
+      -webkit-text-stroke:clamp(.65px, .12vw, 1.6px) rgba(0,0,0,.38);
       paint-order:stroke fill;
       font-size:clamp(18px, calc(var(--box-size) * .22), 42px);
-      line-height:1.12;
+      line-height:1.08;
       font-weight:900;
       overflow-wrap:anywhere;
-      text-shadow:0 2px 5px rgba(0,0,0,.34);
+      text-shadow:0 2px 5px rgba(0,0,0,.35);
     }
 
     .result-image{
@@ -555,7 +551,7 @@
       height:auto;
       min-height:1.1em;
       font-size:clamp(11px, calc(var(--box-size) * .12), 22px);
-      line-height:1.1;
+      line-height:1.08;
     }
 
     .fixed-controls{
@@ -627,9 +623,9 @@
         padding:12px;
       }
 
-      .box-lid,
-      .box-base{
-        border-radius:12px;
+      .gift-cover,
+      .gift-body{
+        border-radius:2px;
       }
 
       .back-btn,
@@ -706,21 +702,6 @@
       { id:"flowers", label:"ازهار وورود" },
       { id:"national-day", label:"اليوم الوطني" },
       { id:"founding-day", label:"يوم التأسيس" }
-    ];
-
-    const BOX_COLORS = [
-      { c:"#1e9be0", l:"#33b4f4", d:"#0786c9", b:"#2ab5f5" },
-      { c:"#d71e3b", l:"#ea2a48", d:"#b9122d", b:"#f05268" },
-      { c:"#ff790b", l:"#ff8a1d", d:"#f15a00", b:"#ff9a35" },
-      { c:"#21864a", l:"#2b9b5a", d:"#14743b", b:"#35a965" },
-      { c:"#c84dd4", l:"#dc62e7", d:"#ad34bb", b:"#e878ee" },
-      { c:"#283bd4", l:"#394ce6", d:"#1d27bd", b:"#5264ff" },
-      { c:"#44bf8f", l:"#58d4a5", d:"#2ea978", b:"#6be0b4" },
-      { c:"#ef310b", l:"#ff4218", d:"#d61d00", b:"#ff6842" },
-      { c:"#f0b429", l:"#ffd05b", d:"#d89812", b:"#ffde82" },
-      { c:"#7357d6", l:"#8a70ee", d:"#5c42bd", b:"#a491ff" },
-      { c:"#0097a7", l:"#16b5c6", d:"#007c88", b:"#31cbd8" },
-      { c:"#f06292", l:"#ff7baa", d:"#dd3d77", b:"#ff99bf" }
     ];
 
     const page = document.getElementById("boxPage");
@@ -879,47 +860,35 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "box-card";
-        const patternClasses = ["pattern-blue", "pattern-green", "pattern-yellow", "pattern-purple", "pattern-red"];
-        button.classList.add(patternClasses[index % patternClasses.length]);
+
+        const giftClasses = ["gift-blue", "gift-green", "gift-yellow", "gift-purple", "gift-red"];
+        button.classList.add(giftClasses[index % giftClasses.length]);
+
         button.setAttribute("aria-label", `صندوق رقم ${index + 1}`);
         button.setAttribute("aria-pressed", "false");
         button.dataset.index = String(index);
 
-        const color = BOX_COLORS[index % BOX_COLORS.length];
-        button.style.setProperty("--box-color", color.c);
-        button.style.setProperty("--box-light", color.l);
-        button.style.setProperty("--box-dark", color.d);
-        button.style.setProperty("--box-border", color.b);
-
         const shell = document.createElement("span");
-        shell.className = "box-shell";
+        shell.className = "gift-shell";
 
-        const base = document.createElement("span");
-        base.className = "box-base";
+        const body = document.createElement("span");
+        body.className = "gift-body";
 
         const content = document.createElement("span");
-        content.className = "box-content";
+        content.className = "gift-content";
         content.appendChild(createResultContent(entry));
 
-        const lid = document.createElement("span");
-        lid.className = "box-lid";
+        const cover = document.createElement("span");
+        cover.className = "gift-cover";
 
         const number = document.createElement("span");
-        number.className = "box-number";
+        number.className = "gift-number";
         number.textContent = String(index + 1);
 
-        const hinge = document.createElement("span");
-        hinge.className = "box-hinge";
-
-        const frontLip = document.createElement("span");
-        frontLip.className = "box-front-lip";
-
-        lid.appendChild(number);
-        shell.appendChild(base);
+        cover.appendChild(number);
+        shell.appendChild(body);
         shell.appendChild(content);
-        shell.appendChild(lid);
-        shell.appendChild(hinge);
-        shell.appendChild(frontLip);
+        shell.appendChild(cover);
         button.appendChild(shell);
 
         button.addEventListener("click", ()=>{
