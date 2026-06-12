@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v16-flat-to-box-rebuild -->
+  <!-- version: open-box-v17-real-cavity-box -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -117,22 +117,27 @@
     }
 
     /*
-      open-box-v16
-      إعادة بناء كاملة للصندوق حسب المرجع الجديد:
-      - الوضع المغلق: بطاقة مربعة مستديرة بلون واحد ورقم أبيض كبير.
-      - الوضع المفتوح: صندوق داخلي ثلاثي الأبعاد بنفس اللون، مع غطاء يفتح للأعلى.
-      - لا نحتفظ بأي هيكل من تصميمات الهدايا/الصناديق القديمة.
+      open-box-v17:
+      بناء صندوق مجسم حقيقي حسب تصميم المستخدم.
+      ليس إطارًا حول مربع:
+      - back-face مستقل.
+      - top wall مستقل.
+      - bottom wall مستقل.
+      - left wall مستقل.
+      - right wall مستقل.
+      - الغطاء/اللوح الأمامي يتحول إلى غطاء علوي.
     */
     .box-card{
-      --panel:#e03a64;
-      --panel-light:#ef6e8d;
+      --panel:#df3a64;
+      --panel-light:#f06f8e;
       --panel-dark:#b91f49;
-      --frame:#c53a5b;
-      --frame-light:#de5f80;
-      --frame-dark:#98213e;
-      --cavity:#921f3a;
-      --cavity-light:#af3551;
-      --cavity-dark:#7f1730;
+
+      --top-wall:#e56d8f;
+      --left-wall:#bd294c;
+      --right-wall:#a91f42;
+      --bottom-wall:#ba2b4c;
+      --back-face:#941d3b;
+
       --shadow:rgba(0,0,0,.14);
 
       display:block;
@@ -150,44 +155,43 @@
     }
 
     .box-pink{
-      --panel:#de3762; --panel-light:#ef6e8d; --panel-dark:#bb244c;
-      --frame:#c33359; --frame-light:#da587b; --frame-dark:#9e2144;
-      --cavity:#931f3b; --cavity-light:#af3654; --cavity-dark:#7c1730;
+      --panel:#df3a64; --panel-light:#f06f8e; --panel-dark:#b91f49;
+      --top-wall:#e97996; --left-wall:#bf2b4e; --right-wall:#a82042; --bottom-wall:#bd2b4d; --back-face:#941d3b;
     }
+
     .box-lime{
-      --panel:#a9c476; --panel-light:#bfd98e; --panel-dark:#87a75b;
-      --frame:#9ebd68; --frame-light:#b7d981; --frame-dark:#7e9d49;
-      --cavity:#5a973f; --cavity-light:#74ac56; --cavity-dark:#488133;
+      --panel:#a8c474; --panel-light:#c7df93; --panel-dark:#86a55a;
+      --top-wall:#c9df93; --left-wall:#93b568; --right-wall:#7fa050; --bottom-wall:#96b868; --back-face:#4d8d3b;
     }
+
     .box-blue{
-      --panel:#5ba6de; --panel-light:#88c2ed; --panel-dark:#3d82c0;
-      --frame:#4d98d1; --frame-light:#7db8e7; --frame-dark:#367bb6;
-      --cavity:#3d7bb0; --cavity-light:#5895ca; --cavity-dark:#2d6391;
+      --panel:#5aa5dd; --panel-light:#8bc5ee; --panel-dark:#3d82bf;
+      --top-wall:#8bc5ee; --left-wall:#4e92cd; --right-wall:#3b7ab2; --bottom-wall:#4d91ca; --back-face:#3c7eb2;
     }
+
     .box-green{
-      --panel:#63b56b; --panel-light:#86cb8d; --panel-dark:#46954f;
-      --frame:#56aa5e; --frame-light:#79c080; --frame-dark:#3c8744;
-      --cavity:#3b7c40; --cavity-light:#57985c; --cavity-dark:#2e6233;
+      --panel:#62b66c; --panel-light:#86cd8e; --panel-dark:#43934b;
+      --top-wall:#86cd8e; --left-wall:#58aa60; --right-wall:#408844; --bottom-wall:#58a85f; --back-face:#3e813f;
     }
+
     .box-orange{
-      --panel:#e79b4d; --panel-light:#f2ba78; --panel-dark:#ca7f33;
-      --frame:#d98d40; --frame-light:#efac64; --frame-dark:#bb722c;
-      --cavity:#a0702c; --cavity-light:#bd8a46; --cavity-dark:#865a1f;
+      --panel:#e79b4e; --panel-light:#f2bc7d; --panel-dark:#c77b2f;
+      --top-wall:#f2bc7d; --left-wall:#d88d43; --right-wall:#b96e2a; --bottom-wall:#d68b40; --back-face:#9e6d2a;
     }
+
     .box-purple{
-      --panel:#8d70d9; --panel-light:#a892eb; --panel-dark:#6e52b8;
-      --frame:#8063d0; --frame-light:#9a84e5; --frame-dark:#6549ae;
-      --cavity:#6b57a6; --cavity-light:#8873c3; --cavity-dark:#56428a;
+      --panel:#8d70da; --panel-light:#ac94ef; --panel-dark:#6d50b8;
+      --top-wall:#ac94ef; --left-wall:#8064cf; --right-wall:#6648ad; --bottom-wall:#8063ce; --back-face:#6b58a4;
     }
+
     .box-red{
-      --panel:#dc4c60; --panel-light:#ef7786; --panel-dark:#bc3146;
-      --frame:#cd3d52; --frame-light:#e06474; --frame-dark:#ac2438;
-      --cavity:#8e2d39; --cavity-light:#ab4854; --cavity-dark:#75202d;
+      --panel:#dc4d61; --panel-light:#ef7888; --panel-dark:#bc3146;
+      --top-wall:#ef7888; --left-wall:#cd3f52; --right-wall:#ab2538; --bottom-wall:#cb3d50; --back-face:#8c2c39;
     }
+
     .box-teal{
-      --panel:#61b8a7; --panel-light:#86d1c3; --panel-dark:#439788;
-      --frame:#52ab9a; --frame-light:#74c5b5; --frame-dark:#398475;
-      --cavity:#3f7d73; --cavity-light:#58978c; --cavity-dark:#31625a;
+      --panel:#60b7a6; --panel-light:#87d3c4; --panel-dark:#429686;
+      --top-wall:#87d3c4; --left-wall:#53aa9a; --right-wall:#398273; --bottom-wall:#52a998; --back-face:#3e7f73;
     }
 
     .box-wrap{
@@ -200,85 +204,104 @@
       transform:translateZ(0);
     }
 
-    .box-shell,
-    .closed-panel{
+    .cavity-box,
+    .front-panel{
       position:absolute;
       inset:0;
     }
 
-    .box-shell{
+    .cavity-box{
       opacity:0;
       transform:scale(.96);
-      transition:opacity .28s ease, transform .9s cubic-bezier(.19,.82,.18,1);
+      transition:opacity .25s ease, transform .72s cubic-bezier(.18,.82,.18,1);
       pointer-events:none;
     }
 
-    .box-card.opened .box-shell{
+    .box-card.opened .cavity-box{
       opacity:1;
       transform:scale(1);
     }
 
-    .box-frame{
+    .box-back{
       position:absolute;
-      inset:0;
-      background:linear-gradient(180deg,var(--frame-light), var(--frame) 58%, var(--frame-dark));
-      border-radius:10px;
+      left:25.5%;
+      right:25.5%;
+      top:23%;
+      bottom:17%;
+      z-index:1;
+      background:var(--back-face);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.18),
-        0 2px 2px rgba(255,255,255,.34),
-        0 6px 10px rgba(0,0,0,.08);
-      overflow:hidden;
+        inset 0 10px 15px rgba(255,255,255,.05),
+        inset 0 -8px 12px rgba(0,0,0,.10);
     }
 
-    .box-well{
+    .wall{
       position:absolute;
-      left:9.5%;
-      right:9.5%;
-      top:13%;
-      bottom:9.5%;
-      overflow:hidden;
-      background:var(--cavity);
-      box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,.08),
-        inset 0 16px 20px rgba(255,255,255,.06),
-        inset 0 -18px 20px rgba(0,0,0,.12);
-    }
-
-    /* جوانب العمق */
-    .box-well::before,
-    .box-well::after{
-      content:"";
-      position:absolute;
-      inset:0;
+      z-index:2;
       pointer-events:none;
     }
 
-    .box-well::before{
+    .wall-top{
+      left:0;
+      right:0;
+      top:0;
+      height:31%;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 24%),
-        linear-gradient(90deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 12%),
-        linear-gradient(270deg, rgba(0,0,0,.14) 0%, rgba(0,0,0,0) 12%),
-        linear-gradient(0deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 14%);
-      mix-blend-mode:normal;
-      opacity:.9;
+        linear-gradient(180deg, rgba(255,255,255,.26), rgba(255,255,255,.05) 45%, rgba(0,0,0,.04)),
+        var(--top-wall);
+      clip-path:polygon(0 0, 100% 0, 74.5% 100%, 25.5% 100%);
     }
 
-    .box-well::after{
+    .wall-bottom{
+      left:0;
+      right:0;
+      bottom:0;
+      height:24%;
       background:
-        linear-gradient(135deg, rgba(255,255,255,.28) 0 10%, transparent 10.2%),
-        linear-gradient(225deg, rgba(0,0,0,.11) 0 9%, transparent 9.2%),
-        linear-gradient(315deg, rgba(0,0,0,.16) 0 10%, transparent 10.2%),
-        linear-gradient(45deg, rgba(255,255,255,.14) 0 9%, transparent 9.2%),
-        radial-gradient(circle at 50% 42%, var(--cavity-light) 0%, var(--cavity) 58%, var(--cavity-dark) 100%);
-      opacity:1;
+        linear-gradient(0deg, rgba(0,0,0,.13), rgba(255,255,255,.03) 58%, rgba(255,255,255,.10)),
+        var(--bottom-wall);
+      clip-path:polygon(25.5% 0, 74.5% 0, 100% 100%, 0 100%);
+    }
+
+    .wall-left{
+      left:0;
+      top:0;
+      bottom:0;
+      width:30%;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.14), rgba(255,255,255,.09) 65%, rgba(255,255,255,.03)),
+        var(--left-wall);
+      clip-path:polygon(0 0, 100% 23%, 100% 83%, 0 100%);
+    }
+
+    .wall-right{
+      right:0;
+      top:0;
+      bottom:0;
+      width:30%;
+      background:
+        linear-gradient(270deg, rgba(0,0,0,.18), rgba(255,255,255,.05) 62%, rgba(255,255,255,.02)),
+        var(--right-wall);
+      clip-path:polygon(0 23%, 100% 0, 100% 100%, 0 83%);
+    }
+
+    .cavity-box::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:3;
+      pointer-events:none;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.07),
+        inset 0 -2px 2px rgba(0,0,0,.08);
     }
 
     .box-content{
       position:absolute;
-      left:13%;
-      right:13%;
-      top:20%;
-      bottom:16%;
+      left:27.5%;
+      right:27.5%;
+      top:29%;
+      bottom:22%;
       z-index:5;
       display:flex;
       align-items:center;
@@ -287,7 +310,7 @@
       text-align:center;
       opacity:0;
       transform:translateY(8px);
-      transition:opacity .24s ease .34s, transform .38s ease .34s;
+      transition:opacity .22s ease .36s, transform .34s ease .36s;
       pointer-events:none;
     }
 
@@ -296,21 +319,23 @@
       transform:translateY(0);
     }
 
-    .closed-panel{
-      z-index:15;
+    .front-panel{
+      z-index:12;
       border-radius:clamp(12px, 12%, 22px);
-      background:linear-gradient(180deg,var(--panel-light), var(--panel) 46%, var(--panel-dark));
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.16), transparent 38%),
+        linear-gradient(180deg,var(--panel-light), var(--panel) 46%, var(--panel-dark));
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.14),
         0 5px 8px rgba(0,0,0,.10);
       transition:
-        top .95s cubic-bezier(.17,.84,.17,1),
-        left .95s cubic-bezier(.17,.84,.17,1),
-        right .95s cubic-bezier(.17,.84,.17,1),
-        height .95s cubic-bezier(.17,.84,.17,1),
-        border-radius .95s cubic-bezier(.17,.84,.17,1),
-        transform .95s cubic-bezier(.17,.84,.17,1),
-        box-shadow .6s ease;
+        left .86s cubic-bezier(.17,.84,.17,1),
+        right .86s cubic-bezier(.17,.84,.17,1),
+        top .86s cubic-bezier(.17,.84,.17,1),
+        height .86s cubic-bezier(.17,.84,.17,1),
+        border-radius .86s cubic-bezier(.17,.84,.17,1),
+        transform .86s cubic-bezier(.17,.84,.17,1),
+        box-shadow .55s ease;
       overflow:hidden;
       display:flex;
       align-items:center;
@@ -318,7 +343,7 @@
       transform-origin:50% 0%;
     }
 
-    .closed-panel::before{
+    .front-panel::before{
       content:"";
       position:absolute;
       left:10%;
@@ -330,16 +355,35 @@
       opacity:.42;
     }
 
-    .box-card.opened .closed-panel{
+    .front-panel::after{
+      content:"";
+      position:absolute;
+      left:28%;
+      right:28%;
+      top:28%;
+      height:16%;
+      border-radius:999px;
+      background:
+        linear-gradient(90deg, transparent 0 42%, rgba(255,255,255,.85) 47% 55%, transparent 62% 100%),
+        rgba(0,0,0,.13);
+      opacity:0;
+      transition:opacity .25s ease .42s;
+    }
+
+    .box-card.opened .front-panel{
       left:-1.5%;
       right:-1.5%;
-      top:-2.5%;
+      top:-2%;
       height:16%;
       border-radius:2px;
-      transform:translateY(0) rotateX(0deg);
+      transform:translateY(0);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,.18),
         0 2px 5px rgba(0,0,0,.08);
+    }
+
+    .box-card.opened .front-panel::after{
+      opacity:.85;
     }
 
     .panel-number{
@@ -350,7 +394,7 @@
       line-height:1;
       font-weight:900;
       text-shadow:0 3px 8px rgba(0,0,0,.20);
-      transition:opacity .18s ease, transform .24s ease;
+      transition:opacity .18s ease, transform .22s ease;
       pointer-events:none;
     }
 
@@ -367,8 +411,8 @@
       justify-content:center;
       text-align:center;
       color:#fff;
-      font-size:clamp(15px, calc(var(--tile-size) * .22), 38px);
-      line-height:1.08;
+      font-size:clamp(12px, calc(var(--tile-size) * .18), 32px);
+      line-height:1.06;
       font-weight:900;
       overflow-wrap:anywhere;
       text-shadow:0 2px 5px rgba(0,0,0,.24);
@@ -389,16 +433,20 @@
       height:100%;
       display:grid;
       grid-template-rows:minmax(0, 1fr) auto;
-      gap:clamp(4px, 5%, 10px);
+      gap:clamp(3px, 4%, 7px);
       align-items:center;
       justify-items:center;
     }
 
-    .result-mixed .result-image{ min-height:0; max-height:100%; }
+    .result-mixed .result-image{
+      min-height:0;
+      max-height:100%;
+    }
+
     .result-mixed .result-text{
       height:auto;
       min-height:1.05em;
-      font-size:clamp(12px, calc(var(--tile-size) * .16), 28px);
+      font-size:clamp(10px, calc(var(--tile-size) * .12), 21px);
       line-height:1.02;
     }
 
@@ -433,31 +481,78 @@
       white-space:nowrap;
     }
 
-    .back-btn{ left:clamp(16px, 2.6vw, 34px); background:#efd553; min-width:clamp(78px, 8vw, 108px); }
-    .reset-btn{ right:clamp(16px, 2.8vw, 42px); background:#1688d3; color:#fff; min-width:clamp(78px, 8vw, 110px); }
+    .back-btn{
+      left:clamp(16px, 2.6vw, 34px);
+      background:#efd553;
+      min-width:clamp(78px, 8vw, 108px);
+    }
+
+    .reset-btn{
+      right:clamp(16px, 2.8vw, 42px);
+      background:#1688d3;
+      color:#fff;
+      min-width:clamp(78px, 8vw, 110px);
+    }
 
     .back-btn:active,
-    .reset-btn:active{ transform:translateY(2px); box-shadow:0 2px 0 rgba(0,0,0,.20); }
+    .reset-btn:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.20);
+    }
 
     @media (orientation:portrait){
-      .stage{ inset:calc(92px + var(--safe-top)) 0 var(--bottom-space) 0; }
+      .stage{
+        inset:calc(92px + var(--safe-top)) 0 var(--bottom-space) 0;
+      }
     }
 
     @media (max-width:560px){
       :root{ --logo-w:92px; }
-      .game-logo{ top:calc(10px + var(--safe-top)); left:12px; }
-      .stage{ inset:calc(64px + var(--safe-top)) 0 calc(66px + var(--safe-bottom)) 0; padding:12px; }
+
+      .game-logo{
+        top:calc(10px + var(--safe-top));
+        left:12px;
+      }
+
+      .stage{
+        inset:calc(64px + var(--safe-top)) 0 calc(66px + var(--safe-bottom)) 0;
+        padding:12px;
+      }
+
       .back-btn,
-      .reset-btn{ height:38px; border-width:2px; border-radius:10px; font-size:15px; padding:0 14px; }
+      .reset-btn{
+        height:38px;
+        border-width:2px;
+        border-radius:10px;
+        font-size:15px;
+        padding:0 14px;
+      }
     }
 
     @media (max-height:520px) and (orientation:landscape){
       :root{ --bottom-space:calc(58px + var(--safe-bottom)); }
-      .stage{ inset:calc(54px + var(--safe-top)) 0 var(--bottom-space) 0; }
-      .game-logo{ width:clamp(78px, 8.8vw, 130px); top:calc(10px + var(--safe-top)); }
-      .fixed-controls{ bottom:calc(8px + var(--safe-bottom)); }
+
+      .stage{
+        inset:calc(54px + var(--safe-top)) 0 var(--bottom-space) 0;
+      }
+
+      .game-logo{
+        width:clamp(78px, 8.8vw, 130px);
+        top:calc(10px + var(--safe-top));
+      }
+
+      .fixed-controls{
+        bottom:calc(8px + var(--safe-bottom));
+      }
+
       .back-btn,
-      .reset-btn{ height:clamp(32px, 8vh, 42px); border-width:2px; border-radius:10px; font-size:clamp(14px, 3.3vh, 20px); box-shadow:0 3px 0 rgba(0,0,0,.18); }
+      .reset-btn{
+        height:clamp(32px, 8vh, 42px);
+        border-width:2px;
+        border-radius:10px;
+        font-size:clamp(14px, 3.3vh, 20px);
+        box-shadow:0 3px 0 rgba(0,0,0,.18);
+      }
     }
   </style>
 </head>
@@ -511,27 +606,48 @@
     let opened = new Set();
 
     function getUrlParam(name){
-      try { return new URLSearchParams(window.location.search || "").get(name) || ""; }
-      catch (_) { return ""; }
+      try {
+        return new URLSearchParams(window.location.search || "").get(name) || "";
+      } catch (_) {
+        return "";
+      }
     }
 
     function getSavedTheme(){
-      try { return sessionStorage.getItem("sandooq_edu_box_theme_v1") || ""; }
-      catch (_) { return ""; }
+      try {
+        return sessionStorage.getItem("sandooq_edu_box_theme_v1") || "";
+      } catch (_) {
+        return "";
+      }
     }
 
     function normalizeTheme(value){
       const raw = String(value || "").trim().toLowerCase();
       const map = {
-        "classic":"white","original":"white","خلفية بيضاء":"white","ابيض":"white","أبيض":"white","white":"white",
-        "classroom":"classroom","فصل مدرسة":"classroom","فصل مدرسي":"classroom",
-        "sky-clouds":"sky-clouds","سماء وغيوم":"sky-clouds",
-        "forest":"forest","غابة":"forest",
-        "math":"math","رياضيات":"math",
-        "english":"english","انجليزي":"english",
-        "flowers":"flowers","ازهار وورود":"flowers","أزهار وورود":"flowers",
-        "national-day":"national-day","اليوم الوطني":"national-day",
-        "founding-day":"founding-day","يوم التأسيس":"founding-day"
+        "classic":"white",
+        "original":"white",
+        "خلفية بيضاء":"white",
+        "ابيض":"white",
+        "أبيض":"white",
+        "white":"white",
+        "classroom":"classroom",
+        "فصل مدرسة":"classroom",
+        "فصل مدرسي":"classroom",
+        "sky-clouds":"sky-clouds",
+        "سماء وغيوم":"sky-clouds",
+        "forest":"forest",
+        "غابة":"forest",
+        "math":"math",
+        "رياضيات":"math",
+        "english":"english",
+        "انجليزي":"english",
+        "flowers":"flowers",
+        "ازهار وورود":"flowers",
+        "أزهار وورود":"flowers",
+        "national-day":"national-day",
+        "اليوم الوطني":"national-day",
+        "founding-day":"founding-day",
+        "يوم التأسيس":"founding-day"
       };
       if (map[raw]) return map[raw];
       return THEMES.some((theme)=> theme.id === raw) ? raw : "white";
@@ -576,9 +692,11 @@
       const ratio = width / height;
       let cols;
 
-      if (count <= 4) cols = window.matchMedia("(orientation: portrait)").matches ? 2 : count;
-      else if (count <= 8) cols = window.matchMedia("(orientation: portrait)").matches ? 2 : 4;
-      else {
+      if (count <= 4) {
+        cols = window.matchMedia("(orientation: portrait)").matches ? 2 : count;
+      } else if (count <= 8) {
+        cols = window.matchMedia("(orientation: portrait)").matches ? 2 : 4;
+      } else {
         cols = Math.ceil(Math.sqrt(count * ratio));
         cols = Math.max(3, Math.min(10, cols));
       }
@@ -641,36 +759,51 @@
         const wrap = document.createElement("span");
         wrap.className = "box-wrap";
 
-        const shell = document.createElement("span");
-        shell.className = "box-shell";
+        const cavity = document.createElement("span");
+        cavity.className = "cavity-box";
 
-        const frame = document.createElement("span");
-        frame.className = "box-frame";
+        const back = document.createElement("span");
+        back.className = "box-back";
 
-        const well = document.createElement("span");
-        well.className = "box-well";
+        const topWall = document.createElement("span");
+        topWall.className = "wall wall-top";
+
+        const rightWall = document.createElement("span");
+        rightWall.className = "wall wall-right";
+
+        const bottomWall = document.createElement("span");
+        bottomWall.className = "wall wall-bottom";
+
+        const leftWall = document.createElement("span");
+        leftWall.className = "wall wall-left";
 
         const content = document.createElement("span");
         content.className = "box-content";
         content.appendChild(createResultContent(entry));
 
-        well.appendChild(content);
-        frame.appendChild(well);
-        shell.appendChild(frame);
+        cavity.appendChild(back);
+        cavity.appendChild(topWall);
+        cavity.appendChild(rightWall);
+        cavity.appendChild(bottomWall);
+        cavity.appendChild(leftWall);
+        cavity.appendChild(content);
 
         const panel = document.createElement("span");
-        panel.className = "closed-panel";
+        panel.className = "front-panel";
 
         const number = document.createElement("span");
         number.className = "panel-number";
         number.textContent = String(index + 1);
         panel.appendChild(number);
 
-        wrap.appendChild(shell);
+        wrap.appendChild(cavity);
         wrap.appendChild(panel);
         button.appendChild(wrap);
 
-        button.addEventListener("click", ()=> openBox(button, index));
+        button.addEventListener("click", ()=>{
+          openBox(button, index);
+        });
+
         grid.appendChild(button);
       });
     }
@@ -693,6 +826,7 @@
         text.className = "result-text";
         text.textContent = entry.text;
         wrap.appendChild(text);
+
         return wrap;
       }
 
@@ -726,15 +860,22 @@
     }
 
     function goBack(){
-      try { if (history.length > 1) return history.back(); }
-      catch (_) {}
+      try {
+        if (history.length > 1) {
+          history.back();
+          return;
+        }
+      } catch (_) {}
       window.location.href = "index.html";
     }
 
     resetBtn.addEventListener("click", resetBoxes);
     backBtn.addEventListener("click", goBack);
+
     window.addEventListener("resize", applyLayout, { passive:true });
-    window.addEventListener("orientationchange", ()=> window.setTimeout(applyLayout, 160), { passive:true });
+    window.addEventListener("orientationchange", ()=>{
+      window.setTimeout(applyLayout, 160);
+    }, { passive:true });
 
     applyTheme(currentTheme);
     renderBoxes();
