@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v27-smart-content-fit -->
+  <!-- version: open-box-v28-color-match-slower-lid -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -461,25 +461,28 @@
 
 
 
-    /* v27:
-       ضبط عرض المحتوى داخل الصندوق:
-       - النص القصير يبقى في المنتصف وبنفس حجمه الحالي.
-       - النص الطويل يتم تصغيره وتقسيمه على سطور ليستفيد من مساحة الصندوق.
-       - الصورة تستفيد من كامل مساحة الصندوق الداخلية بدون خروج.
-       - الصورة مع النص بتوزيع مشابه لمنطق العجلة: صورة كبيرة + نص مضبوط.
+    /* v28:
+       - توحيد لون الغطاء مع جسم الصندوق المفتوح عبر tint واحد للصندوق كامل.
+       - حركة الغطاء أصبحت أبطأ وأوضح: يبدأ من أسفل الصندوق ثم يرتفع ويستقر بالأعلى.
+       - تجهيز الحركة لاحقاً لتناسق صوت الفتح.
+       - الإبقاء على ضبط المحتوى الذكي من v27.
     */
     .box-card{
+      --asset-tint:#a8c474;
+      --asset-body-brightness:1;
+      --asset-lid-brightness:1;
+      --asset-saturation:1.04;
       --asset-filter:none;
     }
 
-    .box-pink{ --asset-filter:hue-rotate(132deg) saturate(1.08) brightness(.94); }
-    .box-lime{ --asset-filter:none; }
-    .box-blue{ --asset-filter:hue-rotate(82deg) saturate(1.05) brightness(.96); }
-    .box-green{ --asset-filter:hue-rotate(-18deg) saturate(1.08) brightness(.88); }
-    .box-orange{ --asset-filter:hue-rotate(-62deg) saturate(1.03) brightness(.98); }
-    .box-purple{ --asset-filter:hue-rotate(150deg) saturate(1.05) brightness(.95); }
-    .box-red{ --asset-filter:hue-rotate(178deg) saturate(1.05) brightness(.93); }
-    .box-teal{ --asset-filter:hue-rotate(45deg) saturate(1.02) brightness(.92); }
+    .box-pink{ --asset-tint:#d83a64; --asset-body-brightness:.96; --asset-lid-brightness:.96; --asset-saturation:1.08; }
+    .box-lime{ --asset-tint:#a8c474; --asset-body-brightness:1; --asset-lid-brightness:1; --asset-saturation:1.04; }
+    .box-blue{ --asset-tint:#5aa5dd; --asset-body-brightness:.98; --asset-lid-brightness:.98; --asset-saturation:1.05; }
+    .box-green{ --asset-tint:#62b66c; --asset-body-brightness:.92; --asset-lid-brightness:.92; --asset-saturation:1.07; }
+    .box-orange{ --asset-tint:#e79b4e; --asset-body-brightness:.96; --asset-lid-brightness:.96; --asset-saturation:1.06; }
+    .box-purple{ --asset-tint:#8d70da; --asset-body-brightness:.94; --asset-lid-brightness:.94; --asset-saturation:1.06; }
+    .box-red{ --asset-tint:#dc4d61; --asset-body-brightness:.92; --asset-lid-brightness:.92; --asset-saturation:1.08; }
+    .box-teal{ --asset-tint:#60b7a6; --asset-body-brightness:.94; --asset-lid-brightness:.94; --asset-saturation:1.05; }
 
     .box-wrap{
       filter:drop-shadow(0 6px 11px var(--shadow));
@@ -488,7 +491,7 @@
     .cavity-box{
       opacity:0;
       transform:scale(.985);
-      transition:opacity .22s ease .10s, transform .48s ease .10s;
+      transition:opacity .34s ease .16s, transform .68s cubic-bezier(.18,.78,.18,1) .08s;
     }
 
     .box-card.opened .cavity-box{
@@ -506,11 +509,14 @@
       position:absolute;
       inset:0;
       z-index:1;
-      background-image:var(--asset-open-body);
-      background-repeat:no-repeat;
-      background-position:center;
-      background-size:100% 100%;
-      filter:var(--asset-filter);
+      background-image:
+        linear-gradient(var(--asset-tint), var(--asset-tint)),
+        var(--asset-open-body);
+      background-repeat:no-repeat, no-repeat;
+      background-position:center, center;
+      background-size:100% 100%, 100% 100%;
+      background-blend-mode:color;
+      filter:brightness(var(--asset-body-brightness)) saturate(var(--asset-saturation));
       pointer-events:none;
     }
 
@@ -534,32 +540,44 @@
       height:8.9%;
       z-index:18;
       opacity:0;
-      background-image:var(--asset-open-lid);
-      background-repeat:no-repeat;
-      background-position:center;
-      background-size:100% 100%;
-      filter:var(--asset-filter);
+      background-image:
+        linear-gradient(var(--asset-tint), var(--asset-tint)),
+        var(--asset-open-lid);
+      background-repeat:no-repeat, no-repeat;
+      background-position:center, center;
+      background-size:100% 100%, 100% 100%;
+      background-blend-mode:color;
+      filter:brightness(var(--asset-lid-brightness)) saturate(var(--asset-saturation));
       pointer-events:none;
-      transform:translateY(16%) scale(.98);
+      transform:translateY(780%) scaleX(.82) scaleY(1.12);
       transform-origin:50% 50%;
     }
 
     .box-card.opened .box-wrap::after{
       opacity:1;
-      animation:assetLidOpen .78s cubic-bezier(.18,.78,.18,1) both;
+      animation:assetLidOpen 1.18s cubic-bezier(.18,.78,.16,1) both;
     }
 
     @keyframes assetLidOpen{
       0%{
         opacity:0;
-        transform:translateY(70%) scaleX(.94) scaleY(1.08);
+        transform:translateY(780%) scaleX(.82) scaleY(1.12);
       }
-      18%{
+      10%{
         opacity:1;
+        transform:translateY(720%) scaleX(.84) scaleY(1.10);
       }
-      62%{
+      42%{
         opacity:1;
-        transform:translateY(-34%) scaleX(1.03) scaleY(.96);
+        transform:translateY(360%) scaleX(.92) scaleY(1.06);
+      }
+      72%{
+        opacity:1;
+        transform:translateY(72%) scaleX(.99) scaleY(1.01);
+      }
+      88%{
+        opacity:1;
+        transform:translateY(-18%) scaleX(1.02) scaleY(.97);
       }
       100%{
         opacity:1;
@@ -577,7 +595,7 @@
       transform:scale(.96);
       box-shadow:none;
       pointer-events:none;
-      transition:opacity .20s ease, transform .24s ease;
+      transition:opacity .32s ease, transform .34s ease;
     }
 
     .box-card.opened .front-panel::before,
