@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v54-wheel-themes-intro-open-box-14 -->
+  <!-- version: open-box-v55-safari-scroll-system-open-box-15 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -35,29 +35,38 @@
       -webkit-text-size-adjust:100%;
     }
 
+    /*
+      open-box-safari-scroll-v1:
+      نفس نظام صفحة العجلة لإعطاء Safari مساحة تمرير صغيرة
+      مع بقاء اللعبة مثبتة داخل الشاشة.
+    */
     body{
-      min-height:100dvh;
-      overflow:hidden;
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
       overscroll-behavior-y:none;
       -webkit-overflow-scrolling:touch;
     }
 
     body::after{
-      content:none;
-      display:none;
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
     }
 
     .game-page{
-      position:relative;
+      position:sticky;
       top:0;
       width:100%;
       height:100dvh;
       min-height:100dvh;
-      overflow:hidden;
+      overflow-x:hidden;
+      overflow-y:hidden;
       background:#fff;
       direction:ltr;
       user-select:none;
-      touch-action:manipulation;
+      touch-action:none;
     }
 
     /* نفس خلفيات وثيمات العجلة تمامًا */
@@ -1198,6 +1207,7 @@
     let selectedBoxIndex = -1;
     let scatterAnimations = new Map();
     let scatterTargets = new Map();
+    let safariTimers = [];
 
     const SCATTER_MOTION_MS = 3200;
     const ZOOM_IN_MOTION_MS = 3300;
@@ -2239,6 +2249,8 @@
           if (opened.has(index)) fitOpenedBoxContent(button);
           else fitClosedCoverText(button);
         });
+
+        collapseSafariBars();
       } finally {
         boxInteractionLocked = false;
       }
@@ -2297,6 +2309,7 @@
         selectedBoxIndex = -1;
         activeFocusButton = null;
         requestAnimationFrame(fitAllBoxText);
+        collapseSafariBars();
       } finally {
         boxInteractionLocked = false;
       }
@@ -2365,6 +2378,40 @@
       window.setTimeout(()=> {
         document.querySelectorAll(".box-card:not(.opened)").forEach(fitClosedCoverText);
       }, 80);
+
+      collapseSafariBars();
+    }
+
+    function collapseSafariBars(){
+      safariTimers.forEach((timer)=> clearTimeout(timer));
+      safariTimers = [];
+
+      [0, 80, 220, 520, 900].forEach((delay)=>{
+        safariTimers.push(setTimeout(()=>{
+          try {
+            window.scrollTo({ top:80, left:0, behavior:"auto" });
+          } catch (_) {
+            window.scrollTo(0, 80);
+          }
+
+          requestAnimationFrame(()=>{
+            applyLayout();
+
+            if (
+              focusedIndex >= 0 &&
+              activeFocusButton &&
+              !boxInteractionLocked
+            ) {
+              const target = getBoxZoomTarget(activeFocusButton);
+              setBoxFocusState(target.scale, target.x, target.y);
+            } else if (focusedIndex < 0) {
+              setBoxFocusState(1, 0, 0);
+            }
+
+            fitAllBoxText();
+          });
+        }, delay));
+      });
     }
 
     function goBack(){
@@ -2410,7 +2457,14 @@
         }
 
         fitAllBoxText();
+        collapseSafariBars();
       }, 160);
+    }, { passive:true });
+
+    document.addEventListener("touchend", collapseSafariBars, { passive:true });
+
+    window.addEventListener("pageshow", ()=>{
+      collapseSafariBars();
     }, { passive:true });
 
     async function playOpeningIntro(){
@@ -2445,6 +2499,8 @@
           fixedControls.style.transform = "none";
           fixedControls.style.pointerEvents = "";
         }
+
+        collapseSafariBars();
       };
 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -2574,6 +2630,7 @@
       applyTheme(currentTheme);
       setBoxFocusState(1, 0, 0);
       renderBoxes();
+      collapseSafariBars();
       await playOpeningIntro();
     }
 
