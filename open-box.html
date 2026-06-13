@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v55-safari-scroll-system-open-box-15 -->
+  <!-- version: open-box-v56-stable-intro-visual-viewport-open-box-16 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -9,6 +9,9 @@
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left: env(safe-area-inset-left, 0px);
+      --safe-right: env(safe-area-inset-right, 0px);
+      --edge-guard:clamp(16px, 2vw, 30px);
       --ink:#111;
       --yellow:#efd553;
       --blue:#1688d3;
@@ -241,14 +244,19 @@
       justify-content:center;
       padding:
         calc(72px + var(--safe-top))
-        clamp(12px, 1.6vw, 24px)
+        calc(var(--edge-guard) + var(--safe-right))
         calc(82px + var(--safe-bottom))
-        clamp(12px, 1.6vw, 24px);
+        calc(var(--edge-guard) + var(--safe-left));
       direction:ltr;
+      transform-origin:center center;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
     .box-grid{
-      width:min(94vw, 1280px);
+      width:max-content;
+      height:max-content;
+      max-width:100%;
       max-height:100%;
       display:grid;
       grid-template-columns:repeat(var(--cols, 4), var(--tile-size));
@@ -260,7 +268,7 @@
       will-change:transform;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
-      contain:layout paint;
+      contain:layout style;
       isolation:isolate;
     }
 
@@ -1093,9 +1101,9 @@
         inset:0;
         padding:
           calc(76px + var(--safe-top))
-          12px
+          calc(14px + var(--safe-right))
           calc(74px + var(--safe-bottom))
-          12px;
+          calc(14px + var(--safe-left));
       }
 
       .back-btn,
@@ -1116,9 +1124,9 @@
         inset:0;
         padding:
           calc(42px + var(--safe-top))
-          12px
+          calc(16px + var(--safe-right))
           calc(62px + var(--safe-bottom))
-          12px;
+          calc(16px + var(--safe-left));
       }
 
       .game-logo{
@@ -1208,6 +1216,11 @@
     let scatterAnimations = new Map();
     let scatterTargets = new Map();
     let safariTimers = [];
+    let viewportLayoutFrame = null;
+    let viewportLayoutTimer = null;
+    let introFrameId = null;
+    let introLayoutFrozen = false;
+    let pendingViewportLayout = false;
 
     const SCATTER_MOTION_MS = 3200;
     const ZOOM_IN_MOTION_MS = 3300;
@@ -1517,9 +1530,66 @@
       try { sessionStorage.setItem("sandooq_edu_box_theme_v1", currentTheme); } catch (_) {}
     }
 
+    function getVisualViewportMetrics(){
+      const vv = window.visualViewport;
+      const layoutWidth = Math.max(
+        280,
+        document.documentElement.clientWidth || 0,
+        window.innerWidth || 0
+      );
+      const layoutHeight = Math.max(
+        260,
+        page?.clientHeight || 0,
+        document.documentElement.clientHeight || 0,
+        window.innerHeight || 0
+      );
+
+      const width = Math.max(
+        280,
+        Math.min(layoutWidth, Number(vv?.width) || layoutWidth)
+      );
+      const height = Math.max(
+        260,
+        Math.min(layoutHeight, Number(vv?.height) || layoutHeight)
+      );
+
+      return {
+        width,
+        height,
+        offsetLeft:Math.max(0, Number(vv?.offsetLeft) || 0),
+        scale:Math.max(1, Number(vv?.scale) || 1)
+      };
+    }
+
+    function syncVisualViewportFrame(force = false){
+      if (introLayoutFrozen && !force) {
+        pendingViewportLayout = true;
+        return false;
+      }
+
+      const metrics = getVisualViewportMetrics();
+
+      /*
+        عند تكبير صفحة Safari يصبح visualViewport أضيق من layout viewport.
+        نضع منطقة الصناديق داخل المساحة المرئية الحقيقية بدل إبقائها
+        متمركزة داخل مساحة أكبر تُقص أطرافها.
+      */
+      stage.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
+      stage.style.right = "auto";
+      stage.style.top = "0px";
+      stage.style.bottom = "auto";
+      stage.style.width = `${metrics.width.toFixed(2)}px`;
+      stage.style.height = `${metrics.height.toFixed(2)}px`;
+
+      page.style.setProperty("--visual-viewport-width", `${metrics.width}px`);
+      page.style.setProperty("--visual-viewport-height", `${metrics.height}px`);
+      return true;
+    }
+
     function calculateLayout(count){
-      const rect = stage.getBoundingClientRect();
+      const metrics = getVisualViewportMetrics();
       const styles = window.getComputedStyle(stage);
+
       const padX =
         parseFloat(styles.paddingLeft || "0") +
         parseFloat(styles.paddingRight || "0");
@@ -1527,19 +1597,33 @@
         parseFloat(styles.paddingTop || "0") +
         parseFloat(styles.paddingBottom || "0");
 
-      const width = Math.max(260, rect.width - padX);
-      const height = Math.max(220, rect.height - padY);
+      /*
+        clientWidth/clientHeight لا يتأثران بحركة scale الخاصة بالانترو،
+        بعكس getBoundingClientRect الذي كان يجعل الصناديق تُحسب صغيرة ثم
+        تكبر فجأة عند نهاية الحركة.
+      */
+      const stageWidth = Math.max(
+        280,
+        Math.min(stage.clientWidth || metrics.width, metrics.width)
+      );
+      const stageHeight = Math.max(
+        260,
+        Math.min(stage.clientHeight || metrics.height, metrics.height)
+      );
+
+      const width = Math.max(220, stageWidth - padX - 4);
+      const height = Math.max(190, stageHeight - padY - 4);
       const total = Math.max(1, Math.min(MAX_BOX_ITEMS, count || 1));
-      const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+      const isPortrait = height > width;
 
       const maxCols = Math.min(total, isPortrait ? 5 : 10);
-      const minCols = isPortrait ? 2 : Math.min(total, 2);
+      const minCols = isPortrait ? Math.min(total, 2) : Math.min(total, 2);
       const baseGap = total > 24 ? 7 : total > 16 ? 9 : total > 10 ? 12 : 20;
       const maxTile = total > 24 ? 112 : total > 16 ? 124 : total > 10 ? 138 : 152;
 
       let best = null;
 
-      for (let cols = minCols; cols <= maxCols; cols += 1) {
+      for (let cols = Math.max(1, minCols); cols <= maxCols; cols += 1) {
         const rows = Math.ceil(total / cols);
         const gap = baseGap;
         const tileByWidth = Math.floor((width - gap * (cols - 1)) / cols);
@@ -1548,42 +1632,141 @@
 
         if (size <= 0) continue;
 
+        const gridWidth = cols * size + gap * Math.max(0, cols - 1);
+        const gridHeight = rows * size + gap * Math.max(0, rows - 1);
         const unusedSlots = cols * rows - total;
         const aspectPenalty = Math.abs(cols / rows - width / Math.max(1, height)) * 3;
         const rowBalance = Math.abs(rows - Math.ceil(Math.sqrt(total))) * 2;
-        const score = size * 100 - unusedSlots * 7 - aspectPenalty - rowBalance;
+        const edgePenalty =
+          Math.max(0, gridWidth - width) * 100 +
+          Math.max(0, gridHeight - height) * 100;
+        const score =
+          size * 100 -
+          unusedSlots * 7 -
+          aspectPenalty -
+          rowBalance -
+          edgePenalty;
 
         if (!best || score > best.score) {
-          best = { cols, rows, gap, size, score };
+          best = {
+            cols,
+            rows,
+            gap,
+            size,
+            gridWidth,
+            gridHeight,
+            score
+          };
         }
       }
 
       if (!best) {
-        const cols = isPortrait ? 3 : Math.min(total, 8);
-        const rows = Math.ceil(total / cols);
+        const cols = isPortrait ? Math.min(total, 3) : Math.min(total, 8);
+        const rows = Math.ceil(total / Math.max(1, cols));
         const gap = 6;
         const size = Math.max(34, Math.min(
           maxTile,
-          Math.floor((width - gap * (cols - 1)) / cols),
-          Math.floor((height - gap * (rows - 1)) / rows)
+          Math.floor((width - gap * Math.max(0, cols - 1)) / Math.max(1, cols)),
+          Math.floor((height - gap * Math.max(0, rows - 1)) / Math.max(1, rows))
         ));
-        best = { cols, rows, gap, size };
+
+        best = {
+          cols:Math.max(1, cols),
+          rows,
+          gap,
+          size,
+          gridWidth:Math.max(1, cols) * size + gap * Math.max(0, cols - 1),
+          gridHeight:rows * size + gap * Math.max(0, rows - 1)
+        };
       }
 
       return {
-        cols: best.cols,
-        gap: Math.max(5, best.gap),
-        size: Math.max(34, best.size)
+        cols:best.cols,
+        rows:best.rows,
+        gap:Math.max(5, best.gap),
+        size:Math.max(34, best.size),
+        gridWidth:best.gridWidth,
+        gridHeight:best.gridHeight
       };
     }
 
-    function applyLayout(){
+    function applyLayout(options = {}){
+      const force = options.force === true;
+
+      if (introLayoutFrozen && !force) {
+        pendingViewportLayout = true;
+        return false;
+      }
+
       const layout = calculateLayout(items.length);
+
       grid.style.setProperty("--cols", String(layout.cols));
       grid.style.setProperty("--tile-gap", `${layout.gap}px`);
       grid.style.setProperty("--tile-size", `${layout.size}px`);
+      grid.style.width = `${layout.gridWidth}px`;
+      grid.style.height = `${layout.gridHeight}px`;
+
       document.documentElement.style.setProperty("--tile-gap", `${layout.gap}px`);
       document.documentElement.style.setProperty("--tile-size", `${layout.size}px`);
+      return true;
+    }
+
+    function refreshResponsiveLayout(options = {}){
+      const force = options.force === true;
+
+      if ((introLayoutFrozen || boxInteractionLocked) && !force) {
+        pendingViewportLayout = true;
+        return;
+      }
+
+      syncVisualViewportFrame(force);
+      applyLayout({ force });
+
+      requestAnimationFrame(()=>{
+        if (focusedIndex >= 0 && activeFocusButton && !boxInteractionLocked) {
+          const target = getBoxZoomTarget(activeFocusButton);
+          setBoxFocusState(target.scale, target.x, target.y);
+        } else if (focusedIndex < 0) {
+          setBoxFocusState(1, 0, 0);
+        }
+
+        fitAllBoxText();
+      });
+
+      pendingViewportLayout = false;
+    }
+
+    function scheduleResponsiveLayout(delay = 0){
+      if (introLayoutFrozen || boxInteractionLocked) {
+        pendingViewportLayout = true;
+        return;
+      }
+
+      if (viewportLayoutFrame) {
+        cancelAnimationFrame(viewportLayoutFrame);
+        viewportLayoutFrame = null;
+      }
+
+      if (viewportLayoutTimer) {
+        clearTimeout(viewportLayoutTimer);
+        viewportLayoutTimer = null;
+      }
+
+      const run = ()=>{
+        viewportLayoutFrame = requestAnimationFrame(()=>{
+          viewportLayoutFrame = null;
+          refreshResponsiveLayout();
+        });
+      };
+
+      if (delay > 0) {
+        viewportLayoutTimer = setTimeout(()=>{
+          viewportLayoutTimer = null;
+          run();
+        }, delay);
+      } else {
+        run();
+      }
     }
 
     function renderBoxes(){
@@ -2253,6 +2436,9 @@
         collapseSafariBars();
       } finally {
         boxInteractionLocked = false;
+        if (pendingViewportLayout && !introLayoutFrozen) {
+          scheduleResponsiveLayout(40);
+        }
       }
     }
 
@@ -2291,6 +2477,9 @@
       } finally {
         openBtn.disabled = false;
         boxInteractionLocked = false;
+        if (pendingViewportLayout && !introLayoutFrozen) {
+          scheduleResponsiveLayout(40);
+        }
       }
     }
 
@@ -2373,6 +2562,9 @@
         activeFocusButton = null;
       } finally {
         boxInteractionLocked = false;
+        if (pendingViewportLayout && !introLayoutFrozen) {
+          scheduleResponsiveLayout(40);
+        }
       }
 
       window.setTimeout(()=> {
@@ -2382,7 +2574,9 @@
       collapseSafariBars();
     }
 
-    function collapseSafariBars(){
+    function collapseSafariBars(options = {}){
+      const refresh = options.refresh !== false;
+
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
@@ -2394,22 +2588,15 @@
             window.scrollTo(0, 80);
           }
 
-          requestAnimationFrame(()=>{
-            applyLayout();
-
-            if (
-              focusedIndex >= 0 &&
-              activeFocusButton &&
-              !boxInteractionLocked
-            ) {
-              const target = getBoxZoomTarget(activeFocusButton);
-              setBoxFocusState(target.scale, target.x, target.y);
-            } else if (focusedIndex < 0) {
-              setBoxFocusState(1, 0, 0);
-            }
-
-            fitAllBoxText();
-          });
+          /*
+            أثناء حركة البداية نطوي شريط Safari فقط، ولا نعيد حساب
+            أحجام الصناديق تحت حركة الكاميرا.
+          */
+          if (refresh && !introLayoutFrozen) {
+            scheduleResponsiveLayout();
+          } else if (refresh) {
+            pendingViewportLayout = true;
+          }
         }, delay));
       });
     }
@@ -2431,49 +2618,52 @@
     page.addEventListener("click", handleZoomResetTap);
 
     window.addEventListener("resize", ()=>{
-      applyLayout();
-
-      requestAnimationFrame(()=>{
-        if (focusedIndex >= 0 && activeFocusButton && !boxInteractionLocked) {
-          const target = getBoxZoomTarget(activeFocusButton);
-          setBoxFocusState(target.scale, target.x, target.y);
-        } else if (focusedIndex < 0) {
-          setBoxFocusState(1, 0, 0);
-        }
-
-        fitAllBoxText();
-      });
+      scheduleResponsiveLayout(40);
     }, { passive:true });
 
     window.addEventListener("orientationchange", ()=>{
+      pendingViewportLayout = true;
       window.setTimeout(()=>{
-        applyLayout();
-
-        if (focusedIndex >= 0 && activeFocusButton && !boxInteractionLocked) {
-          const target = getBoxZoomTarget(activeFocusButton);
-          setBoxFocusState(target.scale, target.x, target.y);
-        } else if (focusedIndex < 0) {
-          setBoxFocusState(1, 0, 0);
-        }
-
-        fitAllBoxText();
         collapseSafariBars();
+        scheduleResponsiveLayout(80);
       }, 160);
     }, { passive:true });
 
-    document.addEventListener("touchend", collapseSafariBars, { passive:true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", ()=>{
+        scheduleResponsiveLayout(34);
+      }, { passive:true });
+
+      window.visualViewport.addEventListener("scroll", ()=>{
+        scheduleResponsiveLayout(34);
+      }, { passive:true });
+    }
+
+    document.addEventListener("touchend", ()=>{
+      collapseSafariBars();
+    }, { passive:true });
 
     window.addEventListener("pageshow", ()=>{
       collapseSafariBars();
+      scheduleResponsiveLayout(60);
     }, { passive:true });
 
     async function playOpeningIntro(){
       if (!page || !stage) return;
 
+      if (introFrameId) {
+        cancelAnimationFrame(introFrameId);
+        introFrameId = null;
+      }
+
       page.classList.remove("intro-done");
       page.classList.add("intro-playing");
 
+      introLayoutFrozen = true;
+      pendingViewportLayout = false;
+
       const holdMs = 2200;
+      const viewportSettleMs = 1050;
       const zoomMs = 7600;
       const startStageScale = 0.42;
       const endStageScale = 1;
@@ -2481,17 +2671,64 @@
       const endBgScale =
         Number(getComputedStyle(page).getPropertyValue("--intro-bg-final-scale")) || 1.18;
 
-      const finish = ()=>{
-        page.classList.remove("intro-playing");
-        page.classList.add("intro-done");
+      let startTime = null;
+      let viewportStabilized = false;
 
-        stage.style.transform = "";
-        stage.style.animation = "";
+      const setIntroFrame = (stageScale, bgScale)=>{
+        stage.style.transform =
+          `translate3d(0,0,0) scale(${Number(stageScale).toFixed(5)})`;
+        stage.style.animation = "none";
 
         if (themeBackground) {
           themeBackground.style.transform =
-            `translate3d(0,0,0) scale(${endBgScale})`;
-          themeBackground.style.animation = "";
+            `translate3d(0,0,0) scale(${Number(bgScale).toFixed(5)})`;
+          themeBackground.style.animation = "none";
+
+          const ratio =
+            (bgScale - startBgScale) /
+            Math.max(.001, endBgScale - startBgScale);
+          const saturation = 1.04 - ratio * .04;
+          themeBackground.style.filter =
+            `saturate(${Math.max(1, Math.min(1.04, saturation))})`;
+        }
+      };
+
+      const stabilizeViewportOnce = ()=>{
+        if (viewportStabilized) return;
+        viewportStabilized = true;
+
+        /*
+          Safari يكون قد أنهى طي الشريط تقريبًا في هذه اللحظة.
+          نحسب الشبكة مرة واحدة والصناديق ما زالت بعيدة، ثم نجمدها
+          حتى نهاية الزوم حتى لا تحدث القفزة الأخيرة.
+        */
+        syncVisualViewportFrame(true);
+        applyLayout({ force:true });
+        fitAllBoxText();
+        setIntroFrame(startStageScale, startBgScale);
+      };
+
+      const finish = ()=>{
+        if (introFrameId) {
+          cancelAnimationFrame(introFrameId);
+          introFrameId = null;
+        }
+
+        if (!viewportStabilized) {
+          stabilizeViewportOnce();
+        }
+
+        /*
+          نبقي scale(1) صراحة ولا نحذف transform؛ حذف transform كان
+          يسمح لسفاري بإظهار الحجم الجديد دفعة واحدة.
+        */
+        setIntroFrame(endStageScale, endBgScale);
+
+        page.classList.remove("intro-playing");
+        page.classList.add("intro-done");
+
+        if (themeBackground) {
+          themeBackground.style.filter = "";
         }
 
         if (fixedControls) {
@@ -2500,88 +2737,49 @@
           fixedControls.style.pointerEvents = "";
         }
 
-        collapseSafariBars();
+        introLayoutFrozen = false;
+
+        // نحافظ على شريط Safari مطويًا دون إعادة تحجيم فوري.
+        collapseSafariBars({ refresh:false });
+
+        // تحديث واحد هادئ بعد استقرار الانترو، فقط عند الحاجة.
+        window.setTimeout(()=>{
+          if (pendingViewportLayout) {
+            refreshResponsiveLayout({ force:true });
+          } else {
+            syncVisualViewportFrame(true);
+          }
+        }, 260);
       };
 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        syncVisualViewportFrame(true);
+        applyLayout({ force:true });
         finish();
         return;
       }
 
-      stage.style.transform =
-        `translate3d(0,0,0) scale(${startStageScale})`;
+      setIntroFrame(startStageScale, startBgScale);
+      collapseSafariBars({ refresh:false });
 
-      if (themeBackground) {
-        themeBackground.style.transform =
-          `translate3d(0,0,0) scale(${startBgScale})`;
-      }
-
-      // ننتظر استقرار التخطيط ورسم الصناديق قبل تشغيل الكاميرا.
       await new Promise((resolve)=>{
         requestAnimationFrame(()=>{
           requestAnimationFrame(resolve);
         });
       });
 
-      if (typeof stage.animate === "function") {
-        const stageAnimation = stage.animate(
-          [
-            {
-              transform:
-                `translate3d(0,0,0) scale(${startStageScale})`
-            },
-            {
-              transform:
-                `translate3d(0,0,0) scale(${endStageScale})`
-            }
-          ],
-          {
-            delay:holdMs,
-            duration:zoomMs,
-            easing:MOTION_EASING,
-            fill:"forwards"
-          }
-        );
-
-        const animations = [stageAnimation.finished.catch(()=> {})];
-
-        if (themeBackground) {
-          const backgroundAnimation = themeBackground.animate(
-            [
-              {
-                transform:
-                  `translate3d(0,0,0) scale(${startBgScale})`
-              },
-              {
-                transform:
-                  `translate3d(0,0,0) scale(${endBgScale})`
-              }
-            ],
-            {
-              delay:holdMs,
-              duration:zoomMs,
-              easing:MOTION_EASING,
-              fill:"forwards"
-            }
-          );
-          animations.push(backgroundAnimation.finished.catch(()=> {}));
-        }
-
-        await Promise.all(animations);
-        await new Promise((resolve)=> setTimeout(resolve, 220));
-        finish();
-        return;
-      }
-
-      // fallback مطابق لحركة العجلة.
-      const startTime = performance.now();
-
       await new Promise((resolve)=>{
         const animate = (now)=>{
+          if (startTime === null) startTime = now;
           const elapsed = now - startTime;
 
+          if (!viewportStabilized && elapsed >= viewportSettleMs) {
+            stabilizeViewportOnce();
+          }
+
           if (elapsed < holdMs) {
-            requestAnimationFrame(animate);
+            setIntroFrame(startStageScale, startBgScale);
+            introFrameId = requestAnimationFrame(animate);
             return;
           }
 
@@ -2589,31 +2787,28 @@
             0,
             Math.min(1, (elapsed - holdMs) / zoomMs)
           );
-          const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
+          const eased = easeInOutSine(progress);
+
           const stageScale =
             startStageScale + (endStageScale - startStageScale) * eased;
           const bgScale =
             startBgScale + (endBgScale - startBgScale) * eased;
 
-          stage.style.transform =
-            `translate3d(0,0,0) scale(${stageScale.toFixed(5)})`;
-
-          if (themeBackground) {
-            themeBackground.style.transform =
-              `translate3d(0,0,0) scale(${bgScale.toFixed(5)})`;
-          }
+          setIntroFrame(stageScale, bgScale);
 
           if (progress < 1) {
-            requestAnimationFrame(animate);
-          } else {
-            setTimeout(resolve, 220);
+            introFrameId = requestAnimationFrame(animate);
+            return;
           }
+
+          window.setTimeout(()=>{
+            finish();
+            resolve();
+          }, 220);
         };
 
-        requestAnimationFrame(animate);
+        introFrameId = requestAnimationFrame(animate);
       });
-
-      finish();
     }
 
     async function initializeOpenBoxGame(){
@@ -2628,9 +2823,9 @@
       setOpenButtonVisible(false);
 
       applyTheme(currentTheme);
+      syncVisualViewportFrame(true);
       setBoxFocusState(1, 0, 0);
       renderBoxes();
-      collapseSafariBars();
       await playOpeningIntro();
     }
 
