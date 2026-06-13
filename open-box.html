@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v49-arabic-descenders-safe-open-box-9 -->
+  <!-- version: open-box-v50-focus-before-open-open-box-10 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -139,6 +139,46 @@
       - جميع الجوانب بنفس اللون الأساسي مع تظليل خفيف فقط.
       - فواصل الزوايا قصيرة وخفيفة مثل المرجع، وليست خطوط إطار.
     */
+    /* v50:
+       - اختيار الصندوق لا يفتحه مباشرة.
+       - الصناديق الأخرى تبتعد خارج المشهد، والصندوق المختار ينتقل للمنتصف.
+       - زر فتح مستقل يظهر بعد اكتمال حركة التركيز.
+       - ضغطة لاحقة على الشاشة تعيد جميع الصناديق إلى مواقعها.
+    */
+    .box-card{
+      --scatter-x:0px;
+      --scatter-y:0px;
+      --scatter-scale:1;
+      --scatter-delay:0ms;
+      transform:
+        translate3d(var(--scatter-x), var(--scatter-y), 0)
+        scale(var(--scatter-scale));
+      transition:
+        transform .48s cubic-bezier(.22,.84,.24,1) var(--scatter-delay),
+        opacity .30s ease var(--scatter-delay),
+        filter .30s ease var(--scatter-delay);
+      will-change:transform, opacity, filter;
+    }
+
+    .box-card.focus-selected{
+      z-index:55;
+      opacity:1;
+      --scatter-x:0px;
+      --scatter-y:0px;
+      --scatter-scale:1;
+    }
+
+    .box-card.focus-away{
+      opacity:0;
+      pointer-events:none;
+      filter:blur(1px);
+    }
+
+    .box-grid.focus-mode .box-card:not(.focus-selected){
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
     .box-card{
       --panel:#df3a64;
       --panel-light:#f06f8e;
@@ -828,8 +868,20 @@
       pointer-events:none;
     }
 
+    .right-controls{
+      pointer-events:auto;
+      position:absolute;
+      right:clamp(16px, 2.8vw, 42px);
+      bottom:0;
+      display:flex;
+      align-items:center;
+      gap:clamp(8px, 1vw, 12px);
+      direction:ltr;
+    }
+
     .back-btn,
-    .reset-btn{
+    .reset-btn,
+    .open-btn{
       pointer-events:auto;
       position:absolute;
       bottom:0;
@@ -855,15 +907,39 @@
       min-width:clamp(78px, 8vw, 108px);
     }
 
+    .right-controls .reset-btn,
+    .right-controls .open-btn{
+      position:static;
+      bottom:auto;
+    }
+
     .reset-btn{
-      right:clamp(16px, 2.8vw, 42px);
       background:#1688d3;
       color:#fff;
       min-width:clamp(78px, 8vw, 110px);
     }
 
+    .open-btn{
+      background:#2cab64;
+      color:#fff;
+      min-width:clamp(78px, 8vw, 104px);
+      opacity:1;
+      transform:translateY(0) scale(1);
+      transition:opacity .20s ease, transform .25s cubic-bezier(.22,.84,.24,1);
+    }
+
+    .open-btn[hidden]{
+      display:none !important;
+    }
+
+    .open-btn.is-entering{
+      opacity:0;
+      transform:translateY(8px) scale(.92);
+    }
+
     .back-btn:active,
-    .reset-btn:active{
+    .reset-btn:active,
+    .open-btn:active{
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.20);
     }
@@ -894,7 +970,8 @@
       }
 
       .back-btn,
-      .reset-btn{
+      .reset-btn,
+      .open-btn{
         height:38px;
         border-width:2px;
         border-radius:10px;
@@ -925,7 +1002,8 @@
       }
 
       .back-btn,
-      .reset-btn{
+      .reset-btn,
+      .open-btn{
         height:clamp(32px, 8vh, 42px);
         border-width:2px;
         border-radius:10px;
@@ -946,7 +1024,10 @@
 
     <footer class="fixed-controls">
       <button class="back-btn" id="backBtn" type="button">رجوع</button>
-      <button class="reset-btn" id="resetBtn" type="button">إعادة</button>
+      <div class="right-controls">
+        <button class="open-btn" id="openBtn" type="button" hidden>فتح</button>
+        <button class="reset-btn" id="resetBtn" type="button">إعادة</button>
+      </div>
     </footer>
   </main>
 
@@ -980,6 +1061,7 @@
     const stage = document.getElementById("stage");
     const grid = document.getElementById("boxGrid");
     const resetBtn = document.getElementById("resetBtn");
+    const openBtn = document.getElementById("openBtn");
     const backBtn = document.getElementById("backBtn");
 
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
@@ -990,6 +1072,7 @@
     let boxFocusState = { scale:1, x:0, y:0 };
     let boxInteractionLocked = false;
     let activeFocusButton = null;
+    let selectedBoxIndex = -1;
 
     const BOX_COLOR_PALETTES = [
       ["#ef2f6a","#ff6f9a","#bd0e46","#d45e82","#981737","#ef2f6a",1.02,1.24],
@@ -1620,7 +1703,90 @@
       };
     }
 
-    function focusBox(button, duration = 1250){
+    function wait(ms){
+      return new Promise((resolve)=> window.setTimeout(resolve, ms));
+    }
+
+    function setOpenButtonVisible(visible){
+      if (!openBtn) return;
+
+      if (!visible) {
+        openBtn.hidden = true;
+        openBtn.classList.remove("is-entering");
+        openBtn.disabled = false;
+        return;
+      }
+
+      openBtn.hidden = false;
+      openBtn.disabled = false;
+      openBtn.classList.add("is-entering");
+
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=> openBtn.classList.remove("is-entering"));
+      });
+    }
+
+    function scatterOtherBoxes(selectedButton){
+      const cards = Array.from(grid.querySelectorAll(".box-card"));
+      if (!selectedButton || !cards.length) return;
+
+      const stageRect = stage.getBoundingClientRect();
+      const selectedCenterX = selectedButton.offsetLeft + selectedButton.offsetWidth / 2;
+      const selectedCenterY = selectedButton.offsetTop + selectedButton.offsetHeight / 2;
+      const travel = Math.max(stageRect.width, stageRect.height) * .78 + selectedButton.offsetWidth * 1.6;
+
+      grid.classList.add("focus-mode");
+
+      cards.forEach((card, cardIndex)=>{
+        card.classList.remove("focus-selected", "focus-away");
+        card.style.setProperty("--scatter-delay", `${Math.min(90, (cardIndex % 6) * 12)}ms`);
+
+        if (card === selectedButton) {
+          card.classList.add("focus-selected");
+          card.style.setProperty("--scatter-x", "0px");
+          card.style.setProperty("--scatter-y", "0px");
+          card.style.setProperty("--scatter-scale", "1");
+          return;
+        }
+
+        const cardCenterX = card.offsetLeft + card.offsetWidth / 2;
+        const cardCenterY = card.offsetTop + card.offsetHeight / 2;
+        let dx = cardCenterX - selectedCenterX;
+        let dy = cardCenterY - selectedCenterY;
+        let length = Math.hypot(dx, dy);
+
+        if (length < 1) {
+          const angle = ((cardIndex + 1) * 2.399963229728653) % (Math.PI * 2);
+          dx = Math.cos(angle);
+          dy = Math.sin(angle);
+          length = 1;
+        }
+
+        const unitX = dx / length;
+        const unitY = dy / length;
+        const extra = (cardIndex % 4) * selectedButton.offsetWidth * .10;
+        const distance = travel + extra;
+
+        card.style.setProperty("--scatter-x", `${(unitX * distance).toFixed(1)}px`);
+        card.style.setProperty("--scatter-y", `${(unitY * distance).toFixed(1)}px`);
+        card.style.setProperty("--scatter-scale", ".76");
+        card.classList.add("focus-away");
+      });
+    }
+
+    function restoreScatteredBoxes(){
+      grid.classList.remove("focus-mode");
+
+      grid.querySelectorAll(".box-card").forEach((card)=>{
+        card.classList.remove("focus-selected", "focus-away");
+        card.style.setProperty("--scatter-x", "0px");
+        card.style.setProperty("--scatter-y", "0px");
+        card.style.setProperty("--scatter-scale", "1");
+        card.style.setProperty("--scatter-delay", "0ms");
+      });
+    }
+
+    function focusBox(button, duration = 900){
       if (!button) return Promise.resolve();
 
       focusedIndex = Number(button.dataset.index || -1);
@@ -1639,26 +1805,86 @@
       });
     }
 
-    async function zoomThenOpenBox(button, index){
+    async function selectBoxForFocus(button, index){
       if (!button || boxInteractionLocked) return;
 
       boxInteractionLocked = true;
+      selectedBoxIndex = index;
+      activeFocusButton = button;
+      setOpenButtonVisible(false);
 
       try {
-        // نفس بناء العجلة: زوم بصري requestAnimationFrame أولاً.
-        await focusBox(button, 1250);
+        scatterOtherBoxes(button);
 
-        // بعد اكتمال التقريب فقط يبدأ فتح الصندوق.
+        // تبدأ حركة الابتعاد أولًا بشكل خفيف، ثم يتقدم الصندوق المختار إلى المنتصف.
+        await wait(55);
+        await focusBox(button, 920);
+
         if (!opened.has(index)) {
-          opened.add(index);
-          button.classList.add("opened");
-          button.setAttribute("aria-pressed", "true");
+          setOpenButtonVisible(true);
         }
 
-        requestAnimationFrame(()=> fitOpenedBoxContent(button));
-        window.setTimeout(()=> fitOpenedBoxContent(button), 120);
-        window.setTimeout(()=> fitOpenedBoxContent(button), 430);
-        window.setTimeout(()=> fitOpenedBoxContent(button), 920);
+        requestAnimationFrame(()=> {
+          if (opened.has(index)) fitOpenedBoxContent(button);
+          else fitClosedCoverText(button);
+        });
+      } finally {
+        boxInteractionLocked = false;
+      }
+    }
+
+    async function openSelectedBox(event){
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      if (
+        boxInteractionLocked ||
+        selectedBoxIndex < 0 ||
+        !activeFocusButton ||
+        opened.has(selectedBoxIndex)
+      ) {
+        setOpenButtonVisible(false);
+        return;
+      }
+
+      boxInteractionLocked = true;
+      openBtn.disabled = true;
+      setOpenButtonVisible(false);
+
+      try {
+        opened.add(selectedBoxIndex);
+        activeFocusButton.classList.add("opened");
+        activeFocusButton.setAttribute("aria-pressed", "true");
+
+        requestAnimationFrame(()=> fitOpenedBoxContent(activeFocusButton));
+        window.setTimeout(()=> fitOpenedBoxContent(activeFocusButton), 120);
+        window.setTimeout(()=> fitOpenedBoxContent(activeFocusButton), 430);
+        window.setTimeout(()=> fitOpenedBoxContent(activeFocusButton), 920);
+
+        // نمنع رجوع المشهد أثناء اكتمال حركة الغطاء.
+        await wait(1320);
+      } finally {
+        openBtn.disabled = false;
+        boxInteractionLocked = false;
+      }
+    }
+
+    async function returnFocusScene(duration = 760){
+      setOpenButtonVisible(false);
+
+      if (boxInteractionLocked) return;
+      boxInteractionLocked = true;
+
+      try {
+        restoreScatteredBoxes();
+        await resetBoxZoom(duration);
+        await wait(80);
+
+        selectedBoxIndex = -1;
+        activeFocusButton = null;
+        requestAnimationFrame(fitAllBoxText);
       } finally {
         boxInteractionLocked = false;
       }
@@ -1670,49 +1896,56 @@
 
       if (boxInteractionLocked) return;
 
-      // أي ضغطة على صندوق أثناء الزوم تعيد المشهد للوضع الطبيعي.
-      if (focusedIndex >= 0 || boxFocusState.scale > 1.001) {
-        boxInteractionLocked = true;
-        try {
-          await resetBoxZoom(900);
-        } finally {
-          boxInteractionLocked = false;
-        }
+      if (focusedIndex >= 0 || boxFocusState.scale > 1.001 || selectedBoxIndex >= 0) {
+        await returnFocusScene(760);
         return;
       }
 
-      zoomThenOpenBox(button, index);
+      await selectBoxForFocus(button, index);
     }
 
     async function handleZoomResetTap(event){
-      if (focusedIndex < 0 && boxFocusState.scale <= 1.001) return;
+      if (
+        focusedIndex < 0 &&
+        boxFocusState.scale <= 1.001 &&
+        selectedBoxIndex < 0
+      ) return;
+
       if (boxInteractionLocked) return;
       if (event.target.closest(".fixed-controls")) return;
 
       event.preventDefault();
-
-      boxInteractionLocked = true;
-      try {
-        await resetBoxZoom(900);
-      } finally {
-        boxInteractionLocked = false;
-      }
+      await returnFocusScene(760);
     }
 
-    function resetBoxes(){
+    async function resetBoxes(event){
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      setOpenButtonVisible(false);
       opened.clear();
-      boxInteractionLocked = false;
-      activeFocusButton = null;
+      restoreScatteredBoxes();
 
       document.querySelectorAll(".box-card.opened").forEach((card)=>{
         card.classList.remove("opened");
         card.setAttribute("aria-pressed", "false");
       });
 
-      resetBoxZoom(1050);
+      boxInteractionLocked = true;
+
+      try {
+        await resetBoxZoom(920);
+        selectedBoxIndex = -1;
+        activeFocusButton = null;
+      } finally {
+        boxInteractionLocked = false;
+      }
+
       window.setTimeout(()=> {
         document.querySelectorAll(".box-card:not(.opened)").forEach(fitClosedCoverText);
-      }, 920);
+      }, 80);
     }
 
     function goBack(){
@@ -1727,6 +1960,7 @@
     }
 
     resetBtn.addEventListener("click", resetBoxes);
+    openBtn.addEventListener("click", openSelectedBox);
     backBtn.addEventListener("click", goBack);
     page.addEventListener("click", handleZoomResetTap);
 
@@ -1765,8 +1999,11 @@
 
       opened.clear();
       focusedIndex = -1;
+      selectedBoxIndex = -1;
       activeFocusButton = null;
       boxInteractionLocked = false;
+      restoreScatteredBoxes();
+      setOpenButtonVisible(false);
 
       applyTheme(currentTheme);
       setBoxFocusState(1, 0, 0);
