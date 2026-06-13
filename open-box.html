@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v48-content-fit-corrected-open-box-8 -->
+  <!-- version: open-box-v49-arabic-descenders-safe-open-box-9 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -790,6 +790,34 @@
       line-height:1.04 !important;
     }
 
+    /* v49:
+       - منع قص الأجزاء السفلية من الحروف العربية.
+       - زيادة ارتفاع السطر وهامش النزول أسفل آخر سطر.
+       - إبقاء القص على منطقة المحتوى نفسها، مع السماح للنص بالرسم كاملًا داخلها.
+    */
+    .content-text-zone{
+      padding:1.2% 2.2% 2.8% !important;
+      overflow:hidden !important;
+    }
+
+    .result-text{
+      max-height:none !important;
+      overflow:visible !important;
+      line-height:1.18 !important;
+      padding:.08em 0 .24em !important;
+      text-rendering:optimizeLegibility;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .content-frame-mixed .content-text-zone{
+      padding:.4% 2.2% 2.6% !important;
+    }
+
+    .content-frame-mixed .result-text{
+      line-height:1.16 !important;
+      padding:.06em 0 .22em !important;
+    }
+
     .fixed-controls{
       position:absolute;
       left:0;
@@ -1450,23 +1478,25 @@
 
       el.style.width = isCover ? "88%" : "100%";
       el.style.height = "auto";
-      el.style.maxHeight = "100%";
-      el.style.lineHeight = mode === "mixed" ? "1.04" : "1.08";
+      el.style.maxHeight = isCover ? "100%" : "none";
+      el.style.lineHeight = isCover ? "1.08" : (mode === "mixed" ? "1.16" : "1.18");
       el.style.whiteSpace = "normal";
       el.style.wordBreak = "normal";
       el.style.overflowWrap = "normal";
+      el.style.overflow = isCover ? "hidden" : "visible";
 
       let low = minFont;
       let high = Math.max(minFont, maxFont);
       let best = minFont;
 
-      for (let i = 0; i < 20; i += 1) {
+      for (let i = 0; i < 22; i += 1) {
         const mid = (low + high) / 2;
         el.style.setProperty("--fit-font-size", `${mid}px`);
         el.style.setProperty("font-size", `${mid}px`, "important");
 
-        const fitsWidth = el.scrollWidth <= availableWidth + .75;
-        const fitsHeight = el.scrollHeight <= availableHeight + .75;
+        const descentSafety = isCover ? 0 : Math.max(2, mid * .12);
+        const fitsWidth = el.scrollWidth <= availableWidth + .5;
+        const fitsHeight = el.scrollHeight + descentSafety <= availableHeight + .5;
 
         if (fitsWidth && fitsHeight) {
           best = mid;
