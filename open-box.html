@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v47-full-content-zones-auto-fit-open-box-7 -->
+  <!-- version: open-box-v48-content-fit-corrected-open-box-8 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -638,15 +638,20 @@
     }
 
 
-    /* v47: منطقة محتوى داخلية كاملة + تقسيمات مخفية للنص والصورة */
+    /* v48:
+       - قياس نص الغلاف فقط أثناء إغلاق الصندوق حتى لا يصغر عند تحوله إلى شريط علوي.
+       - استخدام كامل التجويف الداخلي الآمن للمحتوى.
+       - تقسيم مرن للصورة والنص حسب طول النص.
+       - تطبيق حجم الخط المحسوب فعليًا رغم قواعد CSS السابقة.
+    */
     .box-content{
-      left:7.2% !important;
-      right:7.2% !important;
-      top:11.7% !important;
-      bottom:7.2% !important;
+      left:8.2% !important;
+      right:8.2% !important;
+      top:9.7% !important;
+      bottom:7.4% !important;
       z-index:6 !important;
       overflow:hidden !important;
-      padding:clamp(2px, calc(var(--tile-size) * .018), 5px) !important;
+      padding:0 !important;
       display:flex !important;
       align-items:stretch !important;
       justify-content:stretch !important;
@@ -673,8 +678,24 @@
 
     .content-frame-mixed{
       grid-template-columns:minmax(0, 1fr);
-      grid-template-rows:minmax(0, 67fr) minmax(0, 31fr);
-      gap:2%;
+      grid-template-rows:minmax(0, 67fr) minmax(0, 33fr);
+      gap:1%;
+    }
+
+    .content-frame-mixed.mixed-short{
+      grid-template-rows:minmax(0, 74fr) minmax(0, 26fr);
+    }
+
+    .content-frame-mixed.mixed-medium{
+      grid-template-rows:minmax(0, 66fr) minmax(0, 34fr);
+    }
+
+    .content-frame-mixed.mixed-long{
+      grid-template-rows:minmax(0, 57fr) minmax(0, 43fr);
+    }
+
+    .content-frame-mixed.mixed-xlong{
+      grid-template-rows:minmax(0, 49fr) minmax(0, 51fr);
     }
 
     .content-zone{
@@ -687,6 +708,7 @@
       align-items:center;
       justify-content:center;
       position:relative;
+      box-sizing:border-box;
     }
 
     .content-image-zone{
@@ -694,24 +716,38 @@
     }
 
     .content-text-zone{
-      padding:clamp(1px, calc(var(--tile-size) * .012), 3px)
-              clamp(2px, calc(var(--tile-size) * .018), 5px);
+      padding:1% 2%;
+    }
+
+    .cover-text{
+      width:88% !important;
+      height:auto !important;
+      max-width:88% !important;
+      max-height:82% !important;
+      font-size:var(--fit-font-size, clamp(16px, calc(var(--tile-size) * .23), 42px)) !important;
+      line-height:1.08 !important;
+      overflow:hidden !important;
+      overflow-wrap:normal !important;
+      word-break:normal !important;
+      white-space:normal !important;
+      box-sizing:border-box !important;
     }
 
     .result-text{
       width:100% !important;
       height:auto !important;
       max-width:100% !important;
-      max-height:none !important;
+      max-height:100% !important;
       min-width:0 !important;
+      min-height:0 !important;
       display:block !important;
       text-align:center !important;
       color:#fff !important;
-      font-size:clamp(10px, calc(var(--tile-size) * .18), 34px) !important;
-      line-height:1.08 !important;
+      font-size:var(--fit-font-size, clamp(10px, calc(var(--tile-size) * .18), 34px)) !important;
+      line-height:1.07 !important;
       font-weight:900 !important;
-      overflow:visible !important;
-      overflow-wrap:break-word !important;
+      overflow:hidden !important;
+      overflow-wrap:normal !important;
       word-break:normal !important;
       white-space:normal !important;
       text-shadow:0 2px 5px rgba(0,0,0,.24) !important;
@@ -719,6 +755,7 @@
       margin:0 !important;
       direction:rtl !important;
       unicode-bidi:plaintext !important;
+      box-sizing:border-box !important;
     }
 
     .result-image{
@@ -736,15 +773,21 @@
     }
 
     .content-frame-mixed .content-image-zone{
-      padding:0 1% 1%;
+      padding:0 1%;
+      align-items:flex-start;
+    }
+
+    .content-frame-mixed .result-image{
+      object-position:center top !important;
     }
 
     .content-frame-mixed .content-text-zone{
       padding:0 2% 1%;
+      align-items:center;
     }
 
     .content-frame-mixed .result-text{
-      line-height:1.05 !important;
+      line-height:1.04 !important;
     }
 
     .fixed-controls{
@@ -1297,7 +1340,9 @@
         img.className = "result-image";
         img.alt = "";
         img.src = entry.imageData || entry.imageName;
-        img.addEventListener("load", ()=> requestAnimationFrame(fitAllBoxText), { once:true });
+        img.addEventListener("load", ()=> {
+          requestAnimationFrame(()=> fitOpenedBoxContent(img.closest(".box-card")));
+        }, { once:true });
 
         zone.appendChild(img);
         return zone;
@@ -1317,6 +1362,16 @@
       };
 
       if (hasImage && hasText) {
+        const textLength = Array.from(cleanText.replace(/\s+/g, " ")).length;
+        const lengthClass = textLength <= 18
+          ? "mixed-short"
+          : textLength <= 42
+            ? "mixed-medium"
+            : textLength <= 78
+              ? "mixed-long"
+              : "mixed-xlong";
+
+        frame.classList.add(lengthClass);
         frame.appendChild(createImageZone());
         frame.appendChild(createTextZone("mixed"));
         return frame;
@@ -1332,12 +1387,33 @@
     }
 
     function fitAllBoxText(){
-      document.querySelectorAll(".result-text.fit-text, .cover-text.fit-text").forEach((el)=> fitTextInsideBox(el));
+      document
+        .querySelectorAll(".box-card:not(.opened) .cover-text.fit-text")
+        .forEach((el)=> fitTextInsideBox(el));
+
+      document
+        .querySelectorAll(".box-card.opened .result-text.fit-text")
+        .forEach((el)=> fitTextInsideBox(el));
+    }
+
+    function fitOpenedBoxContent(card){
+      if (!card || !card.classList.contains("opened")) return;
+      card.querySelectorAll(".result-text.fit-text").forEach((el)=> fitTextInsideBox(el));
+    }
+
+    function fitClosedCoverText(card){
+      if (!card || card.classList.contains("opened")) return;
+      card.querySelectorAll(".cover-text.fit-text").forEach((el)=> fitTextInsideBox(el));
     }
 
     function fitTextInsideBox(el){
       const mode = el.dataset.fitText || "text";
       const isCover = mode === "cover";
+      const card = el.closest(".box-card");
+
+      // لا نقيس الغلاف بعد فتح الصندوق؛ وقتها يتحول الغلاف إلى شريط علوي صغير.
+      if (isCover && card?.classList.contains("opened")) return;
+
       const zone = isCover
         ? el.closest(".front-panel")
         : el.closest(".content-text-zone");
@@ -1346,43 +1422,51 @@
 
       const zoneWidth = Math.max(0, zone.clientWidth);
       const zoneHeight = Math.max(0, zone.clientHeight);
-      if (!zoneWidth || !zoneHeight) return;
+      if (zoneWidth < 2 || zoneHeight < 2) return;
 
       const tile = parseFloat(
         getComputedStyle(document.documentElement).getPropertyValue("--tile-size")
       ) || zoneWidth;
 
-      const availableWidth = isCover ? zoneWidth * .84 : Math.max(1, zoneWidth - 2);
-      const availableHeight = isCover ? zoneHeight * .72 : Math.max(1, zoneHeight - 2);
+      const availableWidth = isCover
+        ? Math.max(1, zoneWidth * .88)
+        : Math.max(1, zoneWidth - 2);
+
+      const availableHeight = isCover
+        ? Math.max(1, zoneHeight * .82)
+        : Math.max(1, zoneHeight - 2);
 
       const maxFont = isCover
-        ? Math.min(tile * .25, availableWidth * .21, availableHeight * .42, 42)
+        ? Math.min(tile * .29, availableWidth * .24, availableHeight * .50, 46)
         : mode === "mixed"
-          ? Math.min(tile * .17, availableWidth * .20, availableHeight * .46, 27)
-          : Math.min(tile * .34, availableWidth * .27, availableHeight * .42, 52);
+          ? Math.min(tile * .23, availableWidth * .24, availableHeight * .62, 36)
+          : Math.min(tile * .38, availableWidth * .31, availableHeight * .48, 60);
 
       const minFont = isCover
-        ? Math.max(7, Math.min(tile * .052, 11))
-        : Math.max(6, Math.min(tile * .052, 11));
+        ? Math.max(13, Math.min(tile * .085, 18))
+        : mode === "mixed"
+          ? Math.max(7, Math.min(tile * .050, 11))
+          : Math.max(8, Math.min(tile * .055, 12));
 
-      el.style.width = isCover ? "86%" : "100%";
+      el.style.width = isCover ? "88%" : "100%";
       el.style.height = "auto";
-      el.style.maxHeight = "none";
-      el.style.lineHeight = mode === "mixed" ? "1.05" : "1.08";
+      el.style.maxHeight = "100%";
+      el.style.lineHeight = mode === "mixed" ? "1.04" : "1.08";
       el.style.whiteSpace = "normal";
       el.style.wordBreak = "normal";
-      el.style.overflowWrap = "break-word";
+      el.style.overflowWrap = "normal";
 
       let low = minFont;
       let high = Math.max(minFont, maxFont);
       let best = minFont;
 
-      for (let i = 0; i < 18; i += 1) {
+      for (let i = 0; i < 20; i += 1) {
         const mid = (low + high) / 2;
-        el.style.fontSize = `${mid}px`;
+        el.style.setProperty("--fit-font-size", `${mid}px`);
+        el.style.setProperty("font-size", `${mid}px`, "important");
 
-        const fitsWidth = el.scrollWidth <= availableWidth + .5;
-        const fitsHeight = el.scrollHeight <= availableHeight + .5;
+        const fitsWidth = el.scrollWidth <= availableWidth + .75;
+        const fitsHeight = el.scrollHeight <= availableHeight + .75;
 
         if (fitsWidth && fitsHeight) {
           best = mid;
@@ -1392,7 +1476,9 @@
         }
       }
 
-      el.style.fontSize = `${Math.floor(best * 10) / 10}px`;
+      const finalSize = Math.floor(best * 10) / 10;
+      el.style.setProperty("--fit-font-size", `${finalSize}px`);
+      el.style.setProperty("font-size", `${finalSize}px`, "important");
     }
 
     function clamp(value, min, max){
@@ -1539,9 +1625,10 @@
           button.setAttribute("aria-pressed", "true");
         }
 
-        requestAnimationFrame(fitAllBoxText);
-        window.setTimeout(fitAllBoxText, 420);
-        window.setTimeout(fitAllBoxText, 900);
+        requestAnimationFrame(()=> fitOpenedBoxContent(button));
+        window.setTimeout(()=> fitOpenedBoxContent(button), 120);
+        window.setTimeout(()=> fitOpenedBoxContent(button), 430);
+        window.setTimeout(()=> fitOpenedBoxContent(button), 920);
       } finally {
         boxInteractionLocked = false;
       }
@@ -1593,6 +1680,9 @@
       });
 
       resetBoxZoom(1050);
+      window.setTimeout(()=> {
+        document.querySelectorAll(".box-card:not(.opened)").forEach(fitClosedCoverText);
+      }, 920);
     }
 
     function goBack(){
