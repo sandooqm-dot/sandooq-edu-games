@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v51-slower-focus-motion-open-box-11 -->
+  <!-- version: open-box-v52-ultra-slow-smooth-focus-open-box-12 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -154,10 +154,11 @@
         translate3d(var(--scatter-x), var(--scatter-y), 0)
         scale(var(--scatter-scale));
       transition:
-        transform 1.22s cubic-bezier(.22,.84,.24,1) var(--scatter-delay),
-        opacity .82s ease calc(var(--scatter-delay) + .34s),
-        filter .82s ease calc(var(--scatter-delay) + .34s);
-      will-change:transform, opacity, filter;
+        transform 3s cubic-bezier(.37,0,.63,1) var(--scatter-delay),
+        opacity 3s cubic-bezier(.37,0,.63,1) var(--scatter-delay);
+      will-change:transform, opacity;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
     .box-card.focus-selected{
@@ -171,7 +172,6 @@
     .box-card.focus-away{
       opacity:0;
       pointer-events:none;
-      filter:blur(1px);
     }
 
     .box-grid.focus-mode .box-card:not(.focus-selected){
@@ -1074,6 +1074,11 @@
     let activeFocusButton = null;
     let selectedBoxIndex = -1;
 
+    const SCATTER_MOTION_MS = 3000;
+    const ZOOM_IN_MOTION_MS = 3200;
+    const ZOOM_OUT_MOTION_MS = 3000;
+    const SCATTER_LEAD_MS = 140;
+
     const BOX_COLOR_PALETTES = [
       ["#ef2f6a","#ff6f9a","#bd0e46","#d45e82","#981737","#ef2f6a",1.02,1.24],
       ["#b9df4a","#d8f47b","#80aa32","#b3d95c","#5d9430","#b9df4a",1.05,1.20],
@@ -1739,7 +1744,7 @@
 
       cards.forEach((card, cardIndex)=>{
         card.classList.remove("focus-selected", "focus-away");
-        card.style.setProperty("--scatter-delay", `${Math.min(180, (cardIndex % 6) * 28)}ms`);
+        card.style.setProperty("--scatter-delay", "0ms");
 
         if (card === selectedButton) {
           card.classList.add("focus-selected");
@@ -1786,7 +1791,7 @@
       });
     }
 
-    function focusBox(button, duration = 1550){
+    function focusBox(button, duration = ZOOM_IN_MOTION_MS){
       if (!button) return Promise.resolve();
 
       focusedIndex = Number(button.dataset.index || -1);
@@ -1796,7 +1801,7 @@
       return animateBoxZoom(target, duration);
     }
 
-    function resetBoxZoom(duration = 900){
+    function resetBoxZoom(duration = ZOOM_OUT_MOTION_MS){
       activeFocusButton = null;
 
       return animateBoxZoom({ scale:1, x:0, y:0 }, duration).then(()=>{
@@ -1815,10 +1820,15 @@
 
       try {
         scatterOtherBoxes(button);
+        const scatterFinished = wait(SCATTER_MOTION_MS);
 
-        // تبدأ حركة الابتعاد أولًا بوضوح، ثم يقترب الصندوق المختار ببطء إلى المنتصف.
-        await wait(140);
-        await focusBox(button, 1550);
+        // تبدأ الصناديق بالابتعاد أولًا، ثم يبدأ الزوم البطيء ويستمران بسلاسة معًا.
+        await wait(SCATTER_LEAD_MS);
+
+        await Promise.all([
+          scatterFinished,
+          focusBox(button, ZOOM_IN_MOTION_MS)
+        ]);
 
         if (!opened.has(index)) {
           setOpenButtonVisible(true);
@@ -1871,7 +1881,7 @@
       }
     }
 
-    async function returnFocusScene(duration = 760){
+    async function returnFocusScene(){
       setOpenButtonVisible(false);
 
       if (boxInteractionLocked) return;
@@ -1879,8 +1889,11 @@
 
       try {
         restoreScatteredBoxes();
-        await resetBoxZoom(duration);
-        await wait(80);
+
+        await Promise.all([
+          wait(SCATTER_MOTION_MS),
+          resetBoxZoom(ZOOM_OUT_MOTION_MS)
+        ]);
 
         selectedBoxIndex = -1;
         activeFocusButton = null;
@@ -1897,7 +1910,7 @@
       if (boxInteractionLocked) return;
 
       if (focusedIndex >= 0 || boxFocusState.scale > 1.001 || selectedBoxIndex >= 0) {
-        await returnFocusScene(760);
+        await returnFocusScene();
         return;
       }
 
@@ -1915,7 +1928,7 @@
       if (event.target.closest(".fixed-controls")) return;
 
       event.preventDefault();
-      await returnFocusScene(760);
+      await returnFocusScene();
     }
 
     async function resetBoxes(event){
@@ -1936,7 +1949,11 @@
       boxInteractionLocked = true;
 
       try {
-        await resetBoxZoom(920);
+        await Promise.all([
+          wait(SCATTER_MOTION_MS),
+          resetBoxZoom(ZOOM_OUT_MOTION_MS)
+        ]);
+
         selectedBoxIndex = -1;
         activeFocusButton = null;
       } finally {
