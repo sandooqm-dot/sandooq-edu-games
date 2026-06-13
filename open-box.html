@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v52-ultra-slow-smooth-focus-open-box-12 -->
+  <!-- version: open-box-v53-compositor-smooth-motion-open-box-13 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -118,18 +118,16 @@
       align-content:center;
       gap:var(--tile-gap);
       transform-origin:0 0;
-      transform:translate3d(var(--box-focus-x, 0px), var(--box-focus-y, 0px), 0) scale(var(--box-focus-scale, 1));
+      transform:translate3d(0, 0, 0) scale(1);
       will-change:transform;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      contain:layout paint;
+      isolation:isolate;
     }
 
-    /* v37: زوم بأسلوب العجلة: المتغيرات تتحرك بـ requestAnimationFrame وليس transition */
     .stage{
       overflow:hidden;
-    }
-
-    .box-grid.zooming,
-    .box-grid.zoomed{
-      transform:translate3d(var(--box-focus-x, 0px), var(--box-focus-y, 0px), 0) scale(var(--box-focus-scale, 1));
     }
 
     /*
@@ -146,31 +144,24 @@
        - ضغطة لاحقة على الشاشة تعيد جميع الصناديق إلى مواقعها.
     */
     .box-card{
-      --scatter-x:0px;
-      --scatter-y:0px;
-      --scatter-scale:1;
-      --scatter-delay:0ms;
-      transform:
-        translate3d(var(--scatter-x), var(--scatter-y), 0)
-        scale(var(--scatter-scale));
-      transition:
-        transform 3s cubic-bezier(.37,0,.63,1) var(--scatter-delay),
-        opacity 3s cubic-bezier(.37,0,.63,1) var(--scatter-delay);
+      transform:translate3d(0, 0, 0) scale(1);
+      opacity:1;
       will-change:transform, opacity;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
+      contain:layout paint style;
     }
 
     .box-card.focus-selected{
       z-index:55;
       opacity:1;
-      --scatter-x:0px;
-      --scatter-y:0px;
-      --scatter-scale:1;
     }
 
     .box-card.focus-away{
-      opacity:0;
+      pointer-events:none;
+    }
+
+    .box-grid.motion-active .box-card{
       pointer-events:none;
     }
 
@@ -1069,15 +1060,19 @@
     let opened = new Set();
     let focusedIndex = -1;
     let boxZoomAnimationId = null;
+    let boxZoomWebAnimation = null;
     let boxFocusState = { scale:1, x:0, y:0 };
     let boxInteractionLocked = false;
     let activeFocusButton = null;
     let selectedBoxIndex = -1;
+    let scatterAnimations = new Map();
+    let scatterTargets = new Map();
 
-    const SCATTER_MOTION_MS = 3000;
-    const ZOOM_IN_MOTION_MS = 3200;
-    const ZOOM_OUT_MOTION_MS = 3000;
-    const SCATTER_LEAD_MS = 140;
+    const SCATTER_MOTION_MS = 3200;
+    const ZOOM_IN_MOTION_MS = 3300;
+    const ZOOM_OUT_MOTION_MS = 3200;
+    const SCATTER_LEAD_MS = 120;
+    const MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
 
     const BOX_COLOR_PALETTES = [
       ["#ef2f6a","#ff6f9a","#bd0e46","#d45e82","#981737","#ef2f6a",1.02,1.24],
@@ -1603,22 +1598,24 @@
       return Math.min(max, Math.max(min, value));
     }
 
+    function makeGridTransform(scale, x, y){
+      return `translate3d(${x.toFixed(3)}px, ${y.toFixed(3)}px, 0) scale(${scale.toFixed(6)})`;
+    }
+
     function setBoxFocusState(scale, x, y){
       boxFocusState = { scale, x, y };
-
-      const transformValue = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) scale(${scale.toFixed(5)})`;
-
-      grid.style.setProperty("--box-focus-scale", scale.toFixed(5));
-      grid.style.setProperty("--box-focus-x", `${x.toFixed(2)}px`);
-      grid.style.setProperty("--box-focus-y", `${y.toFixed(2)}px`);
-      grid.style.transform = transformValue;
-      grid.classList.toggle("zoomed", scale > 1.001);
+      grid.style.transform = makeGridTransform(scale, x, y);
     }
 
     function cancelBoxZoomAnimation(){
       if (boxZoomAnimationId) {
         cancelAnimationFrame(boxZoomAnimationId);
         boxZoomAnimationId = null;
+      }
+
+      if (boxZoomWebAnimation) {
+        try { boxZoomWebAnimation.cancel(); } catch (_) {}
+        boxZoomWebAnimation = null;
       }
     }
 
@@ -1642,7 +1639,41 @@
         return Promise.resolve();
       }
 
+      const startTransform = makeGridTransform(start.scale, start.x, start.y);
+      const endTransform = makeGridTransform(end.scale, end.x, end.y);
+
       grid.classList.add("zooming");
+
+      if (typeof grid.animate === "function") {
+        boxZoomWebAnimation = grid.animate(
+          [
+            { transform:startTransform },
+            { transform:endTransform }
+          ],
+          {
+            duration,
+            easing:MOTION_EASING,
+            fill:"forwards"
+          }
+        );
+
+        return boxZoomWebAnimation.finished
+          .catch(()=> {})
+          .then(()=>{
+            grid.style.transform = endTransform;
+
+            if (boxZoomWebAnimation) {
+              try { boxZoomWebAnimation.cancel(); } catch (_) {}
+              boxZoomWebAnimation = null;
+            }
+
+            boxFocusState = end;
+            grid.classList.remove("zooming");
+            grid.classList.toggle("zoomed", end.scale > 1.001);
+          });
+      }
+
+      // fallback للمتصفحات القديمة: نفس منطق العجلة بـ requestAnimationFrame
       const startTime = performance.now();
 
       return new Promise((resolve)=>{
@@ -1660,6 +1691,7 @@
           } else {
             boxZoomAnimationId = null;
             grid.classList.remove("zooming");
+            grid.classList.toggle("zoomed", end.scale > 1.001);
             setBoxFocusState(end.scale, end.x, end.y);
             resolve();
           }
@@ -1731,33 +1763,44 @@
       });
     }
 
-    function scatterOtherBoxes(selectedButton){
-      const cards = Array.from(grid.querySelectorAll(".box-card"));
-      if (!selectedButton || !cards.length) return;
+    function cancelScatterAnimations(){
+      scatterAnimations.forEach((animation)=>{
+        try { animation.cancel(); } catch (_) {}
+      });
+      scatterAnimations.clear();
+    }
 
+    function prepareScatterTargets(selectedButton){
+      const cards = Array.from(grid.querySelectorAll(".box-card"));
+      const targets = new Map();
+
+      if (!selectedButton || !cards.length) return { cards, targets };
+
+      // قراءة جميع القياسات أولًا قبل أي كتابة لتجنب layout thrashing.
       const stageRect = stage.getBoundingClientRect();
       const selectedCenterX = selectedButton.offsetLeft + selectedButton.offsetWidth / 2;
       const selectedCenterY = selectedButton.offsetTop + selectedButton.offsetHeight / 2;
-      const travel = Math.max(stageRect.width, stageRect.height) * .78 + selectedButton.offsetWidth * 1.6;
+      const tile = selectedButton.offsetWidth || 1;
+      const travel = Math.max(stageRect.width, stageRect.height) * .78 + tile * 1.6;
 
-      grid.classList.add("focus-mode");
+      const geometry = cards.map((card, cardIndex)=> ({
+        card,
+        cardIndex,
+        centerX:card.offsetLeft + card.offsetWidth / 2,
+        centerY:card.offsetTop + card.offsetHeight / 2
+      }));
 
-      cards.forEach((card, cardIndex)=>{
-        card.classList.remove("focus-selected", "focus-away");
-        card.style.setProperty("--scatter-delay", "0ms");
-
+      geometry.forEach(({ card, cardIndex, centerX, centerY })=>{
         if (card === selectedButton) {
-          card.classList.add("focus-selected");
-          card.style.setProperty("--scatter-x", "0px");
-          card.style.setProperty("--scatter-y", "0px");
-          card.style.setProperty("--scatter-scale", "1");
+          targets.set(card, {
+            transform:"translate3d(0px, 0px, 0) scale(1)",
+            opacity:1
+          });
           return;
         }
 
-        const cardCenterX = card.offsetLeft + card.offsetWidth / 2;
-        const cardCenterY = card.offsetTop + card.offsetHeight / 2;
-        let dx = cardCenterX - selectedCenterX;
-        let dy = cardCenterY - selectedCenterY;
+        let dx = centerX - selectedCenterX;
+        let dy = centerY - selectedCenterY;
         let length = Math.hypot(dx, dy);
 
         if (length < 1) {
@@ -1769,26 +1812,146 @@
 
         const unitX = dx / length;
         const unitY = dy / length;
-        const extra = (cardIndex % 4) * selectedButton.offsetWidth * .10;
+        const extra = (cardIndex % 4) * tile * .10;
         const distance = travel + extra;
 
-        card.style.setProperty("--scatter-x", `${(unitX * distance).toFixed(1)}px`);
-        card.style.setProperty("--scatter-y", `${(unitY * distance).toFixed(1)}px`);
-        card.style.setProperty("--scatter-scale", ".76");
+        targets.set(card, {
+          transform:`translate3d(${(unitX * distance).toFixed(2)}px, ${(unitY * distance).toFixed(2)}px, 0) scale(.76)`,
+          opacity:0
+        });
+      });
+
+      return { cards, targets };
+    }
+
+    function scatterOtherBoxes(selectedButton){
+      cancelScatterAnimations();
+      scatterTargets.clear();
+
+      const { cards, targets } = prepareScatterTargets(selectedButton);
+      if (!selectedButton || !cards.length) return Promise.resolve();
+
+      grid.classList.add("focus-mode", "motion-active");
+
+      const promises = [];
+
+      cards.forEach((card)=>{
+        card.classList.remove("focus-selected", "focus-away");
+        card.style.transform = "translate3d(0px, 0px, 0) scale(1)";
+        card.style.opacity = "1";
+
+        const target = targets.get(card);
+        if (!target) return;
+
+        scatterTargets.set(card, target);
+
+        if (card === selectedButton) {
+          card.classList.add("focus-selected");
+          return;
+        }
+
         card.classList.add("focus-away");
+
+        if (typeof card.animate === "function") {
+          const animation = card.animate(
+            [
+              {
+                transform:"translate3d(0px, 0px, 0) scale(1)",
+                opacity:1
+              },
+              {
+                transform:target.transform,
+                opacity:target.opacity
+              }
+            ],
+            {
+              duration:SCATTER_MOTION_MS,
+              easing:MOTION_EASING,
+              fill:"forwards"
+            }
+          );
+
+          scatterAnimations.set(card, animation);
+          promises.push(animation.finished.catch(()=> {}));
+        } else {
+          card.style.transform = target.transform;
+          card.style.opacity = String(target.opacity);
+        }
+      });
+
+      if (!promises.length) return wait(SCATTER_MOTION_MS);
+      return Promise.all(promises);
+    }
+
+    function animateScatteredBoxesBack(){
+      cancelScatterAnimations();
+      grid.classList.add("motion-active");
+
+      const cards = Array.from(grid.querySelectorAll(".box-card"));
+      const promises = [];
+
+      cards.forEach((card)=>{
+        if (card.classList.contains("focus-selected")) return;
+
+        const target = scatterTargets.get(card);
+        if (!target) return;
+
+        if (typeof card.animate === "function") {
+          const animation = card.animate(
+            [
+              {
+                transform:target.transform,
+                opacity:target.opacity
+              },
+              {
+                transform:"translate3d(0px, 0px, 0) scale(1)",
+                opacity:1
+              }
+            ],
+            {
+              duration:SCATTER_MOTION_MS,
+              easing:MOTION_EASING,
+              fill:"forwards"
+            }
+          );
+
+          scatterAnimations.set(card, animation);
+          promises.push(animation.finished.catch(()=> {}));
+        } else {
+          card.style.transform = "translate3d(0px, 0px, 0) scale(1)";
+          card.style.opacity = "1";
+        }
+      });
+
+      const finished = promises.length
+        ? Promise.all(promises)
+        : wait(SCATTER_MOTION_MS);
+
+      return finished.then(()=>{
+        cancelScatterAnimations();
+
+        cards.forEach((card)=>{
+          card.style.transform = "translate3d(0px, 0px, 0) scale(1)";
+          card.style.opacity = "1";
+          card.classList.remove("focus-selected", "focus-away");
+        });
+
+        scatterTargets.clear();
+        grid.classList.remove("focus-mode", "motion-active");
       });
     }
 
     function restoreScatteredBoxes(){
-      grid.classList.remove("focus-mode");
+      cancelScatterAnimations();
 
       grid.querySelectorAll(".box-card").forEach((card)=>{
+        card.style.transform = "translate3d(0px, 0px, 0) scale(1)";
+        card.style.opacity = "1";
         card.classList.remove("focus-selected", "focus-away");
-        card.style.setProperty("--scatter-x", "0px");
-        card.style.setProperty("--scatter-y", "0px");
-        card.style.setProperty("--scatter-scale", "1");
-        card.style.setProperty("--scatter-delay", "0ms");
       });
+
+      scatterTargets.clear();
+      grid.classList.remove("focus-mode", "motion-active");
     }
 
     function focusBox(button, duration = ZOOM_IN_MOTION_MS){
@@ -1819,16 +1982,17 @@
       setOpenButtonVisible(false);
 
       try {
-        scatterOtherBoxes(button);
-        const scatterFinished = wait(SCATTER_MOTION_MS);
+        const scatterFinished = scatterOtherBoxes(button);
 
-        // تبدأ الصناديق بالابتعاد أولًا، ثم يبدأ الزوم البطيء ويستمران بسلاسة معًا.
+        // تبدأ الصناديق بالابتعاد أولًا، ثم يبدأ الزوم ويستمران على compositor.
         await wait(SCATTER_LEAD_MS);
 
         await Promise.all([
           scatterFinished,
           focusBox(button, ZOOM_IN_MOTION_MS)
         ]);
+
+        grid.classList.remove("motion-active");
 
         if (!opened.has(index)) {
           setOpenButtonVisible(true);
@@ -1888,10 +2052,8 @@
       boxInteractionLocked = true;
 
       try {
-        restoreScatteredBoxes();
-
         await Promise.all([
-          wait(SCATTER_MOTION_MS),
+          animateScatteredBoxesBack(),
           resetBoxZoom(ZOOM_OUT_MOTION_MS)
         ]);
 
@@ -1939,7 +2101,6 @@
 
       setOpenButtonVisible(false);
       opened.clear();
-      restoreScatteredBoxes();
 
       document.querySelectorAll(".box-card.opened").forEach((card)=>{
         card.classList.remove("opened");
@@ -1949,8 +2110,12 @@
       boxInteractionLocked = true;
 
       try {
+        const scatterReturn = scatterTargets.size
+          ? animateScatteredBoxesBack()
+          : Promise.resolve();
+
         await Promise.all([
-          wait(SCATTER_MOTION_MS),
+          scatterReturn,
           resetBoxZoom(ZOOM_OUT_MOTION_MS)
         ]);
 
