@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v56-stable-intro-visual-viewport-open-box-16 -->
+  <!-- version: open-box-v57-camera-then-scatter-return-open-box-17 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -188,11 +188,23 @@
 
     .game-page.intro-playing .stage{
       transform-origin:center center;
-      transform:translate3d(0,0,0) scale(.42);
-      will-change:transform;
+      transform:translate3d(0,0,0) scale(1);
       pointer-events:none;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
+    }
+
+    /* لا تظهر الشبكة نهائيًا أثناء زوم الخلفية. */
+    .game-page.intro-camera .box-grid{
+      visibility:hidden;
+    }
+
+    /*
+      بعد ثبات الكاميرا تصبح الشبكة مرئية، لكن كل صندوق يكون
+      خارج المشهد وشفافيته صفر قبل تشغيل حركة العودة.
+    */
+    .game-page.intro-boxes-entering .box-grid{
+      visibility:visible;
     }
 
     .game-page.intro-playing .theme-background{
@@ -216,7 +228,8 @@
     @media (prefers-reduced-motion: reduce){
       .game-page.intro-playing .stage,
       .game-page.intro-playing .game-logo,
-      .game-page.intro-playing .theme-background{
+      .game-page.intro-playing .theme-background,
+      .game-page.intro-boxes-entering .box-card{
         animation:none !important;
       }
     }
@@ -1151,7 +1164,7 @@
   </style>
 </head>
 <body>
-  <main class="game-page theme-white intro-playing" id="gamePage">
+  <main class="game-page theme-white intro-playing intro-camera" id="gamePage">
     <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
     <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
 
@@ -2254,6 +2267,64 @@
       return { cards, targets };
     }
 
+    function prepareIntroScatterTargets(){
+      cancelScatterAnimations();
+      scatterTargets.clear();
+
+      const cards = Array.from(grid.querySelectorAll(".box-card"));
+      if (!cards.length) return cards;
+
+      /*
+        نستخدم نفس هندسة حركة ابتعاد/عودة الصناديق أثناء اللعب:
+        كل صندوق يخرج بحسب موقعه من مركز الشبكة، ثم يعود إلى موضعه.
+      */
+      const stageWidth = stage.clientWidth || window.innerWidth || 1;
+      const stageHeight = stage.clientHeight || window.innerHeight || 1;
+      const gridCenterX = grid.clientWidth / 2;
+      const gridCenterY = grid.clientHeight / 2;
+      const tile = cards[0].offsetWidth || 1;
+      const travel = Math.max(stageWidth, stageHeight) * .78 + tile * 1.6;
+
+      const geometry = cards.map((card, cardIndex)=> ({
+        card,
+        cardIndex,
+        centerX:card.offsetLeft + card.offsetWidth / 2,
+        centerY:card.offsetTop + card.offsetHeight / 2
+      }));
+
+      geometry.forEach(({ card, cardIndex, centerX, centerY })=>{
+        let dx = centerX - gridCenterX;
+        let dy = centerY - gridCenterY;
+        let length = Math.hypot(dx, dy);
+
+        if (length < 1) {
+          const angle = ((cardIndex + 1) * 2.399963229728653) % (Math.PI * 2);
+          dx = Math.cos(angle);
+          dy = Math.sin(angle);
+          length = 1;
+        }
+
+        const unitX = dx / length;
+        const unitY = dy / length;
+        const extra = (cardIndex % 4) * tile * .10;
+        const distance = travel + extra;
+
+        const target = {
+          transform:`translate3d(${(unitX * distance).toFixed(2)}px, ${(unitY * distance).toFixed(2)}px, 0) scale(.76)`,
+          opacity:0
+        };
+
+        scatterTargets.set(card, target);
+        card.style.transform = target.transform;
+        card.style.opacity = "0";
+        card.classList.remove("focus-selected");
+        card.classList.add("focus-away");
+      });
+
+      grid.classList.add("focus-mode");
+      return cards;
+    }
+
     function scatterOtherBoxes(selectedButton){
       cancelScatterAnimations();
       scatterTargets.clear();
@@ -2649,34 +2720,30 @@
     }, { passive:true });
 
     async function playOpeningIntro(){
-      if (!page || !stage) return;
+      if (!page || !stage || !grid) return;
 
       if (introFrameId) {
         cancelAnimationFrame(introFrameId);
         introFrameId = null;
       }
 
-      page.classList.remove("intro-done");
-      page.classList.add("intro-playing");
+      page.classList.remove("intro-done", "intro-boxes-entering");
+      page.classList.add("intro-playing", "intro-camera");
 
-      introLayoutFrozen = true;
       pendingViewportLayout = false;
+      introLayoutFrozen = false;
 
       const holdMs = 2200;
-      const viewportSettleMs = 1050;
       const zoomMs = 7600;
-      const startStageScale = 0.42;
-      const endStageScale = 1;
+      const settlePauseMs = 280;
       const startBgScale = 1;
       const endBgScale =
         Number(getComputedStyle(page).getPropertyValue("--intro-bg-final-scale")) || 1.18;
 
       let startTime = null;
-      let viewportStabilized = false;
 
-      const setIntroFrame = (stageScale, bgScale)=>{
-        stage.style.transform =
-          `translate3d(0,0,0) scale(${Number(stageScale).toFixed(5)})`;
+      const setCameraFrame = (bgScale)=>{
+        stage.style.transform = "translate3d(0,0,0) scale(1)";
         stage.style.animation = "none";
 
         if (themeBackground) {
@@ -2688,43 +2755,25 @@
             (bgScale - startBgScale) /
             Math.max(.001, endBgScale - startBgScale);
           const saturation = 1.04 - ratio * .04;
+
           themeBackground.style.filter =
             `saturate(${Math.max(1, Math.min(1.04, saturation))})`;
         }
       };
 
-      const stabilizeViewportOnce = ()=>{
-        if (viewportStabilized) return;
-        viewportStabilized = true;
-
-        /*
-          Safari يكون قد أنهى طي الشريط تقريبًا في هذه اللحظة.
-          نحسب الشبكة مرة واحدة والصناديق ما زالت بعيدة، ثم نجمدها
-          حتى نهاية الزوم حتى لا تحدث القفزة الأخيرة.
-        */
-        syncVisualViewportFrame(true);
-        applyLayout({ force:true });
-        fitAllBoxText();
-        setIntroFrame(startStageScale, startBgScale);
-      };
-
-      const finish = ()=>{
+      const completeIntro = ()=>{
         if (introFrameId) {
           cancelAnimationFrame(introFrameId);
           introFrameId = null;
         }
 
-        if (!viewportStabilized) {
-          stabilizeViewportOnce();
-        }
+        setCameraFrame(endBgScale);
 
-        /*
-          نبقي scale(1) صراحة ولا نحذف transform؛ حذف transform كان
-          يسمح لسفاري بإظهار الحجم الجديد دفعة واحدة.
-        */
-        setIntroFrame(endStageScale, endBgScale);
-
-        page.classList.remove("intro-playing");
+        page.classList.remove(
+          "intro-playing",
+          "intro-camera",
+          "intro-boxes-entering"
+        );
         page.classList.add("intro-done");
 
         if (themeBackground) {
@@ -2738,29 +2787,28 @@
         }
 
         introLayoutFrozen = false;
+        boxInteractionLocked = false;
+        pendingViewportLayout = false;
 
-        // نحافظ على شريط Safari مطويًا دون إعادة تحجيم فوري.
         collapseSafariBars({ refresh:false });
-
-        // تحديث واحد هادئ بعد استقرار الانترو، فقط عند الحاجة.
-        window.setTimeout(()=>{
-          if (pendingViewportLayout) {
-            refreshResponsiveLayout({ force:true });
-          } else {
-            syncVisualViewportFrame(true);
-          }
-        }, 260);
       };
 
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        syncVisualViewportFrame(true);
-        applyLayout({ force:true });
-        finish();
-        return;
+      if (fixedControls) {
+        fixedControls.style.opacity = "0";
+        fixedControls.style.transform = "translateY(12px)";
+        fixedControls.style.pointerEvents = "none";
       }
 
-      setIntroFrame(startStageScale, startBgScale);
-      collapseSafariBars({ refresh:false });
+      /*
+        أثناء كاميرا الخلفية تكون الصناديق مخفية، لذلك نسمح لسفاري
+        بتحديث المساحة المرئية وترتيب الشبكة دون أن يرى المستخدم أي قفزة.
+      */
+      syncVisualViewportFrame(true);
+      applyLayout({ force:true });
+      fitAllBoxText();
+
+      setCameraFrame(startBgScale);
+      collapseSafariBars();
 
       await new Promise((resolve)=>{
         requestAnimationFrame(()=>{
@@ -2768,47 +2816,88 @@
         });
       });
 
-      await new Promise((resolve)=>{
-        const animate = (now)=>{
-          if (startTime === null) startTime = now;
-          const elapsed = now - startTime;
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        await new Promise((resolve)=>{
+          const animate = (now)=>{
+            if (startTime === null) startTime = now;
+            const elapsed = now - startTime;
 
-          if (!viewportStabilized && elapsed >= viewportSettleMs) {
-            stabilizeViewportOnce();
-          }
+            if (elapsed < holdMs) {
+              setCameraFrame(startBgScale);
+              introFrameId = requestAnimationFrame(animate);
+              return;
+            }
 
-          if (elapsed < holdMs) {
-            setIntroFrame(startStageScale, startBgScale);
-            introFrameId = requestAnimationFrame(animate);
-            return;
-          }
+            const progress = Math.max(
+              0,
+              Math.min(1, (elapsed - holdMs) / zoomMs)
+            );
+            const eased = easeInOutSine(progress);
+            const bgScale =
+              startBgScale + (endBgScale - startBgScale) * eased;
 
-          const progress = Math.max(
-            0,
-            Math.min(1, (elapsed - holdMs) / zoomMs)
-          );
-          const eased = easeInOutSine(progress);
+            setCameraFrame(bgScale);
 
-          const stageScale =
-            startStageScale + (endStageScale - startStageScale) * eased;
-          const bgScale =
-            startBgScale + (endBgScale - startBgScale) * eased;
+            if (progress < 1) {
+              introFrameId = requestAnimationFrame(animate);
+              return;
+            }
 
-          setIntroFrame(stageScale, bgScale);
-
-          if (progress < 1) {
-            introFrameId = requestAnimationFrame(animate);
-            return;
-          }
-
-          window.setTimeout(()=>{
-            finish();
+            introFrameId = null;
             resolve();
-          }, 220);
-        };
+          };
 
-        introFrameId = requestAnimationFrame(animate);
+          introFrameId = requestAnimationFrame(animate);
+        });
+      } else {
+        setCameraFrame(endBgScale);
+      }
+
+      /*
+        الكاميرا ثبتت الآن. نحسب المقاس والمركز النهائيين مرة واحدة
+        بينما الشبكة ما زالت مخفية، ثم نجمد التخطيط خلال دخول الصناديق.
+      */
+      collapseSafariBars({ refresh:false });
+
+      await wait(settlePauseMs);
+
+      syncVisualViewportFrame(true);
+      applyLayout({ force:true });
+      setBoxFocusState(1, 0, 0);
+      fitAllBoxText();
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
       });
+
+      introLayoutFrozen = true;
+      boxInteractionLocked = true;
+
+      prepareIntroScatterTargets();
+
+      /*
+        إزالة intro-camera تجعل الشبكة مرئية، لكنها لا تومض:
+        كل صندوق موجود مسبقًا خارج المشهد وبشفافية صفر.
+      */
+      page.classList.remove("intro-camera");
+      page.classList.add("intro-boxes-entering");
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        // نفس دالة عودة الصناديق المستخدمة بعد إلغاء اختيار صندوق.
+        await animateScatteredBoxesBack();
+      } else {
+        restoreScatteredBoxes();
+      }
+
+      completeIntro();
     }
 
     async function initializeOpenBoxGame(){
@@ -2819,7 +2908,6 @@
       selectedBoxIndex = -1;
       activeFocusButton = null;
       boxInteractionLocked = false;
-      restoreScatteredBoxes();
       setOpenButtonVisible(false);
 
       applyTheme(currentTheme);
