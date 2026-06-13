@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v53-compositor-smooth-motion-open-box-13 -->
+  <!-- version: open-box-v54-wheel-themes-intro-open-box-14 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -60,25 +60,154 @@
       touch-action:manipulation;
     }
 
+    /* نفس خلفيات وثيمات العجلة تمامًا */
     .theme-background{
       position:absolute;
       inset:0;
       z-index:0;
       pointer-events:none;
-      background:#fff center/cover no-repeat;
-      transform:scale(1.04);
+      background-color:#fff;
+      background-position:center center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      opacity:0;
+      transform:scale(1);
       transform-origin:center center;
+      will-change:transform, opacity;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
-    .theme-white .theme-background{ background:#fff; transform:scale(1); }
-    .theme-classroom .theme-background{ background-image:url("theme-original-bg.webp?v=45"), url("theme-original-bg.png?v=45"), linear-gradient(180deg,#eef6ef 0%,#d8c6a1 100%); }
-    .theme-sky-clouds .theme-background{ background-image:url("theme-sky-clouds-bg.webp?v=45"), url("theme-sky-clouds-bg.png?v=45"), linear-gradient(180deg,#bfefff 0%,#5cc5f2 100%); }
-    .theme-forest .theme-background{ background-image:url("theme-forest-bg.webp?v=45"), linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%); }
-    .theme-math .theme-background{ background-image:url("theme-math-bg.webp?v=45"), linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%); }
-    .theme-english .theme-background{ background-image:url("theme-english-bg.webp?v=46"), linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%); }
-    .theme-flowers .theme-background{ background-image:url("theme-flowers-bg.webp?v=48"), linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%); }
-    .theme-national-day .theme-background{ background-image:url("theme-national-day-v2-bg.webp?v=53"), linear-gradient(180deg,#165f55 0%,#0f4f46 100%); }
-    .theme-founding-day .theme-background{ background-image:url("theme-founding-day-bg.webp?v=1"), linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%); }
+    .game-page.theme-white{
+      background:#fff;
+    }
+
+    .game-page.theme-white .theme-background{
+      opacity:0;
+      background-image:none;
+    }
+
+    .game-page.theme-classroom .theme-background{
+      opacity:1;
+      background-color:#fff;
+      background-image:
+        url("theme-original-bg.webp?v=45"),
+        url("theme-original-bg.png?v=45"),
+        url("theme-original.webp?v=45"),
+        url("theme-original.png?v=45");
+    }
+
+    .game-page.theme-sky-clouds .theme-background{
+      opacity:1;
+      background-color:#58c7f3;
+      background-image:
+        url("theme-sky-clouds-bg.webp?v=45"),
+        url("theme-sky-clouds-bg.png?v=45"),
+        url("theme-sky-clouds.webp?v=45"),
+        url("theme-sky-clouds.png?v=45");
+    }
+
+    .game-page.theme-forest .theme-background{
+      opacity:1;
+      background-color:#6ec9ee;
+      background-image:
+        url("theme-forest-bg.webp?v=45"),
+        linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%);
+    }
+
+    .game-page.theme-math .theme-background{
+      opacity:1;
+      background-color:#f5f4e7;
+      background-image:
+        url("theme-math-bg.webp?v=45"),
+        linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%);
+    }
+
+    .game-page.theme-english .theme-background{
+      opacity:1;
+      background-color:#72d0d2;
+      background-image:
+        url("theme-english-bg.webp?v=46"),
+        linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%);
+    }
+
+    .game-page.theme-flowers .theme-background{
+      opacity:1;
+      background-color:#f8edf3;
+      background-image:
+        url("theme-flowers-bg.webp?v=48"),
+        linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%);
+    }
+
+    .game-page.theme-national-day .theme-background{
+      opacity:1;
+      background-color:#165f55;
+      background-image:
+        url("theme-national-day-v2-bg.webp?v=53"),
+        linear-gradient(180deg,#165f55 0%,#0f4f46 100%);
+    }
+
+    .game-page.theme-founding-day .theme-background{
+      opacity:1;
+      background-color:#d7c9b1;
+      background-image:
+        url("theme-founding-day-bg.webp?v=1"),
+        linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
+    }
+
+    /*
+      نفس حركة افتتاح العجلة:
+      وقفة قصيرة، ثم اقتراب المشهد والصناديق ببطء مع تكبير الخلفية.
+    */
+    :root{
+      --intro-duration:8.60s;
+      --intro-bg-final-scale:1.18;
+    }
+
+    .fixed-controls{
+      transition:opacity .34s ease, transform .34s ease;
+    }
+
+    .game-page.intro-playing .fixed-controls{
+      opacity:0;
+      transform:translateY(12px);
+      pointer-events:none;
+    }
+
+    .game-page.intro-playing .stage{
+      transform-origin:center center;
+      transform:translate3d(0,0,0) scale(.42);
+      will-change:transform;
+      pointer-events:none;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    .game-page.intro-playing .theme-background{
+      transform:translate3d(0,0,0) scale(1);
+      will-change:transform, opacity;
+    }
+
+    .game-page.intro-done .theme-background{
+      transform:translate3d(0,0,0) scale(var(--intro-bg-final-scale));
+    }
+
+    .game-page.intro-playing .game-logo{
+      animation:introLogoFade .75s ease-out both;
+    }
+
+    @keyframes introLogoFade{
+      0%{ opacity:0; transform:translateY(-8px); }
+      100%{ opacity:1; transform:translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .game-page.intro-playing .stage,
+      .game-page.intro-playing .game-logo,
+      .game-page.intro-playing .theme-background{
+        animation:none !important;
+      }
+    }
 
     .game-logo{
       position:absolute;
@@ -1005,8 +1134,8 @@
   </style>
 </head>
 <body>
-  <main class="game-page theme-white" id="gamePage">
-    <div class="theme-background"></div>
+  <main class="game-page theme-white intro-playing" id="gamePage">
+    <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
     <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
 
     <section class="stage" id="stage">
@@ -1049,11 +1178,13 @@
     ];
 
     const page = document.getElementById("gamePage");
+    const themeBackground = document.getElementById("themeBackground");
     const stage = document.getElementById("stage");
     const grid = document.getElementById("boxGrid");
     const resetBtn = document.getElementById("resetBtn");
     const openBtn = document.getElementById("openBtn");
     const backBtn = document.getElementById("backBtn");
+    const fixedControls = document.querySelector(".fixed-controls");
 
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
@@ -1214,34 +1345,52 @@
 
     function normalizeTheme(value){
       const raw = String(value || "").trim().toLowerCase();
-      const map = {
-        "classic":"white",
-        "original":"white",
-        "خلفية بيضاء":"white",
-        "ابيض":"white",
-        "أبيض":"white",
-        "white":"white",
-        "classroom":"classroom",
-        "فصل مدرسة":"classroom",
-        "فصل مدرسي":"classroom",
-        "sky-clouds":"sky-clouds",
-        "سماء وغيوم":"sky-clouds",
-        "forest":"forest",
-        "غابة":"forest",
-        "math":"math",
-        "رياضيات":"math",
-        "english":"english",
-        "انجليزي":"english",
-        "flowers":"flowers",
-        "ازهار وورود":"flowers",
-        "أزهار وورود":"flowers",
-        "national-day":"national-day",
-        "اليوم الوطني":"national-day",
-        "founding-day":"founding-day",
-        "يوم التأسيس":"founding-day"
-      };
-      if (map[raw]) return map[raw];
-      return THEMES.some((theme)=> theme.id === raw) ? raw : "white";
+
+      if ([
+        "classic","original","white","theme-white","theme-original",
+        "خلفية بيضاء","ابيض","أبيض"
+      ].includes(raw)) return "white";
+
+      if ([
+        "classroom","school","school-classroom","classroom-school",
+        "theme-classroom","theme-school","فصل","فصل مدرسة","فصل مدرسي",
+        "الفصل","المدرسة"
+      ].includes(raw)) return "classroom";
+
+      if ([
+        "sky","clouds","sky-clouds","sky_clouds","theme-sky",
+        "theme-sky-clouds","سماء","غيوم","سماء وغيوم","سماء و غيوم"
+      ].includes(raw)) return "sky-clouds";
+
+      if (["forest","theme-forest","woods","غابة","الغابة"].includes(raw)) {
+        return "forest";
+      }
+
+      if ([
+        "math","maths","mathematics","theme-math","رياضيات","الرياضيات"
+      ].includes(raw)) return "math";
+
+      if ([
+        "english","eng","english-language","theme-english",
+        "انجليزي","الانجليزي","إنجليزي","الإنجليزي"
+      ].includes(raw)) return "english";
+
+      if ([
+        "flowers","flower","floral","theme-flowers",
+        "ازهار وورود","أزهار وورود","ازهار","أزهار","ورود","الورود"
+      ].includes(raw)) return "flowers";
+
+      if ([
+        "national-day","national_day","nationalday","saudi-national-day",
+        "theme-national-day","اليوم الوطني","يوم وطني","الوطني"
+      ].includes(raw)) return "national-day";
+
+      if ([
+        "founding-day","founding_day","foundingday","saudi-founding-day",
+        "theme-founding-day","يوم التأسيس","التأسيس","يوم التاسيس","تأسيس"
+      ].includes(raw)) return "founding-day";
+
+      return "white";
     }
 
     function loadItems(){
@@ -1266,7 +1415,95 @@
 
     function applyTheme(themeId){
       currentTheme = normalizeTheme(themeId);
-      page.className = `game-page theme-${currentTheme}`;
+
+      page.classList.remove(
+        "theme-white",
+        "theme-classroom",
+        "theme-sky-clouds",
+        "theme-forest",
+        "theme-math",
+        "theme-english",
+        "theme-flowers",
+        "theme-national-day",
+        "theme-founding-day"
+      );
+      page.classList.add(`theme-${currentTheme}`);
+
+      // تطبيق احتياطي مباشر مطابق للعجلة حتى تظهر الخلفية رغم الكاش.
+      if (themeBackground) {
+        themeBackground.style.opacity = currentTheme === "white" ? "0" : "1";
+        themeBackground.style.backgroundColor = "#fff";
+        themeBackground.style.backgroundImage = "none";
+
+        if (currentTheme === "classroom") {
+          themeBackground.style.backgroundColor = "#fff";
+          themeBackground.style.backgroundImage = [
+            'url("theme-original-bg.webp?v=45")',
+            'url("theme-original-bg.png?v=45")',
+            'url("theme-original.webp?v=45")',
+            'url("theme-original.png?v=45")'
+          ].join(", ");
+        }
+
+        if (currentTheme === "sky-clouds") {
+          themeBackground.style.backgroundColor = "#58c7f3";
+          themeBackground.style.backgroundImage = [
+            'url("theme-sky-clouds-bg.webp?v=45")',
+            'url("theme-sky-clouds-bg.png?v=45")',
+            'url("theme-sky-clouds.webp?v=45")',
+            'url("theme-sky-clouds.png?v=45")'
+          ].join(", ");
+        }
+
+        if (currentTheme === "forest") {
+          themeBackground.style.backgroundColor = "#6ec9ee";
+          themeBackground.style.backgroundImage = [
+            'url("theme-forest-bg.webp?v=45")',
+            'linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%)'
+          ].join(", ");
+        }
+
+        if (currentTheme === "math") {
+          themeBackground.style.backgroundColor = "#f5f4e7";
+          themeBackground.style.backgroundImage = [
+            'url("theme-math-bg.webp?v=45")',
+            'linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%)'
+          ].join(", ");
+        }
+
+        if (currentTheme === "english") {
+          themeBackground.style.backgroundColor = "#72d0d2";
+          themeBackground.style.backgroundImage = [
+            'url("theme-english-bg.webp?v=46")',
+            'linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%)'
+          ].join(", ");
+        }
+
+        if (currentTheme === "flowers") {
+          themeBackground.style.backgroundColor = "#f8edf3";
+          themeBackground.style.backgroundImage = [
+            'url("theme-flowers-bg.webp?v=48")',
+            'linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%)'
+          ].join(", ");
+        }
+
+        if (currentTheme === "national-day") {
+          themeBackground.style.backgroundColor = "#165f55";
+          themeBackground.style.backgroundImage = [
+            'url("theme-national-day-v2-bg.webp?v=53")',
+            'linear-gradient(180deg,#165f55 0%,#0f4f46 100%)'
+          ].join(", ");
+        }
+
+        if (currentTheme === "founding-day") {
+          themeBackground.style.backgroundColor = "#d7c9b1";
+          themeBackground.style.backgroundImage = [
+            'url("theme-founding-day-bg.webp?v=1")',
+            'linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%)'
+          ].join(", ");
+        }
+      }
+
       try { sessionStorage.setItem("sandooq_edu_box_theme_v1", currentTheme); } catch (_) {}
     }
 
@@ -2138,7 +2375,7 @@
           return;
         }
       } catch (_) {}
-      window.location.href = "index-41.html";
+      window.location.href = "index.html";
     }
 
     resetBtn.addEventListener("click", resetBoxes);
@@ -2176,6 +2413,153 @@
       }, 160);
     }, { passive:true });
 
+    async function playOpeningIntro(){
+      if (!page || !stage) return;
+
+      page.classList.remove("intro-done");
+      page.classList.add("intro-playing");
+
+      const holdMs = 2200;
+      const zoomMs = 7600;
+      const startStageScale = 0.42;
+      const endStageScale = 1;
+      const startBgScale = 1;
+      const endBgScale =
+        Number(getComputedStyle(page).getPropertyValue("--intro-bg-final-scale")) || 1.18;
+
+      const finish = ()=>{
+        page.classList.remove("intro-playing");
+        page.classList.add("intro-done");
+
+        stage.style.transform = "";
+        stage.style.animation = "";
+
+        if (themeBackground) {
+          themeBackground.style.transform =
+            `translate3d(0,0,0) scale(${endBgScale})`;
+          themeBackground.style.animation = "";
+        }
+
+        if (fixedControls) {
+          fixedControls.style.opacity = "1";
+          fixedControls.style.transform = "none";
+          fixedControls.style.pointerEvents = "";
+        }
+      };
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finish();
+        return;
+      }
+
+      stage.style.transform =
+        `translate3d(0,0,0) scale(${startStageScale})`;
+
+      if (themeBackground) {
+        themeBackground.style.transform =
+          `translate3d(0,0,0) scale(${startBgScale})`;
+      }
+
+      // ننتظر استقرار التخطيط ورسم الصناديق قبل تشغيل الكاميرا.
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      if (typeof stage.animate === "function") {
+        const stageAnimation = stage.animate(
+          [
+            {
+              transform:
+                `translate3d(0,0,0) scale(${startStageScale})`
+            },
+            {
+              transform:
+                `translate3d(0,0,0) scale(${endStageScale})`
+            }
+          ],
+          {
+            delay:holdMs,
+            duration:zoomMs,
+            easing:MOTION_EASING,
+            fill:"forwards"
+          }
+        );
+
+        const animations = [stageAnimation.finished.catch(()=> {})];
+
+        if (themeBackground) {
+          const backgroundAnimation = themeBackground.animate(
+            [
+              {
+                transform:
+                  `translate3d(0,0,0) scale(${startBgScale})`
+              },
+              {
+                transform:
+                  `translate3d(0,0,0) scale(${endBgScale})`
+              }
+            ],
+            {
+              delay:holdMs,
+              duration:zoomMs,
+              easing:MOTION_EASING,
+              fill:"forwards"
+            }
+          );
+          animations.push(backgroundAnimation.finished.catch(()=> {}));
+        }
+
+        await Promise.all(animations);
+        await new Promise((resolve)=> setTimeout(resolve, 220));
+        finish();
+        return;
+      }
+
+      // fallback مطابق لحركة العجلة.
+      const startTime = performance.now();
+
+      await new Promise((resolve)=>{
+        const animate = (now)=>{
+          const elapsed = now - startTime;
+
+          if (elapsed < holdMs) {
+            requestAnimationFrame(animate);
+            return;
+          }
+
+          const progress = Math.max(
+            0,
+            Math.min(1, (elapsed - holdMs) / zoomMs)
+          );
+          const eased = -(Math.cos(Math.PI * progress) - 1) / 2;
+          const stageScale =
+            startStageScale + (endStageScale - startStageScale) * eased;
+          const bgScale =
+            startBgScale + (endBgScale - startBgScale) * eased;
+
+          stage.style.transform =
+            `translate3d(0,0,0) scale(${stageScale.toFixed(5)})`;
+
+          if (themeBackground) {
+            themeBackground.style.transform =
+              `translate3d(0,0,0) scale(${bgScale.toFixed(5)})`;
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            setTimeout(resolve, 220);
+          }
+        };
+
+        requestAnimationFrame(animate);
+      });
+
+      finish();
+    }
+
     async function initializeOpenBoxGame(){
       await hydrateItemsFromIndexedDB();
 
@@ -2190,6 +2574,7 @@
       applyTheme(currentTheme);
       setBoxFocusState(1, 0, 0);
       renderBoxes();
+      await playOpeningIntro();
     }
 
     initializeOpenBoxGame();

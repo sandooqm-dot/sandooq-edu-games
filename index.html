@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-open-box-link-v41-production-open-box -->
+<!-- version: index-open-box-themes-intro-v42 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5282,6 +5282,23 @@
     "founding-day": "يوم التأسيس"
   };
 
+  const GAME_THEME_IDS = new Set([
+    "classic",
+    "classroom",
+    "sky-clouds",
+    "forest",
+    "math",
+    "english",
+    "flowers",
+    "national-day",
+    "founding-day"
+  ]);
+
+  function normalizeGameTheme(theme){
+    const value = String(theme || "").trim().toLowerCase();
+    return GAME_THEME_IDS.has(value) ? value : "classic";
+  }
+
   let currentGameTemplate = "wheel";
   let wheelContentType = "text";
   let wheelTheme = "classic";
@@ -5355,7 +5372,7 @@
     const payload = {
       gameTemplate: currentGameTemplate,
       type: wheelContentType,
-      theme: wheelTheme,
+      theme: normalizeGameTheme(wheelTheme),
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries: wheelEntries,
       centerQuestionEnabled: currentGameTemplate === "wheel" ? Boolean(questionPanel?.classList.contains("enabled")) : false,
@@ -5385,7 +5402,7 @@
 
       currentGameTemplate = draft.gameTemplate === "open-box" || draft.template === "open-box" ? "open-box" : "wheel";
       wheelContentType = draft.type || "text";
-      wheelTheme = draft.theme || "classic";
+      wheelTheme = normalizeGameTheme(draft.theme || draft.wheelTheme || draft.selectedTheme);
       wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
       if (currentGameTemplate === "open-box") {
         wheelEntries = wheelEntries.slice(0, OPEN_BOX_MAX_ITEMS);
@@ -5759,8 +5776,7 @@
   }
 
   function setWheelTheme(theme, closeList = true){
-    const allowedThemes = new Set(["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"]);
-    wheelTheme = allowedThemes.has(theme) ? theme : "classic";
+    wheelTheme = normalizeGameTheme(theme);
     document.querySelectorAll(".theme-card").forEach((btn)=>{
       btn.classList.toggle("active", btn.getAttribute("data-wheel-theme") === wheelTheme);
     });
@@ -5780,10 +5796,13 @@
     saveDraft();
 
     const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const selectedTheme = normalizeGameTheme(wheelTheme);
 
     const payload = {
       type: wheelContentType,
-      theme: wheelTheme,
+      theme: selectedTheme,
+      wheelTheme: selectedTheme,
+      selectedTheme,
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
@@ -5806,12 +5825,12 @@
       sessionStorage.removeItem(WHEEL_PAYLOAD_KEY);
       sessionStorage.setItem(`${WHEEL_PAYLOAD_KEY}_${payloadId}`, JSON.stringify(payload));
       sessionStorage.setItem(WHEEL_PAYLOAD_KEY, JSON.stringify(payload));
-      sessionStorage.setItem("sandooq_edu_wheel_theme_v1", wheelTheme || "classic");
+      sessionStorage.setItem("sandooq_edu_wheel_theme_v1", selectedTheme);
     } catch (_) {}
 
     const url = new URL("wheel.html", window.location.href);
     url.searchParams.set("payloadId", payloadId);
-    url.searchParams.set("theme", wheelTheme || "classic");
+    url.searchParams.set("theme", selectedTheme);
     url.searchParams.set("v", String(Date.now()));
 
     window.location.href = `${url.pathname}${url.search}`;
@@ -5830,12 +5849,17 @@
     saveDraft();
 
     const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+    const selectedTheme = normalizeGameTheme(wheelTheme);
 
     const payload = {
       gameTemplate: "open-box",
       type: wheelContentType,
       contentType: wheelContentType,
-      theme: wheelTheme,
+      theme: selectedTheme,
+      wheelTheme: selectedTheme,
+      selectedTheme,
+      intro:true,
+      introMode:"wheel-camera",
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries,
       coverMode: boxCoverMode,
@@ -5853,7 +5877,7 @@
       sessionStorage.setItem(`${OPEN_BOX_PAYLOAD_KEY}_${payloadId}`, JSON.stringify(payload));
       sessionStorage.setItem(OPEN_BOX_PAYLOAD_KEY, JSON.stringify(payload));
       sessionStorage.setItem(OPEN_BOX_DRAFT_KEY, JSON.stringify(payload));
-      sessionStorage.setItem("sandooq_edu_box_theme_v1", wheelTheme || "classic");
+      sessionStorage.setItem("sandooq_edu_box_theme_v1", selectedTheme);
     } catch (_) {}
 
     try {
@@ -5862,7 +5886,8 @@
 
     const url = new URL(OPEN_BOX_PAGE_URL, window.location.href);
     url.searchParams.set("payloadId", payloadId);
-    url.searchParams.set("theme", wheelTheme || "classic");
+    url.searchParams.set("theme", selectedTheme);
+    url.searchParams.set("intro", "1");
     url.searchParams.set("v", String(Date.now()));
 
     window.location.href = `${url.pathname}${url.search}`;
