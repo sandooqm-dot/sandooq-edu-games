@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v62-physically-lowered-audio-open-box-22 -->
+  <!-- version: open-box-v63-theme-matched-box-colors-open-box-23 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1161,7 +1161,46 @@
         box-shadow:0 3px 0 rgba(0,0,0,.18);
       }
     }
-  </style>
+  
+    /*
+      open-box-theme-colors-v1:
+      تباين النص والفواصل للصناديق الفاتحة والداكنة.
+    */
+    .box-card{
+      --box-text:#fff;
+      --box-text-shadow:0 3px 8px rgba(0,0,0,.24);
+      --box-edge:rgba(0,0,0,.18);
+    }
+
+    .box-card .cover-text,
+    .box-card .panel-number,
+    .box-card .result-text{
+      color:var(--box-text) !important;
+      text-shadow:var(--box-text-shadow) !important;
+    }
+
+    .box-card .front-panel{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.16),
+        inset 0 0 0 1.4px var(--box-edge),
+        0 5px 8px rgba(0,0,0,.10);
+    }
+
+    .box-card.opened .front-panel{
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.12),
+        inset 0 0 0 1px var(--box-edge),
+        0 1px 2px rgba(0,0,0,.04);
+    }
+
+    .box-card .cavity-box::after{
+      box-shadow:
+        inset 0 0 0 1px var(--box-edge),
+        0 7px 13px rgba(0,0,0,.045);
+      opacity:.66;
+    }
+
+</style>
 </head>
 <body>
   <main class="game-page theme-white intro-playing intro-camera" id="gamePage">
@@ -1366,6 +1405,40 @@
     const SCATTER_LEAD_MS = 120;
     const MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
 
+    /*
+      open-box-theme-colors-v1:
+      نفس ألوان الأقسام الخاصة المعتمدة في صفحة العجلة.
+    */
+    const THEME_BOX_COLORS = {
+      "sky-clouds": [
+        "#2F55C7",
+        "#5F85DE"
+      ],
+      flowers: [
+        "#C94582",
+        "#E85C9A",
+        "#F48AB8",
+        "#F3B7D1"
+      ],
+      "national-day": [
+        "#1E8A57",
+        "#F4FFF7"
+      ],
+      "founding-day": [
+        "#8D715B",
+        "#DCCCB5",
+        "#B49579",
+        "#F1E6D5"
+      ]
+    };
+
+    const THEME_BOX_EDGE_COLORS = {
+      "sky-clouds":"#173A9B",
+      flowers:"#A93469",
+      "national-day":"#083D2B",
+      "founding-day":"#6E5A43"
+    };
+
     const BOX_COLOR_PALETTES = [
       ["#ef2f6a","#ff6f9a","#bd0e46","#d45e82","#981737","#ef2f6a",1.02,1.24],
       ["#b9df4a","#d8f47b","#80aa32","#b3d95c","#5d9430","#b9df4a",1.05,1.20],
@@ -1399,32 +1472,125 @@
       ["#95d435","#c7f06f","#65991e","#a7d65b","#547e24","#95d435",1.02,1.22]
     ];
 
-    function applyBoxPalette(button, index){
-      const palette = BOX_COLOR_PALETTES[index % BOX_COLOR_PALETTES.length];
-      const [
-        panel,
-        panelLight,
-        panelDark,
-        wallTone,
-        backFace,
-        assetTint,
-        assetBrightness,
-        assetSaturation
-      ] = palette;
+    function hexToRgb(hex){
+      const clean = String(hex || "").replace("#", "").trim();
+      const full = clean.length === 3
+        ? clean.split("").map((char)=> char + char).join("")
+        : clean;
 
-      button.style.setProperty("--panel", panel);
-      button.style.setProperty("--panel-light", panelLight);
-      button.style.setProperty("--panel-dark", panelDark);
-      button.style.setProperty("--wall-tone", wallTone);
+      if (!/^[0-9a-f]{6}$/i.test(full)) {
+        return { r:0, g:0, b:0 };
+      }
+
+      return {
+        r:parseInt(full.slice(0, 2), 16),
+        g:parseInt(full.slice(2, 4), 16),
+        b:parseInt(full.slice(4, 6), 16)
+      };
+    }
+
+    function rgbToHex(r, g, b){
+      const toHex = (value)=> Math.max(0, Math.min(255, Math.round(value)))
+        .toString(16)
+        .padStart(2, "0");
+
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+    }
+
+    function mixHexColors(source, target, amount){
+      const from = hexToRgb(source);
+      const to = hexToRgb(target);
+      const ratio = Math.max(0, Math.min(1, Number(amount) || 0));
+
+      return rgbToHex(
+        from.r + (to.r - from.r) * ratio,
+        from.g + (to.g - from.g) * ratio,
+        from.b + (to.b - from.b) * ratio
+      );
+    }
+
+    function colorBrightness(hex){
+      const { r, g, b } = hexToRgb(hex);
+      return (r * 299 + g * 587 + b * 114) / 1000;
+    }
+
+    function buildThemeBoxPalette(baseColor, themeId){
+      const brightness = colorBrightness(baseColor);
+      const isLight = brightness > 168;
+      const edgeColor =
+        THEME_BOX_EDGE_COLORS[themeId] ||
+        mixHexColors(baseColor, "#000000", .30);
+
+      return {
+        panel:baseColor,
+        panelLight:mixHexColors(baseColor, "#ffffff", isLight ? .16 : .30),
+        panelDark:mixHexColors(baseColor, "#000000", isLight ? .14 : .24),
+        wallTone:mixHexColors(baseColor, "#000000", isLight ? .08 : .12),
+        backFace:mixHexColors(baseColor, "#000000", isLight ? .22 : .38),
+        assetTint:baseColor,
+        assetBrightness:isLight ? .98 : 1.02,
+        assetSaturation:isLight ? 1.06 : 1.18,
+        textColor:isLight
+          ? (themeId === "national-day" ? "#083D2B" : "#4C382A")
+          : "#FFFFFF",
+        textShadow:isLight
+          ? "0 1px 1px rgba(255,255,255,.55)"
+          : "0 3px 8px rgba(0,0,0,.24)",
+        edgeColor
+      };
+    }
+
+    function applyBoxPalette(button, index){
+      const themeColors = THEME_BOX_COLORS[currentTheme];
+      let paletteData;
+
+      if (themeColors && themeColors.length) {
+        const baseColor = themeColors[index % themeColors.length];
+        paletteData = buildThemeBoxPalette(baseColor, currentTheme);
+      } else {
+        const palette = BOX_COLOR_PALETTES[index % BOX_COLOR_PALETTES.length];
+        const [
+          panel,
+          panelLight,
+          panelDark,
+          wallTone,
+          backFace,
+          assetTint,
+          assetBrightness,
+          assetSaturation
+        ] = palette;
+
+        paletteData = {
+          panel,
+          panelLight,
+          panelDark,
+          wallTone,
+          backFace,
+          assetTint,
+          assetBrightness,
+          assetSaturation,
+          textColor:"#FFFFFF",
+          textShadow:"0 3px 8px rgba(0,0,0,.24)",
+          edgeColor:mixHexColors(panel, "#000000", .24)
+        };
+      }
+
+      button.style.setProperty("--panel", paletteData.panel);
+      button.style.setProperty("--panel-light", paletteData.panelLight);
+      button.style.setProperty("--panel-dark", paletteData.panelDark);
+      button.style.setProperty("--wall-tone", paletteData.wallTone);
       button.style.setProperty("--top-wall", "var(--wall-tone)");
       button.style.setProperty("--left-wall", "var(--wall-tone)");
       button.style.setProperty("--right-wall", "var(--wall-tone)");
       button.style.setProperty("--bottom-wall", "var(--wall-tone)");
-      button.style.setProperty("--back-face", backFace);
-      button.style.setProperty("--asset-tint", assetTint);
-      button.style.setProperty("--asset-body-brightness", String(assetBrightness));
-      button.style.setProperty("--asset-lid-brightness", String(assetBrightness));
-      button.style.setProperty("--asset-saturation", String(assetSaturation));
+      button.style.setProperty("--back-face", paletteData.backFace);
+      button.style.setProperty("--asset-tint", paletteData.assetTint);
+      button.style.setProperty("--asset-body-brightness", String(paletteData.assetBrightness));
+      button.style.setProperty("--asset-lid-brightness", String(paletteData.assetBrightness));
+      button.style.setProperty("--asset-saturation", String(paletteData.assetSaturation));
+      button.style.setProperty("--box-text", paletteData.textColor);
+      button.style.setProperty("--box-text-shadow", paletteData.textShadow);
+      button.style.setProperty("--box-edge", paletteData.edgeColor);
     }
 
     function getUrlParam(name){
@@ -1678,6 +1844,10 @@
           ].join(", ");
         }
       }
+
+      grid?.querySelectorAll(".box-card").forEach((button, index)=>{
+        applyBoxPalette(button, index);
+      });
 
       try { sessionStorage.setItem("sandooq_edu_box_theme_v1", currentTheme); } catch (_) {}
     }
