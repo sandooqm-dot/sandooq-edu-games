@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v59-external-audio-files-open-box-19 -->
+  <!-- version: open-box-v60-faster-audio-start-lower-motion-volume-open-box-20 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1232,8 +1232,18 @@
 
       const VOLUMES = {
         open: 1,
-        go: 1,
-        return: 1
+        go: 0.70,
+        return: 0.70
+      };
+
+      /*
+        بداية ملفي الذهاب والعودة تحتوي على صمت قصير.
+        نتجاوز جزءًا بسيطًا منه حتى يبدأ المؤثر أسرع دون قصه بشكل حاد.
+      */
+      const START_OFFSETS = {
+        open: 0,
+        go: 0.22,
+        return: 0.12
       };
 
       const cache = {};
@@ -1277,7 +1287,18 @@
         try {
           stopAll(audio);
           audio.pause();
-          audio.currentTime = 0;
+
+          const startOffset = START_OFFSETS[name] ?? 0;
+          try {
+            if (typeof audio.fastSeek === "function" && startOffset > 0) {
+              audio.fastSeek(startOffset);
+            } else {
+              audio.currentTime = startOffset;
+            }
+          } catch (_) {
+            try { audio.currentTime = 0; } catch (_) {}
+          }
+
           audio.volume = VOLUMES[name] ?? 1;
           audio.playbackRate = 1;
 
