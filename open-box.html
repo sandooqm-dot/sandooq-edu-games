@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v50-focus-before-open-open-box-10 -->
+  <!-- version: open-box-v51-slower-focus-motion-open-box-11 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -154,9 +154,9 @@
         translate3d(var(--scatter-x), var(--scatter-y), 0)
         scale(var(--scatter-scale));
       transition:
-        transform .48s cubic-bezier(.22,.84,.24,1) var(--scatter-delay),
-        opacity .30s ease var(--scatter-delay),
-        filter .30s ease var(--scatter-delay);
+        transform 1.22s cubic-bezier(.22,.84,.24,1) var(--scatter-delay),
+        opacity .82s ease calc(var(--scatter-delay) + .34s),
+        filter .82s ease calc(var(--scatter-delay) + .34s);
       will-change:transform, opacity, filter;
     }
 
@@ -1739,7 +1739,7 @@
 
       cards.forEach((card, cardIndex)=>{
         card.classList.remove("focus-selected", "focus-away");
-        card.style.setProperty("--scatter-delay", `${Math.min(90, (cardIndex % 6) * 12)}ms`);
+        card.style.setProperty("--scatter-delay", `${Math.min(180, (cardIndex % 6) * 28)}ms`);
 
         if (card === selectedButton) {
           card.classList.add("focus-selected");
@@ -1786,7 +1786,7 @@
       });
     }
 
-    function focusBox(button, duration = 900){
+    function focusBox(button, duration = 1550){
       if (!button) return Promise.resolve();
 
       focusedIndex = Number(button.dataset.index || -1);
@@ -1816,9 +1816,9 @@
       try {
         scatterOtherBoxes(button);
 
-        // تبدأ حركة الابتعاد أولًا بشكل خفيف، ثم يتقدم الصندوق المختار إلى المنتصف.
-        await wait(55);
-        await focusBox(button, 920);
+        // تبدأ حركة الابتعاد أولًا بوضوح، ثم يقترب الصندوق المختار ببطء إلى المنتصف.
+        await wait(140);
+        await focusBox(button, 1550);
 
         if (!opened.has(index)) {
           setOpenButtonVisible(true);
