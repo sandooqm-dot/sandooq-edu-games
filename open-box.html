@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v46-wheel-style-sequenced-zoom-open-box-6 -->
+  <!-- version: open-box-v47-full-content-zones-auto-fit-open-box-7 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -638,55 +638,87 @@
     }
 
 
-    /* v27: مساحة محتوى كبيرة داخل جسم الصندوق مع هامش أمان للغطاء */
+    /* v47: منطقة محتوى داخلية كاملة + تقسيمات مخفية للنص والصورة */
     .box-content{
-      left:7.4% !important;
-      right:7.4% !important;
-      top:13.8% !important;
-      bottom:7.8% !important;
+      left:7.2% !important;
+      right:7.2% !important;
+      top:11.7% !important;
+      bottom:7.2% !important;
       z-index:6 !important;
       overflow:hidden !important;
-      padding:clamp(4px, calc(var(--tile-size) * .035), 8px) !important;
+      padding:clamp(2px, calc(var(--tile-size) * .018), 5px) !important;
       display:flex !important;
-      align-items:center !important;
-      justify-content:center !important;
-    }
-
-    .box-content.content-text{
-      align-items:center !important;
-      justify-content:center !important;
-    }
-
-    .box-content.content-image,
-    .box-content.content-mixed{
       align-items:stretch !important;
       justify-content:stretch !important;
+      min-width:0 !important;
+      min-height:0 !important;
+    }
+
+    .content-frame{
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+      overflow:hidden;
+      display:grid;
+      align-items:stretch;
+      justify-items:stretch;
+    }
+
+    .content-frame-text,
+    .content-frame-image{
+      grid-template-columns:minmax(0, 1fr);
+      grid-template-rows:minmax(0, 1fr);
+    }
+
+    .content-frame-mixed{
+      grid-template-columns:minmax(0, 1fr);
+      grid-template-rows:minmax(0, 67fr) minmax(0, 31fr);
+      gap:2%;
+    }
+
+    .content-zone{
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+
+    .content-image-zone{
+      padding:0;
+    }
+
+    .content-text-zone{
+      padding:clamp(1px, calc(var(--tile-size) * .012), 3px)
+              clamp(2px, calc(var(--tile-size) * .018), 5px);
     }
 
     .result-text{
       width:100% !important;
-      height:100% !important;
+      height:auto !important;
       max-width:100% !important;
-      max-height:100% !important;
-      display:flex !important;
-      align-items:center !important;
-      justify-content:center !important;
+      max-height:none !important;
+      min-width:0 !important;
+      display:block !important;
       text-align:center !important;
       color:#fff !important;
-      font-size:clamp(12px, calc(var(--tile-size) * .18), 32px) !important;
+      font-size:clamp(10px, calc(var(--tile-size) * .18), 34px) !important;
       line-height:1.08 !important;
       font-weight:900 !important;
-      overflow:hidden !important;
-      overflow-wrap:anywhere !important;
+      overflow:visible !important;
+      overflow-wrap:break-word !important;
       word-break:normal !important;
       white-space:normal !important;
       text-shadow:0 2px 5px rgba(0,0,0,.24) !important;
       padding:0 !important;
-    }
-
-    .result-text.fit-long-text{
-      align-items:center !important;
-      justify-content:center !important;
+      margin:0 !important;
+      direction:rtl !important;
+      unicode-bidi:plaintext !important;
     }
 
     .result-image{
@@ -694,39 +726,25 @@
       height:100% !important;
       max-width:100% !important;
       max-height:100% !important;
+      min-width:0 !important;
+      min-height:0 !important;
       object-fit:contain !important;
+      object-position:center center !important;
       display:block !important;
       background:transparent !important;
       filter:drop-shadow(0 2px 3px rgba(0,0,0,.14)) !important;
     }
 
-    .result-mixed{
-      width:100% !important;
-      height:100% !important;
-      max-width:100% !important;
-      max-height:100% !important;
-      display:grid !important;
-      grid-template-rows:minmax(0, 1fr) auto !important;
-      gap:clamp(3px, calc(var(--tile-size) * .035), 7px) !important;
-      align-items:center !important;
-      justify-items:center !important;
-      overflow:hidden !important;
+    .content-frame-mixed .content-image-zone{
+      padding:0 1% 1%;
     }
 
-    .result-mixed .result-image{
-      min-height:0 !important;
-      width:100% !important;
-      height:100% !important;
-      object-fit:contain !important;
+    .content-frame-mixed .content-text-zone{
+      padding:0 2% 1%;
     }
 
-    .result-mixed .result-text{
-      height:auto !important;
-      min-height:1.08em !important;
-      max-height:35% !important;
-      font-size:clamp(10px, calc(var(--tile-size) * .13), 22px) !important;
+    .content-frame-mixed .result-text{
       line-height:1.05 !important;
-      padding:0 2% !important;
     }
 
     .fixed-controls{
@@ -1268,39 +1286,49 @@
       const cleanText = String(entry.text || "").trim();
       const hasText = Boolean(cleanText);
 
-      if (hasImage && hasText) {
-        const wrap = document.createElement("span");
-        wrap.className = "result-mixed";
+      const frame = document.createElement("span");
+      frame.className = `content-frame content-frame-${kind}`;
+
+      const createImageZone = () => {
+        const zone = document.createElement("span");
+        zone.className = "content-zone content-image-zone";
 
         const img = document.createElement("img");
         img.className = "result-image";
         img.alt = "";
         img.src = entry.imageData || entry.imageName;
-        wrap.appendChild(img);
+        img.addEventListener("load", ()=> requestAnimationFrame(fitAllBoxText), { once:true });
+
+        zone.appendChild(img);
+        return zone;
+      };
+
+      const createTextZone = (mode) => {
+        const zone = document.createElement("span");
+        zone.className = "content-zone content-text-zone";
 
         const text = document.createElement("span");
         text.className = "result-text fit-text";
-        text.dataset.fitText = "mixed";
-        text.textContent = cleanText;
-        wrap.appendChild(text);
+        text.dataset.fitText = mode;
+        text.textContent = cleanText || "—";
 
-        return wrap;
+        zone.appendChild(text);
+        return zone;
+      };
+
+      if (hasImage && hasText) {
+        frame.appendChild(createImageZone());
+        frame.appendChild(createTextZone("mixed"));
+        return frame;
       }
 
       if (hasImage) {
-        const img = document.createElement("img");
-        img.className = "result-image";
-        img.alt = "";
-        img.src = entry.imageData || entry.imageName;
-        return img;
+        frame.appendChild(createImageZone());
+        return frame;
       }
 
-      const text = document.createElement("span");
-      const isShort = cleanText.length <= 12 && !cleanText.includes("\n");
-      text.className = isShort ? "result-text" : "result-text fit-text fit-long-text";
-      if (!isShort) text.dataset.fitText = "text";
-      text.textContent = cleanText || "—";
-      return text;
+      frame.appendChild(createTextZone("text"));
+      return frame;
     }
 
     function fitAllBoxText(){
@@ -1308,34 +1336,53 @@
     }
 
     function fitTextInsideBox(el){
-      const box = el.closest(".box-content") || el.closest(".front-panel");
-      if (!box) return;
-
-      const boxRect = box.getBoundingClientRect();
-      if (!boxRect.width || !boxRect.height) return;
-
       const mode = el.dataset.fitText || "text";
-      const tile = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--tile-size")) || boxRect.width;
-      const maxFont = mode === "cover"
-        ? Math.min(tile * .25, boxRect.width * .19, boxRect.height * .34, 42)
-        : mode === "mixed"
-          ? Math.min(tile * .15, boxRect.width * .16, 23)
-          : Math.min(tile * .32, boxRect.width * .24, boxRect.height * .34, 48);
-      const minFont = mode === "cover" ? Math.max(8, Math.min(tile * .06, 12)) : Math.max(9, Math.min(tile * .075, 13));
+      const isCover = mode === "cover";
+      const zone = isCover
+        ? el.closest(".front-panel")
+        : el.closest(".content-text-zone");
 
-      el.style.fontSize = `${maxFont}px`;
+      if (!zone) return;
+
+      const zoneWidth = Math.max(0, zone.clientWidth);
+      const zoneHeight = Math.max(0, zone.clientHeight);
+      if (!zoneWidth || !zoneHeight) return;
+
+      const tile = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--tile-size")
+      ) || zoneWidth;
+
+      const availableWidth = isCover ? zoneWidth * .84 : Math.max(1, zoneWidth - 2);
+      const availableHeight = isCover ? zoneHeight * .72 : Math.max(1, zoneHeight - 2);
+
+      const maxFont = isCover
+        ? Math.min(tile * .25, availableWidth * .21, availableHeight * .42, 42)
+        : mode === "mixed"
+          ? Math.min(tile * .17, availableWidth * .20, availableHeight * .46, 27)
+          : Math.min(tile * .34, availableWidth * .27, availableHeight * .42, 52);
+
+      const minFont = isCover
+        ? Math.max(7, Math.min(tile * .052, 11))
+        : Math.max(6, Math.min(tile * .052, 11));
+
+      el.style.width = isCover ? "86%" : "100%";
+      el.style.height = "auto";
+      el.style.maxHeight = "none";
       el.style.lineHeight = mode === "mixed" ? "1.05" : "1.08";
+      el.style.whiteSpace = "normal";
+      el.style.wordBreak = "normal";
+      el.style.overflowWrap = "break-word";
 
       let low = minFont;
-      let high = maxFont;
+      let high = Math.max(minFont, maxFont);
       let best = minFont;
 
-      for (let i = 0; i < 14; i += 1) {
+      for (let i = 0; i < 18; i += 1) {
         const mid = (low + high) / 2;
         el.style.fontSize = `${mid}px`;
 
-        const fitsWidth = el.scrollWidth <= el.clientWidth + 1;
-        const fitsHeight = el.scrollHeight <= el.clientHeight + 1;
+        const fitsWidth = el.scrollWidth <= availableWidth + .5;
+        const fitsHeight = el.scrollHeight <= availableHeight + .5;
 
         if (fitsWidth && fitsHeight) {
           best = mid;
@@ -1493,6 +1540,8 @@
         }
 
         requestAnimationFrame(fitAllBoxText);
+        window.setTimeout(fitAllBoxText, 420);
+        window.setTimeout(fitAllBoxText, 900);
       } finally {
         boxInteractionLocked = false;
       }
