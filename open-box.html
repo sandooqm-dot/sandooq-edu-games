@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v58-wider-intro-camera-open-box-18 -->
+  <!-- version: open-box-v59-external-audio-files-open-box-19 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1216,8 +1216,112 @@
     const backBtn = document.getElementById("backBtn");
     const fixedControls = document.querySelector(".fixed-controls");
 
+    /*
+      open-box-audio-v1:
+      ملفات صوت خارجية بنفس أسلوب صفحة العجلة.
+      ضع الملفات الثلاثة داخل مجلد sounds بجانب ملف الصفحة.
+    */
+    let boxSoundEnabled = true;
+
+    const openBoxAudio = (()=>{
+      const SOUND_FILES = {
+        open: "sounds/open-box-open.mp3?v=1",
+        go: "sounds/open-box-go.mp3?v=1",
+        return: "sounds/open-box-return.mp3?v=1"
+      };
+
+      const VOLUMES = {
+        open: 1,
+        go: 1,
+        return: 1
+      };
+
+      const cache = {};
+      let enabled = true;
+
+      function canPlay(){
+        return enabled !== false && boxSoundEnabled !== false;
+      }
+
+      function getAudio(name){
+        const src = SOUND_FILES[name];
+        if (!src) return null;
+
+        if (!cache[name]) {
+          const audio = new Audio(src);
+          audio.preload = "auto";
+          audio.loop = false;
+          audio.volume = VOLUMES[name] ?? 1;
+          cache[name] = audio;
+        }
+
+        return cache[name];
+      }
+
+      function stopAll(except = null){
+        Object.values(cache).forEach((audio)=>{
+          if (!audio || audio === except) return;
+          try {
+            audio.pause();
+            audio.currentTime = 0;
+          } catch (_) {}
+        });
+      }
+
+      function playNamed(name){
+        if (!canPlay()) return false;
+
+        const audio = getAudio(name);
+        if (!audio) return false;
+
+        try {
+          stopAll(audio);
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = VOLUMES[name] ?? 1;
+          audio.playbackRate = 1;
+
+          const promise = audio.play();
+          if (promise && typeof promise.catch === "function") {
+            promise.catch(()=>{});
+          }
+
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function preload(){
+        Object.keys(SOUND_FILES).forEach((name)=>{
+          const audio = getAudio(name);
+          try { audio?.load?.(); } catch (_) {}
+        });
+      }
+
+      function unlock(){
+        preload();
+      }
+
+      function setEnabled(value){
+        enabled = value !== false;
+        if (!enabled) stopAll();
+      }
+
+      return {
+        unlock,
+        preload,
+        setEnabled,
+        stopAll,
+        playOpen: ()=> playNamed("open"),
+        playGo: ()=> playNamed("go"),
+        playReturn: ()=> playNamed("return")
+      };
+    })();
+
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
+    openBoxAudio.setEnabled(boxSoundEnabled);
     let opened = new Set();
     let focusedIndex = -1;
     let boxZoomAnimationId = null;
@@ -1337,6 +1441,17 @@
       });
     }
 
+    function normalizeSoundEnabled(data){
+      if (!data || typeof data !== "object") return true;
+      if (data.soundEnabled === false) return false;
+      if (
+        data.sounds &&
+        typeof data.sounds === "object" &&
+        data.sounds.enabled === false
+      ) return false;
+      return true;
+    }
+
     function cleanPayloadItems(payload){
       const source = Array.isArray(payload) ? payload : payload.entries || payload.items || [];
       return source
@@ -1364,6 +1479,8 @@
         if (!clean.length) return false;
 
         if (payload.theme) currentTheme = normalizeTheme(payload.theme);
+        boxSoundEnabled = normalizeSoundEnabled(payload);
+        openBoxAudio.setEnabled(boxSoundEnabled);
         items = clean;
         return true;
       } catch (_) {
@@ -1443,6 +1560,7 @@
         const clean = cleanPayloadItems(payload);
 
         if (payload.theme) currentTheme = normalizeTheme(payload.theme);
+        boxSoundEnabled = normalizeSoundEnabled(payload);
         return clean.length ? clean : DEMO_ITEMS;
       } catch (_) {
         return DEMO_ITEMS;
@@ -2477,6 +2595,9 @@
     async function selectBoxForFocus(button, index){
       if (!button || boxInteractionLocked) return;
 
+      openBoxAudio.unlock();
+      openBoxAudio.playGo();
+
       boxInteractionLocked = true;
       selectedBoxIndex = index;
       activeFocusButton = button;
@@ -2529,6 +2650,9 @@
         return;
       }
 
+      openBoxAudio.unlock();
+      openBoxAudio.playOpen();
+
       boxInteractionLocked = true;
       openBtn.disabled = true;
       setOpenButtonVisible(false);
@@ -2558,6 +2682,10 @@
       setOpenButtonVisible(false);
 
       if (boxInteractionLocked) return;
+
+      openBoxAudio.unlock();
+      openBoxAudio.playReturn();
+
       boxInteractionLocked = true;
 
       try {
@@ -2610,6 +2738,18 @@
       }
 
       setOpenButtonVisible(false);
+
+      const shouldPlayReturnSound =
+        focusedIndex >= 0 ||
+        boxFocusState.scale > 1.001 ||
+        selectedBoxIndex >= 0 ||
+        scatterTargets.size > 0;
+
+      if (shouldPlayReturnSound) {
+        openBoxAudio.unlock();
+        openBoxAudio.playReturn();
+      }
+
       opened.clear();
 
       document.querySelectorAll(".box-card.opened").forEach((card)=>{
@@ -2682,6 +2822,10 @@
       } catch (_) {}
       window.location.href = "index.html";
     }
+
+    document.addEventListener("pointerdown", ()=>{
+      openBoxAudio.unlock();
+    }, { once:true, passive:true });
 
     resetBtn.addEventListener("click", resetBoxes);
     openBtn.addEventListener("click", openSelectedBox);
@@ -2909,6 +3053,9 @@
       activeFocusButton = null;
       boxInteractionLocked = false;
       setOpenButtonVisible(false);
+
+      openBoxAudio.setEnabled(boxSoundEnabled);
+      openBoxAudio.preload();
 
       applyTheme(currentTheme);
       syncVisualViewportFrame(true);
