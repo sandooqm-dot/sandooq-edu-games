@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-open-box-simplified-image-picker-v43 -->
+<!-- version: index-open-box-strict-mode-cleanup-v44 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5498,35 +5498,106 @@
     return base;
   }
 
+
+  function normalizeOpenBoxContentType(value){
+    const type = String(value || "").trim().toLowerCase();
+    return ["text", "images", "mixed"].includes(type) ? type : "text";
+  }
+
+  function normalizeOpenBoxCoverMode(value){
+    const mode = String(value || "").trim().toLowerCase();
+    return ["disabled", "text", "image"].includes(mode) ? mode : "disabled";
+  }
+
+  function cleanOpenBoxEntryForModes(entry, contentType = wheelContentType, coverMode = boxCoverMode){
+    const clean = {
+      text:String(entry?.text || ""),
+      imageName:entry?.imageName || "",
+      imageData:entry?.imageData || "",
+      coverText:String(entry?.coverText || ""),
+      coverImageName:entry?.coverImageName || "",
+      coverImageData:entry?.coverImageData || ""
+    };
+
+    const activeContentType = normalizeOpenBoxContentType(contentType);
+    const activeCoverMode = normalizeOpenBoxCoverMode(coverMode);
+
+    if (activeContentType === "text") {
+      clean.imageName = "";
+      clean.imageData = "";
+    } else if (activeContentType === "images") {
+      clean.text = "";
+    }
+
+    if (activeCoverMode === "text") {
+      clean.coverImageName = "";
+      clean.coverImageData = "";
+    } else if (activeCoverMode === "image") {
+      clean.coverText = "";
+    } else {
+      clean.coverText = "";
+      clean.coverImageName = "";
+      clean.coverImageData = "";
+    }
+
+    return clean;
+  }
+
+  function cleanOpenBoxEntriesInPlace(){
+    if (currentGameTemplate !== "open-box") return;
+
+    wheelContentType = normalizeOpenBoxContentType(wheelContentType);
+    boxCoverMode = normalizeOpenBoxCoverMode(boxCoverMode);
+    wheelEntries = wheelEntries.map((entry)=>
+      cleanOpenBoxEntryForModes(entry, wheelContentType, boxCoverMode)
+    );
+  }
+
   function isEntryFilled(entry){
     if (currentGameTemplate === "open-box") {
+      const clean = cleanOpenBoxEntryForModes(
+        entry,
+        wheelContentType,
+        boxCoverMode
+      );
+
       return Boolean(
-        entry.text ||
-        entry.imageData ||
-        entry.imageName ||
-        entry.coverText ||
-        entry.coverImageData ||
-        entry.coverImageName
+        clean.text ||
+        clean.imageData ||
+        clean.imageName ||
+        clean.coverText ||
+        clean.coverImageData ||
+        clean.coverImageName
       );
     }
+
     if (wheelContentType === "images") return Boolean(entry.imageData || entry.imageName);
     if (wheelContentType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
     return Boolean(entry.text);
   }
 
   function getFilledEntries(){
-    return wheelEntries.filter(isEntryFilled).map((entry)=> ({
-      text: String(entry.text || "").trim(),
-      imageName: entry.imageName || "",
-      imageData: entry.imageData || "",
-      coverText: String(entry.coverText || "").trim(),
-      coverImageName: entry.coverImageName || "",
-      coverImageData: entry.coverImageData || ""
+    const source = currentGameTemplate === "open-box"
+      ? wheelEntries.map((entry)=> cleanOpenBoxEntryForModes(
+          entry,
+          wheelContentType,
+          boxCoverMode
+        ))
+      : wheelEntries;
+
+    return source.filter(isEntryFilled).map((entry)=> ({
+      text:String(entry.text || "").trim(),
+      imageName:entry.imageName || "",
+      imageData:entry.imageData || "",
+      coverText:String(entry.coverText || "").trim(),
+      coverImageName:entry.coverImageName || "",
+      coverImageData:entry.coverImageData || ""
     }));
   }
 
   function saveDraft(){
     syncWheelEntriesFromDom();
+    cleanOpenBoxEntriesInPlace();
 
     const payload = {
       gameTemplate: currentGameTemplate,
@@ -5560,7 +5631,7 @@
       if (!draft || typeof draft !== "object") return false;
 
       currentGameTemplate = draft.gameTemplate === "open-box" || draft.template === "open-box" ? "open-box" : "wheel";
-      wheelContentType = draft.type || "text";
+      wheelContentType = normalizeOpenBoxContentType(draft.contentType || draft.type || "text");
       wheelTheme = normalizeGameTheme(draft.theme || draft.wheelTheme || draft.selectedTheme);
       wheelEntries = Array.isArray(draft.entries) ? draft.entries : [];
       if (currentGameTemplate === "open-box") {
@@ -5575,8 +5646,8 @@
         coverImageData: entry.coverImageData || ""
       }));
       wheelSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
-      boxCoverMode = draft.coverMode || "disabled";
-      if (!["disabled","text","image"].includes(boxCoverMode)) boxCoverMode = "disabled";
+      boxCoverMode = normalizeOpenBoxCoverMode(draft.coverMode || "disabled");
+      cleanOpenBoxEntriesInPlace();
       syncSoundUi();
 
       if (wheelGameNameInput) wheelGameNameInput.value = draft.gameName || "";
@@ -5768,8 +5839,16 @@
       if (!selectedFile) return;
 
       wheelEntries[index][imageNameKey] = selectedFile.name;
+
+      if (fieldPrefix === "cover") {
+        wheelEntries[index].coverText = "";
+      } else if (wheelContentType === "images") {
+        wheelEntries[index].text = "";
+      }
+
       readFileAsDataURL(selectedFile, (dataUrl)=>{
         wheelEntries[index][imageDataKey] = dataUrl;
+        cleanOpenBoxEntriesInPlace();
         saveDraft();
         renderWheelEntries();
       });
@@ -5804,6 +5883,8 @@
       input.setAttribute("data-entry-field", "coverText");
       input.addEventListener("input", ()=>{
         wheelEntries[index].coverText = input.value;
+        wheelEntries[index].coverImageName = "";
+        wheelEntries[index].coverImageData = "";
         saveDraft();
       });
       group.appendChild(input);
@@ -5868,6 +5949,10 @@
         input.setAttribute("data-entry-field", "text");
         input.addEventListener("input", ()=>{
           wheelEntries[index].text = input.value;
+          if (wheelContentType === "text") {
+            wheelEntries[index].imageName = "";
+            wheelEntries[index].imageData = "";
+          }
           saveDraft();
         });
         box.appendChild(input);
@@ -5882,7 +5967,9 @@
   }
 
   function setWheelType(type){
-    wheelContentType = type || "text";
+    wheelContentType = currentGameTemplate === "open-box"
+      ? normalizeOpenBoxContentType(type)
+      : (type || "text");
     document.querySelectorAll(".wheel-type").forEach((btn)=>{
       btn.classList.toggle("active", btn.getAttribute("data-wheel-type") === wheelContentType);
     });
@@ -5961,6 +6048,7 @@
 
   async function openOpenBoxPage(){
     syncWheelEntriesFromDom();
+    cleanOpenBoxEntriesInPlace();
 
     const entries = getFilledEntries().slice(0, OPEN_BOX_MAX_ITEMS);
     if (!entries.length) {
@@ -5975,8 +6063,10 @@
 
     const payload = {
       gameTemplate: "open-box",
-      type: wheelContentType,
-      contentType: wheelContentType,
+      payloadVersion:2,
+      strictModes:true,
+      type:normalizeOpenBoxContentType(wheelContentType),
+      contentType:normalizeOpenBoxContentType(wheelContentType),
       theme: selectedTheme,
       wheelTheme: selectedTheme,
       selectedTheme,
@@ -5984,7 +6074,7 @@
       introMode:"wheel-camera",
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries,
-      coverMode: boxCoverMode,
+      coverMode:normalizeOpenBoxCoverMode(boxCoverMode),
       updatedAt: Date.now(),
       payloadId
     };
@@ -6052,14 +6142,20 @@
     btn.addEventListener("click", ()=>{
       syncWheelEntriesFromDom();
       setWheelType(btn.getAttribute("data-wheel-type") || "text");
-      wheelEntries = wheelEntries.map((entry)=>({
-        text: wheelContentType === "images" ? "" : (entry.text || ""),
-        imageName: wheelContentType === "text" ? "" : (entry.imageName || ""),
-        imageData: wheelContentType === "text" ? "" : (entry.imageData || ""),
-        coverText: entry.coverText || "",
-        coverImageName: entry.coverImageName || "",
-        coverImageData: entry.coverImageData || ""
-      }));
+
+      if (currentGameTemplate === "open-box") {
+        cleanOpenBoxEntriesInPlace();
+      } else {
+        wheelEntries = wheelEntries.map((entry)=>({
+          text:wheelContentType === "images" ? "" : (entry.text || ""),
+          imageName:wheelContentType === "text" ? "" : (entry.imageName || ""),
+          imageData:wheelContentType === "text" ? "" : (entry.imageData || ""),
+          coverText:entry.coverText || "",
+          coverImageName:entry.coverImageName || "",
+          coverImageData:entry.coverImageData || ""
+        }));
+      }
+
       renderWheelEntries();
       saveDraft();
     });
@@ -6108,7 +6204,11 @@
       btn.classList.add("active");
 
       if (currentGameTemplate === "open-box") {
-        boxCoverMode = enabled ? (boxCoverMode === "image" ? "image" : "text") : "disabled";
+        syncWheelEntriesFromDom();
+        boxCoverMode = enabled
+          ? normalizeOpenBoxCoverMode(boxCoverMode === "image" ? "image" : "text")
+          : "disabled";
+        cleanOpenBoxEntriesInPlace();
         applySetupMode();
         renderWheelEntries();
         saveDraft();
@@ -6124,7 +6224,9 @@
   document.querySelectorAll("[data-cover-type]").forEach((btn)=>{
     btn.addEventListener("click", ()=>{
       if (currentGameTemplate !== "open-box") return;
+      syncWheelEntriesFromDom();
       boxCoverMode = btn.getAttribute("data-cover-type") === "image" ? "image" : "text";
+      cleanOpenBoxEntriesInPlace();
       applySetupMode();
       renderWheelEntries();
       saveDraft();

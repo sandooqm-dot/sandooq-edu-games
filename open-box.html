@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v68-classroom-notebook-cover-text-scale-open-box-28 -->
+  <!-- version: open-box-v69-strict-payload-modes-open-box-29 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1725,6 +1725,8 @@
       };
     })();
 
+    let currentContentType = "text";
+    let currentCoverMode = "disabled";
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
     openBoxAudio.setEnabled(boxSoundEnabled);
@@ -2015,18 +2017,91 @@
       return true;
     }
 
+    function normalizePayloadContentType(payload, source){
+      const explicit = String(
+        (!Array.isArray(payload) && (payload.contentType || payload.type)) || ""
+      ).trim().toLowerCase();
+
+      if (["text", "images", "mixed"].includes(explicit)) return explicit;
+
+      const hasImage = source.some((entry)=>
+        Boolean(entry?.imageData || entry?.image || entry?.imageName)
+      );
+      const hasText = source.some((entry)=>
+        Boolean(String(entry?.text || entry?.title || entry?.answer || "").trim())
+      );
+
+      if (hasImage && hasText) return "mixed";
+      if (hasImage) return "images";
+      return "text";
+    }
+
+    function normalizePayloadCoverMode(payload, source){
+      const explicit = String(
+        (!Array.isArray(payload) && payload.coverMode) || ""
+      ).trim().toLowerCase();
+
+      if (["disabled", "text", "image"].includes(explicit)) return explicit;
+
+      const hasCoverImage = source.some((entry)=>
+        Boolean(entry?.coverImageData || entry?.coverImage || entry?.coverImageName)
+      );
+      const hasCoverText = source.some((entry)=>
+        Boolean(String(entry?.coverText || "").trim())
+      );
+
+      if (hasCoverImage) return "image";
+      if (hasCoverText) return "text";
+      return "disabled";
+    }
+
     function cleanPayloadItems(payload){
-      const source = Array.isArray(payload) ? payload : payload.entries || payload.items || [];
+      const source = Array.isArray(payload)
+        ? payload
+        : payload.entries || payload.items || [];
+
+      currentContentType = normalizePayloadContentType(payload, source);
+      currentCoverMode = normalizePayloadCoverMode(payload, source);
+
       return source
-        .map((entry)=> ({
-          text: String(entry.text || entry.title || entry.answer || "").trim(),
-          imageData: entry.imageData || entry.image || "",
-          imageName: entry.imageName || "",
-          coverText: String(entry.coverText || "").trim(),
-          coverImageData: entry.coverImageData || entry.coverImage || "",
-          coverImageName: entry.coverImageName || ""
-        }))
-        .filter((entry)=> entry.text || entry.imageData || entry.imageName || entry.coverText || entry.coverImageData || entry.coverImageName)
+        .map((entry)=> {
+          const clean = {
+            text:String(entry.text || entry.title || entry.answer || "").trim(),
+            imageData:entry.imageData || entry.image || "",
+            imageName:entry.imageName || "",
+            coverText:String(entry.coverText || "").trim(),
+            coverImageData:entry.coverImageData || entry.coverImage || "",
+            coverImageName:entry.coverImageName || ""
+          };
+
+          if (currentContentType === "text") {
+            clean.imageData = "";
+            clean.imageName = "";
+          } else if (currentContentType === "images") {
+            clean.text = "";
+          }
+
+          if (currentCoverMode === "text") {
+            clean.coverImageData = "";
+            clean.coverImageName = "";
+          } else if (currentCoverMode === "image") {
+            clean.coverText = "";
+          } else {
+            clean.coverText = "";
+            clean.coverImageData = "";
+            clean.coverImageName = "";
+          }
+
+          return clean;
+        })
+        .filter((entry)=>
+          entry.text ||
+          entry.imageData ||
+          entry.imageName ||
+          entry.coverText ||
+          entry.coverImageData ||
+          entry.coverImageName
+        )
         .slice(0, MAX_BOX_ITEMS);
     }
 
@@ -2533,7 +2608,7 @@
     }
 
     function createCoverContent(entry, index){
-      if (entry.coverImageData || entry.coverImageName) {
+      if (currentCoverMode === "image" && (entry.coverImageData || entry.coverImageName)) {
         const img = document.createElement("img");
         img.className = "cover-image";
         img.alt = "";
@@ -2541,7 +2616,7 @@
         return img;
       }
 
-      if (String(entry.coverText || "").trim()) {
+      if (currentCoverMode === "text" && String(entry.coverText || "").trim()) {
         const text = document.createElement("span");
         text.className = "cover-text fit-text";
         text.dataset.fitText = "cover";
@@ -2556,16 +2631,22 @@
     }
 
     function getEntryKind(entry){
-      const hasImage = Boolean(entry.imageData || entry.imageName);
-      const hasText = Boolean(String(entry.text || "").trim());
-      if (hasImage && hasText) return "mixed";
-      if (hasImage) return "image";
+      const hasImage = currentContentType !== "text" && Boolean(entry.imageData || entry.imageName);
+      const hasText = currentContentType !== "images" && Boolean(String(entry.text || "").trim());
+
+      if (currentContentType === "mixed") {
+        if (hasImage && hasText) return "mixed";
+        if (hasImage) return "image";
+        return "text";
+      }
+
+      if (currentContentType === "images" && hasImage) return "image";
       return "text";
     }
 
     function createResultContent(entry, kind){
-      const hasImage = Boolean(entry.imageData || entry.imageName);
-      const cleanText = String(entry.text || "").trim();
+      const hasImage = currentContentType !== "text" && Boolean(entry.imageData || entry.imageName);
+      const cleanText = currentContentType === "images" ? "" : String(entry.text || "").trim();
       const hasText = Boolean(cleanText);
 
       const frame = document.createElement("span");
