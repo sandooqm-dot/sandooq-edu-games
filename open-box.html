@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v66-classroom-notebook-open-box-26 -->
+  <!-- version: open-box-v67-classroom-notebook-content-fit-open-box-27 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1448,6 +1448,92 @@
         animation-duration:.01ms !important;
       }
     }
+
+    /*
+      v67: ضبط النص على غلاف المفكرة واستغلال مساحة الورقة الداخلية.
+      يطبّق على ثيم الفصل المدرسي فقط.
+    */
+    .game-page.theme-classroom .cover-text{
+      width:58% !important;
+      max-width:58% !important;
+      max-height:58% !important;
+      padding:1% 2% !important;
+      line-height:1.04 !important;
+      box-sizing:border-box !important;
+      overflow:hidden !important;
+      text-wrap:balance;
+    }
+
+    /* توسيع المساحة الفعلية داخل الورقة المسطرة. */
+    .game-page.theme-classroom .box-content{
+      left:17.5% !important;
+      right:17.5% !important;
+      top:20.5% !important;
+      bottom:10.5% !important;
+      padding:0 !important;
+      overflow:hidden !important;
+    }
+
+    .game-page.theme-classroom .content-frame{
+      width:100% !important;
+      height:100% !important;
+      padding:0 !important;
+      overflow:hidden !important;
+    }
+
+    .game-page.theme-classroom .content-image-zone{
+      padding:0 !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    .game-page.theme-classroom .content-text-zone{
+      padding:.4% 1.4% 1.8% !important;
+      align-items:center !important;
+      justify-content:center !important;
+    }
+
+    .game-page.theme-classroom .result-image{
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      object-fit:contain !important;
+      object-position:center center !important;
+    }
+
+    /* في المحتوى المختلط نعطي الصورة المساحة الأكبر مع إبقاء النص واضحًا. */
+    .game-page.theme-classroom .content-frame-mixed{
+      grid-template-rows:minmax(0, 70fr) minmax(0, 30fr) !important;
+      gap:.5% !important;
+    }
+
+    .game-page.theme-classroom .content-frame-mixed.mixed-short{
+      grid-template-rows:minmax(0, 76fr) minmax(0, 24fr) !important;
+    }
+
+    .game-page.theme-classroom .content-frame-mixed.mixed-medium{
+      grid-template-rows:minmax(0, 70fr) minmax(0, 30fr) !important;
+    }
+
+    .game-page.theme-classroom .content-frame-mixed.mixed-long{
+      grid-template-rows:minmax(0, 62fr) minmax(0, 38fr) !important;
+    }
+
+    .game-page.theme-classroom .content-frame-mixed.mixed-xlong{
+      grid-template-rows:minmax(0, 54fr) minmax(0, 46fr) !important;
+    }
+
+    .game-page.theme-classroom .content-frame-mixed .result-image{
+      object-position:center center !important;
+    }
+
+    .game-page.theme-classroom .result-text{
+      width:100% !important;
+      max-width:100% !important;
+      line-height:1.12 !important;
+      padding:.04em 0 .18em !important;
+    }
 </style>
 </head>
 <body>
@@ -2551,8 +2637,13 @@
       const mode = el.dataset.fitText || "text";
       const isCover = mode === "cover";
       const card = el.closest(".box-card");
+      const isClassroomCover = Boolean(
+        isCover &&
+        card &&
+        page?.classList.contains("theme-classroom")
+      );
 
-      // لا نقيس الغلاف بعد فتح الصندوق؛ وقتها يتحول الغلاف إلى شريط علوي صغير.
+      // لا نقيس الغلاف بعد فتح الصندوق؛ وقتها يتحول الغلاف إلى حركة فتح.
       if (isCover && card?.classList.contains("opened")) return;
 
       const zone = isCover
@@ -2569,30 +2660,50 @@
         getComputedStyle(document.documentElement).getPropertyValue("--tile-size")
       ) || zoneWidth;
 
+      /*
+        غلاف المفكرة لا يستخدم كامل المربع بسبب الحلقات والهوامش.
+        لذلك نقيس النص داخل المنطقة الوردية الحقيقية، وليس داخل البلاطة كاملة.
+      */
+      const coverWidthRatio = isClassroomCover ? .54 : .88;
+      const coverHeightRatio = isClassroomCover ? .54 : .82;
+
       const availableWidth = isCover
-        ? Math.max(1, zoneWidth * .88)
+        ? Math.max(1, zoneWidth * coverWidthRatio)
         : Math.max(1, zoneWidth - 2);
 
       const availableHeight = isCover
-        ? Math.max(1, zoneHeight * .82)
+        ? Math.max(1, zoneHeight * coverHeightRatio)
         : Math.max(1, zoneHeight - 2);
 
       const maxFont = isCover
-        ? Math.min(tile * .29, availableWidth * .24, availableHeight * .50, 46)
+        ? isClassroomCover
+          ? Math.min(tile * .255, availableWidth * .30, availableHeight * .34, 42)
+          : Math.min(tile * .29, availableWidth * .24, availableHeight * .50, 46)
         : mode === "mixed"
-          ? Math.min(tile * .23, availableWidth * .24, availableHeight * .62, 36)
-          : Math.min(tile * .38, availableWidth * .31, availableHeight * .48, 60);
+          ? Math.min(tile * .26, availableWidth * .27, availableHeight * .68, 40)
+          : Math.min(tile * .43, availableWidth * .35, availableHeight * .54, 66);
 
       const minFont = isCover
-        ? Math.max(13, Math.min(tile * .085, 18))
+        ? isClassroomCover
+          ? Math.max(8, Math.min(tile * .052, 13))
+          : Math.max(13, Math.min(tile * .085, 18))
         : mode === "mixed"
           ? Math.max(7, Math.min(tile * .050, 11))
           : Math.max(8, Math.min(tile * .055, 12));
 
-      el.style.width = isCover ? "88%" : "100%";
+      if (isClassroomCover) {
+        el.style.setProperty("width", "58%", "important");
+        el.style.setProperty("max-width", "58%", "important");
+        el.style.setProperty("max-height", "58%", "important");
+      } else {
+        el.style.width = isCover ? "88%" : "100%";
+        el.style.maxHeight = isCover ? "100%" : "none";
+      }
+
       el.style.height = "auto";
-      el.style.maxHeight = isCover ? "100%" : "none";
-      el.style.lineHeight = isCover ? "1.08" : (mode === "mixed" ? "1.16" : "1.18");
+      el.style.lineHeight = isCover
+        ? (isClassroomCover ? "1.04" : "1.08")
+        : (mode === "mixed" ? "1.12" : "1.14");
       el.style.whiteSpace = "normal";
       el.style.wordBreak = "normal";
       el.style.overflowWrap = "normal";
@@ -2602,12 +2713,14 @@
       let high = Math.max(minFont, maxFont);
       let best = minFont;
 
-      for (let i = 0; i < 22; i += 1) {
+      for (let i = 0; i < 24; i += 1) {
         const mid = (low + high) / 2;
         el.style.setProperty("--fit-font-size", `${mid}px`);
         el.style.setProperty("font-size", `${mid}px`, "important");
 
-        const descentSafety = isCover ? 0 : Math.max(2, mid * .12);
+        const descentSafety = isCover
+          ? Math.max(1, mid * .04)
+          : Math.max(2, mid * .12);
         const fitsWidth = el.scrollWidth <= availableWidth + .5;
         const fitsHeight = el.scrollHeight + descentSafety <= availableHeight + .5;
 
