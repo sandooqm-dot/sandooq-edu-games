@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v64-correct-inner-text-contrast-open-box-24 -->
+  <!-- version: open-box-v65-clear-inner-result-text-open-box-25 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1178,6 +1178,7 @@
 
     .box-card .result-text{
       color:var(--box-result-text) !important;
+      -webkit-text-fill-color:var(--box-result-text) !important;
       text-shadow:var(--box-result-text-shadow) !important;
     }
 
@@ -1523,7 +1524,19 @@
         isLightSurface ? .055 : .30
       );
 
-      const textIsLight = colorBrightness(pairedText) > 170;
+      const coverTextIsLight = colorBrightness(pairedText) > 170;
+
+      /*
+        داخل الصندوق المصوّر يظهر أغمق من لون الغلاف نفسه،
+        لذلك لا نعتمد لون الغلاف لتحديد لون النص الداخلي.
+        جميع الألوان المتوسطة والداكنة تأخذ نصًا أبيض واضحًا.
+        اللون شديد الفاتح فقط يأخذ نصًا داكنًا.
+      */
+      const resultSurfaceIsVeryLight = colorBrightness(baseColor) >= 235;
+      const resultTextColor = resultSurfaceIsVeryLight
+        ? (themeId === "national-day" ? "#083D2B" : "#34261F")
+        : "#FFFFFF";
+      const resultTextIsLight = colorBrightness(resultTextColor) > 170;
 
       return {
         panel:baseColor,
@@ -1535,13 +1548,13 @@
         assetBrightness:isLightSurface ? 1.02 : 1.00,
         assetSaturation:isLightSurface ? 1.03 : 1.15,
         coverTextColor:pairedText,
-        coverTextShadow:textIsLight
+        coverTextShadow:coverTextIsLight
           ? "0 3px 8px rgba(0,0,0,.28)"
           : "0 1px 1px rgba(255,255,255,.48)",
-        resultTextColor:pairedText,
-        resultTextShadow:textIsLight
-          ? "0 3px 8px rgba(0,0,0,.30)"
-          : "0 1px 1px rgba(255,255,255,.52)",
+        resultTextColor,
+        resultTextShadow:resultTextIsLight
+          ? "0 2px 2px rgba(0,0,0,.72), 0 4px 10px rgba(0,0,0,.34)"
+          : "0 1px 1px rgba(255,255,255,.72), 0 2px 5px rgba(255,255,255,.34)",
         edgeColor:
           THEME_BOX_EDGE_COLORS[themeId] ||
           mixHexColors(baseColor, "#000000", .30)
