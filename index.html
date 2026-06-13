@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-open-box-themes-intro-v42 -->
+<!-- version: index-open-box-simplified-image-picker-v43 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -4993,6 +4993,165 @@
       }
     }
 
+
+    /* v43: تبسيط رفع صور صندوق المحتوى وصورة الغلاف */
+    .image-picker-field{
+      position:relative;
+      width:100%;
+      min-height:58px;
+      border:2px solid var(--ink);
+      border-radius:15px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 10px;
+      cursor:pointer;
+      overflow:hidden;
+    }
+
+    .image-picker-field:focus-within{
+      box-shadow:0 0 0 3px rgba(94,136,219,.20);
+    }
+
+    .image-picker-input{
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      opacity:0 !important;
+      overflow:hidden !important;
+      pointer-events:none !important;
+      inset:auto !important;
+    }
+
+    .image-picker-action{
+      flex:0 0 auto;
+      min-width:104px;
+      min-height:36px;
+      border-radius:999px;
+      background:#eeeeee;
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:7px 14px;
+      font-size:clamp(13px, 1.35vw, 17px);
+      font-weight:900;
+      line-height:1;
+      white-space:nowrap;
+    }
+
+    .image-picker-state{
+      min-width:0;
+      flex:1 1 auto;
+      min-height:40px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#222;
+      font-size:clamp(14px, 1.55vw, 20px);
+      font-weight:800;
+      line-height:1.2;
+      text-align:center;
+      overflow:hidden;
+    }
+
+    .image-picker-empty{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .image-picker-preview{
+      display:block;
+      width:min(84px, 24vw);
+      height:54px;
+      object-fit:contain;
+      border-radius:8px;
+      background:transparent;
+      border:none;
+    }
+
+    /* في إعداد افتح الصندوق لا نستخدم مربع حالة منفصل للصورة */
+    body[data-setup-template="open-box"] .wheel-file-status{
+      display:none !important;
+    }
+
+    body[data-setup-template="open-box"] .question-row{
+      flex-wrap:nowrap;
+      align-items:center;
+    }
+
+    body[data-setup-template="open-box"] #specialPanelTitle{
+      flex:1 1 auto;
+      min-width:0;
+      font-size:clamp(15px, 1.65vw, 22px);
+      line-height:1.35;
+    }
+
+    body[data-setup-template="open-box"] .question-row > .toggle{
+      flex:0 0 auto;
+    }
+
+    body[data-setup-template="open-box"] .question-row > .toggle button{
+      padding:10px 20px;
+      font-size:clamp(15px, 1.55vw, 19px);
+    }
+
+    @media (max-width:760px){
+      .image-picker-field{
+        min-height:56px;
+        border-radius:14px;
+        padding:7px 8px;
+        gap:8px;
+      }
+
+      .image-picker-action{
+        min-width:94px;
+        min-height:34px;
+        padding:7px 11px;
+        font-size:13px;
+      }
+
+      .image-picker-state{
+        font-size:14px;
+      }
+
+      .image-picker-preview{
+        width:64px;
+        height:46px;
+      }
+
+      body[data-setup-template="open-box"] #specialPanelTitle{
+        font-size:clamp(14px, 3.65vw, 17px);
+      }
+
+      body[data-setup-template="open-box"] .question-row{
+        gap:8px;
+      }
+
+      body[data-setup-template="open-box"] .question-row > .toggle{
+        gap:4px;
+        padding:4px;
+      }
+
+      body[data-setup-template="open-box"] .question-row > .toggle button{
+        padding:8px 13px;
+        font-size:13px;
+      }
+    }
+
+    @media (max-width:390px){
+      body[data-setup-template="open-box"] #specialPanelTitle{
+        font-size:13px;
+      }
+
+      body[data-setup-template="open-box"] .question-row > .toggle button{
+        padding:7px 10px;
+        font-size:12px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -5567,28 +5726,59 @@
     });
   }
 
-  function makeFileStatus(entry, fieldPrefix){
+  function createImagePicker(entry, index, fieldPrefix){
     const imageDataKey = fieldPrefix === "cover" ? "coverImageData" : "imageData";
     const imageNameKey = fieldPrefix === "cover" ? "coverImageName" : "imageName";
-    if (!entry[imageNameKey] && !entry[imageDataKey]) return null;
 
-    const status = document.createElement("div");
-    status.className = "wheel-file-status";
+    const label = document.createElement("label");
+    label.className = "image-picker-field";
+    label.classList.toggle("has-image", Boolean(entry[imageDataKey]));
+
+    const file = document.createElement("input");
+    file.className = "image-picker-input";
+    file.type = "file";
+    file.accept = "image/*";
+    file.setAttribute("data-entry-index", String(index));
+    file.setAttribute("aria-label", "إضافة صورة");
+
+    const action = document.createElement("span");
+    action.className = "image-picker-action";
+    action.textContent = "إضافة صورة";
+
+    const state = document.createElement("span");
+    state.className = "image-picker-state";
 
     if (entry[imageDataKey]) {
       const img = document.createElement("img");
-      img.className = "wheel-file-thumb";
-      img.alt = "";
+      img.className = "image-picker-preview";
+      img.alt = entry[imageNameKey] || "الصورة المختارة";
       img.src = entry[imageDataKey];
-      status.appendChild(img);
+      state.appendChild(img);
+    } else {
+      const empty = document.createElement("span");
+      empty.className = "image-picker-empty";
+      empty.textContent = "لم يتم تحديد أي صورة";
+      state.appendChild(empty);
     }
 
-    const name = document.createElement("span");
-    name.className = "wheel-file-name";
-    name.textContent = entry[imageNameKey] ? `الصورة المختارة: ${entry[imageNameKey]}` : "تم اختيار صورة";
-    status.appendChild(name);
-    return status;
+    file.addEventListener("change", ()=>{
+      const selectedFile = file.files && file.files[0] ? file.files[0] : null;
+
+      /* إلغاء نافذة الاختيار لا يحذف الصورة الموجودة */
+      if (!selectedFile) return;
+
+      wheelEntries[index][imageNameKey] = selectedFile.name;
+      readFileAsDataURL(selectedFile, (dataUrl)=>{
+        wheelEntries[index][imageDataKey] = dataUrl;
+        saveDraft();
+        renderWheelEntries();
+      });
+    });
+
+    label.append(file, action, state);
+    return label;
   }
+
 
   function addCoverFields(box, entry, index){
     if (currentGameTemplate !== "open-box" || boxCoverMode === "disabled") return;
@@ -5602,33 +5792,7 @@
     group.appendChild(label);
 
     if (boxCoverMode === "image") {
-      const file = document.createElement("input");
-      file.className = "wheel-entry-file";
-      file.type = "file";
-      file.accept = "image/*";
-      file.setAttribute("data-entry-index", String(index));
-      file.addEventListener("change", ()=>{
-        const selectedFile = file.files && file.files[0] ? file.files[0] : null;
-
-        if (!selectedFile) {
-          wheelEntries[index].coverImageName = "";
-          wheelEntries[index].coverImageData = "";
-          saveDraft();
-          renderWheelEntries();
-          return;
-        }
-
-        wheelEntries[index].coverImageName = selectedFile.name;
-        readFileAsDataURL(selectedFile, (dataUrl)=>{
-          wheelEntries[index].coverImageData = dataUrl;
-          saveDraft();
-          renderWheelEntries();
-        });
-      });
-      group.appendChild(file);
-
-      const status = makeFileStatus(entry, "cover");
-      if (status) group.appendChild(status);
+      group.appendChild(createImagePicker(entry, index, "cover"));
     } else {
       const input = document.createElement("input");
       input.className = "wheel-entry-input";
@@ -5710,49 +5874,7 @@
       }
 
       if (wheelContentType === "images" || wheelContentType === "mixed") {
-        const file = document.createElement("input");
-        file.className = "wheel-entry-file";
-        file.type = "file";
-        file.accept = "image/*";
-        file.setAttribute("data-entry-index", String(index));
-        file.addEventListener("change", ()=>{
-          const selectedFile = file.files && file.files[0] ? file.files[0] : null;
-
-          if (!selectedFile) {
-            wheelEntries[index].imageName = "";
-            wheelEntries[index].imageData = "";
-            saveDraft();
-            renderWheelEntries();
-            return;
-          }
-
-          wheelEntries[index].imageName = selectedFile.name;
-          readFileAsDataURL(selectedFile, (dataUrl)=>{
-            wheelEntries[index].imageData = dataUrl;
-            saveDraft();
-            renderWheelEntries();
-          });
-        });
-        box.appendChild(file);
-
-        if (entry.imageName || entry.imageData) {
-          const status = document.createElement("div");
-          status.className = "wheel-file-status";
-
-          if (entry.imageData) {
-            const img = document.createElement("img");
-            img.className = "wheel-file-thumb";
-            img.alt = "";
-            img.src = entry.imageData;
-            status.appendChild(img);
-          }
-
-          const name = document.createElement("span");
-          name.className = "wheel-file-name";
-          name.textContent = entry.imageName ? `الصورة المختارة: ${entry.imageName}` : "تم اختيار صورة";
-          status.appendChild(name);
-          box.appendChild(status);
-        }
+        box.appendChild(createImagePicker(entry, index, "content"));
       }
 
       wheelItemsEditor.appendChild(box);
