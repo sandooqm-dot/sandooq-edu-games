@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v15-real-zone-fit-text-and-images -->
+  <!-- version: choices-v16-readable-fit-text-no-tiny-fallback -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1470,6 +1470,27 @@
       }
     }
 
+
+    /* v16: منع تصغير النص إلى أحجام مجهرية. */
+    .question-text,
+    .choice-text{
+      display:block !important;
+      flex:0 0 auto !important;
+      align-self:center !important;
+      min-width:0 !important;
+      min-height:0 !important;
+    }
+
+    .question-text{
+      font-size:clamp(18px,3vw,64px);
+      line-height:1.17 !important;
+    }
+
+    .choice-text{
+      font-size:clamp(16px,2.55vw,50px);
+      line-height:1.16 !important;
+    }
+
 </style>
 </head>
 
@@ -2264,18 +2285,23 @@
       const zoneHeight = Math.max(0,zone.clientHeight);
       if (zoneWidth < 2 || zoneHeight < 2) return;
 
-      const availableWidth = Math.max(1,zoneWidth - 2);
-      const availableHeight = Math.max(1,zoneHeight - 2);
+      const availableWidth = Math.max(1,zoneWidth - 4);
+      const availableHeight = Math.max(1,zoneHeight - 4);
 
-      const minFont = Math.max(5,Number(options.minFont) || 5);
+      const minFont = Math.max(12,Number(options.minFont) || 12);
       const maxFont = Math.max(minFont,Number(options.maxFont) || minFont);
-      const lineHeight = String(options.lineHeight || "1.14");
+      const lineHeight = String(options.lineHeight || "1.15");
 
       /*
-        نفس مبدأ صفحة افتح الصندوق:
-        القياس يتم على النص الحقيقي داخل المنطقة الفعلية نفسها،
-        وليس داخل عنصر منفصل قد يلف السطور بطريقة مختلفة.
+        نمنع عنصر النص من التمدد كعنصر Flex؛ لأن التمدد كان يجعل
+        scrollHeight مساويًا تقريبًا لارتفاع المنطقة كاملة، ثم يعتبر
+        القياس أن النص لا يناسب ويهبط به إلى 5 أو 6 بكسل.
       */
+      el.style.display = "block";
+      el.style.flex = "0 0 auto";
+      el.style.alignSelf = "center";
+      el.style.minWidth = "0";
+      el.style.minHeight = "0";
       el.style.width = "100%";
       el.style.maxWidth = "100%";
       el.style.height = "auto";
@@ -2285,7 +2311,7 @@
       el.style.lineHeight = lineHeight;
       el.style.whiteSpace = "normal";
       el.style.wordBreak = "normal";
-      el.style.overflowWrap = "normal";
+      el.style.overflowWrap = "break-word";
       el.style.setProperty("text-wrap","wrap");
       el.style.overflow = "visible";
 
@@ -2293,16 +2319,19 @@
       let high = maxFont;
       let best = minFont;
 
-      for (let i = 0; i < 26; i += 1) {
+      for (let i = 0; i < 28; i += 1) {
         const mid = (low + high) / 2;
 
         el.style.setProperty("--fit-font-size",`${mid}px`);
         el.style.setProperty("font-size",`${mid}px`,"important");
 
-        const descentSafety = Math.max(2,mid * .12);
-        const fitsWidth = el.scrollWidth <= availableWidth + .5;
+        const rect = el.getBoundingClientRect();
+        const fitsWidth =
+          el.scrollWidth <= availableWidth + 1 &&
+          rect.width <= availableWidth + 1;
         const fitsHeight =
-          el.scrollHeight + descentSafety <= availableHeight + .5;
+          el.scrollHeight <= availableHeight + 1 &&
+          rect.height <= availableHeight + 1;
 
         if (fitsWidth && fitsHeight) {
           best = mid;
@@ -2313,19 +2342,13 @@
       }
 
       /*
-        إذا كان النص شديد الطول نضمن عدم قصه حتى لو احتاج
-        للنزول تحت الحجم المعتاد.
+        لا نسمح بالهبوط إلى أحجام مجهرية.
+        إذا كان النص شديد الطول نستخدم الحد الأدنى المقروء فقط.
       */
-      el.style.setProperty("--fit-font-size",`${minFont}px`);
-      el.style.setProperty("font-size",`${minFont}px`,"important");
-
-      const minFits =
-        el.scrollWidth <= availableWidth + .5 &&
-        el.scrollHeight + Math.max(2,minFont * .12) <= availableHeight + .5;
-
-      const finalSize = minFits
-        ? Math.floor(best * 10) / 10
-        : Math.max(4,Math.floor(minFont * .84 * 10) / 10);
+      const finalSize = Math.max(
+        minFont,
+        Math.floor(best * 10) / 10
+      );
 
       el.style.setProperty("--fit-font-size",`${finalSize}px`);
       el.style.setProperty("font-size",`${finalSize}px`,"important");
@@ -2340,12 +2363,12 @@
           const zoneHeight = zone?.clientHeight || questionCard.clientHeight;
 
           fitTextInsidePanel(qText,{
-            minFont:7,
+            minFont:18,
             maxFont:Math.min(
-              72,
-              Math.max(28,zoneHeight * .62)
+              64,
+              Math.max(34,zoneHeight * .58)
             ),
-            lineHeight:"1.18"
+            lineHeight:"1.17"
           });
         }
 
@@ -2354,12 +2377,12 @@
           const zoneHeight = zone?.clientHeight || 90;
 
           fitTextInsidePanel(el,{
-            minFont:6,
+            minFont:16,
             maxFont:Math.min(
-              58,
-              Math.max(24,zoneHeight * .64)
+              50,
+              Math.max(28,zoneHeight * .56)
             ),
-            lineHeight:"1.17"
+            lineHeight:"1.16"
           });
         });
       };
