@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v3-safari-layout-colored-panels-navigation -->
+  <!-- version: choices-v4-compact-panels-plain-answer-marks -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1125,6 +1125,125 @@
 
       .question-navigation{
         gap:7px;
+      }
+    }
+
+
+    /* v4: تصغير بطاقة السؤال والاختيارات وإزالة دائرة علامة الإجابة. */
+
+    .question-view{
+      justify-content:center;
+      gap:clamp(12px,1.7vh,20px);
+      padding-top:clamp(4px,1vh,10px);
+      padding-bottom:clamp(4px,1vh,10px);
+    }
+
+    .question-card{
+      flex:0 0 clamp(82px,13.5vh,128px);
+      width:min(80%,900px);
+      padding:clamp(10px,1.35vw,18px);
+      border-width:clamp(3px,.28vw,4px);
+      border-radius:clamp(10px,1vw,15px);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.23),
+        0 5px 0 rgba(0,0,0,.16),
+        0 10px 18px rgba(0,0,0,.12);
+    }
+
+    .question-text{
+      font-size:clamp(24px,3.25vw,50px);
+      line-height:1.12;
+    }
+
+    .choices-grid{
+      width:min(80%,940px);
+      flex:0 0 auto;
+      min-height:0;
+      grid-auto-rows:clamp(78px,14.5vh,132px);
+      align-content:center;
+      gap:clamp(10px,1.1vw,16px);
+    }
+
+    .choice-card{
+      min-height:0;
+      padding:clamp(8px,1vw,14px);
+      border-width:clamp(3px,.28vw,4px);
+      border-radius:clamp(9px,.9vw,14px);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.22),
+        0 5px 0 rgba(0,0,0,.15),
+        0 9px 16px rgba(0,0,0,.11);
+    }
+
+    .choice-text{
+      font-size:clamp(20px,2.65vw,42px);
+      line-height:1.1;
+    }
+
+    .answer-mark{
+      width:auto;
+      height:auto;
+      aspect-ratio:auto;
+      padding:0;
+      border:0;
+      border-radius:0;
+      background:transparent !important;
+      box-shadow:none;
+      color:#fff;
+      font-size:clamp(76px,11vw,158px) !important;
+      line-height:.82;
+      text-shadow:
+        0 3px 0 rgba(17,17,17,.95),
+        3px 0 0 rgba(17,17,17,.95),
+        -3px 0 0 rgba(17,17,17,.95),
+        0 -3px 0 rgba(17,17,17,.95),
+        0 7px 14px rgba(0,0,0,.36);
+    }
+
+    .answer-mark.is-correct,
+    .answer-mark.is-wrong{
+      background:transparent !important;
+    }
+
+    @media (orientation:portrait){
+      .question-card{
+        flex-basis:clamp(78px,11.5vh,116px);
+        width:88%;
+      }
+
+      .choices-grid{
+        width:88%;
+        grid-auto-rows:clamp(72px,12.5vh,118px);
+      }
+    }
+
+    @media (max-width:680px){
+      .question-view{
+        gap:10px;
+      }
+
+      .question-card{
+        flex-basis:clamp(72px,11vh,104px);
+        width:90%;
+        padding:8px 10px;
+      }
+
+      .choices-grid{
+        width:90%;
+        grid-auto-rows:clamp(64px,11.5vh,102px);
+        gap:8px;
+      }
+
+      .question-text{
+        font-size:clamp(20px,5vw,32px);
+      }
+
+      .choice-text{
+        font-size:clamp(17px,4.2vw,28px);
+      }
+
+      .answer-mark{
+        font-size:clamp(62px,18vw,112px) !important;
       }
     }
 
