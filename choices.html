@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v10-narrow-question-two-choice-balance -->
+  <!-- version: choices-v11-content-shift-down -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1185,6 +1185,30 @@
 
       .question-view.has-two-choices .choices-grid{
         margin-top:clamp(44px,10vh,64px);
+      }
+    }
+
+
+    /* v11: إنزال مجموعة السؤال والإجابات كاملة إلى الأسفل. */
+    .question-view{
+      transform:translateY(clamp(48px,8vh,76px));
+    }
+
+    @media (orientation:portrait){
+      .question-view{
+        transform:translateY(clamp(38px,6vh,62px));
+      }
+    }
+
+    @media (max-width:560px){
+      .question-view{
+        transform:translateY(clamp(30px,5vh,48px));
+      }
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      .question-view{
+        transform:translateY(clamp(24px,6vh,38px));
       }
     }
 
