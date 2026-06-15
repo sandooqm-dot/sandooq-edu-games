@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v7-literal-open-box-display-shell -->
+  <!-- version: choices-v8-raised-question-spaced-answers-hidden-fit-box -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -963,7 +963,179 @@
         transition-duration:.01ms !important;
       }
     }
-  </style>
+  
+    /* v8: رفع السؤال، خفض الاختيارات، وترك مساحة واضحة بينهما. */
+    .question-view{
+      justify-content:flex-start;
+      align-items:center;
+      gap:0;
+      padding:
+        clamp(4px,1vh,12px)
+        0
+        0;
+    }
+
+    .question-card{
+      flex:none;
+      margin-top:clamp(2px,.8vh,10px);
+      width:min(84%,1040px);
+      height:clamp(116px,17vh,158px);
+    }
+
+    .question-card.is-long{
+      height:clamp(142px,21vh,190px);
+      flex-basis:auto;
+    }
+
+    .question-card.is-very-long{
+      height:clamp(168px,25vh,224px);
+      flex-basis:auto;
+    }
+
+    .choices-grid{
+      flex:none;
+      width:min(84%,1060px);
+      margin-top:clamp(58px,9.5vh,96px);
+      grid-auto-rows:clamp(88px,14vh,128px);
+    }
+
+    /*
+      المنطقة الداخلية هي "المربع المخفي" الذي يحدد المساحة الحقيقية للنص.
+      النص يقاس داخل هذه المنطقة، ولا يعتمد على كامل المستطيل الخارجي.
+    */
+    .question-fit-zone,
+    .choice-fit-zone{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      min-width:0;
+      min-height:0;
+      pointer-events:none;
+    }
+
+    .question-fit-zone{
+      width:92%;
+      height:78%;
+    }
+
+    .question-card.is-long .question-fit-zone{
+      height:82%;
+    }
+
+    .question-card.is-very-long .question-fit-zone{
+      height:86%;
+    }
+
+    .choice-fit-zone{
+      width:90%;
+      height:76%;
+    }
+
+    .question-text,
+    .choice-text{
+      display:block;
+      width:100%;
+      max-width:100%;
+      height:auto;
+      max-height:none;
+      margin:0;
+      padding:0;
+      overflow:visible;
+      white-space:normal;
+      word-break:normal;
+      overflow-wrap:break-word;
+      text-wrap:balance;
+      line-height:1.12;
+      text-align:center;
+      direction:rtl;
+      unicode-bidi:plaintext;
+    }
+
+    @media (orientation:portrait){
+      .question-view{
+        padding-top:clamp(4px,1vh,10px);
+      }
+
+      .question-card{
+        width:90%;
+        height:clamp(108px,15vh,148px);
+      }
+
+      .question-card.is-long{
+        height:clamp(140px,20vh,184px);
+      }
+
+      .question-card.is-very-long{
+        height:clamp(168px,24vh,218px);
+      }
+
+      .choices-grid{
+        width:90%;
+        margin-top:clamp(42px,7vh,72px);
+        grid-auto-rows:clamp(78px,12.5vh,116px);
+      }
+    }
+
+    @media (max-width:560px){
+      .question-card{
+        width:92%;
+        height:clamp(98px,14vh,128px);
+      }
+
+      .question-card.is-long{
+        height:clamp(130px,18vh,168px);
+      }
+
+      .question-card.is-very-long{
+        height:clamp(156px,22vh,204px);
+      }
+
+      .choices-grid{
+        width:92%;
+        margin-top:clamp(34px,6vh,58px);
+        grid-auto-rows:clamp(70px,11.5vh,104px);
+      }
+
+      .question-fit-zone{
+        width:94%;
+        height:82%;
+      }
+
+      .choice-fit-zone{
+        width:92%;
+        height:80%;
+      }
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      .question-view{
+        padding-top:0;
+      }
+
+      .question-card{
+        width:min(82%,940px);
+        height:clamp(78px,19vh,104px);
+        margin-top:0;
+      }
+
+      .question-card.is-long{
+        height:clamp(104px,25vh,136px);
+      }
+
+      .question-card.is-very-long{
+        height:clamp(126px,31vh,164px);
+      }
+
+      .choices-grid{
+        width:min(82%,960px);
+        margin-top:clamp(34px,8vh,54px);
+        grid-auto-rows:clamp(64px,18vh,96px);
+      }
+    }
+
+</style>
 </head>
 
 <body>
@@ -1629,70 +1801,126 @@
       return 3;
     }
 
-    function fitText(el,min,max){
+    let hiddenTextMeasureBox = null;
+
+    function getHiddenTextMeasureBox(){
+      if (hiddenTextMeasureBox) return hiddenTextMeasureBox;
+
+      hiddenTextMeasureBox = document.createElement("div");
+      hiddenTextMeasureBox.setAttribute("aria-hidden","true");
+      hiddenTextMeasureBox.style.cssText = [
+        "position:fixed",
+        "left:-100000px",
+        "top:-100000px",
+        "visibility:hidden",
+        "pointer-events:none",
+        "z-index:-1",
+        "margin:0",
+        "padding:0",
+        "border:0",
+        "box-sizing:border-box",
+        "white-space:normal",
+        "word-break:normal",
+        "overflow-wrap:break-word",
+        "text-align:center",
+        "direction:rtl",
+        "unicode-bidi:plaintext",
+        "contain:layout style"
+      ].join(";");
+
+      document.body.appendChild(hiddenTextMeasureBox);
+      return hiddenTextMeasureBox;
+    }
+
+    function fitTextInHiddenBox(el,options = {}){
       if (!el) return;
 
-      const parent = el.parentElement;
-      if (!parent) return;
+      const zone = el.closest(".question-fit-zone, .choice-fit-zone");
+      if (!zone) return;
 
-      const styles = window.getComputedStyle(parent);
-      const paddingX =
-        parseFloat(styles.paddingLeft || "0") +
-        parseFloat(styles.paddingRight || "0");
-      const paddingY =
-        parseFloat(styles.paddingTop || "0") +
-        parseFloat(styles.paddingBottom || "0");
+      const zoneWidth = Math.max(0,zone.clientWidth);
+      const zoneHeight = Math.max(0,zone.clientHeight);
+      if (zoneWidth < 2 || zoneHeight < 2) return;
 
-      const width = Math.max(1,parent.clientWidth - paddingX - 6);
-      const height = Math.max(1,parent.clientHeight - paddingY - 6);
+      const computed = window.getComputedStyle(el);
+      const measure = getHiddenTextMeasureBox();
 
-      el.style.fontSize = "";
-      el.style.maxHeight = "none";
-      el.style.overflow = "visible";
-      el.style.width = "100%";
-      el.style.height = "auto";
+      measure.textContent = el.textContent || "";
+      measure.style.width = `${Math.max(1,zoneWidth - 2)}px`;
+      measure.style.height = "auto";
+      measure.style.maxHeight = "none";
+      measure.style.fontFamily = computed.fontFamily;
+      measure.style.fontWeight = computed.fontWeight;
+      measure.style.fontStyle = computed.fontStyle;
+      measure.style.letterSpacing = computed.letterSpacing;
+      measure.style.lineHeight = options.lineHeight || computed.lineHeight || "1.12";
+      measure.style.textAlign = computed.textAlign || "center";
+      measure.style.direction = computed.direction || "rtl";
 
-      let low = Math.max(14,Number(min) || 14);
-      let high = Math.max(low,Number(max) || low);
-      let best = low;
+      const minFont = Math.max(12,Number(options.minFont) || 12);
+      const maxFont = Math.max(minFont,Number(options.maxFont) || minFont);
 
-      for (let i=0; i<26; i+=1) {
-        const size = (low + high) / 2;
-        el.style.fontSize = `${size}px`;
+      let low = minFont;
+      let high = maxFont;
+      let best = minFont;
 
-        if (
-          el.scrollWidth <= width + .5 &&
-          el.scrollHeight <= height + .5
-        ) {
-          best = size;
-          low = size;
+      for (let i = 0; i < 26; i += 1) {
+        const mid = (low + high) / 2;
+        measure.style.fontSize = `${mid}px`;
+
+        const descentSafety = Math.max(2,mid * .10);
+        const fitsWidth = measure.scrollWidth <= zoneWidth + .5;
+        const fitsHeight =
+          measure.scrollHeight + descentSafety <= zoneHeight + .5;
+
+        if (fitsWidth && fitsHeight) {
+          best = mid;
+          low = mid;
         } else {
-          high = size;
+          high = mid;
         }
       }
 
-      el.style.fontSize =
-        `${Math.max(14,Math.floor(best * .975 * 10) / 10)}px`;
+      const finalSize = Math.max(
+        minFont,
+        Math.floor(best * .985 * 10) / 10
+      );
+
+      el.style.setProperty("--fit-font-size",`${finalSize}px`);
+      el.style.setProperty("font-size",`${finalSize}px`,"important");
+      el.style.lineHeight = options.lineHeight || "1.12";
     }
 
     function fitCurrentSceneText(){
       const run = ()=>{
         const qText = questionCard.querySelector(".question-text");
+
         if (qText) {
-          fitText(
-            qText,
-            17,
-            Math.min(54,Math.max(25,questionCard.clientHeight * .46))
-          );
+          const zone = qText.closest(".question-fit-zone");
+          const zoneHeight = zone?.clientHeight || questionCard.clientHeight;
+
+          fitTextInHiddenBox(qText,{
+            minFont:16,
+            maxFont:Math.min(
+              66,
+              Math.max(30,zoneHeight * .58)
+            ),
+            lineHeight:"1.10"
+          });
         }
 
         choicesGrid.querySelectorAll(".choice-text").forEach((el)=>{
-          const card = el.closest(".choice-card");
-          fitText(
-            el,
-            17,
-            Math.min(44,Math.max(22,(card?.clientHeight || 100) * .46))
-          );
+          const zone = el.closest(".choice-fit-zone");
+          const zoneHeight = zone?.clientHeight || 90;
+
+          fitTextInHiddenBox(el,{
+            minFont:16,
+            maxFont:Math.min(
+              54,
+              Math.max(26,zoneHeight * .62)
+            ),
+            lineHeight:"1.08"
+          });
         });
       };
 
@@ -1700,8 +1928,8 @@
         requestAnimationFrame(run);
       });
 
-      window.setTimeout(run,180);
-      window.setTimeout(run,760);
+      window.setTimeout(run,160);
+      window.setTimeout(run,520);
 
       if (document.fonts?.ready) {
         document.fonts.ready.then(run).catch(()=>{});
@@ -1725,11 +1953,11 @@
         const questionLength = String(item.questionText || "").trim().length;
         questionCard.classList.toggle(
           "is-long",
-          questionLength > 85 && questionLength <= 150
+          questionLength > 72 && questionLength <= 135
         );
         questionCard.classList.toggle(
           "is-very-long",
-          questionLength > 150
+          questionLength > 135
         );
       }
 
@@ -1740,10 +1968,16 @@
         image.src = item.questionImageData;
         questionCard.appendChild(image);
       } else {
+        const fitZone = document.createElement("div");
+        fitZone.className = "question-fit-zone";
+
         const text = document.createElement("div");
         text.className = "question-text";
+        text.dataset.fitText = "question";
         text.textContent = item.questionText;
-        questionCard.appendChild(text);
+
+        fitZone.appendChild(text);
+        questionCard.appendChild(fitZone);
       }
 
       choicesGrid.style.setProperty(
@@ -1766,10 +2000,16 @@
           image.src = choice.imageData;
           button.appendChild(image);
         } else {
+          const fitZone = document.createElement("span");
+          fitZone.className = "choice-fit-zone";
+
           const text = document.createElement("span");
           text.className = "choice-text";
+          text.dataset.fitText = "choice";
           text.textContent = choice.text;
-          button.appendChild(text);
+
+          fitZone.appendChild(text);
+          button.appendChild(fitZone);
         }
 
         const mark = document.createElement("span");
