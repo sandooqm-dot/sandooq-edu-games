@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v12-direct-mode-open-box-intro -->
+  <!-- version: choices-v13-solid-theme-colors-centered-odd-choice -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -494,8 +494,7 @@
       min-height:0;
       border:clamp(3px,.28vw,4px) solid #111;
       border-radius:clamp(10px,1vw,15px);
-      background:
-        linear-gradient(150deg,var(--panel-light) 0%,var(--panel-color) 58%,var(--panel-dark) 100%);
+      background:var(--panel-color);
       color:var(--panel-text);
       box-shadow:
         inset 0 2px 0 rgba(255,255,255,.23),
@@ -586,8 +585,7 @@
       min-height:0;
       border:clamp(3px,.28vw,4px) solid #111;
       border-radius:clamp(9px,.9vw,14px);
-      background:
-        linear-gradient(150deg,var(--panel-light) 0%,var(--panel-color) 58%,var(--panel-dark) 100%);
+      background:var(--panel-color);
       color:var(--panel-text);
       padding:clamp(9px,1.05vw,15px);
       box-shadow:
@@ -1292,6 +1290,44 @@
       }
     }
 
+
+    /* v13: ثلاثة أو خمسة خيارات = الخيار الأخير في منتصف الصف الأخير. */
+    .choices-grid{
+      --choices-gap:clamp(10px,1.1vw,16px);
+      gap:var(--choices-gap);
+    }
+
+    .choices-grid.has-centered-last-choice{
+      --choice-cols:2;
+    }
+
+    .choices-grid.has-centered-last-choice .choice-card:last-child{
+      grid-column:1 / -1;
+      width:calc((100% - var(--choices-gap)) / 2);
+      justify-self:center;
+    }
+
+    /*
+      السؤال والاختيارات يستخدمان لونًا واحدًا ثابتًا بالكامل،
+      والنص أبيض دائمًا لزيادة الوضوح.
+    */
+    .question-card,
+    .choice-card{
+      background:var(--panel-color) !important;
+      color:#fff;
+    }
+
+    .question-text,
+    .choice-text{
+      color:#fff !important;
+    }
+
+    @media (max-width:560px){
+      .choices-grid{
+        --choices-gap:8px;
+      }
+    }
+
 </style>
 </head>
 
@@ -1487,6 +1523,73 @@
         ["#b49579","#7b5f47","#d8c0a8","#fff"],
         ["#f1e6d5","#b9a68d","#fff8ed","#5a4030"]
       ]
+    };
+
+    /*
+      ألوان مستقلة لمستطيلات السؤال والاختيارات:
+      - لون السؤال لا يتكرر داخل الاختيارات.
+      - الثيمات الخاصة تستخدم لونين ثابتين ومتناسقين.
+      - جميع الألوان غامقة بدرجة تسمح بوضوح النص الأبيض.
+    */
+    const PANEL_THEME_COLORS = {
+      white:{
+        question:"#9D174D",
+        choices:[
+          "#C2410C",
+          "#946400",
+          "#166534",
+          "#0F6682",
+          "#4338A8",
+          "#6B2E83"
+        ]
+      },
+
+      classroom:{
+        question:"#9D174D",
+        choices:[
+          "#C2410C",
+          "#946400",
+          "#166534",
+          "#0F6682",
+          "#4338A8",
+          "#6B2E83"
+        ]
+      },
+
+      "sky-clouds":{
+        question:"#274A91",
+        choices:["#176583"]
+      },
+
+      forest:{
+        question:"#24563A",
+        choices:["#536A27"]
+      },
+
+      math:{
+        question:"#34495E",
+        choices:["#256A68"]
+      },
+
+      english:{
+        question:"#304E96",
+        choices:["#1C6873"]
+      },
+
+      flowers:{
+        question:"#9C1D59",
+        choices:["#633173"]
+      },
+
+      "national-day":{
+        question:"#075338",
+        choices:["#146A4A"]
+      },
+
+      "founding-day":{
+        question:"#563627",
+        choices:["#775036"]
+      }
     };
 
     const page = document.getElementById("gamePage");
@@ -1897,12 +2000,52 @@
       element.style.setProperty("--deck-text",text);
     }
 
-    function applyPanelPalette(element,index){
-      const [color,dark,light,panelText] = paletteFor(index);
-      element.style.setProperty("--panel-color",color);
-      element.style.setProperty("--panel-dark",dark);
-      element.style.setProperty("--panel-light",light);
-      element.style.setProperty("--panel-text",panelText);
+    function getPanelThemeColors(){
+      return (
+        PANEL_THEME_COLORS[currentTheme] ||
+        PANEL_THEME_COLORS.classroom
+      );
+    }
+
+    function setSolidPanelColor(element,color){
+      const safeColor = String(color || "#34495E");
+
+      element.style.setProperty("--panel-color",safeColor);
+      element.style.setProperty("--panel-dark",safeColor);
+      element.style.setProperty("--panel-light",safeColor);
+      element.style.setProperty("--panel-text","#fff");
+    }
+
+    function applyQuestionPanelColor(element){
+      const colors = getPanelThemeColors();
+      setSolidPanelColor(element,colors.question);
+    }
+
+    function applyChoicePanelColor(element,choiceIndex){
+      const colors = getPanelThemeColors();
+      const choiceColors =
+        Array.isArray(colors.choices) && colors.choices.length
+          ? colors.choices
+          : ["#256A68"];
+
+      let color =
+        choiceColors[
+          Math.abs(Number(choiceIndex) || 0) %
+          choiceColors.length
+        ];
+
+      /*
+        حماية إضافية: حتى لو عُدلت الألوان مستقبلًا،
+        لا نسمح أن يكون لون الاختيار مطابقًا للسؤال.
+      */
+      if (
+        String(color).toLowerCase() ===
+        String(colors.question).toLowerCase()
+      ) {
+        color = "#256A68";
+      }
+
+      setSolidPanelColor(element,color);
     }
 
     function calculateDeckLayout(){
@@ -1965,10 +2108,8 @@
     }
 
     function choiceColumns(count){
-      if (count <= 2) return 2;
-      if (count === 3) return 3;
-      if (count === 4) return 2;
-      return 3;
+      if (count === 6) return 3;
+      return 2;
     }
 
     let hiddenTextMeasureBox = null;
@@ -2121,7 +2262,12 @@
       questionCard.textContent = "";
       questionCard.classList.remove("is-long","is-very-long");
       choicesGrid.textContent = "";
-      applyPanelPalette(questionCard,index);
+      choicesGrid.classList.toggle(
+        "has-centered-last-choice",
+        item.choices.length === 3 ||
+        item.choices.length === 5
+      );
+      applyQuestionPanelColor(questionCard);
 
       if (item.questionType === "text") {
         const questionLength = String(item.questionText || "").trim().length;
@@ -2165,7 +2311,7 @@
         button.className = "choice-card";
         button.style.setProperty("--choice-order",String(choiceIndex));
         button.setAttribute("aria-label",`الاختيار ${choiceIndex + 1}`);
-        applyPanelPalette(button,index * 7 + choiceIndex + 1);
+        applyChoicePanelColor(button,choiceIndex);
 
         if (item.choicesType === "images") {
           const image = document.createElement("img");
