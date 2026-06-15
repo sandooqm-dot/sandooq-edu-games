@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v13-solid-theme-colors-centered-odd-choice -->
+  <!-- version: choices-v14-swapped-theme-colors-roomier-text-slow-navigation -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1328,6 +1328,47 @@
       }
     }
 
+
+    /* v14: استغلال مساحة النص، تباعد سطور أوضح، وانتقال بطيء موحد. */
+    .question-card{
+      padding-inline:clamp(6px,.65vw,10px);
+    }
+
+    .choice-card{
+      padding-inline:clamp(5px,.6vw,9px);
+    }
+
+    .question-fit-zone{
+      width:97%;
+    }
+
+    .question-card.is-long .question-fit-zone,
+    .question-card.is-very-long .question-fit-zone{
+      width:98%;
+    }
+
+    .choice-fit-zone{
+      width:96%;
+    }
+
+    .question-text{
+      line-height:1.17;
+    }
+
+    .choice-text{
+      line-height:1.15;
+    }
+
+    /* منع الحركة السريعة القديمة أثناء التالي والسابق. */
+    .game-page.direct-navigation-playing .question-view.is-visible .question-card,
+    .game-page.direct-navigation-playing .question-view.is-visible .choice-card{
+      animation:none !important;
+    }
+
+    .game-page.direct-navigation-playing .question-navigation{
+      display:none !important;
+    }
+
 </style>
 </head>
 
@@ -1557,8 +1598,8 @@
       },
 
       "sky-clouds":{
-        question:"#274A91",
-        choices:["#176583"]
+        question:"#176583",
+        choices:["#274A91"]
       },
 
       forest:{
@@ -1577,13 +1618,13 @@
       },
 
       flowers:{
-        question:"#9C1D59",
-        choices:["#633173"]
+        question:"#633173",
+        choices:["#9C1D59"]
       },
 
       "national-day":{
-        question:"#075338",
-        choices:["#146A4A"]
+        question:"#146A4A",
+        choices:["#075338"]
       },
 
       "founding-day":{
@@ -2216,7 +2257,7 @@
               66,
               Math.max(30,zoneHeight * .58)
             ),
-            lineHeight:"1.10"
+            lineHeight:"1.17"
           });
         }
 
@@ -2230,7 +2271,7 @@
               54,
               Math.max(26,zoneHeight * .62)
             ),
-            lineHeight:"1.08"
+            lineHeight:"1.15"
           });
         });
       };
@@ -2598,11 +2639,28 @@
 
       finishView.classList.remove("is-visible");
       cardsView.classList.add("is-hidden");
-      renderQuestion(index);
+      page.classList.add("direct-navigation-playing");
 
-      await wait(520);
+      renderQuestion(index);
+      questionNavigation.hidden = true;
+      fitCurrentSceneText();
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      await animateDirectIntroElements();
+
+      page.classList.remove(
+        "direct-navigation-playing",
+        "direct-intro-elements-entering"
+      );
+
       interactionLocked = false;
-      collapseSafariBars();
+      updateNavigationButtons();
+      collapseSafariBars({ refresh:false });
     }
 
     async function goToNextQuestion(event){
