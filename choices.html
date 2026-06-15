@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v11-content-shift-down -->
+  <!-- version: choices-v12-direct-mode-open-box-intro -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1212,6 +1212,86 @@
       }
     }
 
+
+    /* v12: افتتاح الوضع المباشر بنفس حركة صفحة افتح الصندوق. */
+    :root{
+      --direct-intro-bg-final-scale:1.12;
+      --direct-intro-entry-duration:3200ms;
+      --direct-intro-entry-easing:cubic-bezier(.37,0,.63,1);
+    }
+
+    .fixed-controls{
+      transition:opacity .34s ease, transform .34s ease;
+    }
+
+    .game-page.direct-intro-playing .fixed-controls{
+      opacity:0;
+      transform:translateY(12px);
+      pointer-events:none;
+    }
+
+    .game-page.direct-intro-playing .theme-background{
+      transform:translate3d(0,0,0) scale(1);
+      will-change:transform,opacity;
+    }
+
+    .game-page.direct-intro-done .theme-background{
+      transform:
+        translate3d(0,0,0)
+        scale(var(--direct-intro-bg-final-scale));
+    }
+
+    .game-page.direct-intro-playing .game-logo{
+      animation:directIntroLogoFade .75s ease-out both;
+    }
+
+    @keyframes directIntroLogoFade{
+      0%{
+        opacity:0;
+        transform:translateY(-8px);
+      }
+      100%{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    /*
+      أثناء زوم الخلفية تكون بطاقة السؤال والاختيارات موجودة
+      للقياس فقط، لكنها غير ظاهرة للمستخدم.
+    */
+    .game-page.direct-intro-playing.direct-intro-camera .question-view{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    /*
+      بعد ثبات الزوم نجعل المشهد مرئيًا، بينما العناصر نفسها
+      تبدأ من خارج الشاشة وتعود إلى مواقعها بالتحريك البرمجي.
+    */
+    .game-page.direct-intro-playing.direct-intro-elements-entering .question-view{
+      opacity:1;
+      visibility:visible;
+      pointer-events:none;
+    }
+
+    .game-page.direct-intro-playing .question-view.is-visible .question-card,
+    .game-page.direct-intro-playing .question-view.is-visible .choice-card,
+    .game-page.direct-first-settled .question-view.is-visible .question-card,
+    .game-page.direct-first-settled .question-view.is-visible .choice-card{
+      animation:none !important;
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .game-page.direct-intro-playing .game-logo,
+      .game-page.direct-intro-playing .theme-background,
+      .game-page.direct-intro-playing .question-card,
+      .game-page.direct-intro-playing .choice-card{
+        animation:none !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -1436,6 +1516,15 @@
     let safariTimers = [];
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
+
+    let directIntroFrameId = null;
+    let directIntroRunning = false;
+
+    const DIRECT_INTRO_HOLD_MS = 2200;
+    const DIRECT_INTRO_ZOOM_MS = 7600;
+    const DIRECT_INTRO_SETTLE_MS = 280;
+    const DIRECT_INTRO_ENTRY_MS = 3200;
+    const DIRECT_INTRO_ENTRY_EASING = "cubic-bezier(.37,0,.63,1)";
 
     function getUrlParam(name){
       try {
@@ -1789,6 +1878,10 @@
 
     function wait(ms){
       return new Promise((resolve)=> setTimeout(resolve,ms));
+    }
+
+    function easeInOutSine(t){
+      return -(Math.cos(Math.PI * t) - 1) / 2;
     }
 
     function paletteFor(index){
@@ -2302,6 +2395,32 @@
       interactionLocked = false;
     }
 
+    function clearDirectFirstScenePresentation(){
+      if (!page.classList.contains("direct-first-settled")) return;
+
+      page.classList.remove("direct-first-settled");
+
+      questionCard.getAnimations().forEach((animation)=>{
+        try { animation.cancel(); } catch (_) {}
+      });
+
+      questionCard.style.removeProperty("animation");
+      questionCard.style.removeProperty("transform");
+      questionCard.style.removeProperty("opacity");
+      questionCard.style.removeProperty("will-change");
+
+      choicesGrid.querySelectorAll(".choice-card").forEach((card)=>{
+        card.getAnimations().forEach((animation)=>{
+          try { animation.cancel(); } catch (_) {}
+        });
+
+        card.style.removeProperty("animation");
+        card.style.removeProperty("transform");
+        card.style.removeProperty("opacity");
+        card.style.removeProperty("will-change");
+      });
+    }
+
     function updateNavigationButtons(){
       const questionVisible =
         questionView.classList.contains("is-visible") &&
@@ -2327,6 +2446,7 @@
       interactionLocked = true;
       questionNavigation.hidden = true;
       questionView.classList.remove("is-visible","is-answered");
+      clearDirectFirstScenePresentation();
 
       await wait(220);
 
@@ -2410,33 +2530,42 @@
       } catch (_) {}
     }
 
-    function startIntro(){
+    function playCardsIntro(){
       const background = document.getElementById("themeBackground");
 
-      background.animate(
-        [
-          { transform:"scale(1.00)" },
-          { transform:"scale(1.10)" }
-        ],
-        {
-          duration:4600,
-          easing:"cubic-bezier(.45,0,.25,1)",
-          fill:"forwards"
-        }
+      if (background && typeof background.animate === "function") {
+        background.animate(
+          [
+            { transform:"scale(1.00)" },
+            { transform:"scale(1.10)" }
+          ],
+          {
+            duration:4600,
+            easing:"cubic-bezier(.45,0,.25,1)",
+            fill:"forwards"
+          }
+        );
+      }
+
+      const cards = Array.from(
+        questionGrid.querySelectorAll(".deck-card")
       );
 
-      if (displayMode === "cards") {
-        const cards = Array.from(questionGrid.querySelectorAll(".deck-card"));
-        cards.forEach((card,index)=>{
-          const angle = (Math.PI * 2 * index) / Math.max(1,cards.length);
-          const distance = Math.max(stage.clientWidth,stage.clientHeight) * .7;
+      cards.forEach((card,index)=>{
+        const angle =
+          (Math.PI * 2 * index) /
+          Math.max(1,cards.length);
+        const distance =
+          Math.max(stage.clientWidth,stage.clientHeight) * .7;
 
+        if (typeof card.animate === "function") {
           card.animate(
             [
               {
                 opacity:0,
                 transform:
-                  `translate(${Math.cos(angle) * distance}px,${Math.sin(angle) * distance}px) scale(.74)`
+                  `translate(${Math.cos(angle) * distance}px,` +
+                  `${Math.sin(angle) * distance}px) scale(.74)`
               },
               {
                 opacity:1,
@@ -2450,8 +2579,346 @@
               fill:"both"
             }
           );
+        }
+      });
+    }
+
+    function setDirectIntroCameraFrame(bgScale){
+      const background =
+        document.getElementById("themeBackground");
+
+      if (!background) return;
+
+      background.style.transform =
+        `translate3d(0,0,0) scale(${Number(bgScale).toFixed(5)})`;
+      background.style.animation = "none";
+
+      const endScale =
+        Number(
+          getComputedStyle(page)
+            .getPropertyValue("--direct-intro-bg-final-scale")
+        ) || 1.12;
+
+      const ratio =
+        (bgScale - 1) /
+        Math.max(.001,endScale - 1);
+
+      const saturation = 1.04 - ratio * .04;
+
+      background.style.filter =
+        `saturate(${Math.max(1,Math.min(1.04,saturation))})`;
+    }
+
+    function prepareDirectIntroElementTargets(){
+      const choiceCards = Array.from(
+        choicesGrid.querySelectorAll(".choice-card")
+      );
+
+      const stageRect = stage.getBoundingClientRect();
+      const gridRect = choicesGrid.getBoundingClientRect();
+
+      const questionTravel =
+        Math.max(
+          stageRect.height * .72,
+          questionCard.getBoundingClientRect().height * 2.2
+        );
+
+      const questionTarget = {
+        element:questionCard,
+        fromTransform:
+          `translate3d(0px,${(-questionTravel).toFixed(2)}px,0) scale(.88)`
+      };
+
+      const gridCenterX =
+        gridRect.left + gridRect.width / 2;
+      const gridCenterY =
+        gridRect.top + gridRect.height / 2;
+
+      const baseTravel =
+        Math.max(stageRect.width,stageRect.height) * .78;
+
+      const choiceTargets = choiceCards.map((card,index)=>{
+        const rect = card.getBoundingClientRect();
+
+        let dx =
+          rect.left + rect.width / 2 - gridCenterX;
+        let dy =
+          rect.top + rect.height / 2 - gridCenterY;
+
+        let length = Math.hypot(dx,dy);
+
+        if (length < 1) {
+          const angle =
+            ((index + 1) * 2.399963229728653) %
+            (Math.PI * 2);
+
+          dx = Math.cos(angle);
+          dy = Math.sin(angle);
+          length = 1;
+        }
+
+        const unitX = dx / length;
+        const unitY = dy / length;
+
+        const distance =
+          baseTravel +
+          Math.max(rect.width,rect.height) * 1.45 +
+          (index % 3) * 18;
+
+        return {
+          element:card,
+          fromTransform:
+            `translate3d(` +
+            `${(unitX * distance).toFixed(2)}px,` +
+            `${(unitY * distance).toFixed(2)}px,0)` +
+            ` scale(.76)`
+        };
+      });
+
+      return {
+        questionTarget,
+        choiceTargets
+      };
+    }
+
+    async function animateDirectIntroElements(){
+      const {
+        questionTarget,
+        choiceTargets
+      } = prepareDirectIntroElementTargets();
+
+      const targets = [
+        questionTarget,
+        ...choiceTargets
+      ];
+
+      targets.forEach(({ element,fromTransform })=>{
+        element.getAnimations().forEach((animation)=>{
+          try { animation.cancel(); } catch (_) {}
         });
+
+        element.style.animation = "none";
+        element.style.willChange = "transform,opacity";
+        element.style.transform = fromTransform;
+        element.style.opacity = "0";
+      });
+
+      page.classList.remove("direct-intro-camera");
+      page.classList.add("direct-intro-elements-entering");
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      if (
+        window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches
+      ) {
+        targets.forEach(({ element })=>{
+          element.style.transform =
+            "translate3d(0,0,0) scale(1)";
+          element.style.opacity = "1";
+          element.style.willChange = "";
+        });
+        return;
       }
+
+      const animations = targets.map(
+        ({ element,fromTransform })=>{
+          if (typeof element.animate !== "function") {
+            element.style.transform =
+              "translate3d(0,0,0) scale(1)";
+            element.style.opacity = "1";
+            return null;
+          }
+
+          return element.animate(
+            [
+              {
+                transform:fromTransform,
+                opacity:0
+              },
+              {
+                transform:
+                  "translate3d(0,0,0) scale(1)",
+                opacity:1
+              }
+            ],
+            {
+              duration:DIRECT_INTRO_ENTRY_MS,
+              easing:DIRECT_INTRO_ENTRY_EASING,
+              fill:"forwards"
+            }
+          );
+        }
+      );
+
+      await Promise.all(
+        animations
+          .filter(Boolean)
+          .map((animation)=>
+            animation.finished.catch(()=> {})
+          )
+      );
+
+      targets.forEach(({ element })=>{
+        element.getAnimations().forEach((animation)=>{
+          try { animation.cancel(); } catch (_) {}
+        });
+
+        element.style.animation = "none";
+        element.style.transform =
+          "translate3d(0,0,0) scale(1)";
+        element.style.opacity = "1";
+        element.style.willChange = "";
+      });
+    }
+
+    async function playDirectOpeningIntro(){
+      if (directIntroRunning) return;
+
+      directIntroRunning = true;
+      interactionLocked = true;
+      questionNavigation.hidden = true;
+
+      if (directIntroFrameId) {
+        cancelAnimationFrame(directIntroFrameId);
+        directIntroFrameId = null;
+      }
+
+      page.classList.remove(
+        "direct-intro-done",
+        "direct-intro-elements-entering",
+        "direct-first-settled"
+      );
+
+      page.classList.add(
+        "direct-intro-playing",
+        "direct-intro-camera"
+      );
+
+      const startScale = 1;
+      const endScale =
+        Number(
+          getComputedStyle(page)
+            .getPropertyValue("--direct-intro-bg-final-scale")
+        ) || 1.12;
+
+      let startTime = null;
+
+      syncVisualViewportFrame();
+      fitCurrentSceneText();
+      setDirectIntroCameraFrame(startScale);
+      collapseSafariBars();
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      if (
+        !window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches
+      ) {
+        await new Promise((resolve)=>{
+          const animate = (now)=>{
+            if (startTime === null) startTime = now;
+
+            const elapsed = now - startTime;
+
+            if (elapsed < DIRECT_INTRO_HOLD_MS) {
+              setDirectIntroCameraFrame(startScale);
+              directIntroFrameId =
+                requestAnimationFrame(animate);
+              return;
+            }
+
+            const progress = Math.max(
+              0,
+              Math.min(
+                1,
+                (elapsed - DIRECT_INTRO_HOLD_MS) /
+                DIRECT_INTRO_ZOOM_MS
+              )
+            );
+
+            const eased = easeInOutSine(progress);
+            const scale =
+              startScale +
+              (endScale - startScale) * eased;
+
+            setDirectIntroCameraFrame(scale);
+
+            if (progress < 1) {
+              directIntroFrameId =
+                requestAnimationFrame(animate);
+              return;
+            }
+
+            directIntroFrameId = null;
+            resolve();
+          };
+
+          directIntroFrameId =
+            requestAnimationFrame(animate);
+        });
+      } else {
+        setDirectIntroCameraFrame(endScale);
+      }
+
+      collapseSafariBars({ refresh:false });
+      await wait(DIRECT_INTRO_SETTLE_MS);
+
+      syncVisualViewportFrame();
+      fitCurrentSceneText();
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      await animateDirectIntroElements();
+
+      const background =
+        document.getElementById("themeBackground");
+
+      if (background) {
+        background.style.filter = "";
+        background.style.transform =
+          `translate3d(0,0,0) scale(${endScale})`;
+      }
+
+      page.classList.add(
+        "direct-intro-done",
+        "direct-first-settled"
+      );
+
+      page.classList.remove(
+        "direct-intro-playing",
+        "direct-intro-camera",
+        "direct-intro-elements-entering"
+      );
+
+      directIntroRunning = false;
+      interactionLocked = false;
+
+      updateNavigationButtons();
+      collapseSafariBars({ refresh:false });
+    }
+
+    function startIntro(){
+      if (displayMode === "direct") {
+        playDirectOpeningIntro();
+        return;
+      }
+
+      playCardsIntro();
     }
 
     function scheduleLayout(delay = 0){
@@ -2494,8 +2961,13 @@
         cardsView.classList.remove("is-hidden");
         questionNavigation.hidden = true;
       } else {
+        page.classList.add(
+          "direct-intro-playing",
+          "direct-intro-camera"
+        );
         cardsView.classList.add("is-hidden");
         renderQuestion(0);
+        questionNavigation.hidden = true;
       }
 
       requestAnimationFrame(()=>{
