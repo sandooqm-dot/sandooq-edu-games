@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v14-swapped-theme-colors-roomier-text-slow-navigation -->
+  <!-- version: choices-v15-real-zone-fit-text-and-images -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1369,6 +1369,107 @@
       display:none !important;
     }
 
+
+    /* v15: نفس مبدأ مناطق المحتوى داخل صفحة افتح الصندوق. */
+    .question-card{
+      padding:clamp(3px,.28vw,5px) !important;
+    }
+
+    .choice-card{
+      padding:clamp(3px,.24vw,5px) !important;
+    }
+
+    .question-fit-zone,
+    .choice-fit-zone{
+      box-sizing:border-box;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0;
+      padding:0;
+      min-width:0;
+      min-height:0;
+    }
+
+    .question-fit-zone{
+      width:calc(100% - clamp(8px,.55vw,12px)) !important;
+      height:calc(100% - clamp(8px,.65vh,12px)) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+    .question-card.is-long .question-fit-zone,
+    .question-card.is-very-long .question-fit-zone{
+      width:calc(100% - clamp(8px,.55vw,12px)) !important;
+      height:calc(100% - clamp(8px,.65vh,12px)) !important;
+    }
+
+    .choice-fit-zone{
+      width:calc(100% - clamp(6px,.45vw,10px)) !important;
+      height:calc(100% - clamp(6px,.55vh,10px)) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+    /*
+      إلغاء موازنة السطور لأنها كانت تترك فراغات كبيرة يمينًا ويسارًا.
+      اللف الطبيعي يستغل عرض المستطيل أولًا ثم ينتقل للسطر التالي.
+    */
+    .question-text,
+    .choice-text{
+      width:100% !important;
+      max-width:100% !important;
+      height:auto !important;
+      max-height:none !important;
+      margin:0 !important;
+      padding:0 !important;
+      white-space:normal !important;
+      word-break:normal !important;
+      overflow-wrap:normal !important;
+      text-wrap:wrap !important;
+      overflow:visible !important;
+      box-sizing:border-box !important;
+    }
+
+    .question-text{
+      line-height:1.18 !important;
+    }
+
+    .choice-text{
+      line-height:1.17 !important;
+    }
+
+    .question-media-zone,
+    .choice-media-zone{
+      overflow:hidden !important;
+    }
+
+    .question-image,
+    .choice-image{
+      display:block !important;
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      object-fit:contain !important;
+      object-position:center center !important;
+      margin:0 !important;
+      padding:0 !important;
+    }
+
+    @media (max-width:560px){
+      .question-fit-zone{
+        width:calc(100% - 6px) !important;
+        height:calc(100% - 6px) !important;
+      }
+
+      .choice-fit-zone{
+        width:calc(100% - 5px) !important;
+        height:calc(100% - 5px) !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -2153,38 +2254,7 @@
       return 2;
     }
 
-    let hiddenTextMeasureBox = null;
-
-    function getHiddenTextMeasureBox(){
-      if (hiddenTextMeasureBox) return hiddenTextMeasureBox;
-
-      hiddenTextMeasureBox = document.createElement("div");
-      hiddenTextMeasureBox.setAttribute("aria-hidden","true");
-      hiddenTextMeasureBox.style.cssText = [
-        "position:fixed",
-        "left:-100000px",
-        "top:-100000px",
-        "visibility:hidden",
-        "pointer-events:none",
-        "z-index:-1",
-        "margin:0",
-        "padding:0",
-        "border:0",
-        "box-sizing:border-box",
-        "white-space:normal",
-        "word-break:normal",
-        "overflow-wrap:break-word",
-        "text-align:center",
-        "direction:rtl",
-        "unicode-bidi:plaintext",
-        "contain:layout style"
-      ].join(";");
-
-      document.body.appendChild(hiddenTextMeasureBox);
-      return hiddenTextMeasureBox;
-    }
-
-    function fitTextInHiddenBox(el,options = {}){
+    function fitTextInsidePanel(el,options = {}){
       if (!el) return;
 
       const zone = el.closest(".question-fit-zone, .choice-fit-zone");
@@ -2194,23 +2264,30 @@
       const zoneHeight = Math.max(0,zone.clientHeight);
       if (zoneWidth < 2 || zoneHeight < 2) return;
 
-      const computed = window.getComputedStyle(el);
-      const measure = getHiddenTextMeasureBox();
+      const availableWidth = Math.max(1,zoneWidth - 2);
+      const availableHeight = Math.max(1,zoneHeight - 2);
 
-      measure.textContent = el.textContent || "";
-      measure.style.width = `${Math.max(1,zoneWidth - 2)}px`;
-      measure.style.height = "auto";
-      measure.style.maxHeight = "none";
-      measure.style.fontFamily = computed.fontFamily;
-      measure.style.fontWeight = computed.fontWeight;
-      measure.style.fontStyle = computed.fontStyle;
-      measure.style.letterSpacing = computed.letterSpacing;
-      measure.style.lineHeight = options.lineHeight || computed.lineHeight || "1.12";
-      measure.style.textAlign = computed.textAlign || "center";
-      measure.style.direction = computed.direction || "rtl";
-
-      const minFont = Math.max(12,Number(options.minFont) || 12);
+      const minFont = Math.max(5,Number(options.minFont) || 5);
       const maxFont = Math.max(minFont,Number(options.maxFont) || minFont);
+      const lineHeight = String(options.lineHeight || "1.14");
+
+      /*
+        نفس مبدأ صفحة افتح الصندوق:
+        القياس يتم على النص الحقيقي داخل المنطقة الفعلية نفسها،
+        وليس داخل عنصر منفصل قد يلف السطور بطريقة مختلفة.
+      */
+      el.style.width = "100%";
+      el.style.maxWidth = "100%";
+      el.style.height = "auto";
+      el.style.maxHeight = "none";
+      el.style.margin = "0";
+      el.style.padding = "0";
+      el.style.lineHeight = lineHeight;
+      el.style.whiteSpace = "normal";
+      el.style.wordBreak = "normal";
+      el.style.overflowWrap = "normal";
+      el.style.setProperty("text-wrap","wrap");
+      el.style.overflow = "visible";
 
       let low = minFont;
       let high = maxFont;
@@ -2218,12 +2295,14 @@
 
       for (let i = 0; i < 26; i += 1) {
         const mid = (low + high) / 2;
-        measure.style.fontSize = `${mid}px`;
 
-        const descentSafety = Math.max(2,mid * .10);
-        const fitsWidth = measure.scrollWidth <= zoneWidth + .5;
+        el.style.setProperty("--fit-font-size",`${mid}px`);
+        el.style.setProperty("font-size",`${mid}px`,"important");
+
+        const descentSafety = Math.max(2,mid * .12);
+        const fitsWidth = el.scrollWidth <= availableWidth + .5;
         const fitsHeight =
-          measure.scrollHeight + descentSafety <= zoneHeight + .5;
+          el.scrollHeight + descentSafety <= availableHeight + .5;
 
         if (fitsWidth && fitsHeight) {
           best = mid;
@@ -2233,14 +2312,23 @@
         }
       }
 
-      const finalSize = Math.max(
-        minFont,
-        Math.floor(best * .985 * 10) / 10
-      );
+      /*
+        إذا كان النص شديد الطول نضمن عدم قصه حتى لو احتاج
+        للنزول تحت الحجم المعتاد.
+      */
+      el.style.setProperty("--fit-font-size",`${minFont}px`);
+      el.style.setProperty("font-size",`${minFont}px`,"important");
+
+      const minFits =
+        el.scrollWidth <= availableWidth + .5 &&
+        el.scrollHeight + Math.max(2,minFont * .12) <= availableHeight + .5;
+
+      const finalSize = minFits
+        ? Math.floor(best * 10) / 10
+        : Math.max(4,Math.floor(minFont * .84 * 10) / 10);
 
       el.style.setProperty("--fit-font-size",`${finalSize}px`);
       el.style.setProperty("font-size",`${finalSize}px`,"important");
-      el.style.lineHeight = options.lineHeight || "1.12";
     }
 
     function fitCurrentSceneText(){
@@ -2251,13 +2339,13 @@
           const zone = qText.closest(".question-fit-zone");
           const zoneHeight = zone?.clientHeight || questionCard.clientHeight;
 
-          fitTextInHiddenBox(qText,{
-            minFont:16,
+          fitTextInsidePanel(qText,{
+            minFont:7,
             maxFont:Math.min(
-              66,
-              Math.max(30,zoneHeight * .58)
+              72,
+              Math.max(28,zoneHeight * .62)
             ),
-            lineHeight:"1.17"
+            lineHeight:"1.18"
           });
         }
 
@@ -2265,13 +2353,13 @@
           const zone = el.closest(".choice-fit-zone");
           const zoneHeight = zone?.clientHeight || 90;
 
-          fitTextInHiddenBox(el,{
-            minFont:16,
+          fitTextInsidePanel(el,{
+            minFont:6,
             maxFont:Math.min(
-              54,
-              Math.max(26,zoneHeight * .62)
+              58,
+              Math.max(24,zoneHeight * .64)
             ),
-            lineHeight:"1.15"
+            lineHeight:"1.17"
           });
         });
       };
@@ -2280,8 +2368,9 @@
         requestAnimationFrame(run);
       });
 
-      window.setTimeout(run,160);
-      window.setTimeout(run,520);
+      window.setTimeout(run,80);
+      window.setTimeout(run,240);
+      window.setTimeout(run,620);
 
       if (document.fonts?.ready) {
         document.fonts.ready.then(run).catch(()=>{});
@@ -2323,11 +2412,19 @@
       }
 
       if (item.questionType === "image") {
+        const mediaZone = document.createElement("div");
+        mediaZone.className = "question-fit-zone question-media-zone";
+
         const image = document.createElement("img");
         image.className = "question-image";
         image.alt = "صورة السؤال";
         image.src = item.questionImageData;
-        questionCard.appendChild(image);
+        image.addEventListener("load",()=>{
+          requestAnimationFrame(fitCurrentSceneText);
+        },{ once:true });
+
+        mediaZone.appendChild(image);
+        questionCard.appendChild(mediaZone);
       } else {
         const fitZone = document.createElement("div");
         fitZone.className = "question-fit-zone";
@@ -2355,11 +2452,19 @@
         applyChoicePanelColor(button,choiceIndex);
 
         if (item.choicesType === "images") {
+          const mediaZone = document.createElement("span");
+          mediaZone.className = "choice-fit-zone choice-media-zone";
+
           const image = document.createElement("img");
           image.className = "choice-image";
           image.alt = `الاختيار ${choiceIndex + 1}`;
           image.src = choice.imageData;
-          button.appendChild(image);
+          image.addEventListener("load",()=>{
+            requestAnimationFrame(fitCurrentSceneText);
+          },{ once:true });
+
+          mediaZone.appendChild(image);
+          button.appendChild(mediaZone);
         } else {
           const fitZone = document.createElement("span");
           fitZone.className = "choice-fit-zone";
