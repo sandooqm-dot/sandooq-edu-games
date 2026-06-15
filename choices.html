@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v17-square-image-layout-question-zoom -->
+  <!-- version: choices-v18-larger-spaced-image-layout -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1756,6 +1756,216 @@
 
       .question-view.has-image-question .choices-grid{
         margin-top:clamp(16px,4vh,28px);
+      }
+    }
+
+
+    /* v18: تكبير تخطيط الصور واستغلال المساحة السفلية. */
+
+    /*
+      السؤال المصور يظل دائمًا أكبر من اختيارات الصور،
+      وتُنزل المجموعة كاملة قليلًا للاستفادة من ارتفاع الشاشة.
+    */
+    .question-view.has-image-question,
+    .question-view.has-image-choices{
+      transform:translateY(clamp(42px,6vh,64px)) !important;
+    }
+
+    .question-view.has-image-question{
+      padding-top:clamp(10px,1.7vh,18px) !important;
+    }
+
+    .question-view.has-image-question .question-card.is-image-question{
+      --question-image-size:clamp(190px,28vh,260px);
+      width:var(--question-image-size) !important;
+      height:var(--question-image-size) !important;
+      min-width:var(--question-image-size) !important;
+      min-height:var(--question-image-size) !important;
+    }
+
+    /*
+      مسافة واضحة بين سؤال الصورة وبين مجموعة الاختيارات،
+      مع إلغاء المسافات القديمة الخاصة بمستطيلات النص.
+    */
+    .question-view.has-image-choices .choices-grid.is-image-choices,
+    .question-view.has-image-question .choices-grid.is-image-choices{
+      margin-top:clamp(28px,4.2vh,44px) !important;
+      align-content:center !important;
+    }
+
+    /*
+      كل عدد اختيارات يحصل على حجم مناسب مستقل.
+      لا نستخدم حجمًا واحدًا لثلاث صور وست صور.
+    */
+    .choices-grid.is-image-choices.choice-count-2{
+      --choice-image-size:clamp(166px,24vh,210px);
+      --image-choice-gap:clamp(26px,3vw,46px);
+      max-width:calc(
+        var(--choice-image-size) * 2 +
+        var(--image-choice-gap)
+      ) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-3{
+      --choice-image-size:clamp(154px,22vh,194px);
+      --image-choice-gap:clamp(24px,2.5vw,40px);
+      max-width:calc(
+        var(--choice-image-size) * 3 +
+        var(--image-choice-gap) * 2
+      ) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-4{
+      --choice-image-size:clamp(140px,19.5vh,176px);
+      --image-choice-gap:clamp(22px,2.3vw,36px);
+      max-width:calc(
+        var(--choice-image-size) * 2 +
+        var(--image-choice-gap)
+      ) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-5{
+      --choice-image-size:clamp(126px,17.5vh,158px);
+      --image-choice-gap:clamp(19px,2vw,30px);
+      max-width:calc(
+        var(--choice-image-size) * 3 +
+        var(--image-choice-gap) * 2
+      ) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-6{
+      --choice-image-size:clamp(122px,17vh,154px);
+      --image-choice-gap:clamp(18px,1.9vw,28px);
+      max-width:calc(
+        var(--choice-image-size) * 3 +
+        var(--image-choice-gap) * 2
+      ) !important;
+    }
+
+    /*
+      المسافة بين الصفوف والأعمدة واحدة وواضحة،
+      والصف الأخير في 5 اختيارات يتمركز تلقائيًا.
+    */
+    .choices-grid.is-image-choices{
+      row-gap:var(--image-choice-gap) !important;
+      column-gap:var(--image-choice-gap) !important;
+      justify-content:center !important;
+      align-items:center !important;
+    }
+
+    /*
+      تكبير مساحة الصورة داخل الإطار نفسه.
+    */
+    .choice-card.is-image-choice{
+      padding:clamp(4px,.42vw,7px) !important;
+    }
+
+    .question-card.is-image-question{
+      padding:clamp(5px,.52vw,8px) !important;
+    }
+
+    .choice-card.is-image-choice .choice-fit-zone,
+    .question-card.is-image-question .question-fit-zone{
+      width:100% !important;
+      height:100% !important;
+    }
+
+    /* الوضع العمودي. */
+    @media (orientation:portrait){
+      .question-view.has-image-question,
+      .question-view.has-image-choices{
+        transform:translateY(clamp(28px,4vh,44px)) !important;
+      }
+
+      .question-view.has-image-question .question-card.is-image-question{
+        --question-image-size:clamp(166px,24vh,224px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-2{
+        --choice-image-size:clamp(126px,18vh,166px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-3{
+        --choice-image-size:clamp(104px,15.5vh,142px);
+        --image-choice-gap:clamp(12px,2.5vw,20px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-4{
+        --choice-image-size:clamp(108px,15.5vh,144px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-5,
+      .choices-grid.is-image-choices.choice-count-6{
+        --choice-image-size:clamp(86px,12.5vh,118px);
+        --image-choice-gap:clamp(10px,2vw,16px);
+      }
+    }
+
+    /* الجوال. */
+    @media (max-width:560px){
+      .question-view.has-image-question,
+      .question-view.has-image-choices{
+        transform:translateY(clamp(20px,3vh,34px)) !important;
+      }
+
+      .question-view.has-image-question .question-card.is-image-question{
+        --question-image-size:clamp(142px,21vh,190px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-2{
+        --choice-image-size:clamp(100px,15vh,132px);
+        --image-choice-gap:12px;
+      }
+
+      .choices-grid.is-image-choices.choice-count-3{
+        --choice-image-size:clamp(82px,12.5vh,108px);
+        --image-choice-gap:9px;
+      }
+
+      .choices-grid.is-image-choices.choice-count-4{
+        --choice-image-size:clamp(88px,13vh,114px);
+        --image-choice-gap:10px;
+      }
+
+      .choices-grid.is-image-choices.choice-count-5,
+      .choices-grid.is-image-choices.choice-count-6{
+        --choice-image-size:clamp(70px,10.5vh,94px);
+        --image-choice-gap:8px;
+      }
+    }
+
+    /* الشاشات الأفقية القصيرة. */
+    @media (max-height:520px) and (orientation:landscape){
+      .question-view.has-image-question,
+      .question-view.has-image-choices{
+        transform:translateY(clamp(10px,2.5vh,18px)) !important;
+      }
+
+      .question-view.has-image-question .question-card.is-image-question{
+        --question-image-size:clamp(112px,31vh,154px);
+      }
+
+      .question-view.has-image-choices .choices-grid.is-image-choices,
+      .question-view.has-image-question .choices-grid.is-image-choices{
+        margin-top:clamp(14px,3.5vh,24px) !important;
+      }
+
+      .choices-grid.is-image-choices.choice-count-2{
+        --choice-image-size:clamp(84px,24vh,116px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-3{
+        --choice-image-size:clamp(76px,22vh,106px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-4{
+        --choice-image-size:clamp(68px,20vh,96px);
+      }
+
+      .choices-grid.is-image-choices.choice-count-5,
+      .choices-grid.is-image-choices.choice-count-6{
+        --choice-image-size:clamp(60px,17vh,84px);
+        --image-choice-gap:clamp(7px,1vw,12px);
       }
     }
 
