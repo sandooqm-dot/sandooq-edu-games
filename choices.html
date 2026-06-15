@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v2-index-payload-linked -->
+  <!-- version: choices-v3-safari-layout-colored-panels-navigation -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -791,11 +791,6 @@
       color:#111;
     }
 
-    .reset-btn{
-      right:calc(var(--safe-right) + clamp(20px,3vw,46px));
-      background:var(--blue);
-      color:#fff;
-    }
 
     .game-page.theme-national-day .question-card,
     .game-page.theme-national-day .choice-card,
@@ -886,7 +881,254 @@
         transition-duration:.01ms !important;
       }
     }
-  </style>
+  
+    /* v3: نفس أسلوب صفحة افتح الصندوق لتفادي مشكلة Safari. */
+    html,
+    body{
+      width:100%;
+      min-height:100%;
+      height:auto;
+      overflow-x:hidden;
+      background:#fff;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
+    }
+
+    .game-page{
+      position:sticky;
+      inset:auto;
+      top:0;
+      left:auto;
+      width:100%;
+      height:100dvh;
+      min-height:100dvh;
+      overflow:hidden;
+    }
+
+    .stage{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      padding:
+        calc(78px + var(--safe-top))
+        calc(24px + var(--safe-right))
+        calc(86px + var(--safe-bottom))
+        calc(24px + var(--safe-left));
+      transform-origin:center center;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    /* السؤال والاختيارات كبطاقات مستطيلة وملونة. */
+    .question-card{
+      --panel-color:#2f75d4;
+      --panel-dark:#174b9b;
+      --panel-light:#65a4f1;
+      --panel-text:#fff;
+      flex-basis:clamp(126px,22vh,210px);
+      width:min(90%,1120px);
+      border-radius:clamp(12px,1.35vw,20px);
+      background:
+        linear-gradient(
+          150deg,
+          var(--panel-light) 0%,
+          var(--panel-color) 58%,
+          var(--panel-dark) 100%
+        );
+      color:var(--panel-text);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.25),
+        0 8px 0 rgba(0,0,0,.17),
+        0 16px 28px rgba(0,0,0,.15);
+    }
+
+    .question-text{
+      color:var(--panel-text);
+      text-shadow:0 2px 5px rgba(0,0,0,.24);
+    }
+
+    .choices-grid{
+      width:min(92%,1240px);
+      gap:clamp(12px,1.35vw,20px);
+    }
+
+    .choice-card{
+      --panel-color:#f2772f;
+      --panel-dark:#ba4714;
+      --panel-light:#ffa05f;
+      --panel-text:#fff;
+      border-radius:clamp(11px,1.25vw,18px);
+      background:
+        linear-gradient(
+          150deg,
+          var(--panel-light) 0%,
+          var(--panel-color) 58%,
+          var(--panel-dark) 100%
+        );
+      color:var(--panel-text);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.23),
+        0 7px 0 rgba(0,0,0,.16),
+        0 13px 22px rgba(0,0,0,.13);
+    }
+
+    .choice-text{
+      color:var(--panel-text);
+      text-shadow:0 2px 4px rgba(0,0,0,.22);
+    }
+
+    .question-image,
+    .choice-image{
+      border-radius:10px;
+      filter:drop-shadow(0 3px 5px rgba(0,0,0,.16));
+    }
+
+    .game-page.theme-national-day .question-card,
+    .game-page.theme-national-day .choice-card,
+    .game-page.theme-founding-day .question-card,
+    .game-page.theme-founding-day .choice-card{
+      background:
+        linear-gradient(
+          150deg,
+          var(--panel-light) 0%,
+          var(--panel-color) 58%,
+          var(--panel-dark) 100%
+        );
+    }
+
+    .question-view.is-answered::after{
+      display:none !important;
+    }
+
+    .fixed-controls{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(14px + var(--safe-bottom));
+      height:clamp(44px,6.2vh,60px);
+      z-index:90;
+      pointer-events:none;
+    }
+
+    .control-btn{
+      position:absolute;
+      bottom:0;
+      min-width:clamp(78px,8.5vw,118px);
+      height:clamp(38px,5.2vh,48px);
+      border:2.5px solid #111;
+      border-radius:clamp(10px,1vw,15px);
+      padding:0 clamp(14px,1.8vw,24px);
+      font-size:clamp(18px,1.9vw,27px);
+      box-shadow:0 4px 0 rgba(0,0,0,.22);
+    }
+
+    .back-btn{
+      left:calc(var(--safe-left) + clamp(16px,2.8vw,42px));
+    }
+
+    .question-navigation{
+      pointer-events:auto;
+      position:absolute;
+      right:calc(var(--safe-right) + clamp(16px,2.8vw,42px));
+      bottom:0;
+      display:flex;
+      align-items:center;
+      gap:clamp(8px,1vw,12px);
+      direction:rtl;
+    }
+
+    .question-navigation[hidden]{
+      display:none !important;
+    }
+
+    .question-navigation .control-btn{
+      position:static;
+      bottom:auto;
+    }
+
+    .next-btn{
+      background:#1688d3;
+      color:#fff;
+    }
+
+    .previous-btn{
+      background:#28ad6d;
+      color:#fff;
+    }
+
+    .next-btn[hidden],
+    .previous-btn[hidden]{
+      display:none !important;
+    }
+
+    @media (orientation:portrait){
+      .stage{
+        inset:0;
+        padding:
+          calc(88px + var(--safe-top))
+          calc(16px + var(--safe-right))
+          calc(80px + var(--safe-bottom))
+          calc(16px + var(--safe-left));
+      }
+
+      .question-card{
+        flex-basis:clamp(120px,19vh,190px);
+        width:96%;
+      }
+
+      .choices-grid{
+        width:96%;
+      }
+    }
+
+    @media (max-width:680px){
+      .stage{
+        inset:0;
+        padding:
+          calc(72px + var(--safe-top))
+          calc(12px + var(--safe-right))
+          calc(76px + var(--safe-bottom))
+          calc(12px + var(--safe-left));
+      }
+
+      .question-card{
+        flex-basis:clamp(104px,18vh,160px);
+        border-radius:12px;
+      }
+
+      .choice-card{
+        border-radius:11px;
+      }
+
+      .control-btn{
+        min-width:76px;
+        height:38px;
+        border-width:2px;
+        font-size:17px;
+        padding:0 12px;
+      }
+
+      .question-navigation{
+        gap:7px;
+      }
+    }
+
+</style>
 </head>
 
 <body>
@@ -922,7 +1164,11 @@
 
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
-      <button class="control-btn reset-btn" id="resetBtn" type="button">إعادة</button>
+
+      <div class="question-navigation" id="questionNavigation" hidden>
+        <button class="control-btn next-btn" id="nextBtn" type="button">التالي</button>
+        <button class="control-btn previous-btn" id="previousBtn" type="button">السابق</button>
+      </div>
     </nav>
   </main>
 
@@ -1089,7 +1335,9 @@
     const finishView = document.getElementById("finishView");
     const burstLayer = document.getElementById("burstLayer");
     const backBtn = document.getElementById("backBtn");
-    const resetBtn = document.getElementById("resetBtn");
+    const questionNavigation = document.getElementById("questionNavigation");
+    const nextBtn = document.getElementById("nextBtn");
+    const previousBtn = document.getElementById("previousBtn");
 
     let currentTheme = "classroom";
     let displayMode = "cards";
@@ -1101,6 +1349,9 @@
     let interactionLocked = false;
     let answerLocked = false;
     let directQuestionIndex = 0;
+    let safariTimers = [];
+    let viewportLayoutFrame = null;
+    let viewportLayoutTimer = null;
 
     function getUrlParam(name){
       try {
@@ -1390,18 +1641,61 @@
       page.classList.add(`theme-${currentTheme}`);
     }
 
-    function syncVisualViewport(){
+    function getVisualViewportMetrics(){
       const viewport = window.visualViewport;
-      const width = viewport?.width || window.innerWidth;
-      const height = viewport?.height || window.innerHeight;
-      const offsetLeft = viewport?.offsetLeft || 0;
-      const offsetTop = viewport?.offsetTop || 0;
+      const layoutWidth = Math.max(
+        280,
+        document.documentElement.clientWidth || 0,
+        window.innerWidth || 0
+      );
+      const layoutHeight = Math.max(
+        260,
+        page?.clientHeight || 0,
+        document.documentElement.clientHeight || 0,
+        window.innerHeight || 0
+      );
 
-      document.documentElement.style.setProperty("--app-width",`${width}px`);
-      document.documentElement.style.setProperty("--app-height",`${height}px`);
+      return {
+        width:Math.max(
+          280,
+          Math.min(layoutWidth,Number(viewport?.width) || layoutWidth)
+        ),
+        height:Math.max(
+          260,
+          Math.min(layoutHeight,Number(viewport?.height) || layoutHeight)
+        ),
+        offsetLeft:Math.max(0,Number(viewport?.offsetLeft) || 0)
+      };
+    }
 
-      page.style.left = `${offsetLeft}px`;
-      page.style.top = `${offsetTop}px`;
+    function syncVisualViewportFrame(){
+      const metrics = getVisualViewportMetrics();
+
+      stage.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
+      stage.style.right = "auto";
+      stage.style.top = "0px";
+      stage.style.bottom = "auto";
+      stage.style.width = `${metrics.width.toFixed(2)}px`;
+      stage.style.height = `${metrics.height.toFixed(2)}px`;
+
+      page.style.setProperty("--visual-viewport-width",`${metrics.width}px`);
+      page.style.setProperty("--visual-viewport-height",`${metrics.height}px`);
+    }
+
+    function collapseSafariBars(){
+      safariTimers.forEach((timer)=> clearTimeout(timer));
+      safariTimers = [];
+
+      [0,80,220,520,900].forEach((delay)=>{
+        safariTimers.push(setTimeout(()=>{
+          try {
+            window.scrollTo({ top:80,left:0,behavior:"auto" });
+          } catch (_) {
+            window.scrollTo(0,80);
+          }
+          scheduleLayout();
+        },delay));
+      });
     }
 
     function wait(ms){
@@ -1419,6 +1713,14 @@
       element.style.setProperty("--card-dark",dark);
       element.style.setProperty("--card-light",light);
       element.style.setProperty("--deck-text",text);
+    }
+
+    function applyPanelPalette(element,index){
+      const [color,dark,light,panelText] = paletteFor(index);
+      element.style.setProperty("--panel-color",color);
+      element.style.setProperty("--panel-dark",dark);
+      element.style.setProperty("--panel-light",light);
+      element.style.setProperty("--panel-text",panelText);
     }
 
     function calculateDeckLayout(){
@@ -1538,10 +1840,12 @@
       if (!item) return;
 
       activeQuestionIndex = index;
+      directQuestionIndex = index;
       answerLocked = false;
       questionView.classList.remove("is-answered");
       questionCard.textContent = "";
       choicesGrid.textContent = "";
+      applyPanelPalette(questionCard,index);
 
       if (item.questionType === "image") {
         const image = document.createElement("img");
@@ -1567,6 +1871,7 @@
         button.className = "choice-card";
         button.style.setProperty("--choice-order",String(choiceIndex));
         button.setAttribute("aria-label",`الاختيار ${choiceIndex + 1}`);
+        applyPanelPalette(button,index * 7 + choiceIndex + 1);
 
         if (item.choicesType === "images") {
           const image = document.createElement("img");
@@ -1595,6 +1900,7 @@
       });
 
       questionView.classList.add("is-visible");
+      updateNavigationButtons();
       fitCurrentSceneText();
     }
 
@@ -1648,8 +1954,9 @@
         Math.max(245,stage.clientHeight * .48),
         470
       );
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
+      const stageRect = stage.getBoundingClientRect();
+      const centerX = stageRect.left + stageRect.width / 2;
+      const centerY = stageRect.top + stageRect.height / 2;
 
       const clone = document.createElement("div");
       clone.className = "focus-card";
@@ -1788,9 +2095,63 @@
       interactionLocked = false;
     }
 
+    function updateNavigationButtons(){
+      const questionVisible =
+        questionView.classList.contains("is-visible") &&
+        activeQuestionIndex >= 0 &&
+        activeQuestionIndex < questions.length;
+
+      questionNavigation.hidden = !questionVisible;
+
+      if (!questionVisible) {
+        previousBtn.hidden = true;
+        nextBtn.hidden = true;
+        return;
+      }
+
+      previousBtn.hidden = activeQuestionIndex <= 0;
+      nextBtn.hidden = activeQuestionIndex >= questions.length - 1;
+    }
+
+    async function showQuestionByIndex(index){
+      if (interactionLocked) return;
+      if (!Number.isInteger(index) || index < 0 || index >= questions.length) return;
+
+      interactionLocked = true;
+      questionNavigation.hidden = true;
+      questionView.classList.remove("is-visible","is-answered");
+
+      await wait(220);
+
+      finishView.classList.remove("is-visible");
+      cardsView.classList.add("is-hidden");
+      renderQuestion(index);
+
+      await wait(520);
+      interactionLocked = false;
+      collapseSafariBars();
+    }
+
+    async function goToNextQuestion(event){
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      await showQuestionByIndex(activeQuestionIndex + 1);
+    }
+
+    async function goToPreviousQuestion(event){
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      await showQuestionByIndex(activeQuestionIndex - 1);
+    }
+
     async function hideQuestionScene(){
       if (interactionLocked) return;
       interactionLocked = true;
+      questionNavigation.hidden = true;
 
       questionView.classList.remove("is-visible","is-answered");
       await wait(260);
@@ -1802,61 +2163,19 @@
         activeQuestionIndex = -1;
         answerLocked = false;
         await wait(760);
-      } else {
-        directQuestionIndex += 1;
-        if (directQuestionIndex >= questions.length) {
-          finishView.classList.add("is-visible");
-        } else {
-          renderQuestion(directQuestionIndex);
-        }
       }
 
+      updateNavigationButtons();
       interactionLocked = false;
+      collapseSafariBars();
     }
 
     async function handleSceneTap(event){
       if (event.target.closest(".fixed-controls")) return;
       if (event.target.closest(".choice-card")) return;
-
-      if (
-        questionView.classList.contains("is-visible") &&
-        answerLocked
-      ) {
-        event.preventDefault();
-        await hideQuestionScene();
-      }
+      /* الانتقال أصبح حصريًا من زري السابق والتالي. */
     }
 
-    async function resetGame(){
-      if (interactionLocked) return;
-      interactionLocked = true;
-
-      completed.clear();
-      activeQuestionIndex = -1;
-      activeSourceCard = null;
-      answerLocked = false;
-      directQuestionIndex = 0;
-
-      if (focusCard) {
-        focusCard.remove();
-        focusCard = null;
-      }
-
-      burstLayer.classList.remove("is-active");
-      burstLayer.textContent = "";
-      finishView.classList.remove("is-visible");
-      questionView.classList.remove("is-visible","is-answered");
-
-      if (displayMode === "cards") {
-        cardsView.classList.remove("is-hidden");
-        renderDeck();
-      } else {
-        cardsView.classList.add("is-hidden");
-        renderQuestion(0);
-      }
-
-      interactionLocked = false;
-    }
 
     async function handleBack(){
       if (interactionLocked) return;
@@ -1928,22 +2247,45 @@
       }
     }
 
-    function scheduleLayout(){
-      requestAnimationFrame(()=>{
-        syncVisualViewport();
-        calculateDeckLayout();
-        fitCurrentSceneText();
-      });
+    function scheduleLayout(delay = 0){
+      if (viewportLayoutFrame) {
+        cancelAnimationFrame(viewportLayoutFrame);
+        viewportLayoutFrame = null;
+      }
+
+      if (viewportLayoutTimer) {
+        clearTimeout(viewportLayoutTimer);
+        viewportLayoutTimer = null;
+      }
+
+      const run = ()=>{
+        viewportLayoutFrame = requestAnimationFrame(()=>{
+          viewportLayoutFrame = null;
+          syncVisualViewportFrame();
+          calculateDeckLayout();
+          fitCurrentSceneText();
+        });
+      };
+
+      if (delay > 0) {
+        viewportLayoutTimer = setTimeout(()=>{
+          viewportLayoutTimer = null;
+          run();
+        },delay);
+      } else {
+        run();
+      }
     }
 
     async function initialize(){
-      syncVisualViewport();
+      syncVisualViewportFrame();
       await hydratePayload();
       applyTheme();
 
       if (displayMode === "cards") {
         renderDeck();
         cardsView.classList.remove("is-hidden");
+        questionNavigation.hidden = true;
       } else {
         cardsView.classList.add("is-hidden");
         renderQuestion(0);
@@ -1952,30 +2294,50 @@
       requestAnimationFrame(()=>{
         requestAnimationFrame(startIntro);
       });
+
+      collapseSafariBars();
     }
 
     page.addEventListener("click",handleSceneTap);
+
     backBtn.addEventListener("click",(event)=>{
       event.preventDefault();
       event.stopPropagation();
       handleBack();
     });
-    resetBtn.addEventListener("click",(event)=>{
-      event.preventDefault();
-      event.stopPropagation();
-      resetGame();
-    });
 
-    window.addEventListener("resize",scheduleLayout,{ passive:true });
+    nextBtn.addEventListener("click",goToNextQuestion);
+    previousBtn.addEventListener("click",goToPreviousQuestion);
+
+    window.addEventListener("resize",()=>{
+      scheduleLayout(40);
+    },{ passive:true });
+
     window.addEventListener("orientationchange",()=>{
-      setTimeout(scheduleLayout,120);
-      setTimeout(scheduleLayout,420);
+      setTimeout(()=>{
+        collapseSafariBars();
+        scheduleLayout(80);
+      },160);
     },{ passive:true });
 
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize",scheduleLayout,{ passive:true });
-      window.visualViewport.addEventListener("scroll",syncVisualViewport,{ passive:true });
+      window.visualViewport.addEventListener("resize",()=>{
+        scheduleLayout(34);
+      },{ passive:true });
+
+      window.visualViewport.addEventListener("scroll",()=>{
+        scheduleLayout(34);
+      },{ passive:true });
     }
+
+    document.addEventListener("touchend",()=>{
+      collapseSafariBars();
+    },{ passive:true });
+
+    window.addEventListener("pageshow",()=>{
+      collapseSafariBars();
+      scheduleLayout(60);
+    },{ passive:true });
 
     initialize();
   })();
