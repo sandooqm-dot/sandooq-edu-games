@@ -1,0 +1,1983 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- version: choices-v1-question-cards -->
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
+  />
+  <title>الاختيارات - صندوق الألعاب التعليمية</title>
+
+  <style>
+    :root{
+      --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px);
+      --safe-left:env(safe-area-inset-left,0px);
+      --safe-right:env(safe-area-inset-right,0px);
+      --app-height:100dvh;
+      --app-width:100vw;
+
+      --ink:#111;
+      --yellow:#efd553;
+      --blue:#1688d3;
+      --green:#25ad69;
+      --red:#f04747;
+      --card-radius:clamp(16px,2vw,28px);
+      --shadow:0 12px 0 rgba(0,0,0,.14);
+      --soft-shadow:0 10px 24px rgba(0,0,0,.18);
+      --logo-w:clamp(88px,9.2vw,148px);
+      --controls-h:calc(74px + var(--safe-bottom));
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    html,
+    body{
+      width:100%;
+      height:100%;
+      margin:0;
+      overflow:hidden;
+      background:#fff;
+      color:var(--ink);
+      font-family:
+        "Arial",
+        "Tahoma",
+        system-ui,
+        -apple-system,
+        sans-serif;
+    }
+
+    button{
+      font:inherit;
+    }
+
+    .game-page{
+      position:fixed;
+      inset:0 auto auto 0;
+      width:var(--app-width);
+      height:var(--app-height);
+      overflow:hidden;
+      isolation:isolate;
+      direction:rtl;
+      user-select:none;
+      touch-action:manipulation;
+      background:#fff;
+    }
+
+    .theme-background{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background-position:center center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      transform:scale(1.08);
+      opacity:0;
+      transition:opacity .25s ease;
+      will-change:transform;
+    }
+
+    .game-page.theme-white{
+      background:#fff;
+    }
+
+    .game-page.theme-white .theme-background{
+      opacity:0;
+      background-image:none;
+    }
+
+    .game-page.theme-classroom .theme-background{
+      opacity:1;
+      background-color:#658a68;
+      background-image:
+        url("theme-classroom-bg-v2.webp?v=2"),
+        url("theme-original-bg.webp?v=45"),
+        linear-gradient(180deg,#698f6f 0%,#56775d 100%);
+    }
+
+    .game-page.theme-sky-clouds .theme-background{
+      opacity:1;
+      background-color:#5ecdf3;
+      background-image:
+        url("theme-sky-clouds-bg.webp?v=45"),
+        linear-gradient(180deg,#67d0f3 0%,#b6ecff 100%);
+    }
+
+    .game-page.theme-forest .theme-background{
+      opacity:1;
+      background-color:#72c8ec;
+      background-image:
+        url("theme-forest-bg.webp?v=45"),
+        linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%);
+    }
+
+    .game-page.theme-math .theme-background{
+      opacity:1;
+      background-color:#f5f4e7;
+      background-image:
+        url("theme-math-bg.webp?v=45"),
+        linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%);
+    }
+
+    .game-page.theme-english .theme-background{
+      opacity:1;
+      background-color:#72d0d2;
+      background-image:
+        url("theme-english-bg.webp?v=46"),
+        linear-gradient(180deg,#72d0d2 0%,#65bdc4 100%);
+    }
+
+    .game-page.theme-flowers .theme-background{
+      opacity:1;
+      background-color:#f8edf3;
+      background-image:
+        url("theme-flowers-bg.webp?v=48"),
+        linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%);
+    }
+
+    .game-page.theme-national-day .theme-background{
+      opacity:1;
+      background-color:#165f55;
+      background-image:
+        url("theme-national-day-v2-bg.webp?v=53"),
+        linear-gradient(180deg,#165f55 0%,#0f4f46 100%);
+    }
+
+    .game-page.theme-founding-day .theme-background{
+      opacity:1;
+      background-color:#d7c9b1;
+      background-image:
+        url("theme-founding-day-bg.webp?v=1"),
+        linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
+    }
+
+    .game-logo{
+      position:absolute;
+      z-index:30;
+      top:calc(var(--safe-top) + clamp(18px,3.2vh,38px));
+      left:calc(var(--safe-left) + clamp(22px,3vw,48px));
+      width:var(--logo-w);
+      height:auto;
+      pointer-events:none;
+      filter:drop-shadow(0 3px 4px rgba(0,0,0,.16));
+    }
+
+    .stage{
+      position:absolute;
+      z-index:5;
+      inset:
+        calc(var(--safe-top) + clamp(82px,11vh,116px))
+        calc(var(--safe-right) + clamp(24px,4.2vw,72px))
+        var(--controls-h)
+        calc(var(--safe-left) + clamp(24px,4.2vw,72px));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:visible;
+    }
+
+    .cards-view,
+    .question-view,
+    .finish-view{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .cards-view{
+      z-index:5;
+      opacity:1;
+      visibility:visible;
+      transition:opacity .22s ease;
+    }
+
+    .cards-view.is-hidden{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    .question-grid{
+      --cols:4;
+      --gap:clamp(14px,1.5vw,24px);
+      width:min(92%,1360px);
+      height:min(88%,720px);
+      display:grid;
+      grid-template-columns:repeat(var(--cols),minmax(0,1fr));
+      grid-auto-rows:minmax(0,1fr);
+      align-content:center;
+      justify-content:center;
+      gap:var(--gap);
+    }
+
+    .deck-card{
+      --card-color:#e82f70;
+      --card-dark:#b81550;
+      --card-light:#ff679a;
+      position:relative;
+      min-width:0;
+      min-height:0;
+      border:0;
+      border-radius:var(--card-radius);
+      padding:0;
+      background:
+        linear-gradient(150deg,var(--card-light) 0%,var(--card-color) 56%,var(--card-dark) 100%);
+      color:#fff;
+      cursor:pointer;
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.26),
+        inset 0 0 0 2px rgba(0,0,0,.14),
+        0 9px 0 rgba(0,0,0,.16),
+        0 14px 24px rgba(0,0,0,.16);
+      overflow:hidden;
+      transform:translate3d(0,0,0);
+      opacity:1;
+      transition:
+        transform .78s cubic-bezier(.18,.78,.18,1),
+        opacity .42s ease,
+        filter .25s ease;
+      will-change:transform,opacity;
+    }
+
+    .deck-card::before{
+      content:"";
+      position:absolute;
+      inset:6%;
+      border-radius:calc(var(--card-radius) * .78);
+      border:2px solid rgba(255,255,255,.30);
+      box-shadow:inset 0 0 18px rgba(255,255,255,.08);
+      pointer-events:none;
+    }
+
+    .deck-card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(circle at 24% 18%,rgba(255,255,255,.24),transparent 28%),
+        linear-gradient(90deg,transparent 0 48%,rgba(255,255,255,.06) 49% 51%,transparent 52%);
+      pointer-events:none;
+    }
+
+    .deck-card-number{
+      position:absolute;
+      inset:0;
+      z-index:2;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:10%;
+      color:var(--deck-text,#fff);
+      font-weight:1000;
+      font-size:clamp(28px,5.2vw,84px);
+      line-height:1;
+      text-shadow:0 3px 7px rgba(0,0,0,.28);
+    }
+
+    .deck-card.is-completed{
+      filter:saturate(.55) brightness(.82);
+    }
+
+    .deck-card.is-completed .deck-card-number::after{
+      content:"✓";
+      position:absolute;
+      top:8%;
+      right:8%;
+      width:clamp(28px,3vw,48px);
+      aspect-ratio:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      color:#fff;
+      background:#24aa67;
+      border:3px solid #fff;
+      font-size:60%;
+      box-shadow:0 4px 10px rgba(0,0,0,.22);
+    }
+
+    .deck-card.is-away{
+      opacity:0;
+      pointer-events:none;
+      transform:
+        translate3d(var(--away-x,0),var(--away-y,0),0)
+        scale(.72)
+        rotate(var(--away-r,0deg));
+    }
+
+    .focus-card{
+      --card-color:#e82f70;
+      --card-dark:#b81550;
+      --card-light:#ff679a;
+      position:fixed;
+      z-index:70;
+      margin:0;
+      border:0;
+      padding:0;
+      border-radius:var(--card-radius);
+      background:
+        linear-gradient(150deg,var(--card-light) 0%,var(--card-color) 56%,var(--card-dark) 100%);
+      box-shadow:
+        inset 0 2px 0 rgba(255,255,255,.26),
+        inset 0 0 0 2px rgba(0,0,0,.14),
+        0 15px 0 rgba(0,0,0,.16),
+        0 24px 46px rgba(0,0,0,.25);
+      transform-origin:center;
+      pointer-events:none;
+      overflow:visible;
+      will-change:transform,opacity;
+    }
+
+    .focus-card::before{
+      content:"";
+      position:absolute;
+      inset:6%;
+      border-radius:calc(var(--card-radius) * .78);
+      border:3px solid rgba(255,255,255,.34);
+      z-index:2;
+    }
+
+    .focus-card-number{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--deck-text,#fff);
+      font-weight:1000;
+      font-size:clamp(48px,8vw,126px);
+      line-height:1;
+      text-shadow:0 4px 10px rgba(0,0,0,.28);
+    }
+
+    .focus-card-top{
+      position:absolute;
+      z-index:5;
+      top:0;
+      left:0;
+      width:100%;
+      height:50%;
+      border-radius:var(--card-radius) var(--card-radius) 18px 18px;
+      background:
+        linear-gradient(155deg,var(--card-light) 0%,var(--card-color) 58%,var(--card-dark) 100%);
+      box-shadow:inset 0 2px 0 rgba(255,255,255,.24);
+      transform-origin:50% 0%;
+      opacity:0;
+    }
+
+    .focus-card.is-opening{
+      animation:cardCoreBurst .78s cubic-bezier(.18,.76,.18,1) both;
+    }
+
+    .focus-card.is-opening .focus-card-top{
+      opacity:1;
+      animation:cardTopOpen .78s cubic-bezier(.18,.76,.18,1) both;
+    }
+
+    .focus-card.is-opening .focus-card-number{
+      animation:cardNumberVanish .48s ease both;
+    }
+
+    @keyframes cardCoreBurst{
+      0%{
+        opacity:1;
+        transform:translate3d(0,0,0) scale(1);
+        filter:brightness(1);
+      }
+      36%{
+        opacity:1;
+        transform:translate3d(0,0,0) scale(1.08);
+        filter:brightness(1.28);
+      }
+      68%{
+        opacity:.88;
+        transform:translate3d(0,0,0) scale(1.18);
+        filter:brightness(1.42);
+      }
+      100%{
+        opacity:0;
+        transform:translate3d(0,0,0) scale(1.46);
+        filter:brightness(1.7);
+      }
+    }
+
+    @keyframes cardTopOpen{
+      0%{
+        opacity:0;
+        transform:perspective(900px) rotateX(0deg) translateY(0) scale(1);
+      }
+      20%{ opacity:1; }
+      65%{
+        opacity:1;
+        transform:perspective(900px) rotateX(58deg) translateY(-40%) scale(1.04);
+      }
+      100%{
+        opacity:0;
+        transform:perspective(900px) rotateX(86deg) translateY(-125%) scale(1.10);
+      }
+    }
+
+    @keyframes cardNumberVanish{
+      0%{ opacity:1; transform:scale(1); }
+      100%{ opacity:0; transform:scale(1.25); }
+    }
+
+    .burst-layer{
+      position:fixed;
+      z-index:69;
+      inset:0;
+      pointer-events:none;
+      opacity:0;
+    }
+
+    .burst-layer.is-active{
+      opacity:1;
+    }
+
+    .burst-dot{
+      --x:0px;
+      --y:0px;
+      --r:0deg;
+      position:absolute;
+      left:var(--origin-x);
+      top:var(--origin-y);
+      width:clamp(8px,1.2vw,18px);
+      aspect-ratio:1;
+      border-radius:4px;
+      background:var(--dot-color,#fff);
+      box-shadow:0 2px 6px rgba(0,0,0,.18);
+      animation:burstDot .72s cubic-bezier(.12,.68,.18,1) both;
+    }
+
+    @keyframes burstDot{
+      0%{
+        opacity:1;
+        transform:translate(-50%,-50%) rotate(0deg) scale(.4);
+      }
+      100%{
+        opacity:0;
+        transform:
+          translate(
+            calc(-50% + var(--x)),
+            calc(-50% + var(--y))
+          )
+          rotate(var(--r))
+          scale(1.1);
+      }
+    }
+
+    .question-view{
+      z-index:10;
+      flex-direction:column;
+      gap:clamp(14px,2.1vh,28px);
+      padding:0 1%;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    .question-view.is-visible{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+
+    .question-card{
+      position:relative;
+      flex:0 0 clamp(150px,27vh,250px);
+      width:min(88%,1120px);
+      min-height:0;
+      border:clamp(3px,.35vw,6px) solid #111;
+      border-radius:clamp(18px,2.2vw,34px);
+      background:rgba(255,255,255,.96);
+      box-shadow:
+        0 10px 0 rgba(0,0,0,.17),
+        0 18px 34px rgba(0,0,0,.16);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(16px,2.5vw,38px);
+      overflow:hidden;
+      opacity:0;
+      transform:translateY(-100px) scale(.94);
+    }
+
+    .question-view.is-visible .question-card{
+      animation:questionArrive .68s cubic-bezier(.16,.82,.18,1) .08s both;
+    }
+
+    @keyframes questionArrive{
+      0%{ opacity:0; transform:translateY(-100px) scale(.94); }
+      100%{ opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .question-text{
+      width:100%;
+      max-height:100%;
+      color:#111;
+      font-weight:1000;
+      font-size:clamp(28px,4.4vw,74px);
+      line-height:1.18;
+      text-align:center;
+      overflow:hidden;
+      white-space:normal;
+      overflow-wrap:break-word;
+    }
+
+    .question-image{
+      display:block;
+      width:100%;
+      height:100%;
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      object-position:center;
+      border-radius:18px;
+    }
+
+    .choices-grid{
+      --choice-cols:2;
+      width:min(94%,1280px);
+      flex:1 1 auto;
+      min-height:0;
+      display:grid;
+      grid-template-columns:repeat(var(--choice-cols),minmax(0,1fr));
+      grid-auto-rows:minmax(0,1fr);
+      align-content:stretch;
+      gap:clamp(12px,1.5vw,22px);
+    }
+
+    .choice-card{
+      --choice-color:#fff;
+      position:relative;
+      min-width:0;
+      min-height:0;
+      border:clamp(3px,.32vw,5px) solid #111;
+      border-radius:clamp(16px,2vw,28px);
+      background:var(--choice-color);
+      color:#111;
+      padding:clamp(10px,1.5vw,24px);
+      box-shadow:
+        0 8px 0 rgba(0,0,0,.16),
+        0 14px 22px rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      cursor:pointer;
+      opacity:0;
+      transform:translateY(100px) scale(.92);
+      transition:filter .2s ease;
+    }
+
+    .question-view.is-visible .choice-card{
+      animation:choiceArrive .62s cubic-bezier(.16,.82,.18,1) both;
+      animation-delay:calc(.14s + var(--choice-order,0) * .075s);
+    }
+
+    @keyframes choiceArrive{
+      0%{ opacity:0; transform:translateY(100px) scale(.92); }
+      100%{ opacity:1; transform:translateY(0) scale(1); }
+    }
+
+    .choice-card:active{
+      transform:translateY(3px);
+    }
+
+    .choice-card.is-disabled{
+      cursor:default;
+    }
+
+    .choice-card.is-wrong{
+      animation:wrongShake .44s ease both !important;
+    }
+
+    @keyframes wrongShake{
+      0%,100%{ transform:translateX(0); }
+      20%{ transform:translateX(-10px); }
+      40%{ transform:translateX(10px); }
+      60%{ transform:translateX(-7px); }
+      80%{ transform:translateX(7px); }
+    }
+
+    .choice-text{
+      width:100%;
+      max-height:100%;
+      color:#111;
+      font-weight:1000;
+      font-size:clamp(22px,3.2vw,56px);
+      line-height:1.16;
+      text-align:center;
+      overflow:hidden;
+      white-space:normal;
+      overflow-wrap:break-word;
+    }
+
+    .choice-image{
+      display:block;
+      width:100%;
+      height:100%;
+      max-width:100%;
+      max-height:100%;
+      object-fit:contain;
+      object-position:center;
+      border-radius:14px;
+    }
+
+    .answer-mark{
+      position:absolute;
+      z-index:6;
+      left:50%;
+      top:50%;
+      width:min(62%,170px);
+      aspect-ratio:1;
+      transform:translate(-50%,-50%) scale(.2);
+      opacity:0;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      border:clamp(6px,.75vw,12px) solid #fff;
+      box-shadow:
+        0 0 0 clamp(4px,.45vw,8px) rgba(17,17,17,.92),
+        0 18px 34px rgba(0,0,0,.32);
+      font-family:Arial,sans-serif;
+      font-weight:1000;
+      line-height:1;
+      pointer-events:none;
+    }
+
+    .answer-mark.is-correct{
+      background:var(--green);
+      font-size:min(42%,84px);
+    }
+
+    .answer-mark.is-wrong{
+      background:var(--red);
+      font-size:min(43%,88px);
+    }
+
+    .answer-mark.is-visible{
+      animation:markPop .48s cubic-bezier(.16,1.12,.32,1) both;
+    }
+
+    @keyframes markPop{
+      0%{ opacity:0; transform:translate(-50%,-50%) scale(.15) rotate(-18deg); }
+      70%{ opacity:1; transform:translate(-50%,-50%) scale(1.14) rotate(4deg); }
+      100%{ opacity:1; transform:translate(-50%,-50%) scale(1) rotate(0); }
+    }
+
+    .question-view.is-answered::after{
+      content:"اضغط للمتابعة";
+      position:absolute;
+      bottom:clamp(-2px,.2vh,3px);
+      left:50%;
+      transform:translateX(-50%);
+      padding:7px 18px;
+      border-radius:999px;
+      background:rgba(17,17,17,.78);
+      color:#fff;
+      font-size:clamp(12px,1.25vw,18px);
+      font-weight:900;
+      opacity:0;
+      animation:hintAppear .35s ease .65s both;
+      pointer-events:none;
+    }
+
+    @keyframes hintAppear{
+      to{ opacity:1; }
+    }
+
+    .finish-view{
+      z-index:15;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    .finish-view.is-visible{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+    }
+
+    .finish-card{
+      width:min(82%,760px);
+      min-height:min(54%,390px);
+      border:clamp(4px,.45vw,7px) solid #111;
+      border-radius:clamp(22px,3vw,42px);
+      background:rgba(255,255,255,.96);
+      box-shadow:
+        0 13px 0 rgba(0,0,0,.17),
+        0 24px 48px rgba(0,0,0,.22);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:18px;
+      padding:28px;
+      text-align:center;
+      animation:finishPop .68s cubic-bezier(.16,.92,.18,1) both;
+    }
+
+    @keyframes finishPop{
+      from{ opacity:0; transform:scale(.72); }
+      to{ opacity:1; transform:scale(1); }
+    }
+
+    .finish-icon{
+      width:clamp(90px,13vw,170px);
+      aspect-ratio:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:50%;
+      background:var(--green);
+      color:#fff;
+      border:7px solid #fff;
+      outline:5px solid #111;
+      font-size:clamp(50px,8vw,100px);
+      font-weight:1000;
+      box-shadow:0 14px 24px rgba(0,0,0,.22);
+    }
+
+    .finish-title{
+      margin:0;
+      font-size:clamp(30px,5vw,72px);
+      font-weight:1000;
+    }
+
+    .fixed-controls{
+      position:absolute;
+      z-index:50;
+      inset:auto 0 0 0;
+      height:var(--controls-h);
+      pointer-events:none;
+    }
+
+    .control-btn{
+      position:absolute;
+      bottom:calc(var(--safe-bottom) + clamp(12px,2vh,22px));
+      min-width:clamp(112px,11vw,176px);
+      height:clamp(54px,7vh,72px);
+      border:3px solid #111;
+      border-radius:clamp(14px,1.7vw,22px);
+      font-size:clamp(22px,2.25vw,36px);
+      font-weight:1000;
+      box-shadow:
+        0 6px 0 rgba(0,0,0,.22),
+        0 10px 18px rgba(0,0,0,.12);
+      pointer-events:auto;
+      cursor:pointer;
+    }
+
+    .control-btn:active{
+      transform:translateY(4px);
+      box-shadow:0 2px 0 rgba(0,0,0,.25);
+    }
+
+    .back-btn{
+      left:calc(var(--safe-left) + clamp(20px,3vw,46px));
+      background:var(--yellow);
+      color:#111;
+    }
+
+    .reset-btn{
+      right:calc(var(--safe-right) + clamp(20px,3vw,46px));
+      background:var(--blue);
+      color:#fff;
+    }
+
+    .game-page.theme-national-day .question-card,
+    .game-page.theme-national-day .choice-card,
+    .game-page.theme-founding-day .question-card,
+    .game-page.theme-founding-day .choice-card{
+      background:rgba(255,255,255,.94);
+    }
+
+    @media (orientation:portrait){
+      .stage{
+        inset:
+          calc(var(--safe-top) + 82px)
+          calc(var(--safe-right) + 18px)
+          var(--controls-h)
+          calc(var(--safe-left) + 18px);
+      }
+
+      .question-grid{
+        width:min(94%,760px);
+        height:min(93%,1040px);
+      }
+
+      .question-card{
+        flex-basis:clamp(130px,21vh,220px);
+        width:96%;
+      }
+
+      .choices-grid{
+        width:96%;
+      }
+
+      .game-logo{
+        top:calc(var(--safe-top) + 14px);
+        left:calc(var(--safe-left) + 18px);
+      }
+    }
+
+    @media (max-width:680px){
+      :root{
+        --controls-h:calc(70px + var(--safe-bottom));
+        --logo-w:82px;
+      }
+
+      .stage{
+        inset:
+          calc(var(--safe-top) + 68px)
+          calc(var(--safe-right) + 12px)
+          var(--controls-h)
+          calc(var(--safe-left) + 12px);
+      }
+
+      .question-grid{
+        --gap:12px;
+        width:96%;
+        height:94%;
+      }
+
+      .question-card{
+        flex-basis:clamp(110px,20vh,180px);
+        padding:12px;
+        border-width:3px;
+        border-radius:18px;
+      }
+
+      .choices-grid{
+        gap:10px;
+      }
+
+      .choice-card{
+        border-width:3px;
+        border-radius:16px;
+        padding:9px;
+      }
+
+      .control-btn{
+        min-width:102px;
+        height:52px;
+        font-size:21px;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      *,
+      *::before,
+      *::after{
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="game-page theme-classroom" id="gamePage">
+    <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
+
+    <img
+      class="game-logo"
+      src="logo.PNG"
+      alt=""
+      onerror="this.style.display='none'"
+    />
+
+    <section class="stage" id="stage">
+      <section class="cards-view" id="cardsView" aria-label="بطاقات الأسئلة">
+        <div class="question-grid" id="questionGrid"></div>
+      </section>
+
+      <section class="question-view" id="questionView" aria-label="السؤال والاختيارات">
+        <article class="question-card" id="questionCard"></article>
+        <div class="choices-grid" id="choicesGrid"></div>
+      </section>
+
+      <section class="finish-view" id="finishView">
+        <article class="finish-card">
+          <div class="finish-icon">✓</div>
+          <h2 class="finish-title">أحسنتم</h2>
+        </article>
+      </section>
+    </section>
+
+    <div class="burst-layer" id="burstLayer" aria-hidden="true"></div>
+
+    <nav class="fixed-controls" aria-label="أدوات اللعبة">
+      <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
+      <button class="control-btn reset-btn" id="resetBtn" type="button">إعادة</button>
+    </nav>
+  </main>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const MAX_QUESTIONS = 30;
+    const MIN_CHOICES = 2;
+    const MAX_CHOICES = 6;
+
+    const DEMO_QUESTIONS = [
+      {
+        questionType:"text",
+        questionText:"ما عاصمة المملكة العربية السعودية؟",
+        choicesType:"text",
+        choices:[
+          { text:"الرياض" },
+          { text:"جدة" },
+          { text:"الدمام" },
+          { text:"أبها" }
+        ],
+        correctChoiceIndex:0
+      },
+      {
+        questionType:"text",
+        questionText:"أي الكلمات التالية فعل؟",
+        choicesType:"text",
+        choices:[
+          { text:"كتاب" },
+          { text:"يكتب" },
+          { text:"قلم" },
+          { text:"مدرسة" }
+        ],
+        correctChoiceIndex:1
+      },
+      {
+        questionType:"text",
+        questionText:"ناتج ٥ × ٦ يساوي:",
+        choicesType:"text",
+        choices:[
+          { text:"٢٥" },
+          { text:"٣٠" },
+          { text:"٣٥" },
+          { text:"٤٠" }
+        ],
+        correctChoiceIndex:1
+      },
+      {
+        questionType:"text",
+        questionText:"أي الحيوانات التالية يعيش في الماء؟",
+        choicesType:"text",
+        choices:[
+          { text:"الجمل" },
+          { text:"الحصان" },
+          { text:"الدلفين" },
+          { text:"الأسد" }
+        ],
+        correctChoiceIndex:2
+      },
+      {
+        questionType:"text",
+        questionText:"اختر الكلمة الصحيحة: We ___ students.",
+        choicesType:"text",
+        choices:[
+          { text:"am" },
+          { text:"is" },
+          { text:"are" },
+          { text:"be" }
+        ],
+        correctChoiceIndex:2
+      },
+      {
+        questionType:"text",
+        questionText:"كم عدد أركان الإسلام؟",
+        choicesType:"text",
+        choices:[
+          { text:"ثلاثة" },
+          { text:"أربعة" },
+          { text:"خمسة" },
+          { text:"ستة" }
+        ],
+        correctChoiceIndex:2
+      },
+      {
+        questionType:"text",
+        questionText:"اللون الناتج من مزج الأزرق والأصفر:",
+        choicesType:"text",
+        choices:[
+          { text:"أحمر" },
+          { text:"أخضر" },
+          { text:"برتقالي" },
+          { text:"بنفسجي" }
+        ],
+        correctChoiceIndex:1
+      },
+      {
+        questionType:"text",
+        questionText:"أي الأعداد التالية عدد زوجي؟",
+        choicesType:"text",
+        choices:[
+          { text:"٧" },
+          { text:"٩" },
+          { text:"١١" },
+          { text:"١٢" }
+        ],
+        correctChoiceIndex:3
+      }
+    ];
+
+    const THEMES = [
+      "white",
+      "classroom",
+      "sky-clouds",
+      "forest",
+      "math",
+      "english",
+      "flowers",
+      "national-day",
+      "founding-day"
+    ];
+
+    const DEFAULT_PALETTE = [
+      ["#ec2f70","#b91550","#ff6b9e","#fff"],
+      ["#ff7427","#c84208","#ff9a59","#fff"],
+      ["#dfb00a","#9e7800","#ffd85a","#fff"],
+      ["#33b72f","#138313","#78dc61","#fff"],
+      ["#10ac79","#087553","#5dd8aa","#fff"],
+      ["#168dc8","#08669e","#5bc8ee","#fff"],
+      ["#655fe9","#3f3ac5","#9791ff","#fff"],
+      ["#ca40c3","#8d218b","#ef82ea","#fff"]
+    ];
+
+    const THEME_PALETTES = {
+      "sky-clouds":[
+        ["#2f55c7","#18348f","#6f90e7","#fff"],
+        ["#5f85de","#315ab7","#9ab3f0","#fff"]
+      ],
+      flowers:[
+        ["#c94582","#91275b","#ee79aa","#fff"],
+        ["#e85c9a","#ad326d","#f79bc1","#fff"],
+        ["#f48ab8","#bd5d8a","#ffc0d8","#6b2347"],
+        ["#f3b7d1","#bd789b","#ffe0ed","#6b2347"]
+      ],
+      "national-day":[
+        ["#1e8a57","#0a5838","#62bb8e","#fff"],
+        ["#f4fff7","#b8d8c2","#fff","#083d2b"]
+      ],
+      "founding-day":[
+        ["#8d715b","#604735","#c3aa93","#fff"],
+        ["#dcccb5","#a7947a","#f5ead8","#5a4030"],
+        ["#b49579","#7b5f47","#d8c0a8","#fff"],
+        ["#f1e6d5","#b9a68d","#fff8ed","#5a4030"]
+      ]
+    };
+
+    const page = document.getElementById("gamePage");
+    const stage = document.getElementById("stage");
+    const cardsView = document.getElementById("cardsView");
+    const questionGrid = document.getElementById("questionGrid");
+    const questionView = document.getElementById("questionView");
+    const questionCard = document.getElementById("questionCard");
+    const choicesGrid = document.getElementById("choicesGrid");
+    const finishView = document.getElementById("finishView");
+    const burstLayer = document.getElementById("burstLayer");
+    const backBtn = document.getElementById("backBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    let currentTheme = "classroom";
+    let displayMode = "cards";
+    let questions = [];
+    let completed = new Set();
+    let activeQuestionIndex = -1;
+    let activeSourceCard = null;
+    let focusCard = null;
+    let interactionLocked = false;
+    let answerLocked = false;
+    let directQuestionIndex = 0;
+
+    function getUrlParam(name){
+      try {
+        return new URLSearchParams(window.location.search || "").get(name) || "";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function normalizeTheme(value){
+      const raw = String(value || "").trim().toLowerCase();
+
+      if (["white","classic","original","theme-white","أبيض","ابيض"].includes(raw)) {
+        return "white";
+      }
+      if ([
+        "classroom","school","theme-classroom","فصل","فصل مدرسي","المدرسة"
+      ].includes(raw)) return "classroom";
+      if ([
+        "sky","clouds","sky-clouds","theme-sky-clouds","سماء","سماء وغيوم"
+      ].includes(raw)) return "sky-clouds";
+      if (["forest","theme-forest","غابة","الغابة"].includes(raw)) return "forest";
+      if (["math","maths","theme-math","رياضيات"].includes(raw)) return "math";
+      if (["english","theme-english","انجليزي","إنجليزي"].includes(raw)) return "english";
+      if (["flowers","theme-flowers","ازهار","أزهار","ورود","ازهار وورود"].includes(raw)) {
+        return "flowers";
+      }
+      if (["national-day","theme-national-day","اليوم الوطني"].includes(raw)) {
+        return "national-day";
+      }
+      if (["founding-day","theme-founding-day","يوم التأسيس","التأسيس"].includes(raw)) {
+        return "founding-day";
+      }
+
+      return "classroom";
+    }
+
+    function normalizeType(value, allowed, fallback){
+      const raw = String(value || "").trim().toLowerCase();
+      return allowed.includes(raw) ? raw : fallback;
+    }
+
+    function normalizeDisplayMode(payload){
+      const explicit = String(
+        payload?.displayMode ||
+        payload?.questionsDisplay ||
+        payload?.questionDisplay ||
+        ""
+      ).trim().toLowerCase();
+
+      if (["cards","card","boxes","grid"].includes(explicit)) return "cards";
+      if (["direct","immediate","plain"].includes(explicit)) return "direct";
+
+      if (
+        payload?.questionsInCards === false ||
+        payload?.useQuestionCards === false ||
+        payload?.showQuestionCards === false
+      ) return "direct";
+
+      return "cards";
+    }
+
+    function cleanQuestions(payload){
+      const source = Array.isArray(payload)
+        ? payload
+        : (
+          payload?.questions ||
+          payload?.entries ||
+          payload?.items ||
+          []
+        );
+
+      const globalQuestionType = normalizeType(
+        payload?.questionType,
+        ["text","image","images"],
+        ""
+      );
+      const globalChoicesType = normalizeType(
+        payload?.choicesType || payload?.answersType,
+        ["text","image","images"],
+        ""
+      );
+
+      return source
+        .map((entry)=>{
+          const rawChoices = Array.isArray(entry?.choices)
+            ? entry.choices
+            : Array.isArray(entry?.answers)
+              ? entry.answers
+              : [];
+
+          let questionType = normalizeType(
+            entry?.questionType || globalQuestionType,
+            ["text","image","images"],
+            ""
+          );
+          if (questionType === "images") questionType = "image";
+
+          const questionText = String(
+            entry?.questionText ||
+            entry?.text ||
+            entry?.question ||
+            ""
+          ).trim();
+
+          const questionImageData =
+            entry?.questionImageData ||
+            entry?.questionImage ||
+            entry?.imageData ||
+            entry?.image ||
+            "";
+
+          if (!questionType) {
+            questionType = questionImageData ? "image" : "text";
+          }
+
+          let choicesType = normalizeType(
+            entry?.choicesType ||
+            entry?.answersType ||
+            globalChoicesType,
+            ["text","image","images"],
+            ""
+          );
+          if (choicesType === "image") choicesType = "images";
+
+          const choices = rawChoices
+            .map((choice)=>{
+              if (typeof choice === "string") {
+                return {
+                  text:choice.trim(),
+                  imageData:"",
+                  imageName:"",
+                  isCorrect:false
+                };
+              }
+
+              return {
+                text:String(
+                  choice?.text ||
+                  choice?.title ||
+                  choice?.answer ||
+                  ""
+                ).trim(),
+                imageData:
+                  choice?.imageData ||
+                  choice?.image ||
+                  "",
+                imageName:choice?.imageName || "",
+                isCorrect:Boolean(choice?.isCorrect || choice?.correct)
+              };
+            })
+            .filter((choice)=> choice.text || choice.imageData)
+            .slice(0,MAX_CHOICES);
+
+          if (!choicesType) {
+            choicesType = choices.some((choice)=> choice.imageData)
+              ? "images"
+              : "text";
+          }
+
+          let correctChoiceIndex = Number(
+            entry?.correctChoiceIndex ??
+            entry?.correctIndex ??
+            entry?.answerIndex ??
+            -1
+          );
+
+          if (!Number.isInteger(correctChoiceIndex) || correctChoiceIndex < 0) {
+            correctChoiceIndex = choices.findIndex((choice)=> choice.isCorrect);
+          }
+
+          if (correctChoiceIndex < 0 || correctChoiceIndex >= choices.length) {
+            correctChoiceIndex = 0;
+          }
+
+          const clean = {
+            questionType,
+            questionText,
+            questionImageData,
+            choicesType,
+            choices,
+            correctChoiceIndex
+          };
+
+          if (questionType === "text") {
+            clean.questionImageData = "";
+          } else {
+            clean.questionText = "";
+          }
+
+          clean.choices = clean.choices.map((choice)=>{
+            if (choicesType === "text") {
+              return { ...choice, imageData:"", imageName:"" };
+            }
+            return { ...choice, text:"" };
+          });
+
+          return clean;
+        })
+        .filter((entry)=>
+          entry.choices.length >= MIN_CHOICES &&
+          (
+            (entry.questionType === "text" && entry.questionText) ||
+            (entry.questionType === "image" && entry.questionImageData)
+          )
+        )
+        .slice(0,MAX_QUESTIONS);
+    }
+
+    function openEduGamesDb(){
+      return new Promise((resolve,reject)=>{
+        const request = indexedDB.open("sandooq_edu_games_v1",1);
+
+        request.onupgradeneeded = ()=>{
+          const db = request.result;
+          if (!db.objectStoreNames.contains("payloads")) {
+            db.createObjectStore("payloads",{ keyPath:"key" });
+          }
+        };
+
+        request.onsuccess = ()=> resolve(request.result);
+        request.onerror = ()=> reject(request.error || new Error("indexedDB failed"));
+      });
+    }
+
+    async function readPayloadFromIndexedDB(key){
+      const db = await openEduGamesDb();
+
+      return new Promise((resolve,reject)=>{
+        const tx = db.transaction("payloads","readonly");
+        const request = tx.objectStore("payloads").get(key);
+
+        request.onsuccess = ()=> resolve(request.result ? request.result.payload : null);
+        request.onerror = ()=> reject(request.error || new Error("payload read failed"));
+      });
+    }
+
+    function applyPayload(payload){
+      const clean = cleanQuestions(payload);
+      if (!clean.length) return false;
+
+      questions = clean;
+      currentTheme = normalizeTheme(payload?.theme || currentTheme);
+      displayMode = normalizeDisplayMode(payload || {});
+      return true;
+    }
+
+    async function hydratePayload(){
+      const payloadId = getUrlParam("payloadId");
+
+      if (payloadId) {
+        try {
+          const indexedPayload = await readPayloadFromIndexedDB(`quiz:${payloadId}`);
+          if (indexedPayload && applyPayload(indexedPayload)) return true;
+        } catch (_) {}
+
+        try {
+          const raw = sessionStorage.getItem(`sandooq_quiz_payload_v1_${payloadId}`);
+          if (raw && applyPayload(JSON.parse(raw))) return true;
+        } catch (_) {}
+      }
+
+      const keys = [
+        "sandooq_quiz_payload_v1",
+        "sandooq_quiz_draft_v1"
+      ];
+
+      for (const key of keys) {
+        try {
+          const raw = sessionStorage.getItem(key);
+          if (raw && applyPayload(JSON.parse(raw))) return true;
+        } catch (_) {}
+      }
+
+      questions = DEMO_QUESTIONS.map((item)=>({
+        ...item,
+        choices:item.choices.map((choice)=>({ ...choice }))
+      }));
+      currentTheme = normalizeTheme(getUrlParam("theme") || "classroom");
+      displayMode = getUrlParam("mode") === "direct" ? "direct" : "cards";
+      return false;
+    }
+
+    function applyTheme(){
+      THEMES.forEach((theme)=> page.classList.remove(`theme-${theme}`));
+      page.classList.add(`theme-${currentTheme}`);
+    }
+
+    function syncVisualViewport(){
+      const viewport = window.visualViewport;
+      const width = viewport?.width || window.innerWidth;
+      const height = viewport?.height || window.innerHeight;
+      const offsetLeft = viewport?.offsetLeft || 0;
+      const offsetTop = viewport?.offsetTop || 0;
+
+      document.documentElement.style.setProperty("--app-width",`${width}px`);
+      document.documentElement.style.setProperty("--app-height",`${height}px`);
+
+      page.style.left = `${offsetLeft}px`;
+      page.style.top = `${offsetTop}px`;
+    }
+
+    function wait(ms){
+      return new Promise((resolve)=> setTimeout(resolve,ms));
+    }
+
+    function paletteFor(index){
+      const source = THEME_PALETTES[currentTheme] || DEFAULT_PALETTE;
+      return source[index % source.length];
+    }
+
+    function applyPalette(element,index){
+      const [color,dark,light,text] = paletteFor(index);
+      element.style.setProperty("--card-color",color);
+      element.style.setProperty("--card-dark",dark);
+      element.style.setProperty("--card-light",light);
+      element.style.setProperty("--deck-text",text);
+    }
+
+    function calculateDeckLayout(){
+      const total = Math.max(1,questions.length);
+      const width = Math.max(320,stage.clientWidth);
+      const height = Math.max(320,stage.clientHeight);
+
+      let best = null;
+
+      for (let cols=1; cols<=Math.min(total,8); cols+=1) {
+        const rows = Math.ceil(total / cols);
+        const gap = Math.max(12,Math.min(24,width * .015));
+        const cardW = (width * .92 - gap * (cols - 1)) / cols;
+        const cardH = (height * .88 - gap * (rows - 1)) / rows;
+        const ratio = cardW / Math.max(1,cardH);
+        const size = Math.min(cardW,cardH * .88);
+        const score =
+          size -
+          Math.abs(ratio - .78) * 30 -
+          Math.max(0,rows - 4) * 8;
+
+        if (!best || score > best.score) {
+          best = { cols,rows,score };
+        }
+      }
+
+      questionGrid.style.setProperty("--cols",String(best?.cols || 4));
+    }
+
+    function renderDeck(){
+      questionGrid.textContent = "";
+
+      questions.forEach((_,index)=>{
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "deck-card";
+        button.dataset.index = String(index);
+        button.setAttribute("aria-label",`السؤال ${index + 1}`);
+        applyPalette(button,index);
+
+        const number = document.createElement("span");
+        number.className = "deck-card-number";
+        number.textContent = String(index + 1);
+        button.appendChild(number);
+
+        if (completed.has(index)) {
+          button.classList.add("is-completed");
+        }
+
+        button.addEventListener("click",(event)=>{
+          event.preventDefault();
+          event.stopPropagation();
+          openQuestionFromCard(index,button);
+        });
+
+        questionGrid.appendChild(button);
+      });
+
+      calculateDeckLayout();
+    }
+
+    function choiceColumns(count){
+      if (count <= 2) return 2;
+      if (count === 3) return 3;
+      if (count === 4) return 2;
+      return 3;
+    }
+
+    function fitText(el,min,max){
+      if (!el) return;
+
+      const parent = el.parentElement;
+      if (!parent) return;
+
+      const width = Math.max(1,parent.clientWidth - 8);
+      const height = Math.max(1,parent.clientHeight - 8);
+      let low = min;
+      let high = max;
+      let best = min;
+
+      for (let i=0; i<22; i+=1) {
+        const size = (low + high) / 2;
+        el.style.fontSize = `${size}px`;
+
+        if (
+          el.scrollWidth <= width + .5 &&
+          el.scrollHeight <= height + .5
+        ) {
+          best = size;
+          low = size;
+        } else {
+          high = size;
+        }
+      }
+
+      el.style.fontSize = `${Math.floor(best * 10) / 10}px`;
+    }
+
+    function fitCurrentSceneText(){
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          const qText = questionCard.querySelector(".question-text");
+          if (qText) {
+            fitText(qText,14,Math.min(82,questionCard.clientHeight * .46));
+          }
+
+          choicesGrid.querySelectorAll(".choice-text").forEach((el)=>{
+            const card = el.closest(".choice-card");
+            fitText(el,12,Math.min(62,(card?.clientHeight || 120) * .48));
+          });
+        });
+      });
+    }
+
+    function renderQuestion(index){
+      const item = questions[index];
+      if (!item) return;
+
+      activeQuestionIndex = index;
+      answerLocked = false;
+      questionView.classList.remove("is-answered");
+      questionCard.textContent = "";
+      choicesGrid.textContent = "";
+
+      if (item.questionType === "image") {
+        const image = document.createElement("img");
+        image.className = "question-image";
+        image.alt = "صورة السؤال";
+        image.src = item.questionImageData;
+        questionCard.appendChild(image);
+      } else {
+        const text = document.createElement("div");
+        text.className = "question-text";
+        text.textContent = item.questionText;
+        questionCard.appendChild(text);
+      }
+
+      choicesGrid.style.setProperty(
+        "--choice-cols",
+        String(choiceColumns(item.choices.length))
+      );
+
+      item.choices.forEach((choice,choiceIndex)=>{
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "choice-card";
+        button.style.setProperty("--choice-order",String(choiceIndex));
+        button.setAttribute("aria-label",`الاختيار ${choiceIndex + 1}`);
+
+        if (item.choicesType === "images") {
+          const image = document.createElement("img");
+          image.className = "choice-image";
+          image.alt = `الاختيار ${choiceIndex + 1}`;
+          image.src = choice.imageData;
+          button.appendChild(image);
+        } else {
+          const text = document.createElement("span");
+          text.className = "choice-text";
+          text.textContent = choice.text;
+          button.appendChild(text);
+        }
+
+        const mark = document.createElement("span");
+        mark.className = "answer-mark";
+        button.appendChild(mark);
+
+        button.addEventListener("click",(event)=>{
+          event.preventDefault();
+          event.stopPropagation();
+          chooseAnswer(button,choiceIndex);
+        });
+
+        choicesGrid.appendChild(button);
+      });
+
+      questionView.classList.add("is-visible");
+      fitCurrentSceneText();
+    }
+
+    function showMark(card,type){
+      const mark = card.querySelector(".answer-mark");
+      if (!mark) return;
+
+      mark.className = `answer-mark ${type === "correct" ? "is-correct" : "is-wrong"}`;
+      mark.textContent = type === "correct" ? "✓" : "×";
+
+      requestAnimationFrame(()=>{
+        mark.classList.add("is-visible");
+      });
+    }
+
+    function chooseAnswer(card,choiceIndex){
+      if (answerLocked || interactionLocked) return;
+      if (card.classList.contains("is-disabled")) return;
+
+      const item = questions[activeQuestionIndex];
+      if (!item) return;
+
+      if (choiceIndex === item.correctChoiceIndex) {
+        answerLocked = true;
+        completed.add(activeQuestionIndex);
+        showMark(card,"correct");
+
+        choicesGrid.querySelectorAll(".choice-card").forEach((choiceCard)=>{
+          choiceCard.classList.add("is-disabled");
+          choiceCard.disabled = true;
+        });
+
+        questionView.classList.add("is-answered");
+        return;
+      }
+
+      card.classList.add("is-disabled","is-wrong");
+      card.disabled = true;
+      showMark(card,"wrong");
+
+      setTimeout(()=> card.classList.remove("is-wrong"),480);
+    }
+
+    function createFocusCard(source,index){
+      const rect = source.getBoundingClientRect();
+      const targetW = Math.min(
+        Math.max(230,stage.clientWidth * .28),
+        410
+      );
+      const targetH = Math.min(
+        Math.max(245,stage.clientHeight * .48),
+        470
+      );
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+
+      const clone = document.createElement("div");
+      clone.className = "focus-card";
+      applyPalette(clone,index);
+
+      clone.style.left = `${rect.left}px`;
+      clone.style.top = `${rect.top}px`;
+      clone.style.width = `${rect.width}px`;
+      clone.style.height = `${rect.height}px`;
+
+      const number = document.createElement("span");
+      number.className = "focus-card-number";
+      number.textContent = String(index + 1);
+
+      const top = document.createElement("span");
+      top.className = "focus-card-top";
+
+      clone.append(number,top);
+      document.body.appendChild(clone);
+
+      const translateX = centerX - (rect.left + rect.width / 2);
+      const translateY = centerY - (rect.top + rect.height / 2);
+      const scaleX = targetW / Math.max(1,rect.width);
+      const scaleY = targetH / Math.max(1,rect.height);
+
+      requestAnimationFrame(()=>{
+        clone.style.transition =
+          "transform .78s cubic-bezier(.18,.78,.18,1), border-radius .78s ease";
+        clone.style.transform =
+          `translate3d(${translateX}px,${translateY}px,0) scale(${scaleX},${scaleY})`;
+      });
+
+      return { clone,targetW,targetH };
+    }
+
+    function scatterDeck(selected){
+      const cards = Array.from(questionGrid.querySelectorAll(".deck-card"));
+      const centerX = stage.clientWidth / 2;
+      const centerY = stage.clientHeight / 2;
+      const travel = Math.max(stage.clientWidth,stage.clientHeight) * .86;
+
+      cards.forEach((card,index)=>{
+        if (card === selected) {
+          card.style.opacity = "0";
+          card.style.pointerEvents = "none";
+          return;
+        }
+
+        const rect = card.getBoundingClientRect();
+        const stageRect = stage.getBoundingClientRect();
+        let dx = rect.left + rect.width / 2 - (stageRect.left + centerX);
+        let dy = rect.top + rect.height / 2 - (stageRect.top + centerY);
+        const length = Math.hypot(dx,dy) || 1;
+        dx /= length;
+        dy /= length;
+
+        card.style.setProperty("--away-x",`${dx * travel}px`);
+        card.style.setProperty("--away-y",`${dy * travel}px`);
+        card.style.setProperty("--away-r",`${(index % 2 ? 1 : -1) * (8 + index % 4 * 4)}deg`);
+        card.classList.add("is-away");
+      });
+    }
+
+    function restoreDeck(){
+      questionGrid.querySelectorAll(".deck-card").forEach((card,index)=>{
+        card.classList.remove("is-away");
+        card.style.removeProperty("--away-x");
+        card.style.removeProperty("--away-y");
+        card.style.removeProperty("--away-r");
+        card.style.opacity = "";
+        card.style.pointerEvents = "";
+        card.classList.toggle("is-completed",completed.has(index));
+      });
+    }
+
+    function createBurst(centerX,centerY,index){
+      burstLayer.textContent = "";
+      burstLayer.style.setProperty("--origin-x",`${centerX}px`);
+      burstLayer.style.setProperty("--origin-y",`${centerY}px`);
+
+      const colors = [
+        paletteFor(index)[0],
+        paletteFor(index)[2],
+        "#ffffff",
+        "#ffd653"
+      ];
+
+      for (let i=0; i<18; i+=1) {
+        const angle = (Math.PI * 2 * i) / 18;
+        const distance = 90 + (i % 5) * 22;
+        const dot = document.createElement("span");
+        dot.className = "burst-dot";
+        dot.style.setProperty("--x",`${Math.cos(angle) * distance}px`);
+        dot.style.setProperty("--y",`${Math.sin(angle) * distance}px`);
+        dot.style.setProperty("--r",`${180 + i * 37}deg`);
+        dot.style.setProperty("--dot-color",colors[i % colors.length]);
+        burstLayer.appendChild(dot);
+      }
+
+      burstLayer.classList.add("is-active");
+      setTimeout(()=>{
+        burstLayer.classList.remove("is-active");
+        burstLayer.textContent = "";
+      },820);
+    }
+
+    async function openQuestionFromCard(index,source){
+      if (interactionLocked) return;
+      if (!source || !questions[index]) return;
+
+      interactionLocked = true;
+      activeSourceCard = source;
+      scatterDeck(source);
+
+      const { clone } = createFocusCard(source,index);
+      focusCard = clone;
+
+      await wait(820);
+
+      const rect = clone.getBoundingClientRect();
+      createBurst(
+        rect.left + rect.width / 2,
+        rect.top + rect.height / 2,
+        index
+      );
+
+      clone.classList.add("is-opening");
+      await wait(330);
+
+      cardsView.classList.add("is-hidden");
+      renderQuestion(index);
+
+      await wait(620);
+      clone.remove();
+      focusCard = null;
+      interactionLocked = false;
+    }
+
+    async function hideQuestionScene(){
+      if (interactionLocked) return;
+      interactionLocked = true;
+
+      questionView.classList.remove("is-visible","is-answered");
+      await wait(260);
+
+      if (displayMode === "cards") {
+        cardsView.classList.remove("is-hidden");
+        restoreDeck();
+        activeSourceCard = null;
+        activeQuestionIndex = -1;
+        answerLocked = false;
+        await wait(760);
+      } else {
+        directQuestionIndex += 1;
+        if (directQuestionIndex >= questions.length) {
+          finishView.classList.add("is-visible");
+        } else {
+          renderQuestion(directQuestionIndex);
+        }
+      }
+
+      interactionLocked = false;
+    }
+
+    async function handleSceneTap(event){
+      if (event.target.closest(".fixed-controls")) return;
+      if (event.target.closest(".choice-card")) return;
+
+      if (
+        questionView.classList.contains("is-visible") &&
+        answerLocked
+      ) {
+        event.preventDefault();
+        await hideQuestionScene();
+      }
+    }
+
+    async function resetGame(){
+      if (interactionLocked) return;
+      interactionLocked = true;
+
+      completed.clear();
+      activeQuestionIndex = -1;
+      activeSourceCard = null;
+      answerLocked = false;
+      directQuestionIndex = 0;
+
+      if (focusCard) {
+        focusCard.remove();
+        focusCard = null;
+      }
+
+      burstLayer.classList.remove("is-active");
+      burstLayer.textContent = "";
+      finishView.classList.remove("is-visible");
+      questionView.classList.remove("is-visible","is-answered");
+
+      if (displayMode === "cards") {
+        cardsView.classList.remove("is-hidden");
+        renderDeck();
+      } else {
+        cardsView.classList.add("is-hidden");
+        renderQuestion(0);
+      }
+
+      interactionLocked = false;
+    }
+
+    async function handleBack(){
+      if (interactionLocked) return;
+
+      if (questionView.classList.contains("is-visible")) {
+        if (displayMode === "cards") {
+          answerLocked = true;
+          await hideQuestionScene();
+        } else {
+          try { history.back(); } catch (_) {}
+        }
+        return;
+      }
+
+      try {
+        const returnUrl = getUrlParam("return") || getUrlParam("returnUrl");
+        if (returnUrl) {
+          location.href = returnUrl;
+          return;
+        }
+      } catch (_) {}
+
+      try {
+        history.back();
+      } catch (_) {}
+    }
+
+    function startIntro(){
+      const background = document.getElementById("themeBackground");
+
+      background.animate(
+        [
+          { transform:"scale(1.00)" },
+          { transform:"scale(1.10)" }
+        ],
+        {
+          duration:4600,
+          easing:"cubic-bezier(.45,0,.25,1)",
+          fill:"forwards"
+        }
+      );
+
+      if (displayMode === "cards") {
+        const cards = Array.from(questionGrid.querySelectorAll(".deck-card"));
+        cards.forEach((card,index)=>{
+          const angle = (Math.PI * 2 * index) / Math.max(1,cards.length);
+          const distance = Math.max(stage.clientWidth,stage.clientHeight) * .7;
+
+          card.animate(
+            [
+              {
+                opacity:0,
+                transform:
+                  `translate(${Math.cos(angle) * distance}px,${Math.sin(angle) * distance}px) scale(.74)`
+              },
+              {
+                opacity:1,
+                transform:"translate(0,0) scale(1)"
+              }
+            ],
+            {
+              duration:1050,
+              delay:320 + index * 36,
+              easing:"cubic-bezier(.16,.82,.18,1)",
+              fill:"both"
+            }
+          );
+        });
+      }
+    }
+
+    function scheduleLayout(){
+      requestAnimationFrame(()=>{
+        syncVisualViewport();
+        calculateDeckLayout();
+        fitCurrentSceneText();
+      });
+    }
+
+    async function initialize(){
+      syncVisualViewport();
+      await hydratePayload();
+      applyTheme();
+
+      if (displayMode === "cards") {
+        renderDeck();
+        cardsView.classList.remove("is-hidden");
+      } else {
+        cardsView.classList.add("is-hidden");
+        renderQuestion(0);
+      }
+
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(startIntro);
+      });
+    }
+
+    page.addEventListener("click",handleSceneTap);
+    backBtn.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      handleBack();
+    });
+    resetBtn.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      resetGame();
+    });
+
+    window.addEventListener("resize",scheduleLayout,{ passive:true });
+    window.addEventListener("orientationchange",()=>{
+      setTimeout(scheduleLayout,120);
+      setTimeout(scheduleLayout,420);
+    },{ passive:true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize",scheduleLayout,{ passive:true });
+      window.visualViewport.addEventListener("scroll",syncVisualViewport,{ passive:true });
+    }
+
+    initialize();
+  })();
+  </script>
+</body>
+</html>
