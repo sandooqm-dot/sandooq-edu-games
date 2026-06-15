@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v16-readable-fit-text-no-tiny-fallback -->
+  <!-- version: choices-v17-square-image-layout-question-zoom -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1491,6 +1491,274 @@
       line-height:1.16 !important;
     }
 
+
+    /* v17: السؤال المصور داخل إطار مربع، والاختيارات المصورة داخل مربعات. */
+    :root{
+      --question-image-size:clamp(150px,23vh,224px);
+      --choice-image-size:clamp(96px,16.5vh,152px);
+      --image-choice-gap:clamp(10px,1.2vw,18px);
+    }
+
+    .question-view.has-image-question,
+    .question-view.has-image-choices{
+      transform:translateY(clamp(20px,3.5vh,38px));
+    }
+
+    .question-view.has-image-question{
+      padding-top:clamp(12px,2.4vh,28px);
+    }
+
+    .question-view.has-image-question .question-card.is-image-question{
+      flex:0 0 auto !important;
+      width:var(--question-image-size) !important;
+      height:var(--question-image-size) !important;
+      min-width:var(--question-image-size) !important;
+      min-height:var(--question-image-size) !important;
+      aspect-ratio:1 / 1;
+      margin:0 !important;
+      padding:clamp(6px,.65vw,10px) !important;
+      border:clamp(3px,.3vw,5px) solid #111 !important;
+      border-radius:clamp(12px,1.35vw,20px) !important;
+      background:rgba(255,255,255,.96) !important;
+      box-shadow:
+        0 6px 0 rgba(0,0,0,.18),
+        0 14px 25px rgba(0,0,0,.18) !important;
+      overflow:hidden !important;
+      cursor:zoom-in;
+    }
+
+    .question-card.is-image-question .question-fit-zone{
+      width:100% !important;
+      height:100% !important;
+      max-width:none !important;
+      max-height:none !important;
+      pointer-events:auto !important;
+      cursor:zoom-in;
+      border-radius:clamp(7px,.85vw,13px);
+      overflow:hidden !important;
+    }
+
+    .question-card.is-image-question .question-image{
+      display:block !important;
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      object-fit:contain !important;
+      object-position:center center !important;
+      border-radius:clamp(6px,.75vw,11px) !important;
+      background:#fff;
+      cursor:zoom-in;
+    }
+
+    .question-view.has-image-question .choices-grid{
+      margin-top:clamp(28px,4.8vh,50px);
+    }
+
+    /* شبكة صور الاختيارات تعتمد المربعات بدل المستطيلات. */
+    .choices-grid.is-image-choices{
+      display:flex !important;
+      flex-wrap:wrap;
+      justify-content:center;
+      align-content:center;
+      align-items:center;
+      gap:var(--image-choice-gap) !important;
+      width:100% !important;
+      max-width:none;
+      margin-inline:auto;
+      grid-template-columns:none !important;
+      grid-auto-rows:auto !important;
+      direction:ltr;
+    }
+
+    .choices-grid.is-image-choices.choice-count-2{
+      max-width:calc(
+        var(--choice-image-size) +
+        var(--choice-image-size) +
+        var(--image-choice-gap)
+      );
+    }
+
+    .choices-grid.is-image-choices.choice-count-3,
+    .choices-grid.is-image-choices.choice-count-5,
+    .choices-grid.is-image-choices.choice-count-6{
+      max-width:calc(
+        var(--choice-image-size) +
+        var(--choice-image-size) +
+        var(--choice-image-size) +
+        var(--image-choice-gap) +
+        var(--image-choice-gap)
+      );
+    }
+
+    .choices-grid.is-image-choices.choice-count-4{
+      max-width:calc(
+        var(--choice-image-size) +
+        var(--choice-image-size) +
+        var(--image-choice-gap)
+      );
+    }
+
+    .choices-grid.is-image-choices .choice-card.is-image-choice{
+      flex:0 0 var(--choice-image-size) !important;
+      width:var(--choice-image-size) !important;
+      height:var(--choice-image-size) !important;
+      min-width:var(--choice-image-size) !important;
+      min-height:var(--choice-image-size) !important;
+      aspect-ratio:1 / 1;
+      padding:clamp(5px,.55vw,9px) !important;
+      border:clamp(3px,.28vw,4px) solid #111 !important;
+      border-radius:clamp(11px,1.15vw,18px) !important;
+      background:rgba(255,255,255,.96) !important;
+      box-shadow:
+        0 5px 0 rgba(0,0,0,.17),
+        0 11px 20px rgba(0,0,0,.15) !important;
+      overflow:hidden !important;
+    }
+
+    .choice-card.is-image-choice .choice-fit-zone{
+      width:100% !important;
+      height:100% !important;
+      max-width:none !important;
+      max-height:none !important;
+      border-radius:clamp(6px,.75vw,11px);
+      overflow:hidden !important;
+    }
+
+    .choice-card.is-image-choice .choice-image{
+      display:block !important;
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      object-fit:contain !important;
+      object-position:center center !important;
+      margin:0 !important;
+      padding:0 !important;
+      border-radius:clamp(5px,.65vw,9px) !important;
+      background:#fff;
+    }
+
+    .choices-grid.is-image-choices.has-centered-last-choice .choice-card:last-child{
+      width:var(--choice-image-size) !important;
+      justify-self:auto;
+      grid-column:auto;
+    }
+
+    /* تكبير صورة السؤال فقط. */
+    .question-image-overlay{
+      position:fixed;
+      inset:0;
+      z-index:240;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:
+        calc(clamp(18px,3vw,40px) + var(--safe-top))
+        calc(clamp(18px,3vw,40px) + var(--safe-right))
+        calc(clamp(18px,3vw,40px) + var(--safe-bottom))
+        calc(clamp(18px,3vw,40px) + var(--safe-left));
+      background:rgba(8,14,24,.78);
+      backdrop-filter:blur(5px);
+      -webkit-backdrop-filter:blur(5px);
+      cursor:zoom-out;
+      touch-action:none;
+    }
+
+    .question-image-overlay[hidden]{
+      display:none !important;
+    }
+
+    .question-image-overlay-frame{
+      width:min(84vw,78vh,760px);
+      height:min(84vw,78vh,760px);
+      aspect-ratio:1 / 1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(9px,1.4vw,18px);
+      border:clamp(4px,.45vw,7px) solid #111;
+      border-radius:clamp(16px,2vw,30px);
+      background:#fff;
+      box-shadow:
+        0 12px 0 rgba(0,0,0,.22),
+        0 28px 58px rgba(0,0,0,.42);
+      animation:questionImageZoomIn .34s cubic-bezier(.16,.9,.2,1) both;
+      overflow:hidden;
+    }
+
+    .question-image-overlay-img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      object-position:center center;
+      border-radius:clamp(9px,1.2vw,18px);
+      -webkit-user-drag:none;
+      user-select:none;
+    }
+
+    @keyframes questionImageZoomIn{
+      from{
+        opacity:0;
+        transform:scale(.68);
+      }
+      to{
+        opacity:1;
+        transform:scale(1);
+      }
+    }
+
+    .game-page.question-image-zoom-open .fixed-controls{
+      opacity:0 !important;
+      pointer-events:none !important;
+    }
+
+    @media (orientation:portrait){
+      :root{
+        --question-image-size:clamp(144px,21vh,210px);
+        --choice-image-size:clamp(88px,13.5vh,134px);
+      }
+
+      .question-view.has-image-question,
+      .question-view.has-image-choices{
+        transform:translateY(clamp(15px,2.5vh,28px));
+      }
+    }
+
+    @media (max-width:560px){
+      :root{
+        --question-image-size:clamp(132px,19vh,186px);
+        --choice-image-size:clamp(76px,12vh,112px);
+        --image-choice-gap:8px;
+      }
+
+      .question-view.has-image-question .choices-grid{
+        margin-top:clamp(20px,3.8vh,34px);
+      }
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      :root{
+        --question-image-size:clamp(104px,28vh,146px);
+        --choice-image-size:clamp(70px,22vh,104px);
+        --image-choice-gap:clamp(7px,1vw,12px);
+      }
+
+      .question-view.has-image-question,
+      .question-view.has-image-choices{
+        transform:translateY(clamp(8px,2vh,16px));
+      }
+
+      .question-view.has-image-question{
+        padding-top:0;
+      }
+
+      .question-view.has-image-question .choices-grid{
+        margin-top:clamp(16px,4vh,28px);
+      }
+    }
+
 </style>
 </head>
 
@@ -1524,6 +1792,23 @@
     </section>
 
     <div class="burst-layer" id="burstLayer" aria-hidden="true"></div>
+
+    <div
+      class="question-image-overlay"
+      id="questionImageOverlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="عرض صورة السؤال بحجم كبير"
+      hidden
+    >
+      <div class="question-image-overlay-frame">
+        <img
+          class="question-image-overlay-img"
+          id="questionImageOverlayImg"
+          alt="صورة السؤال مكبرة"
+        />
+      </div>
+    </div>
 
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
@@ -1768,6 +2053,8 @@
     const questionNavigation = document.getElementById("questionNavigation");
     const nextBtn = document.getElementById("nextBtn");
     const previousBtn = document.getElementById("previousBtn");
+    const questionImageOverlay = document.getElementById("questionImageOverlay");
+    const questionImageOverlayImg = document.getElementById("questionImageOverlayImg");
 
     let currentTheme = "classroom";
     let displayMode = "cards";
@@ -1782,6 +2069,7 @@
     let safariTimers = [];
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
+    let questionImageZoomOpen = false;
 
     let directIntroFrameId = null;
     let directIntroRunning = false;
@@ -2400,6 +2688,34 @@
       }
     }
 
+    function closeQuestionImageZoom(){
+      if (!questionImageZoomOpen) return;
+
+      questionImageZoomOpen = false;
+      page.classList.remove("question-image-zoom-open");
+      questionImageOverlay.hidden = true;
+      questionImageOverlayImg.removeAttribute("src");
+    }
+
+    function openQuestionImageZoom(src){
+      const safeSrc = String(src || "").trim();
+      if (!safeSrc || interactionLocked) return;
+
+      questionImageZoomOpen = true;
+      questionImageOverlayImg.src = safeSrc;
+      questionImageOverlay.hidden = false;
+      page.classList.add("question-image-zoom-open");
+    }
+
+    function toggleQuestionImageZoom(src){
+      if (questionImageZoomOpen) {
+        closeQuestionImageZoom();
+        return;
+      }
+
+      openQuestionImageZoom(src);
+    }
+
     function renderQuestion(index){
       const item = questions[index];
       if (!item) return;
@@ -2407,19 +2723,69 @@
       activeQuestionIndex = index;
       directQuestionIndex = index;
       answerLocked = false;
-      questionView.classList.remove("is-answered","has-two-choices");
+      closeQuestionImageZoom();
+
+      const isImageQuestion = item.questionType === "image";
+      const hasImageChoices = item.choicesType === "images";
+
+      questionView.classList.remove(
+        "is-answered",
+        "has-two-choices",
+        "has-image-question",
+        "has-image-choices"
+      );
       questionView.classList.toggle(
         "has-two-choices",
-        item.choices.length === 2
+        !hasImageChoices && item.choices.length === 2
       );
+      questionView.classList.toggle(
+        "has-image-question",
+        isImageQuestion
+      );
+      questionView.classList.toggle(
+        "has-image-choices",
+        hasImageChoices
+      );
+
       questionCard.textContent = "";
-      questionCard.classList.remove("is-long","is-very-long");
+      questionCard.classList.remove(
+        "is-long",
+        "is-very-long",
+        "is-image-question"
+      );
+      questionCard.classList.toggle(
+        "is-image-question",
+        isImageQuestion
+      );
+
       choicesGrid.textContent = "";
+      choicesGrid.classList.remove(
+        "is-image-choices",
+        "choice-count-2",
+        "choice-count-3",
+        "choice-count-4",
+        "choice-count-5",
+        "choice-count-6"
+      );
+      choicesGrid.classList.toggle(
+        "is-image-choices",
+        hasImageChoices
+      );
       choicesGrid.classList.toggle(
         "has-centered-last-choice",
-        item.choices.length === 3 ||
-        item.choices.length === 5
+        !hasImageChoices &&
+        (
+          item.choices.length === 3 ||
+          item.choices.length === 5
+        )
       );
+
+      if (hasImageChoices) {
+        choicesGrid.classList.add(
+          `choice-count-${item.choices.length}`
+        );
+      }
+
       applyQuestionPanelColor(questionCard);
 
       if (item.questionType === "text") {
@@ -2436,15 +2802,36 @@
 
       if (item.questionType === "image") {
         const mediaZone = document.createElement("div");
-        mediaZone.className = "question-fit-zone question-media-zone";
+        mediaZone.className =
+          "question-fit-zone question-media-zone question-image-trigger";
+        mediaZone.setAttribute("role","button");
+        mediaZone.setAttribute("tabindex","0");
+        mediaZone.setAttribute(
+          "aria-label",
+          "تكبير صورة السؤال"
+        );
 
         const image = document.createElement("img");
         image.className = "question-image";
         image.alt = "صورة السؤال";
         image.src = item.questionImageData;
+        image.draggable = false;
         image.addEventListener("load",()=>{
           requestAnimationFrame(fitCurrentSceneText);
         },{ once:true });
+
+        const toggleZoom = (event)=>{
+          event.preventDefault();
+          event.stopPropagation();
+          toggleQuestionImageZoom(image.currentSrc || image.src);
+        };
+
+        mediaZone.addEventListener("click",toggleZoom);
+        mediaZone.addEventListener("keydown",(event)=>{
+          if (event.key === "Enter" || event.key === " ") {
+            toggleZoom(event);
+          }
+        });
 
         mediaZone.appendChild(image);
         questionCard.appendChild(mediaZone);
@@ -2470,6 +2857,10 @@
         const button = document.createElement("button");
         button.type = "button";
         button.className = "choice-card";
+        button.classList.toggle(
+          "is-image-choice",
+          item.choicesType === "images"
+        );
         button.style.setProperty("--choice-order",String(choiceIndex));
         button.setAttribute("aria-label",`الاختيار ${choiceIndex + 1}`);
         applyChoicePanelColor(button,choiceIndex);
@@ -2532,6 +2923,7 @@
     }
 
     function chooseAnswer(card,choiceIndex){
+      if (questionImageZoomOpen) return;
       if (answerLocked || interactionLocked) return;
       if (card.classList.contains("is-disabled")) return;
 
@@ -2758,6 +3150,7 @@
       if (interactionLocked) return;
       if (!Number.isInteger(index) || index < 0 || index >= questions.length) return;
 
+      closeQuestionImageZoom();
       interactionLocked = true;
       questionNavigation.hidden = true;
       questionView.classList.remove("is-visible","is-answered");
@@ -2808,6 +3201,10 @@
     }
 
     async function hideQuestionScene(){
+      if (questionImageZoomOpen) {
+        closeQuestionImageZoom();
+        return;
+      }
       if (interactionLocked) return;
       interactionLocked = true;
       questionNavigation.hidden = true;
@@ -2837,6 +3234,10 @@
 
 
     async function handleBack(){
+      if (questionImageZoomOpen) {
+        closeQuestionImageZoom();
+        return;
+      }
       if (interactionLocked) return;
 
       if (questionView.classList.contains("is-visible")) {
@@ -3310,6 +3711,19 @@
     }
 
     page.addEventListener("click",handleSceneTap);
+
+    questionImageOverlay.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      closeQuestionImageZoom();
+    });
+
+    document.addEventListener("keydown",(event)=>{
+      if (event.key === "Escape" && questionImageZoomOpen) {
+        event.preventDefault();
+        closeQuestionImageZoom();
+      }
+    });
 
     backBtn.addEventListener("click",(event)=>{
       event.preventDefault();
