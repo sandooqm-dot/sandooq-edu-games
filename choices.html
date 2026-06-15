@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v18-larger-spaced-image-layout -->
+  <!-- version: choices-v19-equal-large-image-cards-wide-question -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -1969,6 +1969,224 @@
       }
     }
 
+
+    /* v19: صور الإجابات بحجم صورة السؤال تقريبًا، مع مسافات واضحة. */
+
+    /*
+      متغير واحد يحدد ارتفاع السؤال وحجم مربعات الإجابات.
+      السؤال يأخذ نفس الارتفاع، لكنه أعرض قليلًا من الجانبين
+      ليكون واضحًا بصريًا أنه السؤال.
+    */
+    .question-view.has-image-question{
+      --image-card-size:clamp(190px,27vh,236px);
+      --image-choice-gap:clamp(32px,3.6vw,58px);
+    }
+
+    .question-view.image-choice-count-2{
+      --image-card-size:clamp(205px,29vh,252px);
+      --image-choice-gap:clamp(42px,4.8vw,76px);
+    }
+
+    .question-view.image-choice-count-3{
+      --image-card-size:clamp(190px,27vh,236px);
+      --image-choice-gap:clamp(38px,4vw,66px);
+    }
+
+    .question-view.image-choice-count-4{
+      --image-card-size:clamp(158px,22vh,194px);
+      --image-choice-gap:clamp(28px,3vw,48px);
+    }
+
+    .question-view.image-choice-count-5{
+      --image-card-size:clamp(138px,19vh,170px);
+      --image-choice-gap:clamp(22px,2.4vw,38px);
+    }
+
+    .question-view.image-choice-count-6{
+      --image-card-size:clamp(134px,18.5vh,166px);
+      --image-choice-gap:clamp(20px,2.2vw,34px);
+    }
+
+    /*
+      وضع الصور له تخطيط مستقل:
+      ننزل المجموعة قليلًا ونستخدم منتصف الشاشة بدل تكديسها في الأعلى.
+    */
+    .question-view.has-image-question.has-image-choices{
+      justify-content:center !important;
+      padding-top:0 !important;
+      transform:translateY(clamp(28px,4vh,46px)) !important;
+    }
+
+    /*
+      إطار السؤال بنفس ارتفاع مربعات الإجابات،
+      لكنه أعرض 24% تقريبًا من اليمين واليسار.
+    */
+    .question-view.has-image-question .question-card.is-image-question{
+      width:calc(var(--image-card-size) * 1.24) !important;
+      height:var(--image-card-size) !important;
+      min-width:calc(var(--image-card-size) * 1.24) !important;
+      min-height:var(--image-card-size) !important;
+      max-width:calc(var(--image-card-size) * 1.24) !important;
+      max-height:var(--image-card-size) !important;
+      aspect-ratio:auto !important;
+      padding:clamp(4px,.38vw,6px) !important;
+    }
+
+    /*
+      مربعات الإجابات تستخدم الحجم نفسه المستخدم في ارتفاع السؤال.
+    */
+    .choices-grid.is-image-choices .choice-card.is-image-choice{
+      --choice-image-size:var(--image-card-size);
+      flex:0 0 var(--image-card-size) !important;
+      width:var(--image-card-size) !important;
+      height:var(--image-card-size) !important;
+      min-width:var(--image-card-size) !important;
+      min-height:var(--image-card-size) !important;
+      max-width:var(--image-card-size) !important;
+      max-height:var(--image-card-size) !important;
+      padding:clamp(3px,.3vw,5px) !important;
+    }
+
+    /*
+      مسافة أكبر بين السؤال والإجابات،
+      ومسافة واضحة بين كل مربع والآخر.
+    */
+    .question-view.has-image-question .choices-grid.is-image-choices{
+      margin-top:clamp(38px,5.5vh,62px) !important;
+      row-gap:var(--image-choice-gap) !important;
+      column-gap:var(--image-choice-gap) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-2{
+      max-width:calc(
+        var(--image-card-size) * 2 +
+        var(--image-choice-gap)
+      ) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-3,
+    .choices-grid.is-image-choices.choice-count-5,
+    .choices-grid.is-image-choices.choice-count-6{
+      max-width:calc(
+        var(--image-card-size) * 3 +
+        var(--image-choice-gap) * 2
+      ) !important;
+    }
+
+    .choices-grid.is-image-choices.choice-count-4{
+      max-width:calc(
+        var(--image-card-size) * 2 +
+        var(--image-choice-gap)
+      ) !important;
+    }
+
+    /*
+      استغلال أكبر مساحة ممكنة داخل الإطار مع إبقاء الصورة كاملة.
+    */
+    .question-card.is-image-question .question-fit-zone,
+    .choice-card.is-image-choice .choice-fit-zone{
+      width:100% !important;
+      height:100% !important;
+      padding:0 !important;
+      margin:0 !important;
+    }
+
+    .question-card.is-image-question .question-image,
+    .choice-card.is-image-choice .choice-image{
+      width:100% !important;
+      height:100% !important;
+      max-width:100% !important;
+      max-height:100% !important;
+      object-fit:contain !important;
+      object-position:center center !important;
+    }
+
+    @media (orientation:portrait){
+      .question-view.has-image-question{
+        --image-card-size:clamp(150px,21vh,198px);
+        --image-choice-gap:clamp(14px,2.8vw,24px);
+      }
+
+      .question-view.image-choice-count-3{
+        --image-card-size:clamp(112px,16vh,148px);
+      }
+
+      .question-view.image-choice-count-4{
+        --image-card-size:clamp(105px,15vh,138px);
+      }
+
+      .question-view.image-choice-count-5,
+      .question-view.image-choice-count-6{
+        --image-card-size:clamp(84px,12vh,112px);
+      }
+
+      .question-view.has-image-question.has-image-choices{
+        transform:translateY(clamp(20px,3vh,34px)) !important;
+      }
+    }
+
+    @media (max-width:560px){
+      .question-view.has-image-question{
+        --image-card-size:clamp(132px,19vh,176px);
+      }
+
+      .question-view.image-choice-count-2{
+        --image-card-size:clamp(104px,15vh,132px);
+      }
+
+      .question-view.image-choice-count-3{
+        --image-card-size:clamp(84px,12.5vh,108px);
+        --image-choice-gap:10px;
+      }
+
+      .question-view.image-choice-count-4{
+        --image-card-size:clamp(82px,12vh,104px);
+        --image-choice-gap:9px;
+      }
+
+      .question-view.image-choice-count-5,
+      .question-view.image-choice-count-6{
+        --image-card-size:clamp(66px,9.8vh,88px);
+        --image-choice-gap:8px;
+      }
+
+      .question-view.has-image-question .choices-grid.is-image-choices{
+        margin-top:clamp(24px,4vh,38px) !important;
+      }
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      .question-view.has-image-question{
+        --image-card-size:clamp(104px,29vh,146px);
+        --image-choice-gap:clamp(12px,1.7vw,22px);
+      }
+
+      .question-view.image-choice-count-2{
+        --image-card-size:clamp(94px,27vh,132px);
+      }
+
+      .question-view.image-choice-count-3{
+        --image-card-size:clamp(84px,24vh,118px);
+      }
+
+      .question-view.image-choice-count-4{
+        --image-card-size:clamp(70px,20vh,98px);
+      }
+
+      .question-view.image-choice-count-5,
+      .question-view.image-choice-count-6{
+        --image-card-size:clamp(60px,17vh,84px);
+      }
+
+      .question-view.has-image-question.has-image-choices{
+        transform:translateY(clamp(8px,2vh,16px)) !important;
+      }
+
+      .question-view.has-image-question .choices-grid.is-image-choices{
+        margin-top:clamp(14px,3.5vh,24px) !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -2942,7 +3160,12 @@
         "is-answered",
         "has-two-choices",
         "has-image-question",
-        "has-image-choices"
+        "has-image-choices",
+        "image-choice-count-2",
+        "image-choice-count-3",
+        "image-choice-count-4",
+        "image-choice-count-5",
+        "image-choice-count-6"
       );
       questionView.classList.toggle(
         "has-two-choices",
@@ -2956,6 +3179,12 @@
         "has-image-choices",
         hasImageChoices
       );
+
+      if (hasImageChoices) {
+        questionView.classList.add(
+          `image-choice-count-${item.choices.length}`
+        );
+      }
 
       questionCard.textContent = "";
       questionCard.classList.remove(
