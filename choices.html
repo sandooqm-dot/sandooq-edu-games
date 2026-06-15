@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v5-open-box-safari-layout-complete-text -->
+  <!-- version: choices-v6-clean-open-box-shell -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -15,40 +15,50 @@
       --safe-bottom:env(safe-area-inset-bottom,0px);
       --safe-left:env(safe-area-inset-left,0px);
       --safe-right:env(safe-area-inset-right,0px);
-      --app-height:100dvh;
-      --app-width:100vw;
+      --edge-guard:clamp(16px,2vw,30px);
 
       --ink:#111;
       --yellow:#efd553;
       --blue:#1688d3;
       --green:#25ad69;
       --red:#f04747;
-      --card-radius:clamp(16px,2vw,28px);
-      --shadow:0 12px 0 rgba(0,0,0,.14);
-      --soft-shadow:0 10px 24px rgba(0,0,0,.18);
-      --logo-w:clamp(88px,9.2vw,148px);
-      --controls-h:calc(74px + var(--safe-bottom));
+      --logo-w:clamp(86px,9.2vw,148px);
+      --card-radius:clamp(14px,1.6vw,24px);
     }
 
     *{
       box-sizing:border-box;
       -webkit-tap-highlight-color:transparent;
+      font-family:Tahoma,Arial,"Segoe UI",sans-serif;
     }
 
     html,
     body{
-      width:100%;
-      height:100%;
       margin:0;
-      overflow:hidden;
+      width:100%;
+      min-height:100%;
       background:#fff;
       color:var(--ink);
-      font-family:
-        "Arial",
-        "Tahoma",
-        system-ui,
-        -apple-system,
-        sans-serif;
+      -webkit-text-size-adjust:100%;
+    }
+
+    html{
+      overflow-x:hidden;
+    }
+
+    body{
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
     }
 
     button{
@@ -56,16 +66,18 @@
     }
 
     .game-page{
-      position:fixed;
-      inset:0 auto auto 0;
-      width:var(--app-width);
-      height:var(--app-height);
-      overflow:hidden;
-      isolation:isolate;
-      direction:rtl;
-      user-select:none;
-      touch-action:manipulation;
+      position:sticky;
+      top:0;
+      width:100%;
+      height:100dvh;
+      min-height:100dvh;
+      overflow-x:hidden;
+      overflow-y:hidden;
       background:#fff;
+      direction:ltr;
+      user-select:none;
+      touch-action:none;
+      isolation:isolate;
     }
 
     .theme-background{
@@ -73,13 +85,16 @@
       inset:0;
       z-index:0;
       pointer-events:none;
+      background-color:#fff;
       background-position:center center;
       background-size:cover;
       background-repeat:no-repeat;
-      transform:scale(1.08);
       opacity:0;
-      transition:opacity .25s ease;
-      will-change:transform;
+      transform:scale(1);
+      transform-origin:center center;
+      will-change:transform,opacity;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
     .game-page.theme-white{
@@ -93,16 +108,18 @@
 
     .game-page.theme-classroom .theme-background{
       opacity:1;
-      background-color:#658a68;
+      background-color:#fff;
       background-image:
         url("theme-classroom-bg-v2.webp?v=2"),
         url("theme-original-bg.webp?v=45"),
-        linear-gradient(180deg,#698f6f 0%,#56775d 100%);
+        url("theme-original-bg.png?v=45"),
+        url("theme-original.webp?v=45"),
+        url("theme-original.png?v=45");
     }
 
     .game-page.theme-sky-clouds .theme-background{
       opacity:1;
-      background-color:#5ecdf3;
+      background-color:#58c7f3;
       background-image:
         url("theme-sky-clouds-bg.webp?v=45"),
         linear-gradient(180deg,#67d0f3 0%,#b6ecff 100%);
@@ -110,7 +127,7 @@
 
     .game-page.theme-forest .theme-background{
       opacity:1;
-      background-color:#72c8ec;
+      background-color:#6ec9ee;
       background-image:
         url("theme-forest-bg.webp?v=45"),
         linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%);
@@ -156,29 +173,42 @@
         linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
     }
 
+    /* نفس موضع شعار صفحة افتح الصندوق. */
     .game-logo{
       position:absolute;
-      z-index:30;
-      top:calc(var(--safe-top) + clamp(18px,3.2vh,38px));
-      left:calc(var(--safe-left) + clamp(22px,3vw,48px));
+      top:clamp(10px,1.7vw,22px);
+      left:clamp(12px,2vw,30px);
       width:var(--logo-w);
       height:auto;
+      max-height:clamp(68px,9vw,120px);
+      object-fit:contain;
+      z-index:80;
       pointer-events:none;
-      filter:drop-shadow(0 3px 4px rgba(0,0,0,.16));
+      user-select:none;
+      -webkit-user-drag:none;
     }
 
+    /*
+      visualViewport يغيّر أبعاد stage فقط.
+      الشعار والأزرار لا يتم تحريكهما برمجيًا.
+    */
     .stage{
       position:absolute;
-      z-index:5;
-      inset:
-        calc(var(--safe-top) + clamp(82px,11vh,116px))
-        calc(var(--safe-right) + clamp(24px,4.2vw,72px))
-        var(--controls-h)
-        calc(var(--safe-left) + clamp(24px,4.2vw,72px));
+      inset:0;
+      z-index:2;
       display:flex;
       align-items:center;
       justify-content:center;
-      overflow:visible;
+      padding:
+        calc(72px + var(--safe-top))
+        calc(var(--edge-guard) + var(--safe-right))
+        calc(82px + var(--safe-bottom))
+        calc(var(--edge-guard) + var(--safe-left));
+      direction:ltr;
+      overflow:hidden;
+      transform-origin:center center;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
     .cards-view,
@@ -206,15 +236,16 @@
 
     .question-grid{
       --cols:4;
-      --gap:clamp(14px,1.5vw,24px);
+      --gap:clamp(12px,1.45vw,22px);
       width:min(92%,1360px);
-      height:min(88%,720px);
+      height:min(86%,690px);
       display:grid;
       grid-template-columns:repeat(var(--cols),minmax(0,1fr));
       grid-auto-rows:minmax(0,1fr);
       align-content:center;
       justify-content:center;
       gap:var(--gap);
+      direction:ltr;
     }
 
     .deck-card{
@@ -234,8 +265,8 @@
       box-shadow:
         inset 0 2px 0 rgba(255,255,255,.26),
         inset 0 0 0 2px rgba(0,0,0,.14),
-        0 9px 0 rgba(0,0,0,.16),
-        0 14px 24px rgba(0,0,0,.16);
+        0 7px 0 rgba(0,0,0,.16),
+        0 13px 22px rgba(0,0,0,.15);
       overflow:hidden;
       transform:translate3d(0,0,0);
       opacity:1;
@@ -290,17 +321,12 @@
       position:absolute;
       top:8%;
       right:8%;
-      width:clamp(28px,3vw,48px);
-      aspect-ratio:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:50%;
       color:#fff;
-      background:#24aa67;
-      border:3px solid #fff;
-      font-size:60%;
-      box-shadow:0 4px 10px rgba(0,0,0,.22);
+      font-size:48%;
+      font-weight:1000;
+      text-shadow:
+        0 2px 0 rgba(0,0,0,.9),
+        0 5px 10px rgba(0,0,0,.28);
     }
 
     .deck-card.is-away{
@@ -327,8 +353,8 @@
       box-shadow:
         inset 0 2px 0 rgba(255,255,255,.26),
         inset 0 0 0 2px rgba(0,0,0,.14),
-        0 15px 0 rgba(0,0,0,.16),
-        0 24px 46px rgba(0,0,0,.25);
+        0 13px 0 rgba(0,0,0,.16),
+        0 22px 42px rgba(0,0,0,.25);
       transform-origin:center;
       pointer-events:none;
       overflow:visible;
@@ -387,42 +413,17 @@
     }
 
     @keyframes cardCoreBurst{
-      0%{
-        opacity:1;
-        transform:translate3d(0,0,0) scale(1);
-        filter:brightness(1);
-      }
-      36%{
-        opacity:1;
-        transform:translate3d(0,0,0) scale(1.08);
-        filter:brightness(1.28);
-      }
-      68%{
-        opacity:.88;
-        transform:translate3d(0,0,0) scale(1.18);
-        filter:brightness(1.42);
-      }
-      100%{
-        opacity:0;
-        transform:translate3d(0,0,0) scale(1.46);
-        filter:brightness(1.7);
-      }
+      0%{ opacity:1; transform:translate3d(0,0,0) scale(1); filter:brightness(1); }
+      36%{ opacity:1; transform:translate3d(0,0,0) scale(1.08); filter:brightness(1.28); }
+      68%{ opacity:.88; transform:translate3d(0,0,0) scale(1.18); filter:brightness(1.42); }
+      100%{ opacity:0; transform:translate3d(0,0,0) scale(1.46); filter:brightness(1.7); }
     }
 
     @keyframes cardTopOpen{
-      0%{
-        opacity:0;
-        transform:perspective(900px) rotateX(0deg) translateY(0) scale(1);
-      }
+      0%{ opacity:0; transform:perspective(900px) rotateX(0deg) translateY(0) scale(1); }
       20%{ opacity:1; }
-      65%{
-        opacity:1;
-        transform:perspective(900px) rotateX(58deg) translateY(-40%) scale(1.04);
-      }
-      100%{
-        opacity:0;
-        transform:perspective(900px) rotateX(86deg) translateY(-125%) scale(1.10);
-      }
+      65%{ opacity:1; transform:perspective(900px) rotateX(58deg) translateY(-40%) scale(1.04); }
+      100%{ opacity:0; transform:perspective(900px) rotateX(86deg) translateY(-125%) scale(1.10); }
     }
 
     @keyframes cardNumberVanish{
@@ -465,10 +466,7 @@
       100%{
         opacity:0;
         transform:
-          translate(
-            calc(-50% + var(--x)),
-            calc(-50% + var(--y))
-          )
+          translate(calc(-50% + var(--x)),calc(-50% + var(--y)))
           rotate(var(--r))
           scale(1.1);
       }
@@ -477,8 +475,10 @@
     .question-view{
       z-index:10;
       flex-direction:column;
-      gap:clamp(14px,2.1vh,28px);
-      padding:0 1%;
+      justify-content:center;
+      gap:clamp(12px,1.7vh,20px);
+      padding:0;
+      direction:rtl;
       opacity:0;
       visibility:hidden;
       pointer-events:none;
@@ -491,23 +491,38 @@
     }
 
     .question-card{
+      --panel-color:#2f75d4;
+      --panel-dark:#174b9b;
+      --panel-light:#65a4f1;
+      --panel-text:#fff;
       position:relative;
-      flex:0 0 clamp(150px,27vh,250px);
-      width:min(88%,1120px);
+      flex:0 0 clamp(104px,15vh,142px);
+      width:min(82%,960px);
       min-height:0;
-      border:clamp(3px,.35vw,6px) solid #111;
-      border-radius:clamp(18px,2.2vw,34px);
-      background:rgba(255,255,255,.96);
+      border:clamp(3px,.28vw,4px) solid #111;
+      border-radius:clamp(10px,1vw,15px);
+      background:
+        linear-gradient(150deg,var(--panel-light) 0%,var(--panel-color) 58%,var(--panel-dark) 100%);
+      color:var(--panel-text);
       box-shadow:
-        0 10px 0 rgba(0,0,0,.17),
-        0 18px 34px rgba(0,0,0,.16);
+        inset 0 2px 0 rgba(255,255,255,.23),
+        0 5px 0 rgba(0,0,0,.16),
+        0 10px 18px rgba(0,0,0,.12);
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:clamp(16px,2.5vw,38px);
+      padding:clamp(11px,1.4vw,19px);
       overflow:hidden;
       opacity:0;
-      transform:translateY(-100px) scale(.94);
+      transform:translateY(-90px) scale(.95);
+    }
+
+    .question-card.is-long{
+      flex-basis:clamp(132px,19vh,176px);
+    }
+
+    .question-card.is-very-long{
+      flex-basis:clamp(158px,23vh,212px);
     }
 
     .question-view.is-visible .question-card{
@@ -515,21 +530,33 @@
     }
 
     @keyframes questionArrive{
-      0%{ opacity:0; transform:translateY(-100px) scale(.94); }
+      0%{ opacity:0; transform:translateY(-90px) scale(.95); }
       100%{ opacity:1; transform:translateY(0) scale(1); }
     }
 
-    .question-text{
+    .question-text,
+    .choice-text{
       width:100%;
-      max-height:100%;
-      color:#111;
-      font-weight:1000;
-      font-size:clamp(28px,4.4vw,74px);
-      line-height:1.18;
-      text-align:center;
-      overflow:hidden;
+      height:auto;
+      max-height:none;
+      overflow:visible;
       white-space:normal;
-      overflow-wrap:break-word;
+      overflow-wrap:anywhere;
+      word-break:normal;
+      text-wrap:balance;
+      box-sizing:border-box;
+      text-align:center;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      font-weight:1000;
+      color:var(--panel-text,#fff);
+      text-shadow:0 2px 4px rgba(0,0,0,.24);
+    }
+
+    .question-text{
+      line-height:1.16;
+      padding:.06em .10em .14em;
+      font-size:clamp(20px,3.2vw,52px);
     }
 
     .question-image{
@@ -540,42 +567,47 @@
       max-height:100%;
       object-fit:contain;
       object-position:center;
-      border-radius:18px;
+      border-radius:10px;
     }
 
     .choices-grid{
       --choice-cols:2;
-      width:min(94%,1280px);
-      flex:1 1 auto;
+      width:min(82%,980px);
+      flex:0 0 auto;
       min-height:0;
       display:grid;
       grid-template-columns:repeat(var(--choice-cols),minmax(0,1fr));
-      grid-auto-rows:minmax(0,1fr);
-      align-content:stretch;
-      gap:clamp(12px,1.5vw,22px);
+      grid-auto-rows:clamp(84px,13.5vh,122px);
+      align-content:center;
+      gap:clamp(10px,1.1vw,16px);
+      direction:ltr;
     }
 
     .choice-card{
-      --choice-color:#fff;
+      --panel-color:#f2772f;
+      --panel-dark:#ba4714;
+      --panel-light:#ffa05f;
+      --panel-text:#fff;
       position:relative;
       min-width:0;
       min-height:0;
-      border:clamp(3px,.32vw,5px) solid #111;
-      border-radius:clamp(16px,2vw,28px);
-      background:var(--choice-color);
-      color:#111;
-      padding:clamp(10px,1.5vw,24px);
+      border:clamp(3px,.28vw,4px) solid #111;
+      border-radius:clamp(9px,.9vw,14px);
+      background:
+        linear-gradient(150deg,var(--panel-light) 0%,var(--panel-color) 58%,var(--panel-dark) 100%);
+      color:var(--panel-text);
+      padding:clamp(9px,1.05vw,15px);
       box-shadow:
-        0 8px 0 rgba(0,0,0,.16),
-        0 14px 22px rgba(0,0,0,.12);
+        inset 0 2px 0 rgba(255,255,255,.22),
+        0 5px 0 rgba(0,0,0,.15),
+        0 9px 16px rgba(0,0,0,.11);
       display:flex;
       align-items:center;
       justify-content:center;
       overflow:hidden;
       cursor:pointer;
       opacity:0;
-      transform:translateY(100px) scale(.92);
-      transition:filter .2s ease;
+      transform:translateY(90px) scale(.93);
     }
 
     .question-view.is-visible .choice-card{
@@ -584,12 +616,12 @@
     }
 
     @keyframes choiceArrive{
-      0%{ opacity:0; transform:translateY(100px) scale(.92); }
+      0%{ opacity:0; transform:translateY(90px) scale(.93); }
       100%{ opacity:1; transform:translateY(0) scale(1); }
     }
 
     .choice-card:active{
-      transform:translateY(3px);
+      transform:translateY(2px);
     }
 
     .choice-card.is-disabled{
@@ -609,16 +641,9 @@
     }
 
     .choice-text{
-      width:100%;
-      max-height:100%;
-      color:#111;
-      font-weight:1000;
-      font-size:clamp(22px,3.2vw,56px);
-      line-height:1.16;
-      text-align:center;
-      overflow:hidden;
-      white-space:normal;
-      overflow-wrap:break-word;
+      line-height:1.12;
+      padding:.05em .08em .12em;
+      font-size:clamp(18px,2.6vw,42px);
     }
 
     .choice-image{
@@ -629,7 +654,7 @@
       max-height:100%;
       object-fit:contain;
       object-position:center;
-      border-radius:14px;
+      border-radius:9px;
     }
 
     .answer-mark{
@@ -637,33 +662,35 @@
       z-index:6;
       left:50%;
       top:50%;
-      width:min(62%,170px);
-      aspect-ratio:1;
+      width:auto;
+      height:auto;
+      padding:0;
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
+      color:#fff;
+      font-family:Arial,sans-serif;
+      font-weight:1000;
+      font-size:clamp(72px,10vw,150px);
+      line-height:.82;
+      text-shadow:
+        0 3px 0 rgba(17,17,17,.95),
+        3px 0 0 rgba(17,17,17,.95),
+        -3px 0 0 rgba(17,17,17,.95),
+        0 -3px 0 rgba(17,17,17,.95),
+        0 7px 14px rgba(0,0,0,.36);
       transform:translate(-50%,-50%) scale(.2);
       opacity:0;
-      border-radius:50%;
       display:flex;
       align-items:center;
       justify-content:center;
-      color:#fff;
-      border:clamp(6px,.75vw,12px) solid #fff;
-      box-shadow:
-        0 0 0 clamp(4px,.45vw,8px) rgba(17,17,17,.92),
-        0 18px 34px rgba(0,0,0,.32);
-      font-family:Arial,sans-serif;
-      font-weight:1000;
-      line-height:1;
       pointer-events:none;
     }
 
-    .answer-mark.is-correct{
-      background:var(--green);
-      font-size:min(42%,84px);
-    }
-
+    .answer-mark.is-correct,
     .answer-mark.is-wrong{
-      background:var(--red);
-      font-size:min(43%,88px);
+      background:transparent;
     }
 
     .answer-mark.is-visible{
@@ -677,24 +704,7 @@
     }
 
     .question-view.is-answered::after{
-      content:"اضغط للمتابعة";
-      position:absolute;
-      bottom:clamp(-2px,.2vh,3px);
-      left:50%;
-      transform:translateX(-50%);
-      padding:7px 18px;
-      border-radius:999px;
-      background:rgba(17,17,17,.78);
-      color:#fff;
-      font-size:clamp(12px,1.25vw,18px);
-      font-weight:900;
-      opacity:0;
-      animation:hintAppear .35s ease .65s both;
-      pointer-events:none;
-    }
-
-    @keyframes hintAppear{
-      to{ opacity:1; }
+      display:none;
     }
 
     .finish-view{
@@ -726,6 +736,7 @@
       gap:18px;
       padding:28px;
       text-align:center;
+      direction:rtl;
       animation:finishPop .68s cubic-bezier(.16,.92,.18,1) both;
     }
 
@@ -735,19 +746,13 @@
     }
 
     .finish-icon{
-      width:clamp(90px,13vw,170px);
-      aspect-ratio:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:50%;
-      background:var(--green);
-      color:#fff;
-      border:7px solid #fff;
-      outline:5px solid #111;
-      font-size:clamp(50px,8vw,100px);
+      color:#25ad69;
+      font-size:clamp(74px,11vw,150px);
       font-weight:1000;
-      box-shadow:0 14px 24px rgba(0,0,0,.22);
+      line-height:1;
+      text-shadow:
+        0 3px 0 rgba(17,17,17,.9),
+        0 8px 16px rgba(0,0,0,.24);
     }
 
     .finish-title{
@@ -756,265 +761,7 @@
       font-weight:1000;
     }
 
-    .fixed-controls{
-      position:absolute;
-      z-index:50;
-      inset:auto 0 0 0;
-      height:var(--controls-h);
-      pointer-events:none;
-    }
-
-    .control-btn{
-      position:absolute;
-      bottom:calc(var(--safe-bottom) + clamp(12px,2vh,22px));
-      min-width:clamp(112px,11vw,176px);
-      height:clamp(54px,7vh,72px);
-      border:3px solid #111;
-      border-radius:clamp(14px,1.7vw,22px);
-      font-size:clamp(22px,2.25vw,36px);
-      font-weight:1000;
-      box-shadow:
-        0 6px 0 rgba(0,0,0,.22),
-        0 10px 18px rgba(0,0,0,.12);
-      pointer-events:auto;
-      cursor:pointer;
-    }
-
-    .control-btn:active{
-      transform:translateY(4px);
-      box-shadow:0 2px 0 rgba(0,0,0,.25);
-    }
-
-    .back-btn{
-      left:calc(var(--safe-left) + clamp(20px,3vw,46px));
-      background:var(--yellow);
-      color:#111;
-    }
-
-
-    .game-page.theme-national-day .question-card,
-    .game-page.theme-national-day .choice-card,
-    .game-page.theme-founding-day .question-card,
-    .game-page.theme-founding-day .choice-card{
-      background:rgba(255,255,255,.94);
-    }
-
-    @media (orientation:portrait){
-      .stage{
-        inset:
-          calc(var(--safe-top) + 82px)
-          calc(var(--safe-right) + 18px)
-          var(--controls-h)
-          calc(var(--safe-left) + 18px);
-      }
-
-      .question-grid{
-        width:min(94%,760px);
-        height:min(93%,1040px);
-      }
-
-      .question-card{
-        flex-basis:clamp(130px,21vh,220px);
-        width:96%;
-      }
-
-      .choices-grid{
-        width:96%;
-      }
-
-      .game-logo{
-        top:calc(var(--safe-top) + 14px);
-        left:calc(var(--safe-left) + 18px);
-      }
-    }
-
-    @media (max-width:680px){
-      :root{
-        --controls-h:calc(70px + var(--safe-bottom));
-        --logo-w:82px;
-      }
-
-      .stage{
-        inset:
-          calc(var(--safe-top) + 68px)
-          calc(var(--safe-right) + 12px)
-          var(--controls-h)
-          calc(var(--safe-left) + 12px);
-      }
-
-      .question-grid{
-        --gap:12px;
-        width:96%;
-        height:94%;
-      }
-
-      .question-card{
-        flex-basis:clamp(110px,20vh,180px);
-        padding:12px;
-        border-width:3px;
-        border-radius:18px;
-      }
-
-      .choices-grid{
-        gap:10px;
-      }
-
-      .choice-card{
-        border-width:3px;
-        border-radius:16px;
-        padding:9px;
-      }
-
-      .control-btn{
-        min-width:102px;
-        height:52px;
-        font-size:21px;
-      }
-    }
-
-    @media (prefers-reduced-motion:reduce){
-      *,
-      *::before,
-      *::after{
-        animation-duration:.01ms !important;
-        animation-iteration-count:1 !important;
-        transition-duration:.01ms !important;
-      }
-    }
-  
-    /* v3: نفس أسلوب صفحة افتح الصندوق لتفادي مشكلة Safari. */
-    html,
-    body{
-      width:100%;
-      min-height:100%;
-      height:auto;
-      overflow-x:hidden;
-      background:#fff;
-      -webkit-text-size-adjust:100%;
-    }
-
-    body{
-      min-height:calc(100dvh + 160px);
-      overflow-x:hidden;
-      overflow-y:auto;
-      overscroll-behavior-y:none;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    body::after{
-      content:"";
-      display:block;
-      height:160px;
-      pointer-events:none;
-    }
-
-    .game-page{
-      position:sticky;
-      inset:auto;
-      top:0;
-      left:auto;
-      width:100%;
-      height:100dvh;
-      min-height:100dvh;
-      overflow:hidden;
-    }
-
-    .stage{
-      position:absolute;
-      inset:0;
-      width:100%;
-      height:100%;
-      padding:
-        calc(78px + var(--safe-top))
-        calc(24px + var(--safe-right))
-        calc(86px + var(--safe-bottom))
-        calc(24px + var(--safe-left));
-      transform-origin:center center;
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    /* السؤال والاختيارات كبطاقات مستطيلة وملونة. */
-    .question-card{
-      --panel-color:#2f75d4;
-      --panel-dark:#174b9b;
-      --panel-light:#65a4f1;
-      --panel-text:#fff;
-      flex-basis:clamp(126px,22vh,210px);
-      width:min(90%,1120px);
-      border-radius:clamp(12px,1.35vw,20px);
-      background:
-        linear-gradient(
-          150deg,
-          var(--panel-light) 0%,
-          var(--panel-color) 58%,
-          var(--panel-dark) 100%
-        );
-      color:var(--panel-text);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.25),
-        0 8px 0 rgba(0,0,0,.17),
-        0 16px 28px rgba(0,0,0,.15);
-    }
-
-    .question-text{
-      color:var(--panel-text);
-      text-shadow:0 2px 5px rgba(0,0,0,.24);
-    }
-
-    .choices-grid{
-      width:min(92%,1240px);
-      gap:clamp(12px,1.35vw,20px);
-    }
-
-    .choice-card{
-      --panel-color:#f2772f;
-      --panel-dark:#ba4714;
-      --panel-light:#ffa05f;
-      --panel-text:#fff;
-      border-radius:clamp(11px,1.25vw,18px);
-      background:
-        linear-gradient(
-          150deg,
-          var(--panel-light) 0%,
-          var(--panel-color) 58%,
-          var(--panel-dark) 100%
-        );
-      color:var(--panel-text);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.23),
-        0 7px 0 rgba(0,0,0,.16),
-        0 13px 22px rgba(0,0,0,.13);
-    }
-
-    .choice-text{
-      color:var(--panel-text);
-      text-shadow:0 2px 4px rgba(0,0,0,.22);
-    }
-
-    .question-image,
-    .choice-image{
-      border-radius:10px;
-      filter:drop-shadow(0 3px 5px rgba(0,0,0,.16));
-    }
-
-    .game-page.theme-national-day .question-card,
-    .game-page.theme-national-day .choice-card,
-    .game-page.theme-founding-day .question-card,
-    .game-page.theme-founding-day .choice-card{
-      background:
-        linear-gradient(
-          150deg,
-          var(--panel-light) 0%,
-          var(--panel-color) 58%,
-          var(--panel-dark) 100%
-        );
-    }
-
-    .question-view.is-answered::after{
-      display:none !important;
-    }
-
+    /* نفس شريط أزرار صفحة افتح الصندوق. */
     .fixed-controls{
       position:absolute;
       left:0;
@@ -1025,40 +772,55 @@
       pointer-events:none;
     }
 
+    .back-btn,
+    .question-navigation,
+    .question-navigation button{
+      pointer-events:auto;
+    }
+
     .control-btn{
       position:absolute;
       bottom:0;
-      min-width:clamp(78px,8.5vw,118px);
-      height:clamp(38px,5.2vh,48px);
+      height:clamp(34px,4.8vh,44px);
       border:2.5px solid #111;
-      border-radius:clamp(10px,1vw,15px);
-      padding:0 clamp(14px,1.8vw,24px);
-      font-size:clamp(18px,1.9vw,27px);
-      box-shadow:0 4px 0 rgba(0,0,0,.22);
+      border-radius:11px;
+      color:#111;
+      font-size:clamp(14px,1.7vw,19px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 clamp(15px,2vw,24px);
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+      cursor:pointer;
+      white-space:nowrap;
     }
 
     .back-btn{
-      left:calc(var(--safe-left) + clamp(16px,2.8vw,42px));
+      left:clamp(16px,2.6vw,34px);
+      background:#efd553;
+      min-width:clamp(78px,8vw,108px);
     }
 
     .question-navigation{
-      pointer-events:auto;
       position:absolute;
-      right:calc(var(--safe-right) + clamp(16px,2.8vw,42px));
+      right:clamp(16px,2.8vw,42px);
       bottom:0;
       display:flex;
       align-items:center;
       gap:clamp(8px,1vw,12px);
-      direction:rtl;
+      direction:ltr;
     }
 
     .question-navigation[hidden]{
-      display:none !important;
+      display:none;
     }
 
     .question-navigation .control-btn{
       position:static;
       bottom:auto;
+      min-width:clamp(78px,8vw,110px);
     }
 
     .next-btn{
@@ -1073,350 +835,12 @@
 
     .next-btn[hidden],
     .previous-btn[hidden]{
-      display:none !important;
+      display:none;
     }
 
-    @media (orientation:portrait){
-      .stage{
-        inset:0;
-        padding:
-          calc(88px + var(--safe-top))
-          calc(16px + var(--safe-right))
-          calc(80px + var(--safe-bottom))
-          calc(16px + var(--safe-left));
-      }
-
-      .question-card{
-        flex-basis:clamp(120px,19vh,190px);
-        width:96%;
-      }
-
-      .choices-grid{
-        width:96%;
-      }
-    }
-
-    @media (max-width:680px){
-      .stage{
-        inset:0;
-        padding:
-          calc(72px + var(--safe-top))
-          calc(12px + var(--safe-right))
-          calc(76px + var(--safe-bottom))
-          calc(12px + var(--safe-left));
-      }
-
-      .question-card{
-        flex-basis:clamp(104px,18vh,160px);
-        border-radius:12px;
-      }
-
-      .choice-card{
-        border-radius:11px;
-      }
-
-      .control-btn{
-        min-width:76px;
-        height:38px;
-        border-width:2px;
-        font-size:17px;
-        padding:0 12px;
-      }
-
-      .question-navigation{
-        gap:7px;
-      }
-    }
-
-
-    /* v4: تصغير بطاقة السؤال والاختيارات وإزالة دائرة علامة الإجابة. */
-
-    .question-view{
-      justify-content:center;
-      gap:clamp(12px,1.7vh,20px);
-      padding-top:clamp(4px,1vh,10px);
-      padding-bottom:clamp(4px,1vh,10px);
-    }
-
-    .question-card{
-      flex:0 0 clamp(82px,13.5vh,128px);
-      width:min(80%,900px);
-      padding:clamp(10px,1.35vw,18px);
-      border-width:clamp(3px,.28vw,4px);
-      border-radius:clamp(10px,1vw,15px);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.23),
-        0 5px 0 rgba(0,0,0,.16),
-        0 10px 18px rgba(0,0,0,.12);
-    }
-
-    .question-text{
-      font-size:clamp(24px,3.25vw,50px);
-      line-height:1.12;
-    }
-
-    .choices-grid{
-      width:min(80%,940px);
-      flex:0 0 auto;
-      min-height:0;
-      grid-auto-rows:clamp(78px,14.5vh,132px);
-      align-content:center;
-      gap:clamp(10px,1.1vw,16px);
-    }
-
-    .choice-card{
-      min-height:0;
-      padding:clamp(8px,1vw,14px);
-      border-width:clamp(3px,.28vw,4px);
-      border-radius:clamp(9px,.9vw,14px);
-      box-shadow:
-        inset 0 2px 0 rgba(255,255,255,.22),
-        0 5px 0 rgba(0,0,0,.15),
-        0 9px 16px rgba(0,0,0,.11);
-    }
-
-    .choice-text{
-      font-size:clamp(20px,2.65vw,42px);
-      line-height:1.1;
-    }
-
-    .answer-mark{
-      width:auto;
-      height:auto;
-      aspect-ratio:auto;
-      padding:0;
-      border:0;
-      border-radius:0;
-      background:transparent !important;
-      box-shadow:none;
-      color:#fff;
-      font-size:clamp(76px,11vw,158px) !important;
-      line-height:.82;
-      text-shadow:
-        0 3px 0 rgba(17,17,17,.95),
-        3px 0 0 rgba(17,17,17,.95),
-        -3px 0 0 rgba(17,17,17,.95),
-        0 -3px 0 rgba(17,17,17,.95),
-        0 7px 14px rgba(0,0,0,.36);
-    }
-
-    .answer-mark.is-correct,
-    .answer-mark.is-wrong{
-      background:transparent !important;
-    }
-
-    @media (orientation:portrait){
-      .question-card{
-        flex-basis:clamp(78px,11.5vh,116px);
-        width:88%;
-      }
-
-      .choices-grid{
-        width:88%;
-        grid-auto-rows:clamp(72px,12.5vh,118px);
-      }
-    }
-
-    @media (max-width:680px){
-      .question-view{
-        gap:10px;
-      }
-
-      .question-card{
-        flex-basis:clamp(72px,11vh,104px);
-        width:90%;
-        padding:8px 10px;
-      }
-
-      .choices-grid{
-        width:90%;
-        grid-auto-rows:clamp(64px,11.5vh,102px);
-        gap:8px;
-      }
-
-      .question-text{
-        font-size:clamp(20px,5vw,32px);
-      }
-
-      .choice-text{
-        font-size:clamp(17px,4.2vw,28px);
-      }
-
-      .answer-mark{
-        font-size:clamp(62px,18vw,112px) !important;
-      }
-    }
-
-
-    /* v5: اعتماد طريقة صفحة افتح الصندوق حرفيًا في هيكل Safari. */
-    html,
-    body{
-      margin:0 !important;
-      width:100% !important;
-      min-height:100% !important;
-      height:auto !important;
-      background:#fff;
-      color:var(--ink);
-      -webkit-text-size-adjust:100%;
-    }
-
-    html{
-      overflow-x:hidden !important;
-      overflow-y:auto !important;
-    }
-
-    body{
-      min-height:calc(100dvh + 160px) !important;
-      overflow-x:hidden !important;
-      overflow-y:auto !important;
-      overscroll-behavior-y:none;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    body::after{
-      content:"";
-      display:block;
-      height:160px;
-      pointer-events:none;
-    }
-
-    .game-page{
-      position:sticky !important;
-      inset:auto !important;
-      top:0 !important;
-      width:100% !important;
-      height:100dvh !important;
-      min-height:100dvh !important;
-      overflow-x:hidden !important;
-      overflow-y:hidden !important;
-      background:#fff;
-      direction:ltr;
-      touch-action:none;
-    }
-
-    /* نفس موقع وحجم شعار صفحة افتح الصندوق. */
-    .game-logo{
-      position:absolute;
-      top:clamp(10px,1.7vw,22px) !important;
-      left:calc(
-        var(--logo-viewport-left,0px) +
-        clamp(12px,2vw,30px)
-      ) !important;
-      width:clamp(86px,9.2vw,148px) !important;
-      max-height:clamp(68px,9vw,120px);
-      object-fit:contain;
-      z-index:80;
-      filter:none;
-      pointer-events:none;
-      user-select:none;
-      -webkit-user-drag:none;
-    }
-
-    .stage{
-      position:absolute !important;
-      inset:0 !important;
-      z-index:2;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:
-        calc(72px + var(--safe-top))
-        calc(clamp(16px,2vw,30px) + var(--safe-right))
-        calc(82px + var(--safe-bottom))
-        calc(clamp(16px,2vw,30px) + var(--safe-left));
-      direction:ltr;
-      overflow:hidden;
-      transform-origin:center center;
-      backface-visibility:hidden;
-      -webkit-backface-visibility:hidden;
-    }
-
-    .question-view{
-      direction:rtl;
-      justify-content:center;
-      gap:clamp(12px,1.7vh,20px);
-      padding:0;
-    }
-
-    /*
-      نترك مساحة فعلية داخل البطاقات للنص، ولا نستخدم max-height
-      الذي كان يخفي السطر الأخير في Safari.
-    */
-    .question-text,
-    .choice-text{
-      width:100%;
-      height:auto;
-      max-height:none !important;
-      overflow:visible !important;
-      white-space:normal;
-      overflow-wrap:anywhere;
-      word-break:normal;
-      text-wrap:balance;
-      padding:.04em .08em .12em;
-      box-sizing:border-box;
-    }
-
-    .question-card{
-      flex:0 0 clamp(96px,15vh,145px);
-      width:min(80%,900px);
-      min-height:0;
-      padding:clamp(10px,1.35vw,18px);
-      overflow:hidden;
-    }
-
-    .choices-grid{
-      width:min(80%,940px);
-      flex:0 0 auto;
-      min-height:0;
-      grid-auto-rows:clamp(82px,13.5vh,124px);
-      align-content:center;
-      gap:clamp(10px,1.1vw,16px);
-    }
-
-    .choice-card{
-      min-height:0;
-      padding:clamp(8px,1vw,14px);
-      overflow:hidden;
-    }
-
-    /* نفس موقع وحجم أزرار صفحة افتح الصندوق. */
-    .fixed-controls{
-      position:absolute !important;
-      right:auto !important;
-      bottom:calc(14px + var(--safe-bottom)) !important;
-      height:clamp(44px,6.2vh,60px);
-      z-index:90;
-      pointer-events:none;
-    }
-
-    .control-btn{
-      pointer-events:auto;
-      height:clamp(34px,4.8vh,44px) !important;
-      border:2.5px solid #111;
-      border-radius:11px !important;
-      font-size:clamp(14px,1.7vw,19px) !important;
-      font-weight:900;
-      line-height:1;
-      padding:0 clamp(15px,2vw,24px) !important;
-      box-shadow:0 4px 0 rgba(0,0,0,.18);
-      white-space:nowrap;
-    }
-
-    .back-btn{
-      left:clamp(16px,2.6vw,34px) !important;
-      min-width:clamp(78px,8vw,108px) !important;
-      background:#efd553;
-      color:#111;
-    }
-
-    .question-navigation{
-      right:clamp(16px,2.8vw,42px) !important;
-      bottom:0;
-      gap:clamp(8px,1vw,12px);
-    }
-
-    .question-navigation .control-btn{
-      min-width:clamp(78px,8vw,110px) !important;
+    .control-btn:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.20);
     }
 
     @media (orientation:portrait){
@@ -1426,8 +850,15 @@
       }
 
       .question-card{
-        flex-basis:clamp(90px,13vh,132px);
         width:88%;
+      }
+
+      .question-card.is-long{
+        flex-basis:clamp(138px,18vh,178px);
+      }
+
+      .question-card.is-very-long{
+        flex-basis:clamp(164px,22vh,220px);
       }
 
       .choices-grid{
@@ -1437,10 +868,13 @@
     }
 
     @media (max-width:560px){
+      :root{
+        --logo-w:92px;
+      }
+
       .game-logo{
-        top:calc(10px + var(--safe-top)) !important;
-        left:calc(var(--logo-viewport-left,0px) + 12px) !important;
-        width:92px !important;
+        top:calc(10px + var(--safe-top));
+        left:12px;
       }
 
       .stage{
@@ -1452,9 +886,17 @@
       }
 
       .question-card{
-        flex-basis:clamp(82px,12vh,116px);
         width:90%;
-        padding:8px 10px;
+        flex-basis:clamp(92px,12vh,116px);
+        padding:9px 11px;
+      }
+
+      .question-card.is-long{
+        flex-basis:clamp(128px,17vh,166px);
+      }
+
+      .question-card.is-very-long{
+        flex-basis:clamp(158px,22vh,214px);
       }
 
       .choices-grid{
@@ -1464,11 +906,15 @@
       }
 
       .control-btn{
-        height:38px !important;
+        height:38px;
         border-width:2px;
-        border-radius:10px !important;
-        font-size:15px !important;
-        padding:0 14px !important;
+        border-radius:10px;
+        font-size:15px;
+        padding:0 14px;
+      }
+
+      .answer-mark{
+        font-size:clamp(60px,18vw,108px);
       }
     }
 
@@ -1482,32 +928,51 @@
       }
 
       .game-logo{
-        width:clamp(78px,8.8vw,130px) !important;
-        top:calc(10px + var(--safe-top)) !important;
+        width:clamp(78px,8.8vw,130px);
+        top:calc(10px + var(--safe-top));
       }
 
       .fixed-controls{
-        bottom:calc(8px + var(--safe-bottom)) !important;
+        bottom:calc(8px + var(--safe-bottom));
       }
 
       .question-card{
-        flex-basis:clamp(74px,17vh,104px);
-        width:min(78%,860px);
+        width:min(78%,880px);
+        flex-basis:clamp(78px,18vh,106px);
+      }
+
+      .question-card.is-long{
+        flex-basis:clamp(104px,25vh,136px);
+      }
+
+      .question-card.is-very-long{
+        flex-basis:clamp(126px,31vh,164px);
       }
 
       .choices-grid{
-        width:min(78%,900px);
-        grid-auto-rows:clamp(62px,18vh,96px);
+        width:min(78%,920px);
+        grid-auto-rows:clamp(64px,18vh,96px);
       }
 
       .control-btn{
-        height:clamp(32px,8vh,42px) !important;
-        font-size:clamp(14px,3.3vh,20px) !important;
+        height:clamp(32px,8vh,42px);
+        border-width:2px;
+        border-radius:10px;
+        font-size:clamp(14px,3.3vh,20px);
         box-shadow:0 3px 0 rgba(0,0,0,.18);
       }
     }
 
-</style>
+    @media (prefers-reduced-motion:reduce){
+      *,
+      *::before,
+      *::after{
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -1706,8 +1171,6 @@
 
     const page = document.getElementById("gamePage");
     const stage = document.getElementById("stage");
-    const gameLogo = document.querySelector(".game-logo");
-    const fixedControls = document.querySelector(".fixed-controls");
     const cardsView = document.getElementById("cardsView");
     const questionGrid = document.getElementById("questionGrid");
     const questionView = document.getElementById("questionView");
@@ -2061,20 +1524,6 @@
 
       page.style.setProperty("--visual-viewport-width",`${metrics.width}px`);
       page.style.setProperty("--visual-viewport-height",`${metrics.height}px`);
-      page.style.setProperty("--visual-offset-left",`${metrics.offsetLeft}px`);
-
-      if (fixedControls) {
-        fixedControls.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
-        fixedControls.style.right = "auto";
-        fixedControls.style.width = `${metrics.width.toFixed(2)}px`;
-      }
-
-      if (gameLogo) {
-        gameLogo.style.setProperty(
-          "--logo-viewport-left",
-          `${metrics.offsetLeft}px`
-        );
-      }
     }
 
     function collapseSafariBars(){
@@ -2198,18 +1647,16 @@
         parseFloat(parentStyles.paddingTop || "0") +
         parseFloat(parentStyles.paddingBottom || "0");
 
-      const width = Math.max(1,parent.clientWidth - paddingX - 4);
-      const height = Math.max(1,parent.clientHeight - paddingY - 4);
+      const availableWidth = Math.max(1,parent.clientWidth - paddingX - 6);
+      const availableHeight = Math.max(1,parent.clientHeight - paddingY - 6);
 
-      const oldMaxHeight = el.style.maxHeight;
-      const oldOverflow = el.style.overflow;
-
+      el.style.fontSize = "";
       el.style.maxHeight = "none";
       el.style.overflow = "visible";
       el.style.width = "100%";
       el.style.height = "auto";
 
-      let low = Math.max(9,Number(min) || 9);
+      let low = Math.max(12,Number(min) || 12);
       let high = Math.max(low,Number(max) || low);
       let best = low;
 
@@ -2218,8 +1665,8 @@
         el.style.fontSize = `${size}px`;
 
         const fits =
-          el.scrollWidth <= width + .5 &&
-          el.scrollHeight <= height + .5;
+          el.scrollWidth <= availableWidth + .5 &&
+          el.scrollHeight <= availableHeight + .5;
 
         if (fits) {
           best = size;
@@ -2229,13 +1676,8 @@
         }
       }
 
-      /*
-        هامش أمان بسيط لسفاري حتى لا يختفي السطر الأخير بسبب اختلاف
-        التقريب بين القياس والرسم الفعلي.
-      */
-      el.style.fontSize = `${Math.max(9,Math.floor(best * .965 * 10) / 10)}px`;
-      el.style.maxHeight = oldMaxHeight || "none";
-      el.style.overflow = oldOverflow || "visible";
+      const safeSize = Math.max(low > best ? best : low, best) * .975;
+      el.style.fontSize = `${Math.max(12,Math.floor(safeSize * 10) / 10)}px`;
     }
 
     function fitCurrentSceneText(){
@@ -2244,10 +1686,10 @@
         if (qText) {
           fitText(
             qText,
-            9,
+            16,
             Math.min(
-              50,
-              Math.max(18,questionCard.clientHeight * .42)
+              54,
+              Math.max(24,questionCard.clientHeight * .45)
             )
           );
         }
@@ -2256,10 +1698,10 @@
           const card = el.closest(".choice-card");
           fitText(
             el,
-            9,
+            16,
             Math.min(
-              42,
-              Math.max(16,(card?.clientHeight || 100) * .42)
+              44,
+              Math.max(22,(card?.clientHeight || 100) * .46)
             )
           );
         });
@@ -2269,9 +1711,8 @@
         requestAnimationFrame(run);
       });
 
-      [90,260,620].forEach((delay)=>{
-        window.setTimeout(run,delay);
-      });
+      window.setTimeout(run,180);
+      window.setTimeout(run,760);
 
       if (document.fonts?.ready) {
         document.fonts.ready.then(run).catch(()=>{});
@@ -2287,8 +1728,15 @@
       answerLocked = false;
       questionView.classList.remove("is-answered");
       questionCard.textContent = "";
+      questionCard.classList.remove("is-long","is-very-long");
       choicesGrid.textContent = "";
       applyPanelPalette(questionCard,index);
+
+      if (item.questionType === "text") {
+        const length = String(item.questionText || "").trim().length;
+        questionCard.classList.toggle("is-long",length > 85 && length <= 150);
+        questionCard.classList.toggle("is-very-long",length > 150);
+      }
 
       if (item.questionType === "image") {
         const image = document.createElement("img");
