@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v9-smaller-lower-question-colored-marks -->
+  <!-- version: choices-v10-narrow-question-two-choice-balance -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -995,7 +995,7 @@
     .question-card{
       flex:none;
       margin-top:0;
-      width:min(82%,980px);
+      width:min(72%,880px);
       height:clamp(92px,13.5vh,124px);
     }
 
@@ -1012,8 +1012,20 @@
     .choices-grid{
       flex:none;
       width:min(84%,1060px);
-      margin-top:clamp(38px,6.5vh,64px);
+      margin-top:clamp(56px,8.5vh,86px);
       grid-auto-rows:clamp(88px,14vh,128px);
+    }
+
+    /*
+      عند وجود خيارين فقط نُنزّل مجموعة السؤال والإجابات معًا
+      لاستغلال الفراغ السفلي وتحقيق توازن بصري أفضل.
+    */
+    .question-view.has-two-choices{
+      padding-top:clamp(92px,15vh,138px);
+    }
+
+    .question-view.has-two-choices .choices-grid{
+      margin-top:clamp(64px,9.5vh,94px);
     }
 
     /*
@@ -1076,7 +1088,7 @@
       }
 
       .question-card{
-        width:88%;
+        width:78%;
         height:clamp(88px,12.5vh,116px);
       }
 
@@ -1090,14 +1102,22 @@
 
       .choices-grid{
         width:90%;
-        margin-top:clamp(30px,5.5vh,52px);
+        margin-top:clamp(46px,7vh,68px);
         grid-auto-rows:clamp(78px,12.5vh,116px);
+      }
+
+      .question-view.has-two-choices{
+        padding-top:clamp(74px,12vh,112px);
+      }
+
+      .question-view.has-two-choices .choices-grid{
+        margin-top:clamp(52px,8vh,78px);
       }
     }
 
     @media (max-width:560px){
       .question-card{
-        width:90%;
+        width:82%;
         height:clamp(78px,11.5vh,102px);
       }
 
@@ -1111,8 +1131,16 @@
 
       .choices-grid{
         width:92%;
-        margin-top:clamp(24px,4.5vh,42px);
+        margin-top:clamp(38px,6vh,54px);
         grid-auto-rows:clamp(70px,11.5vh,104px);
+      }
+
+      .question-view.has-two-choices{
+        padding-top:clamp(58px,10vh,88px);
+      }
+
+      .question-view.has-two-choices .choices-grid{
+        margin-top:clamp(42px,7vh,62px);
       }
 
       .question-fit-zone{
@@ -1132,7 +1160,7 @@
       }
 
       .question-card{
-        width:min(80%,900px);
+        width:min(70%,820px);
         height:clamp(68px,16vh,88px);
         margin-top:0;
       }
@@ -1147,8 +1175,16 @@
 
       .choices-grid{
         width:min(82%,960px);
-        margin-top:clamp(24px,6vh,40px);
+        margin-top:clamp(38px,9vh,58px);
         grid-auto-rows:clamp(64px,18vh,96px);
+      }
+
+      .question-view.has-two-choices{
+        padding-top:clamp(46px,11vh,72px);
+      }
+
+      .question-view.has-two-choices .choices-grid{
+        margin-top:clamp(44px,10vh,64px);
       }
     }
 
@@ -1960,7 +1996,11 @@
       activeQuestionIndex = index;
       directQuestionIndex = index;
       answerLocked = false;
-      questionView.classList.remove("is-answered");
+      questionView.classList.remove("is-answered","has-two-choices");
+      questionView.classList.toggle(
+        "has-two-choices",
+        item.choices.length === 2
+      );
       questionCard.textContent = "";
       questionCard.classList.remove("is-long","is-very-long");
       choicesGrid.textContent = "";
