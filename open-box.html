@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v71-classroom-background-v2-open-box-31 -->
+  <!-- version: open-box-v72-three-tap-flow-no-button-open-box-32 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1031,8 +1031,7 @@
     }
 
     .back-btn,
-    .reset-btn,
-    .open-btn{
+    .reset-btn{
       pointer-events:auto;
       position:absolute;
       bottom:0;
@@ -1058,8 +1057,7 @@
       min-width:clamp(78px, 8vw, 108px);
     }
 
-    .right-controls .reset-btn,
-    .right-controls .open-btn{
+    .right-controls .reset-btn{
       position:static;
       bottom:auto;
     }
@@ -1070,27 +1068,11 @@
       min-width:clamp(78px, 8vw, 110px);
     }
 
-    .open-btn{
-      background:#2cab64;
-      color:#fff;
-      min-width:clamp(78px, 8vw, 104px);
-      opacity:1;
-      transform:translateY(0) scale(1);
-      transition:opacity .20s ease, transform .25s cubic-bezier(.22,.84,.24,1);
-    }
 
-    .open-btn[hidden]{
-      display:none !important;
-    }
 
-    .open-btn.is-entering{
-      opacity:0;
-      transform:translateY(8px) scale(.92);
-    }
 
     .back-btn:active,
-    .reset-btn:active,
-    .open-btn:active{
+    .reset-btn:active{
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.20);
     }
@@ -1121,8 +1103,7 @@
       }
 
       .back-btn,
-      .reset-btn,
-      .open-btn{
+      .reset-btn{
         height:38px;
         border-width:2px;
         border-radius:10px;
@@ -1153,8 +1134,7 @@
       }
 
       .back-btn,
-      .reset-btn,
-      .open-btn{
+      .reset-btn{
         height:clamp(32px, 8vh, 42px);
         border-width:2px;
         border-radius:10px;
@@ -1572,7 +1552,6 @@
     <footer class="fixed-controls">
       <button class="back-btn" id="backBtn" type="button">رجوع</button>
       <div class="right-controls">
-        <button class="open-btn" id="openBtn" type="button" hidden>فتح</button>
         <button class="reset-btn" id="resetBtn" type="button">إعادة</button>
       </div>
     </footer>
@@ -1609,7 +1588,6 @@
     const stage = document.getElementById("stage");
     const grid = document.getElementById("boxGrid");
     const resetBtn = document.getElementById("resetBtn");
-    const openBtn = document.getElementById("openBtn");
     const backBtn = document.getElementById("backBtn");
     const fixedControls = document.querySelector(".fixed-controls");
 
@@ -2994,24 +2972,6 @@
       return new Promise((resolve)=> window.setTimeout(resolve, ms));
     }
 
-    function setOpenButtonVisible(visible){
-      if (!openBtn) return;
-
-      if (!visible) {
-        openBtn.hidden = true;
-        openBtn.classList.remove("is-entering");
-        openBtn.disabled = false;
-        return;
-      }
-
-      openBtn.hidden = false;
-      openBtn.disabled = false;
-      openBtn.classList.add("is-entering");
-
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=> openBtn.classList.remove("is-entering"));
-      });
-    }
 
     function cancelScatterAnimations(){
       scatterAnimations.forEach((animation)=>{
@@ -3290,7 +3250,6 @@
       boxInteractionLocked = true;
       selectedBoxIndex = index;
       activeFocusButton = button;
-      setOpenButtonVisible(false);
 
       try {
         const scatterFinished = scatterOtherBoxes(button);
@@ -3304,10 +3263,6 @@
         ]);
 
         grid.classList.remove("motion-active");
-
-        if (!opened.has(index)) {
-          setOpenButtonVisible(true);
-        }
 
         requestAnimationFrame(()=> {
           if (opened.has(index)) fitOpenedBoxContent(button);
@@ -3335,7 +3290,6 @@
         !activeFocusButton ||
         opened.has(selectedBoxIndex)
       ) {
-        setOpenButtonVisible(false);
         return;
       }
 
@@ -3343,8 +3297,6 @@
       openBoxAudio.playOpen();
 
       boxInteractionLocked = true;
-      openBtn.disabled = true;
-      setOpenButtonVisible(false);
 
       try {
         opened.add(selectedBoxIndex);
@@ -3359,7 +3311,6 @@
         // نمنع رجوع المشهد أثناء اكتمال حركة الغطاء.
         await wait(1320);
       } finally {
-        openBtn.disabled = false;
         boxInteractionLocked = false;
         if (pendingViewportLayout && !introLayoutFrozen) {
           scheduleResponsiveLayout(40);
@@ -3368,8 +3319,6 @@
     }
 
     async function returnFocusScene(){
-      setOpenButtonVisible(false);
-
       if (boxInteractionLocked) return;
 
       openBoxAudio.unlock();
@@ -3392,32 +3341,58 @@
       }
     }
 
+    function hasFocusedScene(){
+      return (
+        focusedIndex >= 0 ||
+        boxFocusState.scale > 1.001 ||
+        selectedBoxIndex >= 0
+      );
+    }
+
+    async function advanceFocusedScene(event){
+      if (!hasFocusedScene()) return;
+      if (boxInteractionLocked) return;
+      if (event?.target?.closest?.(".fixed-controls")) return;
+      if (selectedBoxIndex < 0 || !activeFocusButton) return;
+
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      /*
+        التسلسل:
+        النقرة الأولى تقرّب الصندوق.
+        النقرة الثانية تفتح الصندوق.
+        النقرة الثالثة تعيد الصندوق إلى مكانه.
+
+        أثناء حركة الفتح يبقى boxInteractionLocked مفعّلًا،
+        لذلك لا تُقبل نقرة الإرجاع إلا بعد اكتمال الفتح فعليًا.
+      */
+      if (!opened.has(selectedBoxIndex)) {
+        await openSelectedBox(event);
+        return;
+      }
+
+      await returnFocusScene();
+    }
+
     async function handleBoxClick(event, button, index){
       event.preventDefault();
       event.stopPropagation();
 
       if (boxInteractionLocked) return;
 
-      if (focusedIndex >= 0 || boxFocusState.scale > 1.001 || selectedBoxIndex >= 0) {
-        await returnFocusScene();
+      if (!hasFocusedScene()) {
+        await selectBoxForFocus(button, index);
         return;
       }
 
-      await selectBoxForFocus(button, index);
+      await advanceFocusedScene(event);
     }
 
-    async function handleZoomResetTap(event){
-      if (
-        focusedIndex < 0 &&
-        boxFocusState.scale <= 1.001 &&
-        selectedBoxIndex < 0
-      ) return;
-
-      if (boxInteractionLocked) return;
-      if (event.target.closest(".fixed-controls")) return;
-
-      event.preventDefault();
-      await returnFocusScene();
+    async function handleSceneTap(event){
+      await advanceFocusedScene(event);
     }
 
     async function resetBoxes(event){
@@ -3425,8 +3400,6 @@
         event.preventDefault();
         event.stopPropagation();
       }
-
-      setOpenButtonVisible(false);
 
       const shouldPlayReturnSound =
         focusedIndex >= 0 ||
@@ -3517,9 +3490,8 @@
     }, { once:true, passive:true });
 
     resetBtn.addEventListener("click", resetBoxes);
-    openBtn.addEventListener("click", openSelectedBox);
     backBtn.addEventListener("click", goBack);
-    page.addEventListener("click", handleZoomResetTap);
+    page.addEventListener("click", handleSceneTap);
 
     window.addEventListener("resize", ()=>{
       scheduleResponsiveLayout(40);
@@ -3741,8 +3713,6 @@
       selectedBoxIndex = -1;
       activeFocusButton = null;
       boxInteractionLocked = false;
-      setOpenButtonVisible(false);
-
       openBoxAudio.setEnabled(boxSoundEnabled);
       openBoxAudio.preload();
 
