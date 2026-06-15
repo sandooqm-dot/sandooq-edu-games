@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v6-clean-open-box-shell -->
+  <!-- version: choices-v7-literal-open-box-display-shell -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -42,10 +42,10 @@
       -webkit-text-size-adjust:100%;
     }
 
-    html{
-      overflow-x:hidden;
-    }
-
+    /*
+      منقول من صفحة افتح الصندوق:
+      body وحده مسؤول عن التمرير، ولا توجد أي قاعدة overflow على html.
+    */
     body{
       min-height:calc(100dvh + 160px);
       overflow-x:hidden;
@@ -59,10 +59,6 @@
       display:block;
       height:160px;
       pointer-events:none;
-    }
-
-    button{
-      font:inherit;
     }
 
     .game-page{
@@ -173,7 +169,7 @@
         linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
     }
 
-    /* نفس موضع شعار صفحة افتح الصندوق. */
+    /* منقول حرفيًا من صفحة افتح الصندوق. */
     .game-logo{
       position:absolute;
       top:clamp(10px,1.7vw,22px);
@@ -188,10 +184,7 @@
       -webkit-user-drag:none;
     }
 
-    /*
-      visualViewport يغيّر أبعاد stage فقط.
-      الشعار والأزرار لا يتم تحريكهما برمجيًا.
-    */
+    /* منقول حرفيًا من صفحة افتح الصندوق. */
     .stage{
       position:absolute;
       inset:0;
@@ -205,10 +198,10 @@
         calc(82px + var(--safe-bottom))
         calc(var(--edge-guard) + var(--safe-left));
       direction:ltr;
-      overflow:hidden;
       transform-origin:center center;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
+      overflow:hidden;
     }
 
     .cards-view,
@@ -761,7 +754,7 @@
       font-weight:1000;
     }
 
-    /* نفس شريط أزرار صفحة افتح الصندوق. */
+    /* هذا الجزء منقول حرفيًا من صفحة افتح الصندوق. */
     .fixed-controls{
       position:absolute;
       left:0;
@@ -772,13 +765,20 @@
       pointer-events:none;
     }
 
-    .back-btn,
-    .question-navigation,
-    .question-navigation button{
+    .right-controls{
       pointer-events:auto;
+      position:absolute;
+      right:clamp(16px,2.8vw,42px);
+      bottom:0;
+      display:flex;
+      align-items:center;
+      gap:clamp(8px,1vw,12px);
+      direction:ltr;
     }
 
-    .control-btn{
+    .back-btn,
+    .right-controls .control-btn{
+      pointer-events:auto;
       position:absolute;
       bottom:0;
       height:clamp(34px,4.8vh,44px);
@@ -803,21 +803,7 @@
       min-width:clamp(78px,8vw,108px);
     }
 
-    .question-navigation{
-      position:absolute;
-      right:clamp(16px,2.8vw,42px);
-      bottom:0;
-      display:flex;
-      align-items:center;
-      gap:clamp(8px,1vw,12px);
-      direction:ltr;
-    }
-
-    .question-navigation[hidden]{
-      display:none;
-    }
-
-    .question-navigation .control-btn{
+    .right-controls .control-btn{
       position:static;
       bottom:auto;
       min-width:clamp(78px,8vw,110px);
@@ -833,18 +819,21 @@
       color:#fff;
     }
 
+    .right-controls[hidden],
     .next-btn[hidden],
     .previous-btn[hidden]{
       display:none;
     }
 
-    .control-btn:active{
+    .back-btn:active,
+    .right-controls .control-btn:active{
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.20);
     }
 
     @media (orientation:portrait){
       .stage{
+        inset:0;
         padding-top:calc(90px + var(--safe-top));
         padding-bottom:calc(76px + var(--safe-bottom));
       }
@@ -868,9 +857,7 @@
     }
 
     @media (max-width:560px){
-      :root{
-        --logo-w:92px;
-      }
+      :root{ --logo-w:92px; }
 
       .game-logo{
         top:calc(10px + var(--safe-top));
@@ -878,6 +865,7 @@
       }
 
       .stage{
+        inset:0;
         padding:
           calc(76px + var(--safe-top))
           calc(14px + var(--safe-right))
@@ -905,7 +893,8 @@
         gap:8px;
       }
 
-      .control-btn{
+      .back-btn,
+      .right-controls .control-btn{
         height:38px;
         border-width:2px;
         border-radius:10px;
@@ -920,6 +909,7 @@
 
     @media (max-height:520px) and (orientation:landscape){
       .stage{
+        inset:0;
         padding:
           calc(42px + var(--safe-top))
           calc(16px + var(--safe-right))
@@ -954,7 +944,8 @@
         grid-auto-rows:clamp(64px,18vh,96px);
       }
 
-      .control-btn{
+      .back-btn,
+      .right-controls .control-btn{
         height:clamp(32px,8vh,42px);
         border-width:2px;
         border-radius:10px;
@@ -1009,7 +1000,7 @@
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
 
-      <div class="question-navigation" id="questionNavigation" hidden>
+      <div class="right-controls question-navigation" id="questionNavigation" hidden>
         <button class="control-btn next-btn" id="nextBtn" type="button">التالي</button>
         <button class="control-btn previous-btn" id="previousBtn" type="button">السابق</button>
       </div>
@@ -1526,7 +1517,9 @@
       page.style.setProperty("--visual-viewport-height",`${metrics.height}px`);
     }
 
-    function collapseSafariBars(){
+    function collapseSafariBars(options = {}){
+      const refresh = options.refresh !== false;
+
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
@@ -1537,7 +1530,10 @@
           } catch (_) {
             window.scrollTo(0,80);
           }
-          scheduleLayout();
+
+          if (refresh) {
+            scheduleLayout();
+          }
         },delay));
       });
     }
@@ -1639,16 +1635,16 @@
       const parent = el.parentElement;
       if (!parent) return;
 
-      const parentStyles = window.getComputedStyle(parent);
+      const styles = window.getComputedStyle(parent);
       const paddingX =
-        parseFloat(parentStyles.paddingLeft || "0") +
-        parseFloat(parentStyles.paddingRight || "0");
+        parseFloat(styles.paddingLeft || "0") +
+        parseFloat(styles.paddingRight || "0");
       const paddingY =
-        parseFloat(parentStyles.paddingTop || "0") +
-        parseFloat(parentStyles.paddingBottom || "0");
+        parseFloat(styles.paddingTop || "0") +
+        parseFloat(styles.paddingBottom || "0");
 
-      const availableWidth = Math.max(1,parent.clientWidth - paddingX - 6);
-      const availableHeight = Math.max(1,parent.clientHeight - paddingY - 6);
+      const width = Math.max(1,parent.clientWidth - paddingX - 6);
+      const height = Math.max(1,parent.clientHeight - paddingY - 6);
 
       el.style.fontSize = "";
       el.style.maxHeight = "none";
@@ -1656,19 +1652,18 @@
       el.style.width = "100%";
       el.style.height = "auto";
 
-      let low = Math.max(12,Number(min) || 12);
+      let low = Math.max(14,Number(min) || 14);
       let high = Math.max(low,Number(max) || low);
       let best = low;
 
-      for (let i=0; i<28; i+=1) {
+      for (let i=0; i<26; i+=1) {
         const size = (low + high) / 2;
         el.style.fontSize = `${size}px`;
 
-        const fits =
-          el.scrollWidth <= availableWidth + .5 &&
-          el.scrollHeight <= availableHeight + .5;
-
-        if (fits) {
+        if (
+          el.scrollWidth <= width + .5 &&
+          el.scrollHeight <= height + .5
+        ) {
           best = size;
           low = size;
         } else {
@@ -1676,8 +1671,8 @@
         }
       }
 
-      const safeSize = Math.max(low > best ? best : low, best) * .975;
-      el.style.fontSize = `${Math.max(12,Math.floor(safeSize * 10) / 10)}px`;
+      el.style.fontSize =
+        `${Math.max(14,Math.floor(best * .975 * 10) / 10)}px`;
     }
 
     function fitCurrentSceneText(){
@@ -1686,11 +1681,8 @@
         if (qText) {
           fitText(
             qText,
-            16,
-            Math.min(
-              54,
-              Math.max(24,questionCard.clientHeight * .45)
-            )
+            17,
+            Math.min(54,Math.max(25,questionCard.clientHeight * .46))
           );
         }
 
@@ -1698,11 +1690,8 @@
           const card = el.closest(".choice-card");
           fitText(
             el,
-            16,
-            Math.min(
-              44,
-              Math.max(22,(card?.clientHeight || 100) * .46)
-            )
+            17,
+            Math.min(44,Math.max(22,(card?.clientHeight || 100) * .46))
           );
         });
       };
@@ -1733,9 +1722,15 @@
       applyPanelPalette(questionCard,index);
 
       if (item.questionType === "text") {
-        const length = String(item.questionText || "").trim().length;
-        questionCard.classList.toggle("is-long",length > 85 && length <= 150);
-        questionCard.classList.toggle("is-very-long",length > 150);
+        const questionLength = String(item.questionText || "").trim().length;
+        questionCard.classList.toggle(
+          "is-long",
+          questionLength > 85 && questionLength <= 150
+        );
+        questionCard.classList.toggle(
+          "is-very-long",
+          questionLength > 150
+        );
       }
 
       if (item.questionType === "image") {
