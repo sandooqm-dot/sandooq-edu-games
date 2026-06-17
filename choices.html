@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v27-delayed-boxes-realistic-content-release -->
+  <!-- version: choices-v28-no-shake-visible-returned-box -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3004,6 +3004,30 @@
       will-change:opacity,transform,filter;
     }
 
+
+    /* v28: الصندوق المستخدم يبقى ظاهرًا بنفس لونه، ويختفي رقمه فقط. */
+    .box-card.is-completed{
+      filter:none !important;
+      opacity:1 !important;
+      cursor:default;
+      pointer-events:none;
+    }
+
+    .box-card.is-completed .panel-number{
+      opacity:0 !important;
+      transform:scale(.65);
+    }
+
+    /*
+      أثناء رجوع السؤال، يجب أن يظهر الصندوق فوق المستطيلات
+      ثم يعود إلى موقعه وهو ظاهر بالكامل.
+    */
+    .game-page.box-return-sequence .box-card.focus-selected{
+      opacity:1 !important;
+      visibility:visible !important;
+      z-index:120 !important;
+    }
+
 </style>
 </head>
 
@@ -3330,7 +3354,6 @@
     const BOX_MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
     const BOX_ELEMENT_DURATION_MS = 940;
     const BOX_ELEMENT_STEP_MS = 90;
-    const BOX_ITEM_SHAKE_MS = 360;
     const BOX_FAST_FADE_MS = 220;
     const CARDS_INTRO_ZOOM_MS = 4600;
     const CARDS_INTRO_ENTRY_MS = 1120;
@@ -4358,9 +4381,9 @@
     function restoreDeck(){
       cancelQuestionBoxScatterAnimations();
       questionGrid.querySelectorAll(".box-card").forEach((card,index)=>{
+        resetQuestionBoxVisibility(card);
         card.style.transform = "translate3d(0,0,0) scale(1)";
-        card.style.opacity = "1";
-        card.classList.remove("focus-selected","focus-away","box-vanished");
+        card.classList.remove("focus-selected","focus-away");
         card.classList.toggle("is-completed",completed.has(index));
         const number = card.querySelector(".panel-number");
         if (number) number.textContent = completed.has(index) ? "" : String(index + 1);
@@ -4373,47 +4396,69 @@
       questionBoxSelected = null;
     }
 
-    function animateBoxShake(button,strong = false){
-      const wrap = button?.querySelector(".box-wrap");
-      if (!wrap || typeof wrap.animate !== "function") return wait(strong ? 560 : 720);
-      const magnitude = strong ? 5 : 4;
-      const animation = wrap.animate(
-        [
-          { transform:"translate3d(0,0,0) rotate(0deg)" },
-          { transform:`translate3d(-${magnitude}px,1px,0) rotate(-2deg)` },
-          { transform:`translate3d(${magnitude}px,-1px,0) rotate(2deg)` },
-          { transform:`translate3d(-${magnitude - 1}px,0,0) rotate(-1.5deg)` },
-          { transform:`translate3d(${magnitude - 1}px,0,0) rotate(1.5deg)` },
-          { transform:"translate3d(0,0,0) rotate(0deg)" }
-        ],
-        { duration:strong ? 560 : 720,easing:"ease-in-out" }
+    function resetQuestionBoxVisibility(button){
+      if (!button) return;
+
+      const animations =
+        typeof button.getAnimations === "function"
+          ? button.getAnimations({ subtree:true })
+          : [];
+
+      animations.forEach((animation)=>{
+        try { animation.cancel(); } catch (_) {}
+      });
+
+      button.classList.remove(
+        "box-vanished",
+        "is-fast-fading"
       );
-      return animation.finished.catch(()=>{});
+
+      button.style.opacity = "1";
+      button.style.visibility = "visible";
+      button.style.removeProperty("filter");
+
+      const wrap = button.querySelector(".box-wrap");
+      if (wrap) {
+        wrap.style.removeProperty("transform");
+        wrap.style.removeProperty("filter");
+        wrap.style.removeProperty("opacity");
+      }
     }
 
-    function animateBoxItemShake(button){
-      const wrap = button?.querySelector(".box-wrap");
+    async function revealQuestionBox(button){
+      if (!button) return;
 
-      if (!wrap || typeof wrap.animate !== "function") {
-        return wait(BOX_ITEM_SHAKE_MS);
+      resetQuestionBoxVisibility(button);
+      button.classList.add("focus-selected");
+
+      if (typeof button.animate !== "function") {
+        await wait(80);
+        return;
       }
 
-      const animation = wrap.animate(
+      const animation = button.animate(
         [
-          { transform:"translate3d(0,0,0) rotate(0deg) scale(1)" },
-          { transform:"translate3d(-5px,1px,0) rotate(-2.4deg) scale(1.015)" },
-          { transform:"translate3d(5px,-1px,0) rotate(2.4deg) scale(1.02)" },
-          { transform:"translate3d(-4px,0,0) rotate(-1.8deg) scale(1.01)" },
-          { transform:"translate3d(4px,0,0) rotate(1.8deg) scale(1.01)" },
-          { transform:"translate3d(0,0,0) rotate(0deg) scale(1)" }
+          {
+            opacity:0,
+            transform:"translate3d(0,-4px,0) scale(.94)"
+          },
+          {
+            opacity:1,
+            transform:"translate3d(0,0,0) scale(1)"
+          }
         ],
         {
-          duration:BOX_ITEM_SHAKE_MS,
-          easing:"ease-in-out"
+          duration:180,
+          easing:"cubic-bezier(.16,.82,.18,1)",
+          fill:"forwards"
         }
       );
 
-      return animation.finished.catch(()=>{});
+      await animation.finished.catch(()=>{});
+
+      try { animation.cancel(); } catch (_) {}
+      button.style.opacity = "1";
+      button.style.visibility = "visible";
     }
 
     async function fadeQuestionBoxFast(button){
@@ -4448,12 +4493,15 @@
         );
 
         await animation.finished.catch(()=>{});
+        try { animation.cancel(); } catch (_) {}
       } else {
         await wait(BOX_FAST_FADE_MS);
       }
 
       button.classList.add("box-vanished");
       button.classList.remove("is-fast-fading");
+      button.style.removeProperty("opacity");
+      button.style.removeProperty("transform");
       button.style.removeProperty("filter");
     }
 
@@ -4518,7 +4566,7 @@
 
       /*
         السؤال أولًا، وبعده كل إجابة على حدة.
-        الصندوق يهتز مع ظهور كل مستطيل فقط.
+        لا يوجد أي اهتزاز؛ المستطيلات تخرج مباشرة من الصندوق.
       */
       for (let index=0; index<prepared.length; index+=1) {
         const {
@@ -4571,12 +4619,11 @@
               )
             : null;
 
-        await Promise.all([
-          animateBoxItemShake(source),
-          elementAnimation
-            ? elementAnimation.finished.catch(()=>{})
-            : wait(BOX_ELEMENT_DURATION_MS)
-        ]);
+        if (elementAnimation) {
+          await elementAnimation.finished.catch(()=>{});
+        } else {
+          await wait(BOX_ELEMENT_DURATION_MS);
+        }
 
         if (BOX_ELEMENT_STEP_MS > 0) {
           await wait(BOX_ELEMENT_STEP_MS);
@@ -4627,7 +4674,7 @@
       questionBoxSelected = source;
       questionBoxFocusedIndex = index;
       activeQuestionIndex = index;
-      source.classList.remove("box-vanished");
+      resetQuestionBoxVisibility(source);
 
       const scatterFinished = scatterQuestionBoxes(source);
       await wait(120);
@@ -4673,10 +4720,8 @@
       questionNavigation.hidden = true;
       page.classList.add("box-return-sequence");
       cardsView.classList.remove("is-hidden");
-      questionBoxSelected.classList.remove("box-vanished");
-      questionBoxSelected.style.opacity = "1";
-      await wait(120);
 
+      await revealQuestionBox(questionBoxSelected);
       await animateQuestionIntoBox(questionBoxSelected);
       questionView.classList.remove("is-visible","is-answered");
 
@@ -4686,6 +4731,11 @@
       if (markCompleted && number) number.textContent = "";
       questionBoxSelected.classList.toggle("is-completed",markCompleted);
       questionBoxSelected.disabled = markCompleted;
+      questionBoxSelected.setAttribute(
+        "aria-disabled",
+        markCompleted ? "true" : "false"
+      );
+      resetQuestionBoxVisibility(questionBoxSelected);
 
       await Promise.all([
         restoreQuestionBoxesAnimated(),
@@ -4694,13 +4744,31 @@
 
       const selected = questionGrid.querySelector(`.box-card[data-index="${finishedIndex}"]`);
       if (selected) {
-        selected.style.opacity = "1";
+        resetQuestionBoxVisibility(selected);
         selected.style.transform = "translate3d(0,0,0) scale(1)";
-        selected.classList.remove("focus-selected","focus-away","box-vanished");
-        selected.classList.toggle("is-completed",completed.has(finishedIndex));
-        const selectedNumber = selected.querySelector(".panel-number");
-        if (selectedNumber) selectedNumber.textContent = completed.has(finishedIndex) ? "" : String(finishedIndex + 1);
+        selected.classList.remove("focus-selected","focus-away");
+        selected.classList.toggle(
+          "is-completed",
+          completed.has(finishedIndex)
+        );
+
+        const selectedNumber =
+          selected.querySelector(".panel-number");
+
+        if (selectedNumber) {
+          selectedNumber.textContent =
+            completed.has(finishedIndex)
+              ? ""
+              : String(finishedIndex + 1);
+        }
+
         selected.disabled = completed.has(finishedIndex);
+        selected.setAttribute(
+          "aria-disabled",
+          completed.has(finishedIndex)
+            ? "true"
+            : "false"
+        );
       }
 
       page.classList.remove("box-return-sequence");
