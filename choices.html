@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v29-all-panels-together-from-box -->
+  <!-- version: choices-v30-question-with-all-panels-instant-box-hide -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3028,6 +3028,29 @@
       z-index:120 !important;
     }
 
+
+    /* v30: ضمان ظهور السؤال مع جميع الإجابات في حركة الصندوق نفسها. */
+    .game-page.box-question-sequence .question-view{
+      opacity:1 !important;
+      visibility:visible !important;
+      pointer-events:none !important;
+    }
+
+    .game-page.box-question-sequence .question-card,
+    .game-page.box-question-sequence .choice-card{
+      visibility:visible !important;
+      animation:none !important;
+    }
+
+    .game-page.box-question-sequence .question-card{
+      display:flex !important;
+      z-index:24 !important;
+    }
+
+    .game-page.box-question-sequence .choice-card{
+      z-index:23 !important;
+    }
+
 </style>
 </head>
 
@@ -4504,6 +4527,25 @@
       button.style.removeProperty("filter");
     }
 
+    function hideQuestionBoxImmediately(button){
+      if (!button) return;
+
+      const animations =
+        typeof button.getAnimations === "function"
+          ? button.getAnimations({ subtree:true })
+          : [];
+
+      animations.forEach((animation)=>{
+        try { animation.cancel(); } catch (_) {}
+      });
+
+      button.classList.remove("is-fast-fading");
+      button.classList.add("box-vanished");
+      button.style.removeProperty("opacity");
+      button.style.removeProperty("transform");
+      button.style.removeProperty("filter");
+    }
+
     function getElementBoxMotion(element,sourceRect){
       const rect = element.getBoundingClientRect();
       return {
@@ -4513,6 +4555,8 @@
     }
 
     async function animateQuestionOutOfBox(source){
+      questionView.classList.add("is-visible");
+
       const sourceRect = source.getBoundingClientRect();
       const elements = [
         questionCard,
@@ -4520,11 +4564,10 @@
       ];
 
       /*
-        نفس نقطة دخول المستطيلات إلى الصندوق:
-        جميع العناصر تبدأ من مركز الصندوق نفسه، ثم تخرج معًا
-        إلى مواقعها النهائية دفعة واحدة.
+        السؤال وجميع الإجابات يبدأون من مركز الصندوق نفسه
+        وفي الإطار الزمني نفسه، ثم يصل كل عنصر إلى موقعه النهائي.
       */
-      const prepared = elements.map((element)=>{
+      const prepared = elements.map((element,index)=>{
         const { dx,dy } =
           getElementBoxMotion(element,sourceRect);
 
@@ -4532,18 +4575,34 @@
           try { animation.cancel(); } catch (_) {}
         });
 
-        element.style.animation = "none";
+        element.style.setProperty("animation","none","important");
+        element.style.setProperty("visibility","visible","important");
+        element.style.setProperty(
+          "display",
+          element === questionCard ? "flex" : "flex",
+          "important"
+        );
         element.style.willChange = "transform,opacity";
         element.style.opacity = "0";
         element.style.transform =
           `translate3d(${dx}px,${dy}px,0) scale(.10)`;
+        element.style.zIndex =
+          element === questionCard ? "24" : "23";
 
         return {
           element,
           dx,
-          dy
+          dy,
+          index
         };
       });
+
+      /*
+        إجبار المتصفح على تثبيت أحجام ومواقع السؤال والإجابات
+        قبل تشغيل الحركة، حتى لا يتأخر مستطيل السؤال عن البقية.
+      */
+      questionCard.getBoundingClientRect();
+      choicesGrid.getBoundingClientRect();
 
       await new Promise((resolve)=>{
         requestAnimationFrame(()=>{
@@ -4607,11 +4666,13 @@
           try { animation.cancel(); } catch (_) {}
         });
 
-        element.style.animation = "none";
+        element.style.setProperty("animation","none","important");
         element.style.transform =
           "translate3d(0,0,0) scale(1)";
         element.style.opacity = "1";
+        element.style.visibility = "visible";
         element.style.willChange = "";
+        element.style.removeProperty("z-index");
       });
     }
 
@@ -4708,7 +4769,7 @@
       );
 
       await animateQuestionOutOfBox(source);
-      await fadeQuestionBoxFast(source);
+      hideQuestionBoxImmediately(source);
 
       cardsView.classList.add("is-hidden");
       page.classList.remove("box-question-sequence");
