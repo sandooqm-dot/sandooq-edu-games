@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v28-no-shake-visible-returned-box -->
+  <!-- version: choices-v29-all-panels-together-from-box -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3352,8 +3352,7 @@
     const BOX_ZOOM_IN_MS = 1550;
     const BOX_ZOOM_OUT_MS = 1450;
     const BOX_MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
-    const BOX_ELEMENT_DURATION_MS = 940;
-    const BOX_ELEMENT_STEP_MS = 90;
+    const BOX_ELEMENT_DURATION_MS = 1080;
     const BOX_FAST_FADE_MS = 220;
     const CARDS_INTRO_ZOOM_MS = 4600;
     const CARDS_INTRO_ENTRY_MS = 1120;
@@ -4521,24 +4520,13 @@
       ];
 
       /*
-        نقطة الخروج تكون عند منتصف الحافة العلوية للصندوق،
-        وليس من منتصف الصندوق.
+        نفس نقطة دخول المستطيلات إلى الصندوق:
+        جميع العناصر تبدأ من مركز الصندوق نفسه، ثم تخرج معًا
+        إلى مواقعها النهائية دفعة واحدة.
       */
-      const exitX = sourceRect.left + sourceRect.width / 2;
-      const exitY = sourceRect.top + Math.max(5,sourceRect.height * .06);
-      const riseDistance = Math.min(125,Math.max(54,sourceRect.height * .72));
-
       const prepared = elements.map((element)=>{
-        const rect = element.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        const dx = exitX - centerX;
-        const dy = exitY - centerY;
-        const startScale = Math.max(
-          .12,
-          Math.min(.28,(sourceRect.width / Math.max(1,rect.width)) * .32)
-        );
+        const { dx,dy } =
+          getElementBoxMotion(element,sourceRect);
 
         element.getAnimations().forEach((animation)=>{
           try { animation.cancel(); } catch (_) {}
@@ -4548,13 +4536,12 @@
         element.style.willChange = "transform,opacity";
         element.style.opacity = "0";
         element.style.transform =
-          `translate3d(${dx}px,${dy}px,0) scale(${startScale})`;
+          `translate3d(${dx}px,${dy}px,0) scale(.10)`;
 
         return {
           element,
           dx,
-          dy,
-          startScale
+          dy
         };
       });
 
@@ -4564,71 +4551,56 @@
         });
       });
 
-      /*
-        السؤال أولًا، وبعده كل إجابة على حدة.
-        لا يوجد أي اهتزاز؛ المستطيلات تخرج مباشرة من الصندوق.
-      */
-      for (let index=0; index<prepared.length; index+=1) {
-        const {
-          element,
-          dx,
-          dy,
-          startScale
-        } = prepared[index];
+      const animations = prepared.map(
+        ({ element,dx,dy })=>{
+          if (typeof element.animate !== "function") {
+            element.style.opacity = "1";
+            element.style.transform =
+              "translate3d(0,0,0) scale(1)";
+            return null;
+          }
 
-        const liftY = dy - riseDistance;
-        const middleX = dx * .58;
-        const middleY = dy * .42 - riseDistance * .48;
-
-        const elementAnimation =
-          typeof element.animate === "function"
-            ? element.animate(
-                [
-                  {
-                    transform:
-                      `translate3d(${dx}px,${dy}px,0) scale(${startScale})`,
-                    opacity:0
-                  },
-                  {
-                    transform:
-                      `translate3d(${dx}px,${liftY}px,0) scale(${Math.min(.46,startScale + .20)})`,
-                    opacity:1,
-                    offset:.24
-                  },
-                  {
-                    transform:
-                      `translate3d(${middleX}px,${middleY}px,0) scale(.82)`,
-                    opacity:1,
-                    offset:.62
-                  },
-                  {
-                    transform:"translate3d(0,0,0) scale(1.035)",
-                    opacity:1,
-                    offset:.90
-                  },
-                  {
-                    transform:"translate3d(0,0,0) scale(1)",
-                    opacity:1
-                  }
-                ],
-                {
-                  duration:BOX_ELEMENT_DURATION_MS,
-                  easing:"cubic-bezier(.18,.82,.18,1)",
-                  fill:"forwards"
-                }
-              )
-            : null;
-
-        if (elementAnimation) {
-          await elementAnimation.finished.catch(()=>{});
-        } else {
-          await wait(BOX_ELEMENT_DURATION_MS);
+          return element.animate(
+            [
+              {
+                transform:
+                  `translate3d(${dx}px,${dy}px,0) scale(.10)`,
+                opacity:0
+              },
+              {
+                transform:
+                  `translate3d(${dx * .54}px,${dy * .54}px,0) scale(.58)`,
+                opacity:1,
+                offset:.48
+              },
+              {
+                transform:
+                  "translate3d(0,0,0) scale(1.025)",
+                opacity:1,
+                offset:.90
+              },
+              {
+                transform:
+                  "translate3d(0,0,0) scale(1)",
+                opacity:1
+              }
+            ],
+            {
+              duration:BOX_ELEMENT_DURATION_MS,
+              easing:"cubic-bezier(.18,.82,.18,1)",
+              fill:"forwards"
+            }
+          );
         }
+      );
 
-        if (BOX_ELEMENT_STEP_MS > 0) {
-          await wait(BOX_ELEMENT_STEP_MS);
-        }
-      }
+      await Promise.all(
+        animations
+          .filter(Boolean)
+          .map((animation)=>
+            animation.finished.catch(()=>{})
+          )
+      );
 
       prepared.forEach(({ element })=>{
         element.getAnimations().forEach((animation)=>{
@@ -4636,7 +4608,8 @@
         });
 
         element.style.animation = "none";
-        element.style.transform = "translate3d(0,0,0) scale(1)";
+        element.style.transform =
+          "translate3d(0,0,0) scale(1)";
         element.style.opacity = "1";
         element.style.willChange = "";
       });
@@ -4644,25 +4617,64 @@
 
     async function animateQuestionIntoBox(source){
       const sourceRect = source.getBoundingClientRect();
-      const elements = [questionCard,...choicesGrid.querySelectorAll(".choice-card")];
+      const elements = [
+        questionCard,
+        ...choicesGrid.querySelectorAll(".choice-card")
+      ];
 
-      for (let index=0; index<elements.length; index+=1) {
-        const element = elements[index];
-        const { dx,dy } = getElementBoxMotion(element,sourceRect);
-        element.getAnimations().forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
-        const animation = element.animate(
+      /*
+        جميع المستطيلات تدخل معًا إلى مركز الصندوق،
+        وهي الحركة العكسية تمامًا لحركة خروجها.
+      */
+      const animations = elements.map((element)=>{
+        const { dx,dy } =
+          getElementBoxMotion(element,sourceRect);
+
+        element.getAnimations().forEach((animation)=>{
+          try { animation.cancel(); } catch (_) {}
+        });
+
+        if (typeof element.animate !== "function") {
+          element.style.opacity = "0";
+          element.style.transform =
+            `translate3d(${dx}px,${dy}px,0) scale(.10)`;
+          return null;
+        }
+
+        return element.animate(
           [
-            { transform:"translate3d(0,0,0) scale(1)",opacity:1 },
-            { transform:`translate3d(${dx}px,${dy}px,0) scale(.10)`,opacity:0 }
+            {
+              transform:
+                "translate3d(0,0,0) scale(1)",
+              opacity:1
+            },
+            {
+              transform:
+                `translate3d(${dx * .54}px,${dy * .54}px,0) scale(.58)`,
+              opacity:1,
+              offset:.48
+            },
+            {
+              transform:
+                `translate3d(${dx}px,${dy}px,0) scale(.10)`,
+              opacity:0
+            }
           ],
           {
-            duration:700,
+            duration:BOX_ELEMENT_DURATION_MS,
             easing:"cubic-bezier(.55,0,.75,.25)",
             fill:"forwards"
           }
         );
-        await animation.finished.catch(()=>{});
-      }
+      });
+
+      await Promise.all(
+        animations
+          .filter(Boolean)
+          .map((animation)=>
+            animation.finished.catch(()=>{})
+          )
+      );
     }
 
     async function openQuestionFromCard(index,source){
