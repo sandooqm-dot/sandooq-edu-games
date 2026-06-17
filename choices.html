@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v21-raised-text-question-and-image-group -->
+  <!-- version: choices-v22-answer-mark-pop-then-corner -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -2513,6 +2513,116 @@
 
       .question-view.has-image-question.has-image-choices{
         transform:translateY(clamp(-42px,-9vh,-28px)) !important;
+      }
+    }
+
+
+    /* v22: تظهر العلامة في المنتصف، تكبر سريعًا، ثم تستقر في زاوية الإجابة. */
+    .answer-mark{
+      --mark-corner-left:clamp(10px,1vw,18px);
+      --mark-corner-top:clamp(9px,.9vw,16px);
+      --mark-corner-scale:.38;
+      will-change:left,top,transform,opacity;
+      transform-origin:center center;
+    }
+
+    .choice-card.is-image-choice .answer-mark{
+      --mark-corner-left:clamp(8px,.8vw,14px);
+      --mark-corner-top:clamp(8px,.8vw,14px);
+      --mark-corner-scale:.32;
+    }
+
+    .answer-mark.is-visible{
+      animation:
+        answerMarkRevealThenCorner
+        1.34s
+        linear
+        both !important;
+    }
+
+    @keyframes answerMarkRevealThenCorner{
+      0%{
+        left:50%;
+        top:50%;
+        opacity:0;
+        transform:
+          translate(-50%,-50%)
+          scale(.08)
+          rotate(-18deg);
+        animation-timing-function:
+          cubic-bezier(.16,1,.3,1);
+      }
+
+      14%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(.48)
+          rotate(-9deg);
+      }
+
+      32%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(1.18)
+          rotate(4deg);
+      }
+
+      44%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(1)
+          rotate(0deg);
+        animation-timing-function:
+          cubic-bezier(.22,.72,.24,1);
+      }
+
+      60%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(1)
+          rotate(0deg);
+      }
+
+      100%{
+        left:var(--mark-corner-left);
+        top:var(--mark-corner-top);
+        opacity:1;
+        transform:
+          translate(0,0)
+          scale(var(--mark-corner-scale))
+          rotate(0deg);
+      }
+    }
+
+    @media (max-width:560px){
+      .answer-mark{
+        --mark-corner-left:8px;
+        --mark-corner-top:7px;
+        --mark-corner-scale:.36;
+      }
+
+      .choice-card.is-image-choice .answer-mark{
+        --mark-corner-left:6px;
+        --mark-corner-top:6px;
+        --mark-corner-scale:.30;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .answer-mark.is-visible{
+        animation-duration:.01ms !important;
       }
     }
 
