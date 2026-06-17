@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v25-clearer-line-spacing-white-nav-text -->
+  <!-- version: choices-v26-open-box-card-mode -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -2758,6 +2758,210 @@
       -webkit-text-fill-color:#fff !important;
     }
 
+
+    /* v26: وضع البطاقات يستخدم نفس حجم وشكل وتوزيع صفحة افتح الصندوق. */
+    :root{
+      --tile-size:150px;
+      --tile-gap:24px;
+    }
+
+    .cards-view{
+      overflow:hidden;
+    }
+
+    .question-grid.box-grid{
+      width:max-content;
+      height:max-content;
+      max-width:100%;
+      max-height:100%;
+      display:grid;
+      grid-template-columns:repeat(var(--cols,4),var(--tile-size));
+      grid-auto-rows:var(--tile-size);
+      justify-content:center;
+      align-content:center;
+      gap:var(--tile-gap);
+      transform-origin:0 0;
+      transform:translate3d(0,0,0) scale(1);
+      will-change:transform;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      contain:layout style;
+      isolation:isolate;
+      direction:ltr;
+    }
+
+    .box-card{
+      --panel:#df3a64;
+      --panel-light:#f06f8e;
+      --panel-dark:#b91f49;
+      --wall-tone:#ca6f84;
+      --shadow:rgba(0,0,0,.17);
+      --box-cover-text:#fff;
+      position:relative;
+      display:block;
+      width:var(--tile-size);
+      height:var(--tile-size);
+      padding:0;
+      margin:0;
+      border:0;
+      background:transparent;
+      appearance:none;
+      -webkit-appearance:none;
+      cursor:pointer;
+      touch-action:manipulation;
+      perspective:1200px;
+      opacity:1;
+      transform:translate3d(0,0,0) scale(1);
+      will-change:transform,opacity;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      contain:layout paint style;
+    }
+
+    .box-card.focus-selected{ z-index:55; }
+    .box-card.focus-away{ pointer-events:none; }
+    .box-grid.motion-active .box-card{ pointer-events:none; }
+
+    .box-wrap{
+      position:relative;
+      display:block;
+      width:100%;
+      height:100%;
+      overflow:visible;
+      filter:drop-shadow(0 6px 10px var(--shadow));
+      transform:translateZ(0);
+      transform-origin:center center;
+    }
+
+    .front-panel{
+      position:absolute;
+      inset:0;
+      z-index:12;
+      border-radius:clamp(11px,11%,20px);
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.05),transparent 18%),
+        linear-gradient(180deg,var(--panel) 0%,var(--panel) 48%,var(--panel-dark) 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.16),
+        inset 0 0 0 1.4px rgba(0,0,0,.18),
+        0 5px 8px rgba(0,0,0,.10);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transform-origin:50% 0%;
+    }
+
+    .front-panel::before{
+      content:"";
+      position:absolute;
+      inset:6%;
+      border-radius:calc(clamp(11px,11%,20px) * .78);
+      border:2px solid rgba(255,255,255,.28);
+      box-shadow:inset 0 0 18px rgba(255,255,255,.07);
+      pointer-events:none;
+    }
+
+    .panel-number{
+      position:relative;
+      z-index:2;
+      color:var(--box-cover-text,#fff);
+      font-size:clamp(22px,calc(var(--tile-size) * .52),78px);
+      line-height:1;
+      font-weight:900;
+      text-shadow:0 3px 8px rgba(0,0,0,.24);
+      transition:opacity .24s ease,transform .24s ease;
+      pointer-events:none;
+    }
+
+    .box-card.is-completed{
+      filter:saturate(.34) brightness(.78);
+      cursor:default;
+      pointer-events:none;
+    }
+
+    .box-card.is-completed .panel-number{
+      opacity:0;
+      transform:scale(.65);
+    }
+
+    .box-card.box-vanished{
+      opacity:0 !important;
+      pointer-events:none !important;
+    }
+
+    .game-page.box-question-sequence .question-view.is-visible .question-card,
+    .game-page.box-question-sequence .question-view.is-visible .choice-card,
+    .game-page.box-return-sequence .question-view.is-visible .question-card,
+    .game-page.box-return-sequence .question-view.is-visible .choice-card{
+      animation:none !important;
+    }
+
+    /* نفس غلاف المفكرة المستخدم في صفحة افتح الصندوق داخل ثيم الفصل. */
+    .game-page.theme-classroom{
+      --asset-notebook-cover:url("data:image/webp;base64,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");
+    }
+
+    .game-page.theme-classroom .box-card:nth-child(8n + 1){ --notebook-hue:0deg; --notebook-brightness:1; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 2){ --notebook-hue:40deg; --notebook-brightness:1.03; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 3){ --notebook-hue:82deg; --notebook-brightness:1.05; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 4){ --notebook-hue:128deg; --notebook-brightness:.97; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 5){ --notebook-hue:175deg; --notebook-brightness:1; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 6){ --notebook-hue:218deg; --notebook-brightness:.98; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 7){ --notebook-hue:272deg; --notebook-brightness:1; }
+    .game-page.theme-classroom .box-card:nth-child(8n + 8){ --notebook-hue:330deg; --notebook-brightness:.98; }
+
+    .game-page.theme-classroom .box-wrap{
+      filter:drop-shadow(0 7px 9px rgba(0,0,0,.16));
+      transform-style:preserve-3d;
+    }
+
+    .game-page.theme-classroom .front-panel{
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      border-radius:0 !important;
+      background:none !important;
+      box-shadow:none !important;
+      overflow:visible !important;
+      transform-origin:50% 12% !important;
+      transform-style:preserve-3d;
+    }
+
+    .game-page.theme-classroom .front-panel::before{
+      content:"" !important;
+      display:block !important;
+      position:absolute;
+      inset:0;
+      z-index:0;
+      border:0;
+      border-radius:0;
+      box-shadow:none;
+      background-image:var(--asset-notebook-cover);
+      background-repeat:no-repeat;
+      background-position:center;
+      background-size:contain;
+      filter:
+        hue-rotate(var(--notebook-hue,0deg))
+        saturate(1.22)
+        brightness(var(--notebook-brightness,1));
+      pointer-events:none;
+    }
+
+    .game-page.theme-classroom .panel-number{
+      z-index:2;
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+      text-shadow:0 2px 6px rgba(0,0,0,.34) !important;
+      font-size:clamp(20px,calc(var(--tile-size) * .38),62px) !important;
+      transform:translateY(7%);
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      .question-grid.box-grid{
+        max-height:100%;
+      }
+    }
 </style>
 </head>
 
@@ -2774,7 +2978,7 @@
 
     <section class="stage" id="stage">
       <section class="cards-view" id="cardsView" aria-label="بطاقات الأسئلة">
-        <div class="question-grid" id="questionGrid"></div>
+        <div class="question-grid box-grid" id="questionGrid"></div>
       </section>
 
       <section class="question-view" id="questionView" aria-label="السؤال والاختيارات">
@@ -3069,6 +3273,21 @@
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
     let questionImageZoomOpen = false;
+
+    let questionBoxGridState = { scale:1, x:0, y:0 };
+    let questionBoxZoomAnimation = null;
+    let questionBoxZoomFrame = null;
+    let questionBoxFocusedIndex = -1;
+    let questionBoxSelected = null;
+    const questionBoxScatterTargets = new Map();
+    const questionBoxScatterAnimations = new Map();
+
+    const BOX_SCATTER_MS = 1450;
+    const BOX_ZOOM_IN_MS = 1550;
+    const BOX_ZOOM_OUT_MS = 1450;
+    const BOX_MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
+    const BOX_ELEMENT_DURATION_MS = 1120;
+    const BOX_ELEMENT_STEP_MS = 300;
 
     let directIntroFrameId = null;
     let directIntroRunning = false;
@@ -3498,31 +3717,91 @@
       setSolidPanelColor(element,color);
     }
 
-    function calculateDeckLayout(){
-      const total = Math.max(1,questions.length);
-      const width = Math.max(320,stage.clientWidth);
-      const height = Math.max(320,stage.clientHeight);
+    function applyQuestionBoxPalette(button,index){
+      const [color,dark,light,textColor] = paletteFor(index);
+      const wall = dark || color;
 
+      button.style.setProperty("--panel",color);
+      button.style.setProperty("--panel-light",light || color);
+      button.style.setProperty("--panel-dark",dark || color);
+      button.style.setProperty("--wall-tone",wall);
+      button.style.setProperty("--top-wall",wall);
+      button.style.setProperty("--left-wall",wall);
+      button.style.setProperty("--right-wall",wall);
+      button.style.setProperty("--bottom-wall",wall);
+      button.style.setProperty("--back-face",dark || color);
+      button.style.setProperty("--box-cover-text",textColor || "#fff");
+    }
+
+    function calculateDeckLayout(){
+      const styles = getComputedStyle(stage);
+      const padX =
+        parseFloat(styles.paddingLeft || "0") +
+        parseFloat(styles.paddingRight || "0");
+      const padY =
+        parseFloat(styles.paddingTop || "0") +
+        parseFloat(styles.paddingBottom || "0");
+
+      const width = Math.max(220,(stage.clientWidth || innerWidth) - padX - 4);
+      const height = Math.max(190,(stage.clientHeight || innerHeight) - padY - 4);
+      const total = Math.max(1,Math.min(MAX_QUESTIONS,questions.length || 1));
+      const isPortrait = height > width;
+      const maxCols = Math.min(total,isPortrait ? 5 : 10);
+      const minCols = Math.min(total,2);
+      const baseGap = total > 24 ? 7 : total > 16 ? 9 : total > 10 ? 12 : 20;
+      const maxTile = total > 24 ? 112 : total > 16 ? 124 : total > 10 ? 138 : 152;
       let best = null;
 
-      for (let cols=1; cols<=Math.min(total,8); cols+=1) {
+      for (let cols=Math.max(1,minCols); cols<=maxCols; cols+=1) {
         const rows = Math.ceil(total / cols);
-        const gap = Math.max(12,Math.min(24,width * .015));
-        const cardW = (width * .92 - gap * (cols - 1)) / cols;
-        const cardH = (height * .88 - gap * (rows - 1)) / rows;
-        const ratio = cardW / Math.max(1,cardH);
-        const size = Math.min(cardW,cardH * .88);
-        const score =
-          size -
-          Math.abs(ratio - .78) * 30 -
-          Math.max(0,rows - 4) * 8;
+        const gap = baseGap;
+        const tileByWidth = Math.floor((width - gap * (cols - 1)) / cols);
+        const tileByHeight = Math.floor((height - gap * (rows - 1)) / rows);
+        const size = Math.min(maxTile,tileByWidth,tileByHeight);
+        if (size <= 0) continue;
+
+        const gridWidth = cols * size + gap * Math.max(0,cols - 1);
+        const gridHeight = rows * size + gap * Math.max(0,rows - 1);
+        const unusedSlots = cols * rows - total;
+        const aspectPenalty = Math.abs(cols / rows - width / Math.max(1,height)) * 3;
+        const rowBalance = Math.abs(rows - Math.ceil(Math.sqrt(total))) * 2;
+        const score = size * 100 - unusedSlots * 7 - aspectPenalty - rowBalance;
 
         if (!best || score > best.score) {
-          best = { cols,rows,score };
+          best = { cols,rows,gap,size,gridWidth,gridHeight,score };
         }
       }
 
-      questionGrid.style.setProperty("--cols",String(best?.cols || 4));
+      if (!best) {
+        const cols = isPortrait ? Math.min(total,3) : Math.min(total,8);
+        const rows = Math.ceil(total / Math.max(1,cols));
+        const gap = 6;
+        const size = Math.max(34,Math.min(
+          maxTile,
+          Math.floor((width - gap * Math.max(0,cols - 1)) / Math.max(1,cols)),
+          Math.floor((height - gap * Math.max(0,rows - 1)) / Math.max(1,rows))
+        ));
+        best = {
+          cols:Math.max(1,cols),rows,gap,size,
+          gridWidth:Math.max(1,cols) * size + gap * Math.max(0,cols - 1),
+          gridHeight:rows * size + gap * Math.max(0,rows - 1)
+        };
+      }
+
+      questionGrid.style.setProperty("--cols",String(best.cols));
+      questionGrid.style.setProperty("--tile-gap",`${Math.max(5,best.gap)}px`);
+      questionGrid.style.setProperty("--tile-size",`${Math.max(34,best.size)}px`);
+      questionGrid.style.width = `${best.gridWidth}px`;
+      questionGrid.style.height = `${best.gridHeight}px`;
+      document.documentElement.style.setProperty("--tile-gap",`${Math.max(5,best.gap)}px`);
+      document.documentElement.style.setProperty("--tile-size",`${Math.max(34,best.size)}px`);
+
+      if (questionBoxSelected && questionBoxFocusedIndex >= 0) {
+        requestAnimationFrame(()=>{
+          const target = getQuestionBoxZoomTarget(questionBoxSelected);
+          setQuestionBoxGridState(target.scale,target.x,target.y);
+        });
+      }
     }
 
     function renderDeck(){
@@ -3531,23 +3810,35 @@
       questions.forEach((_,index)=>{
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "deck-card";
+        button.className = "box-card";
         button.dataset.index = String(index);
-        button.setAttribute("aria-label",`السؤال ${index + 1}`);
-        applyPalette(button,index);
+        button.setAttribute("aria-label",`صندوق السؤال ${index + 1}`);
+        applyQuestionBoxPalette(button,index);
+
+        const wrap = document.createElement("span");
+        wrap.className = "box-wrap";
+
+        const panel = document.createElement("span");
+        panel.className = "front-panel";
 
         const number = document.createElement("span");
-        number.className = "deck-card-number";
-        number.textContent = String(index + 1);
-        button.appendChild(number);
+        number.className = "panel-number";
+        number.textContent = completed.has(index) ? "" : String(index + 1);
+
+        panel.appendChild(number);
+        wrap.appendChild(panel);
+        button.appendChild(wrap);
 
         if (completed.has(index)) {
           button.classList.add("is-completed");
+          button.disabled = true;
+          button.setAttribute("aria-disabled","true");
         }
 
         button.addEventListener("click",(event)=>{
           event.preventDefault();
           event.stopPropagation();
+          if (button.classList.contains("is-completed")) return;
           openQuestionFromCard(index,button);
         });
 
@@ -3555,6 +3846,7 @@
       });
 
       calculateDeckLayout();
+      setQuestionBoxGridState(1,0,0);
     }
 
     function choiceColumns(count){
@@ -3574,16 +3866,10 @@
 
       const availableWidth = Math.max(1,zoneWidth - 4);
       const availableHeight = Math.max(1,zoneHeight - 4);
-
       const minFont = Math.max(12,Number(options.minFont) || 12);
       const maxFont = Math.max(minFont,Number(options.maxFont) || minFont);
       const lineHeight = String(options.lineHeight || "1.15");
 
-      /*
-        نمنع عنصر النص من التمدد كعنصر Flex؛ لأن التمدد كان يجعل
-        scrollHeight مساويًا تقريبًا لارتفاع المنطقة كاملة، ثم يعتبر
-        القياس أن النص لا يناسب ويهبط به إلى 5 أو 6 بكسل.
-      */
       el.style.display = "block";
       el.style.flex = "0 0 auto";
       el.style.alignSelf = "center";
@@ -3606,20 +3892,13 @@
       let high = maxFont;
       let best = minFont;
 
-      for (let i = 0; i < 28; i += 1) {
+      for (let i=0; i<28; i+=1) {
         const mid = (low + high) / 2;
-
         el.style.setProperty("--fit-font-size",`${mid}px`);
         el.style.setProperty("font-size",`${mid}px`,"important");
-
         const rect = el.getBoundingClientRect();
-        const fitsWidth =
-          el.scrollWidth <= availableWidth + 1 &&
-          rect.width <= availableWidth + 1;
-        const fitsHeight =
-          el.scrollHeight <= availableHeight + 1 &&
-          rect.height <= availableHeight + 1;
-
+        const fitsWidth = el.scrollWidth <= availableWidth + 1 && rect.width <= availableWidth + 1;
+        const fitsHeight = el.scrollHeight <= availableHeight + 1 && rect.height <= availableHeight + 1;
         if (fitsWidth && fitsHeight) {
           best = mid;
           low = mid;
@@ -3628,15 +3907,7 @@
         }
       }
 
-      /*
-        لا نسمح بالهبوط إلى أحجام مجهرية.
-        إذا كان النص شديد الطول نستخدم الحد الأدنى المقروء فقط.
-      */
-      const finalSize = Math.max(
-        minFont,
-        Math.floor(best * 10) / 10
-      );
-
+      const finalSize = Math.max(minFont,Math.floor(best * 10) / 10);
       el.style.setProperty("--fit-font-size",`${finalSize}px`);
       el.style.setProperty("font-size",`${finalSize}px`,"important");
     }
@@ -3644,17 +3915,12 @@
     function fitCurrentSceneText(){
       const run = ()=>{
         const qText = questionCard.querySelector(".question-text");
-
         if (qText) {
           const zone = qText.closest(".question-fit-zone");
           const zoneHeight = zone?.clientHeight || questionCard.clientHeight;
-
           fitTextInsidePanel(qText,{
             minFont:18,
-            maxFont:Math.min(
-              64,
-              Math.max(34,zoneHeight * .58)
-            ),
+            maxFont:Math.min(64,Math.max(34,zoneHeight * .58)),
             lineHeight:"1.46"
           });
         }
@@ -3662,34 +3928,23 @@
         choicesGrid.querySelectorAll(".choice-text").forEach((el)=>{
           const zone = el.closest(".choice-fit-zone");
           const zoneHeight = zone?.clientHeight || 90;
-
           fitTextInsidePanel(el,{
             minFont:16,
-            maxFont:Math.min(
-              50,
-              Math.max(28,zoneHeight * .56)
-            ),
+            maxFont:Math.min(50,Math.max(28,zoneHeight * .56)),
             lineHeight:"1.38"
           });
         });
       };
 
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(run);
-      });
-
-      window.setTimeout(run,80);
-      window.setTimeout(run,240);
-      window.setTimeout(run,620);
-
-      if (document.fonts?.ready) {
-        document.fonts.ready.then(run).catch(()=>{});
-      }
+      requestAnimationFrame(()=> requestAnimationFrame(run));
+      setTimeout(run,80);
+      setTimeout(run,240);
+      setTimeout(run,620);
+      if (document.fonts?.ready) document.fonts.ready.then(run).catch(()=>{});
     }
 
     function closeQuestionImageZoom(){
       if (!questionImageZoomOpen) return;
-
       questionImageZoomOpen = false;
       page.classList.remove("question-image-zoom-open");
       questionImageOverlay.hidden = true;
@@ -3699,7 +3954,6 @@
     function openQuestionImageZoom(src){
       const safeSrc = String(src || "").trim();
       if (!safeSrc || interactionLocked) return;
-
       questionImageZoomOpen = true;
       questionImageOverlayImg.src = safeSrc;
       questionImageOverlay.hidden = false;
@@ -3711,7 +3965,6 @@
         closeQuestionImageZoom();
         return;
       }
-
       openQuestionImageZoom(src);
     }
 
@@ -3728,149 +3981,84 @@
       const hasImageChoices = item.choicesType === "images";
 
       questionView.classList.remove(
-        "is-answered",
-        "has-two-choices",
-        "has-image-question",
-        "has-image-choices",
-        "image-choice-count-2",
-        "image-choice-count-3",
-        "image-choice-count-4",
-        "image-choice-count-5",
-        "image-choice-count-6"
+        "is-answered","has-two-choices","has-image-question","has-image-choices",
+        "image-choice-count-2","image-choice-count-3","image-choice-count-4",
+        "image-choice-count-5","image-choice-count-6"
       );
-      questionView.classList.toggle(
-        "has-two-choices",
-        !hasImageChoices && item.choices.length === 2
-      );
-      questionView.classList.toggle(
-        "has-image-question",
-        isImageQuestion
-      );
-      questionView.classList.toggle(
-        "has-image-choices",
-        hasImageChoices
-      );
-
-      if (hasImageChoices) {
-        questionView.classList.add(
-          `image-choice-count-${item.choices.length}`
-        );
-      }
+      questionView.classList.toggle("has-two-choices",!hasImageChoices && item.choices.length === 2);
+      questionView.classList.toggle("has-image-question",isImageQuestion);
+      questionView.classList.toggle("has-image-choices",hasImageChoices);
+      if (hasImageChoices) questionView.classList.add(`image-choice-count-${item.choices.length}`);
 
       questionCard.textContent = "";
-      questionCard.classList.remove(
-        "is-long",
-        "is-very-long",
-        "is-image-question"
-      );
-      questionCard.classList.toggle(
-        "is-image-question",
-        isImageQuestion
-      );
+      questionCard.classList.remove("is-long","is-very-long","is-image-question");
+      questionCard.classList.toggle("is-image-question",isImageQuestion);
+      questionCard.style.removeProperty("animation");
+      questionCard.style.removeProperty("transform");
+      questionCard.style.removeProperty("opacity");
+      questionCard.style.removeProperty("will-change");
 
       choicesGrid.textContent = "";
       choicesGrid.classList.remove(
-        "is-image-choices",
-        "choice-count-2",
-        "choice-count-3",
-        "choice-count-4",
-        "choice-count-5",
-        "choice-count-6"
+        "is-image-choices","choice-count-2","choice-count-3","choice-count-4","choice-count-5","choice-count-6"
       );
-      choicesGrid.classList.toggle(
-        "is-image-choices",
-        hasImageChoices
-      );
+      choicesGrid.classList.toggle("is-image-choices",hasImageChoices);
       choicesGrid.classList.toggle(
         "has-centered-last-choice",
-        !hasImageChoices &&
-        (
-          item.choices.length === 3 ||
-          item.choices.length === 5
-        )
+        !hasImageChoices && (item.choices.length === 3 || item.choices.length === 5)
       );
-
-      if (hasImageChoices) {
-        choicesGrid.classList.add(
-          `choice-count-${item.choices.length}`
-        );
-      }
+      if (hasImageChoices) choicesGrid.classList.add(`choice-count-${item.choices.length}`);
 
       applyQuestionPanelColor(questionCard);
 
       if (item.questionType === "text") {
         const questionLength = String(item.questionText || "").trim().length;
-        questionCard.classList.toggle(
-          "is-long",
-          questionLength > 72 && questionLength <= 135
-        );
-        questionCard.classList.toggle(
-          "is-very-long",
-          questionLength > 135
-        );
+        questionCard.classList.toggle("is-long",questionLength > 72 && questionLength <= 135);
+        questionCard.classList.toggle("is-very-long",questionLength > 135);
       }
 
       if (item.questionType === "image") {
         const mediaZone = document.createElement("div");
-        mediaZone.className =
-          "question-fit-zone question-media-zone question-image-trigger";
+        mediaZone.className = "question-fit-zone question-media-zone question-image-trigger";
         mediaZone.setAttribute("role","button");
         mediaZone.setAttribute("tabindex","0");
-        mediaZone.setAttribute(
-          "aria-label",
-          "تكبير صورة السؤال"
-        );
+        mediaZone.setAttribute("aria-label","تكبير صورة السؤال");
 
         const image = document.createElement("img");
         image.className = "question-image";
         image.alt = "صورة السؤال";
         image.src = item.questionImageData;
         image.draggable = false;
-        image.addEventListener("load",()=>{
-          requestAnimationFrame(fitCurrentSceneText);
-        },{ once:true });
+        image.addEventListener("load",()=> requestAnimationFrame(fitCurrentSceneText),{ once:true });
 
         const toggleZoom = (event)=>{
           event.preventDefault();
           event.stopPropagation();
           toggleQuestionImageZoom(image.currentSrc || image.src);
         };
-
         mediaZone.addEventListener("click",toggleZoom);
         mediaZone.addEventListener("keydown",(event)=>{
-          if (event.key === "Enter" || event.key === " ") {
-            toggleZoom(event);
-          }
+          if (event.key === "Enter" || event.key === " ") toggleZoom(event);
         });
-
         mediaZone.appendChild(image);
         questionCard.appendChild(mediaZone);
       } else {
         const fitZone = document.createElement("div");
         fitZone.className = "question-fit-zone";
-
         const text = document.createElement("div");
         text.className = "question-text";
         text.dataset.fitText = "question";
         text.textContent = item.questionText;
-
         fitZone.appendChild(text);
         questionCard.appendChild(fitZone);
       }
 
-      choicesGrid.style.setProperty(
-        "--choice-cols",
-        String(choiceColumns(item.choices.length))
-      );
-
+      choicesGrid.style.setProperty("--choice-cols",String(choiceColumns(item.choices.length)));
       item.choices.forEach((choice,choiceIndex)=>{
         const button = document.createElement("button");
         button.type = "button";
         button.className = "choice-card";
-        button.classList.toggle(
-          "is-image-choice",
-          item.choicesType === "images"
-        );
+        button.classList.toggle("is-image-choice",item.choicesType === "images");
         button.style.setProperty("--choice-order",String(choiceIndex));
         button.setAttribute("aria-label",`الاختيار ${choiceIndex + 1}`);
         applyChoicePanelColor(button,choiceIndex);
@@ -3878,26 +4066,20 @@
         if (item.choicesType === "images") {
           const mediaZone = document.createElement("span");
           mediaZone.className = "choice-fit-zone choice-media-zone";
-
           const image = document.createElement("img");
           image.className = "choice-image";
           image.alt = `الاختيار ${choiceIndex + 1}`;
           image.src = choice.imageData;
-          image.addEventListener("load",()=>{
-            requestAnimationFrame(fitCurrentSceneText);
-          },{ once:true });
-
+          image.addEventListener("load",()=> requestAnimationFrame(fitCurrentSceneText),{ once:true });
           mediaZone.appendChild(image);
           button.appendChild(mediaZone);
         } else {
           const fitZone = document.createElement("span");
           fitZone.className = "choice-fit-zone";
-
           const text = document.createElement("span");
           text.className = "choice-text";
           text.dataset.fitText = "choice";
           text.textContent = choice.text;
-
           fitZone.appendChild(text);
           button.appendChild(fitZone);
         }
@@ -3905,13 +4087,11 @@
         const mark = document.createElement("span");
         mark.className = "answer-mark";
         button.appendChild(mark);
-
         button.addEventListener("click",(event)=>{
           event.preventDefault();
           event.stopPropagation();
           chooseAnswer(button,choiceIndex);
         });
-
         choicesGrid.appendChild(button);
       });
 
@@ -3923,34 +4103,27 @@
     function showMark(card,type){
       const mark = card.querySelector(".answer-mark");
       if (!mark) return;
-
       card.classList.add("has-visible-mark");
       mark.className = `answer-mark ${type === "correct" ? "is-correct" : "is-wrong"}`;
       mark.textContent = type === "correct" ? "✓" : "×";
-
-      requestAnimationFrame(()=>{
-        mark.classList.add("is-visible");
-      });
+      requestAnimationFrame(()=> mark.classList.add("is-visible"));
     }
 
     function chooseAnswer(card,choiceIndex){
       if (questionImageZoomOpen) return;
       if (answerLocked || interactionLocked) return;
       if (card.classList.contains("is-disabled")) return;
-
       const item = questions[activeQuestionIndex];
       if (!item) return;
 
       if (choiceIndex === item.correctChoiceIndex) {
         answerLocked = true;
-        completed.add(activeQuestionIndex);
+        if (displayMode !== "cards") completed.add(activeQuestionIndex);
         showMark(card,"correct");
-
         choicesGrid.querySelectorAll(".choice-card").forEach((choiceCard)=>{
           choiceCard.classList.add("is-disabled");
           choiceCard.disabled = true;
         });
-
         questionView.classList.add("is-answered");
         return;
       }
@@ -3958,159 +4131,383 @@
       card.classList.add("is-disabled","is-wrong");
       card.disabled = true;
       showMark(card,"wrong");
-
       setTimeout(()=> card.classList.remove("is-wrong"),480);
     }
 
-    function createFocusCard(source,index){
-      const rect = source.getBoundingClientRect();
-      const targetW = Math.min(
-        Math.max(230,stage.clientWidth * .28),
-        410
-      );
-      const targetH = Math.min(
-        Math.max(245,stage.clientHeight * .48),
-        470
-      );
-      const stageRect = stage.getBoundingClientRect();
-      const centerX = stageRect.left + stageRect.width / 2;
-      const centerY = stageRect.top + stageRect.height / 2;
-
-      const clone = document.createElement("div");
-      clone.className = "focus-card";
-      applyPalette(clone,index);
-
-      clone.style.left = `${rect.left}px`;
-      clone.style.top = `${rect.top}px`;
-      clone.style.width = `${rect.width}px`;
-      clone.style.height = `${rect.height}px`;
-
-      const number = document.createElement("span");
-      number.className = "focus-card-number";
-      number.textContent = String(index + 1);
-
-      const top = document.createElement("span");
-      top.className = "focus-card-top";
-
-      clone.append(number,top);
-      document.body.appendChild(clone);
-
-      const translateX = centerX - (rect.left + rect.width / 2);
-      const translateY = centerY - (rect.top + rect.height / 2);
-      const scaleX = targetW / Math.max(1,rect.width);
-      const scaleY = targetH / Math.max(1,rect.height);
-
-      requestAnimationFrame(()=>{
-        clone.style.transition =
-          "transform .78s cubic-bezier(.18,.78,.18,1), border-radius .78s ease";
-        clone.style.transform =
-          `translate3d(${translateX}px,${translateY}px,0) scale(${scaleX},${scaleY})`;
-      });
-
-      return { clone,targetW,targetH };
+    function makeQuestionBoxGridTransform(scale,x,y){
+      return `translate3d(${x.toFixed(3)}px,${y.toFixed(3)}px,0) scale(${scale.toFixed(6)})`;
     }
 
-    function scatterDeck(selected){
-      const cards = Array.from(questionGrid.querySelectorAll(".deck-card"));
-      const centerX = stage.clientWidth / 2;
-      const centerY = stage.clientHeight / 2;
-      const travel = Math.max(stage.clientWidth,stage.clientHeight) * .86;
+    function setQuestionBoxGridState(scale,x,y){
+      questionBoxGridState = { scale,x,y };
+      questionGrid.style.transform = makeQuestionBoxGridTransform(scale,x,y);
+    }
 
-      cards.forEach((card,index)=>{
+    function cancelQuestionBoxZoom(){
+      if (questionBoxZoomFrame) {
+        cancelAnimationFrame(questionBoxZoomFrame);
+        questionBoxZoomFrame = null;
+      }
+      if (questionBoxZoomAnimation) {
+        try { questionBoxZoomAnimation.cancel(); } catch (_) {}
+        questionBoxZoomAnimation = null;
+      }
+    }
+
+    function animateQuestionBoxGrid(target,duration){
+      cancelQuestionBoxZoom();
+      const start = { ...questionBoxGridState };
+      const end = {
+        scale:Math.max(1,Number(target.scale) || 1),
+        x:Number(target.x) || 0,
+        y:Number(target.y) || 0
+      };
+      const startTransform = makeQuestionBoxGridTransform(start.scale,start.x,start.y);
+      const endTransform = makeQuestionBoxGridTransform(end.scale,end.x,end.y);
+
+      if (typeof questionGrid.animate === "function") {
+        questionBoxZoomAnimation = questionGrid.animate(
+          [{ transform:startTransform },{ transform:endTransform }],
+          { duration,easing:BOX_MOTION_EASING,fill:"forwards" }
+        );
+        return questionBoxZoomAnimation.finished.catch(()=>{}).then(()=>{
+          questionGrid.style.transform = endTransform;
+          try { questionBoxZoomAnimation?.cancel(); } catch (_) {}
+          questionBoxZoomAnimation = null;
+          questionBoxGridState = end;
+        });
+      }
+
+      const startTime = performance.now();
+      return new Promise((resolve)=>{
+        const frame = (now)=>{
+          const p = Math.min(1,(now - startTime) / duration);
+          const e = easeInOutSine(p);
+          setQuestionBoxGridState(
+            start.scale + (end.scale - start.scale) * e,
+            start.x + (end.x - start.x) * e,
+            start.y + (end.y - start.y) * e
+          );
+          if (p < 1) questionBoxZoomFrame = requestAnimationFrame(frame);
+          else { questionBoxZoomFrame = null; resolve(); }
+        };
+        questionBoxZoomFrame = requestAnimationFrame(frame);
+      });
+    }
+
+    function getQuestionBoxZoomTarget(button){
+      const stageW = Math.max(1,stage.clientWidth || innerWidth);
+      const stageH = Math.max(1,stage.clientHeight || innerHeight);
+      const isLandscape = innerWidth > innerHeight;
+      const tile = Math.max(1,button.offsetWidth || 150);
+      const desiredTile = isLandscape
+        ? Math.min(stageW * .34,stageH * .58,tile * 2.18)
+        : Math.min(stageW * .72,stageH * .42,tile * 2.24);
+      const scale = Math.min(isLandscape ? 2.18 : 2.24,Math.max(1.38,desiredTile / tile));
+      const localCenterX = button.offsetLeft + button.offsetWidth / 2;
+      const localCenterY = button.offsetTop + button.offsetHeight / 2;
+      const focusX = stageW * .50;
+      const focusY = stageH * (isLandscape ? .50 : .53);
+      return {
+        scale,
+        x:focusX - questionGrid.offsetLeft - localCenterX * scale,
+        y:focusY - questionGrid.offsetTop - localCenterY * scale
+      };
+    }
+
+    function cancelQuestionBoxScatterAnimations(){
+      questionBoxScatterAnimations.forEach((animation)=>{
+        try { animation.cancel(); } catch (_) {}
+      });
+      questionBoxScatterAnimations.clear();
+    }
+
+    function scatterQuestionBoxes(selected){
+      cancelQuestionBoxScatterAnimations();
+      questionBoxScatterTargets.clear();
+      const cards = Array.from(questionGrid.querySelectorAll(".box-card"));
+      const stageRect = stage.getBoundingClientRect();
+      const selectedX = selected.offsetLeft + selected.offsetWidth / 2;
+      const selectedY = selected.offsetTop + selected.offsetHeight / 2;
+      const tile = selected.offsetWidth || 1;
+      const travel = Math.max(stageRect.width,stageRect.height) * .78 + tile * 1.6;
+      const promises = [];
+      questionGrid.classList.add("focus-mode","motion-active");
+
+      cards.forEach((card,cardIndex)=>{
+        card.classList.remove("focus-selected","focus-away");
+        card.style.opacity = "1";
+        card.style.transform = "translate3d(0,0,0) scale(1)";
         if (card === selected) {
-          card.style.opacity = "0";
-          card.style.pointerEvents = "none";
+          card.classList.add("focus-selected");
           return;
         }
 
-        const rect = card.getBoundingClientRect();
-        const stageRect = stage.getBoundingClientRect();
-        let dx = rect.left + rect.width / 2 - (stageRect.left + centerX);
-        let dy = rect.top + rect.height / 2 - (stageRect.top + centerY);
-        const length = Math.hypot(dx,dy) || 1;
-        dx /= length;
-        dy /= length;
+        let dx = card.offsetLeft + card.offsetWidth / 2 - selectedX;
+        let dy = card.offsetTop + card.offsetHeight / 2 - selectedY;
+        let length = Math.hypot(dx,dy);
+        if (length < 1) {
+          const angle = ((cardIndex + 1) * 2.399963229728653) % (Math.PI * 2);
+          dx = Math.cos(angle); dy = Math.sin(angle); length = 1;
+        }
+        const distance = travel + (cardIndex % 4) * tile * .10;
+        const target = {
+          transform:`translate3d(${(dx / length * distance).toFixed(2)}px,${(dy / length * distance).toFixed(2)}px,0) scale(.76)`,
+          opacity:0
+        };
+        questionBoxScatterTargets.set(card,target);
+        card.classList.add("focus-away");
 
-        card.style.setProperty("--away-x",`${dx * travel}px`);
-        card.style.setProperty("--away-y",`${dy * travel}px`);
-        card.style.setProperty("--away-r",`${(index % 2 ? 1 : -1) * (8 + index % 4 * 4)}deg`);
-        card.classList.add("is-away");
+        if (typeof card.animate === "function") {
+          const animation = card.animate(
+            [
+              { transform:"translate3d(0,0,0) scale(1)",opacity:1 },
+              { transform:target.transform,opacity:0 }
+            ],
+            { duration:BOX_SCATTER_MS,easing:BOX_MOTION_EASING,fill:"forwards" }
+          );
+          questionBoxScatterAnimations.set(card,animation);
+          promises.push(animation.finished.catch(()=>{}));
+        }
+      });
+
+      return promises.length ? Promise.all(promises) : wait(BOX_SCATTER_MS);
+    }
+
+    function restoreQuestionBoxesAnimated(){
+      cancelQuestionBoxScatterAnimations();
+      const cards = Array.from(questionGrid.querySelectorAll(".box-card"));
+      const promises = [];
+      questionGrid.classList.add("motion-active");
+
+      cards.forEach((card)=>{
+        if (card === questionBoxSelected) return;
+        const target = questionBoxScatterTargets.get(card);
+        if (!target) return;
+        if (typeof card.animate === "function") {
+          const animation = card.animate(
+            [
+              { transform:target.transform,opacity:0 },
+              { transform:"translate3d(0,0,0) scale(1)",opacity:1 }
+            ],
+            { duration:BOX_SCATTER_MS,easing:BOX_MOTION_EASING,fill:"forwards" }
+          );
+          promises.push(animation.finished.catch(()=>{}));
+          questionBoxScatterAnimations.set(card,animation);
+        }
+      });
+
+      return (promises.length ? Promise.all(promises) : wait(BOX_SCATTER_MS)).then(()=>{
+        cancelQuestionBoxScatterAnimations();
+        cards.forEach((card)=>{
+          card.style.transform = "translate3d(0,0,0) scale(1)";
+          card.style.opacity = "1";
+          card.classList.remove("focus-selected","focus-away");
+        });
+        questionBoxScatterTargets.clear();
+        questionGrid.classList.remove("focus-mode","motion-active");
       });
     }
 
     function restoreDeck(){
-      questionGrid.querySelectorAll(".deck-card").forEach((card,index)=>{
-        card.classList.remove("is-away");
-        card.style.removeProperty("--away-x");
-        card.style.removeProperty("--away-y");
-        card.style.removeProperty("--away-r");
-        card.style.opacity = "";
-        card.style.pointerEvents = "";
+      cancelQuestionBoxScatterAnimations();
+      questionGrid.querySelectorAll(".box-card").forEach((card,index)=>{
+        card.style.transform = "translate3d(0,0,0) scale(1)";
+        card.style.opacity = "1";
+        card.classList.remove("focus-selected","focus-away","box-vanished");
         card.classList.toggle("is-completed",completed.has(index));
+        const number = card.querySelector(".panel-number");
+        if (number) number.textContent = completed.has(index) ? "" : String(index + 1);
+        card.disabled = completed.has(index);
+      });
+      questionBoxScatterTargets.clear();
+      questionGrid.classList.remove("focus-mode","motion-active");
+      setQuestionBoxGridState(1,0,0);
+      questionBoxFocusedIndex = -1;
+      questionBoxSelected = null;
+    }
+
+    function animateBoxShake(button,strong = false){
+      const wrap = button?.querySelector(".box-wrap");
+      if (!wrap || typeof wrap.animate !== "function") return wait(strong ? 560 : 720);
+      const magnitude = strong ? 5 : 4;
+      const animation = wrap.animate(
+        [
+          { transform:"translate3d(0,0,0) rotate(0deg)" },
+          { transform:`translate3d(-${magnitude}px,1px,0) rotate(-2deg)` },
+          { transform:`translate3d(${magnitude}px,-1px,0) rotate(2deg)` },
+          { transform:`translate3d(-${magnitude - 1}px,0,0) rotate(-1.5deg)` },
+          { transform:`translate3d(${magnitude - 1}px,0,0) rotate(1.5deg)` },
+          { transform:"translate3d(0,0,0) rotate(0deg)" }
+        ],
+        { duration:strong ? 560 : 720,easing:"ease-in-out" }
+      );
+      return animation.finished.catch(()=>{});
+    }
+
+    function getElementBoxMotion(element,sourceRect){
+      const rect = element.getBoundingClientRect();
+      return {
+        dx:sourceRect.left + sourceRect.width / 2 - (rect.left + rect.width / 2),
+        dy:sourceRect.top + sourceRect.height / 2 - (rect.top + rect.height / 2)
+      };
+    }
+
+    async function animateQuestionOutOfBox(source){
+      const sourceRect = source.getBoundingClientRect();
+      const elements = [questionCard,...choicesGrid.querySelectorAll(".choice-card")];
+      const animations = [];
+
+      elements.forEach((element,index)=>{
+        const { dx,dy } = getElementBoxMotion(element,sourceRect);
+        element.getAnimations().forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+        element.style.animation = "none";
+        element.style.willChange = "transform,opacity";
+        element.style.opacity = "0";
+        element.style.transform = `translate3d(${dx}px,${dy}px,0) scale(.12)`;
+
+        const animation = element.animate(
+          [
+            { transform:`translate3d(${dx}px,${dy}px,0) scale(.12)`,opacity:0 },
+            { transform:"translate3d(0,0,0) scale(1.04)",opacity:1,offset:.84 },
+            { transform:"translate3d(0,0,0) scale(1)",opacity:1 }
+          ],
+          {
+            duration:BOX_ELEMENT_DURATION_MS,
+            delay:index * BOX_ELEMENT_STEP_MS,
+            easing:"cubic-bezier(.16,.9,.2,1)",
+            fill:"forwards"
+          }
+        );
+        animations.push(animation.finished.catch(()=>{}));
+      });
+
+      await Promise.all(animations);
+      elements.forEach((element)=>{
+        element.getAnimations().forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+        element.style.animation = "none";
+        element.style.transform = "translate3d(0,0,0) scale(1)";
+        element.style.opacity = "1";
+        element.style.willChange = "";
       });
     }
 
-    function createBurst(centerX,centerY,index){
-      burstLayer.textContent = "";
-      burstLayer.style.setProperty("--origin-x",`${centerX}px`);
-      burstLayer.style.setProperty("--origin-y",`${centerY}px`);
+    async function animateQuestionIntoBox(source){
+      const sourceRect = source.getBoundingClientRect();
+      const elements = [questionCard,...choicesGrid.querySelectorAll(".choice-card")];
 
-      const colors = [
-        paletteFor(index)[0],
-        paletteFor(index)[2],
-        "#ffffff",
-        "#ffd653"
-      ];
-
-      for (let i=0; i<18; i+=1) {
-        const angle = (Math.PI * 2 * i) / 18;
-        const distance = 90 + (i % 5) * 22;
-        const dot = document.createElement("span");
-        dot.className = "burst-dot";
-        dot.style.setProperty("--x",`${Math.cos(angle) * distance}px`);
-        dot.style.setProperty("--y",`${Math.sin(angle) * distance}px`);
-        dot.style.setProperty("--r",`${180 + i * 37}deg`);
-        dot.style.setProperty("--dot-color",colors[i % colors.length]);
-        burstLayer.appendChild(dot);
+      for (let index=0; index<elements.length; index+=1) {
+        const element = elements[index];
+        const { dx,dy } = getElementBoxMotion(element,sourceRect);
+        element.getAnimations().forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+        const animation = element.animate(
+          [
+            { transform:"translate3d(0,0,0) scale(1)",opacity:1 },
+            { transform:`translate3d(${dx}px,${dy}px,0) scale(.10)`,opacity:0 }
+          ],
+          {
+            duration:700,
+            easing:"cubic-bezier(.55,0,.75,.25)",
+            fill:"forwards"
+          }
+        );
+        await animation.finished.catch(()=>{});
       }
-
-      burstLayer.classList.add("is-active");
-      setTimeout(()=>{
-        burstLayer.classList.remove("is-active");
-        burstLayer.textContent = "";
-      },820);
     }
 
     async function openQuestionFromCard(index,source){
-      if (interactionLocked) return;
-      if (!source || !questions[index]) return;
+      if (interactionLocked || !source || !questions[index]) return;
+      if (completed.has(index) || source.classList.contains("is-completed")) return;
 
       interactionLocked = true;
       activeSourceCard = source;
-      scatterDeck(source);
+      questionBoxSelected = source;
+      questionBoxFocusedIndex = index;
+      activeQuestionIndex = index;
+      source.classList.remove("box-vanished");
 
-      const { clone } = createFocusCard(source,index);
-      focusCard = clone;
+      const scatterFinished = scatterQuestionBoxes(source);
+      await wait(120);
+      await Promise.all([
+        scatterFinished,
+        animateQuestionBoxGrid(getQuestionBoxZoomTarget(source),BOX_ZOOM_IN_MS)
+      ]);
+      questionGrid.classList.remove("motion-active");
 
-      await wait(820);
+      await animateBoxShake(source,false);
 
-      const rect = clone.getBoundingClientRect();
-      createBurst(
-        rect.left + rect.width / 2,
-        rect.top + rect.height / 2,
-        index
-      );
-
-      clone.classList.add("is-opening");
-      await wait(330);
-
-      cardsView.classList.add("is-hidden");
+      page.classList.add("box-question-sequence");
       renderQuestion(index);
+      questionNavigation.hidden = true;
+      fitCurrentSceneText();
+      await new Promise((resolve)=> requestAnimationFrame(()=> requestAnimationFrame(resolve)));
+      await animateQuestionOutOfBox(source);
+      await animateBoxShake(source,true);
 
-      await wait(620);
-      clone.remove();
-      focusCard = null;
+      source.classList.add("box-vanished");
+      await wait(260);
+      cardsView.classList.add("is-hidden");
+      page.classList.remove("box-question-sequence");
       interactionLocked = false;
+      updateNavigationButtons();
+      collapseSafariBars({ refresh:false });
+    }
+
+    async function returnQuestionToBoxes(markCompleted = true){
+      if (interactionLocked) return;
+      if (!questionBoxSelected || activeQuestionIndex < 0) {
+        questionView.classList.remove("is-visible","is-answered");
+        cardsView.classList.remove("is-hidden");
+        restoreDeck();
+        updateNavigationButtons();
+        return;
+      }
+
+      closeQuestionImageZoom();
+      interactionLocked = true;
+      questionNavigation.hidden = true;
+      page.classList.add("box-return-sequence");
+      cardsView.classList.remove("is-hidden");
+      questionBoxSelected.classList.remove("box-vanished");
+      questionBoxSelected.style.opacity = "1";
+      await wait(120);
+
+      await animateQuestionIntoBox(questionBoxSelected);
+      questionView.classList.remove("is-visible","is-answered");
+
+      if (markCompleted) completed.add(activeQuestionIndex);
+      const finishedIndex = activeQuestionIndex;
+      const number = questionBoxSelected.querySelector(".panel-number");
+      if (markCompleted && number) number.textContent = "";
+      questionBoxSelected.classList.toggle("is-completed",markCompleted);
+      questionBoxSelected.disabled = markCompleted;
+
+      await animateBoxShake(questionBoxSelected,true);
+      await Promise.all([
+        restoreQuestionBoxesAnimated(),
+        animateQuestionBoxGrid({ scale:1,x:0,y:0 },BOX_ZOOM_OUT_MS)
+      ]);
+
+      const selected = questionGrid.querySelector(`.box-card[data-index="${finishedIndex}"]`);
+      if (selected) {
+        selected.style.opacity = "1";
+        selected.style.transform = "translate3d(0,0,0) scale(1)";
+        selected.classList.remove("focus-selected","focus-away","box-vanished");
+        selected.classList.toggle("is-completed",completed.has(finishedIndex));
+        const selectedNumber = selected.querySelector(".panel-number");
+        if (selectedNumber) selectedNumber.textContent = completed.has(finishedIndex) ? "" : String(finishedIndex + 1);
+        selected.disabled = completed.has(finishedIndex);
+      }
+
+      page.classList.remove("box-return-sequence");
+      questionBoxFocusedIndex = -1;
+      questionBoxSelected = null;
+      activeSourceCard = null;
+      activeQuestionIndex = -1;
+      answerLocked = false;
+      interactionLocked = false;
+      updateNavigationButtons();
+      collapseSafariBars();
     }
 
     function clearDirectFirstScenePresentation(){
@@ -4146,10 +4543,15 @@
         activeQuestionIndex < questions.length;
 
       questionNavigation.hidden = !questionVisible;
-
       if (!questionVisible) {
         previousBtn.hidden = true;
         nextBtn.hidden = true;
+        return;
+      }
+
+      if (displayMode === "cards") {
+        previousBtn.hidden = true;
+        nextBtn.hidden = false;
         return;
       }
 
@@ -4200,6 +4602,10 @@
         event.preventDefault();
         event.stopPropagation();
       }
+      if (displayMode === "cards") {
+        await returnQuestionToBoxes(true);
+        return;
+      }
       await showQuestionByIndex(activeQuestionIndex + 1);
     }
 
@@ -4208,6 +4614,7 @@
         event.preventDefault();
         event.stopPropagation();
       }
+      if (displayMode === "cards") return;
       await showQuestionByIndex(activeQuestionIndex - 1);
     }
 
@@ -4216,22 +4623,15 @@
         closeQuestionImageZoom();
         return;
       }
+      if (displayMode === "cards") {
+        await returnQuestionToBoxes(false);
+        return;
+      }
       if (interactionLocked) return;
       interactionLocked = true;
       questionNavigation.hidden = true;
-
       questionView.classList.remove("is-visible","is-answered");
       await wait(260);
-
-      if (displayMode === "cards") {
-        cardsView.classList.remove("is-hidden");
-        restoreDeck();
-        activeSourceCard = null;
-        activeQuestionIndex = -1;
-        answerLocked = false;
-        await wait(760);
-      }
-
       updateNavigationButtons();
       interactionLocked = false;
       collapseSafariBars();
@@ -4292,7 +4692,7 @@
       }
 
       const cards = Array.from(
-        questionGrid.querySelectorAll(".deck-card")
+        questionGrid.querySelectorAll(".box-card")
       );
 
       cards.forEach((card,index)=>{
