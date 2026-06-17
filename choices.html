@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v20-wide-spaced-image-grid-clear-line-height -->
+  <!-- version: choices-v21-raised-text-question-and-image-group -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -2462,6 +2462,57 @@
 
       .question-view.has-image-question{
         --question-image-height:clamp(140px,20vh,186px);
+      }
+    }
+
+
+    /* v21: رفع مواضع السؤال والاختيارات فقط دون تغيير الأحجام. */
+
+    /*
+      سؤال نص + اختيارات صور:
+      رفع المجموعة كاملة ليصبح مستطيل السؤال قريبًا من أعلى الشاشة
+      كما هو محدد في الصورة المرجعية.
+    */
+    .question-view.has-image-choices:not(.has-image-question){
+      transform:translateY(clamp(-145px,-14vh,-110px)) !important;
+    }
+
+    /*
+      سؤال صورة + اختيارات صور:
+      رفع السؤال وجميع مربعات الإجابات معًا،
+      بحيث يبقى الصف السفلي أعلى زر الرجوع بمسافة آمنة بسيطة.
+    */
+    .question-view.has-image-question.has-image-choices{
+      transform:translateY(clamp(-76px,-9vh,-58px)) !important;
+    }
+
+    @media (orientation:portrait){
+      .question-view.has-image-choices:not(.has-image-question){
+        transform:translateY(clamp(-82px,-9vh,-58px)) !important;
+      }
+
+      .question-view.has-image-question.has-image-choices{
+        transform:translateY(clamp(-48px,-6vh,-32px)) !important;
+      }
+    }
+
+    @media (max-width:560px){
+      .question-view.has-image-choices:not(.has-image-question){
+        transform:translateY(clamp(-62px,-8vh,-42px)) !important;
+      }
+
+      .question-view.has-image-question.has-image-choices{
+        transform:translateY(clamp(-38px,-5vh,-24px)) !important;
+      }
+    }
+
+    @media (max-height:520px) and (orientation:landscape){
+      .question-view.has-image-choices:not(.has-image-question){
+        transform:translateY(clamp(-58px,-12vh,-42px)) !important;
+      }
+
+      .question-view.has-image-question.has-image-choices{
+        transform:translateY(clamp(-42px,-9vh,-28px)) !important;
       }
     }
 
