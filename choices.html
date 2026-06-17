@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v22-answer-mark-pop-then-corner -->
+  <!-- version: choices-v23-mark-fixed-on-outer-top-left-corner -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -2626,6 +2626,108 @@
       }
     }
 
+
+    /* v23: تثبيت العلامة على الزاوية العلوية اليسرى نفسها. */
+    .choice-card.has-visible-mark{
+      overflow:visible !important;
+    }
+
+    .answer-mark{
+      --mark-corner-left:0px;
+      --mark-corner-top:0px;
+      --mark-corner-scale:.40;
+    }
+
+    .choice-card.is-image-choice .answer-mark{
+      --mark-corner-left:0px;
+      --mark-corner-top:0px;
+      --mark-corner-scale:.36;
+    }
+
+    /*
+      مركز العلامة يستقر فوق نقطة الزاوية نفسها؛
+      لذلك يبقى جزء منها داخل المستطيل وجزء خارج المستطيل.
+    */
+    @keyframes answerMarkRevealThenCorner{
+      0%{
+        left:50%;
+        top:50%;
+        opacity:0;
+        transform:
+          translate(-50%,-50%)
+          scale(.08)
+          rotate(-18deg);
+        animation-timing-function:
+          cubic-bezier(.16,1,.3,1);
+      }
+
+      14%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(.48)
+          rotate(-9deg);
+      }
+
+      32%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(1.18)
+          rotate(4deg);
+      }
+
+      44%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(1)
+          rotate(0deg);
+        animation-timing-function:
+          cubic-bezier(.22,.72,.24,1);
+      }
+
+      60%{
+        left:50%;
+        top:50%;
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(1)
+          rotate(0deg);
+      }
+
+      100%{
+        left:var(--mark-corner-left);
+        top:var(--mark-corner-top);
+        opacity:1;
+        transform:
+          translate(-50%,-50%)
+          scale(var(--mark-corner-scale))
+          rotate(0deg);
+      }
+    }
+
+    @media (max-width:560px){
+      .answer-mark{
+        --mark-corner-left:0px;
+        --mark-corner-top:0px;
+        --mark-corner-scale:.38;
+      }
+
+      .choice-card.is-image-choice .answer-mark{
+        --mark-corner-left:0px;
+        --mark-corner-top:0px;
+        --mark-corner-scale:.34;
+      }
+    }
+
 </style>
 </head>
 
@@ -3792,6 +3894,7 @@
       const mark = card.querySelector(".answer-mark");
       if (!mark) return;
 
+      card.classList.add("has-visible-mark");
       mark.className = `answer-mark ${type === "correct" ? "is-correct" : "is-wrong"}`;
       mark.textContent = type === "correct" ? "✓" : "×";
 
