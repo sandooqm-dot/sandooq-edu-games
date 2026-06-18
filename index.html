@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-choices-builder-clean-ui-v47 -->
+<!-- version: index-choices-builder-compact-stacked-v48 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -6091,6 +6091,299 @@
       }
     }
 
+
+
+    /* v48: تحسينات صفحة إعداد الاختيارات مع الحفاظ على هوية اللعبة. */
+    .choices-setup .game-name-input::placeholder{
+      color:#9a9a9a;
+      opacity:1;
+    }
+
+    /* مربع الثيم أصغر ومتوازن بين العنوان والزر والمعاينة. */
+    .choices-theme-section{
+      padding:10px 13px !important;
+    }
+
+    .choices-theme-current{
+      grid-template-columns:minmax(0,1fr) auto clamp(72px,9vw,96px) !important;
+      min-height:54px !important;
+      gap:9px !important;
+    }
+
+    .choices-theme-title-wrap{
+      justify-items:start !important;
+      text-align:right !important;
+    }
+
+    .choices-theme-section .choices-section-title{
+      font-size:clamp(17px,1.65vw,22px) !important;
+    }
+
+    .choices-theme-preview{
+      border-width:2px !important;
+      border-radius:12px !important;
+    }
+
+    .choices-theme-change{
+      min-height:34px !important;
+      border-radius:11px !important;
+      padding:5px 11px !important;
+      font-size:clamp(12px,1.05vw,14px) !important;
+      box-shadow:0 2px 0 rgba(0,0,0,.14) !important;
+    }
+
+    /* رؤوس أقلام فقط داخل إعداد اللعبة. */
+    .choices-section-head{
+      margin-bottom:10px !important;
+    }
+
+    .choices-config-grid{
+      gap:10px !important;
+    }
+
+    .choices-config-group{
+      gap:8px !important;
+      padding:10px !important;
+      border-radius:15px !important;
+    }
+
+    .choices-config-group-title{
+      font-size:clamp(15px,1.4vw,18px) !important;
+    }
+
+    .choices-config-group-note,
+    .choices-mode-icon{
+      display:none !important;
+    }
+
+    .choices-mode-btn{
+      min-height:42px !important;
+      padding:6px 8px !important;
+      border-radius:12px !important;
+      gap:0 !important;
+    }
+
+    .choices-mode-btn strong{
+      font-size:clamp(13px,1.25vw,16px) !important;
+    }
+
+    .choices-mode-btn.active{
+      background:var(--orange) !important;
+      color:#fff !important;
+      box-shadow:0 3px 0 rgba(0,0,0,.16) !important;
+    }
+
+    /* سهم واضح ومباشر للإعدادات المتقدمة. */
+    .choices-advanced-toggle{
+      min-height:42px !important;
+      font-size:clamp(14px,1.35vw,17px) !important;
+      justify-content:space-between !important;
+      padding-inline:15px !important;
+    }
+
+    .choices-advanced-arrow{
+      width:26px;
+      height:26px;
+      border:2px solid var(--ink);
+      border-radius:50%;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px !important;
+      line-height:1;
+      background:#fff;
+      transition:transform .22s ease,background .22s ease,color .22s ease !important;
+    }
+
+    .choices-advanced-toggle[aria-expanded="true"] .choices-advanced-arrow{
+      transform:rotate(180deg) !important;
+      background:var(--orange);
+      color:#fff;
+    }
+
+    /* إعدادات متقدمة أصغر ومتوازنة. */
+    .choices-advanced-inner{
+      padding:10px 12px !important;
+      gap:6px !important;
+    }
+
+    .choices-advanced-row{
+      min-height:44px !important;
+      padding:4px 2px 8px !important;
+      gap:10px !important;
+    }
+
+    .choices-advanced-label strong{
+      font-size:clamp(15px,1.35vw,18px) !important;
+    }
+
+    .choices-advanced-label span{
+      font-size:clamp(11px,1vw,13px) !important;
+    }
+
+    .quiz-font-select{
+      min-width:118px !important;
+      max-width:142px !important;
+      height:36px !important;
+      border-radius:11px !important;
+      padding-inline:9px !important;
+      font-size:13px !important;
+    }
+
+    /* سويتش الصوت: أصغر، والدائرة متمركزة داخل محيطه. */
+    .quiz-sound-toggle{
+      width:68px !important;
+      height:34px !important;
+      border-radius:999px !important;
+    }
+
+    .quiz-sound-toggle::after{
+      top:2px !important;
+      left:2px !important;
+      width:26px !important;
+      height:26px !important;
+      border-width:2px !important;
+    }
+
+    .quiz-sound-toggle.is-on::after{
+      transform:translateX(34px) !important;
+    }
+
+    .quiz-sound-toggle span{
+      font-size:17px !important;
+    }
+
+    /* جميع الأسئلة تظهر تحت بعضها كما في النظام السابق. */
+    .quiz-question-navigation,
+    .quiz-question-tabs{
+      display:none !important;
+    }
+
+    .quiz-questions-editor{
+      display:grid !important;
+      gap:14px !important;
+    }
+
+    .quiz-question-entry{
+      margin:0 !important;
+    }
+
+    .quiz-add-question{
+      margin:14px auto 0 !important;
+      justify-self:center !important;
+    }
+
+    .quiz-choices-title-row{
+      justify-content:center !important;
+    }
+
+    .quiz-choice-count{
+      display:none !important;
+    }
+
+    /* سويتش الإجابة الصحيح: أصغر ومحاذاته الداخلية سليمة. */
+    .quiz-correct-switch{
+      width:64px !important;
+      height:34px !important;
+      border-radius:999px !important;
+    }
+
+    .quiz-correct-switch::after{
+      top:2px !important;
+      left:2px !important;
+      width:26px !important;
+      height:26px !important;
+    }
+
+    .quiz-correct-switch.is-correct::after{
+      transform:translateX(30px) !important;
+    }
+
+    .quiz-switch-x,
+    .quiz-switch-check{
+      font-size:18px !important;
+    }
+
+    .quiz-choice-row{
+      grid-template-columns:34px minmax(0,1fr) 64px !important;
+    }
+
+    /* زر إضافة اختيار أزرق ونصه أبيض. */
+    .quiz-add-choice{
+      background:#1688d3 !important;
+      color:#fff !important;
+      border-color:var(--ink) !important;
+    }
+
+    @media(max-width:760px){
+      .choices-theme-section{
+        padding:9px 10px !important;
+      }
+
+      .choices-theme-current{
+        grid-template-columns:minmax(0,1fr) auto 72px !important;
+        min-height:50px !important;
+        gap:7px !important;
+      }
+
+      .choices-theme-title-wrap{
+        justify-items:center !important;
+        text-align:center !important;
+      }
+
+      .choices-theme-section .choices-section-title{
+        font-size:17px !important;
+      }
+
+      .choices-theme-change{
+        min-height:32px !important;
+        padding:4px 9px !important;
+        font-size:12px !important;
+      }
+
+      .choices-config-grid{
+        gap:9px !important;
+      }
+
+      .choices-config-group{
+        padding:9px !important;
+      }
+
+      .choices-mode-btn{
+        min-height:40px !important;
+      }
+
+      .choices-advanced-row{
+        min-height:42px !important;
+      }
+
+      .choices-advanced-label strong{
+        font-size:15px !important;
+      }
+
+      .quiz-font-select{
+        min-width:108px !important;
+        max-width:126px !important;
+      }
+
+      .quiz-choice-row{
+        grid-template-columns:32px minmax(0,1fr) 62px !important;
+      }
+
+      .quiz-correct-switch{
+        width:62px !important;
+        height:32px !important;
+      }
+
+      .quiz-correct-switch::after{
+        width:24px !important;
+        height:24px !important;
+      }
+
+      .quiz-correct-switch.is-correct::after{
+        transform:translateX(30px) !important;
+      }
+    }
 </style>
 </head>
 <body>
@@ -6332,15 +6625,14 @@
       <span class="game-name-title">ادخل اسم اللعبة</span>
       <span class="game-name-note">سيتم حفظ اللعبة في الألعاب المحفوظة بهذا الاسم</span>
     </div>
-    <input class="game-name-input" id="quizGameNameInput" maxlength="60" placeholder="مثال: مراجعة درس النباتات" type="text"/>
+    <input class="game-name-input" id="quizGameNameInput" maxlength="60" placeholder="اكتب اسم اللعبة هنا.." type="text"/>
   </div>
 
   <div class="choices-setup-body">
-    <section class="choices-section">
+    <section class="choices-section choices-theme-section">
       <div class="choices-theme-current">
         <div class="choices-theme-title-wrap">
           <h3 class="choices-section-title">اختر ثيم اللعبة</h3>
-          <p class="choices-section-note">يمكن تغييره قبل الاختبار أو الحفظ</p>
         </div>
         <button class="choices-theme-change" id="toggleQuizThemeListBtn" type="button">تغيير</button>
         <span aria-hidden="true" class="choices-theme-preview theme-art classic" id="quizCurrentThemePreview"></span>
@@ -6380,41 +6672,37 @@
     <section class="choices-section">
       <div class="choices-section-head">
         <h3 class="choices-section-title">إعداد اللعبة</h3>
-        <p class="choices-section-note">اختر طريقة السؤال والاختيارات والعرض</p>
       </div>
 
       <div class="choices-config-grid">
         <div class="choices-config-group">
           <h4 class="choices-config-group-title">نوع السؤال</h4>
-          <p class="choices-config-group-note">نص أو صورة فقط</p>
           <div class="choices-mode-grid" aria-label="نوع السؤال">
-            <button class="choices-mode-btn active" data-quiz-question-type="text" type="button"><span class="choices-mode-icon">T</span><strong>نص</strong></button>
-            <button class="choices-mode-btn" data-quiz-question-type="image" type="button"><span class="choices-mode-icon">▧</span><strong>صورة</strong></button>
+            <button class="choices-mode-btn active" data-quiz-question-type="text" type="button"><strong>نص</strong></button>
+            <button class="choices-mode-btn" data-quiz-question-type="image" type="button"><strong>صورة</strong></button>
           </div>
         </div>
 
         <div class="choices-config-group">
           <h4 class="choices-config-group-title">نوع الاختيارات</h4>
-          <p class="choices-config-group-note">جميعها من النوع نفسه</p>
           <div class="choices-mode-grid" aria-label="نوع الاختيارات">
-            <button class="choices-mode-btn active" data-quiz-choices-type="text" type="button"><span class="choices-mode-icon">T</span><strong>نصوص</strong></button>
-            <button class="choices-mode-btn" data-quiz-choices-type="images" type="button"><span class="choices-mode-icon">▧</span><strong>صور</strong></button>
+            <button class="choices-mode-btn active" data-quiz-choices-type="text" type="button"><strong>نصوص</strong></button>
+            <button class="choices-mode-btn" data-quiz-choices-type="images" type="button"><strong>صور</strong></button>
           </div>
         </div>
 
         <div class="choices-config-group">
           <h4 class="choices-config-group-title">طريقة العرض</h4>
-          <p class="choices-config-group-note">مباشر أو داخل صناديق</p>
           <div class="choices-mode-grid" aria-label="طريقة عرض الأسئلة">
-            <button class="choices-mode-btn active" data-quiz-display-mode="cards" type="button"><span class="choices-mode-icon">□</span><strong>صناديق</strong></button>
-            <button class="choices-mode-btn" data-quiz-display-mode="direct" type="button"><span class="choices-mode-icon">▶</span><strong>مباشر</strong></button>
+            <button class="choices-mode-btn active" data-quiz-display-mode="cards" type="button"><strong>صناديق</strong></button>
+            <button class="choices-mode-btn" data-quiz-display-mode="direct" type="button"><strong>مباشر</strong></button>
           </div>
         </div>
       </div>
 
       <button class="choices-advanced-toggle" id="quizAdvancedToggleBtn" type="button" aria-expanded="false">
         <span>⚙ الإعدادات المتقدمة</span>
-        <span class="choices-advanced-arrow" aria-hidden="true">⌄</span>
+        <span class="choices-advanced-arrow" aria-hidden="true">▼</span>
       </button>
 
       <div class="choices-advanced-panel" id="quizAdvancedPanel" aria-hidden="true">
@@ -6447,15 +6735,10 @@
     <section class="choices-section">
       <div class="choices-section-head">
         <h3 class="choices-section-title">الأسئلة والاختيارات</h3>
-        <p class="choices-section-note">عدّل سؤالًا واحدًا في كل مرة، ويمكن إضافة حتى 30 سؤالًا</p>
-      </div>
-
-      <div class="quiz-question-navigation">
-        <div class="quiz-question-tabs" id="quizQuestionTabs" aria-label="قائمة الأسئلة"></div>
-        <button class="quiz-add-question" id="addQuizQuestionBtn" type="button"><span>＋</span><span>إضافة سؤال</span></button>
       </div>
 
       <div class="quiz-questions-editor" id="quizQuestionsEditor"></div>
+      <button class="quiz-add-question" id="addQuizQuestionBtn" type="button"><span>＋</span><span>إضافة سؤال</span></button>
     </section>
 
     <div class="choices-actions">
@@ -7678,272 +7961,275 @@
     }
 
     clampActiveQuizQuestionIndex();
-    renderQuizQuestionTabs();
-
     quizQuestionsEditor.textContent = "";
 
-    const questionIndex = activeQuizQuestionIndex;
-    const question = quizQuestions[questionIndex];
-    const entry = document.createElement("article");
-    entry.className = "quiz-question-entry";
+    quizQuestions.forEach((question,questionIndex)=>{
+      const entry = document.createElement("article");
+      entry.className = "quiz-question-entry";
+      entry.dataset.questionIndex = String(questionIndex);
 
-    const head = document.createElement("div");
-    head.className = "quiz-question-head";
+      const head = document.createElement("div");
+      head.className = "quiz-question-head";
 
-    const number = document.createElement("span");
-    number.className = "quiz-question-number";
-    number.textContent = `السؤال ${questionIndex + 1}`;
+      const number = document.createElement("span");
+      number.className = "quiz-question-number";
+      number.textContent = `السؤال ${questionIndex + 1}`;
 
-    const removeQuestion = document.createElement("button");
-    removeQuestion.type = "button";
-    removeQuestion.className = "quiz-remove-question";
-    removeQuestion.innerHTML = "<span>×</span><span>حذف</span>";
-    removeQuestion.setAttribute(
-      "aria-label",
-      `حذف السؤال ${questionIndex + 1}`
-    );
-    removeQuestion.hidden = quizQuestions.length <= 1;
-
-    removeQuestion.addEventListener("click",()=>{
-      if (quizQuestions.length <= 1) return;
-
-      animateQuizRemoval(entry,()=>{
-        quizQuestions.splice(questionIndex,1);
-        activeQuizQuestionIndex = Math.min(
-          questionIndex,
-          quizQuestions.length - 1
-        );
-        renderQuizQuestions();
-        saveQuizDraft();
-      });
-    });
-
-    head.append(number,removeQuestion);
-    entry.appendChild(head);
-
-    const qLabel = document.createElement("div");
-    qLabel.className = "quiz-field-label";
-    qLabel.textContent =
-      quizQuestionType === "text"
-        ? "نص السؤال"
-        : "صورة السؤال";
-
-    entry.appendChild(qLabel);
-
-    if (quizQuestionType === "text") {
-      const input = document.createElement("input");
-      input.className = "quiz-text-input";
-      input.type = "text";
-      input.maxLength = 220;
-      input.placeholder = "اكتب السؤال هنا";
-      input.value = question.questionText || "";
-
-      input.addEventListener("input",()=>{
-        quizQuestions[questionIndex].questionText = input.value;
-        saveQuizDraft();
-      });
-
-      entry.appendChild(input);
-    } else {
-      entry.appendChild(createQuizImagePicker({
-        data:question.questionImageData,
-        name:question.questionImageName,
-        label:`صورة السؤال ${questionIndex + 1}`,
-        onChange:({imageData,imageName})=>{
-          quizQuestions[questionIndex].questionImageData = imageData;
-          quizQuestions[questionIndex].questionImageName = imageName;
-          quizQuestions[questionIndex].questionText = "";
-        }
-      }));
-    }
-
-    const choicesTitleRow = document.createElement("div");
-    choicesTitleRow.className = "quiz-choices-title-row";
-
-    const choicesLabel = document.createElement("div");
-    choicesLabel.className = "quiz-field-label";
-    choicesLabel.textContent =
-      "الاختيارات — حدّد الإجابة الصحيحة من الزر الموجود يمين كل اختيار";
-
-    const choiceCount = document.createElement("span");
-    choiceCount.className = "quiz-choice-count";
-    choiceCount.textContent =
-      `${question.choices.length} من ${QUIZ_MAX_CHOICES}`;
-
-    choicesTitleRow.append(choicesLabel,choiceCount);
-    entry.appendChild(choicesTitleRow);
-
-    const list = document.createElement("div");
-    list.className = "quiz-choices-list";
-
-    question.choices.forEach((choice,choiceIndex)=>{
-      const row = document.createElement("div");
-      row.className = "quiz-choice-row";
-
-      const content = document.createElement("div");
-      content.className = "quiz-choice-content";
-
-      if (quizChoicesType === "text") {
-        const input = document.createElement("input");
-        input.className = "quiz-text-input";
-        input.type = "text";
-        input.maxLength = 100;
-        input.placeholder = `الخيار ${choiceIndex + 1}`;
-        input.value = choice.text || "";
-
-        input.addEventListener("input",()=>{
-          quizQuestions[questionIndex]
-            .choices[choiceIndex]
-            .text = input.value;
-          saveQuizDraft();
-        });
-
-        content.appendChild(input);
-      } else {
-        content.appendChild(createQuizImagePicker({
-          data:choice.imageData,
-          name:choice.imageName,
-          label:`صورة الخيار ${choiceIndex + 1}`,
-          onChange:({imageData,imageName})=>{
-            const target =
-              quizQuestions[questionIndex]
-                .choices[choiceIndex];
-
-            target.imageData = imageData;
-            target.imageName = imageName;
-            target.text = "";
-          }
-        }));
-      }
-
-      const correctSwitch = document.createElement("button");
-      correctSwitch.type = "button";
-      correctSwitch.className = "quiz-correct-switch";
-
-      if (question.correctChoiceIndex === choiceIndex) {
-        correctSwitch.classList.add("is-correct");
-      }
-
-      correctSwitch.setAttribute(
+      const removeQuestion = document.createElement("button");
+      removeQuestion.type = "button";
+      removeQuestion.className = "quiz-remove-question";
+      removeQuestion.innerHTML = "<span>×</span><span>حذف</span>";
+      removeQuestion.setAttribute(
         "aria-label",
-        question.correctChoiceIndex === choiceIndex
-          ? "هذا هو الاختيار الصحيح"
-          : "تعيين هذا الاختيار كإجابة صحيحة"
+        `حذف السؤال ${questionIndex + 1}`
       );
+      removeQuestion.hidden = quizQuestions.length <= 1;
 
-      correctSwitch.innerHTML =
-        '<span class="quiz-switch-x">×</span>' +
-        '<span class="quiz-switch-check">✓</span>';
+      removeQuestion.addEventListener("click",()=>{
+        if (quizQuestions.length <= 1) return;
 
-      correctSwitch.addEventListener(
-        "click",
-        ()=> setCorrectChoice(questionIndex,choiceIndex)
-      );
-
-      const removeChoice = document.createElement("button");
-      removeChoice.type = "button";
-      removeChoice.className = "quiz-remove-choice";
-      removeChoice.textContent = "×";
-      removeChoice.setAttribute(
-        "aria-label",
-        `حذف الخيار ${choiceIndex + 1}`
-      );
-      removeChoice.disabled =
-        question.choices.length <= QUIZ_MIN_CHOICES;
-
-      removeChoice.addEventListener("click",()=>{
-        const targetQuestion = quizQuestions[questionIndex];
-
-        if (
-          !targetQuestion ||
-          targetQuestion.choices.length <= QUIZ_MIN_CHOICES
-        ) {
-          return;
-        }
-
-        animateQuizRemoval(row,()=>{
-          targetQuestion.choices.splice(choiceIndex,1);
-
-          if (
-            targetQuestion.correctChoiceIndex === choiceIndex
-          ) {
-            targetQuestion.correctChoiceIndex = -1;
-          } else if (
-            targetQuestion.correctChoiceIndex > choiceIndex
-          ) {
-            targetQuestion.correctChoiceIndex -= 1;
-          }
-
-          targetQuestion.choices.forEach((item,index)=>{
-            item.isCorrect =
-              index === targetQuestion.correctChoiceIndex;
-          });
-
+        animateQuizRemoval(entry,()=>{
+          quizQuestions.splice(questionIndex,1);
+          activeQuizQuestionIndex = Math.max(
+            0,
+            Math.min(questionIndex,quizQuestions.length - 1)
+          );
           renderQuizQuestions();
           saveQuizDraft();
         });
       });
 
-      /*
-        direction:ltr في السطر:
-        الحذف يسار — الإدخال وسط — الصحيح يمين.
-      */
-      row.append(removeChoice,content,correctSwitch);
-      list.appendChild(row);
+      head.append(number,removeQuestion);
+      entry.appendChild(head);
 
-      if (
-        pendingQuizChoiceEnter ===
-        `${questionIndex}:${choiceIndex}`
-      ) {
-        playQuizEntryAnimation(row);
+      const qLabel = document.createElement("div");
+      qLabel.className = "quiz-field-label";
+      qLabel.textContent =
+        quizQuestionType === "text"
+          ? "نص السؤال"
+          : "صورة السؤال";
+
+      entry.appendChild(qLabel);
+
+      if (quizQuestionType === "text") {
+        const input = document.createElement("input");
+        input.className = "quiz-text-input";
+        input.type = "text";
+        input.maxLength = 220;
+        input.placeholder = "اكتب السؤال هنا";
+        input.value = question.questionText || "";
+
+        input.addEventListener("input",()=>{
+          quizQuestions[questionIndex].questionText = input.value;
+          saveQuizDraft();
+        });
+
+        entry.appendChild(input);
+      } else {
+        entry.appendChild(createQuizImagePicker({
+          data:question.questionImageData,
+          name:question.questionImageName,
+          label:`صورة السؤال ${questionIndex + 1}`,
+          onChange:({imageData,imageName})=>{
+            quizQuestions[questionIndex].questionImageData = imageData;
+            quizQuestions[questionIndex].questionImageName = imageName;
+            quizQuestions[questionIndex].questionText = "";
+          }
+        }));
+      }
+
+      const choicesTitleRow = document.createElement("div");
+      choicesTitleRow.className = "quiz-choices-title-row";
+
+      const choicesLabel = document.createElement("div");
+      choicesLabel.className = "quiz-field-label";
+      choicesLabel.textContent = "الاختيارات";
+
+      choicesTitleRow.appendChild(choicesLabel);
+      entry.appendChild(choicesTitleRow);
+
+      const list = document.createElement("div");
+      list.className = "quiz-choices-list";
+
+      question.choices.forEach((choice,choiceIndex)=>{
+        const row = document.createElement("div");
+        row.className = "quiz-choice-row";
+
+        const content = document.createElement("div");
+        content.className = "quiz-choice-content";
+
+        if (quizChoicesType === "text") {
+          const input = document.createElement("input");
+          input.className = "quiz-text-input";
+          input.type = "text";
+          input.maxLength = 100;
+          input.placeholder = `الخيار ${choiceIndex + 1}`;
+          input.value = choice.text || "";
+
+          input.addEventListener("input",()=>{
+            quizQuestions[questionIndex]
+              .choices[choiceIndex]
+              .text = input.value;
+            saveQuizDraft();
+          });
+
+          content.appendChild(input);
+        } else {
+          content.appendChild(createQuizImagePicker({
+            data:choice.imageData,
+            name:choice.imageName,
+            label:`صورة الخيار ${choiceIndex + 1}`,
+            onChange:({imageData,imageName})=>{
+              const target =
+                quizQuestions[questionIndex]
+                  .choices[choiceIndex];
+
+              target.imageData = imageData;
+              target.imageName = imageName;
+              target.text = "";
+            }
+          }));
+        }
+
+        const correctSwitch = document.createElement("button");
+        correctSwitch.type = "button";
+        correctSwitch.className = "quiz-correct-switch";
+
+        if (question.correctChoiceIndex === choiceIndex) {
+          correctSwitch.classList.add("is-correct");
+        }
+
+        correctSwitch.setAttribute(
+          "aria-label",
+          question.correctChoiceIndex === choiceIndex
+            ? "هذا هو الاختيار الصحيح"
+            : "تعيين هذا الاختيار كإجابة صحيحة"
+        );
+
+        correctSwitch.innerHTML =
+          '<span class="quiz-switch-x">×</span>' +
+          '<span class="quiz-switch-check">✓</span>';
+
+        correctSwitch.addEventListener(
+          "click",
+          ()=> setCorrectChoice(questionIndex,choiceIndex)
+        );
+
+        const removeChoice = document.createElement("button");
+        removeChoice.type = "button";
+        removeChoice.className = "quiz-remove-choice";
+        removeChoice.textContent = "×";
+        removeChoice.setAttribute(
+          "aria-label",
+          `حذف الخيار ${choiceIndex + 1}`
+        );
+        removeChoice.disabled =
+          question.choices.length <= QUIZ_MIN_CHOICES;
+
+        removeChoice.addEventListener("click",()=>{
+          const targetQuestion = quizQuestions[questionIndex];
+
+          if (
+            !targetQuestion ||
+            targetQuestion.choices.length <= QUIZ_MIN_CHOICES
+          ) {
+            return;
+          }
+
+          animateQuizRemoval(row,()=>{
+            targetQuestion.choices.splice(choiceIndex,1);
+
+            if (
+              targetQuestion.correctChoiceIndex === choiceIndex
+            ) {
+              targetQuestion.correctChoiceIndex = -1;
+            } else if (
+              targetQuestion.correctChoiceIndex > choiceIndex
+            ) {
+              targetQuestion.correctChoiceIndex -= 1;
+            }
+
+            targetQuestion.choices.forEach((item,index)=>{
+              item.isCorrect =
+                index === targetQuestion.correctChoiceIndex;
+            });
+
+            renderQuizQuestions();
+            saveQuizDraft();
+          });
+        });
+
+        row.append(removeChoice,content,correctSwitch);
+        list.appendChild(row);
+
+        if (
+          pendingQuizChoiceEnter ===
+          `${questionIndex}:${choiceIndex}`
+        ) {
+          playQuizEntryAnimation(row);
+        }
+      });
+
+      entry.appendChild(list);
+
+      const addChoice = document.createElement("button");
+      addChoice.type = "button";
+      addChoice.className = "quiz-add-choice";
+      addChoice.innerHTML =
+        "<span>＋</span><span>إضافة اختيار</span>";
+      addChoice.hidden =
+        question.choices.length >= QUIZ_MAX_CHOICES;
+
+      addChoice.setAttribute(
+        "aria-label",
+        `إضافة اختيار للسؤال ${questionIndex + 1}`
+      );
+
+      addChoice.addEventListener("click",()=>{
+        if (
+          quizQuestions[questionIndex].choices.length >=
+          QUIZ_MAX_CHOICES
+        ) {
+          return;
+        }
+
+        const newChoiceIndex =
+          quizQuestions[questionIndex].choices.length;
+
+        quizQuestions[questionIndex]
+          .choices
+          .push(createQuizChoice());
+
+        pendingQuizChoiceEnter =
+          `${questionIndex}:${newChoiceIndex}`;
+
+        renderQuizQuestions();
+        saveQuizDraft();
+
+        window.setTimeout(()=>{
+          const currentEntry =
+            quizQuestionsEditor.querySelector(
+              `[data-question-index="${questionIndex}"]`
+            );
+          currentEntry
+            ?.querySelectorAll(".quiz-choice-row")
+            ?.[newChoiceIndex]
+            ?.scrollIntoView({
+              behavior:"smooth",
+              block:"center"
+            });
+        },40);
+      });
+
+      entry.appendChild(addChoice);
+      quizQuestionsEditor.appendChild(entry);
+
+      if (pendingQuizQuestionEnter === questionIndex) {
+        playQuizEntryAnimation(entry);
       }
     });
 
     pendingQuizChoiceEnter = "";
-    entry.appendChild(list);
-
-    const addChoice = document.createElement("button");
-    addChoice.type = "button";
-    addChoice.className = "quiz-add-choice";
-    addChoice.innerHTML =
-      "<span>＋</span><span>إضافة اختيار</span>";
-    addChoice.hidden =
-      question.choices.length >= QUIZ_MAX_CHOICES;
-
-    addChoice.setAttribute(
-      "aria-label",
-      `إضافة اختيار للسؤال ${questionIndex + 1}`
-    );
-
-    addChoice.addEventListener("click",()=>{
-      if (
-        quizQuestions[questionIndex].choices.length >=
-        QUIZ_MAX_CHOICES
-      ) {
-        return;
-      }
-
-      const newChoiceIndex =
-        quizQuestions[questionIndex].choices.length;
-
-      quizQuestions[questionIndex]
-        .choices
-        .push(createQuizChoice());
-
-      pendingQuizChoiceEnter =
-        `${questionIndex}:${newChoiceIndex}`;
-
-      renderQuizQuestions();
-      saveQuizDraft();
-    });
-
-    entry.appendChild(addChoice);
-    quizQuestionsEditor.appendChild(entry);
-
-    if (pendingQuizQuestionEnter === questionIndex) {
-      playQuizEntryAnimation(entry);
-    }
-
     pendingQuizQuestionEnter = -1;
 
     if (addQuizQuestionBtn) {
@@ -8185,13 +8471,15 @@
     saveQuizDraft();
 
     window.setTimeout(()=>{
-      quizQuestionsEditor
-        ?.querySelector(".quiz-question-entry")
-        ?.scrollIntoView({
-          behavior:"smooth",
-          block:"center"
-        });
-    },40);
+      const entries =
+        quizQuestionsEditor
+          ?.querySelectorAll(".quiz-question-entry");
+
+      entries?.[entries.length - 1]?.scrollIntoView({
+        behavior:"smooth",
+        block:"center"
+      });
+    },50);
   });
 
   quizAdvancedToggleBtn?.addEventListener("click",()=>{
