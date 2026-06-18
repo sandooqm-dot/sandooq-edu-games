@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-choices-builder-linked-v46 -->
+<!-- version: index-choices-builder-clean-ui-v47 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -5154,275 +5154,658 @@
 
 
 
-    /* v46: إعداد لعبة الاختيارات وربطها بصفحة choices.html */
+    /* v47: واجهة إدخال الاختيارات — مرتبة، مدمجة، وقابلة للتوسع */
     .choices-setup{
       display:none;
-      width:min(1180px,92%);
+      width:min(1020px,94%);
       margin:0 auto;
       position:relative;
       z-index:5;
-      background:#fff;
-      border:3px solid var(--ink);
-      border-radius:26px;
-      padding:clamp(18px,2.4vw,28px);
+      background:transparent;
+      border:0;
+      border-radius:0;
+      padding:clamp(8px,1.3vw,16px) 0 clamp(20px,2.5vw,30px);
+      --choices-font:Tahoma, Arial, "Segoe UI", sans-serif;
+      font-family:var(--choices-font);
     }
 
-    .choices-setup.active{ display:block; }
+    .choices-setup.active{
+      display:block;
+    }
+
+    .choices-setup[data-quiz-font="arial"]{
+      --choices-font:Arial, Tahoma, sans-serif;
+    }
+
+    .choices-setup[data-quiz-font="traditional"]{
+      --choices-font:"Traditional Arabic", "Simplified Arabic", Tahoma, serif;
+    }
+
+    .choices-setup,
+    .choices-setup button,
+    .choices-setup input,
+    .choices-setup select{
+      font-family:var(--choices-font);
+    }
+
+    .choices-setup .game-name-panel{
+      margin:0 0 clamp(12px,1.6vw,18px) !important;
+      padding:clamp(14px,1.7vw,20px) !important;
+      border:3px solid var(--ink) !important;
+      border-radius:22px !important;
+      background:#fff !important;
+      gap:9px !important;
+    }
+
+    .choices-setup .game-name-title{
+      font-size:clamp(20px,2.1vw,29px) !important;
+    }
+
+    .choices-setup .game-name-note{
+      font-size:clamp(12px,1.15vw,15px) !important;
+    }
+
+    .choices-setup .game-name-input{
+      height:clamp(44px,4.7vw,52px) !important;
+      border-radius:16px !important;
+      font-size:clamp(15px,1.45vw,19px) !important;
+    }
 
     .choices-setup-body{
       display:grid;
-      gap:clamp(14px,1.8vw,22px);
-      margin-top:clamp(16px,2vw,24px);
+      gap:clamp(12px,1.55vw,18px);
+      margin:0;
     }
 
-    .choices-panel{
+    .choices-section{
       border:3px solid var(--ink);
       border-radius:22px;
-      background:#f8f8f8;
+      background:#fff;
       padding:clamp(14px,1.7vw,20px);
     }
 
-    .choices-panel-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:14px;
+    .choices-section-head{
+      display:grid;
+      justify-items:center;
+      gap:4px;
+      margin-bottom:clamp(12px,1.5vw,17px);
+      text-align:center;
     }
 
-    .choices-panel-title{
+    .choices-section-title{
       margin:0;
-      font-size:clamp(18px,2vw,28px);
-      font-weight:900;
+      color:#111;
+      font-size:clamp(19px,2vw,27px);
+      font-weight:950;
+      line-height:1.15;
     }
 
-    .choices-panel-note{
-      color:#555;
-      font-size:clamp(12px,1.25vw,16px);
+    .choices-section-note{
+      margin:0;
+      color:#666;
+      font-size:clamp(11px,1.15vw,14px);
       font-weight:700;
       line-height:1.45;
     }
 
-    .choices-mode-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:clamp(10px,1.4vw,15px);
-    }
-
-    .choices-mode-btn{
-      min-height:clamp(72px,7.5vw,98px);
-      border:3px solid var(--ink);
-      border-radius:20px;
-      background:#fff;
-      color:#111;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:5px;
-      padding:10px;
-      cursor:pointer;
-      transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
-    }
-
-    .choices-mode-btn strong{
-      font-size:clamp(17px,1.85vw,25px);
-      line-height:1.1;
-    }
-
-    .choices-mode-btn span{
-      color:#5b5b5b;
-      font-size:clamp(11px,1.2vw,15px);
-      font-weight:700;
-      text-align:center;
-    }
-
-    .choices-mode-btn.active{
-      background:var(--title-yellow);
-      transform:translateY(-3px);
-      box-shadow:0 6px 0 rgba(0,0,0,.18);
-    }
-
+    /* الثيم */
     .choices-theme-current{
       display:grid;
-      grid-template-columns:minmax(0,1fr) auto clamp(100px,14vw,170px);
+      grid-template-columns:minmax(0,1fr) auto clamp(92px,12vw,140px);
       align-items:center;
       gap:12px;
+      min-height:76px;
+    }
+
+    .choices-theme-title-wrap{
+      display:grid;
+      justify-items:center;
+      gap:3px;
+      text-align:center;
     }
 
     .choices-theme-preview{
       width:100%;
       aspect-ratio:16/9;
       border:3px solid var(--ink);
-      border-radius:16px;
+      border-radius:15px;
       overflow:hidden;
       background-position:center;
       background-size:cover;
       background-repeat:no-repeat;
     }
 
+    .choices-theme-change,
+    .choices-theme-activate{
+      min-height:40px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      background:var(--orange);
+      color:#fff;
+      padding:7px 14px;
+      font-size:clamp(13px,1.25vw,16px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.14);
+    }
+
     .choices-theme-list{
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
+      gap:10px;
       margin-top:14px;
     }
 
-    .choices-theme-list[hidden]{ display:none !important; }
+    .choices-theme-list[hidden]{
+      display:none !important;
+    }
 
     .choices-theme-card{
-      border:3px solid var(--ink);
-      border-radius:18px;
+      border:2px solid var(--ink);
+      border-radius:16px;
       background:#fff;
-      padding:9px;
+      padding:8px;
       display:grid;
-      gap:8px;
+      gap:7px;
+      transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
     }
 
     .choices-theme-card.active{
       background:#fff7cf;
-      box-shadow:0 5px 0 rgba(0,0,0,.14);
+      box-shadow:0 4px 0 rgba(0,0,0,.13);
+      transform:translateY(-2px);
     }
 
     .choices-theme-card .theme-art{
       width:100%;
       aspect-ratio:16/9;
-      border-radius:11px;
-      border:2px solid rgba(17,17,17,.25);
+      border-radius:10px;
+      border:2px solid rgba(17,17,17,.22);
       background-position:center;
       background-size:cover;
     }
 
     .choices-theme-name{
       text-align:center;
-      font-size:clamp(13px,1.4vw,18px);
+      font-size:clamp(12px,1.25vw,16px);
       font-weight:900;
     }
 
-    .choices-theme-activate,
-    .choices-theme-change{
-      min-height:42px;
+    /* إعداد النشاط: مجموعات اختيار مدمجة */
+    .choices-config-grid{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:clamp(10px,1.4vw,15px);
+    }
+
+    .choices-config-group{
+      min-width:0;
+      display:grid;
+      align-content:start;
+      gap:8px;
+      border:2px solid rgba(17,17,17,.18);
+      border-radius:17px;
+      background:#f8f8f8;
+      padding:11px;
+    }
+
+    .choices-config-group-title{
+      margin:0;
+      text-align:center;
+      font-size:clamp(15px,1.5vw,19px);
+      font-weight:950;
+      line-height:1.15;
+    }
+
+    .choices-config-group-note{
+      min-height:30px;
+      margin:0;
+      color:#666;
+      text-align:center;
+      font-size:clamp(10px,1vw,12px);
+      font-weight:700;
+      line-height:1.35;
+    }
+
+    .choices-mode-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:7px;
+    }
+
+    .choices-mode-btn{
+      min-width:0;
+      min-height:48px;
       border:2px solid var(--ink);
       border-radius:14px;
-      background:var(--orange);
-      color:#fff;
-      padding:7px 14px;
-      font-weight:900;
+      background:#fff;
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      padding:7px 8px;
+      cursor:pointer;
+      transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
+    }
+
+    .choices-mode-icon{
+      flex:0 0 auto;
+      min-width:24px;
+      height:24px;
+      border:2px solid currentColor;
+      border-radius:7px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-size:14px;
+      font-weight:1000;
+      line-height:1;
+    }
+
+    .choices-mode-btn strong{
+      min-width:0;
+      font-size:clamp(13px,1.25vw,16px);
+      line-height:1.1;
+      white-space:nowrap;
+    }
+
+    .choices-mode-btn.active{
+      background:var(--title-yellow);
+      transform:translateY(-2px);
+      box-shadow:0 4px 0 rgba(0,0,0,.16);
+    }
+
+    /* الإعدادات المتقدمة */
+    .choices-advanced-toggle{
+      width:100%;
+      min-height:46px;
+      border:2px solid var(--ink);
+      border-radius:15px;
+      background:#f6f6f6;
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
+      margin-top:12px;
+      padding:8px 14px;
+      font-size:clamp(14px,1.4vw,18px);
+      font-weight:950;
       cursor:pointer;
     }
 
-    .quiz-questions-editor{
+    .choices-advanced-arrow{
+      transition:transform .22s ease;
+      font-size:16px;
+    }
+
+    .choices-advanced-toggle[aria-expanded="true"] .choices-advanced-arrow{
+      transform:rotate(180deg);
+    }
+
+    .choices-advanced-panel{
+      max-height:0;
+      opacity:0;
+      overflow:hidden;
+      margin-top:0;
+      transition:max-height .30s ease,opacity .22s ease,margin .30s ease;
+    }
+
+    .choices-advanced-panel.is-open{
+      max-height:360px;
+      opacity:1;
+      margin-top:12px;
+    }
+
+    .choices-advanced-inner{
+      border:2px solid rgba(17,17,17,.2);
+      border-radius:16px;
+      background:#fffdf4;
+      padding:10px;
       display:grid;
-      gap:14px;
+      gap:9px;
+    }
+
+    .choices-advanced-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap:12px;
+      min-height:48px;
+      border-bottom:1px solid rgba(17,17,17,.12);
+      padding:3px 2px 10px;
+    }
+
+    .choices-advanced-row:last-child{
+      border-bottom:0;
+      padding-bottom:3px;
+    }
+
+    .choices-advanced-label{
+      display:grid;
+      gap:2px;
+    }
+
+    .choices-advanced-label strong{
+      font-size:clamp(13px,1.35vw,17px);
+    }
+
+    .choices-advanced-label span{
+      color:#666;
+      font-size:clamp(10px,1vw,12px);
+      font-weight:700;
+    }
+
+    .quiz-sound-toggle{
+      width:80px;
+      height:38px;
+      border:2px solid var(--ink);
+      border-radius:999px;
+      background:#ef5459;
+      color:#fff;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      align-items:center;
+      padding:0;
+      overflow:hidden;
+      cursor:pointer;
+      position:relative;
+    }
+
+    .quiz-sound-toggle::after{
+      content:"";
+      position:absolute;
+      top:3px;
+      left:3px;
+      width:28px;
+      height:28px;
+      border:2px solid rgba(17,17,17,.25);
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 2px 5px rgba(0,0,0,.22);
+      transition:transform .2s ease;
+    }
+
+    .quiz-sound-toggle.is-on{
+      background:var(--green);
+    }
+
+    .quiz-sound-toggle.is-on::after{
+      transform:translateX(40px);
+    }
+
+    .quiz-sound-toggle span{
+      position:relative;
+      z-index:2;
+      font-size:20px;
+      font-weight:1000;
+      pointer-events:none;
+    }
+
+    .quiz-font-select{
+      min-width:160px;
+      height:40px;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:#fff;
+      color:#111;
+      padding:0 12px;
+      font-size:14px;
+      font-weight:800;
+      outline:none;
+    }
+
+    /* شريط الأسئلة */
+    .quiz-question-navigation{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .quiz-question-tabs{
+      min-width:0;
+      display:flex;
+      gap:7px;
+      overflow-x:auto;
+      overscroll-behavior-inline:contain;
+      scrollbar-width:thin;
+      padding:4px 2px 7px;
+    }
+
+    .quiz-question-tab{
+      flex:0 0 auto;
+      min-width:78px;
+      height:40px;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:#f6f6f6;
+      color:#111;
+      padding:0 12px;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
+    }
+
+    .quiz-question-tab.active{
+      background:var(--title-yellow);
+      transform:translateY(-2px);
+      box-shadow:0 3px 0 rgba(0,0,0,.15);
+    }
+
+    .quiz-add-question{
+      width:auto;
+      height:40px;
+      margin:0;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:var(--title-yellow);
+      color:#111;
+      padding:0 13px;
+      font-size:13px;
+      font-weight:950;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.15);
+      white-space:nowrap;
+    }
+
+    .quiz-add-question[hidden]{
+      display:none !important;
+    }
+
+    /* محرر سؤال واحد فقط */
+    .quiz-questions-editor{
+      display:block;
     }
 
     .quiz-question-entry{
       position:relative;
       display:grid;
-      gap:14px;
-      border:3px solid var(--ink);
-      border-radius:20px;
-      background:#fff;
-      padding:clamp(14px,1.8vw,20px);
+      gap:12px;
+      border:2px solid var(--ink);
+      border-radius:18px;
+      background:#f9f9f9;
+      padding:clamp(12px,1.5vw,17px);
+      transform-origin:center top;
+      transition:opacity .22s ease,transform .22s ease,max-height .26s ease,padding .26s ease,margin .26s ease;
+    }
+
+    .quiz-question-entry.is-entering{
+      opacity:0;
+      transform:translateY(12px) scale(.985);
+    }
+
+    .quiz-question-entry.is-removing{
+      opacity:0;
+      transform:translateX(-24px) scale(.98);
+      max-height:0 !important;
+      padding-top:0 !important;
+      padding-bottom:0 !important;
+      margin:0 !important;
+      overflow:hidden !important;
     }
 
     .quiz-question-head{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
+      gap:10px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(17,17,17,.13);
     }
 
     .quiz-question-number{
-      font-size:clamp(17px,1.8vw,24px);
+      font-size:clamp(16px,1.6vw,21px);
       font-weight:1000;
     }
 
     .quiz-remove-question{
-      width:34px;
+      min-width:76px;
       height:34px;
       border:2px solid var(--ink);
-      border-radius:50%;
+      border-radius:12px;
       background:#f04f55;
       color:#fff;
-      font-size:22px;
-      font-weight:1000;
+      padding:0 11px;
+      font-size:13px;
+      font-weight:950;
       line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
+      gap:5px;
       cursor:pointer;
     }
 
     .quiz-field-label{
+      margin:0;
       color:#222;
-      font-size:clamp(13px,1.35vw,17px);
-      font-weight:900;
-      margin-bottom:-6px;
+      text-align:center;
+      font-size:clamp(13px,1.3vw,16px);
+      font-weight:950;
+      line-height:1.35;
     }
 
     .quiz-text-input,
     .quiz-file-input{
       width:100%;
-      min-height:50px;
+      min-height:46px;
       border:2px solid var(--ink);
-      border-radius:15px;
+      border-radius:14px;
       background:#fff;
-      padding:10px 14px;
-      font-size:clamp(15px,1.6vw,21px);
+      padding:9px 13px;
+      font-size:clamp(14px,1.4vw,18px);
       font-weight:700;
       outline:none;
     }
 
-    .quiz-file-input{ cursor:pointer; }
+    .quiz-text-input:focus,
+    .quiz-file-input:focus,
+    .quiz-font-select:focus{
+      box-shadow:0 0 0 3px rgba(239,213,83,.55);
+    }
+
+    .quiz-file-input{
+      cursor:pointer;
+    }
 
     .quiz-file-status{
       display:flex;
       align-items:center;
-      gap:10px;
-      min-height:38px;
+      gap:8px;
+      min-height:34px;
       color:#555;
-      font-size:13px;
+      font-size:12px;
       font-weight:800;
     }
 
     .quiz-file-thumb{
-      width:54px;
-      height:40px;
+      width:52px;
+      height:38px;
       border:2px solid var(--ink);
-      border-radius:9px;
+      border-radius:8px;
       object-fit:contain;
       background:#f3f3f3;
     }
 
-    .quiz-choices-list{
-      display:grid;
+    .quiz-choices-title-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
       gap:10px;
+      margin-top:2px;
     }
 
-    .quiz-choice-row{
+    .quiz-choice-count{
+      color:#666;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .quiz-choices-list{
       display:grid;
-      grid-template-columns:minmax(0,1fr) auto auto;
+      gap:8px;
+    }
+
+    /*
+      الترتيب البصري ثابت:
+      حذف في اليسار — الإدخال في الوسط — الصحيح في اليمين.
+    */
+    .quiz-choice-row{
+      direction:ltr;
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
       align-items:center;
-      gap:10px;
-      border:2px dashed rgba(17,17,17,.28);
-      border-radius:16px;
-      background:#fffdf3;
-      padding:10px;
+      gap:8px;
+      min-width:0;
+      border:0;
+      border-radius:14px;
+      background:#fff;
+      padding:6px;
+      box-shadow:inset 0 0 0 2px rgba(17,17,17,.13);
+      transition:opacity .22s ease,transform .22s ease,max-height .26s ease,padding .26s ease,margin .26s ease;
+    }
+
+    .quiz-choice-row.is-entering{
+      opacity:0;
+      transform:translateY(10px) scale(.99);
+    }
+
+    .quiz-choice-row.is-removing{
+      opacity:0;
+      transform:translateX(-24px) scale(.98);
+      max-height:0 !important;
+      padding-top:0 !important;
+      padding-bottom:0 !important;
+      margin:0 !important;
+      overflow:hidden !important;
     }
 
     .quiz-choice-content{
+      direction:rtl;
       min-width:0;
       display:grid;
-      gap:7px;
+      gap:5px;
+    }
+
+    .quiz-choice-content .quiz-text-input{
+      min-width:0;
+      min-height:42px;
     }
 
     .quiz-remove-choice{
-      width:30px;
-      height:30px;
+      width:34px;
+      height:34px;
       border:2px solid var(--ink);
-      border-radius:50%;
+      border-radius:11px;
       background:#f04f55;
       color:#fff;
       display:flex;
@@ -5434,12 +5817,17 @@
       cursor:pointer;
     }
 
+    .quiz-remove-choice:disabled{
+      opacity:.32 !important;
+      cursor:not-allowed;
+    }
+
     .quiz-correct-switch{
       --switch-bg:#ef474d;
       position:relative;
-      width:94px;
-      height:44px;
-      border:3px solid var(--ink);
+      width:76px;
+      height:36px;
+      border:2px solid var(--ink);
       border-radius:999px;
       background:var(--switch-bg);
       padding:0;
@@ -5449,7 +5837,7 @@
       color:#fff;
       cursor:pointer;
       overflow:hidden;
-      box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
     }
 
     .quiz-correct-switch::after{
@@ -5457,118 +5845,250 @@
       position:absolute;
       top:3px;
       left:3px;
-      width:34px;
-      height:32px;
+      width:26px;
+      height:26px;
       border-radius:50%;
       background:#fff;
-      border:2px solid rgba(17,17,17,.28);
-      box-shadow:0 2px 6px rgba(0,0,0,.25);
-      transition:transform .2s ease;
+      border:2px solid rgba(17,17,17,.25);
+      box-shadow:0 2px 5px rgba(0,0,0,.22);
+      transition:transform .20s ease;
     }
 
     .quiz-correct-switch.is-correct{
       --switch-bg:#25ad69;
+      animation:quizCorrectPop .25s ease-out;
     }
 
     .quiz-correct-switch.is-correct::after{
-      transform:translateX(50px);
+      transform:translateX(38px);
     }
 
     .quiz-switch-x,
     .quiz-switch-check{
       position:relative;
       z-index:2;
-      font-size:25px;
+      font-size:20px;
       line-height:1;
       font-weight:1000;
       pointer-events:none;
     }
 
+    @keyframes quizCorrectPop{
+      0%{ transform:scale(.90); }
+      65%{ transform:scale(1.07); }
+      100%{ transform:scale(1); }
+    }
+
     .quiz-add-choice{
-      width:42px;
-      height:42px;
+      width:auto;
+      min-width:132px;
+      height:38px;
       margin:2px auto 0;
-      border:3px solid var(--ink);
-      border-radius:50%;
+      border:2px solid var(--ink);
+      border-radius:13px;
       background:var(--title-yellow);
       color:#111;
-      font-size:30px;
-      font-weight:1000;
+      padding:0 13px;
+      font-size:13px;
+      font-weight:950;
       line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
+      gap:5px;
       cursor:pointer;
-      box-shadow:0 4px 0 rgba(0,0,0,.16);
+      box-shadow:0 3px 0 rgba(0,0,0,.14);
     }
 
-    .quiz-add-choice[hidden]{ display:none !important; }
-
-    .quiz-add-question{
-      width:62px;
-      height:62px;
-      margin:16px auto 0;
-      border:3px solid var(--ink);
-      border-radius:50%;
-      background:var(--title-yellow);
-      color:#111;
-      font-size:42px;
-      font-weight:1000;
-      line-height:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      box-shadow:0 5px 0 rgba(0,0,0,.18);
+    .quiz-add-choice[hidden]{
+      display:none !important;
     }
-
-    .quiz-add-question[hidden]{ display:none !important; }
 
     .choices-actions{
       display:grid;
-      gap:12px;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:10px;
     }
 
     .choices-test-btn,
     .choices-save-btn{
-      min-height:56px;
+      min-height:50px;
       border:3px solid var(--ink);
-      border-radius:20px;
-      font-size:clamp(18px,2vw,28px);
-      font-weight:900;
+      border-radius:17px;
+      font-size:clamp(15px,1.55vw,20px);
+      font-weight:950;
       cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.15);
     }
 
-    .choices-test-btn{ background:var(--orange); color:#fff; }
-    .choices-save-btn{ background:var(--title-yellow); color:#111; }
+    .choices-test-btn{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .choices-save-btn{
+      background:var(--title-yellow);
+      color:#111;
+    }
+
+    @media(max-width:850px){
+      .choices-config-grid{
+        grid-template-columns:1fr;
+      }
+
+      .choices-config-group{
+        padding:10px;
+      }
+
+      .choices-config-group-note{
+        min-height:0;
+      }
+    }
 
     @media(max-width:760px){
       .choices-setup{
-        width:92%;
-        padding:16px 12px;
-        border-radius:22px;
+        width:94%;
+        padding-top:8px;
       }
 
-      .choices-setup-body{ gap:12px; margin-top:14px; }
-      .choices-panel{ padding:12px; border-radius:18px; }
-      .choices-mode-grid{ gap:8px; }
-      .choices-mode-btn{ min-height:68px; border-radius:16px; padding:7px; }
-      .choices-mode-btn strong{ font-size:15px; }
-      .choices-mode-btn span{ font-size:10px; }
+      .choices-setup .game-name-panel,
+      .choices-section{
+        border-radius:19px !important;
+        padding:12px !important;
+      }
+
+      .choices-section-title{
+        font-size:19px;
+      }
 
       .choices-theme-current{
-        grid-template-columns:minmax(0,1fr) auto 92px;
+        grid-template-columns:minmax(0,1fr) auto 86px;
+        gap:8px;
       }
 
-      .choices-theme-list{ grid-template-columns:1fr; }
-      .quiz-question-entry{ padding:12px; border-radius:17px; }
-      .quiz-choice-row{
+      .choices-theme-list{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .choices-mode-btn{
+        min-height:44px;
+        padding:6px;
+      }
+
+      .choices-mode-btn strong{
+        font-size:13px;
+      }
+
+      .choices-mode-icon{
+        min-width:22px;
+        height:22px;
+        font-size:12px;
+      }
+
+      .choices-advanced-row{
         grid-template-columns:minmax(0,1fr) auto;
       }
-      .quiz-remove-choice{ grid-column:2; grid-row:1; }
-      .quiz-correct-switch{ grid-column:1 / -1; justify-self:center; width:92px; }
-      .quiz-text-input,.quiz-file-input{ min-height:45px; font-size:14px; }
-      .choices-test-btn,.choices-save-btn{ min-height:48px; font-size:17px; }
+
+      .quiz-font-select{
+        min-width:126px;
+        max-width:150px;
+      }
+
+      .quiz-question-navigation{
+        grid-template-columns:minmax(0,1fr);
+      }
+
+      .quiz-add-question{
+        justify-self:center;
+      }
+
+      .quiz-question-entry{
+        padding:11px;
+      }
+
+      .quiz-question-head{
+        padding-bottom:7px;
+      }
+
+      .quiz-choice-row{
+        grid-template-columns:34px minmax(0,1fr) 72px;
+        gap:6px;
+        padding:5px;
+      }
+
+      .quiz-correct-switch{
+        width:72px;
+        height:34px;
+      }
+
+      .quiz-correct-switch::after{
+        width:24px;
+        height:24px;
+      }
+
+      .quiz-correct-switch.is-correct::after{
+        transform:translateX(36px);
+      }
+
+      .quiz-remove-choice{
+        width:32px;
+        height:32px;
+      }
+
+      .choices-actions{
+        gap:8px;
+      }
+
+      .choices-test-btn,
+      .choices-save-btn{
+        min-height:46px;
+        font-size:15px;
+      }
+    }
+
+    @media(max-width:430px){
+      .choices-theme-current{
+        grid-template-columns:minmax(0,1fr) auto 76px;
+      }
+
+      .choices-theme-change{
+        padding-inline:10px;
+      }
+
+      .choices-theme-list{
+        grid-template-columns:1fr;
+      }
+
+      .choices-mode-btn{
+        gap:4px;
+      }
+
+      .choices-mode-btn strong{
+        font-size:12px;
+      }
+
+      .quiz-choice-row{
+        grid-template-columns:32px minmax(0,1fr) 68px;
+        gap:5px;
+      }
+
+      .quiz-correct-switch{
+        width:68px;
+      }
+
+      .quiz-correct-switch.is-correct::after{
+        transform:translateX(32px);
+      }
+
+      .quiz-text-input,
+      .quiz-file-input{
+        font-size:13px;
+      }
+
+      .quiz-remove-question{
+        min-width:68px;
+        padding-inline:8px;
+      }
     }
 
 </style>
@@ -5806,7 +6326,7 @@
 </section>
 
 
-<section class="choices-setup" id="choicesSetupScreen">
+<section class="choices-setup" id="choicesSetupScreen" data-quiz-font="default">
   <div class="game-name-panel">
     <div class="game-name-head">
       <span class="game-name-title">ادخل اسم اللعبة</span>
@@ -5816,9 +6336,12 @@
   </div>
 
   <div class="choices-setup-body">
-    <div class="choices-panel">
+    <section class="choices-section">
       <div class="choices-theme-current">
-        <h3 class="choices-panel-title">اختر ثيم اللعبة</h3>
+        <div class="choices-theme-title-wrap">
+          <h3 class="choices-section-title">اختر ثيم اللعبة</h3>
+          <p class="choices-section-note">يمكن تغييره قبل الاختبار أو الحفظ</p>
+        </div>
         <button class="choices-theme-change" id="toggleQuizThemeListBtn" type="button">تغيير</button>
         <span aria-hidden="true" class="choices-theme-preview theme-art classic" id="quizCurrentThemePreview"></span>
       </div>
@@ -5852,49 +6375,88 @@
           <span class="theme-art founding-day"></span><span class="choices-theme-name">يوم التأسيس</span><button class="choices-theme-activate" type="button">تفعيل</button>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="choices-panel">
-      <div class="choices-panel-head">
-        <h3 class="choices-panel-title">نوع السؤال</h3>
-        <span class="choices-panel-note">السؤال يكون نصًا فقط أو صورة فقط</span>
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">إعداد اللعبة</h3>
+        <p class="choices-section-note">اختر طريقة السؤال والاختيارات والعرض</p>
       </div>
-      <div class="choices-mode-grid" aria-label="نوع السؤال">
-        <button class="choices-mode-btn active" data-quiz-question-type="text" type="button"><strong>نص فقط</strong><span>اكتب السؤال داخل بطاقة السؤال</span></button>
-        <button class="choices-mode-btn" data-quiz-question-type="image" type="button"><strong>صورة فقط</strong><span>ارفع صورة لتكون هي السؤال</span></button>
-      </div>
-    </div>
 
-    <div class="choices-panel">
-      <div class="choices-panel-head">
-        <h3 class="choices-panel-title">نوع الاختيارات</h3>
-        <span class="choices-panel-note">جميع اختيارات اللعبة تكون من النوع نفسه</span>
-      </div>
-      <div class="choices-mode-grid" aria-label="نوع الاختيارات">
-        <button class="choices-mode-btn active" data-quiz-choices-type="text" type="button"><strong>نصوص فقط</strong><span>كل اختيار يكون نصًا</span></button>
-        <button class="choices-mode-btn" data-quiz-choices-type="images" type="button"><strong>صور فقط</strong><span>كل اختيار يكون صورة</span></button>
-      </div>
-    </div>
+      <div class="choices-config-grid">
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع السؤال</h4>
+          <p class="choices-config-group-note">نص أو صورة فقط</p>
+          <div class="choices-mode-grid" aria-label="نوع السؤال">
+            <button class="choices-mode-btn active" data-quiz-question-type="text" type="button"><span class="choices-mode-icon">T</span><strong>نص</strong></button>
+            <button class="choices-mode-btn" data-quiz-question-type="image" type="button"><span class="choices-mode-icon">▧</span><strong>صورة</strong></button>
+          </div>
+        </div>
 
-    <div class="choices-panel">
-      <div class="choices-panel-head">
-        <h3 class="choices-panel-title">طريقة عرض الأسئلة</h3>
-        <span class="choices-panel-note">يمكن عرضها مباشرة أو داخل بطاقات مرقمة</span>
-      </div>
-      <div class="choices-mode-grid" aria-label="طريقة عرض الأسئلة">
-        <button class="choices-mode-btn active" data-quiz-display-mode="cards" type="button"><strong>داخل بطاقات</strong><span>اختر بطاقة لفتح السؤال</span></button>
-        <button class="choices-mode-btn" data-quiz-display-mode="direct" type="button"><strong>عرض مباشر</strong><span>يظهر السؤال والاختيارات مباشرة</span></button>
-      </div>
-    </div>
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع الاختيارات</h4>
+          <p class="choices-config-group-note">جميعها من النوع نفسه</p>
+          <div class="choices-mode-grid" aria-label="نوع الاختيارات">
+            <button class="choices-mode-btn active" data-quiz-choices-type="text" type="button"><span class="choices-mode-icon">T</span><strong>نصوص</strong></button>
+            <button class="choices-mode-btn" data-quiz-choices-type="images" type="button"><span class="choices-mode-icon">▧</span><strong>صور</strong></button>
+          </div>
+        </div>
 
-    <div class="choices-panel">
-      <div class="choices-panel-head">
-        <h3 class="choices-panel-title">الأسئلة والاختيارات</h3>
-        <span class="choices-panel-note">خياران جاهزان، ويمكن إضافة حتى 6 اختيارات لكل سؤال</span>
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">طريقة العرض</h4>
+          <p class="choices-config-group-note">مباشر أو داخل صناديق</p>
+          <div class="choices-mode-grid" aria-label="طريقة عرض الأسئلة">
+            <button class="choices-mode-btn active" data-quiz-display-mode="cards" type="button"><span class="choices-mode-icon">□</span><strong>صناديق</strong></button>
+            <button class="choices-mode-btn" data-quiz-display-mode="direct" type="button"><span class="choices-mode-icon">▶</span><strong>مباشر</strong></button>
+          </div>
+        </div>
       </div>
+
+      <button class="choices-advanced-toggle" id="quizAdvancedToggleBtn" type="button" aria-expanded="false">
+        <span>⚙ الإعدادات المتقدمة</span>
+        <span class="choices-advanced-arrow" aria-hidden="true">⌄</span>
+      </button>
+
+      <div class="choices-advanced-panel" id="quizAdvancedPanel" aria-hidden="true">
+        <div class="choices-advanced-inner">
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label">
+              <strong>أصوات اللعبة</strong>
+              <span>تشغيل أو إيقاف أصوات الإجابات والحركات</span>
+            </div>
+            <button class="quiz-sound-toggle is-on" id="quizSoundToggleBtn" type="button" aria-pressed="true" aria-label="تشغيل أصوات اللعبة">
+              <span>×</span><span>✓</span>
+            </button>
+          </div>
+
+          <div class="choices-advanced-row">
+            <label class="choices-advanced-label" for="quizFontSelect">
+              <strong>نوع الخط</strong>
+              <span>يُحفظ الاختيار مع إعدادات اللعبة</span>
+            </label>
+            <select class="quiz-font-select" id="quizFontSelect">
+              <option value="default">خط اللعبة</option>
+              <option value="arial">Arial</option>
+              <option value="traditional">عربي تقليدي</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">الأسئلة والاختيارات</h3>
+        <p class="choices-section-note">عدّل سؤالًا واحدًا في كل مرة، ويمكن إضافة حتى 30 سؤالًا</p>
+      </div>
+
+      <div class="quiz-question-navigation">
+        <div class="quiz-question-tabs" id="quizQuestionTabs" aria-label="قائمة الأسئلة"></div>
+        <button class="quiz-add-question" id="addQuizQuestionBtn" type="button"><span>＋</span><span>إضافة سؤال</span></button>
+      </div>
+
       <div class="quiz-questions-editor" id="quizQuestionsEditor"></div>
-      <button aria-label="إضافة سؤال" class="quiz-add-question" id="addQuizQuestionBtn" type="button">+</button>
-    </div>
+    </section>
 
     <div class="choices-actions">
       <button class="choices-test-btn" id="testQuizBtn" type="button">اختبار اللعبة</button>
@@ -5902,7 +6464,6 @@
     </div>
   </div>
 </section>
-
 <section class="screen" id="savedScreen">
 <h2 class="screen-title">العابي المحفوظة</h2>
 <p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
@@ -6802,12 +7363,23 @@
   const quizThemeListPanel = document.getElementById("quizThemeListPanel");
   const toggleQuizThemeListBtn = document.getElementById("toggleQuizThemeListBtn");
   const quizCurrentThemePreview = document.getElementById("quizCurrentThemePreview");
+  const quizQuestionTabs = document.getElementById("quizQuestionTabs");
+  const quizAdvancedToggleBtn = document.getElementById("quizAdvancedToggleBtn");
+  const quizAdvancedPanel = document.getElementById("quizAdvancedPanel");
+  const quizSoundToggleBtn = document.getElementById("quizSoundToggleBtn");
+  const quizFontSelect = document.getElementById("quizFontSelect");
 
   let quizQuestionType = "text";
   let quizChoicesType = "text";
   let quizDisplayMode = "cards";
   let quizTheme = "classic";
   let quizQuestions = [];
+  let activeQuizQuestionIndex = 0;
+  let quizSoundsEnabled = true;
+  let quizFont = "default";
+  let quizAdvancedOpen = false;
+  let pendingQuizQuestionEnter = -1;
+  let pendingQuizChoiceEnter = "";
 
   function createQuizChoice(){
     return {
@@ -6965,6 +7537,126 @@
     return wrap;
   }
 
+  function clampActiveQuizQuestionIndex(){
+    if (!quizQuestions.length) {
+      activeQuizQuestionIndex = 0;
+      return;
+    }
+
+    activeQuizQuestionIndex = Math.max(
+      0,
+      Math.min(activeQuizQuestionIndex,quizQuestions.length - 1)
+    );
+  }
+
+  function updateQuizAdvancedUI(){
+    quizAdvancedToggleBtn?.setAttribute(
+      "aria-expanded",
+      quizAdvancedOpen ? "true" : "false"
+    );
+
+    quizAdvancedPanel?.classList.toggle(
+      "is-open",
+      quizAdvancedOpen
+    );
+
+    quizAdvancedPanel?.setAttribute(
+      "aria-hidden",
+      quizAdvancedOpen ? "false" : "true"
+    );
+
+    quizSoundToggleBtn?.classList.toggle(
+      "is-on",
+      quizSoundsEnabled
+    );
+
+    quizSoundToggleBtn?.setAttribute(
+      "aria-pressed",
+      quizSoundsEnabled ? "true" : "false"
+    );
+
+    quizSoundToggleBtn?.setAttribute(
+      "aria-label",
+      quizSoundsEnabled
+        ? "إيقاف أصوات اللعبة"
+        : "تشغيل أصوات اللعبة"
+    );
+
+    if (quizFontSelect) {
+      quizFontSelect.value = quizFont;
+    }
+
+    if (quizSetupScreen) {
+      quizSetupScreen.dataset.quizFont = quizFont;
+    }
+  }
+
+  function animateQuizRemoval(element,onDone){
+    if (!element) {
+      onDone();
+      return;
+    }
+
+    element.style.maxHeight = `${element.offsetHeight}px`;
+
+    requestAnimationFrame(()=>{
+      element.classList.add("is-removing");
+    });
+
+    window.setTimeout(onDone,270);
+  }
+
+  function playQuizEntryAnimation(element){
+    if (!element) return;
+
+    element.classList.add("is-entering");
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        element.classList.remove("is-entering");
+      });
+    });
+  }
+
+  function renderQuizQuestionTabs(){
+    if (!quizQuestionTabs) return;
+
+    clampActiveQuizQuestionIndex();
+    quizQuestionTabs.textContent = "";
+
+    quizQuestions.forEach((_,index)=>{
+      const tab = document.createElement("button");
+      tab.type = "button";
+      tab.className = "quiz-question-tab";
+      tab.textContent = `سؤال ${index + 1}`;
+      tab.classList.toggle(
+        "active",
+        index === activeQuizQuestionIndex
+      );
+
+      if (index === activeQuizQuestionIndex) {
+        tab.setAttribute("aria-current","true");
+      }
+
+      tab.addEventListener("click",()=>{
+        if (index === activeQuizQuestionIndex) return;
+        activeQuizQuestionIndex = index;
+        renderQuizQuestions();
+        saveQuizDraft();
+
+        requestAnimationFrame(()=>{
+          tab.scrollIntoView({
+            behavior:"smooth",
+            block:"nearest",
+            inline:"center"
+          });
+        });
+      });
+
+      quizQuestionTabs.appendChild(tab);
+    });
+  }
+
   function setCorrectChoice(questionIndex,choiceIndex){
     const question = quizQuestions[questionIndex];
     if (!question) return;
@@ -6978,171 +7670,285 @@
 
   function renderQuizQuestions(){
     if (!quizQuestionsEditor) return;
+
     sanitizeQuizDataInPlace();
+
+    if (!quizQuestions.length) {
+      quizQuestions = [createQuizQuestion()];
+    }
+
+    clampActiveQuizQuestionIndex();
+    renderQuizQuestionTabs();
+
     quizQuestionsEditor.textContent = "";
 
-    quizQuestions.forEach((question,questionIndex)=>{
-      const entry = document.createElement("article");
-      entry.className = "quiz-question-entry";
+    const questionIndex = activeQuizQuestionIndex;
+    const question = quizQuestions[questionIndex];
+    const entry = document.createElement("article");
+    entry.className = "quiz-question-entry";
 
-      const head = document.createElement("div");
-      head.className = "quiz-question-head";
+    const head = document.createElement("div");
+    head.className = "quiz-question-head";
 
-      const number = document.createElement("span");
-      number.className = "quiz-question-number";
-      number.textContent = `السؤال ${questionIndex + 1}`;
+    const number = document.createElement("span");
+    number.className = "quiz-question-number";
+    number.textContent = `السؤال ${questionIndex + 1}`;
 
-      const removeQuestion = document.createElement("button");
-      removeQuestion.type = "button";
-      removeQuestion.className = "quiz-remove-question";
-      removeQuestion.textContent = "×";
-      removeQuestion.setAttribute("aria-label",`حذف السؤال ${questionIndex + 1}`);
-      removeQuestion.hidden = quizQuestions.length <= 1;
-      removeQuestion.addEventListener("click",()=>{
-        if (quizQuestions.length <= 1) return;
+    const removeQuestion = document.createElement("button");
+    removeQuestion.type = "button";
+    removeQuestion.className = "quiz-remove-question";
+    removeQuestion.innerHTML = "<span>×</span><span>حذف</span>";
+    removeQuestion.setAttribute(
+      "aria-label",
+      `حذف السؤال ${questionIndex + 1}`
+    );
+    removeQuestion.hidden = quizQuestions.length <= 1;
+
+    removeQuestion.addEventListener("click",()=>{
+      if (quizQuestions.length <= 1) return;
+
+      animateQuizRemoval(entry,()=>{
         quizQuestions.splice(questionIndex,1);
+        activeQuizQuestionIndex = Math.min(
+          questionIndex,
+          quizQuestions.length - 1
+        );
         renderQuizQuestions();
         saveQuizDraft();
       });
+    });
 
-      head.append(number,removeQuestion);
-      entry.appendChild(head);
+    head.append(number,removeQuestion);
+    entry.appendChild(head);
 
-      const qLabel = document.createElement("div");
-      qLabel.className = "quiz-field-label";
-      qLabel.textContent = quizQuestionType === "text" ? "نص السؤال" : "صورة السؤال";
-      entry.appendChild(qLabel);
+    const qLabel = document.createElement("div");
+    qLabel.className = "quiz-field-label";
+    qLabel.textContent =
+      quizQuestionType === "text"
+        ? "نص السؤال"
+        : "صورة السؤال";
 
-      if (quizQuestionType === "text") {
+    entry.appendChild(qLabel);
+
+    if (quizQuestionType === "text") {
+      const input = document.createElement("input");
+      input.className = "quiz-text-input";
+      input.type = "text";
+      input.maxLength = 220;
+      input.placeholder = "اكتب السؤال هنا";
+      input.value = question.questionText || "";
+
+      input.addEventListener("input",()=>{
+        quizQuestions[questionIndex].questionText = input.value;
+        saveQuizDraft();
+      });
+
+      entry.appendChild(input);
+    } else {
+      entry.appendChild(createQuizImagePicker({
+        data:question.questionImageData,
+        name:question.questionImageName,
+        label:`صورة السؤال ${questionIndex + 1}`,
+        onChange:({imageData,imageName})=>{
+          quizQuestions[questionIndex].questionImageData = imageData;
+          quizQuestions[questionIndex].questionImageName = imageName;
+          quizQuestions[questionIndex].questionText = "";
+        }
+      }));
+    }
+
+    const choicesTitleRow = document.createElement("div");
+    choicesTitleRow.className = "quiz-choices-title-row";
+
+    const choicesLabel = document.createElement("div");
+    choicesLabel.className = "quiz-field-label";
+    choicesLabel.textContent =
+      "الاختيارات — حدّد الإجابة الصحيحة من الزر الموجود يمين كل اختيار";
+
+    const choiceCount = document.createElement("span");
+    choiceCount.className = "quiz-choice-count";
+    choiceCount.textContent =
+      `${question.choices.length} من ${QUIZ_MAX_CHOICES}`;
+
+    choicesTitleRow.append(choicesLabel,choiceCount);
+    entry.appendChild(choicesTitleRow);
+
+    const list = document.createElement("div");
+    list.className = "quiz-choices-list";
+
+    question.choices.forEach((choice,choiceIndex)=>{
+      const row = document.createElement("div");
+      row.className = "quiz-choice-row";
+
+      const content = document.createElement("div");
+      content.className = "quiz-choice-content";
+
+      if (quizChoicesType === "text") {
         const input = document.createElement("input");
         input.className = "quiz-text-input";
         input.type = "text";
-        input.maxLength = 220;
-        input.placeholder = "اكتب السؤال";
-        input.value = question.questionText || "";
+        input.maxLength = 100;
+        input.placeholder = `الخيار ${choiceIndex + 1}`;
+        input.value = choice.text || "";
+
         input.addEventListener("input",()=>{
-          quizQuestions[questionIndex].questionText = input.value;
+          quizQuestions[questionIndex]
+            .choices[choiceIndex]
+            .text = input.value;
           saveQuizDraft();
         });
-        entry.appendChild(input);
+
+        content.appendChild(input);
       } else {
-        entry.appendChild(createQuizImagePicker({
-          data:question.questionImageData,
-          name:question.questionImageName,
-          label:`صورة السؤال ${questionIndex + 1}`,
+        content.appendChild(createQuizImagePicker({
+          data:choice.imageData,
+          name:choice.imageName,
+          label:`صورة الخيار ${choiceIndex + 1}`,
           onChange:({imageData,imageName})=>{
-            quizQuestions[questionIndex].questionImageData = imageData;
-            quizQuestions[questionIndex].questionImageName = imageName;
-            quizQuestions[questionIndex].questionText = "";
+            const target =
+              quizQuestions[questionIndex]
+                .choices[choiceIndex];
+
+            target.imageData = imageData;
+            target.imageName = imageName;
+            target.text = "";
           }
         }));
       }
 
-      const choicesLabel = document.createElement("div");
-      choicesLabel.className = "quiz-field-label";
-      choicesLabel.textContent = "الاختيارات — فعّل علامة الصح بجانب الإجابة الصحيحة";
-      entry.appendChild(choicesLabel);
+      const correctSwitch = document.createElement("button");
+      correctSwitch.type = "button";
+      correctSwitch.className = "quiz-correct-switch";
 
-      const list = document.createElement("div");
-      list.className = "quiz-choices-list";
+      if (question.correctChoiceIndex === choiceIndex) {
+        correctSwitch.classList.add("is-correct");
+      }
 
-      question.choices.forEach((choice,choiceIndex)=>{
-        const row = document.createElement("div");
-        row.className = "quiz-choice-row";
+      correctSwitch.setAttribute(
+        "aria-label",
+        question.correctChoiceIndex === choiceIndex
+          ? "هذا هو الاختيار الصحيح"
+          : "تعيين هذا الاختيار كإجابة صحيحة"
+      );
 
-        const content = document.createElement("div");
-        content.className = "quiz-choice-content";
+      correctSwitch.innerHTML =
+        '<span class="quiz-switch-x">×</span>' +
+        '<span class="quiz-switch-check">✓</span>';
 
-        if (quizChoicesType === "text") {
-          const input = document.createElement("input");
-          input.className = "quiz-text-input";
-          input.type = "text";
-          input.maxLength = 100;
-          input.placeholder = `الخيار ${choiceIndex + 1}`;
-          input.value = choice.text || "";
-          input.addEventListener("input",()=>{
-            quizQuestions[questionIndex].choices[choiceIndex].text = input.value;
-            saveQuizDraft();
-          });
-          content.appendChild(input);
-        } else {
-          content.appendChild(createQuizImagePicker({
-            data:choice.imageData,
-            name:choice.imageName,
-            label:`صورة الخيار ${choiceIndex + 1}`,
-            onChange:({imageData,imageName})=>{
-              const target = quizQuestions[questionIndex].choices[choiceIndex];
-              target.imageData = imageData;
-              target.imageName = imageName;
-              target.text = "";
-            }
-          }));
+      correctSwitch.addEventListener(
+        "click",
+        ()=> setCorrectChoice(questionIndex,choiceIndex)
+      );
+
+      const removeChoice = document.createElement("button");
+      removeChoice.type = "button";
+      removeChoice.className = "quiz-remove-choice";
+      removeChoice.textContent = "×";
+      removeChoice.setAttribute(
+        "aria-label",
+        `حذف الخيار ${choiceIndex + 1}`
+      );
+      removeChoice.disabled =
+        question.choices.length <= QUIZ_MIN_CHOICES;
+
+      removeChoice.addEventListener("click",()=>{
+        const targetQuestion = quizQuestions[questionIndex];
+
+        if (
+          !targetQuestion ||
+          targetQuestion.choices.length <= QUIZ_MIN_CHOICES
+        ) {
+          return;
         }
 
-        const correctSwitch = document.createElement("button");
-        correctSwitch.type = "button";
-        correctSwitch.className = "quiz-correct-switch";
-        if (question.correctChoiceIndex === choiceIndex) {
-          correctSwitch.classList.add("is-correct");
-        }
-        correctSwitch.setAttribute(
-          "aria-label",
-          question.correctChoiceIndex === choiceIndex
-            ? "هذا هو الاختيار الصحيح"
-            : "تعيين هذا الاختيار كإجابة صحيحة"
-        );
-        correctSwitch.innerHTML = '<span class="quiz-switch-x">×</span><span class="quiz-switch-check">✓</span>';
-        correctSwitch.addEventListener("click",()=> setCorrectChoice(questionIndex,choiceIndex));
-
-        const removeChoice = document.createElement("button");
-        removeChoice.type = "button";
-        removeChoice.className = "quiz-remove-choice";
-        removeChoice.textContent = "×";
-        removeChoice.setAttribute("aria-label",`حذف الخيار ${choiceIndex + 1}`);
-        removeChoice.disabled = question.choices.length <= QUIZ_MIN_CHOICES;
-        removeChoice.style.opacity = question.choices.length <= QUIZ_MIN_CHOICES ? ".4" : "1";
-        removeChoice.addEventListener("click",()=>{
-          const targetQuestion = quizQuestions[questionIndex];
-          if (!targetQuestion || targetQuestion.choices.length <= QUIZ_MIN_CHOICES) return;
-
+        animateQuizRemoval(row,()=>{
           targetQuestion.choices.splice(choiceIndex,1);
-          if (targetQuestion.correctChoiceIndex === choiceIndex) {
+
+          if (
+            targetQuestion.correctChoiceIndex === choiceIndex
+          ) {
             targetQuestion.correctChoiceIndex = -1;
-          } else if (targetQuestion.correctChoiceIndex > choiceIndex) {
+          } else if (
+            targetQuestion.correctChoiceIndex > choiceIndex
+          ) {
             targetQuestion.correctChoiceIndex -= 1;
           }
+
           targetQuestion.choices.forEach((item,index)=>{
-            item.isCorrect = index === targetQuestion.correctChoiceIndex;
+            item.isCorrect =
+              index === targetQuestion.correctChoiceIndex;
           });
+
           renderQuizQuestions();
           saveQuizDraft();
         });
-
-        row.append(content,correctSwitch,removeChoice);
-        list.appendChild(row);
       });
 
-      entry.appendChild(list);
+      /*
+        direction:ltr في السطر:
+        الحذف يسار — الإدخال وسط — الصحيح يمين.
+      */
+      row.append(removeChoice,content,correctSwitch);
+      list.appendChild(row);
 
-      const addChoice = document.createElement("button");
-      addChoice.type = "button";
-      addChoice.className = "quiz-add-choice";
-      addChoice.textContent = "+";
-      addChoice.hidden = question.choices.length >= QUIZ_MAX_CHOICES;
-      addChoice.setAttribute("aria-label",`إضافة خيار للسؤال ${questionIndex + 1}`);
-      addChoice.addEventListener("click",()=>{
-        if (quizQuestions[questionIndex].choices.length >= QUIZ_MAX_CHOICES) return;
-        quizQuestions[questionIndex].choices.push(createQuizChoice());
-        renderQuizQuestions();
-        saveQuizDraft();
-      });
-      entry.appendChild(addChoice);
-
-      quizQuestionsEditor.appendChild(entry);
+      if (
+        pendingQuizChoiceEnter ===
+        `${questionIndex}:${choiceIndex}`
+      ) {
+        playQuizEntryAnimation(row);
+      }
     });
 
+    pendingQuizChoiceEnter = "";
+    entry.appendChild(list);
+
+    const addChoice = document.createElement("button");
+    addChoice.type = "button";
+    addChoice.className = "quiz-add-choice";
+    addChoice.innerHTML =
+      "<span>＋</span><span>إضافة اختيار</span>";
+    addChoice.hidden =
+      question.choices.length >= QUIZ_MAX_CHOICES;
+
+    addChoice.setAttribute(
+      "aria-label",
+      `إضافة اختيار للسؤال ${questionIndex + 1}`
+    );
+
+    addChoice.addEventListener("click",()=>{
+      if (
+        quizQuestions[questionIndex].choices.length >=
+        QUIZ_MAX_CHOICES
+      ) {
+        return;
+      }
+
+      const newChoiceIndex =
+        quizQuestions[questionIndex].choices.length;
+
+      quizQuestions[questionIndex]
+        .choices
+        .push(createQuizChoice());
+
+      pendingQuizChoiceEnter =
+        `${questionIndex}:${newChoiceIndex}`;
+
+      renderQuizQuestions();
+      saveQuizDraft();
+    });
+
+    entry.appendChild(addChoice);
+    quizQuestionsEditor.appendChild(entry);
+
+    if (pendingQuizQuestionEnter === questionIndex) {
+      playQuizEntryAnimation(entry);
+    }
+
+    pendingQuizQuestionEnter = -1;
+
     if (addQuizQuestionBtn) {
-      addQuizQuestionBtn.hidden = quizQuestions.length >= QUIZ_MAX_QUESTIONS;
+      addQuizQuestionBtn.hidden =
+        quizQuestions.length >= QUIZ_MAX_QUESTIONS;
     }
   }
 
@@ -7157,6 +7963,9 @@
       questionType:quizQuestionType,
       choicesType:quizChoicesType,
       displayMode:quizDisplayMode,
+      soundEnabled:quizSoundsEnabled,
+      fontFamily:quizFont,
+      activeQuestionIndex:activeQuizQuestionIndex,
       questions:quizQuestions,
       updatedAt:Date.now()
     };
@@ -7182,11 +7991,19 @@
       quizQuestionType = draft.questionType === "image" ? "image" : "text";
       quizChoicesType = draft.choicesType === "images" ? "images" : "text";
       quizDisplayMode = draft.displayMode === "direct" ? "direct" : "cards";
+      quizSoundsEnabled = draft.soundEnabled !== false;
+      quizFont = ["default","arial","traditional"].includes(draft.fontFamily)
+        ? draft.fontFamily
+        : "default";
+      activeQuizQuestionIndex = Number.isInteger(draft.activeQuestionIndex)
+        ? draft.activeQuestionIndex
+        : 0;
       quizQuestions = Array.isArray(draft.questions)
         ? draft.questions.map(ensureQuizQuestionStructure)
         : [createQuizQuestion()];
       if (!quizQuestions.length) quizQuestions = [createQuizQuestion()];
       sanitizeQuizDataInPlace();
+      clampActiveQuizQuestionIndex();
       return true;
     } catch (_) {
       return false;
@@ -7292,12 +8109,20 @@
   }
 
   function openQuizSetup(){
-    if (!quizQuestions.length) quizQuestions = [createQuizQuestion()];
+    if (!quizQuestions.length) {
+      quizQuestions = [createQuizQuestion()];
+    }
+
     sanitizeQuizDataInPlace();
+    clampActiveQuizQuestionIndex();
     updateQuizModeButtons();
     updateQuizThemeSummary();
+    updateQuizAdvancedUI();
     renderQuizQuestions();
-    if (typeof openScreen === "function") openScreen("choicesSetupScreen");
+
+    if (typeof openScreen === "function") {
+      openScreen("choicesSetupScreen");
+    }
   }
 
   document.querySelectorAll("[data-template='quiz']").forEach((button)=>{
@@ -7351,13 +8176,44 @@
 
   addQuizQuestionBtn?.addEventListener("click",()=>{
     if (quizQuestions.length >= QUIZ_MAX_QUESTIONS) return;
+
     quizQuestions.push(createQuizQuestion());
+    activeQuizQuestionIndex = quizQuestions.length - 1;
+    pendingQuizQuestionEnter = activeQuizQuestionIndex;
+
     renderQuizQuestions();
     saveQuizDraft();
-    setTimeout(()=>{
-      const entries = quizQuestionsEditor.querySelectorAll(".quiz-question-entry");
-      entries[entries.length - 1]?.scrollIntoView({behavior:"smooth",block:"center"});
-    },0);
+
+    window.setTimeout(()=>{
+      quizQuestionsEditor
+        ?.querySelector(".quiz-question-entry")
+        ?.scrollIntoView({
+          behavior:"smooth",
+          block:"center"
+        });
+    },40);
+  });
+
+  quizAdvancedToggleBtn?.addEventListener("click",()=>{
+    quizAdvancedOpen = !quizAdvancedOpen;
+    updateQuizAdvancedUI();
+  });
+
+  quizSoundToggleBtn?.addEventListener("click",()=>{
+    quizSoundsEnabled = !quizSoundsEnabled;
+    updateQuizAdvancedUI();
+    saveQuizDraft();
+  });
+
+  quizFontSelect?.addEventListener("change",()=>{
+    quizFont = ["default","arial","traditional"].includes(
+      quizFontSelect.value
+    )
+      ? quizFontSelect.value
+      : "default";
+
+    updateQuizAdvancedUI();
+    saveQuizDraft();
   });
 
   quizGameNameInput?.addEventListener("input",saveQuizDraft);
@@ -7372,6 +8228,7 @@
   if (!quizQuestions.length) quizQuestions = [createQuizQuestion()];
   updateQuizModeButtons();
   updateQuizThemeSummary();
+  updateQuizAdvancedUI();
   renderQuizQuestions();
 
   if (window.location.hash === "#choicesSetup") {
