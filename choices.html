@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v31-open-box-focus-motion-instant-hide -->
+  <!-- version: choices-v32-open-box-viewport-intro-hide-before-panels -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3070,6 +3070,78 @@
       visibility:visible !important;
     }
 
+
+    /* v32: قياسات العرض وزوم البداية مطابقة لصفحة افتح الصندوق. */
+    :root{
+      --cards-intro-duration:8.60s;
+      --cards-intro-bg-final-scale:1.12;
+    }
+
+    .game-page.cards-intro-playing .fixed-controls{
+      opacity:0 !important;
+      transform:translateY(12px) !important;
+      pointer-events:none !important;
+    }
+
+    .game-page.cards-intro-playing .stage{
+      transform-origin:center center;
+      transform:translate3d(0,0,0) scale(1) !important;
+      pointer-events:none;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    /* الشبكة لا تظهر نهائيًا خلال زوم الخلفية. */
+    .game-page.cards-intro-camera .question-grid{
+      opacity:0 !important;
+      visibility:hidden !important;
+      pointer-events:none !important;
+    }
+
+    /*
+      بعد ثبات الزوم تصبح الشبكة مرئية، لكن الصناديق تكون
+      خارج المشهد مسبقًا قبل بدء حركة رجوعها.
+    */
+    .game-page.cards-intro-boxes-entering .question-grid{
+      opacity:1 !important;
+      visibility:visible !important;
+    }
+
+    .game-page.cards-intro-playing .theme-background{
+      transform:translate3d(0,0,0) scale(1);
+      will-change:transform,opacity;
+    }
+
+    .game-page.cards-intro-done .theme-background{
+      transform:
+        translate3d(0,0,0)
+        scale(var(--cards-intro-bg-final-scale));
+    }
+
+    .game-page.cards-intro-playing .game-logo{
+      animation:cardsIntroLogoFade .75s ease-out both;
+    }
+
+    @keyframes cardsIntroLogoFade{
+      0%{
+        opacity:0;
+        transform:translateY(-8px);
+      }
+      100%{
+        opacity:1;
+        transform:translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .game-page.cards-intro-playing .stage,
+      .game-page.cards-intro-playing .game-logo,
+      .game-page.cards-intro-playing .theme-background,
+      .game-page.cards-intro-boxes-entering .box-card{
+        animation:none !important;
+      }
+    }
+
 </style>
 </head>
 
@@ -3364,6 +3436,8 @@
     const questionNavigation = document.getElementById("questionNavigation");
     const nextBtn = document.getElementById("nextBtn");
     const previousBtn = document.getElementById("previousBtn");
+    const fixedControls = document.querySelector(".fixed-controls");
+    const themeBackground = document.getElementById("themeBackground");
     const questionImageOverlay = document.getElementById("questionImageOverlay");
     const questionImageOverlayImg = document.getElementById("questionImageOverlayImg");
 
@@ -3382,6 +3456,10 @@
     let viewportLayoutTimer = null;
     let questionImageZoomOpen = false;
 
+    let cardsIntroFrameId = null;
+    let cardsIntroLayoutFrozen = false;
+    let cardsPendingViewportLayout = false;
+
     let questionBoxGridState = { scale:1, x:0, y:0 };
     let questionBoxZoomAnimation = null;
     let questionBoxZoomFrame = null;
@@ -3397,8 +3475,11 @@
     const BOX_SCATTER_LEAD_MS = 120;
     const BOX_ELEMENT_DURATION_MS = 1080;
     const BOX_FAST_FADE_MS = 220;
-    const CARDS_INTRO_ZOOM_MS = 4600;
-    const CARDS_INTRO_ENTRY_MS = 1120;
+    const CARDS_INTRO_HOLD_MS = 2200;
+    const CARDS_INTRO_ZOOM_MS = 7600;
+    const CARDS_INTRO_SETTLE_MS = 280;
+    const CARDS_INTRO_ENTRY_MS = 3200;
+    const CARDS_INTRO_ENTRY_EASING = "cubic-bezier(.37,0,.63,1)";
 
     let directIntroFrameId = null;
     let directIntroRunning = false;
@@ -3711,31 +3792,72 @@
         window.innerHeight || 0
       );
 
+      const width = Math.max(
+        280,
+        Math.min(
+          layoutWidth,
+          Number(viewport?.width) || layoutWidth
+        )
+      );
+
+      const height = Math.max(
+        260,
+        Math.min(
+          layoutHeight,
+          Number(viewport?.height) || layoutHeight
+        )
+      );
+
       return {
-        width:Math.max(
-          280,
-          Math.min(layoutWidth,Number(viewport?.width) || layoutWidth)
+        width,
+        height,
+        offsetLeft:Math.max(
+          0,
+          Number(viewport?.offsetLeft) || 0
         ),
-        height:Math.max(
-          260,
-          Math.min(layoutHeight,Number(viewport?.height) || layoutHeight)
-        ),
-        offsetLeft:Math.max(0,Number(viewport?.offsetLeft) || 0)
+        scale:Math.max(
+          1,
+          Number(viewport?.scale) || 1
+        )
       };
     }
 
-    function syncVisualViewportFrame(){
+    function syncVisualViewportFrame(force = false){
+      if (
+        displayMode === "cards" &&
+        cardsIntroLayoutFrozen &&
+        !force
+      ) {
+        cardsPendingViewportLayout = true;
+        return false;
+      }
+
       const metrics = getVisualViewportMetrics();
 
-      stage.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
+      /*
+        مطابق لصفحة افتح الصندوق:
+        نضع المسرح داخل المساحة المرئية الحقيقية في Safari.
+      */
+      stage.style.left =
+        `${metrics.offsetLeft.toFixed(2)}px`;
       stage.style.right = "auto";
       stage.style.top = "0px";
       stage.style.bottom = "auto";
-      stage.style.width = `${metrics.width.toFixed(2)}px`;
-      stage.style.height = `${metrics.height.toFixed(2)}px`;
+      stage.style.width =
+        `${metrics.width.toFixed(2)}px`;
+      stage.style.height =
+        `${metrics.height.toFixed(2)}px`;
 
-      page.style.setProperty("--visual-viewport-width",`${metrics.width}px`);
-      page.style.setProperty("--visual-viewport-height",`${metrics.height}px`);
+      page.style.setProperty(
+        "--visual-viewport-width",
+        `${metrics.width}px`
+      );
+      page.style.setProperty(
+        "--visual-viewport-height",
+        `${metrics.height}px`
+      );
+
+      return true;
     }
 
     function collapseSafariBars(options = {}){
@@ -3752,8 +3874,13 @@
             window.scrollTo(0,80);
           }
 
-          if (refresh) {
+          if (
+            refresh &&
+            !cardsIntroLayoutFrozen
+          ) {
             scheduleLayout();
+          } else if (refresh) {
+            cardsPendingViewportLayout = true;
           }
         },delay));
       });
@@ -3844,84 +3971,261 @@
       button.style.setProperty("--box-cover-text",textColor || "#fff");
     }
 
-    function calculateDeckLayout(){
-      const styles = getComputedStyle(stage);
+    function calculateDeckLayout(options = {}){
+      const force = options.force === true;
+
+      if (
+        displayMode === "cards" &&
+        cardsIntroLayoutFrozen &&
+        !force
+      ) {
+        cardsPendingViewportLayout = true;
+        return false;
+      }
+
+      const metrics = getVisualViewportMetrics();
+      const styles = window.getComputedStyle(stage);
+
       const padX =
         parseFloat(styles.paddingLeft || "0") +
         parseFloat(styles.paddingRight || "0");
+
       const padY =
         parseFloat(styles.paddingTop || "0") +
         parseFloat(styles.paddingBottom || "0");
 
-      const width = Math.max(220,(stage.clientWidth || innerWidth) - padX - 4);
-      const height = Math.max(190,(stage.clientHeight || innerHeight) - padY - 4);
-      const total = Math.max(1,Math.min(MAX_QUESTIONS,questions.length || 1));
+      /*
+        مطابق لصفحة افتح الصندوق:
+        clientWidth وclientHeight لا يتأثران بزوم الخلفية.
+      */
+      const stageWidth = Math.max(
+        280,
+        Math.min(
+          stage.clientWidth || metrics.width,
+          metrics.width
+        )
+      );
+
+      const stageHeight = Math.max(
+        260,
+        Math.min(
+          stage.clientHeight || metrics.height,
+          metrics.height
+        )
+      );
+
+      const width =
+        Math.max(220,stageWidth - padX - 4);
+      const height =
+        Math.max(190,stageHeight - padY - 4);
+
+      const total = Math.max(
+        1,
+        Math.min(
+          MAX_QUESTIONS,
+          questions.length || 1
+        )
+      );
+
       const isPortrait = height > width;
-      const maxCols = Math.min(total,isPortrait ? 5 : 10);
-      const minCols = Math.min(total,2);
-      const baseGap = total > 24 ? 7 : total > 16 ? 9 : total > 10 ? 12 : 20;
-      const maxTile = total > 24 ? 112 : total > 16 ? 124 : total > 10 ? 138 : 152;
+      const maxCols =
+        Math.min(total,isPortrait ? 5 : 10);
+      const minCols =
+        isPortrait
+          ? Math.min(total,2)
+          : Math.min(total,2);
+
+      const baseGap =
+        total > 24
+          ? 7
+          : total > 16
+            ? 9
+            : total > 10
+              ? 12
+              : 20;
+
+      const maxTile =
+        total > 24
+          ? 112
+          : total > 16
+            ? 124
+            : total > 10
+              ? 138
+              : 152;
+
       let best = null;
 
-      for (let cols=Math.max(1,minCols); cols<=maxCols; cols+=1) {
+      for (
+        let cols=Math.max(1,minCols);
+        cols<=maxCols;
+        cols+=1
+      ) {
         const rows = Math.ceil(total / cols);
         const gap = baseGap;
-        const tileByWidth = Math.floor((width - gap * (cols - 1)) / cols);
-        const tileByHeight = Math.floor((height - gap * (rows - 1)) / rows);
-        const size = Math.min(maxTile,tileByWidth,tileByHeight);
+
+        const tileByWidth = Math.floor(
+          (width - gap * (cols - 1)) / cols
+        );
+
+        const tileByHeight = Math.floor(
+          (height - gap * (rows - 1)) / rows
+        );
+
+        const size = Math.min(
+          maxTile,
+          tileByWidth,
+          tileByHeight
+        );
+
         if (size <= 0) continue;
 
-        const gridWidth = cols * size + gap * Math.max(0,cols - 1);
-        const gridHeight = rows * size + gap * Math.max(0,rows - 1);
-        const unusedSlots = cols * rows - total;
-        const aspectPenalty = Math.abs(cols / rows - width / Math.max(1,height)) * 3;
-        const rowBalance = Math.abs(rows - Math.ceil(Math.sqrt(total))) * 2;
-        const score = size * 100 - unusedSlots * 7 - aspectPenalty - rowBalance;
+        const gridWidth =
+          cols * size +
+          gap * Math.max(0,cols - 1);
+
+        const gridHeight =
+          rows * size +
+          gap * Math.max(0,rows - 1);
+
+        const unusedSlots =
+          cols * rows - total;
+
+        const aspectPenalty =
+          Math.abs(
+            cols / rows -
+            width / Math.max(1,height)
+          ) * 3;
+
+        const rowBalance =
+          Math.abs(
+            rows -
+            Math.ceil(Math.sqrt(total))
+          ) * 2;
+
+        const edgePenalty =
+          Math.max(0,gridWidth - width) * 100 +
+          Math.max(0,gridHeight - height) * 100;
+
+        const score =
+          size * 100 -
+          unusedSlots * 7 -
+          aspectPenalty -
+          rowBalance -
+          edgePenalty;
 
         if (!best || score > best.score) {
-          best = { cols,rows,gap,size,gridWidth,gridHeight,score };
+          best = {
+            cols,
+            rows,
+            gap,
+            size,
+            gridWidth,
+            gridHeight,
+            score
+          };
         }
       }
 
       if (!best) {
-        const cols = isPortrait ? Math.min(total,3) : Math.min(total,8);
-        const rows = Math.ceil(total / Math.max(1,cols));
+        const cols =
+          isPortrait
+            ? Math.min(total,3)
+            : Math.min(total,8);
+
+        const rows =
+          Math.ceil(total / Math.max(1,cols));
+
         const gap = 6;
-        const size = Math.max(34,Math.min(
-          maxTile,
-          Math.floor((width - gap * Math.max(0,cols - 1)) / Math.max(1,cols)),
-          Math.floor((height - gap * Math.max(0,rows - 1)) / Math.max(1,rows))
-        ));
+
+        const size = Math.max(
+          34,
+          Math.min(
+            maxTile,
+            Math.floor(
+              (
+                width -
+                gap * Math.max(0,cols - 1)
+              ) / Math.max(1,cols)
+            ),
+            Math.floor(
+              (
+                height -
+                gap * Math.max(0,rows - 1)
+              ) / Math.max(1,rows)
+            )
+          )
+        );
+
         best = {
-          cols:Math.max(1,cols),rows,gap,size,
-          gridWidth:Math.max(1,cols) * size + gap * Math.max(0,cols - 1),
-          gridHeight:rows * size + gap * Math.max(0,rows - 1)
+          cols:Math.max(1,cols),
+          rows,
+          gap,
+          size,
+          gridWidth:
+            Math.max(1,cols) * size +
+            gap * Math.max(0,cols - 1),
+          gridHeight:
+            rows * size +
+            gap * Math.max(0,rows - 1)
         };
       }
 
-      questionGrid.style.setProperty("--cols",String(best.cols));
-      questionGrid.style.setProperty("--tile-gap",`${Math.max(5,best.gap)}px`);
-      questionGrid.style.setProperty("--tile-size",`${Math.max(34,best.size)}px`);
-      questionGrid.style.width = `${best.gridWidth}px`;
-      questionGrid.style.height = `${best.gridHeight}px`;
-      document.documentElement.style.setProperty("--tile-gap",`${Math.max(5,best.gap)}px`);
-      document.documentElement.style.setProperty("--tile-size",`${Math.max(34,best.size)}px`);
+      const gap = Math.max(5,best.gap);
+      const size = Math.max(34,best.size);
+
+      questionGrid.style.setProperty(
+        "--cols",
+        String(best.cols)
+      );
+      questionGrid.style.setProperty(
+        "--tile-gap",
+        `${gap}px`
+      );
+      questionGrid.style.setProperty(
+        "--tile-size",
+        `${size}px`
+      );
+      questionGrid.style.width =
+        `${best.gridWidth}px`;
+      questionGrid.style.height =
+        `${best.gridHeight}px`;
+
+      document.documentElement.style.setProperty(
+        "--tile-gap",
+        `${gap}px`
+      );
+      document.documentElement.style.setProperty(
+        "--tile-size",
+        `${size}px`
+      );
 
       /*
-        لا نسمح لتحديث المقاسات بأن يقفز بالصندوق مباشرة إلى المنتصف
-        أثناء حركة الاختيار. الحركة وحدها هي التي تنقله وتكبره.
+        لا نعيد حساب موضع الصندوق المختار أثناء الحركة.
       */
       if (
         questionBoxSelected &&
         questionBoxFocusedIndex >= 0 &&
         !interactionLocked &&
-        !questionGrid.classList.contains("motion-active")
+        !questionGrid.classList.contains(
+          "motion-active"
+        )
       ) {
         requestAnimationFrame(()=>{
-          const target = getQuestionBoxZoomTarget(questionBoxSelected);
-          setQuestionBoxGridState(target.scale,target.x,target.y);
+          const target =
+            getQuestionBoxZoomTarget(
+              questionBoxSelected
+            );
+
+          setQuestionBoxGridState(
+            target.scale,
+            target.x,
+            target.y
+          );
         });
       }
+
+      cardsPendingViewportLayout = false;
+      return true;
     }
 
     function renderDeck(){
@@ -3965,7 +4269,7 @@
         questionGrid.appendChild(button);
       });
 
-      calculateDeckLayout();
+      calculateDeckLayout({ force:true });
       setQuestionBoxGridState(1,0,0);
     }
 
@@ -4342,6 +4646,119 @@
       questionBoxScatterAnimations.clear();
     }
 
+    function prepareCardsIntroScatterTargets(){
+      cancelQuestionBoxScatterAnimations();
+      questionBoxScatterTargets.clear();
+
+      const cards = Array.from(
+        questionGrid.querySelectorAll(
+          ".box-card"
+        )
+      );
+
+      if (!cards.length) return cards;
+
+      /*
+        نفس هندسة مقدمة افتح الصندوق:
+        كل صندوق يبدأ خارج المشهد بحسب موقعه من مركز الشبكة.
+      */
+      const stageWidth =
+        stage.clientWidth ||
+        window.innerWidth ||
+        1;
+
+      const stageHeight =
+        stage.clientHeight ||
+        window.innerHeight ||
+        1;
+
+      const gridCenterX =
+        questionGrid.clientWidth / 2;
+
+      const gridCenterY =
+        questionGrid.clientHeight / 2;
+
+      const tile =
+        cards[0].offsetWidth || 1;
+
+      const travel =
+        Math.max(stageWidth,stageHeight) * .78 +
+        tile * 1.6;
+
+      const geometry = cards.map(
+        (card,cardIndex)=>({
+          card,
+          cardIndex,
+          centerX:
+            card.offsetLeft +
+            card.offsetWidth / 2,
+          centerY:
+            card.offsetTop +
+            card.offsetHeight / 2
+        })
+      );
+
+      geometry.forEach(
+        ({
+          card,
+          cardIndex,
+          centerX,
+          centerY
+        })=>{
+          let dx = centerX - gridCenterX;
+          let dy = centerY - gridCenterY;
+          let length = Math.hypot(dx,dy);
+
+          if (length < 1) {
+            const angle =
+              (
+                (cardIndex + 1) *
+                2.399963229728653
+              ) % (Math.PI * 2);
+
+            dx = Math.cos(angle);
+            dy = Math.sin(angle);
+            length = 1;
+          }
+
+          const unitX = dx / length;
+          const unitY = dy / length;
+          const extra =
+            (cardIndex % 4) * tile * .10;
+          const distance =
+            travel + extra;
+
+          const target = {
+            transform:
+              `translate3d(` +
+              `${(unitX * distance).toFixed(2)}px,` +
+              `${(unitY * distance).toFixed(2)}px,0)` +
+              ` scale(.76)`,
+            opacity:0
+          };
+
+          questionBoxScatterTargets.set(
+            card,
+            target
+          );
+
+          card.style.transform =
+            target.transform;
+          card.style.opacity = "0";
+          card.classList.remove(
+            "focus-selected"
+          );
+          card.classList.add("focus-away");
+        }
+      );
+
+      questionGrid.classList.add(
+        "focus-mode"
+      );
+
+      return cards;
+    }
+
     function scatterQuestionBoxes(selected){
       cancelQuestionBoxScatterAnimations();
       questionBoxScatterTargets.clear();
@@ -4642,6 +5059,12 @@
       questionCard.getBoundingClientRect();
       choicesGrid.getBoundingClientRect();
 
+      /*
+        الصندوق ثبت الآن في المنتصف.
+        نخفيه فورًا قبل أن يبدأ ظهور أي مستطيل.
+      */
+      hideQuestionBoxImmediately(source);
+
       await new Promise((resolve)=>{
         requestAnimationFrame(()=>{
           requestAnimationFrame(resolve);
@@ -4698,12 +5121,6 @@
             animation.finished.catch(()=>{})
           )
       );
-
-      /*
-        لحظة وصول السؤال وجميع الإجابات إلى مواقعها:
-        يختفي الصندوق فورًا في نفس الدورة، دون تأخير إضافي.
-      */
-      hideQuestionBoxImmediately(source);
 
       prepared.forEach(({ element })=>{
         element.getAnimations().forEach((animation)=>{
@@ -5063,74 +5480,145 @@
     }
 
     async function playCardsIntro(){
-      interactionLocked = true;
+      if (!page || !stage || !questionGrid) {
+        return;
+      }
 
-      page.classList.add(
-        "cards-intro-playing",
+      if (cardsIntroFrameId) {
+        cancelAnimationFrame(
+          cardsIntroFrameId
+        );
+        cardsIntroFrameId = null;
+      }
+
+      page.classList.remove(
+        "cards-intro-done",
+        "cards-intro-boxes-entering",
         "cards-intro-zooming"
       );
 
-      const background =
-        document.getElementById("themeBackground");
+      page.classList.add(
+        "cards-intro-playing",
+        "cards-intro-camera"
+      );
 
-      const reducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
+      cardsPendingViewportLayout = false;
+      cardsIntroLayoutFrozen = false;
+      interactionLocked = true;
 
-      let backgroundAnimation = null;
+      const holdMs =
+        CARDS_INTRO_HOLD_MS;
+      const zoomMs =
+        CARDS_INTRO_ZOOM_MS;
+      const settlePauseMs =
+        CARDS_INTRO_SETTLE_MS;
+      const startBgScale = 1;
 
-      if (
-        !reducedMotion &&
-        background &&
-        typeof background.animate === "function"
-      ) {
-        backgroundAnimation = background.animate(
-          [
-            { transform:"scale(1.00)" },
-            { transform:"scale(1.10)" }
-          ],
-          {
-            duration:CARDS_INTRO_ZOOM_MS,
-            easing:"cubic-bezier(.45,0,.25,1)",
-            fill:"forwards"
-          }
+      const endBgScale =
+        Number(
+          getComputedStyle(page)
+            .getPropertyValue(
+              "--cards-intro-bg-final-scale"
+            )
+        ) || 1.12;
+
+      let startTime = null;
+
+      const setCameraFrame = (bgScale)=>{
+        stage.style.transform =
+          "translate3d(0,0,0) scale(1)";
+        stage.style.animation = "none";
+
+        if (themeBackground) {
+          themeBackground.style.transform =
+            `translate3d(0,0,0) ` +
+            `scale(${Number(bgScale).toFixed(5)})`;
+
+          themeBackground.style.animation =
+            "none";
+
+          const ratio =
+            (bgScale - startBgScale) /
+            Math.max(
+              .001,
+              endBgScale - startBgScale
+            );
+
+          const saturation =
+            1.04 - ratio * .04;
+
+          themeBackground.style.filter =
+            `saturate(` +
+            `${Math.max(
+              1,
+              Math.min(1.04,saturation)
+            )}` +
+            `)`;
+        }
+      };
+
+      const completeIntro = ()=>{
+        if (cardsIntroFrameId) {
+          cancelAnimationFrame(
+            cardsIntroFrameId
+          );
+          cardsIntroFrameId = null;
+        }
+
+        setCameraFrame(endBgScale);
+
+        page.classList.remove(
+          "cards-intro-playing",
+          "cards-intro-camera",
+          "cards-intro-boxes-entering",
+          "cards-intro-zooming"
         );
 
-        await backgroundAnimation.finished.catch(()=>{});
-      } else if (!reducedMotion) {
-        await wait(CARDS_INTRO_ZOOM_MS);
+        page.classList.add(
+          "cards-intro-done"
+        );
+
+        if (themeBackground) {
+          themeBackground.style.filter = "";
+        }
+
+        if (fixedControls) {
+          fixedControls.style.opacity = "1";
+          fixedControls.style.transform =
+            "none";
+          fixedControls.style.pointerEvents =
+            "";
+        }
+
+        cardsIntroLayoutFrozen = false;
+        interactionLocked = false;
+        cardsPendingViewportLayout = false;
+
+        collapseSafariBars({
+          refresh:false
+        });
+      };
+
+      if (fixedControls) {
+        fixedControls.style.opacity = "0";
+        fixedControls.style.transform =
+          "translateY(12px)";
+        fixedControls.style.pointerEvents =
+          "none";
       }
 
       /*
-        تجهيز الصناديق خارج الشاشة قبل كشف الشبكة،
-        لمنع ظهورها ولو للحظة أثناء الزوم.
+        مطابق لصفحة افتح الصندوق:
+        نثبت مساحة Safari ونحسب الشبكة وهي مخفية.
       */
-      const cards = Array.from(
-        questionGrid.querySelectorAll(".box-card")
-      );
-
-      const prepared = cards.map((card,index)=>{
-        const angle =
-          (Math.PI * 2 * index) /
-          Math.max(1,cards.length);
-        const distance =
-          Math.max(stage.clientWidth,stage.clientHeight) * .72;
-
-        const startTransform =
-          `translate3d(` +
-          `${Math.cos(angle) * distance}px,` +
-          `${Math.sin(angle) * distance}px,0)` +
-          ` scale(.72)`;
-
-        card.style.opacity = "0";
-        card.style.transform = startTransform;
-
-        return {
-          card,
-          startTransform,
-          index
-        };
+      syncVisualViewportFrame(true);
+      calculateDeckLayout({
+        force:true
       });
+      setQuestionBoxGridState(1,0,0);
+
+      setCameraFrame(startBgScale);
+      collapseSafariBars();
 
       await new Promise((resolve)=>{
         requestAnimationFrame(()=>{
@@ -5138,63 +5626,120 @@
         });
       });
 
-      page.classList.remove("cards-intro-zooming");
+      const reducedMotion =
+        window.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
 
-      const animations = prepared.map(
-        ({ card,startTransform,index })=>{
-          if (reducedMotion || typeof card.animate !== "function") {
-            card.style.opacity = "1";
-            card.style.transform =
-              "translate3d(0,0,0) scale(1)";
-            return null;
-          }
-
-          return card.animate(
-            [
-              {
-                opacity:0,
-                transform:startTransform
-              },
-              {
-                opacity:1,
-                transform:"translate3d(0,0,0) scale(1)"
-              }
-            ],
-            {
-              duration:CARDS_INTRO_ENTRY_MS,
-              delay:index * 42,
-              easing:"cubic-bezier(.16,.82,.18,1)",
-              fill:"forwards"
+      if (!reducedMotion) {
+        await new Promise((resolve)=>{
+          const animate = (now)=>{
+            if (startTime === null) {
+              startTime = now;
             }
-          );
-        }
-      );
 
-      await Promise.all(
-        animations
-          .filter(Boolean)
-          .map((animation)=>
-            animation.finished.catch(()=>{})
-          )
-      );
+            const elapsed =
+              now - startTime;
 
-      prepared.forEach(({ card })=>{
-        card.getAnimations().forEach((animation)=>{
-          try { animation.cancel(); } catch (_) {}
+            if (elapsed < holdMs) {
+              setCameraFrame(startBgScale);
+              cardsIntroFrameId =
+                requestAnimationFrame(
+                  animate
+                );
+              return;
+            }
+
+            const progress = Math.max(
+              0,
+              Math.min(
+                1,
+                (
+                  elapsed - holdMs
+                ) / zoomMs
+              )
+            );
+
+            const eased =
+              easeInOutSine(progress);
+
+            const bgScale =
+              startBgScale +
+              (
+                endBgScale -
+                startBgScale
+              ) * eased;
+
+            setCameraFrame(bgScale);
+
+            if (progress < 1) {
+              cardsIntroFrameId =
+                requestAnimationFrame(
+                  animate
+                );
+              return;
+            }
+
+            cardsIntroFrameId = null;
+            resolve();
+          };
+
+          cardsIntroFrameId =
+            requestAnimationFrame(animate);
         });
+      } else {
+        setCameraFrame(endBgScale);
+      }
 
-        card.style.opacity = "1";
-        card.style.transform =
-          "translate3d(0,0,0) scale(1)";
+      /*
+        الزوم ثبت. نعيد قياس المساحة والشبكة مرة واحدة،
+        ثم نجمد التخطيط خلال دخول الصناديق.
+      */
+      collapseSafariBars({
+        refresh:false
       });
 
+      await wait(settlePauseMs);
+
+      syncVisualViewportFrame(true);
+      calculateDeckLayout({
+        force:true
+      });
+      setQuestionBoxGridState(1,0,0);
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      cardsIntroLayoutFrozen = true;
+      interactionLocked = true;
+
+      prepareCardsIntroScatterTargets();
+
       page.classList.remove(
-        "cards-intro-playing",
+        "cards-intro-camera",
         "cards-intro-zooming"
       );
 
-      interactionLocked = false;
-      collapseSafariBars({ refresh:false });
+      page.classList.add(
+        "cards-intro-boxes-entering"
+      );
+
+      await new Promise((resolve)=>{
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(resolve);
+        });
+      });
+
+      if (!reducedMotion) {
+        await restoreQuestionBoxesAnimated();
+      } else {
+        restoreDeck();
+      }
+
+      completeIntro();
     }
 
     function setDirectIntroCameraFrame(bgScale){
@@ -5536,37 +6081,61 @@
     }
 
     function scheduleLayout(delay = 0){
+      if (
+        displayMode === "cards" &&
+        (
+          cardsIntroLayoutFrozen ||
+          interactionLocked
+        )
+      ) {
+        cardsPendingViewportLayout = true;
+        return;
+      }
+
       if (viewportLayoutFrame) {
-        cancelAnimationFrame(viewportLayoutFrame);
+        cancelAnimationFrame(
+          viewportLayoutFrame
+        );
         viewportLayoutFrame = null;
       }
 
       if (viewportLayoutTimer) {
-        clearTimeout(viewportLayoutTimer);
+        clearTimeout(
+          viewportLayoutTimer
+        );
         viewportLayoutTimer = null;
       }
 
       const run = ()=>{
-        viewportLayoutFrame = requestAnimationFrame(()=>{
-          viewportLayoutFrame = null;
-          syncVisualViewportFrame();
-          calculateDeckLayout();
-          fitCurrentSceneText();
-        });
+        viewportLayoutFrame =
+          requestAnimationFrame(()=>{
+            viewportLayoutFrame = null;
+
+            syncVisualViewportFrame();
+
+            if (displayMode === "cards") {
+              calculateDeckLayout();
+            }
+
+            fitCurrentSceneText();
+            cardsPendingViewportLayout =
+              false;
+          });
       };
 
       if (delay > 0) {
-        viewportLayoutTimer = setTimeout(()=>{
-          viewportLayoutTimer = null;
-          run();
-        },delay);
+        viewportLayoutTimer =
+          setTimeout(()=>{
+            viewportLayoutTimer = null;
+            run();
+          },delay);
       } else {
         run();
       }
     }
 
     async function initialize(){
-      syncVisualViewportFrame();
+      syncVisualViewportFrame(true);
       await hydratePayload();
       applyTheme();
 
@@ -5574,7 +6143,7 @@
         interactionLocked = true;
         page.classList.add(
           "cards-intro-playing",
-          "cards-intro-zooming"
+          "cards-intro-camera"
         );
         renderDeck();
         cardsView.classList.remove("is-hidden");
