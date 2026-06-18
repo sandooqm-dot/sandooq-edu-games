@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-choices-builder-compact-controls-v52 -->
+<!-- version: index-choices-builder-advanced-clean-eye-switch-v53 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -7322,6 +7322,120 @@
       }
     }
 
+
+
+    /* v53: تنظيف الإعدادات المتقدمة، توحيد السويتش، وتحسين المعاينة. */
+
+    /* لا تظهر أي نصوص تفسيرية داخل الإعدادات المتقدمة. */
+    .choices-advanced-label span{
+      display:none !important;
+    }
+
+    .choices-advanced-label{
+      gap:0 !important;
+      align-items:center !important;
+    }
+
+    /* زيادة ارتفاع صورة الثيم فقط دون تغيير عرضها. */
+    .choices-theme-preview{
+      height:84px !important;
+      min-height:84px !important;
+      align-self:center !important;
+    }
+
+    .choices-theme-current{
+      min-height:94px !important;
+    }
+
+    /* سويتش الإجابة الصحيحة بنفس هندسة سويتش الأصوات، مع الحفاظ على حجمه الحالي. */
+    .quiz-correct-switch,
+    .quiz-choice-row.is-image-choice .quiz-correct-switch{
+      position:relative !important;
+      display:grid !important;
+      grid-template-columns:1fr 1fr !important;
+      align-items:center !important;
+      overflow:hidden !important;
+      border:2px solid var(--ink) !important;
+      border-radius:999px !important;
+      background:#ef5459 !important;
+      color:#fff !important;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.20) !important;
+      padding:0 !important;
+    }
+
+    .quiz-correct-switch.is-correct,
+    .quiz-choice-row.is-image-choice .quiz-correct-switch.is-correct{
+      background:var(--green) !important;
+    }
+
+    .quiz-correct-switch::after,
+    .quiz-choice-row.is-image-choice .quiz-correct-switch::after{
+      content:"" !important;
+      position:absolute !important;
+      top:50% !important;
+      left:2px !important;
+      width:20px !important;
+      height:20px !important;
+      aspect-ratio:1/1 !important;
+      border:2px solid rgba(17,17,17,.25) !important;
+      border-radius:50% !important;
+      background:#fff !important;
+      box-shadow:0 2px 5px rgba(0,0,0,.22) !important;
+      transform:translateY(-50%) !important;
+      transition:left .20s ease !important;
+    }
+
+    .quiz-correct-switch.is-correct::after,
+    .quiz-choice-row.is-image-choice .quiz-correct-switch.is-correct::after{
+      left:calc(100% - 24px) !important;
+      transform:translateY(-50%) !important;
+    }
+
+    .quiz-switch-x,
+    .quiz-switch-check{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      line-height:1 !important;
+    }
+
+    /* أيقونة العين. */
+    .quiz-text-review-btn svg{
+      fill:none !important;
+      stroke:currentColor !important;
+      stroke-width:2 !important;
+      stroke-linecap:round !important;
+      stroke-linejoin:round !important;
+    }
+
+    /* النص الباهت داخل نافذة المراجعة. */
+    .quiz-text-editor-textarea::placeholder{
+      color:#a9a9a9 !important;
+      opacity:1 !important;
+    }
+
+    @media(max-width:760px){
+      .choices-theme-preview{
+        height:80px !important;
+        min-height:80px !important;
+      }
+
+      .choices-theme-current{
+        min-height:90px !important;
+      }
+    }
+
+    @media(max-width:430px){
+      .choices-theme-preview{
+        height:76px !important;
+        min-height:76px !important;
+      }
+
+      .choices-theme-current{
+        min-height:86px !important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -7609,7 +7723,7 @@
 
     <section class="choices-section">
       <div class="choices-section-head">
-        <h3 class="choices-section-title">إعداد اللعبة</h3>
+        <h3 class="choices-section-title">إعدادات طريقة اللعب</h3>
       </div>
 
       <div class="choices-config-grid">
@@ -7651,7 +7765,6 @@
           <div class="choices-advanced-row">
             <div class="choices-advanced-label">
               <strong>أصوات اللعبة</strong>
-              <span>تشغيل أو إيقاف أصوات الإجابات والحركات</span>
             </div>
             <button class="quiz-sound-toggle is-on" id="quizSoundToggleBtn" type="button" aria-pressed="true" aria-label="تشغيل أصوات اللعبة">
               <span>×</span><span>✓</span>
@@ -7661,7 +7774,6 @@
           <div class="choices-advanced-row">
             <label class="choices-advanced-label" for="quizFontSelect">
               <strong>نوع الخط</strong>
-              <span>يُحفظ الاختيار مع إعدادات اللعبة</span>
             </label>
             <select class="quiz-font-select" id="quizFontSelect">
               <option value="default">خط اللعبة</option>
@@ -8858,10 +8970,11 @@
     document.body.appendChild(quizTextEditorOverlay);
   }
 
-  function openQuizTextEditor({value,maxLength,onSave}){
+  function openQuizTextEditor({value,maxLength,onSave,placeholder}){
     ensureQuizTextEditor();
     quizTextEditorTextarea.maxLength = maxLength;
     quizTextEditorTextarea.value = String(value || "");
+    quizTextEditorTextarea.placeholder = String(placeholder || "");
     quizTextEditorSaveHandler = onSave;
     quizTextEditorOverlay.classList.add("is-open");
     quizTextEditorOverlay.setAttribute("aria-hidden","false");
@@ -8875,22 +8988,23 @@
     },30);
   }
 
-  function createQuizReviewButton({label,getValue,maxLength,onSave}){
+  function createQuizReviewButton({label,getValue,maxLength,onSave,placeholder}){
     const button = document.createElement("button");
     button.type = "button";
     button.className = "quiz-text-review-btn";
     button.setAttribute("aria-label",label);
     button.innerHTML =
       '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-      '<circle cx="10.5" cy="10.5" r="6.5"></circle>' +
-      '<path d="M15.5 15.5L21 21"></path>' +
+      '<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"></path>' +
+      '<circle cx="12" cy="12" r="2.8"></circle>' +
       '</svg>';
 
     button.addEventListener("click",()=>{
       openQuizTextEditor({
         value:getValue(),
         maxLength,
-        onSave
+        onSave,
+        placeholder
       });
     });
 
@@ -9112,6 +9226,7 @@
           label:`مراجعة نص السؤال ${questionIndex + 1}`,
           getValue:()=> input.value,
           maxLength:220,
+          placeholder:"اكتب السؤال هنا..",
           onSave:(value)=>{
             input.value = value;
             quizQuestions[questionIndex].questionText = value;
@@ -9174,6 +9289,7 @@
             label:`مراجعة نص الخيار ${choiceIndex + 1}`,
             getValue:()=> input.value,
             maxLength:100,
+            placeholder:"اكتب الاختيار هنا..",
             onSave:(value)=>{
               input.value = value;
               quizQuestions[questionIndex]
