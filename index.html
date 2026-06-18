@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-choices-builder-polished-controls-v49 -->
+<!-- version: index-choices-builder-theme-image-and-custom-picker-v50 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -6592,6 +6592,223 @@
         height:58px !important;
       }
     }
+
+    /* v50: صورة الثيم تملأ القسم، زر عرض مدمج، ومنتقي صور مخصص. */
+
+    /* صورة الثيم تلامس حدود القسم من الأعلى والأسفل واليسار. */
+    .choices-theme-section{
+      padding:0 14px 0 0 !important;
+      overflow:hidden !important;
+    }
+
+    .choices-theme-current{
+      grid-template-columns:minmax(0,1fr) 56px clamp(150px,40%,250px) !important;
+      min-height:94px !important;
+      gap:10px !important;
+      align-items:stretch !important;
+    }
+
+    .choices-theme-title-wrap{
+      align-self:center !important;
+    }
+
+    .choices-theme-preview{
+      width:100% !important;
+      height:auto !important;
+      min-height:94px !important;
+      align-self:stretch !important;
+      border:0 !important;
+      border-right:3px solid var(--ink) !important;
+      border-radius:0 !important;
+      background-size:cover !important;
+      background-position:center !important;
+    }
+
+    .choices-theme-change{
+      align-self:center !important;
+    }
+
+    .choices-theme-list:not([hidden]){
+      margin:12px 12px 12px 12px !important;
+    }
+
+    /* نص عرض/إخفاء والسهم داخل زر واحد ناعم الزوايا. */
+    .choices-advanced-action{
+      min-width:78px !important;
+      min-height:29px !important;
+      padding:3px 9px !important;
+      border:2px solid var(--ink) !important;
+      border-radius:999px !important;
+      background:#fff !important;
+      display:inline-flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:6px !important;
+      transition:background .2s ease,color .2s ease !important;
+    }
+
+    .choices-advanced-arrow{
+      width:auto !important;
+      height:auto !important;
+      flex:0 0 auto !important;
+      border:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      color:inherit !important;
+      font-size:12px !important;
+    }
+
+    .choices-advanced-action-text{
+      min-width:auto !important;
+      font-size:12px !important;
+      line-height:1 !important;
+    }
+
+    .choices-advanced-toggle[aria-expanded="true"] .choices-advanced-action{
+      background:var(--orange) !important;
+      color:#fff !important;
+    }
+
+    .choices-advanced-toggle[aria-expanded="true"] .choices-advanced-arrow{
+      background:transparent !important;
+      color:inherit !important;
+    }
+
+    /* إخفاء مدخل الملف الافتراضي واستبداله بمربع مخصص واحد فقط. */
+    .quiz-file-input{
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      opacity:0 !important;
+      overflow:hidden !important;
+      pointer-events:none !important;
+      margin:0 !important;
+      padding:0 !important;
+      border:0 !important;
+    }
+
+    .quiz-image-picker-wrap{
+      width:100%;
+      min-width:0;
+      display:block;
+    }
+
+    .quiz-image-picker-button{
+      width:100%;
+      min-height:46px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      background:#fff;
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:6px 10px;
+      cursor:pointer;
+      direction:rtl;
+      text-align:center;
+      font-weight:800;
+    }
+
+    .quiz-image-picker-action{
+      flex:0 0 auto;
+      min-width:82px;
+      min-height:32px;
+      border-radius:999px;
+      background:#ededed;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:5px 12px;
+      color:#111;
+      font-size:clamp(12px,1.15vw,14px);
+      font-weight:900;
+      line-height:1;
+    }
+
+    .quiz-image-picker-state{
+      min-width:0;
+      flex:1 1 auto;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#333;
+      font-size:clamp(13px,1.25vw,16px);
+      font-weight:800;
+      text-align:center;
+    }
+
+    .quiz-image-picker-button.has-image .quiz-image-picker-action{
+      background:var(--orange);
+      color:#fff;
+    }
+
+    .quiz-image-picker-button:focus-visible{
+      outline:3px solid rgba(94,136,219,.55);
+      outline-offset:2px;
+    }
+
+    /* لا نعرض أي صورة مصغرة أو اسم ملف أو حالة إضافية أسفل المربع. */
+    .quiz-file-status,
+    .quiz-file-thumb{
+      display:none !important;
+    }
+
+    @media(max-width:760px){
+      .choices-theme-section{
+        padding:0 10px 0 0 !important;
+      }
+
+      .choices-theme-current{
+        grid-template-columns:minmax(0,1fr) 52px minmax(148px,43%) !important;
+        min-height:92px !important;
+        gap:8px !important;
+      }
+
+      .choices-theme-preview{
+        min-height:92px !important;
+      }
+
+      .choices-theme-change{
+        width:52px !important;
+        min-width:52px !important;
+      }
+
+      .choices-advanced-action{
+        min-width:72px !important;
+        min-height:27px !important;
+        padding:3px 8px !important;
+      }
+
+      .quiz-image-picker-button{
+        min-height:44px;
+        padding:5px 8px;
+      }
+
+      .quiz-image-picker-action{
+        min-width:76px;
+        min-height:30px;
+        padding-inline:10px;
+        font-size:12px;
+      }
+
+      .quiz-image-picker-state{
+        font-size:13px;
+      }
+    }
+
+    @media(max-width:430px){
+      .choices-theme-current{
+        grid-template-columns:minmax(0,1fr) 50px minmax(142px,44%) !important;
+        gap:7px !important;
+      }
+
+      .choices-theme-preview{
+        min-height:90px !important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -7987,7 +8204,7 @@
 
   function createQuizImagePicker({data,name,onChange,label}){
     const wrap = document.createElement("div");
-    wrap.className = "quiz-choice-content";
+    wrap.className = "quiz-image-picker-wrap";
 
     const input = document.createElement("input");
     input.className = "quiz-file-input";
@@ -7995,40 +8212,52 @@
     input.accept = "image/*";
     input.setAttribute("aria-label",label);
 
-    const status = document.createElement("div");
-    status.className = "quiz-file-status";
+    const pickerButton = document.createElement("button");
+    pickerButton.type = "button";
+    pickerButton.className = "quiz-image-picker-button";
 
-    function renderStatus(imageData,imageName){
-      status.textContent = "";
-      if (imageData) {
-        const image = document.createElement("img");
-        image.className = "quiz-file-thumb";
-        image.alt = "";
-        image.src = imageData;
-        const text = document.createElement("span");
-        text.textContent = imageName || "تم اختيار الصورة";
-        status.append(image,text);
-      } else {
-        status.textContent = "لم يتم اختيار صورة";
-      }
+    const actionText = document.createElement("span");
+    actionText.className = "quiz-image-picker-action";
+
+    const stateText = document.createElement("span");
+    stateText.className = "quiz-image-picker-state";
+
+    function renderState(imageData){
+      const hasImage = Boolean(imageData);
+      pickerButton.classList.toggle("has-image",hasImage);
+      actionText.textContent = hasImage ? "تغيير" : "وضع صورة";
+      stateText.textContent = hasImage ? "تم وضع صورة" : "لم تضع صورة";
+      pickerButton.setAttribute(
+        "aria-label",
+        hasImage ? `${label} — تغيير الصورة` : `${label} — وضع صورة`
+      );
     }
 
-    renderStatus(data,name);
+    renderState(data);
+
+    pickerButton.addEventListener("click",()=>{
+      input.click();
+    });
 
     input.addEventListener("change",async ()=>{
       const file = input.files?.[0];
       if (!file) return;
+
       try {
         const imageData = await readImageFile(file);
-        onChange({imageData,imageName:file.name || "صورة"});
-        renderStatus(imageData,file.name || "صورة");
+        onChange({
+          imageData,
+          imageName:file.name || "صورة"
+        });
+        renderState(imageData);
         saveQuizDraft();
       } catch (_) {
         alert("تعذر قراءة الصورة، حاول اختيار صورة أخرى.");
       }
     });
 
-    wrap.append(input,status);
+    pickerButton.append(actionText,stateText);
+    wrap.append(input,pickerButton);
     return wrap;
   }
 
