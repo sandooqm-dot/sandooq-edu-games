@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v30-question-with-all-panels-instant-box-hide -->
+  <!-- version: choices-v31-open-box-focus-motion-instant-hide -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3051,6 +3051,25 @@
       z-index:23 !important;
     }
 
+
+    /* v31: حركة الاختيار مطابقة لصفحة افتح الصندوق. */
+    .box-card.box-vanished{
+      opacity:0 !important;
+      visibility:hidden !important;
+      pointer-events:none !important;
+      transition:none !important;
+    }
+
+    /*
+      أثناء الزوم يبقى الصندوق المختار واضحًا فوق بقية الصناديق،
+      بينما تتحرك الشبكة بسلاسة من موقعه الحقيقي إلى المنتصف.
+    */
+    .question-grid.box-grid.motion-active .box-card.focus-selected{
+      z-index:140 !important;
+      opacity:1 !important;
+      visibility:visible !important;
+    }
+
 </style>
 </head>
 
@@ -3371,10 +3390,11 @@
     const questionBoxScatterTargets = new Map();
     const questionBoxScatterAnimations = new Map();
 
-    const BOX_SCATTER_MS = 1450;
-    const BOX_ZOOM_IN_MS = 1550;
-    const BOX_ZOOM_OUT_MS = 1450;
+    const BOX_SCATTER_MS = 3200;
+    const BOX_ZOOM_IN_MS = 3300;
+    const BOX_ZOOM_OUT_MS = 3200;
     const BOX_MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
+    const BOX_SCATTER_LEAD_MS = 120;
     const BOX_ELEMENT_DURATION_MS = 1080;
     const BOX_FAST_FADE_MS = 220;
     const CARDS_INTRO_ZOOM_MS = 4600;
@@ -3887,7 +3907,16 @@
       document.documentElement.style.setProperty("--tile-gap",`${Math.max(5,best.gap)}px`);
       document.documentElement.style.setProperty("--tile-size",`${Math.max(34,best.size)}px`);
 
-      if (questionBoxSelected && questionBoxFocusedIndex >= 0) {
+      /*
+        لا نسمح لتحديث المقاسات بأن يقفز بالصندوق مباشرة إلى المنتصف
+        أثناء حركة الاختيار. الحركة وحدها هي التي تنقله وتكبره.
+      */
+      if (
+        questionBoxSelected &&
+        questionBoxFocusedIndex >= 0 &&
+        !interactionLocked &&
+        !questionGrid.classList.contains("motion-active")
+      ) {
         requestAnimationFrame(()=>{
           const target = getQuestionBoxZoomTarget(questionBoxSelected);
           setQuestionBoxGridState(target.scale,target.x,target.y);
@@ -4435,6 +4464,9 @@
         "is-fast-fading"
       );
 
+      button.style.removeProperty("opacity");
+      button.style.removeProperty("visibility");
+      button.style.removeProperty("pointer-events");
       button.style.opacity = "1";
       button.style.visibility = "visible";
       button.style.removeProperty("filter");
@@ -4541,8 +4573,14 @@
 
       button.classList.remove("is-fast-fading");
       button.classList.add("box-vanished");
-      button.style.removeProperty("opacity");
-      button.style.removeProperty("transform");
+
+      /*
+        الإخفاء هنا مباشر في نفس الإطار الذي تنتهي فيه المستطيلات،
+        ولا نعتمد على Transition أو تلاشي إضافي.
+      */
+      button.style.setProperty("opacity","0","important");
+      button.style.setProperty("visibility","hidden","important");
+      button.style.setProperty("pointer-events","none","important");
       button.style.removeProperty("filter");
     }
 
@@ -4661,6 +4699,12 @@
           )
       );
 
+      /*
+        لحظة وصول السؤال وجميع الإجابات إلى مواقعها:
+        يختفي الصندوق فورًا في نفس الدورة، دون تأخير إضافي.
+      */
+      hideQuestionBoxImmediately(source);
+
       prepared.forEach(({ element })=>{
         element.getAnimations().forEach((animation)=>{
           try { animation.cancel(); } catch (_) {}
@@ -4750,7 +4794,7 @@
       resetQuestionBoxVisibility(source);
 
       const scatterFinished = scatterQuestionBoxes(source);
-      await wait(120);
+      await wait(BOX_SCATTER_LEAD_MS);
       await Promise.all([
         scatterFinished,
         animateQuestionBoxGrid(getQuestionBoxZoomTarget(source),BOX_ZOOM_IN_MS)
@@ -4769,7 +4813,6 @@
       );
 
       await animateQuestionOutOfBox(source);
-      hideQuestionBoxImmediately(source);
 
       cardsView.classList.add("is-hidden");
       page.classList.remove("box-question-sequence");
