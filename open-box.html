@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v72-three-tap-flow-no-button-open-box-32 -->
+  <!-- version: open-box-v73-theme-intro-audio -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1713,6 +1713,154 @@
         playGo: ()=> playNamed("go"),
         playReturn: ()=> playNamed("return")
       };
+    })();
+
+
+
+    /*
+      theme-intro-audio-v1:
+      تشغيل صوت الثيم مع حركة الزوم الافتتاحية.
+      الملفات المطلوبة داخل مجلد sounds بجانب الصفحة.
+    */
+    const themeIntroAudio = (()=>{
+      const SOUND_FILES = {
+        default: "sounds/theme-default.mp3?v=1",
+        "sky-clouds": "sounds/theme-sky-clouds.mp3?v=1",
+        "national-day": "sounds/theme-national-day.mp3?v=1",
+        "founding-day": "sounds/theme-founding-day.mp3?v=1"
+      };
+
+      let audio = null;
+      let currentSrc = "";
+      let enabled = true;
+      let pendingTheme = "";
+      let pendingUntil = 0;
+      let unlockArmed = false;
+
+      function normalizeThemeKey(theme){
+        const value = String(theme || "").trim().toLowerCase();
+        if (["sky","clouds","sky-clouds","theme-sky-clouds","سماء","سماء وغيوم"].includes(value)) {
+          return "sky-clouds";
+        }
+        if (["national-day","theme-national-day","اليوم الوطني"].includes(value)) {
+          return "national-day";
+        }
+        if (["founding-day","theme-founding-day","يوم التأسيس","التأسيس"].includes(value)) {
+          return "founding-day";
+        }
+        return "default";
+      }
+
+      function resolveSrc(theme){
+        return SOUND_FILES[normalizeThemeKey(theme)] || SOUND_FILES.default;
+      }
+
+      function ensureAudio(theme){
+        const src = resolveSrc(theme);
+        if (!audio || currentSrc !== src) {
+          try {
+            audio?.pause?.();
+          } catch (_) {}
+
+          audio = new Audio(src);
+          audio.preload = "auto";
+          audio.loop = false;
+          audio.volume = 1;
+          audio.setAttribute("playsinline", "");
+          audio.setAttribute("webkit-playsinline", "");
+          currentSrc = src;
+        }
+        return audio;
+      }
+
+      function clearPending(){
+        pendingTheme = "";
+        pendingUntil = 0;
+      }
+
+      function disarmUnlock(){
+        if (!unlockArmed) return;
+        unlockArmed = false;
+        document.removeEventListener("pointerdown", resumePending, true);
+        document.removeEventListener("touchstart", resumePending, true);
+        document.removeEventListener("keydown", resumePending, true);
+      }
+
+      function resumePending(){
+        disarmUnlock();
+        if (!pendingTheme || performance.now() > pendingUntil) {
+          clearPending();
+          return;
+        }
+        const theme = pendingTheme;
+        clearPending();
+        play(theme, false);
+      }
+
+      function armUnlock(){
+        if (unlockArmed) return;
+        unlockArmed = true;
+        document.addEventListener("pointerdown", resumePending, true);
+        document.addEventListener("touchstart", resumePending, true);
+        document.addEventListener("keydown", resumePending, true);
+      }
+
+      function preload(theme){
+        if (!enabled) return;
+        const target = ensureAudio(theme);
+        try { target.load(); } catch (_) {}
+      }
+
+      function play(theme, allowFallback = true){
+        if (!enabled) return false;
+        const target = ensureAudio(theme);
+
+        try {
+          target.pause();
+          target.currentTime = 0;
+          target.volume = 1;
+          target.playbackRate = 1;
+
+          const promise = target.play();
+          if (promise && typeof promise.then === "function") {
+            promise.then(()=>{
+              clearPending();
+              disarmUnlock();
+            }).catch(()=>{
+              if (!allowFallback) return;
+              pendingTheme = String(theme || "default");
+              pendingUntil = performance.now() + 15000;
+              armUnlock();
+            });
+          }
+          return true;
+        } catch (_) {
+          if (allowFallback) {
+            pendingTheme = String(theme || "default");
+            pendingUntil = performance.now() + 15000;
+            armUnlock();
+          }
+          return false;
+        }
+      }
+
+      function stop(){
+        clearPending();
+        disarmUnlock();
+        try {
+          audio?.pause?.();
+          if (audio) audio.currentTime = 0;
+        } catch (_) {}
+      }
+
+      function setEnabled(value){
+        enabled = value !== false;
+        if (!enabled) stop();
+      }
+
+      window.addEventListener("pagehide", stop, { passive:true });
+
+      return { preload, play, stop, setEnabled };
     })();
 
     let currentContentType = "text";
@@ -3715,11 +3863,14 @@
       boxInteractionLocked = false;
       openBoxAudio.setEnabled(boxSoundEnabled);
       openBoxAudio.preload();
+      themeIntroAudio.setEnabled(boxSoundEnabled);
 
       applyTheme(currentTheme);
       syncVisualViewportFrame(true);
       setBoxFocusState(1, 0, 0);
       renderBoxes();
+      themeIntroAudio.preload(currentTheme);
+      themeIntroAudio.play(currentTheme);
       await playOpeningIntro();
     }
 
