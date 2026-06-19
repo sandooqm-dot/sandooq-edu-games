@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v35-open-box-sounds-synced -->
+  <!-- version: choices-v36-wrong-answer-sound -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3508,19 +3508,22 @@
       const SOUND_FILES = {
         open: "sounds/open-box-open.mp3?v=1",
         go: "sounds/open-box-go.mp3?v=2",
-        return: "sounds/open-box-return.mp3?v=2"
+        return: "sounds/open-box-return.mp3?v=2",
+        wrong: "sounds/choice-wrong.mp3?v=1"
       };
 
       const VOLUMES = {
         open: 1,
         go: 1,
-        return: 1
+        return: 1,
+        wrong: 1
       };
 
       const START_OFFSETS = {
         open: 0,
         go: 0,
-        return: 0
+        return: 0,
+        wrong: 0
       };
 
       const cache = {};
@@ -3613,7 +3616,8 @@
         stopAll,
         playOpen: ()=> playNamed("open"),
         playGo: ()=> playNamed("go"),
-        playReturn: ()=> playNamed("return")
+        playReturn: ()=> playNamed("return"),
+        playWrong: ()=> playNamed("wrong")
       };
     })();
 
@@ -4837,6 +4841,8 @@
         return;
       }
 
+      choicesAudio.unlock();
+      choicesAudio.playWrong();
       card.classList.add("is-disabled","is-wrong");
       card.disabled = true;
       showMark(card,"wrong");
