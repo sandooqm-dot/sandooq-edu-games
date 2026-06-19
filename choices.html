@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v39-start-end -->
+  <!-- version: choices-v40-direct-completion-and-fixed-back -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3431,6 +3431,46 @@
       }
     }
 
+
+    /* v40: اكتمال الوضع المباشر مع إبقاء زر الرجوع ثابتًا دائمًا. */
+
+    .game-page.activity-ended .stage{
+      visibility:visible !important;
+      pointer-events:auto !important;
+    }
+
+    .game-page.activity-ended .cards-view,
+    .game-page.activity-ended .question-view{
+      opacity:0 !important;
+      visibility:hidden !important;
+      pointer-events:none !important;
+    }
+
+    .game-page.activity-ended .activity-overlay.end-celebration.is-visible{
+      display:flex !important;
+      visibility:visible !important;
+      pointer-events:auto !important;
+    }
+
+    .game-page.activity-ended .fixed-controls{
+      visibility:visible !important;
+      opacity:1 !important;
+      transform:none !important;
+      pointer-events:none !important;
+      z-index:260 !important;
+    }
+
+    .game-page.activity-ended .back-btn{
+      display:flex !important;
+      visibility:visible !important;
+      opacity:1 !important;
+      pointer-events:auto !important;
+    }
+
+    .game-page.activity-ended .right-controls{
+      display:none !important;
+    }
+
 </style>
 </head>
 
@@ -5150,7 +5190,10 @@
 
       activeQuestionIndex = index;
       directQuestionIndex = index;
-      answerLocked = false;
+      const questionWasCompleted =
+        displayMode !== "cards" &&
+        completed.has(index);
+      answerLocked = questionWasCompleted;
       closeQuestionImageZoom();
 
       const isImageQuestion = item.questionType === "image";
@@ -5271,6 +5314,24 @@
         choicesGrid.appendChild(button);
       });
 
+      if (questionWasCompleted) {
+        questionView.classList.add("is-answered");
+
+        const renderedChoices = Array.from(
+          choicesGrid.querySelectorAll(".choice-card")
+        );
+
+        renderedChoices.forEach((choiceCard)=>{
+          choiceCard.classList.add("is-disabled");
+          choiceCard.disabled = true;
+        });
+
+        const correctCard = renderedChoices[item.correctChoiceIndex];
+        if (correctCard) {
+          showMark(correctCard,"correct");
+        }
+      }
+
       questionView.classList.add("is-visible");
       updateNavigationButtons();
       fitCurrentSceneText();
@@ -5306,13 +5367,24 @@
         });
         questionView.classList.add("is-answered");
 
-        if (
+        const directActivityCompleted =
           displayMode !== "cards" &&
           questions.length > 0 &&
-          completed.size >= questions.length
-        ) {
-          window.setTimeout(showEndCelebration, 900);
+          questions.every((_,questionIndex)=> completed.has(questionIndex));
+
+        if (directActivityCompleted) {
+          window.setTimeout(()=>{
+            if (
+              displayMode !== "cards" &&
+              questions.length > 0 &&
+              questions.every((_,questionIndex)=> completed.has(questionIndex))
+            ) {
+              showEndCelebration();
+            }
+          },900);
         }
+
+        updateNavigationButtons();
         return;
       }
 
@@ -6304,6 +6376,12 @@
         closeQuestionImageZoom();
         return;
       }
+
+      if (page.classList.contains("activity-ended")) {
+        goToChoicesSettings();
+        return;
+      }
+
       if (interactionLocked) return;
 
       if (questionView.classList.contains("is-visible")) {
