@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v37-theme-intro-audio -->
+  <!-- version: choices-v38-back-to-settings -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -5898,6 +5898,17 @@
     }
 
 
+    function goToChoicesSettings(){
+      try {
+        const settingsUrl = new URL("index.html", window.location.href);
+        settingsUrl.hash = "choicesSetup";
+        window.location.href =
+          `${settingsUrl.pathname}${settingsUrl.search}${settingsUrl.hash}`;
+      } catch (_) {
+        window.location.href = "index.html#choicesSetup";
+      }
+    }
+
     async function handleBack(){
       if (questionImageZoomOpen) {
         closeQuestionImageZoom();
@@ -5910,22 +5921,12 @@
           answerLocked = true;
           await hideQuestionScene();
         } else {
-          try { history.back(); } catch (_) {}
+          goToChoicesSettings();
         }
         return;
       }
 
-      try {
-        const returnUrl = getUrlParam("return") || getUrlParam("returnUrl");
-        if (returnUrl) {
-          location.href = returnUrl;
-          return;
-        }
-      } catch (_) {}
-
-      try {
-        history.back();
-      } catch (_) {}
+      goToChoicesSettings();
     }
 
     async function playCardsIntro(){
