@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-choices-builder-advanced-clean-eye-switch-v53 -->
+<!-- version: index-choices-box-cover-types-v54 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -7436,6 +7436,39 @@
       }
     }
 
+
+
+    /* v54: نوع غلاف الصندوق يظهر فقط مع طريقة عرض الصناديق. */
+    .quiz-cover-type-group{
+      grid-column:1 / -1;
+    }
+
+    .quiz-cover-type-group[hidden]{
+      display:none !important;
+    }
+
+    .quiz-cover-mode-grid{
+      grid-template-columns:repeat(4,minmax(0,1fr));
+    }
+
+    .quiz-cover-field{
+      display:grid;
+      gap:8px;
+      margin-bottom:14px;
+      padding-bottom:14px;
+      border-bottom:1px solid rgba(17,17,17,.14);
+    }
+
+    .quiz-cover-field .quiz-field-label{
+      margin:0;
+    }
+
+    @media(max-width:850px){
+      .quiz-cover-mode-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -7746,8 +7779,18 @@
         <div class="choices-config-group">
           <h4 class="choices-config-group-title">طريقة العرض</h4>
           <div class="choices-mode-grid" aria-label="طريقة عرض الأسئلة">
-            <button class="choices-mode-btn active" data-quiz-display-mode="cards" type="button"><strong>صناديق</strong></button>
-            <button class="choices-mode-btn" data-quiz-display-mode="direct" type="button"><strong>مباشر</strong></button>
+            <button class="choices-mode-btn" data-quiz-display-mode="cards" type="button"><strong>صناديق</strong></button>
+            <button class="choices-mode-btn active" data-quiz-display-mode="direct" type="button"><strong>مباشر</strong></button>
+          </div>
+        </div>
+
+        <div class="choices-config-group quiz-cover-type-group" id="quizCoverTypeGroup" hidden>
+          <h4 class="choices-config-group-title">نوع غلاف الصندوق</h4>
+          <div class="choices-mode-grid quiz-cover-mode-grid" aria-label="نوع غلاف الصندوق">
+            <button class="choices-mode-btn" data-quiz-cover-type="arabic-numbers" type="button"><strong>أرقام عربية</strong></button>
+            <button class="choices-mode-btn active" data-quiz-cover-type="english-numbers" type="button"><strong>أرقام إنجليزية</strong></button>
+            <button class="choices-mode-btn" data-quiz-cover-type="images" type="button"><strong>صور</strong></button>
+            <button class="choices-mode-btn" data-quiz-cover-type="text" type="button"><strong>نصوص</strong></button>
           </div>
         </div>
       </div>
@@ -8686,7 +8729,7 @@
   "use strict";
 
   const QUIZ_PAYLOAD_KEY = "sandooq_quiz_payload_v1";
-  const QUIZ_DRAFT_KEY = "sandooq_quiz_draft_v1";
+  const QUIZ_DRAFT_KEY = "sandooq_quiz_draft_v2";
   const QUIZ_PAGE_URL = "choices.html";
   const QUIZ_MAX_QUESTIONS = 30;
   const QUIZ_MIN_CHOICES = 2;
@@ -8705,10 +8748,12 @@
   const quizAdvancedPanel = document.getElementById("quizAdvancedPanel");
   const quizSoundToggleBtn = document.getElementById("quizSoundToggleBtn");
   const quizFontSelect = document.getElementById("quizFontSelect");
+  const quizCoverTypeGroup = document.getElementById("quizCoverTypeGroup");
 
   let quizQuestionType = "text";
   let quizChoicesType = "text";
-  let quizDisplayMode = "cards";
+  let quizDisplayMode = "direct";
+  let quizCoverType = "english-numbers";
   let quizTheme = "classic";
   let quizQuestions = [];
   let activeQuizQuestionIndex = 0;
@@ -8729,6 +8774,9 @@
 
   function createQuizQuestion(){
     return {
+      coverText:"",
+      coverImageData:"",
+      coverImageName:"",
       questionText:"",
       questionImageData:"",
       questionImageName:"",
@@ -8739,6 +8787,9 @@
 
   function ensureQuizQuestionStructure(question){
     const clean = {
+      coverText:String(question?.coverText || question?.boxCoverText || ""),
+      coverImageData:question?.coverImageData || question?.boxCoverImageData || "",
+      coverImageName:question?.coverImageName || question?.boxCoverImageName || "",
       questionText:String(question?.questionText || ""),
       questionImageData:question?.questionImageData || "",
       questionImageName:question?.questionImageName || "",
@@ -8782,6 +8833,17 @@
         clean.questionText = "";
       }
 
+      if (["english-numbers","arabic-numbers"].includes(quizCoverType)) {
+        clean.coverText = "";
+        clean.coverImageData = "";
+        clean.coverImageName = "";
+      } else if (quizCoverType === "text") {
+        clean.coverImageData = "";
+        clean.coverImageName = "";
+      } else if (quizCoverType === "images") {
+        clean.coverText = "";
+      }
+
       clean.choices = clean.choices.map((choice,index)=>{
         const next = {...choice,isCorrect:index === clean.correctChoiceIndex};
         if (quizChoicesType === "text") {
@@ -8807,6 +8869,12 @@
     document.querySelectorAll("[data-quiz-display-mode]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.quizDisplayMode === quizDisplayMode);
     });
+    document.querySelectorAll("[data-quiz-cover-type]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.quizCoverType === quizCoverType);
+    });
+    if (quizCoverTypeGroup) {
+      quizCoverTypeGroup.hidden = quizDisplayMode !== "cards";
+    }
   }
 
   function updateQuizThemeSummary(){
@@ -9197,6 +9265,65 @@
       head.append(number,removeQuestion);
       entry.appendChild(head);
 
+      if (
+        quizDisplayMode === "cards" &&
+        ["text","images"].includes(quizCoverType)
+      ) {
+        const coverField = document.createElement("div");
+        coverField.className = "quiz-cover-field";
+
+        const coverLabel = document.createElement("div");
+        coverLabel.className = "quiz-field-label";
+        coverLabel.textContent = quizCoverType === "text"
+          ? "نص غلاف الصندوق"
+          : "صورة غلاف الصندوق";
+        coverField.appendChild(coverLabel);
+
+        if (quizCoverType === "text") {
+          const fieldRow = document.createElement("div");
+          fieldRow.className = "quiz-text-field-with-review";
+
+          const coverInput = document.createElement("input");
+          coverInput.className = "quiz-text-input";
+          coverInput.type = "text";
+          coverInput.maxLength = 70;
+          coverInput.placeholder = "اكتب نص الغلاف هنا";
+          coverInput.value = question.coverText || "";
+          coverInput.addEventListener("input",()=>{
+            quizQuestions[questionIndex].coverText = coverInput.value;
+            saveQuizDraft();
+          });
+
+          const reviewButton = createQuizReviewButton({
+            label:`مراجعة نص غلاف السؤال ${questionIndex + 1}`,
+            getValue:()=> coverInput.value,
+            maxLength:70,
+            placeholder:"اكتب نص الغلاف هنا..",
+            onSave:(value)=>{
+              coverInput.value = value;
+              quizQuestions[questionIndex].coverText = value;
+              saveQuizDraft();
+            }
+          });
+
+          fieldRow.append(coverInput,reviewButton);
+          coverField.appendChild(fieldRow);
+        } else {
+          coverField.appendChild(createQuizImagePicker({
+            data:question.coverImageData,
+            name:question.coverImageName,
+            label:`صورة غلاف السؤال ${questionIndex + 1}`,
+            onChange:({imageData,imageName})=>{
+              quizQuestions[questionIndex].coverImageData = imageData;
+              quizQuestions[questionIndex].coverImageName = imageName;
+              quizQuestions[questionIndex].coverText = "";
+            }
+          }));
+        }
+
+        entry.appendChild(coverField);
+      }
+
       const qLabel = document.createElement("div");
       qLabel.className = "quiz-field-label";
       qLabel.textContent =
@@ -9483,6 +9610,7 @@
       questionType:quizQuestionType,
       choicesType:quizChoicesType,
       displayMode:quizDisplayMode,
+      coverType:quizCoverType,
       soundEnabled:quizSoundsEnabled,
       fontFamily:quizFont,
       activeQuestionIndex:activeQuizQuestionIndex,
@@ -9510,7 +9638,10 @@
         : String(draft.theme || "classic");
       quizQuestionType = draft.questionType === "image" ? "image" : "text";
       quizChoicesType = draft.choicesType === "images" ? "images" : "text";
-      quizDisplayMode = draft.displayMode === "direct" ? "direct" : "cards";
+      quizDisplayMode = draft.displayMode === "cards" ? "cards" : "direct";
+      quizCoverType = ["english-numbers","arabic-numbers","images","text"].includes(draft.coverType)
+        ? draft.coverType
+        : "english-numbers";
       quizSoundsEnabled = draft.soundEnabled !== false;
       quizFont = ["default","arial","traditional"].includes(draft.fontFamily)
         ? draft.fontFamily
@@ -9541,6 +9672,24 @@
     for (let index=0; index<quizQuestions.length; index+=1) {
       const question = quizQuestions[index];
       const number = index + 1;
+
+      if (
+        quizDisplayMode === "cards" &&
+        quizCoverType === "text" &&
+        !String(question.coverText || "").trim()
+      ) {
+        alert(`يرجى كتابة نص غلاف الصندوق للسؤال ${number}.`);
+        return false;
+      }
+
+      if (
+        quizDisplayMode === "cards" &&
+        quizCoverType === "images" &&
+        !question.coverImageData
+      ) {
+        alert(`يرجى اختيار صورة غلاف الصندوق للسؤال ${number}.`);
+        return false;
+      }
 
       if (quizQuestionType === "text" && !String(question.questionText || "").trim()) {
         alert(`يرجى كتابة نص السؤال ${number}.`);
@@ -9588,6 +9737,15 @@
       ...quizDraftPayload(),
       payloadId,
       questions:quizQuestions.map((question)=>({
+        coverText:quizDisplayMode === "cards" && quizCoverType === "text"
+          ? String(question.coverText || "").trim()
+          : "",
+        coverImageData:quizDisplayMode === "cards" && quizCoverType === "images"
+          ? question.coverImageData
+          : "",
+        coverImageName:quizDisplayMode === "cards" && quizCoverType === "images"
+          ? question.coverImageName
+          : "",
         questionType:quizQuestionType,
         questionText:quizQuestionType === "text" ? String(question.questionText || "").trim() : "",
         questionImageData:quizQuestionType === "image" ? question.questionImageData : "",
@@ -9671,8 +9829,22 @@
 
   document.querySelectorAll("[data-quiz-display-mode]").forEach((button)=>{
     button.addEventListener("click",()=>{
-      quizDisplayMode = button.dataset.quizDisplayMode === "direct" ? "direct" : "cards";
+      quizDisplayMode = button.dataset.quizDisplayMode === "cards" ? "cards" : "direct";
       updateQuizModeButtons();
+      renderQuizQuestions();
+      saveQuizDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-quiz-cover-type]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      const requested = button.dataset.quizCoverType;
+      quizCoverType = ["english-numbers","arabic-numbers","images","text"].includes(requested)
+        ? requested
+        : "english-numbers";
+      sanitizeQuizDataInPlace();
+      updateQuizModeButtons();
+      renderQuizQuestions();
       saveQuizDraft();
     });
   });

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v33-flowers-two-colors-swapped-navigation -->
+  <!-- version: choices-v34-box-cover-content-types -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3142,6 +3142,65 @@
       }
     }
 
+
+
+    /* v34: محتوى غلاف الصندوق مطابق لطريقة صفحة افتح الصندوق. */
+    .cover-text{
+      position:relative;
+      z-index:2;
+      width:86%;
+      max-height:76%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      color:var(--box-cover-text,#fff);
+      font-size:clamp(14px,calc(var(--tile-size) * .23),34px);
+      line-height:1.08;
+      font-weight:900;
+      overflow:hidden;
+      overflow-wrap:anywhere;
+      text-wrap:balance;
+      text-shadow:0 3px 8px rgba(0,0,0,.24);
+      pointer-events:none;
+    }
+
+    .cover-image{
+      position:relative;
+      z-index:2;
+      width:82%;
+      height:82%;
+      object-fit:contain;
+      object-position:center;
+      display:block;
+      filter:drop-shadow(0 3px 5px rgba(0,0,0,.16));
+      pointer-events:none;
+    }
+
+    .box-card.is-completed .cover-text,
+    .box-card.is-completed .cover-image{
+      opacity:0 !important;
+      transform:scale(.65);
+    }
+
+    .game-page.theme-classroom .cover-text{
+      z-index:2;
+      width:58% !important;
+      max-width:58% !important;
+      max-height:58% !important;
+      color:#fff !important;
+      -webkit-text-fill-color:#fff !important;
+      text-shadow:0 2px 6px rgba(0,0,0,.34) !important;
+      transform:translateY(7%);
+    }
+
+    .game-page.theme-classroom .cover-image{
+      z-index:2;
+      width:54% !important;
+      height:54% !important;
+      transform:translateY(7%);
+    }
+
 </style>
 </head>
 
@@ -3441,6 +3500,7 @@
 
     let currentTheme = "classroom";
     let displayMode = "cards";
+    let coverType = "english-numbers";
     let questions = [];
     let completed = new Set();
     let activeQuestionIndex = -1;
@@ -3547,6 +3607,20 @@
       ) return "direct";
 
       return "cards";
+    }
+
+    function normalizeCoverType(payload){
+      const raw = String(
+        payload?.coverType ||
+        payload?.boxCoverType ||
+        payload?.questionCoverType ||
+        "english-numbers"
+      ).trim().toLowerCase();
+
+      if (["arabic-numbers","arabic","arabic-digits"].includes(raw)) return "arabic-numbers";
+      if (["images","image","pictures"].includes(raw)) return "images";
+      if (["text","texts","words"].includes(raw)) return "text";
+      return "english-numbers";
     }
 
     function cleanQuestions(payload){
@@ -3663,6 +3737,9 @@
           }
 
           const clean = {
+            coverText:String(entry?.coverText || entry?.boxCoverText || "").trim(),
+            coverImageData:entry?.coverImageData || entry?.boxCoverImageData || "",
+            coverImageName:entry?.coverImageName || entry?.boxCoverImageName || "",
             questionType,
             questionText,
             questionImageData,
@@ -3731,6 +3808,7 @@
       questions = clean;
       currentTheme = normalizeTheme(payload?.theme || currentTheme);
       displayMode = normalizeDisplayMode(payload || {});
+      coverType = normalizeCoverType(payload || {});
       document.title = String(payload?.gameName || "الاختيارات") + " - صندوق الألعاب التعليمية";
       return true;
     }
@@ -3752,6 +3830,7 @@
 
       const keys = [
         "sandooq_quiz_payload_v1",
+        "sandooq_quiz_draft_v2",
         "sandooq_quiz_draft_v1"
       ];
 
@@ -3767,7 +3846,7 @@
         choices:item.choices.map((choice)=>({ ...choice }))
       }));
       currentTheme = normalizeTheme(getUrlParam("theme") || "classroom");
-      displayMode = getUrlParam("mode") === "direct" ? "direct" : "cards";
+      displayMode = getUrlParam("mode") === "cards" ? "cards" : "direct";
       return false;
     }
 
@@ -4223,7 +4302,82 @@
       }
 
       cardsPendingViewportLayout = false;
+      requestAnimationFrame(fitAllDeckCoverText);
       return true;
+    }
+
+    function toArabicIndicNumber(value){
+      return String(value).replace(/\d/g,(digit)=> "٠١٢٣٤٥٦٧٨٩"[Number(digit)]);
+    }
+
+    function fitDeckCoverText(element){
+      if (!element) return;
+      const panel = element.closest(".front-panel");
+      if (!panel) return;
+
+      const availableWidth = Math.max(20,element.clientWidth || panel.clientWidth * .86);
+      const availableHeight = Math.max(20,panel.clientHeight * .72);
+      const tile = Math.max(40,panel.clientWidth || 100);
+      const minFont = Math.max(10,Math.min(16,tile * .10));
+      const maxFont = Math.max(minFont,Math.min(46,tile * .30));
+
+      element.style.fontSize = `${maxFont}px`;
+      let low = minFont;
+      let high = maxFont;
+      let best = minFont;
+
+      for (let i=0;i<24;i+=1) {
+        const mid = (low + high) / 2;
+        element.style.fontSize = `${mid}px`;
+        const fits =
+          element.scrollWidth <= availableWidth + 1 &&
+          element.scrollHeight <= availableHeight + 1;
+        if (fits) {
+          best = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+
+      element.style.fontSize = `${Math.floor(best * 10) / 10}px`;
+    }
+
+    function fitAllDeckCoverText(){
+      questionGrid.querySelectorAll(".cover-text").forEach(fitDeckCoverText);
+    }
+
+    function setDeckCoverContent(button,index,isCompleted = false){
+      const panel = button?.querySelector(".front-panel");
+      if (!panel) return;
+      panel.textContent = "";
+      if (isCompleted) return;
+
+      const question = questions[index] || {};
+
+      if (coverType === "images" && question.coverImageData) {
+        const image = document.createElement("img");
+        image.className = "cover-image";
+        image.alt = "";
+        image.src = question.coverImageData;
+        panel.appendChild(image);
+        return;
+      }
+
+      if (coverType === "text" && String(question.coverText || "").trim()) {
+        const coverText = document.createElement("span");
+        coverText.className = "cover-text";
+        coverText.textContent = String(question.coverText || "").trim();
+        panel.appendChild(coverText);
+        return;
+      }
+
+      const number = document.createElement("span");
+      number.className = "panel-number";
+      number.textContent = coverType === "arabic-numbers"
+        ? toArabicIndicNumber(index + 1)
+        : String(index + 1);
+      panel.appendChild(number);
     }
 
     function renderDeck(){
@@ -4243,13 +4397,9 @@
         const panel = document.createElement("span");
         panel.className = "front-panel";
 
-        const number = document.createElement("span");
-        number.className = "panel-number";
-        number.textContent = completed.has(index) ? "" : String(index + 1);
-
-        panel.appendChild(number);
         wrap.appendChild(panel);
         button.appendChild(wrap);
+        setDeckCoverContent(button,index,completed.has(index));
 
         if (completed.has(index)) {
           button.classList.add("is-completed");
@@ -4269,6 +4419,7 @@
 
       calculateDeckLayout({ force:true });
       setQuestionBoxGridState(1,0,0);
+      requestAnimationFrame(fitAllDeckCoverText);
     }
 
     function choiceColumns(count){
@@ -4851,8 +5002,7 @@
         card.style.transform = "translate3d(0,0,0) scale(1)";
         card.classList.remove("focus-selected","focus-away");
         card.classList.toggle("is-completed",completed.has(index));
-        const number = card.querySelector(".panel-number");
-        if (number) number.textContent = completed.has(index) ? "" : String(index + 1);
+        setDeckCoverContent(card,index,completed.has(index));
         card.disabled = completed.has(index);
       });
       questionBoxScatterTargets.clear();
@@ -4860,6 +5010,7 @@
       setQuestionBoxGridState(1,0,0);
       questionBoxFocusedIndex = -1;
       questionBoxSelected = null;
+      requestAnimationFrame(fitAllDeckCoverText);
     }
 
     function resetQuestionBoxVisibility(button){
@@ -5258,8 +5409,11 @@
 
       if (markCompleted) completed.add(activeQuestionIndex);
       const finishedIndex = activeQuestionIndex;
-      const number = questionBoxSelected.querySelector(".panel-number");
-      if (markCompleted && number) number.textContent = "";
+      setDeckCoverContent(
+        questionBoxSelected,
+        finishedIndex,
+        markCompleted
+      );
       questionBoxSelected.classList.toggle("is-completed",markCompleted);
       questionBoxSelected.disabled = markCompleted;
       questionBoxSelected.setAttribute(
@@ -5283,15 +5437,12 @@
           completed.has(finishedIndex)
         );
 
-        const selectedNumber =
-          selected.querySelector(".panel-number");
-
-        if (selectedNumber) {
-          selectedNumber.textContent =
-            completed.has(finishedIndex)
-              ? ""
-              : String(finishedIndex + 1);
-        }
+        setDeckCoverContent(
+          selected,
+          finishedIndex,
+          completed.has(finishedIndex)
+        );
+        requestAnimationFrame(fitAllDeckCoverText);
 
         selected.disabled = completed.has(finishedIndex);
         selected.setAttribute(
