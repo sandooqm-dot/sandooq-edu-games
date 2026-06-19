@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v34-box-cover-content-types -->
+  <!-- version: choices-v35-open-box-sounds-synced -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3498,6 +3498,125 @@
     const questionImageOverlay = document.getElementById("questionImageOverlay");
     const questionImageOverlayImg = document.getElementById("questionImageOverlayImg");
 
+    /*
+      نفس مؤثرات صفحة افتح الصندوق، وبنفس الملفات والإعدادات.
+      توضع الملفات داخل مجلد sounds بجانب الصفحة.
+    */
+    let quizSoundEnabled = true;
+
+    const choicesAudio = (()=>{
+      const SOUND_FILES = {
+        open: "sounds/open-box-open.mp3?v=1",
+        go: "sounds/open-box-go.mp3?v=2",
+        return: "sounds/open-box-return.mp3?v=2"
+      };
+
+      const VOLUMES = {
+        open: 1,
+        go: 1,
+        return: 1
+      };
+
+      const START_OFFSETS = {
+        open: 0,
+        go: 0,
+        return: 0
+      };
+
+      const cache = {};
+      let enabled = true;
+
+      function canPlay(){
+        return enabled !== false && quizSoundEnabled !== false;
+      }
+
+      function getAudio(name){
+        const src = SOUND_FILES[name];
+        if (!src) return null;
+
+        if (!cache[name]) {
+          const audio = new Audio(src);
+          audio.preload = "auto";
+          audio.loop = false;
+          audio.volume = VOLUMES[name] ?? 1;
+          cache[name] = audio;
+        }
+
+        return cache[name];
+      }
+
+      function stopAll(except = null){
+        Object.values(cache).forEach((audio)=>{
+          if (!audio || audio === except) return;
+          try {
+            audio.pause();
+            audio.currentTime = 0;
+          } catch (_) {}
+        });
+      }
+
+      function playNamed(name){
+        if (!canPlay()) return false;
+
+        const audio = getAudio(name);
+        if (!audio) return false;
+
+        try {
+          stopAll(audio);
+          audio.pause();
+
+          const startOffset = START_OFFSETS[name] ?? 0;
+          try {
+            if (typeof audio.fastSeek === "function" && startOffset > 0) {
+              audio.fastSeek(startOffset);
+            } else {
+              audio.currentTime = startOffset;
+            }
+          } catch (_) {
+            try { audio.currentTime = 0; } catch (_) {}
+          }
+
+          audio.volume = VOLUMES[name] ?? 1;
+          audio.playbackRate = 1;
+
+          const promise = audio.play();
+          if (promise && typeof promise.catch === "function") {
+            promise.catch(()=>{});
+          }
+
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
+      function preload(){
+        Object.keys(SOUND_FILES).forEach((name)=>{
+          const audio = getAudio(name);
+          try { audio?.load?.(); } catch (_) {}
+        });
+      }
+
+      function unlock(){
+        preload();
+      }
+
+      function setEnabled(value){
+        enabled = value !== false;
+        if (!enabled) stopAll();
+      }
+
+      return {
+        unlock,
+        preload,
+        setEnabled,
+        stopAll,
+        playOpen: ()=> playNamed("open"),
+        playGo: ()=> playNamed("go"),
+        playReturn: ()=> playNamed("return")
+      };
+    })();
+
     let currentTheme = "classroom";
     let displayMode = "cards";
     let coverType = "english-numbers";
@@ -3587,6 +3706,17 @@
     function normalizeType(value, allowed, fallback){
       const raw = String(value || "").trim().toLowerCase();
       return allowed.includes(raw) ? raw : fallback;
+    }
+
+    function normalizeSoundEnabled(data){
+      if (!data || typeof data !== "object") return true;
+      if (data.soundEnabled === false) return false;
+      if (
+        data.sounds &&
+        typeof data.sounds === "object" &&
+        data.sounds.enabled === false
+      ) return false;
+      return true;
     }
 
     function normalizeDisplayMode(payload){
@@ -3809,6 +3939,8 @@
       currentTheme = normalizeTheme(payload?.theme || currentTheme);
       displayMode = normalizeDisplayMode(payload || {});
       coverType = normalizeCoverType(payload || {});
+      quizSoundEnabled = normalizeSoundEnabled(payload);
+      choicesAudio.setEnabled(quizSoundEnabled);
       document.title = String(payload?.gameName || "الاختيارات") + " - صندوق الألعاب التعليمية";
       return true;
     }
@@ -3847,6 +3979,8 @@
       }));
       currentTheme = normalizeTheme(getUrlParam("theme") || "classroom");
       displayMode = getUrlParam("mode") === "cards" ? "cards" : "direct";
+      quizSoundEnabled = true;
+      choicesAudio.setEnabled(true);
       return false;
     }
 
@@ -4690,6 +4824,8 @@
       if (!item) return;
 
       if (choiceIndex === item.correctChoiceIndex) {
+        choicesAudio.unlock();
+        choicesAudio.playOpen();
         answerLocked = true;
         if (displayMode !== "cards") completed.add(activeQuestionIndex);
         showMark(card,"correct");
@@ -5352,6 +5488,9 @@
       if (interactionLocked || !source || !questions[index]) return;
       if (completed.has(index) || source.classList.contains("is-completed")) return;
 
+      choicesAudio.unlock();
+      choicesAudio.playGo();
+
       interactionLocked = true;
       activeSourceCard = source;
       questionBoxSelected = source;
@@ -5421,6 +5560,13 @@
         markCompleted ? "true" : "false"
       );
       resetQuestionBoxVisibility(questionBoxSelected);
+
+      /*
+        يبدأ صوت العودة في اللحظة نفسها التي يبدأ فيها الصندوق
+        الرجوع إلى موقعه، بنفس توقيت صفحة افتح الصندوق.
+      */
+      choicesAudio.unlock();
+      choicesAudio.playReturn();
 
       await Promise.all([
         restoreQuestionBoxesAnimated(),
@@ -6286,6 +6432,8 @@
     async function initialize(){
       syncVisualViewportFrame(true);
       await hydratePayload();
+      choicesAudio.setEnabled(quizSoundEnabled);
+      choicesAudio.preload();
       applyTheme();
 
       if (displayMode === "cards") {
