@@ -1,0 +1,1376 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- version: match-v1-independent-player -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <title>المطابقة - صندوق الألعاب التعليمية</title>
+  <style>
+    :root{
+      --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px);
+      --safe-left:env(safe-area-inset-left,0px);
+      --safe-right:env(safe-area-inset-right,0px);
+      --ink:#111;
+      --yellow:#efd553;
+      --blue:#1688d3;
+      --green:#25ad69;
+      --red:#f04747;
+      --orange:#f47a45;
+      --logo-w:clamp(86px,9.2vw,148px);
+      --edge-guard:clamp(12px,2vw,28px);
+      --game-font:Tahoma,Arial,"Segoe UI",sans-serif;
+    }
+
+    *{
+      box-sizing:border-box;
+      -webkit-tap-highlight-color:transparent;
+      font-family:var(--game-font);
+    }
+
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:100%;
+      background:#fff;
+      color:var(--ink);
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
+    }
+
+    .match-page{
+      position:sticky;
+      top:0;
+      width:100%;
+      height:100dvh;
+      min-height:100dvh;
+      overflow:hidden;
+      background:#fff;
+      direction:ltr;
+      user-select:none;
+      touch-action:none;
+      isolation:isolate;
+    }
+
+    .match-page[data-font="arial"]{
+      --game-font:Arial,sans-serif;
+    }
+
+    .match-page[data-font="traditional"]{
+      --game-font:"Traditional Arabic","Arabic Typesetting",Tahoma,Arial,sans-serif;
+    }
+
+    .theme-background{
+      position:absolute;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+      background-color:#fff;
+      background-position:center center;
+      background-size:cover;
+      background-repeat:no-repeat;
+      opacity:0;
+      transform:scale(1.05);
+      transform-origin:center;
+      transition:transform .8s ease;
+    }
+
+    .match-page.theme-white{background:#fff}
+    .match-page.theme-white .theme-background{opacity:0;background-image:none}
+
+    .match-page.theme-classroom .theme-background{
+      opacity:1;
+      background-color:#fff;
+      background-image:
+        url("theme-classroom-bg-v2.webp?v=2"),
+        url("theme-original-bg.webp?v=45"),
+        url("theme-original-bg.png?v=45"),
+        url("theme-original.webp?v=45"),
+        url("theme-original.png?v=45");
+    }
+
+    .match-page.theme-sky-clouds .theme-background{
+      opacity:1;
+      background-color:#58c7f3;
+      background-image:url("theme-sky-clouds-bg.webp?v=45"),linear-gradient(180deg,#67d0f3 0%,#b6ecff 100%);
+    }
+
+    .match-page.theme-forest .theme-background{
+      opacity:1;
+      background-color:#6ec9ee;
+      background-image:url("theme-forest-bg.webp?v=45"),linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%);
+    }
+
+    .match-page.theme-math .theme-background{
+      opacity:1;
+      background-color:#f5f4e7;
+      background-image:url("theme-math-bg.webp?v=45"),linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%);
+    }
+
+    .match-page.theme-english .theme-background{
+      opacity:1;
+      background-color:#72d0d2;
+      background-image:url("theme-english-bg.webp?v=46"),linear-gradient(180deg,#72d0d2 0%,#65bdc4 100%);
+    }
+
+    .match-page.theme-flowers .theme-background{
+      opacity:1;
+      background-color:#f8edf3;
+      background-image:url("theme-flowers-bg.webp?v=48"),linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%);
+    }
+
+    .match-page.theme-national-day .theme-background{
+      opacity:1;
+      background-color:#165f55;
+      background-image:url("theme-national-day-v2-bg.webp?v=53"),linear-gradient(180deg,#165f55 0%,#0f4f46 100%);
+    }
+
+    .match-page.theme-founding-day .theme-background{
+      opacity:1;
+      background-color:#d7c9b1;
+      background-image:url("theme-founding-day-bg.webp?v=1"),linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%);
+    }
+
+    .game-logo{
+      position:absolute;
+      top:clamp(10px,1.7vw,22px);
+      left:clamp(12px,2vw,30px);
+      width:var(--logo-w);
+      height:auto;
+      max-height:clamp(68px,9vw,120px);
+      object-fit:contain;
+      z-index:80;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .match-stage{
+      position:absolute;
+      inset:0;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:
+        calc(70px + var(--safe-top))
+        calc(var(--edge-guard) + var(--safe-right))
+        calc(78px + var(--safe-bottom))
+        calc(var(--edge-guard) + var(--safe-left));
+      overflow:hidden;
+      direction:ltr;
+    }
+
+    .match-grid{
+      --cols:4;
+      --rows:2;
+      width:min(94vw,1450px);
+      height:min(80dvh,780px);
+      display:grid;
+      grid-template-columns:repeat(var(--cols),minmax(0,1fr));
+      grid-template-rows:repeat(var(--rows),minmax(0,1fr));
+      gap:clamp(7px,1.1vw,16px);
+      align-content:center;
+      justify-content:center;
+      perspective:1200px;
+      direction:ltr;
+    }
+
+    .match-card{
+      position:relative;
+      min-width:0;
+      min-height:0;
+      border:0;
+      padding:0;
+      background:transparent;
+      cursor:pointer;
+      perspective:1000px;
+      touch-action:manipulation;
+      transform:translateZ(0);
+      will-change:transform;
+    }
+
+    .match-card:disabled{cursor:default}
+
+    .card-inner{
+      position:absolute;
+      inset:0;
+      transform-style:preserve-3d;
+      transition:transform .56s cubic-bezier(.2,.72,.18,1);
+      border-radius:clamp(10px,1.4vw,20px);
+      will-change:transform;
+    }
+
+    .match-card.is-open .card-inner,
+    .match-card.is-matched .card-inner{
+      transform:rotateY(180deg);
+    }
+
+    .card-face{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      border:clamp(2px,.25vw,4px) solid #111;
+      border-radius:clamp(10px,1.4vw,20px);
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      box-shadow:0 clamp(4px,.7vw,8px) 0 rgba(0,0,0,.18),0 10px 20px rgba(0,0,0,.12);
+    }
+
+    .card-back{
+      background:linear-gradient(145deg,#ff679a 0%,#e82f70 52%,#b81550 100%);
+      color:#fff;
+      text-shadow:0 3px 7px rgba(0,0,0,.28);
+    }
+
+    .card-back::before{
+      content:"";
+      position:absolute;
+      inset:7%;
+      border:2px solid rgba(255,255,255,.32);
+      border-radius:calc(clamp(10px,1.4vw,20px) * .78);
+      pointer-events:none;
+    }
+
+    .card-back::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at 25% 18%,rgba(255,255,255,.25),transparent 30%);
+      pointer-events:none;
+    }
+
+    .card-front{
+      transform:rotateY(180deg);
+      background:rgba(255,255,255,.97);
+      color:#111;
+    }
+
+    .cover-content,
+    .front-content{
+      position:relative;
+      z-index:2;
+      width:100%;
+      height:100%;
+      padding:clamp(5px,1vw,14px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:clamp(3px,.6vw,8px);
+      text-align:center;
+      direction:rtl;
+      overflow:hidden;
+    }
+
+    .cover-number{
+      font-size:clamp(18px,4.1vw,68px);
+      line-height:1;
+      font-weight:1000;
+    }
+
+    .cover-text{
+      width:100%;
+      max-height:100%;
+      overflow:hidden;
+      font-size:clamp(12px,2vw,32px);
+      line-height:1.15;
+      font-weight:950;
+      word-break:break-word;
+      padding:4px;
+    }
+
+    .cover-image{
+      width:88%;
+      height:84%;
+      object-fit:contain;
+      border-radius:10px;
+    }
+
+    .front-image{
+      width:100%;
+      height:0;
+      min-height:0;
+      flex:1 1 auto;
+      object-fit:contain;
+      border-radius:10px;
+    }
+
+    .front-text{
+      width:100%;
+      flex:0 0 auto;
+      max-height:48%;
+      overflow:hidden;
+      font-size:clamp(11px,1.75vw,28px);
+      line-height:1.2;
+      font-weight:950;
+      word-break:break-word;
+      padding:2px 4px;
+    }
+
+    .front-content.only-text .front-text{
+      max-height:100%;
+      font-size:clamp(14px,2.5vw,42px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:1;
+    }
+
+    .front-content.only-image .front-image{
+      height:100%;
+      flex:1;
+    }
+
+    .match-card.is-matched{
+      filter:saturate(.63) brightness(.92);
+    }
+
+    .result-mark{
+      position:absolute;
+      z-index:12;
+      left:50%;
+      top:50%;
+      width:clamp(42px,6vw,84px);
+      height:clamp(42px,6vw,84px);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#fff;
+      font-size:clamp(30px,4.5vw,64px);
+      line-height:1;
+      font-weight:1000;
+      border:3px solid #fff;
+      box-shadow:0 5px 14px rgba(0,0,0,.24);
+      opacity:0;
+      transform:translate(-50%,-50%) scale(.3);
+      pointer-events:none;
+    }
+
+    .result-mark.is-correct{
+      background:#25ad69;
+      animation:correctMarkPin .92s cubic-bezier(.2,.92,.18,1) forwards;
+    }
+
+    .result-mark.is-wrong{
+      background:#f04747;
+      animation:wrongMarkPop .72s cubic-bezier(.2,.92,.18,1) both;
+    }
+
+    @keyframes correctMarkPin{
+      0%{opacity:0;left:50%;top:50%;transform:translate(-50%,-50%) scale(.25)}
+      22%{opacity:1;left:50%;top:50%;transform:translate(-50%,-50%) scale(1.18)}
+      52%{opacity:1;left:50%;top:50%;transform:translate(-50%,-50%) scale(1)}
+      100%{opacity:1;left:88%;top:13%;transform:translate(-50%,-50%) scale(.52)}
+    }
+
+    @keyframes wrongMarkPop{
+      0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}
+      30%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}
+      75%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+      100%{opacity:0;transform:translate(-50%,-50%) scale(.82)}
+    }
+
+    .match-card.is-wrong{
+      animation:cardWrongShake .46s ease both;
+    }
+
+    @keyframes cardWrongShake{
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px) rotate(-1.5deg)}
+      40%{transform:translateX(7px) rotate(1.2deg)}
+      60%{transform:translateX(-5px) rotate(-.8deg)}
+      80%{transform:translateX(3px) rotate(.5deg)}
+    }
+
+    .match-grid.is-shuffling .match-card{
+      pointer-events:none;
+    }
+
+    .fixed-controls{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:calc(64px + var(--safe-bottom));
+      padding:0 max(12px,var(--safe-right)) var(--safe-bottom) max(12px,var(--safe-left));
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      z-index:260;
+      pointer-events:none;
+      direction:ltr;
+    }
+
+    .back-btn{
+      min-width:clamp(106px,14vw,156px);
+      height:clamp(42px,6vh,54px);
+      border:3px solid #111;
+      border-radius:15px;
+      background:#efd553;
+      color:#111;
+      font-size:clamp(16px,2vw,23px);
+      font-weight:950;
+      box-shadow:0 5px 0 rgba(0,0,0,.20);
+      cursor:pointer;
+      pointer-events:auto;
+    }
+
+    .back-btn:active{transform:translateY(2px);box-shadow:0 3px 0 rgba(0,0,0,.20)}
+
+    .activity-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:220;
+      overflow:hidden;
+      padding:clamp(18px,4vw,44px);
+      direction:rtl;
+      background:rgba(17,17,17,.12);
+      pointer-events:none;
+    }
+
+    .activity-overlay.is-visible{display:flex}
+
+    .celebration-card{
+      position:relative;
+      width:min(520px,86vw);
+      min-height:clamp(260px,44vh,420px);
+      border:2px solid rgba(255,255,255,.86);
+      border-radius:28px;
+      background:rgba(255,255,255,.78);
+      -webkit-backdrop-filter:blur(9px);
+      backdrop-filter:blur(9px);
+      box-shadow:0 18px 45px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.72);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:clamp(22px,4.6vw,44px);
+      pointer-events:auto;
+      animation:celebrationPop .62s cubic-bezier(.2,1.12,.22,1) both;
+      overflow:hidden;
+    }
+
+    .celebration-card::before{
+      content:"";
+      position:absolute;
+      width:92%;
+      aspect-ratio:1;
+      left:50%;
+      top:45%;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(239,213,83,.32) 0%,rgba(239,213,83,.14) 34%,rgba(255,255,255,0) 68%);
+      animation:celebrationGlow 2.4s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .celebration-icon{
+      position:relative;
+      z-index:1;
+      width:clamp(92px,17vw,144px);
+      height:clamp(92px,17vw,144px);
+      margin-bottom:clamp(12px,2.6vw,20px);
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.15));
+      animation:iconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s;
+    }
+
+    .celebration-title{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:#102b57;
+      font-size:clamp(34px,6.2vw,64px);
+      line-height:1.05;
+      font-weight:900;
+      text-shadow:0 2px 0 rgba(255,255,255,.70);
+    }
+
+    .celebration-subtitle{
+      position:relative;
+      z-index:1;
+      margin:clamp(8px,1.7vw,14px) 0 0;
+      color:#26364a;
+      font-size:clamp(17px,2.7vw,28px);
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .celebration-actions{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(12px,2.2vw,20px);
+      margin-top:clamp(22px,4vw,34px);
+      flex-wrap:wrap;
+    }
+
+    .celebration-actions button{
+      min-width:clamp(118px,18vw,178px);
+      height:clamp(44px,6.4vh,58px);
+      border:3px solid #111;
+      border-radius:15px;
+      font-size:clamp(17px,2.5vw,25px);
+      font-weight:900;
+      padding:0 clamp(20px,3vw,32px);
+      box-shadow:0 5px 0 rgba(0,0,0,.22);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .restart-btn{background:linear-gradient(180deg,#2fa7f2 0%,#1688d3 56%,#0d6fb4 100%);color:#fff}
+    .home-btn{background:linear-gradient(180deg,#ffe56d 0%,#efd553 58%,#dfc13f 100%);color:#111}
+
+    .celebration-confetti{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+
+    .celebration-confetti span{
+      position:absolute;
+      top:-12vh;
+      width:clamp(8px,1.2vw,14px);
+      height:clamp(14px,2vw,24px);
+      border-radius:4px;
+      background:var(--confetti-color,#efd553);
+      opacity:.9;
+      transform:rotate(var(--confetti-rotate,0deg));
+      animation:confettiFall var(--confetti-duration,4.4s) linear infinite;
+      animation-delay:var(--confetti-delay,0s);
+    }
+
+    @keyframes celebrationPop{
+      0%{opacity:0;transform:scale(.82) translateY(20px)}
+      70%{opacity:1;transform:scale(1.035) translateY(0)}
+      100%{opacity:1;transform:scale(1) translateY(0)}
+    }
+    @keyframes iconPop{
+      0%{opacity:0;transform:scale(.5) rotate(-12deg)}
+      72%{opacity:1;transform:scale(1.12) rotate(3deg)}
+      100%{opacity:1;transform:scale(1) rotate(0)}
+    }
+    @keyframes celebrationGlow{
+      0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}
+    }
+    @keyframes confettiFall{
+      0%{transform:translate3d(0,-12vh,0) rotate(var(--confetti-rotate,0deg));opacity:0}
+      9%{opacity:.95}
+      100%{transform:translate3d(var(--confetti-drift,0px),112vh,0) rotate(calc(var(--confetti-rotate,0deg) + 680deg));opacity:0}
+    }
+
+    .match-page.activity-ended .match-grid{visibility:hidden;pointer-events:none}
+    .match-page.activity-ended .back-btn{display:block;visibility:visible;pointer-events:auto}
+
+    .error-message{
+      position:relative;
+      z-index:3;
+      width:min(720px,90vw);
+      padding:24px;
+      border:3px solid #111;
+      border-radius:22px;
+      background:rgba(255,255,255,.94);
+      text-align:center;
+      direction:rtl;
+      font-size:clamp(18px,2.4vw,30px);
+      font-weight:900;
+      line-height:1.6;
+    }
+
+    @media(max-width:760px){
+      :root{--logo-w:92px}
+      .match-stage{
+        padding:
+          calc(58px + var(--safe-top))
+          calc(7px + var(--safe-right))
+          calc(68px + var(--safe-bottom))
+          calc(7px + var(--safe-left));
+      }
+      .match-grid{
+        width:96vw;
+        height:calc(100dvh - 132px - var(--safe-top) - var(--safe-bottom));
+        gap:6px;
+      }
+      .card-face{border-width:2px;border-radius:10px;box-shadow:0 4px 0 rgba(0,0,0,.18),0 7px 12px rgba(0,0,0,.10)}
+      .front-content,.cover-content{padding:4px;gap:2px}
+      .front-text{font-size:clamp(9px,3vw,17px)}
+      .front-content.only-text .front-text{font-size:clamp(11px,3.8vw,22px)}
+      .cover-text{font-size:clamp(10px,3.3vw,19px)}
+      .cover-number{font-size:clamp(18px,8vw,42px)}
+      .celebration-card{width:min(360px,88vw);min-height:clamp(250px,42vh,360px);border-radius:24px}
+      .celebration-actions{gap:10px}
+      .celebration-actions button{min-width:118px;height:42px;font-size:16px;border-radius:12px;padding:0 18px}
+    }
+
+    @media(max-height:560px) and (orientation:landscape){
+      .match-stage{padding-top:18px;padding-bottom:54px}
+      .match-grid{height:calc(100dvh - 72px);width:min(88vw,1300px)}
+      .game-logo{width:78px;top:7px;left:10px}
+      .fixed-controls{height:52px}
+      .back-btn{height:38px;min-width:96px;font-size:15px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      .card-inner{transition-duration:.01ms}
+      .match-card.is-wrong,.result-mark,.celebration-card,.celebration-icon{animation-duration:.01ms!important}
+    }
+  </style>
+</head>
+<body>
+  <main class="match-page theme-classroom" id="matchPage" data-font="default">
+    <div class="theme-background" aria-hidden="true"></div>
+    <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'" />
+
+    <section class="match-stage" id="matchStage" aria-label="لعبة المطابقة">
+      <div class="match-grid" id="matchGrid"></div>
+    </section>
+
+    <section class="activity-overlay" id="finishView" aria-hidden="true">
+      <div class="celebration-confetti" aria-hidden="true">
+        <span style="left:5%;--confetti-color:#1688d3;--confetti-duration:3.8s;--confetti-delay:-.2s;--confetti-drift:-42px;--confetti-rotate:18deg"></span>
+        <span style="left:13%;--confetti-color:#f47a45;--confetti-duration:4.2s;--confetti-delay:-.7s;--confetti-drift:35px;--confetti-rotate:62deg"></span>
+        <span style="left:22%;--confetti-color:#e91e63;--confetti-duration:4.6s;--confetti-delay:-1.2s;--confetti-drift:-25px;--confetti-rotate:103deg"></span>
+        <span style="left:31%;--confetti-color:#43a047;--confetti-duration:5s;--confetti-delay:-1.8s;--confetti-drift:46px;--confetti-rotate:144deg"></span>
+        <span style="left:40%;--confetti-color:#8e24aa;--confetti-duration:4.1s;--confetti-delay:-2.2s;--confetti-drift:-38px;--confetti-rotate:175deg"></span>
+        <span style="left:49%;--confetti-color:#ffd166;--confetti-duration:4.7s;--confetti-delay:-.5s;--confetti-drift:18px;--confetti-rotate:32deg"></span>
+        <span style="left:58%;--confetti-color:#06b6d4;--confetti-duration:5.1s;--confetti-delay:-1.1s;--confetti-drift:-48px;--confetti-rotate:78deg"></span>
+        <span style="left:67%;--confetti-color:#efd553;--confetti-duration:4.3s;--confetti-delay:-1.7s;--confetti-drift:40px;--confetti-rotate:119deg"></span>
+        <span style="left:76%;--confetti-color:#1688d3;--confetti-duration:4.9s;--confetti-delay:-2.3s;--confetti-drift:-30px;--confetti-rotate:156deg"></span>
+        <span style="left:85%;--confetti-color:#f47a45;--confetti-duration:4s;--confetti-delay:-.9s;--confetti-drift:28px;--confetti-rotate:47deg"></span>
+        <span style="left:94%;--confetti-color:#e91e63;--confetti-duration:4.5s;--confetti-delay:-1.5s;--confetti-drift:-36px;--confetti-rotate:92deg"></span>
+      </div>
+      <div class="celebration-card" role="status" aria-live="polite">
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="finishGold" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#fff08a"/><stop offset="45%" stop-color="#efd553"/><stop offset="100%" stop-color="#f4a51f"/>
+            </linearGradient>
+            <linearGradient id="finishBlue" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#24a6ef"/><stop offset="100%" stop-color="#116eb5"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.72)" stroke="rgba(255,255,255,.90)" stroke-width="5"/>
+          <path d="M38 26h44v13c0 22-8 35-22 38C46 74 38 61 38 39V26z" fill="url(#finishGold)" stroke="#111" stroke-opacity=".16" stroke-width="2"/>
+          <path d="M38 36H23c1 17 9 28 22 30M82 36h15c-1 17-9 28-22 30" fill="none" stroke="url(#finishGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M55 76h10v13H55z" fill="#e7a51d"/><path d="M42 89h36v10H42z" fill="url(#finishBlue)"/><path d="M36 99h48v8H36z" fill="#102b57" opacity=".92"/>
+          <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
+        </svg>
+        <h1 class="celebration-title">أحسنتم!</h1>
+        <p class="celebration-subtitle">انتهى النشاط بنجاح</p>
+        <div class="celebration-actions">
+          <button class="restart-btn" type="button" id="restartBtn">إعادة</button>
+          <button class="home-btn" type="button" id="homeBtn">الصفحة الرئيسية</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="activity-overlay is-visible" id="startGate" aria-hidden="false">
+      <div class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="startBlue" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#2fa7f2"/><stop offset="100%" stop-color="#0d6fb4"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.76)" stroke="rgba(255,255,255,.92)" stroke-width="5"/>
+          <circle cx="60" cy="60" r="35" fill="url(#startBlue)"/>
+          <path d="M52 42l27 18-27 18z" fill="#fff"/>
+        </svg>
+        <h1 class="celebration-title" id="startTitle">ابدأ اللعبة</h1>
+        <p class="celebration-subtitle">اضغط للبدء وتشغيل الصوت</p>
+        <div class="celebration-actions">
+          <button class="restart-btn" type="button" id="startBtn">تشغيل</button>
+        </div>
+      </div>
+    </section>
+
+    <nav class="fixed-controls" aria-label="أدوات اللعبة">
+      <button class="back-btn" id="backBtn" type="button">رجوع</button>
+    </nav>
+  </main>
+
+  <script>
+  (() => {
+    "use strict";
+
+    const MATCH_PAYLOAD_KEY = "sandooq_match_payload_v1";
+    const THEMES = ["white","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+
+    const page = document.getElementById("matchPage");
+    const grid = document.getElementById("matchGrid");
+    const startGate = document.getElementById("startGate");
+    const finishView = document.getElementById("finishView");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    const backBtn = document.getElementById("backBtn");
+
+    let currentTheme = "classroom";
+    let contentMode = "text";
+    let matchingMode = "identical";
+    let coverMode = "english-numbers";
+    let soundEnabled = true;
+    let fontFamily = "default";
+    let pairs = [];
+    let cards = [];
+    let firstCard = null;
+    let secondCard = null;
+    let interactionLocked = true;
+    let matchedPairs = 0;
+    let gameStarted = false;
+    let shuffleToken = 0;
+
+    const wait = (ms)=>new Promise((resolve)=>setTimeout(resolve,ms));
+
+    function getParam(name){
+      try { return new URLSearchParams(window.location.search).get(name) || ""; }
+      catch (_) { return ""; }
+    }
+
+    function normalizeTheme(value){
+      const raw = String(value || "").trim().toLowerCase();
+      if (["classic","white","original","default","خلفية بيضاء"].includes(raw)) return "white";
+      if (["classroom","theme-classroom","original-classroom","فصل مدرسي"].includes(raw)) return "classroom";
+      if (["sky","clouds","sky-clouds","theme-sky-clouds","سماء","سماء وغيوم"].includes(raw)) return "sky-clouds";
+      if (["forest","theme-forest","غابة"].includes(raw)) return "forest";
+      if (["math","maths","theme-math","رياضيات"].includes(raw)) return "math";
+      if (["english","theme-english","انجليزي","إنجليزي"].includes(raw)) return "english";
+      if (["flowers","theme-flowers","ازهار","أزهار","ورود","ازهار وورود"].includes(raw)) return "flowers";
+      if (["national-day","theme-national-day","اليوم الوطني"].includes(raw)) return "national-day";
+      if (["founding-day","theme-founding-day","يوم التأسيس","التأسيس"].includes(raw)) return "founding-day";
+      return "classroom";
+    }
+
+    function normalizeCard(card){
+      return {
+        text:String(card?.text || "").trim(),
+        image:String(card?.imageData || card?.image || ""),
+        imageName:String(card?.imageName || ""),
+        coverText:String(card?.coverText || "").trim(),
+        coverImage:String(card?.coverImageData || card?.coverImage || ""),
+        coverImageName:String(card?.coverImageName || "")
+      };
+    }
+
+    function normalizePayload(payload){
+      const rawPairs = Array.isArray(payload?.pairs) ? payload.pairs : [];
+      const normalizedPairs = rawPairs.slice(0,15).map((pair,index)=>({
+        id:String(pair?.pairId || pair?.id || `pair-${index + 1}`),
+        first:normalizeCard(pair?.first || pair?.a || {}),
+        second:normalizeCard(pair?.second || pair?.b || {})
+      })).filter((pair)=>{
+        const first = pair.first;
+        return Boolean(first.text || first.image);
+      });
+
+      return {
+        gameName:String(payload?.name || payload?.gameName || "المطابقة").trim() || "المطابقة",
+        theme:normalizeTheme(payload?.theme || payload?.selectedTheme || getParam("theme")),
+        contentMode:["text","images","mixed"].includes(payload?.contentMode) ? payload.contentMode : "text",
+        matchingMode:payload?.matchingMode === "different" ? "different" : "identical",
+        coverMode:["arabic-numbers","english-numbers","images","text"].includes(payload?.coverMode) ? payload.coverMode : "english-numbers",
+        soundEnabled:payload?.soundEnabled !== false && (!payload?.sounds || payload.sounds.enabled !== false),
+        fontFamily:["default","arial","traditional"].includes(payload?.fontFamily) ? payload.fontFamily : "default",
+        pairs:normalizedPairs
+      };
+    }
+
+    function demoPayload(){
+      return normalizePayload({
+        name:"المطابقة",
+        theme:getParam("theme") || "classroom",
+        contentMode:"text",
+        matchingMode:"different",
+        coverMode:"english-numbers",
+        pairs:[
+          {id:"pair-1",first:{text:"تفاحة"},second:{text:"🍎"}},
+          {id:"pair-2",first:{text:"خمسة"},second:{text:"٥"}},
+          {id:"pair-3",first:{text:"سماء"},second:{text:"غيوم"}},
+          {id:"pair-4",first:{text:"كتاب"},second:{text:"قراءة"}}
+        ]
+      });
+    }
+
+    function openDb(){
+      return new Promise((resolve,reject)=>{
+        const request = indexedDB.open("sandooq_edu_games_v1",1);
+        request.onupgradeneeded = ()=>{
+          const db = request.result;
+          if (!db.objectStoreNames.contains("payloads")) db.createObjectStore("payloads",{keyPath:"key"});
+        };
+        request.onsuccess = ()=>resolve(request.result);
+        request.onerror = ()=>reject(request.error || new Error("indexedDB failed"));
+      });
+    }
+
+    async function readIndexedPayload(key){
+      const db = await openDb();
+      return new Promise((resolve,reject)=>{
+        const tx = db.transaction("payloads","readonly");
+        const request = tx.objectStore("payloads").get(key);
+        request.onsuccess = ()=>resolve(request.result?.payload || null);
+        request.onerror = ()=>reject(request.error || new Error("payload read failed"));
+      });
+    }
+
+    async function hydratePayload(){
+      const payloadId = getParam("payloadId");
+      let rawPayload = null;
+
+      if (payloadId) {
+        try { rawPayload = await readIndexedPayload(`match:${payloadId}`); } catch (_) {}
+        if (!rawPayload) {
+          try {
+            const raw = sessionStorage.getItem(`${MATCH_PAYLOAD_KEY}_${payloadId}`);
+            if (raw) rawPayload = JSON.parse(raw);
+          } catch (_) {}
+        }
+      }
+
+      if (!rawPayload) {
+        const keys = [MATCH_PAYLOAD_KEY,"sandooq_match_draft_v1"];
+        for (const key of keys) {
+          try {
+            const raw = sessionStorage.getItem(key);
+            if (raw) {
+              rawPayload = JSON.parse(raw);
+              break;
+            }
+          } catch (_) {}
+        }
+      }
+
+      const payload = rawPayload ? normalizePayload(rawPayload) : demoPayload();
+      currentTheme = payload.theme;
+      contentMode = payload.contentMode;
+      matchingMode = payload.matchingMode;
+      coverMode = payload.coverMode;
+      soundEnabled = payload.soundEnabled;
+      fontFamily = payload.fontFamily;
+      pairs = payload.pairs;
+      document.title = `${payload.gameName} - صندوق الألعاب التعليمية`;
+    }
+
+    const sfx = (()=>{
+      const files = {
+        flip:"sounds/open-box-go.mp3?v=2",
+        correct:"sounds/open-box-open.mp3?v=1",
+        wrong:"sounds/choice-wrong.mp3?v=1"
+      };
+      const volumes = {flip:.24,correct:1,wrong:1};
+      const cache = {};
+
+      function get(name){
+        if (!cache[name]) {
+          const audio = new Audio(files[name]);
+          audio.preload = "auto";
+          audio.loop = false;
+          audio.volume = volumes[name] ?? 1;
+          audio.setAttribute("playsinline","");
+          cache[name] = audio;
+        }
+        return cache[name];
+      }
+
+      function stop(){
+        Object.values(cache).forEach((audio)=>{
+          try { audio.pause(); audio.currentTime = 0; } catch (_) {}
+        });
+      }
+
+      function play(name){
+        if (!soundEnabled) return;
+        const audio = get(name);
+        try {
+          Object.values(cache).forEach((item)=>{
+            if (!item || item === audio) return;
+            try { item.pause(); item.currentTime = 0; } catch (_) {}
+          });
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = volumes[name] ?? 1;
+          const promise = audio.play();
+          promise?.catch?.(()=>{});
+        } catch (_) {}
+      }
+
+      function preload(){
+        Object.keys(files).forEach((name)=>{ try { get(name).load(); } catch (_) {} });
+      }
+
+      return {play,stop,preload};
+    })();
+
+    const themeAudio = (()=>{
+      const files = {
+        default:"sounds/theme-default.mp3?v=1",
+        "sky-clouds":"sounds/theme-sky-clouds.mp3?v=1",
+        "national-day":"sounds/theme-national-day.mp3?v=1",
+        "founding-day":"sounds/theme-founding-day.mp3?v=1"
+      };
+      let audio = null;
+      let fadeTimer = null;
+
+      function key(theme){
+        if (["sky-clouds","national-day","founding-day"].includes(theme)) return theme;
+        return "default";
+      }
+
+      function ensure(theme){
+        const src = files[key(theme)];
+        if (!audio || audio.dataset.src !== src) {
+          stop();
+          audio = new Audio(src);
+          audio.dataset.src = src;
+          audio.preload = "auto";
+          audio.loop = false;
+          audio.volume = 1;
+          audio.setAttribute("playsinline","");
+          audio.setAttribute("webkit-playsinline","");
+        }
+        return audio;
+      }
+
+      function preload(theme){
+        if (!soundEnabled) return;
+        try { ensure(theme).load(); } catch (_) {}
+      }
+
+      function play(theme){
+        if (!soundEnabled) return;
+        const target = ensure(theme);
+        try {
+          target.pause();
+          target.currentTime = 0;
+          target.volume = 1;
+          const promise = target.play();
+          promise?.catch?.(()=>{});
+        } catch (_) {}
+      }
+
+      function stop(){
+        if (fadeTimer) clearInterval(fadeTimer);
+        fadeTimer = null;
+        try { audio?.pause?.(); if (audio) audio.currentTime = 0; } catch (_) {}
+      }
+
+      function fadeOut(duration = 300){
+        if (!audio || audio.paused) { stop(); return; }
+        if (fadeTimer) clearInterval(fadeTimer);
+        const startVolume = audio.volume;
+        const started = performance.now();
+        fadeTimer = setInterval(()=>{
+          const progress = Math.min(1,(performance.now() - started) / duration);
+          audio.volume = Math.max(0,startVolume * (1 - progress));
+          if (progress >= 1) {
+            clearInterval(fadeTimer);
+            fadeTimer = null;
+            stop();
+          }
+        },30);
+      }
+
+      return {preload,play,stop,fadeOut};
+    })();
+
+    function applyTheme(){
+      THEMES.forEach((theme)=>page.classList.remove(`theme-${theme}`));
+      page.classList.add(`theme-${currentTheme}`);
+      page.dataset.font = fontFamily;
+    }
+
+    function toArabicNumber(value){
+      const map = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+      return String(value).replace(/\d/g,(digit)=>map[Number(digit)]);
+    }
+
+    function shuffleArray(array){
+      const result = array.slice();
+      for (let index=result.length - 1; index>0; index-=1) {
+        const swapIndex = Math.floor(Math.random() * (index + 1));
+        [result[index],result[swapIndex]] = [result[swapIndex],result[index]];
+      }
+      return result;
+    }
+
+    function buildCards(){
+      const built = [];
+      pairs.forEach((pair,pairIndex)=>{
+        const pairId = String(pair.id || `pair-${pairIndex + 1}`);
+        const first = normalizeCard(pair.first);
+        const second = matchingMode === "identical" ? {...first} : normalizeCard(pair.second);
+        built.push({id:`${pairId}-a`,pairId,side:"first",content:first,matched:false});
+        built.push({id:`${pairId}-b`,pairId,side:"second",content:second,matched:false});
+      });
+      return shuffleArray(built);
+    }
+
+    function layoutGrid(){
+      const count = cards.length || grid.children.length || 2;
+      const mobile = window.innerWidth <= 640;
+      let cols;
+      if (mobile) {
+        if (count <= 4) cols = 2;
+        else if (count <= 9) cols = 3;
+        else if (count <= 16) cols = 4;
+        else cols = 5;
+      } else {
+        if (count <= 4) cols = 2;
+        else if (count <= 6) cols = 3;
+        else if (count <= 12) cols = 4;
+        else if (count <= 20) cols = 5;
+        else cols = 6;
+      }
+      const rows = Math.ceil(count / cols);
+      grid.style.setProperty("--cols",String(cols));
+      grid.style.setProperty("--rows",String(rows));
+    }
+
+    function createImage(src,className,alt){
+      const image = document.createElement("img");
+      image.className = className;
+      image.src = src;
+      image.alt = alt || "";
+      return image;
+    }
+
+    function renderCover(container,card,index){
+      container.innerHTML = "";
+      if (coverMode === "arabic-numbers" || coverMode === "english-numbers") {
+        const number = document.createElement("span");
+        number.className = "cover-number";
+        number.textContent = coverMode === "arabic-numbers" ? toArabicNumber(index + 1) : String(index + 1);
+        container.appendChild(number);
+        return;
+      }
+      if (coverMode === "images" && card.content.coverImage) {
+        container.appendChild(createImage(card.content.coverImage,"cover-image","غلاف البطاقة"));
+        return;
+      }
+      const text = document.createElement("span");
+      text.className = "cover-text";
+      text.textContent = card.content.coverText || "؟";
+      container.appendChild(text);
+    }
+
+    function renderFront(container,card){
+      container.innerHTML = "";
+      container.classList.remove("only-text","only-image");
+      const hasText = Boolean(card.content.text);
+      const hasImage = Boolean(card.content.image);
+
+      if (hasImage) container.appendChild(createImage(card.content.image,"front-image","محتوى البطاقة"));
+      if (hasText) {
+        const text = document.createElement("div");
+        text.className = "front-text";
+        text.textContent = card.content.text;
+        container.appendChild(text);
+      }
+
+      if (hasText && !hasImage) container.classList.add("only-text");
+      if (hasImage && !hasText) container.classList.add("only-image");
+    }
+
+    function createCardElement(card,index){
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "match-card";
+      button.dataset.cardId = card.id;
+      button.dataset.pairId = card.pairId;
+      button.setAttribute("aria-label",`البطاقة ${index + 1}`);
+
+      const inner = document.createElement("span");
+      inner.className = "card-inner";
+
+      const back = document.createElement("span");
+      back.className = "card-face card-back";
+      const cover = document.createElement("span");
+      cover.className = "cover-content";
+      renderCover(cover,card,index);
+      back.appendChild(cover);
+
+      const front = document.createElement("span");
+      front.className = "card-face card-front";
+      const content = document.createElement("span");
+      content.className = "front-content";
+      renderFront(content,card);
+      front.appendChild(content);
+
+      inner.append(back,front);
+      button.appendChild(inner);
+      button.addEventListener("click",()=>handleCardClick(button));
+      return button;
+    }
+
+    function renderCards(){
+      grid.innerHTML = "";
+      cards.forEach((card,index)=>grid.appendChild(createCardElement(card,index)));
+      layoutGrid();
+    }
+
+    function refreshNumberCovers(){
+      if (!["arabic-numbers","english-numbers"].includes(coverMode)) return;
+      Array.from(grid.children).forEach((element,index)=>{
+        const number = element.querySelector(".cover-number");
+        if (number) number.textContent = coverMode === "arabic-numbers" ? toArabicNumber(index + 1) : String(index + 1);
+        element.setAttribute("aria-label",`البطاقة ${index + 1}`);
+      });
+    }
+
+    async function performShuffle(){
+      const token = ++shuffleToken;
+      interactionLocked = true;
+      grid.classList.add("is-shuffling");
+      firstCard = null;
+      secondCard = null;
+
+      const durations = [560,650,760,860];
+      for (const duration of durations) {
+        if (token !== shuffleToken) return;
+        const elements = Array.from(grid.children);
+        const oldRects = new Map(elements.map((el)=>[el.dataset.cardId,el.getBoundingClientRect()]));
+        const shuffledElements = shuffleArray(elements);
+        shuffledElements.forEach((el)=>grid.appendChild(el));
+        await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+
+        const animations = shuffledElements.map((el)=>{
+          const before = oldRects.get(el.dataset.cardId);
+          const after = el.getBoundingClientRect();
+          const dx = before ? before.left - after.left : 0;
+          const dy = before ? before.top - after.top : 0;
+          return el.animate(
+            [
+              {transform:`translate3d(${dx}px,${dy}px,0) scale(.96)`},
+              {transform:"translate3d(0,0,0) scale(1)"}
+            ],
+            {duration,easing:"cubic-bezier(.18,.78,.18,1)",fill:"both"}
+          ).finished.catch(()=>{});
+        });
+        await Promise.all(animations);
+        await wait(55);
+      }
+
+      if (token !== shuffleToken) return;
+      refreshNumberCovers();
+      grid.classList.remove("is-shuffling");
+      themeAudio.fadeOut(320);
+      interactionLocked = false;
+    }
+
+    function addResultMark(card,type){
+      card.querySelector(".result-mark")?.remove();
+      const mark = document.createElement("span");
+      mark.className = `result-mark ${type === "correct" ? "is-correct" : "is-wrong"}`;
+      mark.textContent = type === "correct" ? "✓" : "×";
+      card.appendChild(mark);
+      return mark;
+    }
+
+    function openCard(card){
+      card.classList.add("is-open");
+      card.setAttribute("aria-expanded","true");
+      sfx.play("flip");
+    }
+
+    function closeCard(card){
+      card.classList.remove("is-open","is-wrong");
+      card.setAttribute("aria-expanded","false");
+      card.querySelector(".result-mark.is-wrong")?.remove();
+    }
+
+    async function handleCorrect(first,second){
+      sfx.play("correct");
+      first.classList.add("is-matched");
+      second.classList.add("is-matched");
+      first.disabled = true;
+      second.disabled = true;
+      addResultMark(first,"correct");
+      addResultMark(second,"correct");
+      matchedPairs += 1;
+      await wait(940);
+      firstCard = null;
+      secondCard = null;
+      interactionLocked = false;
+
+      if (matchedPairs >= pairs.length) {
+        interactionLocked = true;
+        await wait(420);
+        showFinish();
+      }
+    }
+
+    async function handleWrong(first,second){
+      sfx.play("wrong");
+      addResultMark(first,"wrong");
+      addResultMark(second,"wrong");
+      first.classList.add("is-wrong");
+      second.classList.add("is-wrong");
+      await wait(820);
+      closeCard(first);
+      closeCard(second);
+      await wait(570);
+      firstCard = null;
+      secondCard = null;
+      interactionLocked = false;
+    }
+
+    function handleCardClick(card){
+      if (interactionLocked || card.disabled || card.classList.contains("is-open") || card.classList.contains("is-matched")) return;
+      openCard(card);
+
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      secondCard = card;
+      interactionLocked = true;
+      const samePair = firstCard.dataset.pairId === secondCard.dataset.pairId;
+      if (samePair) handleCorrect(firstCard,secondCard);
+      else handleWrong(firstCard,secondCard);
+    }
+
+    function hideFinish(){
+      page.classList.remove("activity-ended");
+      finishView.classList.remove("is-visible");
+      finishView.setAttribute("aria-hidden","true");
+    }
+
+    function showFinish(){
+      page.classList.add("activity-ended");
+      finishView.classList.add("is-visible");
+      finishView.setAttribute("aria-hidden","false");
+    }
+
+    async function restartGame(){
+      hideFinish();
+      shuffleToken += 1;
+      sfx.stop();
+      themeAudio.stop();
+      matchedPairs = 0;
+      firstCard = null;
+      secondCard = null;
+      cards = buildCards();
+      renderCards();
+      interactionLocked = true;
+      themeAudio.play(currentTheme);
+      await performShuffle();
+    }
+
+    function goHome(){
+      sfx.stop();
+      themeAudio.stop();
+      try { window.location.assign(new URL("index.html",window.location.href).href); }
+      catch (_) { window.location.href = "index.html"; }
+    }
+
+    function goSettings(){
+      sfx.stop();
+      themeAudio.stop();
+      try {
+        const url = new URL("index.html",window.location.href);
+        url.hash = "matchSetup";
+        window.location.href = `${url.pathname}${url.search}${url.hash}`;
+      } catch (_) {
+        window.location.href = "index.html#matchSetup";
+      }
+    }
+
+    function showError(message){
+      grid.innerHTML = "";
+      const box = document.createElement("div");
+      box.className = "error-message";
+      box.textContent = message;
+      grid.style.display = "flex";
+      grid.appendChild(box);
+      interactionLocked = true;
+    }
+
+    function collapseSafariBars(){
+      try { window.scrollTo(0,1); } catch (_) {}
+    }
+
+    async function initialize(){
+      await hydratePayload();
+      applyTheme();
+      sfx.preload();
+      themeAudio.preload(currentTheme);
+
+      if (!pairs.length) {
+        startGate.classList.remove("is-visible");
+        startGate.setAttribute("aria-hidden","true");
+        showError("لم تصل بيانات صالحة للمطابقة. ارجع إلى صفحة الإعداد وأضف الأزواج ثم اختبر اللعبة.");
+        return;
+      }
+
+      cards = buildCards();
+      renderCards();
+      startGate.classList.add("is-visible");
+      startGate.setAttribute("aria-hidden","false");
+      collapseSafariBars();
+    }
+
+    startBtn.addEventListener("click",async(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      if (gameStarted) return;
+      gameStarted = true;
+      sfx.preload();
+      themeAudio.play(currentTheme);
+      startGate.classList.remove("is-visible");
+      startGate.setAttribute("aria-hidden","true");
+      await performShuffle();
+    });
+
+    restartBtn.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      restartGame();
+    });
+
+    homeBtn.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      goHome();
+    });
+
+    backBtn.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      goSettings();
+    });
+
+    window.addEventListener("resize",layoutGrid,{passive:true});
+    window.addEventListener("orientationchange",()=>setTimeout(()=>{layoutGrid();collapseSafariBars();},140),{passive:true});
+    window.addEventListener("pagehide",()=>{sfx.stop();themeAudio.stop();},{passive:true});
+    window.addEventListener("pageshow",collapseSafariBars,{passive:true});
+    document.addEventListener("touchend",collapseSafariBars,{passive:true});
+
+    initialize();
+  })();
+  </script>
+</body>
+</html>

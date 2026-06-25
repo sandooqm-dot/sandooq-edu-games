@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-wheel-open-box-theme-cards-v59 -->
+<!-- version: index-match-setup-v53 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -8694,6 +8694,217 @@
       }
     }
 
+
+    /* match-setup-v1: إعدادات المطابقة داخل index بنفس لغة تصميم الاختيارات. */
+    .match-setup{
+      display:none;
+      width:min(1180px,92%);
+      margin:0 auto;
+      position:relative;
+      z-index:5;
+    }
+
+    .match-setup.active{
+      display:block;
+    }
+
+    .match-setup-body{
+      display:grid;
+      gap:18px;
+      margin-top:18px;
+    }
+
+    .match-setup .choices-config-grid{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+
+    .match-content-mode-grid{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+
+    .match-cover-mode-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .match-pairs-editor{
+      display:grid;
+      gap:16px;
+    }
+
+    .match-pair-entry{
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#fff;
+      padding:clamp(14px,2vw,22px);
+      box-shadow:0 5px 0 rgba(0,0,0,.12);
+      display:grid;
+      gap:14px;
+    }
+
+    .match-pair-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding-bottom:10px;
+      border-bottom:2px solid rgba(17,17,17,.13);
+    }
+
+    .match-pair-number{
+      font-size:clamp(19px,2vw,27px);
+      font-weight:950;
+      color:#111;
+    }
+
+    .match-remove-pair{
+      min-width:92px;
+      min-height:42px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      background:#f05d5b;
+      color:#fff;
+      font-size:15px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.15);
+    }
+
+    .match-remove-pair:disabled{
+      opacity:.42;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+
+    .match-pair-cards{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .match-pair-cards.is-identical{
+      grid-template-columns:1fr;
+    }
+
+    .match-card-editor{
+      min-width:0;
+      border:2px solid rgba(17,17,17,.16);
+      border-radius:18px;
+      background:#f8f8f8;
+      padding:14px;
+      display:grid;
+      gap:12px;
+    }
+
+    .match-card-editor-title{
+      margin:0;
+      text-align:center;
+      font-size:clamp(17px,1.7vw,22px);
+      font-weight:950;
+    }
+
+    .match-field-group{
+      display:grid;
+      gap:8px;
+    }
+
+    .match-field-label{
+      font-size:15px;
+      font-weight:900;
+      color:#333;
+    }
+
+    .match-text-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 46px;
+      gap:8px;
+      align-items:stretch;
+    }
+
+    .match-text-row .quiz-text-review-btn{
+      position:static;
+      width:46px;
+      height:auto;
+      min-height:46px;
+      transform:none;
+    }
+
+    .match-image-picker-wrap{
+      padding:0;
+      border:0;
+      background:transparent;
+    }
+
+    .match-image-picker-wrap .quiz-image-picker-button{
+      width:100%;
+    }
+
+    .match-add-pair{
+      width:min(420px,100%);
+      min-height:54px;
+      margin:2px auto 0;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#efd553;
+      color:#111;
+      font-size:clamp(17px,1.8vw,23px);
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 5px 0 rgba(0,0,0,.16);
+    }
+
+    .match-add-pair[hidden]{
+      display:none !important;
+    }
+
+    .match-limit-note{
+      margin:0;
+      text-align:center;
+      color:#555;
+      font-size:14px;
+      font-weight:800;
+    }
+
+    .match-setup[data-match-font="arial"],
+    .match-setup[data-match-font="arial"] *{
+      font-family:Arial,sans-serif !important;
+    }
+
+    .match-setup[data-match-font="traditional"],
+    .match-setup[data-match-font="traditional"] *{
+      font-family:"Traditional Arabic","Arabic Typesetting",Tahoma,Arial,sans-serif !important;
+    }
+
+    @media(max-width:900px){
+      .match-setup .choices-config-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:760px){
+      .match-setup{
+        width:94%;
+      }
+
+      .match-pair-entry{
+        border-radius:18px;
+        padding:12px;
+      }
+
+      .match-content-mode-grid{
+        grid-template-columns:1fr;
+      }
+
+      .match-pair-cards{
+        grid-template-columns:1fr;
+      }
+
+      .match-remove-pair{
+        min-width:78px;
+        min-height:38px;
+        font-size:13px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -8794,7 +9005,7 @@
 <div aria-hidden="true" class="template-cover empty"></div>
 <div class="template-content">
 <h3 class="template-title">المطابقة</h3>
-<p class="template-desc">طابق الكلمات أو الصور.</p>
+<p class="template-desc">أنشئ أزواجًا متطابقة أو مختلفة، واقلب البطاقات للعثور على كل زوج</p>
 </div>
 </button>
 <button class="template-card" data-template="sort" type="button">
@@ -9100,6 +9311,136 @@
     </div>
   </div>
 </section>
+
+
+<section class="choices-setup match-setup" id="matchSetupScreen" data-match-font="default">
+  <div class="game-name-panel">
+    <div class="game-name-head">
+      <span class="game-name-title">ادخل اسم اللعبة</span>
+      <span class="game-name-note">سيتم حفظ اللعبة في الألعاب المحفوظة بهذا الاسم</span>
+    </div>
+    <input class="game-name-input" id="matchGameNameInput" maxlength="60" placeholder="اكتب اسم اللعبة هنا.." type="text"/>
+  </div>
+
+  <div class="match-setup-body">
+    <section class="choices-section choices-theme-section">
+      <div class="choices-theme-current">
+        <div class="choices-theme-title-wrap">
+          <h3 class="choices-section-title">اختر ثيم اللعبة</h3>
+        </div>
+        <button class="choices-theme-change" id="toggleMatchThemeListBtn" type="button">تغيير</button>
+        <span aria-hidden="true" class="choices-theme-preview theme-art classic" id="matchCurrentThemePreview"></span>
+      </div>
+
+      <div class="choices-theme-list" hidden id="matchThemeListPanel">
+        <div class="choices-theme-card active" data-match-theme="classic">
+          <span class="theme-art classic"></span><span class="choices-theme-name">خلفية بيضاء</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="classroom">
+          <span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="sky-clouds">
+          <span class="theme-art sky-clouds"></span><span class="choices-theme-name">سماء وغيوم</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="forest">
+          <span class="theme-art forest"></span><span class="choices-theme-name">غابة</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="math">
+          <span class="theme-art math"></span><span class="choices-theme-name">رياضيات</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="english">
+          <span class="theme-art english"></span><span class="choices-theme-name">انجليزي</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="flowers">
+          <span class="theme-art flowers"></span><span class="choices-theme-name">ازهار وورود</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="national-day">
+          <span class="theme-art national-day"></span><span class="choices-theme-name">اليوم الوطني</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-match-theme="founding-day">
+          <span class="theme-art founding-day"></span><span class="choices-theme-name">يوم التأسيس</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">إعدادات طريقة اللعب</h3>
+      </div>
+
+      <div class="choices-config-grid">
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع المحتوى</h4>
+          <div class="choices-mode-grid match-content-mode-grid" aria-label="نوع محتوى بطاقات المطابقة">
+            <button class="choices-mode-btn active" data-match-content-mode="text" type="button"><strong>نصوص فقط</strong></button>
+            <button class="choices-mode-btn" data-match-content-mode="images" type="button"><strong>صور فقط</strong></button>
+            <button class="choices-mode-btn" data-match-content-mode="mixed" type="button"><strong>نصوص وصور</strong></button>
+          </div>
+        </div>
+
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع المطابقة</h4>
+          <div class="choices-mode-grid" aria-label="نوع المطابقة">
+            <button class="choices-mode-btn active" data-matching-mode="identical" type="button"><strong>عنصران متطابقان</strong></button>
+            <button class="choices-mode-btn" data-matching-mode="different" type="button"><strong>عناصر مختلفة</strong></button>
+          </div>
+        </div>
+
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع غلاف البطاقة قبل القلب</h4>
+          <div class="choices-mode-grid match-cover-mode-grid" aria-label="نوع غلاف البطاقة">
+            <button class="choices-mode-btn" data-match-cover-mode="arabic-numbers" type="button"><strong>أرقام عربية</strong></button>
+            <button class="choices-mode-btn active" data-match-cover-mode="english-numbers" type="button"><strong>أرقام إنجليزية</strong></button>
+            <button class="choices-mode-btn" data-match-cover-mode="images" type="button"><strong>صور</strong></button>
+            <button class="choices-mode-btn" data-match-cover-mode="text" type="button"><strong>نصوص</strong></button>
+          </div>
+        </div>
+      </div>
+
+      <button class="choices-advanced-toggle" id="matchAdvancedToggleBtn" type="button" aria-expanded="false">
+        <span>⚙ الإعدادات المتقدمة</span>
+        <span class="choices-advanced-action" aria-hidden="true">
+          <span class="choices-advanced-arrow">▼</span>
+          <span class="choices-advanced-action-text" id="matchAdvancedActionText">عرض</span>
+        </span>
+      </button>
+
+      <div class="choices-advanced-panel" id="matchAdvancedPanel" aria-hidden="true">
+        <div class="choices-advanced-inner">
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>أصوات اللعبة</strong></div>
+            <button class="quiz-sound-toggle is-on" id="matchSoundToggleBtn" type="button" aria-pressed="true" aria-label="تشغيل أصوات اللعبة">
+              <span>×</span><span>✓</span>
+            </button>
+          </div>
+          <div class="choices-advanced-row">
+            <label class="choices-advanced-label" for="matchFontSelect"><strong>نوع الخط</strong></label>
+            <select class="quiz-font-select" id="matchFontSelect">
+              <option value="default">خط اللعبة</option>
+              <option value="arial">Arial</option>
+              <option value="traditional">عربي تقليدي</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">أزواج المطابقة</h3>
+      </div>
+      <div class="match-pairs-editor" id="matchPairsEditor"></div>
+      <button class="match-add-pair" id="addMatchPairBtn" type="button">＋ إضافة زوج</button>
+      <p class="match-limit-note">الحد الأعلى 15 زوجًا — 30 بطاقة</p>
+    </section>
+
+    <div class="choices-actions">
+      <button class="choices-test-btn" id="testMatchBtn" type="button">اختبار اللعبة</button>
+      <button class="choices-save-btn" id="saveMatchBtn" type="button">حفظ اللعبة</button>
+    </div>
+  </div>
+</section>
+
 <section class="screen" id="savedScreen">
 <h2 class="screen-title">العابي المحفوظة</h2>
 <p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
@@ -9127,7 +9468,7 @@
   const OPEN_BOX_PAGE_URL = "open-box.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
-  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
   const wheelItemsEditor = document.getElementById("wheelItemsEditor");
@@ -11517,6 +11858,692 @@
   if (window.location.hash === "#choicesSetup") {
     openQuizSetup();
   }
+})();
+</script>
+
+
+<script>
+(() => {
+  "use strict";
+
+  const MATCH_PAYLOAD_KEY = "sandooq_match_payload_v1";
+  const MATCH_DRAFT_KEY = "sandooq_match_draft_v1";
+  const MATCH_PAGE_URL = "match.html";
+  const MATCH_MIN_PAIRS = 2;
+  const MATCH_MAX_PAIRS = 15;
+  const MATCH_SAVED_REGISTRY_KEY = "sandooq_edu_saved_games_v1";
+
+  const matchSetupScreen = document.getElementById("matchSetupScreen");
+  const matchGameNameInput = document.getElementById("matchGameNameInput");
+  const matchThemeListPanel = document.getElementById("matchThemeListPanel");
+  const toggleMatchThemeListBtn = document.getElementById("toggleMatchThemeListBtn");
+  const matchCurrentThemePreview = document.getElementById("matchCurrentThemePreview");
+  const matchPairsEditor = document.getElementById("matchPairsEditor");
+  const addMatchPairBtn = document.getElementById("addMatchPairBtn");
+  const matchAdvancedToggleBtn = document.getElementById("matchAdvancedToggleBtn");
+  const matchAdvancedActionText = document.getElementById("matchAdvancedActionText");
+  const matchAdvancedPanel = document.getElementById("matchAdvancedPanel");
+  const matchSoundToggleBtn = document.getElementById("matchSoundToggleBtn");
+  const matchFontSelect = document.getElementById("matchFontSelect");
+
+  let matchTheme = "classic";
+  let matchContentMode = "text";
+  let matchingMode = "identical";
+  let matchCoverMode = "english-numbers";
+  let matchSoundEnabled = true;
+  let matchFont = "default";
+  let matchAdvancedOpen = false;
+  let matchPairs = [];
+  let matchPairSequence = 0;
+
+  function blankMatchCard(){
+    return {
+      text:"",
+      image:"",
+      imageData:"",
+      imageName:"",
+      coverText:"",
+      coverImage:"",
+      coverImageData:"",
+      coverImageName:""
+    };
+  }
+
+  function cleanMatchCard(card){
+    return {
+      text:String(card?.text || ""),
+      image:String(card?.image || card?.imageData || ""),
+      imageData:String(card?.imageData || card?.image || ""),
+      imageName:String(card?.imageName || ""),
+      coverText:String(card?.coverText || ""),
+      coverImage:String(card?.coverImage || card?.coverImageData || ""),
+      coverImageData:String(card?.coverImageData || card?.coverImage || ""),
+      coverImageName:String(card?.coverImageName || "")
+    };
+  }
+
+  function createMatchPair(source = null){
+    matchPairSequence += 1;
+    return {
+      id:String(source?.id || `pair-${Date.now()}-${matchPairSequence}`),
+      first:cleanMatchCard(source?.first || {}),
+      second:cleanMatchCard(source?.second || {})
+    };
+  }
+
+  function ensureMinimumPairs(){
+    while (matchPairs.length < MATCH_MIN_PAIRS) {
+      matchPairs.push(createMatchPair());
+    }
+    if (matchPairs.length > MATCH_MAX_PAIRS) {
+      matchPairs = matchPairs.slice(0,MATCH_MAX_PAIRS);
+    }
+  }
+
+  function normalizeMatchContentMode(value){
+    return ["text","images","mixed"].includes(value) ? value : "text";
+  }
+
+  function normalizeMatchingMode(value){
+    return value === "different" ? "different" : "identical";
+  }
+
+  function normalizeMatchCoverMode(value){
+    return ["arabic-numbers","english-numbers","images","text"].includes(value)
+      ? value
+      : "english-numbers";
+  }
+
+  function updateMatchThemeUI(){
+    const theme = typeof normalizeGameTheme === "function"
+      ? normalizeGameTheme(matchTheme)
+      : matchTheme;
+    matchTheme = theme;
+
+    if (matchCurrentThemePreview) {
+      matchCurrentThemePreview.className = `choices-theme-preview theme-art ${theme}`;
+      matchCurrentThemePreview.setAttribute("aria-label",THEME_LABELS?.[theme] || "خلفية بيضاء");
+    }
+
+    matchThemeListPanel?.querySelectorAll("[data-match-theme]").forEach((card)=>{
+      card.classList.toggle("active",card.dataset.matchTheme === theme);
+    });
+  }
+
+  function updateMatchModeUI(){
+    document.querySelectorAll("[data-match-content-mode]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.matchContentMode === matchContentMode);
+    });
+    document.querySelectorAll("[data-matching-mode]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.matchingMode === matchingMode);
+    });
+    document.querySelectorAll("[data-match-cover-mode]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.matchCoverMode === matchCoverMode);
+    });
+  }
+
+  function updateMatchAdvancedUI(){
+    matchAdvancedToggleBtn?.setAttribute("aria-expanded",matchAdvancedOpen ? "true" : "false");
+    matchAdvancedPanel?.classList.toggle("is-open",matchAdvancedOpen);
+    matchAdvancedPanel?.setAttribute("aria-hidden",matchAdvancedOpen ? "false" : "true");
+    if (matchAdvancedActionText) {
+      matchAdvancedActionText.textContent = matchAdvancedOpen ? "إخفاء" : "عرض";
+    }
+
+    matchSoundToggleBtn?.classList.toggle("is-on",matchSoundEnabled);
+    matchSoundToggleBtn?.setAttribute("aria-pressed",matchSoundEnabled ? "true" : "false");
+    matchSoundToggleBtn?.setAttribute("aria-label",matchSoundEnabled ? "إيقاف أصوات اللعبة" : "تشغيل أصوات اللعبة");
+
+    if (matchFontSelect) matchFontSelect.value = matchFont;
+    if (matchSetupScreen) matchSetupScreen.dataset.matchFont = matchFont;
+  }
+
+  function matchDraftPayload(){
+    ensureMinimumPairs();
+    return {
+      gameType:"match",
+      gameTemplate:"match",
+      payloadVersion:1,
+      name:String(matchGameNameInput?.value || "").trim(),
+      gameName:String(matchGameNameInput?.value || "").trim(),
+      theme:matchTheme,
+      selectedTheme:matchTheme,
+      contentMode:matchContentMode,
+      matchingMode,
+      coverMode:matchCoverMode,
+      soundEnabled:matchSoundEnabled,
+      sounds:{ enabled:matchSoundEnabled, mode:"files" },
+      fontFamily:matchFont,
+      pairs:matchPairs.map((pair)=>(
+        {
+          id:String(pair.id),
+          first:cleanMatchCard(pair.first),
+          second:cleanMatchCard(pair.second)
+        }
+      )),
+      updatedAt:Date.now()
+    };
+  }
+
+  function saveMatchDraft(){
+    try {
+      sessionStorage.setItem(MATCH_DRAFT_KEY,JSON.stringify(matchDraftPayload()));
+    } catch (_) {}
+  }
+
+  function loadMatchDraft(){
+    try {
+      const raw = sessionStorage.getItem(MATCH_DRAFT_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+      if (!draft || !["match","matching"].includes(draft.gameType || draft.gameTemplate)) return false;
+
+      if (matchGameNameInput) matchGameNameInput.value = String(draft.name || draft.gameName || "");
+      matchTheme = typeof normalizeGameTheme === "function"
+        ? normalizeGameTheme(draft.theme || draft.selectedTheme || "classic")
+        : "classic";
+      matchContentMode = normalizeMatchContentMode(draft.contentMode || "text");
+      matchingMode = normalizeMatchingMode(draft.matchingMode || "identical");
+      matchCoverMode = normalizeMatchCoverMode(draft.coverMode || "english-numbers");
+      matchSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
+      matchFont = ["default","arial","traditional"].includes(draft.fontFamily) ? draft.fontFamily : "default";
+      matchPairs = Array.isArray(draft.pairs)
+        ? draft.pairs.slice(0,MATCH_MAX_PAIRS).map((pair)=>createMatchPair(pair))
+        : [];
+      ensureMinimumPairs();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function createMatchReviewButton({label,getValue,maxLength,placeholder,onSave}){
+    if (typeof createSetupReviewButton === "function") {
+      return createSetupReviewButton({label,getValue,maxLength,placeholder,onSave});
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quiz-text-review-btn";
+    button.textContent = "◉";
+    button.setAttribute("aria-label",label);
+    button.addEventListener("click",()=>{
+      const value = window.prompt(placeholder,getValue());
+      if (value !== null) onSave(String(value).slice(0,maxLength));
+    });
+    return button;
+  }
+
+  function createMatchTextField({label,value,placeholder,maxLength,onInput}){
+    const group = document.createElement("div");
+    group.className = "match-field-group";
+
+    const fieldLabel = document.createElement("div");
+    fieldLabel.className = "match-field-label";
+    fieldLabel.textContent = label;
+
+    const row = document.createElement("div");
+    row.className = "match-text-row";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "quiz-text-input";
+    input.maxLength = maxLength;
+    input.placeholder = placeholder;
+    input.value = value || "";
+    input.addEventListener("input",()=>{
+      onInput(input.value);
+      saveMatchDraft();
+    });
+
+    const review = createMatchReviewButton({
+      label:`مراجعة ${label}`,
+      getValue:()=>input.value,
+      maxLength,
+      placeholder,
+      onSave:(nextValue)=>{
+        input.value = nextValue;
+        onInput(nextValue);
+        saveMatchDraft();
+      }
+    });
+
+    row.append(input,review);
+    group.append(fieldLabel,row);
+    return group;
+  }
+
+  function createMatchImagePicker({label,card,imageField,nameField}){
+    const group = document.createElement("div");
+    group.className = "match-field-group";
+
+    const fieldLabel = document.createElement("div");
+    fieldLabel.className = "match-field-label";
+    fieldLabel.textContent = label;
+
+    const wrap = document.createElement("div");
+    wrap.className = "quiz-image-picker-wrap match-image-picker-wrap";
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.className = "image-picker-input quiz-file-input";
+    fileInput.setAttribute("aria-label",label);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quiz-image-picker-button";
+
+    const action = document.createElement("span");
+    action.className = "quiz-image-picker-action";
+
+    const info = document.createElement("span");
+    info.className = "quiz-image-picker-info";
+
+    function render(){
+      const data = String(card[imageField] || "");
+      button.classList.toggle("has-image",Boolean(data));
+      action.textContent = data ? "تغيير الصورة" : "اختيار صورة";
+      info.innerHTML = "";
+      if (data) {
+        const thumb = document.createElement("img");
+        thumb.className = "quiz-image-picker-thumb";
+        thumb.alt = "";
+        thumb.src = data;
+        const name = document.createElement("span");
+        name.className = "quiz-image-picker-name";
+        name.textContent = card[nameField] || "صورة";
+        info.append(thumb,name);
+      } else {
+        const state = document.createElement("span");
+        state.className = "quiz-image-picker-state";
+        state.textContent = "لم تضع صورة";
+        info.appendChild(state);
+      }
+    }
+
+    button.addEventListener("click",()=>fileInput.click());
+    fileInput.addEventListener("change",()=>{
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      card[nameField] = file.name || "صورة";
+      const handle = (dataUrl)=>{
+        card[imageField] = dataUrl || "";
+        if (imageField === "imageData") card.image = dataUrl || "";
+        if (imageField === "coverImageData") card.coverImage = dataUrl || "";
+        render();
+        saveMatchDraft();
+      };
+      if (typeof readFileAsDataURL === "function") readFileAsDataURL(file,handle);
+      else {
+        const reader = new FileReader();
+        reader.onload = ()=>handle(String(reader.result || ""));
+        reader.readAsDataURL(file);
+      }
+    });
+
+    render();
+    button.append(action,info);
+    wrap.append(fileInput,button);
+    group.append(fieldLabel,wrap);
+    return group;
+  }
+
+  function createMatchCardEditor(pair,side,title){
+    const card = pair[side];
+    const editor = document.createElement("div");
+    editor.className = "match-card-editor";
+
+    const heading = document.createElement("h4");
+    heading.className = "match-card-editor-title";
+    heading.textContent = title;
+    editor.appendChild(heading);
+
+    if (matchContentMode === "text" || matchContentMode === "mixed") {
+      editor.appendChild(createMatchTextField({
+        label:"نص البطاقة",
+        value:card.text,
+        placeholder:matchContentMode === "mixed" ? "اكتب النص المرافق للصورة.." : "اكتب محتوى البطاقة..",
+        maxLength:80,
+        onInput:(value)=>{ card.text = value; }
+      }));
+    }
+
+    if (matchContentMode === "images" || matchContentMode === "mixed") {
+      editor.appendChild(createMatchImagePicker({
+        label:"صورة البطاقة",
+        card,
+        imageField:"imageData",
+        nameField:"imageName"
+      }));
+    }
+
+    if (matchCoverMode === "text") {
+      editor.appendChild(createMatchTextField({
+        label:matchingMode === "identical" ? "نص غلاف البطاقتين" : "نص غلاف البطاقة",
+        value:card.coverText,
+        placeholder:"اكتب النص الظاهر قبل قلب البطاقة..",
+        maxLength:40,
+        onInput:(value)=>{ card.coverText = value; }
+      }));
+    }
+
+    if (matchCoverMode === "images") {
+      editor.appendChild(createMatchImagePicker({
+        label:matchingMode === "identical" ? "صورة غلاف البطاقتين" : "صورة غلاف البطاقة",
+        card,
+        imageField:"coverImageData",
+        nameField:"coverImageName"
+      }));
+    }
+
+    return editor;
+  }
+
+  function renderMatchPairs(){
+    ensureMinimumPairs();
+    if (!matchPairsEditor) return;
+    matchPairsEditor.innerHTML = "";
+
+    matchPairs.forEach((pair,index)=>{
+      const entry = document.createElement("article");
+      entry.className = "match-pair-entry";
+
+      const head = document.createElement("div");
+      head.className = "match-pair-head";
+
+      const number = document.createElement("span");
+      number.className = "match-pair-number";
+      number.textContent = `الزوج ${index + 1}`;
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "match-remove-pair";
+      remove.textContent = "إزالة";
+      remove.disabled = matchPairs.length <= MATCH_MIN_PAIRS;
+      remove.addEventListener("click",()=>{
+        if (matchPairs.length <= MATCH_MIN_PAIRS) return;
+        matchPairs.splice(index,1);
+        renderMatchPairs();
+        saveMatchDraft();
+      });
+
+      head.append(number,remove);
+
+      const cards = document.createElement("div");
+      cards.className = `match-pair-cards${matchingMode === "identical" ? " is-identical" : ""}`;
+      cards.appendChild(createMatchCardEditor(
+        pair,
+        "first",
+        matchingMode === "identical" ? "محتوى الزوج" : "البطاقة الأولى"
+      ));
+      if (matchingMode === "different") {
+        cards.appendChild(createMatchCardEditor(pair,"second","البطاقة الثانية"));
+      }
+
+      entry.append(head,cards);
+      matchPairsEditor.appendChild(entry);
+    });
+
+    if (addMatchPairBtn) {
+      addMatchPairBtn.hidden = matchPairs.length >= MATCH_MAX_PAIRS;
+      addMatchPairBtn.disabled = matchPairs.length >= MATCH_MAX_PAIRS;
+    }
+  }
+
+  function activeImage(card,cover = false){
+    return cover
+      ? String(card?.coverImageData || card?.coverImage || "")
+      : String(card?.imageData || card?.image || "");
+  }
+
+  function validateMatchCard(card,pairNumber,cardLabel){
+    if ((matchContentMode === "text" || matchContentMode === "mixed") && !String(card.text || "").trim()) {
+      alert(`يرجى كتابة نص ${cardLabel} في الزوج ${pairNumber}.`);
+      return false;
+    }
+    if ((matchContentMode === "images" || matchContentMode === "mixed") && !activeImage(card)) {
+      alert(`يرجى اختيار صورة ${cardLabel} في الزوج ${pairNumber}.`);
+      return false;
+    }
+    if (matchCoverMode === "text" && !String(card.coverText || "").trim()) {
+      alert(`يرجى كتابة نص الغلاف ${cardLabel} في الزوج ${pairNumber}.`);
+      return false;
+    }
+    if (matchCoverMode === "images" && !activeImage(card,true)) {
+      alert(`يرجى اختيار صورة الغلاف ${cardLabel} في الزوج ${pairNumber}.`);
+      return false;
+    }
+    return true;
+  }
+
+  function validateMatchSetup(){
+    ensureMinimumPairs();
+    if (matchPairs.length < MATCH_MIN_PAIRS) {
+      alert("يجب إضافة زوجين على الأقل.");
+      return false;
+    }
+
+    for (let index=0; index<matchPairs.length; index+=1) {
+      const pair = matchPairs[index];
+      const number = index + 1;
+      if (!validateMatchCard(pair.first,number,matchingMode === "identical" ? "للزوج" : "للبطاقة الأولى")) return false;
+      if (matchingMode === "different" && !validateMatchCard(pair.second,number,"للبطاقة الثانية")) return false;
+    }
+    return true;
+  }
+
+  function cleanCardForPayload(card){
+    const clean = cleanMatchCard(card);
+    if (matchContentMode === "text") {
+      clean.image = "";
+      clean.imageData = "";
+      clean.imageName = "";
+    } else if (matchContentMode === "images") {
+      clean.text = "";
+    }
+
+    if (matchCoverMode !== "text") clean.coverText = "";
+    if (matchCoverMode !== "images") {
+      clean.coverImage = "";
+      clean.coverImageData = "";
+      clean.coverImageName = "";
+    }
+    return clean;
+  }
+
+  function buildMatchPayload(payloadId = ""){
+    const base = matchDraftPayload();
+    return {
+      ...base,
+      gameType:"match",
+      gameTemplate:"match",
+      name:String(matchGameNameInput?.value || "").trim(),
+      gameName:String(matchGameNameInput?.value || "").trim(),
+      theme:matchTheme,
+      selectedTheme:matchTheme,
+      contentMode:matchContentMode,
+      matchingMode,
+      coverMode:matchCoverMode,
+      pairs:matchPairs.map((pair,index)=>(
+        {
+          id:`pair-${index + 1}`,
+          pairId:`pair-${index + 1}`,
+          first:cleanCardForPayload(pair.first),
+          second:matchingMode === "different" ? cleanCardForPayload(pair.second) : blankMatchCard()
+        }
+      )),
+      payloadId,
+      updatedAt:Date.now()
+    };
+  }
+
+  async function persistMatchPayload(payloadId,payload){
+    try {
+      Object.keys(sessionStorage).forEach((key)=>{
+        if (key.startsWith(`${MATCH_PAYLOAD_KEY}_`)) sessionStorage.removeItem(key);
+      });
+      sessionStorage.removeItem(MATCH_PAYLOAD_KEY);
+      sessionStorage.setItem(`${MATCH_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
+      sessionStorage.setItem(MATCH_PAYLOAD_KEY,JSON.stringify(payload));
+      sessionStorage.setItem(MATCH_DRAFT_KEY,JSON.stringify(payload));
+    } catch (_) {}
+
+    try {
+      if (typeof savePayloadToIndexedDB === "function") {
+        await savePayloadToIndexedDB(`match:${payloadId}`,payload);
+      }
+    } catch (_) {}
+  }
+
+  async function openMatchPage(){
+    if (!validateMatchSetup()) return;
+    const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2,9)}`;
+    const payload = buildMatchPayload(payloadId);
+    await persistMatchPayload(payloadId,payload);
+
+    const url = new URL(MATCH_PAGE_URL,window.location.href);
+    url.searchParams.set("payloadId",payloadId);
+    url.searchParams.set("theme",matchTheme);
+    url.searchParams.set("return","index.html#matchSetup");
+    url.searchParams.set("v",String(Date.now()));
+    window.location.href = `${url.pathname}${url.search}`;
+  }
+
+  function updateMatchSavedRegistry(storageKey,payload){
+    try {
+      const raw = localStorage.getItem(MATCH_SAVED_REGISTRY_KEY);
+      const registry = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(registry) ? registry : [];
+      const name = payload.name || payload.gameName || "لعبة مطابقة";
+      const existingIndex = list.findIndex((item)=>item?.storageKey === storageKey);
+      const record = {
+        id:storageKey,
+        storageKey,
+        gameType:"match",
+        name,
+        updatedAt:payload.updatedAt
+      };
+      if (existingIndex >= 0) list[existingIndex] = record;
+      else list.unshift(record);
+      localStorage.setItem(MATCH_SAVED_REGISTRY_KEY,JSON.stringify(list.slice(0,200)));
+    } catch (_) {}
+  }
+
+  async function saveMatchGame(){
+    if (!validateMatchSetup()) return;
+    const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+    const payload = buildMatchPayload(savedId);
+    saveMatchDraft();
+    const storageKey = `saved:match:${savedId}`;
+    try {
+      if (typeof savePayloadToIndexedDB === "function") {
+        await savePayloadToIndexedDB(storageKey,payload);
+      }
+      updateMatchSavedRegistry(storageKey,payload);
+      alert("تم حفظ لعبة المطابقة.");
+    } catch (_) {
+      alert("تعذر حفظ اللعبة على هذا الجهاز. حاول مرة أخرى.");
+    }
+  }
+
+  function openMatchSetup(){
+    ensureMinimumPairs();
+    updateMatchModeUI();
+    updateMatchThemeUI();
+    updateMatchAdvancedUI();
+    renderMatchPairs();
+    if (typeof openScreen === "function") openScreen("matchSetupScreen");
+  }
+
+  document.querySelectorAll("[data-template='matching']").forEach((button)=>{
+    button.addEventListener("click",openMatchSetup);
+  });
+
+  document.querySelectorAll("[data-match-content-mode]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      matchContentMode = normalizeMatchContentMode(button.dataset.matchContentMode);
+      updateMatchModeUI();
+      renderMatchPairs();
+      saveMatchDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-matching-mode]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      matchingMode = normalizeMatchingMode(button.dataset.matchingMode);
+      updateMatchModeUI();
+      renderMatchPairs();
+      saveMatchDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-match-cover-mode]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      matchCoverMode = normalizeMatchCoverMode(button.dataset.matchCoverMode);
+      updateMatchModeUI();
+      renderMatchPairs();
+      saveMatchDraft();
+    });
+  });
+
+  toggleMatchThemeListBtn?.addEventListener("click",()=>{
+    if (matchThemeListPanel) matchThemeListPanel.hidden = !matchThemeListPanel.hidden;
+  });
+
+  matchThemeListPanel?.querySelectorAll(".choices-theme-activate").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      const card = button.closest("[data-match-theme]");
+      if (!card) return;
+      matchTheme = typeof normalizeGameTheme === "function"
+        ? normalizeGameTheme(card.dataset.matchTheme || "classic")
+        : "classic";
+      updateMatchThemeUI();
+      matchThemeListPanel.hidden = true;
+      saveMatchDraft();
+    });
+  });
+
+  addMatchPairBtn?.addEventListener("click",()=>{
+    if (matchPairs.length >= MATCH_MAX_PAIRS) return;
+    matchPairs.push(createMatchPair());
+    renderMatchPairs();
+    saveMatchDraft();
+    window.setTimeout(()=>{
+      matchPairsEditor?.lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"});
+    },40);
+  });
+
+  matchAdvancedToggleBtn?.addEventListener("click",()=>{
+    matchAdvancedOpen = !matchAdvancedOpen;
+    updateMatchAdvancedUI();
+  });
+
+  matchSoundToggleBtn?.addEventListener("click",()=>{
+    matchSoundEnabled = !matchSoundEnabled;
+    updateMatchAdvancedUI();
+    saveMatchDraft();
+  });
+
+  matchFontSelect?.addEventListener("change",()=>{
+    matchFont = ["default","arial","traditional"].includes(matchFontSelect.value)
+      ? matchFontSelect.value
+      : "default";
+    updateMatchAdvancedUI();
+    saveMatchDraft();
+  });
+
+  matchGameNameInput?.addEventListener("input",saveMatchDraft);
+  document.getElementById("testMatchBtn")?.addEventListener("click",openMatchPage);
+  document.getElementById("saveMatchBtn")?.addEventListener("click",saveMatchGame);
+
+  loadMatchDraft();
+  ensureMinimumPairs();
+  updateMatchModeUI();
+  updateMatchThemeUI();
+  updateMatchAdvancedUI();
+  renderMatchPairs();
+
+  if (window.location.hash === "#matchSetup") openMatchSetup();
 })();
 </script>
 
