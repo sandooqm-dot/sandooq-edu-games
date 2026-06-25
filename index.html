@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-match-setup-v53 -->
+<!-- version: index-match-setup-v54-template-open-fix -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -10494,6 +10494,18 @@
     });
   });
 
+  /* v54: ربط بطاقة المطابقة من نفس طبقة ربط القوالب الأساسية،
+     مع إبقاء تهيئة صفحة المطابقة في ملفها البرمجي الخاص داخل index. */
+  document.querySelectorAll("[data-template='matching']").forEach((btn)=>{
+    btn.addEventListener("click", ()=> {
+      if (typeof window.openMatchSetupScreen === "function") {
+        window.openMatchSetupScreen();
+        return;
+      }
+      openScreen("matchSetupScreen");
+    });
+  });
+
   document.querySelectorAll(".wheel-type").forEach((btn)=>{
     btn.addEventListener("click", ()=>{
       syncWheelEntriesFromDom();
@@ -12455,9 +12467,8 @@
     if (typeof openScreen === "function") openScreen("matchSetupScreen");
   }
 
-  document.querySelectorAll("[data-template='matching']").forEach((button)=>{
-    button.addEventListener("click",openMatchSetup);
-  });
+  /* v54: تُستدعى من ربط القوالب الأساسي أعلاه لتعمل البطاقة بثبات على Safari. */
+  window.openMatchSetupScreen = openMatchSetup;
 
   document.querySelectorAll("[data-match-content-mode]").forEach((button)=>{
     button.addEventListener("click",()=>{
