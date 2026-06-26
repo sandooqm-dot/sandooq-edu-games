@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-match-setup-v56-identical-number-covers -->
+<!-- version: index-match-setup-v57-remove-matched-color-range-fix -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -9136,6 +9136,7 @@
       border-radius:999px;
       background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);
       outline:none;
+      direction:ltr;
     }
 
     .match-hue-range::-webkit-slider-thumb{
@@ -9706,6 +9707,12 @@
             </button>
           </div>
           <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>إزالة البطاقات بعد مطابقتها</strong></div>
+            <button class="quiz-sound-toggle is-on" id="matchRemoveMatchedToggleBtn" type="button" aria-pressed="true" aria-label="إيقاف إزالة البطاقات بعد مطابقتها">
+              <span>×</span><span>✓</span>
+            </button>
+          </div>
+          <div class="choices-advanced-row">
             <label class="choices-advanced-label" for="matchFontSelect"><strong>نوع الخط</strong></label>
             <select class="quiz-font-select" id="matchFontSelect">
               <option value="default">خط اللعبة</option>
@@ -9716,15 +9723,15 @@
           <div class="choices-advanced-row">
             <div class="choices-advanced-label"><strong>لون البطاقات</strong></div>
             <div class="match-color-control">
-              <span class="match-color-swatch" id="matchCardColorSwatch" aria-label="لون البطاقات المختار"></span>
               <button class="match-color-change" data-match-color-target="card" type="button">تغيير</button>
+              <span class="match-color-swatch" id="matchCardColorSwatch" aria-label="لون البطاقات المختار"></span>
             </div>
           </div>
           <div class="choices-advanced-row">
             <div class="choices-advanced-label"><strong>لون النص</strong></div>
             <div class="match-color-control">
-              <span class="match-color-swatch" id="matchTextColorSwatch" aria-label="لون النص المختار"></span>
               <button class="match-color-change" data-match-color-target="text" type="button">تغيير</button>
+              <span class="match-color-swatch" id="matchTextColorSwatch" aria-label="لون النص المختار"></span>
             </div>
           </div>
         </div>
@@ -9768,7 +9775,7 @@
         <div class="match-spectrum" id="matchColorSpectrum" aria-label="نطاق اختيار اللون">
           <span class="match-spectrum-marker" id="matchSpectrumMarker"></span>
         </div>
-        <input class="match-hue-range" id="matchHueRange" type="range" min="0" max="360" value="340" aria-label="درجة اللون"/>
+        <input class="match-hue-range" id="matchHueRange" type="range" min="0" max="360" value="340" dir="ltr" aria-label="درجة اللون"/>
         <div class="match-color-code-row">
           <input class="match-color-code" id="matchColorCodeInput" maxlength="7" value="#E82F70" aria-label="رمز اللون"/>
           <span class="match-color-code-label">رمز اللون</span>
@@ -12233,6 +12240,7 @@
   const matchAdvancedActionText = document.getElementById("matchAdvancedActionText");
   const matchAdvancedPanel = document.getElementById("matchAdvancedPanel");
   const matchSoundToggleBtn = document.getElementById("matchSoundToggleBtn");
+  const matchRemoveMatchedToggleBtn = document.getElementById("matchRemoveMatchedToggleBtn");
   const matchFontSelect = document.getElementById("matchFontSelect");
   const matchCardColorSwatch = document.getElementById("matchCardColorSwatch");
   const matchTextColorSwatch = document.getElementById("matchTextColorSwatch");
@@ -12255,6 +12263,7 @@
   let matchingMode = "identical";
   let matchCoverMode = "english-numbers";
   let matchSoundEnabled = true;
+  let matchRemoveMatchedCards = true;
   let matchFont = "default";
   let matchCardColor = "#e82f70";
   let matchTextColor = "#ffffff";
@@ -12548,6 +12557,13 @@
     matchSoundToggleBtn?.setAttribute("aria-pressed",matchSoundEnabled ? "true" : "false");
     matchSoundToggleBtn?.setAttribute("aria-label",matchSoundEnabled ? "إيقاف أصوات اللعبة" : "تشغيل أصوات اللعبة");
 
+    matchRemoveMatchedToggleBtn?.classList.toggle("is-on",matchRemoveMatchedCards);
+    matchRemoveMatchedToggleBtn?.setAttribute("aria-pressed",matchRemoveMatchedCards ? "true" : "false");
+    matchRemoveMatchedToggleBtn?.setAttribute(
+      "aria-label",
+      matchRemoveMatchedCards ? "إيقاف إزالة البطاقات بعد مطابقتها" : "تشغيل إزالة البطاقات بعد مطابقتها"
+    );
+
     if (matchFontSelect) matchFontSelect.value = matchFont;
     if (matchSetupScreen) matchSetupScreen.dataset.matchFont = matchFont;
     updateMatchColorUI();
@@ -12569,6 +12585,7 @@
       coverMode:matchCoverMode,
       soundEnabled:matchSoundEnabled,
       sounds:{ enabled:matchSoundEnabled, mode:"files" },
+      removeMatchedCards:matchRemoveMatchedCards,
       fontFamily:matchFont,
       cardColor:normalizeMatchHex(matchCardColor,"#e82f70"),
       textColor:normalizeMatchHex(matchTextColor,"#ffffff"),
@@ -12605,6 +12622,7 @@
       matchCoverMode = normalizeMatchCoverMode(draft.coverMode || "english-numbers");
       enforceMatchCoverModeForMatching();
       matchSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
+      matchRemoveMatchedCards = draft.removeMatchedCards !== false;
       matchFont = ["default","arial","traditional"].includes(draft.fontFamily) ? draft.fontFamily : "default";
       matchCardColor = normalizeMatchHex(draft.cardColor,"#e82f70");
       matchTextColor = normalizeMatchHex(draft.textColor,"#ffffff");
@@ -13082,6 +13100,12 @@
 
   matchSoundToggleBtn?.addEventListener("click",()=>{
     matchSoundEnabled = !matchSoundEnabled;
+    updateMatchAdvancedUI();
+    saveMatchDraft();
+  });
+
+  matchRemoveMatchedToggleBtn?.addEventListener("click",()=>{
+    matchRemoveMatchedCards = !matchRemoveMatchedCards;
     updateMatchAdvancedUI();
     saveMatchDraft();
   });

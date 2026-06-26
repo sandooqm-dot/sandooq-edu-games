@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v10-large-text-solid-cards -->
+  <!-- version: match-v11-remove-matched-cards -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -558,6 +558,22 @@
       filter:none;
     }
 
+    .match-card.is-removing{
+      animation:matchedCardRemove .48s cubic-bezier(.4,0,.2,1) forwards;
+      pointer-events:none;
+    }
+
+    .match-card.is-removed{
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    @keyframes matchedCardRemove{
+      0%{opacity:1;transform:scale(1)}
+      55%{opacity:.45;transform:scale(.86)}
+      100%{opacity:0;transform:scale(.68)}
+    }
+
     .result-mark{
       position:absolute;
       z-index:12;
@@ -854,7 +870,7 @@
     @media(prefers-reduced-motion:reduce){
       .card-inner{transition-duration:.01ms}
       .match-card.is-cover-switching .card-back,
-      .match-card.is-wrong,.result-mark,.celebration-card,.celebration-icon{animation-duration:.01ms!important}
+      .match-card.is-wrong,.match-card.is-removing,.result-mark,.celebration-card,.celebration-icon{animation-duration:.01ms!important}
     }
   </style>
 </head>
@@ -951,6 +967,7 @@
     let matchingMode = "identical";
     let coverMode = "english-numbers";
     let soundEnabled = true;
+    let removeMatchedCards = true;
     let fontFamily = "default";
     let cardColor = "#e82f70";
     let textColor = "#ffffff";
@@ -1058,6 +1075,7 @@
         matchingMode:payload?.matchingMode === "different" ? "different" : "identical",
         coverMode:["arabic-numbers","english-numbers","images","text"].includes(payload?.coverMode) ? payload.coverMode : "english-numbers",
         soundEnabled:payload?.soundEnabled !== false && (!payload?.sounds || payload.sounds.enabled !== false),
+        removeMatchedCards:payload?.removeMatchedCards !== false,
         fontFamily:["default","arial","traditional"].includes(payload?.fontFamily) ? payload.fontFamily : "default",
         cardColor:normalizeHexColor(payload?.cardColor,"#e82f70"),
         textColor:normalizeHexColor(payload?.textColor,"#ffffff"),
@@ -1072,6 +1090,7 @@
         contentMode:"text",
         matchingMode:"different",
         coverMode:"english-numbers",
+        removeMatchedCards:true,
         cardColor:"#e82f70",
         textColor:"#ffffff",
         pairs:[
@@ -1138,6 +1157,7 @@
       matchingMode = payload.matchingMode;
       coverMode = payload.coverMode;
       soundEnabled = payload.soundEnabled;
+      removeMatchedCards = payload.removeMatchedCards;
       fontFamily = payload.fontFamily;
       cardColor = payload.cardColor;
       textColor = payload.textColor;
@@ -1744,13 +1764,24 @@
       addResultMark(second,"correct");
       matchedPairs += 1;
       await wait(940);
+
+      if (removeMatchedCards) {
+        first.classList.add("is-removing");
+        second.classList.add("is-removing");
+        await wait(480);
+        first.classList.remove("is-removing");
+        second.classList.remove("is-removing");
+        first.classList.add("is-removed");
+        second.classList.add("is-removed");
+      }
+
       firstCard = null;
       secondCard = null;
       interactionLocked = false;
 
       if (matchedPairs >= pairs.length) {
         interactionLocked = true;
-        await wait(420);
+        await wait(removeMatchedCards ? 260 : 420);
         showFinish();
       }
     }
