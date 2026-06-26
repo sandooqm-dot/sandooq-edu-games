@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v7-readable-adaptive-mixed-content -->
+  <!-- version: match-v9-custom-colors-40-cards -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -25,6 +25,11 @@
       --flip-duration:.48s;
       --cover-swap-duration:.26s;
       --intro-bg-final-scale:1.12;
+      --match-card-color:#e82f70;
+      --match-card-light:#ff679a;
+      --match-card-dark:#b81550;
+      --match-text-color:#ffffff;
+      --match-text-shadow:0 3px 7px rgba(0,0,0,.28);
     }
 
     *{
@@ -291,9 +296,9 @@
     .card-back{
       transform:rotateY(0deg) translateZ(.1px);
       -webkit-transform:rotateY(0deg) translateZ(.1px);
-      background:linear-gradient(145deg,#ff679a 0%,#e82f70 52%,#b81550 100%);
-      color:#fff;
-      text-shadow:0 3px 7px rgba(0,0,0,.28);
+      background:linear-gradient(145deg,var(--match-card-light) 0%,var(--match-card-color) 52%,var(--match-card-dark) 100%);
+      color:var(--match-text-color);
+      text-shadow:var(--match-text-shadow);
     }
 
     .card-back::after{
@@ -307,9 +312,9 @@
     .card-front{
       transform:rotateY(180deg) translateZ(.1px);
       -webkit-transform:rotateY(180deg) translateZ(.1px);
-      background:linear-gradient(145deg,#ff679a 0%,#e82f70 52%,#b81550 100%);
-      color:#fff;
-      text-shadow:0 3px 7px rgba(0,0,0,.24);
+      background:linear-gradient(145deg,var(--match-card-light) 0%,var(--match-card-color) 52%,var(--match-card-dark) 100%);
+      color:var(--match-text-color);
+      text-shadow:var(--match-text-shadow);
     }
 
     /* الوجهان موجودان طوال الحركة، ويكشف دوران البطاقة الوجه المقابل فعليًا. */
@@ -377,7 +382,7 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      color:#fff;
+      color:var(--match-text-color);
       font-size:clamp(22px,calc(var(--card-size) * .40),66px);
       line-height:1;
       font-weight:1000;
@@ -936,6 +941,8 @@
     let coverMode = "english-numbers";
     let soundEnabled = true;
     let fontFamily = "default";
+    let cardColor = "#e82f70";
+    let textColor = "#ffffff";
     let pairs = [];
     let cards = [];
     let firstCard = null;
@@ -972,6 +979,45 @@
       return "classroom";
     }
 
+
+
+    function normalizeHexColor(value,fallback){
+      const raw = String(value || "").trim();
+      const short = raw.match(/^#?([0-9a-f]{3})$/i);
+      if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
+      const full = raw.match(/^#?([0-9a-f]{6})$/i);
+      return full ? `#${full[1]}`.toLowerCase() : fallback;
+    }
+
+    function mixHexColor(source,target,amount){
+      const a = normalizeHexColor(source,"#000000").slice(1);
+      const b = normalizeHexColor(target,"#000000").slice(1);
+      const ratio = Math.max(0,Math.min(1,Number(amount)||0));
+      const result = [0,2,4].map((offset)=>{
+        const from = parseInt(a.slice(offset,offset+2),16);
+        const to = parseInt(b.slice(offset,offset+2),16);
+        return Math.round(from + (to - from) * ratio).toString(16).padStart(2,"0");
+      }).join("");
+      return `#${result}`;
+    }
+
+    function colorLuminance(hex){
+      const safe = normalizeHexColor(hex,"#ffffff").slice(1);
+      const channels = [0,2,4].map((offset)=>parseInt(safe.slice(offset,offset+2),16)/255).map((value)=>value <= .03928 ? value / 12.92 : Math.pow((value + .055) / 1.055,2.4));
+      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+    }
+
+    function applyCardPalette(){
+      cardColor = normalizeHexColor(cardColor,"#e82f70");
+      textColor = normalizeHexColor(textColor,"#ffffff");
+      page.style.setProperty("--match-card-color",cardColor);
+      page.style.setProperty("--match-card-light",mixHexColor(cardColor,"#ffffff",.27));
+      page.style.setProperty("--match-card-dark",mixHexColor(cardColor,"#000000",.24));
+      page.style.setProperty("--match-text-color",textColor);
+      page.style.setProperty("--match-text-shadow",colorLuminance(textColor) < .38 ? "0 1px 3px rgba(255,255,255,.38)" : "0 3px 7px rgba(0,0,0,.28)");
+    }
+
+
     function normalizeCard(card){
       return {
         text:String(card?.text || "").trim(),
@@ -985,7 +1031,7 @@
 
     function normalizePayload(payload){
       const rawPairs = Array.isArray(payload?.pairs) ? payload.pairs : [];
-      const normalizedPairs = rawPairs.slice(0,15).map((pair,index)=>({
+      const normalizedPairs = rawPairs.slice(0,20).map((pair,index)=>({
         id:String(pair?.pairId || pair?.id || `pair-${index + 1}`),
         first:normalizeCard(pair?.first || pair?.a || {}),
         second:normalizeCard(pair?.second || pair?.b || {})
@@ -1002,6 +1048,8 @@
         coverMode:["arabic-numbers","english-numbers","images","text"].includes(payload?.coverMode) ? payload.coverMode : "english-numbers",
         soundEnabled:payload?.soundEnabled !== false && (!payload?.sounds || payload.sounds.enabled !== false),
         fontFamily:["default","arial","traditional"].includes(payload?.fontFamily) ? payload.fontFamily : "default",
+        cardColor:normalizeHexColor(payload?.cardColor,"#e82f70"),
+        textColor:normalizeHexColor(payload?.textColor,"#ffffff"),
         pairs:normalizedPairs
       };
     }
@@ -1013,6 +1061,8 @@
         contentMode:"text",
         matchingMode:"different",
         coverMode:"english-numbers",
+        cardColor:"#e82f70",
+        textColor:"#ffffff",
         pairs:[
           {id:"pair-1",first:{text:"تفاحة"},second:{text:"🍎"}},
           {id:"pair-2",first:{text:"خمسة"},second:{text:"٥"}},
@@ -1078,6 +1128,8 @@
       coverMode = payload.coverMode;
       soundEnabled = payload.soundEnabled;
       fontFamily = payload.fontFamily;
+      cardColor = payload.cardColor;
+      textColor = payload.textColor;
       pairs = payload.pairs;
       document.title = `${payload.gameName} - صندوق الألعاب التعليمية`;
     }
@@ -1208,6 +1260,7 @@
       THEMES.forEach((theme)=>page.classList.remove(`theme-${theme}`));
       page.classList.add(`theme-${currentTheme}`);
       page.dataset.font = fontFamily;
+      applyCardPalette();
     }
 
     function toArabicNumber(value){
@@ -1247,7 +1300,7 @@
     }
 
     function layoutGrid(){
-      const count = Math.max(1,Math.min(30,cards.length || grid.children.length || 2));
+      const count = Math.max(1,Math.min(40,cards.length || grid.children.length || 2));
       const styles = window.getComputedStyle(stage);
       const padX = parseFloat(styles.paddingLeft || "0") + parseFloat(styles.paddingRight || "0");
       const padY = parseFloat(styles.paddingTop || "0") + parseFloat(styles.paddingBottom || "0");
@@ -1259,8 +1312,8 @@
       const portrait = height > width;
       const maxCols = Math.min(count,portrait ? 5 : 10);
       const minCols = Math.min(count,2);
-      const gap = count > 24 ? 7 : count > 16 ? 9 : count > 10 ? 12 : 20;
-      const maxSize = count > 24 ? 112 : count > 16 ? 124 : count > 10 ? 138 : 152;
+      const gap = count > 32 ? 5 : count > 24 ? 7 : count > 16 ? 9 : count > 10 ? 12 : 20;
+      const maxSize = count > 32 ? 100 : count > 24 ? 112 : count > 16 ? 124 : count > 10 ? 138 : 152;
       let best = null;
 
       for (let cols=Math.max(1,minCols);cols<=maxCols;cols+=1) {
