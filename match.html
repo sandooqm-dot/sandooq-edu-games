@@ -466,17 +466,41 @@
     .front-content.mixed-content{
       display:grid;
       grid-template-columns:minmax(0,1fr);
-      grid-template-rows:minmax(0,var(--mixed-image-track,1.1fr)) minmax(0,var(--mixed-text-track,1fr));
+      grid-template-rows:minmax(0,var(--mixed-image-track,1.12fr)) minmax(0,var(--mixed-text-track,1.08fr));
       align-items:stretch;
       justify-items:stretch;
-      gap:clamp(2px,calc(var(--card-size) * .025),5px);
+      gap:clamp(1px,calc(var(--card-size) * .014),3px);
+      padding:clamp(2px,calc(var(--card-size) * .018),4px);
+      --mixed-image-scale:1.08;
     }
 
-    .front-content.mixed-short{--mixed-image-track:1.22fr;--mixed-text-track:.98fr}
-    .front-content.mixed-medium{--mixed-image-track:.94fr;--mixed-text-track:1.16fr}
-    .front-content.mixed-long{--mixed-image-track:.68fr;--mixed-text-track:1.42fr}
-    .front-content.mixed-xlong{--mixed-image-track:.50fr;--mixed-text-track:1.60fr}
-    .front-content.mixed-force-text{--mixed-image-track:.38fr;--mixed-text-track:1.72fr}
+    /* النص القصير يأخذ حجمًا بصريًا كبيرًا، مع إبقاء الصورة واضحة وكبيرة.
+       لا نقلص الاثنين إلا كلما زاد طول النص فعلًا. */
+    .front-content.mixed-short{
+      --mixed-image-track:1.18fr;
+      --mixed-text-track:1.02fr;
+      --mixed-image-scale:1.13;
+    }
+    .front-content.mixed-medium{
+      --mixed-image-track:1.04fr;
+      --mixed-text-track:1.16fr;
+      --mixed-image-scale:1.10;
+    }
+    .front-content.mixed-long{
+      --mixed-image-track:.82fr;
+      --mixed-text-track:1.38fr;
+      --mixed-image-scale:1.05;
+    }
+    .front-content.mixed-xlong{
+      --mixed-image-track:.64fr;
+      --mixed-text-track:1.56fr;
+      --mixed-image-scale:1.01;
+    }
+    .front-content.mixed-force-text{
+      --mixed-image-track:.50fr;
+      --mixed-text-track:1.70fr;
+      --mixed-image-scale:.98;
+    }
 
     .front-image-zone .front-image{
       width:100%;
@@ -486,6 +510,8 @@
       flex:none;
       object-fit:contain;
       object-position:center;
+      transform:scale(var(--mixed-image-scale,1));
+      transform-origin:center;
     }
 
     .front-text-zone .front-text{
@@ -500,7 +526,7 @@
       white-space:normal;
       word-break:normal;
       overflow-wrap:break-word;
-      line-height:1.14;
+      line-height:1.08;
       text-align:center;
       direction:rtl;
     }
@@ -1332,12 +1358,12 @@
       };
 
       if (hasImage && hasText) {
-        const textLength = Array.from(cleanText.replace(/\s+/g," ")) .length;
-        const lengthClass = textLength <= 18
+        const textLength = Array.from(cleanText.replace(/\s+/g," ")).length;
+        const lengthClass = textLength <= 22
           ? "mixed-short"
-          : textLength <= 38
+          : textLength <= 48
             ? "mixed-medium"
-            : textLength <= 68
+            : textLength <= 82
               ? "mixed-long"
               : "mixed-xlong";
         container.classList.add("mixed-content",lengthClass);
@@ -1369,12 +1395,28 @@
 
       const mode = element.dataset.fitText || "text";
       const cardSize = parseFloat(getComputedStyle(grid).getPropertyValue("--card-size")) || card.clientWidth || 100;
-      const maxFont = mode === "mixed"
-        ? Math.min(cardSize * .185,availableWidth * .23,availableHeight * .64,30)
-        : Math.min(cardSize * .27,availableWidth * .30,availableHeight * .60,42);
-      const minFont = mode === "mixed"
-        ? Math.max(11,Math.min(cardSize * .082,18))
-        : Math.max(10,Math.min(cardSize * .072,15));
+      const content = element.closest(".front-content");
+      let maxFont;
+      let minFont;
+
+      if (mode === "mixed") {
+        if (content?.classList.contains("mixed-short")) {
+          maxFont = Math.min(cardSize * .255,availableWidth * .34,48);
+          minFont = Math.max(20,Math.min(cardSize * .135,29));
+        } else if (content?.classList.contains("mixed-medium")) {
+          maxFont = Math.min(cardSize * .225,availableWidth * .31,43);
+          minFont = Math.max(18,Math.min(cardSize * .108,24));
+        } else if (content?.classList.contains("mixed-long")) {
+          maxFont = Math.min(cardSize * .195,availableWidth * .28,37);
+          minFont = Math.max(15,Math.min(cardSize * .086,19));
+        } else {
+          maxFont = Math.min(cardSize * .17,availableWidth * .25,32);
+          minFont = Math.max(13,Math.min(cardSize * .072,16));
+        }
+      } else {
+        maxFont = Math.min(cardSize * .27,availableWidth * .30,availableHeight * .60,42);
+        minFont = Math.max(10,Math.min(cardSize * .072,15));
+      }
 
       element.style.width = "100%";
       element.style.height = "auto";
@@ -1383,7 +1425,7 @@
       element.style.whiteSpace = "normal";
       element.style.wordBreak = "normal";
       element.style.overflowWrap = "break-word";
-      element.style.lineHeight = mode === "mixed" ? "1.14" : "1.13";
+      element.style.lineHeight = mode === "mixed" ? "1.08" : "1.13";
 
       let low = minFont;
       let high = Math.max(minFont,maxFont);
@@ -1403,9 +1445,9 @@
       element.style.setProperty("font-size",`${Math.floor(best * 10) / 10}px`,"important");
 
       if (mode === "mixed" && best <= minFont + .15 && element.scrollHeight > availableHeight + .5) {
-        const content = element.closest(".front-content.mixed-content");
-        if (content && !content.classList.contains("mixed-force-text")) {
-          content.classList.add("mixed-force-text");
+        const mixedContent = element.closest(".front-content.mixed-content");
+        if (mixedContent && !mixedContent.classList.contains("mixed-force-text")) {
+          mixedContent.classList.add("mixed-force-text");
           requestAnimationFrame(()=>fitFrontText(element));
         }
       }
