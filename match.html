@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v6-first-touch-and-adaptive-mixed-content -->
+  <!-- version: match-v7-readable-adaptive-mixed-content -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -472,10 +472,11 @@
       gap:clamp(2px,calc(var(--card-size) * .025),5px);
     }
 
-    .front-content.mixed-short{--mixed-image-track:1.35fr;--mixed-text-track:.85fr}
-    .front-content.mixed-medium{--mixed-image-track:1.08fr;--mixed-text-track:1.02fr}
-    .front-content.mixed-long{--mixed-image-track:.82fr;--mixed-text-track:1.28fr}
-    .front-content.mixed-xlong{--mixed-image-track:.62fr;--mixed-text-track:1.48fr}
+    .front-content.mixed-short{--mixed-image-track:1.22fr;--mixed-text-track:.98fr}
+    .front-content.mixed-medium{--mixed-image-track:.94fr;--mixed-text-track:1.16fr}
+    .front-content.mixed-long{--mixed-image-track:.68fr;--mixed-text-track:1.42fr}
+    .front-content.mixed-xlong{--mixed-image-track:.50fr;--mixed-text-track:1.60fr}
+    .front-content.mixed-force-text{--mixed-image-track:.38fr;--mixed-text-track:1.72fr}
 
     .front-image-zone .front-image{
       width:100%;
@@ -488,17 +489,20 @@
     }
 
     .front-text-zone .front-text{
+      display:block;
       width:100%;
       max-width:100%;
       max-height:none;
       overflow:visible;
       flex:none;
       margin:0;
-      padding:0 clamp(1px,calc(var(--card-size) * .012),3px);
+      padding:0 clamp(2px,calc(var(--card-size) * .018),4px);
       white-space:normal;
       word-break:normal;
-      overflow-wrap:anywhere;
-      line-height:1.12;
+      overflow-wrap:break-word;
+      line-height:1.14;
+      text-align:center;
+      direction:rtl;
     }
 
     .front-content.only-text .front-text-zone,
@@ -1299,7 +1303,7 @@
       container.innerHTML = "";
       container.classList.remove(
         "only-text","only-image","mixed-content",
-        "mixed-short","mixed-medium","mixed-long","mixed-xlong"
+        "mixed-short","mixed-medium","mixed-long","mixed-xlong","mixed-force-text"
       );
       const cleanText = String(card.content.text || "").trim();
       const hasText = Boolean(cleanText);
@@ -1366,11 +1370,11 @@
       const mode = element.dataset.fitText || "text";
       const cardSize = parseFloat(getComputedStyle(grid).getPropertyValue("--card-size")) || card.clientWidth || 100;
       const maxFont = mode === "mixed"
-        ? Math.min(cardSize * .19,availableWidth * .24,availableHeight * .50,30)
-        : Math.min(cardSize * .27,availableWidth * .30,availableHeight * .50,42);
+        ? Math.min(cardSize * .185,availableWidth * .23,availableHeight * .64,30)
+        : Math.min(cardSize * .27,availableWidth * .30,availableHeight * .60,42);
       const minFont = mode === "mixed"
-        ? Math.max(6,Math.min(cardSize * .048,10))
-        : Math.max(8,Math.min(cardSize * .060,12));
+        ? Math.max(11,Math.min(cardSize * .082,18))
+        : Math.max(10,Math.min(cardSize * .072,15));
 
       element.style.width = "100%";
       element.style.height = "auto";
@@ -1378,8 +1382,8 @@
       element.style.overflow = "visible";
       element.style.whiteSpace = "normal";
       element.style.wordBreak = "normal";
-      element.style.overflowWrap = "anywhere";
-      element.style.lineHeight = mode === "mixed" ? "1.10" : "1.13";
+      element.style.overflowWrap = "break-word";
+      element.style.lineHeight = mode === "mixed" ? "1.14" : "1.13";
 
       let low = minFont;
       let high = Math.max(minFont,maxFont);
@@ -1397,6 +1401,14 @@
         }
       }
       element.style.setProperty("font-size",`${Math.floor(best * 10) / 10}px`,"important");
+
+      if (mode === "mixed" && best <= minFont + .15 && element.scrollHeight > availableHeight + .5) {
+        const content = element.closest(".front-content.mixed-content");
+        if (content && !content.classList.contains("mixed-force-text")) {
+          content.classList.add("mixed-force-text");
+          requestAnimationFrame(()=>fitFrontText(element));
+        }
+      }
     }
 
     function fitCardFront(card){
