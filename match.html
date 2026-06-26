@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v5-visual-number-order-and-true-3d-flip -->
+  <!-- version: match-v6-first-touch-and-adaptive-mixed-content -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -448,6 +448,64 @@
     .front-content.only-image .front-image{
       height:100%;
       flex:1;
+    }
+
+    /* توزيع الصورة والنص داخل البطاقة كما في افتح الصندوق:
+       كلما طال النص تقل مساحة الصورة قليلًا ويُصغّر الخط تلقائيًا حتى يظهر النص كاملًا. */
+    .front-image-zone,
+    .front-text-zone{
+      width:100%;
+      min-width:0;
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    .front-content.mixed-content{
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      grid-template-rows:minmax(0,var(--mixed-image-track,1.1fr)) minmax(0,var(--mixed-text-track,1fr));
+      align-items:stretch;
+      justify-items:stretch;
+      gap:clamp(2px,calc(var(--card-size) * .025),5px);
+    }
+
+    .front-content.mixed-short{--mixed-image-track:1.35fr;--mixed-text-track:.85fr}
+    .front-content.mixed-medium{--mixed-image-track:1.08fr;--mixed-text-track:1.02fr}
+    .front-content.mixed-long{--mixed-image-track:.82fr;--mixed-text-track:1.28fr}
+    .front-content.mixed-xlong{--mixed-image-track:.62fr;--mixed-text-track:1.48fr}
+
+    .front-image-zone .front-image{
+      width:100%;
+      height:100%;
+      min-width:0;
+      min-height:0;
+      flex:none;
+      object-fit:contain;
+      object-position:center;
+    }
+
+    .front-text-zone .front-text{
+      width:100%;
+      max-width:100%;
+      max-height:none;
+      overflow:visible;
+      flex:none;
+      margin:0;
+      padding:0 clamp(1px,calc(var(--card-size) * .012),3px);
+      white-space:normal;
+      word-break:normal;
+      overflow-wrap:anywhere;
+      line-height:1.12;
+    }
+
+    .front-content.only-text .front-text-zone,
+    .front-content.only-image .front-image-zone{
+      width:100%;
+      height:100%;
+      flex:1 1 auto;
     }
 
     .match-card.is-matched{
@@ -1239,20 +1297,119 @@
 
     function renderFront(container,card){
       container.innerHTML = "";
-      container.classList.remove("only-text","only-image");
-      const hasText = Boolean(card.content.text);
+      container.classList.remove(
+        "only-text","only-image","mixed-content",
+        "mixed-short","mixed-medium","mixed-long","mixed-xlong"
+      );
+      const cleanText = String(card.content.text || "").trim();
+      const hasText = Boolean(cleanText);
       const hasImage = Boolean(card.content.image);
 
-      if (hasImage) container.appendChild(createImage(card.content.image,"front-image","محتوى البطاقة"));
-      if (hasText) {
-        const text = document.createElement("div");
+      const createImageZone = ()=>{
+        const zone = document.createElement("span");
+        zone.className = "front-image-zone";
+        const image = createImage(card.content.image,"front-image","محتوى البطاقة");
+        image.addEventListener("load",()=>{
+          requestAnimationFrame(()=>fitCardFront(container.closest(".match-card")));
+        },{once:true});
+        zone.appendChild(image);
+        return zone;
+      };
+
+      const createTextZone = (mode)=>{
+        const zone = document.createElement("span");
+        zone.className = "front-text-zone";
+        const text = document.createElement("span");
         text.className = "front-text";
-        text.textContent = card.content.text;
-        container.appendChild(text);
+        text.dataset.fitText = mode;
+        text.textContent = cleanText;
+        zone.appendChild(text);
+        return zone;
+      };
+
+      if (hasImage && hasText) {
+        const textLength = Array.from(cleanText.replace(/\s+/g," ")) .length;
+        const lengthClass = textLength <= 18
+          ? "mixed-short"
+          : textLength <= 38
+            ? "mixed-medium"
+            : textLength <= 68
+              ? "mixed-long"
+              : "mixed-xlong";
+        container.classList.add("mixed-content",lengthClass);
+        container.append(createImageZone(),createTextZone("mixed"));
+        return;
       }
 
-      if (hasText && !hasImage) container.classList.add("only-text");
-      if (hasImage && !hasText) container.classList.add("only-image");
+      if (hasImage) {
+        container.classList.add("only-image");
+        container.appendChild(createImageZone());
+        return;
+      }
+
+      if (hasText) {
+        container.classList.add("only-text");
+        container.appendChild(createTextZone("text"));
+      }
+    }
+
+    function fitFrontText(element){
+      if (!element) return;
+      const zone = element.closest(".front-text-zone");
+      const card = element.closest(".match-card");
+      if (!zone || !card) return;
+
+      const availableWidth = Math.max(1,zone.clientWidth - 2);
+      const availableHeight = Math.max(1,zone.clientHeight - 2);
+      if (availableWidth < 3 || availableHeight < 3) return;
+
+      const mode = element.dataset.fitText || "text";
+      const cardSize = parseFloat(getComputedStyle(grid).getPropertyValue("--card-size")) || card.clientWidth || 100;
+      const maxFont = mode === "mixed"
+        ? Math.min(cardSize * .19,availableWidth * .24,availableHeight * .50,30)
+        : Math.min(cardSize * .27,availableWidth * .30,availableHeight * .50,42);
+      const minFont = mode === "mixed"
+        ? Math.max(6,Math.min(cardSize * .048,10))
+        : Math.max(8,Math.min(cardSize * .060,12));
+
+      element.style.width = "100%";
+      element.style.height = "auto";
+      element.style.maxHeight = "none";
+      element.style.overflow = "visible";
+      element.style.whiteSpace = "normal";
+      element.style.wordBreak = "normal";
+      element.style.overflowWrap = "anywhere";
+      element.style.lineHeight = mode === "mixed" ? "1.10" : "1.13";
+
+      let low = minFont;
+      let high = Math.max(minFont,maxFont);
+      let best = minFont;
+      for (let index=0;index<24;index+=1) {
+        const size = (low + high) / 2;
+        element.style.setProperty("font-size",`${size}px`,"important");
+        const descentSafety = Math.max(1.5,size * .12);
+        const fits = element.scrollWidth <= availableWidth + .5 && element.scrollHeight + descentSafety <= availableHeight + .5;
+        if (fits) {
+          best = size;
+          low = size;
+        } else {
+          high = size;
+        }
+      }
+      element.style.setProperty("font-size",`${Math.floor(best * 10) / 10}px`,"important");
+    }
+
+    function fitCardFront(card){
+      if (!card) return;
+      card.querySelectorAll(".front-text[data-fit-text]").forEach(fitFrontText);
+    }
+
+    function fitAllFrontText(){
+      grid.querySelectorAll(".front-text[data-fit-text]").forEach(fitFrontText);
+    }
+
+    function scheduleFrontTextFit(){
+      requestAnimationFrame(()=>requestAnimationFrame(fitAllFrontText));
     }
 
     function createCardElement(card,index){
@@ -1286,7 +1443,11 @@
 
       inner.append(back,front);
       button.appendChild(inner);
-      button.addEventListener("click",()=>handleCardClick(button));
+      /* النقرات اللمسية والفأرة تُعالج بحسب الإحداثيات المرئية من الشبكة.
+         نُبقي click للوحة المفاتيح فقط حفاظًا على إمكانية الوصول. */
+      button.addEventListener("click",(event)=>{
+        if (event.detail === 0) handleCardClick(button);
+      });
       return button;
     }
 
@@ -1296,6 +1457,7 @@
       cards.forEach((card,index)=>grid.appendChild(createCardElement(card,index)));
       layoutGrid();
       refreshNumberCovers();
+      scheduleFrontTextFit();
     }
 
     function getCardsInVisualReadingOrder(){
@@ -1375,7 +1537,7 @@
         shuffledElements.forEach((el)=>grid.appendChild(el));
         await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-        const animations = shuffledElements.map((el)=>{
+        const runningAnimations = shuffledElements.map((el)=>{
           const before = oldRects.get(el.dataset.cardId);
           const after = el.getBoundingClientRect();
           const dx = before ? before.left - after.left : 0;
@@ -1385,10 +1547,15 @@
               {transform:`translate3d(${dx}px,${dy}px,0) scale(.965)`},
               {transform:"translate3d(0,0,0) scale(1)"}
             ],
-            {duration,easing:"cubic-bezier(.18,.78,.18,1)",fill:"both"}
-          ).finished.catch(()=>{});
+            {duration,easing:"cubic-bezier(.18,.78,.18,1)",fill:"none"}
+          );
         });
-        await Promise.all(animations);
+        await Promise.all(runningAnimations.map((animation)=>animation.finished.catch(()=>{})));
+        /* Safari قد يُبقي مناطق اللمس في مواقع FLIP القديمة لأول نقرة إذا ظلت
+           كائنات Web Animations منتهية. نلغيها ونُجبر تحديث التخطيط قبل التفاعل. */
+        runningAnimations.forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+        shuffledElements.forEach((element)=>{ element.style.transform = ""; });
+        void grid.offsetWidth;
         if (duration !== durations[durations.length - 1]) await wait(30);
       }
 
@@ -1399,6 +1566,13 @@
       await switchShuffleCovers(false,token);
       await wait(170);
       if (token !== shuffleToken) return;
+      /* تثبيت مواقع اللمس المرئية بعد الخلط قبل السماح بأول نقرة. */
+      Array.from(grid.children).forEach((element)=>{
+        element.getAnimations().forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+        element.style.transform = "";
+      });
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      scheduleFrontTextFit();
       grid.classList.remove("is-shuffling");
       interactionLocked = false;
     }
@@ -1413,6 +1587,7 @@
     }
 
     function openCard(card){
+      fitCardFront(card);
       card.classList.add("is-open");
       card.setAttribute("aria-expanded","true");
     }
@@ -1464,6 +1639,22 @@
       firstCard = null;
       secondCard = null;
       interactionLocked = false;
+    }
+
+    function getVisibleCardAtPoint(clientX,clientY){
+      const candidates = Array.from(grid.querySelectorAll(".match-card"));
+      return candidates.find((candidate)=>{
+        const rect = candidate.getBoundingClientRect();
+        return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+      }) || null;
+    }
+
+    function handleGridPointerUp(event){
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      const card = getVisibleCardAtPoint(event.clientX,event.clientY);
+      if (!card) return;
+      event.preventDefault();
+      handleCardClick(card);
     }
 
     async function handleCardClick(card){
@@ -1670,8 +1861,9 @@
       goSettings();
     });
 
-    window.addEventListener("resize",layoutGrid,{passive:true});
-    window.addEventListener("orientationchange",()=>setTimeout(()=>{layoutGrid();collapseSafariBars();},140),{passive:true});
+    grid.addEventListener("pointerup",handleGridPointerUp);
+    window.addEventListener("resize",()=>{layoutGrid();scheduleFrontTextFit();},{passive:true});
+    window.addEventListener("orientationchange",()=>setTimeout(()=>{layoutGrid();scheduleFrontTextFit();collapseSafariBars();},140),{passive:true});
     window.addEventListener("pagehide",()=>{
       if (introFrameId) cancelAnimationFrame(introFrameId);
       introFrameId = null;
@@ -1679,7 +1871,8 @@
       themeAudio.stop();
     },{passive:true});
     window.addEventListener("pageshow",collapseSafariBars,{passive:true});
-    document.addEventListener("touchend",collapseSafariBars,{passive:true});
+    /* لا نطوي شريط Safari عند كل touchend؛ تغيّر الـ visual viewport في لحظة
+       اللمسة الأولى كان قد ينقل النقرة إلى البطاقة التي فوقها. */
 
     initialize();
   })();
