@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v9-custom-colors-40-cards -->
+  <!-- version: match-v10-large-text-solid-cards -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -296,23 +296,20 @@
     .card-back{
       transform:rotateY(0deg) translateZ(.1px);
       -webkit-transform:rotateY(0deg) translateZ(.1px);
-      background:linear-gradient(145deg,var(--match-card-light) 0%,var(--match-card-color) 52%,var(--match-card-dark) 100%);
+      background:var(--match-card-color);
       color:var(--match-text-color);
       text-shadow:var(--match-text-shadow);
     }
 
     .card-back::after{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:radial-gradient(circle at 25% 18%,rgba(255,255,255,.25),transparent 30%);
-      pointer-events:none;
+      display:none;
+      content:none;
     }
 
     .card-front{
       transform:rotateY(180deg) translateZ(.1px);
       -webkit-transform:rotateY(180deg) translateZ(.1px);
-      background:linear-gradient(145deg,var(--match-card-light) 0%,var(--match-card-color) 52%,var(--match-card-dark) 100%);
+      background:var(--match-card-color);
       color:var(--match-text-color);
       text-shadow:var(--match-text-shadow);
     }
@@ -443,11 +440,25 @@
 
     .front-content.only-text .front-text{
       max-height:100%;
-      font-size:clamp(14px,calc(var(--card-size) * .25),42px);
+      font-size:clamp(18px,calc(var(--card-size) * .36),66px);
       display:flex;
       align-items:center;
       justify-content:center;
       flex:1;
+      line-height:1.12;
+      padding:clamp(4px,calc(var(--card-size) * .045),10px);
+    }
+
+    .front-content.only-text.text-short .front-text{
+      font-size:clamp(22px,calc(var(--card-size) * .42),72px);
+    }
+
+    .front-content.only-text.text-medium .front-text{
+      font-size:clamp(19px,calc(var(--card-size) * .34),60px);
+    }
+
+    .front-content.only-text.text-long .front-text{
+      font-size:clamp(16px,calc(var(--card-size) * .27),48px);
     }
 
     .front-content.only-image .front-image{
@@ -544,7 +555,7 @@
     }
 
     .match-card.is-matched{
-      filter:saturate(.63) brightness(.92);
+      filter:none;
     }
 
     .result-mark{
@@ -824,7 +835,7 @@
       .card-face{border-width:2px;border-radius:10px;box-shadow:0 4px 0 rgba(0,0,0,.18),0 7px 12px rgba(0,0,0,.10)}
       .front-content,.cover-content{padding:3px;gap:2px}
       .front-text{font-size:clamp(9px,3vw,17px)}
-      .front-content.only-text .front-text{font-size:clamp(11px,3.8vw,22px)}
+      .front-content.only-text .front-text{font-size:clamp(16px,5.8vw,34px)}
       .cover-text{font-size:clamp(10px,3.3vw,19px)}
       .cover-number{font-size:clamp(18px,8vw,42px)}
       .celebration-card{width:min(360px,88vw);min-height:clamp(250px,42vh,360px);border-radius:24px}
@@ -1011,10 +1022,10 @@
       cardColor = normalizeHexColor(cardColor,"#e82f70");
       textColor = normalizeHexColor(textColor,"#ffffff");
       page.style.setProperty("--match-card-color",cardColor);
-      page.style.setProperty("--match-card-light",mixHexColor(cardColor,"#ffffff",.27));
-      page.style.setProperty("--match-card-dark",mixHexColor(cardColor,"#000000",.24));
+      page.style.setProperty("--match-card-light",cardColor);
+      page.style.setProperty("--match-card-dark",cardColor);
       page.style.setProperty("--match-text-color",textColor);
-      page.style.setProperty("--match-text-shadow",colorLuminance(textColor) < .38 ? "0 1px 3px rgba(255,255,255,.38)" : "0 3px 7px rgba(0,0,0,.28)");
+      page.style.setProperty("--match-text-shadow",colorLuminance(textColor) < .38 ? "0 1px 3px rgba(255,255,255,.38)" : "0 2px 4px rgba(0,0,0,.24)");
     }
 
 
@@ -1382,7 +1393,8 @@
       container.innerHTML = "";
       container.classList.remove(
         "only-text","only-image","mixed-content",
-        "mixed-short","mixed-medium","mixed-long","mixed-xlong","mixed-force-text"
+        "mixed-short","mixed-medium","mixed-long","mixed-xlong","mixed-force-text",
+        "text-short","text-medium","text-long"
       );
       const cleanText = String(card.content.text || "").trim();
       const hasText = Boolean(cleanText);
@@ -1431,7 +1443,13 @@
       }
 
       if (hasText) {
-        container.classList.add("only-text");
+        const textLength = Array.from(cleanText.replace(/\s+/g," ")).length;
+        const lengthClass = textLength <= 16
+          ? "text-short"
+          : textLength <= 38
+            ? "text-medium"
+            : "text-long";
+        container.classList.add("only-text",lengthClass);
         container.appendChild(createTextZone("text"));
       }
     }
@@ -1467,8 +1485,17 @@
           minFont = Math.max(13,Math.min(cardSize * .072,16));
         }
       } else {
-        maxFont = Math.min(cardSize * .27,availableWidth * .30,availableHeight * .60,42);
-        minFont = Math.max(10,Math.min(cardSize * .072,15));
+        const cleanLength = Array.from(String(element.textContent || "").trim().replace(/\s+/g," ")).length;
+        if (cleanLength <= 16) {
+          maxFont = Math.min(cardSize * .44,availableWidth * .48,availableHeight * .72,72);
+          minFont = Math.max(17,Math.min(cardSize * .16,30));
+        } else if (cleanLength <= 38) {
+          maxFont = Math.min(cardSize * .36,availableWidth * .42,availableHeight * .62,60);
+          minFont = Math.max(15,Math.min(cardSize * .125,25));
+        } else {
+          maxFont = Math.min(cardSize * .29,availableWidth * .36,availableHeight * .54,48);
+          minFont = Math.max(12,Math.min(cardSize * .09,19));
+        }
       }
 
       element.style.width = "100%";

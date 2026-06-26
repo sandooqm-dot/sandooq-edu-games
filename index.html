@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-match-setup-v55-colors-3-to-20 -->
+<!-- version: index-match-setup-v56-identical-number-covers -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -8726,6 +8726,10 @@
       grid-template-columns:repeat(2,minmax(0,1fr));
     }
 
+    .match-cover-mode-grid [hidden]{
+      display:none !important;
+    }
+
     .match-pairs-editor{
       display:grid;
       gap:16px;
@@ -12492,6 +12496,12 @@
       : "english-numbers";
   }
 
+  function enforceMatchCoverModeForMatching(){
+    if (matchingMode === "identical" && !["arabic-numbers","english-numbers"].includes(matchCoverMode)) {
+      matchCoverMode = "arabic-numbers";
+    }
+  }
+
   function updateMatchThemeUI(){
     const theme = typeof normalizeGameTheme === "function"
       ? normalizeGameTheme(matchTheme)
@@ -12509,6 +12519,9 @@
   }
 
   function updateMatchModeUI(){
+    enforceMatchCoverModeForMatching();
+    const identical = matchingMode === "identical";
+
     document.querySelectorAll("[data-match-content-mode]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.matchContentMode === matchContentMode);
     });
@@ -12516,6 +12529,9 @@
       button.classList.toggle("active",button.dataset.matchingMode === matchingMode);
     });
     document.querySelectorAll("[data-match-cover-mode]").forEach((button)=>{
+      const customCover = ["images","text"].includes(button.dataset.matchCoverMode);
+      button.hidden = identical && customCover;
+      button.setAttribute("aria-hidden",button.hidden ? "true" : "false");
       button.classList.toggle("active",button.dataset.matchCoverMode === matchCoverMode);
     });
   }
@@ -12539,6 +12555,7 @@
 
   function matchDraftPayload(){
     ensureMinimumPairs();
+    enforceMatchCoverModeForMatching();
     return {
       gameType:"match",
       gameTemplate:"match",
@@ -12586,6 +12603,7 @@
       matchContentMode = normalizeMatchContentMode(draft.contentMode || "text");
       matchingMode = normalizeMatchingMode(draft.matchingMode || "identical");
       matchCoverMode = normalizeMatchCoverMode(draft.coverMode || "english-numbers");
+      enforceMatchCoverModeForMatching();
       matchSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
       matchFont = ["default","arial","traditional"].includes(draft.fontFamily) ? draft.fontFamily : "default";
       matchCardColor = normalizeMatchHex(draft.cardColor,"#e82f70");
@@ -12760,7 +12778,7 @@
       }));
     }
 
-    if (matchCoverMode === "text") {
+    if (matchingMode === "different" && matchCoverMode === "text") {
       editor.appendChild(createMatchTextField({
         label:matchingMode === "identical" ? "نص غلاف البطاقتين" : "نص غلاف البطاقة",
         value:card.coverText,
@@ -12770,7 +12788,7 @@
       }));
     }
 
-    if (matchCoverMode === "images") {
+    if (matchingMode === "different" && matchCoverMode === "images") {
       editor.appendChild(createMatchImagePicker({
         label:matchingMode === "identical" ? "صورة غلاف البطاقتين" : "صورة غلاف البطاقة",
         card,
@@ -12848,11 +12866,11 @@
       alert(`يرجى اختيار صورة ${cardLabel} في الزوج ${pairNumber}.`);
       return false;
     }
-    if (matchCoverMode === "text" && !String(card.coverText || "").trim()) {
+    if (matchingMode === "different" && matchCoverMode === "text" && !String(card.coverText || "").trim()) {
       alert(`يرجى كتابة نص الغلاف ${cardLabel} في الزوج ${pairNumber}.`);
       return false;
     }
-    if (matchCoverMode === "images" && !activeImage(card,true)) {
+    if (matchingMode === "different" && matchCoverMode === "images" && !activeImage(card,true)) {
       alert(`يرجى اختيار صورة الغلاف ${cardLabel} في الزوج ${pairNumber}.`);
       return false;
     }
@@ -12895,6 +12913,7 @@
   }
 
   function buildMatchPayload(payloadId = ""){
+    enforceMatchCoverModeForMatching();
     const base = matchDraftPayload();
     return {
       ...base,
@@ -13013,6 +13032,7 @@
   document.querySelectorAll("[data-matching-mode]").forEach((button)=>{
     button.addEventListener("click",()=>{
       matchingMode = normalizeMatchingMode(button.dataset.matchingMode);
+      enforceMatchCoverModeForMatching();
       updateMatchModeUI();
       renderMatchPairs();
       saveMatchDraft();
