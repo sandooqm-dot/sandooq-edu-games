@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v4-clean-cover-full-media-number-order -->
+  <!-- version: match-v5-visual-number-order-and-true-3d-flip -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -22,7 +22,7 @@
       --game-font:Tahoma,Arial,"Segoe UI",sans-serif;
       --card-size:152px;
       --card-gap:20px;
-      --flip-duration:.42s;
+      --flip-duration:.48s;
       --cover-swap-duration:.26s;
       --intro-bg-final-scale:1.12;
     }
@@ -255,8 +255,12 @@
     .card-inner{
       position:absolute;
       inset:0;
+      transform:rotateY(0deg);
+      -webkit-transform:rotateY(0deg);
       transform-style:preserve-3d;
-      transition:transform var(--flip-duration) cubic-bezier(.2,.72,.18,1);
+      -webkit-transform-style:preserve-3d;
+      transition:transform var(--flip-duration) cubic-bezier(.34,.08,.22,1);
+      -webkit-transition:-webkit-transform var(--flip-duration) cubic-bezier(.34,.08,.22,1);
       border-radius:clamp(10px,1.4vw,20px);
       will-change:transform;
     }
@@ -264,6 +268,7 @@
     .match-card.is-open .card-inner,
     .match-card.is-matched .card-inner{
       transform:rotateY(180deg);
+      -webkit-transform:rotateY(180deg);
     }
 
     .card-face{
@@ -278,13 +283,14 @@
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       transform-style:preserve-3d;
+      -webkit-transform-style:preserve-3d;
       box-shadow:0 clamp(4px,.7vw,8px) 0 rgba(0,0,0,.18),0 10px 20px rgba(0,0,0,.12);
-      transition:opacity 0s linear .21s;
+      will-change:transform;
     }
 
     .card-back{
-      transform:rotateY(0deg) translateZ(1px);
-      opacity:1;
+      transform:rotateY(0deg) translateZ(.1px);
+      -webkit-transform:rotateY(0deg) translateZ(.1px);
       background:linear-gradient(145deg,#ff679a 0%,#e82f70 52%,#b81550 100%);
       color:#fff;
       text-shadow:0 3px 7px rgba(0,0,0,.28);
@@ -299,23 +305,14 @@
     }
 
     .card-front{
-      transform:rotateY(180deg) translateZ(1px);
-      opacity:0;
+      transform:rotateY(180deg) translateZ(.1px);
+      -webkit-transform:rotateY(180deg) translateZ(.1px);
       background:linear-gradient(145deg,#ff679a 0%,#e82f70 52%,#b81550 100%);
       color:#fff;
       text-shadow:0 3px 7px rgba(0,0,0,.24);
     }
 
-    /* إخفاء وجه الغلاف فعليًا عند منتصف القلب وإعادته عند إغلاق البطاقة. */
-    .match-card.is-open .card-back,
-    .match-card.is-matched .card-back{
-      opacity:0;
-    }
-
-    .match-card.is-open .card-front,
-    .match-card.is-matched .card-front{
-      opacity:1;
-    }
+    /* الوجهان موجودان طوال الحركة، ويكشف دوران البطاقة الوجه المقابل فعليًا. */
 
     .cover-content,
     .front-content{
@@ -861,7 +858,7 @@
     let shuffleToken = 0;
     let introFrameId = null;
 
-    const FLIP_DURATION = 420;
+    const FLIP_DURATION = 480;
     const COVER_SWAP_DURATION = 260;
     const RESULT_REVEAL_DELAY = 700;
     const WRONG_MARK_DURATION = 950;
@@ -1298,11 +1295,43 @@
       applyGridReadingDirection();
       cards.forEach((card,index)=>grid.appendChild(createCardElement(card,index)));
       layoutGrid();
+      refreshNumberCovers();
+    }
+
+    function getCardsInVisualReadingOrder(){
+      const elements = Array.from(grid.children);
+      if (!elements.length) return elements;
+
+      const entries = elements.map((element)=>({
+        element,
+        rect:element.getBoundingClientRect()
+      }));
+      const cardSize = Math.max(1,parseFloat(getComputedStyle(grid).getPropertyValue("--card-size")) || entries[0].rect.height || 1);
+      const rowTolerance = Math.max(4,cardSize * .32);
+      entries.sort((a,b)=>a.rect.top - b.rect.top || a.rect.left - b.rect.left);
+
+      const rows = [];
+      entries.forEach((entry)=>{
+        let row = rows.find((candidate)=>Math.abs(candidate.top - entry.rect.top) <= rowTolerance);
+        if (!row) {
+          row = {top:entry.rect.top,items:[]};
+          rows.push(row);
+        }
+        row.items.push(entry);
+      });
+      rows.sort((a,b)=>a.top - b.top);
+
+      const arabic = coverMode === "arabic-numbers";
+      return rows.flatMap((row)=>{
+        row.items.sort((a,b)=>arabic ? b.rect.left - a.rect.left : a.rect.left - b.rect.left);
+        return row.items.map((entry)=>entry.element);
+      });
     }
 
     function refreshNumberCovers(){
       if (!["arabic-numbers","english-numbers"].includes(coverMode)) return;
-      Array.from(grid.children).forEach((element,index)=>{
+      const visualOrder = getCardsInVisualReadingOrder();
+      visualOrder.forEach((element,index)=>{
         const number = element.querySelector(".cover-number");
         if (number) number.textContent = coverMode === "arabic-numbers" ? toArabicNumber(index + 1) : String(index + 1);
         element.setAttribute("aria-label",`البطاقة ${index + 1}`);
@@ -1364,6 +1393,9 @@
       }
 
       if (token !== shuffleToken) return;
+      /* بعد استقرار البطاقات نرقّم المواقع المرئية من جديد مثل المقطع المرجعي:
+         العربية تبدأ من أعلى اليمين، والإنجليزية من أعلى اليسار. */
+      refreshNumberCovers();
       await switchShuffleCovers(false,token);
       await wait(170);
       if (token !== shuffleToken) return;
