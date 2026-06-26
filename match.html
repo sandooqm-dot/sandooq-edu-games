@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v3-reference-motion-sound-and-mystery-covers -->
+  <!-- version: match-v4-clean-cover-full-media-number-order -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -290,15 +290,6 @@
       text-shadow:0 3px 7px rgba(0,0,0,.28);
     }
 
-    .card-back::before{
-      content:"";
-      position:absolute;
-      inset:7%;
-      border:2px solid rgba(255,255,255,.32);
-      border-radius:calc(clamp(10px,1.4vw,20px) * .78);
-      pointer-events:none;
-    }
-
     .card-back::after{
       content:"";
       position:absolute;
@@ -332,7 +323,7 @@
       z-index:2;
       width:100%;
       height:100%;
-      padding:clamp(5px,1vw,14px);
+      padding:clamp(3px,calc(var(--card-size) * .035),7px);
       display:flex;
       align-items:center;
       justify-content:center;
@@ -344,6 +335,12 @@
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
       transform:translateZ(2px);
+    }
+
+    /* استغلال كامل مساحة البطاقة للصور مع هامش أمان صغير فقط. */
+    .cover-content.cover-image-only,
+    .front-content.only-image{
+      padding:clamp(3px,calc(var(--card-size) * .03),6px);
     }
 
     .cover-number{
@@ -364,10 +361,14 @@
     }
 
     .cover-image{
-      width:88%;
-      height:84%;
+      display:block;
+      width:100%;
+      height:100%;
+      max-width:100%;
+      max-height:100%;
       object-fit:contain;
-      border-radius:10px;
+      object-position:center;
+      border-radius:clamp(6px,calc(var(--card-size) * .055),10px);
     }
 
     /* أثناء خلط البداية تُقلب هوية الغلاف مؤقتًا إلى علامة استفهام،
@@ -411,14 +412,19 @@
     }
 
     .front-image{
+      display:block;
       width:100%;
       height:0;
+      min-width:0;
       min-height:0;
+      max-width:100%;
+      max-height:100%;
       flex:1 1 auto;
       object-fit:contain;
-      border-radius:10px;
-      background:rgba(255,255,255,.94);
-      padding:clamp(2px,calc(var(--card-size) * .025),5px);
+      object-position:center;
+      border-radius:clamp(6px,calc(var(--card-size) * .055),10px);
+      background:transparent;
+      padding:0;
     }
 
     .front-text{
@@ -726,7 +732,7 @@
         max-height:calc(100dvh - 126px - var(--safe-top) - var(--safe-bottom));
       }
       .card-face{border-width:2px;border-radius:10px;box-shadow:0 4px 0 rgba(0,0,0,.18),0 7px 12px rgba(0,0,0,.10)}
-      .front-content,.cover-content{padding:4px;gap:2px}
+      .front-content,.cover-content{padding:3px;gap:2px}
       .front-text{font-size:clamp(9px,3vw,17px)}
       .front-content.only-text .front-text{font-size:clamp(11px,3.8vw,22px)}
       .cover-text{font-size:clamp(10px,3.3vw,19px)}
@@ -1142,7 +1148,17 @@
         built.push({id:`${pairId}-a`,pairId,side:"first",content:first,matched:false});
         built.push({id:`${pairId}-b`,pairId,side:"second",content:second,matched:false});
       });
-      return shuffleArray(built);
+      /* قبل بدء حركة الخلط تبقى البطاقات بترتيبها الطبيعي،
+         ثم تتولى حركة الخلط نفسها إعادة ترتيبها بصريًا وفعليًا. */
+      return built;
+    }
+
+    function applyGridReadingDirection(){
+      const direction = coverMode === "arabic-numbers" ? "rtl" : "ltr";
+      grid.dir = direction;
+      grid.style.direction = direction;
+      grid.classList.toggle("numbers-arabic",coverMode === "arabic-numbers");
+      grid.classList.toggle("numbers-english",coverMode === "english-numbers");
     }
 
     function layoutGrid(){
@@ -1205,6 +1221,7 @@
 
     function renderCover(container,card,index){
       container.innerHTML = "";
+      container.classList.remove("cover-image-only");
       if (coverMode === "arabic-numbers" || coverMode === "english-numbers") {
         const number = document.createElement("span");
         number.className = "cover-number";
@@ -1213,6 +1230,7 @@
         return;
       }
       if (coverMode === "images" && card.content.coverImage) {
+        container.classList.add("cover-image-only");
         container.appendChild(createImage(card.content.coverImage,"cover-image","غلاف البطاقة"));
         return;
       }
@@ -1277,6 +1295,7 @@
 
     function renderCards(){
       grid.innerHTML = "";
+      applyGridReadingDirection();
       cards.forEach((card,index)=>grid.appendChild(createCardElement(card,index)));
       layoutGrid();
     }
