@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v15-hidden-start-cards-flip-sound -->
+  <!-- version: match-v17-balanced-audio-levels -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -1201,7 +1201,7 @@
         correct:"sounds/open-box-open.mp3?v=1",
         wrong:"sounds/choice-wrong.mp3?v=1"
       };
-      const volumes = {shuffle:1,flip:1,correct:1,wrong:1};
+      const volumes = {shuffle:1.18,flip:.55,correct:1,wrong:1};
       const cache = {};
       const SHUFFLE_REFERENCE_GAIN = 1.0592537252;
       let audioContext = null;
@@ -1344,9 +1344,9 @@
           const source = context.createBufferSource();
           const gain = context.createGain();
           source.buffer = buffer;
-          /* المصدر المضمّن أقل من صوت الفيديو المرجعي بنصف ديسيبل تقريبًا.
-             هذه القيمة تعيده إلى مستوى المقطع نفسه دون قص أو تضخيم زائد. */
-          gain.gain.value = SHUFFLE_REFERENCE_GAIN;
+          /* نرفع صوت الخلط فوق المستوى المرجعي بدرجة واضحة، مع إبقاء
+             معامل التعويض الأصلي ثم تطبيق مستوى الخلط المستقل. */
+          gain.gain.value = SHUFFLE_REFERENCE_GAIN * (volumes.shuffle ?? 1);
           source.connect(gain);
           gain.connect(context.destination);
           source.onended = ()=>{
