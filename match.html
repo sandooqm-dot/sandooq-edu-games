@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v13-delayed-slow-card-reveal -->
+  <!-- version: match-v14-reference-timed-shuffle-webaudio -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -1195,6 +1195,11 @@
       };
       const volumes = {shuffle:1,correct:1,wrong:1};
       const cache = {};
+      const SHUFFLE_REFERENCE_GAIN = 1.0592537252;
+      let audioContext = null;
+      let shuffleBuffer = null;
+      let shuffleBufferPromise = null;
+      let shuffleSource = null;
 
       function get(name){
         if (!cache[name]) {
@@ -1208,14 +1213,114 @@
         return cache[name];
       }
 
+      function ensureAudioContext(){
+        if (audioContext) return audioContext;
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        audioContext = new AudioContextClass();
+        return audioContext;
+      }
+
+      function dataUriToArrayBuffer(uri){
+        const commaIndex = String(uri || "").indexOf(",");
+        if (commaIndex < 0) throw new Error("Invalid audio data URI");
+        const binary = atob(String(uri).slice(commaIndex + 1));
+        const bytes = new Uint8Array(binary.length);
+        for (let index=0;index<binary.length;index+=1) bytes[index] = binary.charCodeAt(index);
+        return bytes.buffer;
+      }
+
+      function decodeAudioBuffer(context,arrayBuffer){
+        return new Promise((resolve,reject)=>{
+          let settled = false;
+          const finish = (callback)=>(value)=>{
+            if (settled) return;
+            settled = true;
+            callback(value);
+          };
+          try {
+            const result = context.decodeAudioData(
+              arrayBuffer.slice(0),
+              finish(resolve),
+              finish(reject)
+            );
+            if (result && typeof result.then === "function") {
+              result.then(finish(resolve),finish(reject));
+            }
+          } catch (error) {
+            finish(reject)(error);
+          }
+        });
+      }
+
+      function prepareShuffleBuffer(){
+        if (shuffleBuffer) return Promise.resolve(shuffleBuffer);
+        if (shuffleBufferPromise) return shuffleBufferPromise;
+        const context = ensureAudioContext();
+        if (!context) return Promise.resolve(null);
+        shuffleBufferPromise = decodeAudioBuffer(context,dataUriToArrayBuffer(files.shuffle))
+          .then((buffer)=>{
+            shuffleBuffer = buffer;
+            return buffer;
+          })
+          .catch(()=>{
+            shuffleBufferPromise = null;
+            return null;
+          });
+        return shuffleBufferPromise;
+      }
+
+      async function ready(name = "shuffle"){
+        if (!soundEnabled || name !== "shuffle") return true;
+        return Boolean(await prepareShuffleBuffer());
+      }
+
+      function stopShuffle(){
+        if (!shuffleSource) return;
+        try { shuffleSource.stop(0); } catch (_) {}
+        try { shuffleSource.disconnect(); } catch (_) {}
+        shuffleSource = null;
+      }
+
       function stop(){
+        stopShuffle();
         Object.values(cache).forEach((audio)=>{
           try { audio.pause(); audio.currentTime = 0; } catch (_) {}
         });
       }
 
+      async function playShuffle(){
+        if (!soundEnabled) return false;
+        const context = ensureAudioContext();
+        const buffer = await prepareShuffleBuffer();
+        if (!context || !buffer) return false;
+        try {
+          if (context.state === "suspended") await context.resume();
+          stopShuffle();
+          const source = context.createBufferSource();
+          const gain = context.createGain();
+          source.buffer = buffer;
+          /* المصدر المضمّن أقل من صوت الفيديو المرجعي بنصف ديسيبل تقريبًا.
+             هذه القيمة تعيده إلى مستوى المقطع نفسه دون قص أو تضخيم زائد. */
+          gain.gain.value = SHUFFLE_REFERENCE_GAIN;
+          source.connect(gain);
+          gain.connect(context.destination);
+          source.onended = ()=>{
+            if (shuffleSource === source) shuffleSource = null;
+            try { source.disconnect(); } catch (_) {}
+            try { gain.disconnect(); } catch (_) {}
+          };
+          shuffleSource = source;
+          source.start(0);
+          return true;
+        } catch (_) {
+          return false;
+        }
+      }
+
       function play(name){
-        if (!soundEnabled) return;
+        if (!soundEnabled) return Promise.resolve(false);
+        if (name === "shuffle") return playShuffle();
         const audio = get(name);
         try {
           Object.values(cache).forEach((item)=>{
@@ -1227,44 +1332,40 @@
           audio.volume = volumes[name] ?? 1;
           const promise = audio.play();
           promise?.catch?.(()=>{});
-        } catch (_) {}
+          return promise || Promise.resolve(true);
+        } catch (_) {
+          return Promise.resolve(false);
+        }
       }
 
       function preload(){
-        Object.keys(files).forEach((name)=>{ try { get(name).load(); } catch (_) {} });
+        ["correct","wrong"].forEach((name)=>{ try { get(name).load(); } catch (_) {} });
       }
 
       /*
-        Safari لا يضمن تشغيل صوت الخلط بعد انتهاء الزوم الطويل ما لم يُفتح
-        عنصر الصوت نفسه داخل ضغطة تشغيل المستخدم. نشغله هنا بصمت للحظة،
-        ثم نعيده إلى البداية ليعمل لاحقًا مع أول حركة للبطاقات.
+        نفتح Web Audio داخل ضغطة المستخدم بمقطع صامت حقيقي، ولا نشغّل
+        ملف الخلط نفسه إطلاقًا. لذلك لا يتسرب أي جزء من صوته مع موسيقى الزوم.
       */
-      async function unlock(name = "shuffle"){
+      async function unlock(){
         if (!soundEnabled) return false;
-        const audio = get(name);
-        const targetVolume = volumes[name] ?? 1;
+        const context = ensureAudioContext();
+        if (!context) return false;
         try {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.muted = false;
-          audio.volume = 0;
-          const promise = audio.play();
-          if (promise && typeof promise.then === "function") await promise;
-          audio.pause();
-          audio.currentTime = 0;
-          audio.volume = targetVolume;
+          if (context.state === "suspended") await context.resume();
+          const silentBuffer = context.createBuffer(1,1,context.sampleRate);
+          const silentSource = context.createBufferSource();
+          silentSource.buffer = silentBuffer;
+          silentSource.connect(context.destination);
+          silentSource.start(0);
+          silentSource.onended = ()=>{ try { silentSource.disconnect(); } catch (_) {} };
+          prepareShuffleBuffer().catch(()=>{});
           return true;
         } catch (_) {
-          try {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.volume = targetVolume;
-          } catch (_) {}
           return false;
         }
       }
 
-      return {play,stop,preload,unlock};
+      return {play,stop,preload,unlock,ready};
     })();
 
     const themeAudio = (()=>{
@@ -1717,6 +1818,140 @@
       return token === shuffleToken;
     }
 
+    function waitUntilTimeline(startedAt,offset){
+      return wait(Math.max(0,startedAt + offset - performance.now()));
+    }
+
+    function makeDifferentShuffleOrder(elements){
+      let result = shuffleArray(elements);
+      const unchanged = result.every((element,index)=>element === elements[index]);
+      if (unchanged && result.length > 1) result = result.slice(1).concat(result[0]);
+      return result;
+    }
+
+    async function animateReferenceShuffle(token,duration = 4500){
+      if (token !== shuffleToken) return false;
+      const elements = Array.from(grid.children);
+      if (!elements.length) return false;
+
+      const originalRects = new Map(
+        elements.map((element)=>[element.dataset.cardId,element.getBoundingClientRect()])
+      );
+      const shuffledElements = makeDifferentShuffleOrder(elements);
+      shuffledElements.forEach((element)=>grid.appendChild(element));
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      if (token !== shuffleToken) return false;
+
+      const finalRects = new Map(
+        shuffledElements.map((element)=>[element.dataset.cardId,element.getBoundingClientRect()])
+      );
+      const gridRect = grid.getBoundingClientRect();
+      const centerX = gridRect.left + gridRect.width / 2;
+      const centerY = gridRect.top + gridRect.height / 2;
+      const cardSize = Math.max(
+        1,
+        parseFloat(getComputedStyle(grid).getPropertyValue("--card-size")) ||
+        shuffledElements[0].getBoundingClientRect().width ||
+        100
+      );
+
+      /* منحنى السرعة مأخوذ من حركة المقطع المرجعي بين 0.70 و5.20 ثانية:
+         بداية متوسطة، حركة قوية متصلة، ثم تهدئة طويلة قبل الاستقرار. */
+      const speedProfile = [
+        .508,.674,1.272,1.314,1.213,.925,1.256,1.283,.880,1.209,1.785,
+        1.117,1.241,1.294,1.485,.915,1.288,.596,1.113,.869,.492,.199,.072
+      ];
+      const cumulative = [0];
+      for (let index=1;index<speedProfile.length;index+=1) {
+        cumulative[index] = cumulative[index - 1] +
+          (speedProfile[index - 1] + speedProfile[index]) / 2;
+      }
+      const totalMotion = cumulative[cumulative.length - 1] || 1;
+      const sampleCount = speedProfile.length;
+      const amplitudeX = Math.min(gridRect.width * .34,cardSize * 2.75);
+      const amplitudeY = Math.min(gridRect.height * .38,cardSize * 2.05);
+      const minX = gridRect.left + cardSize * .48;
+      const maxX = gridRect.right - cardSize * .48;
+      const minY = gridRect.top + cardSize * .48;
+      const maxY = gridRect.bottom - cardSize * .48;
+      const clamp = (value,min,max)=>Math.max(min,Math.min(max,value));
+      const smoothstep = (value)=>value * value * (3 - 2 * value);
+
+      const runningAnimations = shuffledElements.map((element,index)=>{
+        const before = originalRects.get(element.dataset.cardId);
+        const after = finalRects.get(element.dataset.cardId);
+        const startX = before ? before.left + before.width / 2 : centerX;
+        const startY = before ? before.top + before.height / 2 : centerY;
+        const endX = after ? after.left + after.width / 2 : centerX;
+        const endY = after ? after.top + after.height / 2 : centerY;
+        const finalCenterX = endX;
+        const finalCenterY = endY;
+        const basePhase = (index / Math.max(1,shuffledElements.length)) * Math.PI * 2;
+        const phaseSkew = ((index * 37) % 11) * .071;
+        const keyframes = [];
+
+        for (let sample=0;sample<sampleCount;sample+=1) {
+          const timeProgress = sample / (sampleCount - 1);
+          const pathProgress = cumulative[sample] / totalMotion;
+          const easedTravel = smoothstep(timeProgress);
+          const gatherEnvelope = Math.pow(Math.sin(Math.PI * timeProgress),.82);
+          const centerPull = .62 * Math.pow(Math.sin(Math.PI * timeProgress),1.08);
+          const phase = basePhase + phaseSkew + pathProgress * Math.PI * 4.55;
+          const baseX = startX + (endX - startX) * easedTravel;
+          const baseY = startY + (endY - startY) * easedTravel;
+          const pulledX = baseX + (centerX - baseX) * centerPull;
+          const pulledY = baseY + (centerY - baseY) * centerPull;
+          const waveX =
+            Math.sin(phase) * .67 +
+            Math.sin(phase * 2.08 + index * .73) * .23 +
+            Math.cos(phase * .57 + index) * .10;
+          const waveY =
+            Math.cos(phase * .91 + index * .41) * .64 +
+            Math.sin(phase * 1.83 + index * .29) * .25 +
+            Math.cos(phase * .46 + index * .97) * .11;
+          let x = pulledX + gatherEnvelope * amplitudeX * waveX;
+          let y = pulledY + gatherEnvelope * amplitudeY * waveY;
+
+          if (sample === 0) {
+            x = startX;
+            y = startY;
+          } else if (sample === sampleCount - 1) {
+            x = endX;
+            y = endY;
+          } else {
+            x = clamp(x,minX,maxX);
+            y = clamp(y,minY,maxY);
+          }
+
+          const scale = sample === 0 || sample === sampleCount - 1
+            ? 1
+            : 1 - gatherEnvelope * .032 + Math.sin(phase * .72) * .009;
+          keyframes.push({
+            offset:timeProgress,
+            transform:`translate3d(${x - finalCenterX}px,${y - finalCenterY}px,0) scale(${scale})`
+          });
+        }
+
+        element.style.transform = keyframes[0].transform;
+        element.style.zIndex = String(10 + (index % 7));
+        return {element,keyframes};
+      });
+
+      void grid.offsetWidth;
+      const animations = runningAnimations.map(({element,keyframes})=>
+        element.animate(keyframes,{duration,easing:"linear",fill:"both"})
+      );
+      await Promise.all(animations.map((animation)=>animation.finished.catch(()=>{})));
+
+      animations.forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+      runningAnimations.forEach(({element})=>{
+        element.style.transform = "";
+        element.style.zIndex = "";
+      });
+      void grid.offsetWidth;
+      return token === shuffleToken;
+    }
+
     async function performShuffle({skipThemeFade = false} = {}){
       const token = ++shuffleToken;
       interactionLocked = true;
@@ -1732,53 +1967,70 @@
         if (token !== shuffleToken) return;
       }
 
-      /* الصوت مستخرج من مقطع اللعبة المرجعي ويبدأ مع انقلاب الأغلفة إلى ؟. */
-      sfx.play("shuffle");
-      if (!(await switchShuffleCovers(true,token))) return;
-
-      /* مدة الحركة مطابقة تقريبًا للمقطع: حركة متصلة تتباطأ تدريجيًا. */
-      const durations = [380,450,520,600,690,760];
-      for (const duration of durations) {
-        if (token !== shuffleToken) return;
-        const elements = Array.from(grid.children);
-        const oldRects = new Map(elements.map((el)=>[el.dataset.cardId,el.getBoundingClientRect()]));
-        const shuffledElements = shuffleArray(elements);
-        shuffledElements.forEach((el)=>grid.appendChild(el));
-        await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-
-        const runningAnimations = shuffledElements.map((el)=>{
-          const before = oldRects.get(el.dataset.cardId);
-          const after = el.getBoundingClientRect();
-          const dx = before ? before.left - after.left : 0;
-          const dy = before ? before.top - after.top : 0;
-          return el.animate(
-            [
-              {transform:`translate3d(${dx}px,${dy}px,0) scale(.965)`},
-              {transform:"translate3d(0,0,0) scale(1)"}
-            ],
-            {duration,easing:"cubic-bezier(.18,.78,.18,1)",fill:"none"}
-          );
-        });
-        await Promise.all(runningAnimations.map((animation)=>animation.finished.catch(()=>{})));
-        /* Safari قد يُبقي مناطق اللمس في مواقع FLIP القديمة لأول نقرة إذا ظلت
-           كائنات Web Animations منتهية. نلغيها ونُجبر تحديث التخطيط قبل التفاعل. */
-        runningAnimations.forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
-        shuffledElements.forEach((element)=>{ element.style.transform = ""; });
-        void grid.offsetWidth;
-        if (duration !== durations[durations.length - 1]) await wait(30);
-      }
-
+      /* ننتظر تجهيز نسخة Web Audio قبل بدء الخط الزمني؛ لا يصدر أي صوت هنا. */
+      await sfx.ready("shuffle");
       if (token !== shuffleToken) return;
-      /* بعد استقرار البطاقات نرقّم المواقع المرئية من جديد مثل المقطع المرجعي:
-         العربية تبدأ من أعلى اليمين، والإنجليزية من أعلى اليسار. */
+
+      /*
+        الخط الزمني مطابق للمقطع المرجعي:
+        0.25s يبدأ تحول الأغلفة إلى ؟
+        0.45s يبدأ صوت الخلط بمستواه الأصلي
+        0.70s تبدأ حركة البطاقات
+        4.35s تبدأ عودة الأغلفة الأصلية مع نهاية الصوت
+        5.20s تستقر آخر بطاقة بالكامل
+      */
+      const timelineStartedAt = performance.now();
+      const coverToQuestionAt = 250;
+      const shuffleAudioAt = 450;
+      const movementAt = 700;
+      const coverRestoreAt = 4350;
+      const timelineEndAt = 5200;
+      const movementDuration = timelineEndAt - movementAt;
+
+      const coverToQuestionTask = (async()=>{
+        await waitUntilTimeline(timelineStartedAt,coverToQuestionAt);
+        if (token !== shuffleToken) return false;
+        return switchShuffleCovers(true,token);
+      })();
+
+      const audioTask = (async()=>{
+        await waitUntilTimeline(timelineStartedAt,shuffleAudioAt);
+        if (token !== shuffleToken) return false;
+        await sfx.play("shuffle");
+        return token === shuffleToken;
+      })();
+
+      const movementTask = (async()=>{
+        await waitUntilTimeline(timelineStartedAt,movementAt);
+        if (token !== shuffleToken) return false;
+        const moved = await animateReferenceShuffle(token,movementDuration);
+        return moved && token === shuffleToken;
+      })();
+
+      const coverRestoreTask = (async()=>{
+        await waitUntilTimeline(timelineStartedAt,coverRestoreAt);
+        if (token !== shuffleToken) return false;
+        /* ترتيب DOM النهائي معروف منذ بداية الحركة، لذلك نعيد ترقيم المواقع
+           قبل كشف الأغلفة بينما لا تزال علامة الاستفهام ظاهرة. */
+        refreshNumberCovers();
+        return switchShuffleCovers(false,token);
+      })();
+
+      await Promise.all([
+        coverToQuestionTask,
+        audioTask,
+        movementTask,
+        coverRestoreTask,
+        waitUntilTimeline(timelineStartedAt,timelineEndAt)
+      ]);
+      if (token !== shuffleToken) return;
+
       refreshNumberCovers();
-      await switchShuffleCovers(false,token);
-      await wait(170);
-      if (token !== shuffleToken) return;
-      /* تثبيت مواقع اللمس المرئية بعد الخلط قبل السماح بأول نقرة. */
       Array.from(grid.children).forEach((element)=>{
         element.getAnimations().forEach((animation)=>{ try { animation.cancel(); } catch (_) {} });
+        element.classList.remove("is-cover-switching","is-mystery-cover");
         element.style.transform = "";
+        element.style.zIndex = "";
       });
       await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
       scheduleFrontTextFit();
@@ -2138,10 +2390,9 @@
       if (gameStarted) return;
       gameStarted = true;
       sfx.preload();
-      /* يبدأ فتح صوت الخلط داخل ضغطة المستخدم نفسها حتى لا يمنعه Safari لاحقًا. */
-      const shuffleUnlock = sfx.unlock("shuffle");
+      /* نفتح Web Audio بصمت داخل ضغطة المستخدم، من دون تشغيل ملف الخلط نفسه. */
+      await sfx.unlock();
       themeAudio.play(currentTheme);
-      await shuffleUnlock;
       startGate.classList.remove("is-visible");
       startGate.setAttribute("aria-hidden","true");
       await playOpeningIntro();
