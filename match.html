@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v12-restored-shuffle-audio-choices-intro -->
+  <!-- version: match-v13-delayed-slow-card-reveal -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -171,7 +171,29 @@
 
     .match-page.intro-camera .match-grid{
       visibility:hidden;
+      opacity:0;
+      transform:translate3d(0,12px,0) scale(.94);
       pointer-events:none;
+    }
+
+    /* بعد توقف صوت الزوم نترك لحظة هادئة، ثم نظهر البطاقات ببطء
+       قبل بدء حركة الخلط وصوتها. */
+    .match-page.intro-pre-reveal .match-grid{
+      visibility:visible;
+      opacity:0;
+      transform:translate3d(0,12px,0) scale(.94);
+      pointer-events:none;
+      transition:none;
+    }
+
+    .match-page.intro-reveal .match-grid{
+      visibility:visible;
+      opacity:1;
+      transform:translate3d(0,0,0) scale(1);
+      pointer-events:none;
+      transition:
+        opacity .82s ease,
+        transform .82s cubic-bezier(.18,.78,.18,1);
     }
 
     .match-page.intro-playing .theme-background{
@@ -1695,17 +1717,20 @@
       return token === shuffleToken;
     }
 
-    async function performShuffle(){
+    async function performShuffle({skipThemeFade = false} = {}){
       const token = ++shuffleToken;
       interactionLocked = true;
       grid.classList.add("is-shuffling");
       firstCard = null;
       secondCard = null;
 
-      /* تنتهي موسيقى الثيم قبل صوت الحركة حتى لا يتداخل الصوتان. */
-      themeAudio.fadeOut(240);
-      await wait(250);
-      if (token !== shuffleToken) return;
+      /* في بداية اللعبة تتوقف موسيقى الزوم قبل إظهار البطاقات، لذلك نتجاوز
+         هذا الجزء. يبقى هنا للمسارات الأخرى حتى لا يتداخل الصوتان. */
+      if (!skipThemeFade) {
+        themeAudio.fadeOut(240);
+        await wait(250);
+        if (token !== shuffleToken) return;
+      }
 
       /* الصوت مستخرج من مقطع اللعبة المرجعي ويبدأ مع انقلاب الأغلفة إلى ؟. */
       sfx.play("shuffle");
@@ -1974,13 +1999,26 @@
       collapseSafariBars({refresh:false});
       await wait(settleMs);
 
-      /* إعادة القياس مرة واحدة بعد ثبات الزوم وقبل بدء الخلط. */
+      /* يتوقف صوت الزوم أولًا، ثم نترك لحظة هادئة قصيرة قبل ظهور البطاقات. */
+      themeAudio.fadeOut(240);
+      await wait(260);
+      await wait(780);
+
+      /* إعادة القياس بعد ثبات الزوم وقبل إظهار البطاقات. */
       syncVisualViewportFrame();
       layoutGrid();
       await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-      page.classList.remove("intro-camera","intro-playing");
+      /* مرحلة ظهور بطيئة ومستقلة؛ لا يبدأ الخلط حتى تكتمل بالكامل. */
+      page.classList.remove("intro-camera");
+      page.classList.add("intro-pre-reveal");
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      page.classList.remove("intro-pre-reveal");
+      page.classList.add("intro-reveal");
+      await wait(840);
+      page.classList.remove("intro-reveal","intro-playing");
       page.classList.add("intro-done");
+
       if (themeBackground) themeBackground.style.filter = "";
       if (fixedControls) {
         fixedControls.style.opacity = "1";
@@ -2107,7 +2145,7 @@
       startGate.classList.remove("is-visible");
       startGate.setAttribute("aria-hidden","true");
       await playOpeningIntro();
-      await performShuffle();
+      await performShuffle({skipThemeFade:true});
     });
 
     restartBtn.addEventListener("click",(event)=>{
