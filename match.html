@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v11-remove-matched-cards -->
+  <!-- version: match-v12-restored-shuffle-audio-choices-intro -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -1212,7 +1212,37 @@
         Object.keys(files).forEach((name)=>{ try { get(name).load(); } catch (_) {} });
       }
 
-      return {play,stop,preload};
+      /*
+        Safari لا يضمن تشغيل صوت الخلط بعد انتهاء الزوم الطويل ما لم يُفتح
+        عنصر الصوت نفسه داخل ضغطة تشغيل المستخدم. نشغله هنا بصمت للحظة،
+        ثم نعيده إلى البداية ليعمل لاحقًا مع أول حركة للبطاقات.
+      */
+      async function unlock(name = "shuffle"){
+        if (!soundEnabled) return false;
+        const audio = get(name);
+        const targetVolume = volumes[name] ?? 1;
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+          audio.volume = 0;
+          const promise = audio.play();
+          if (promise && typeof promise.then === "function") await promise;
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = targetVolume;
+          return true;
+        } catch (_) {
+          try {
+            audio.pause();
+            audio.currentTime = 0;
+            audio.volume = targetVolume;
+          } catch (_) {}
+          return false;
+        }
+      }
+
+      return {play,stop,preload,unlock};
     })();
 
     const themeAudio = (()=>{
@@ -1763,7 +1793,8 @@
       addResultMark(first,"correct");
       addResultMark(second,"correct");
       matchedPairs += 1;
-      await wait(940);
+      /* نترك الزوج الصحيح ظاهرًا قليلًا حتى يراه اللاعب بوضوح قبل الحذف. */
+      await wait(1400);
 
       if (removeMatchedCards) {
         first.classList.add("is-removing");
@@ -1870,8 +1901,8 @@
       page.classList.remove("intro-done");
       page.classList.add("intro-playing","intro-camera");
       interactionLocked = true;
-      layoutGrid();
 
+      /* نفس توقيت وطريقة زوم صفحة الاختيارات تمامًا. */
       const holdMs = 2200;
       const zoomMs = 7600;
       const settleMs = 280;
@@ -1880,31 +1911,56 @@
       let startedAt = null;
 
       const setFrame = (scale)=>{
+        stage.style.transform = "translate3d(0,0,0) scale(1)";
+        stage.style.animation = "none";
+
         if (themeBackground) {
           themeBackground.style.transform = `translate3d(0,0,0) scale(${Number(scale).toFixed(5)})`;
-          themeBackground.style.filter = `saturate(${Math.max(1,1.04-((scale-startScale)/Math.max(.001,endScale-startScale))*.04)})`;
+          themeBackground.style.animation = "none";
+
+          const ratio = (scale - startScale) / Math.max(.001,endScale - startScale);
+          const saturation = 1.04 - ratio * .04;
+          themeBackground.style.filter = `saturate(${Math.max(1,Math.min(1.04,saturation))})`;
         }
       };
 
+      if (fixedControls) {
+        fixedControls.style.opacity = "0";
+        fixedControls.style.transform = "translateY(12px)";
+        fixedControls.style.pointerEvents = "none";
+      }
+
+      /* تثبيت مساحة Safari الحقيقية قبل بدء الزوم مثل صفحة الاختيارات. */
+      syncVisualViewportFrame();
+      layoutGrid();
       setFrame(startScale);
+      collapseSafariBars({refresh:false});
+
       await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reducedMotion) {
         await new Promise((resolve)=>{
           const animate = (now)=>{
             if (startedAt === null) startedAt = now;
             const elapsed = now - startedAt;
+
             if (elapsed < holdMs) {
               setFrame(startScale);
               introFrameId = requestAnimationFrame(animate);
               return;
             }
+
             const progress = Math.max(0,Math.min(1,(elapsed - holdMs) / zoomMs));
-            setFrame(startScale + (endScale - startScale) * easeInOutSine(progress));
+            const eased = easeInOutSine(progress);
+            const scale = startScale + (endScale - startScale) * eased;
+            setFrame(scale);
+
             if (progress < 1) {
               introFrameId = requestAnimationFrame(animate);
               return;
             }
+
             introFrameId = null;
             resolve();
           };
@@ -1915,17 +1971,23 @@
       }
 
       setFrame(endScale);
-      if (themeBackground) themeBackground.style.filter = "";
+      collapseSafariBars({refresh:false});
       await wait(settleMs);
+
+      /* إعادة القياس مرة واحدة بعد ثبات الزوم وقبل بدء الخلط. */
+      syncVisualViewportFrame();
       layoutGrid();
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+
       page.classList.remove("intro-camera","intro-playing");
       page.classList.add("intro-done");
+      if (themeBackground) themeBackground.style.filter = "";
       if (fixedControls) {
-        fixedControls.style.opacity = "";
-        fixedControls.style.transform = "";
+        fixedControls.style.opacity = "1";
+        fixedControls.style.transform = "none";
         fixedControls.style.pointerEvents = "";
       }
-      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      collapseSafariBars({refresh:false});
     }
 
     async function restartGame(){
@@ -1971,11 +2033,48 @@
       interactionLocked = true;
     }
 
-    function collapseSafariBars(){
-      try { window.scrollTo(0,1); } catch (_) {}
+    let safariTimers = [];
+
+    function getVisualViewportMetrics(){
+      const viewport = window.visualViewport;
+      return {
+        width:Math.max(1,Number(viewport?.width) || window.innerWidth || document.documentElement.clientWidth || 1),
+        height:Math.max(1,Number(viewport?.height) || window.innerHeight || document.documentElement.clientHeight || 1),
+        offsetLeft:Math.max(0,Number(viewport?.offsetLeft) || 0)
+      };
+    }
+
+    function syncVisualViewportFrame(){
+      const metrics = getVisualViewportMetrics();
+      stage.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
+      stage.style.right = "auto";
+      stage.style.top = "0px";
+      stage.style.bottom = "auto";
+      stage.style.width = `${metrics.width.toFixed(2)}px`;
+      stage.style.height = `${metrics.height.toFixed(2)}px`;
+      page.style.setProperty("--visual-viewport-width",`${metrics.width}px`);
+      page.style.setProperty("--visual-viewport-height",`${metrics.height}px`);
+    }
+
+    function collapseSafariBars(options = {}){
+      const refresh = options.refresh !== false;
+      safariTimers.forEach((timer)=>clearTimeout(timer));
+      safariTimers = [];
+
+      [0,80,220,520,900].forEach((delay)=>{
+        safariTimers.push(setTimeout(()=>{
+          try { window.scrollTo({top:80,left:0,behavior:"auto"}); }
+          catch (_) { try { window.scrollTo(0,80); } catch (_) {} }
+          if (refresh && !interactionLocked) {
+            syncVisualViewportFrame();
+            layoutGrid();
+          }
+        },delay));
+      });
     }
 
     async function initialize(){
+      syncVisualViewportFrame();
       await hydratePayload();
       applyTheme();
       sfx.preload();
@@ -2001,7 +2100,10 @@
       if (gameStarted) return;
       gameStarted = true;
       sfx.preload();
+      /* يبدأ فتح صوت الخلط داخل ضغطة المستخدم نفسها حتى لا يمنعه Safari لاحقًا. */
+      const shuffleUnlock = sfx.unlock("shuffle");
       themeAudio.play(currentTheme);
+      await shuffleUnlock;
       startGate.classList.remove("is-visible");
       startGate.setAttribute("aria-hidden","true");
       await playOpeningIntro();
@@ -2035,7 +2137,8 @@
       sfx.stop();
       themeAudio.stop();
     },{passive:true});
-    window.addEventListener("pageshow",collapseSafariBars,{passive:true});
+    window.addEventListener("pageshow",()=>{ syncVisualViewportFrame(); collapseSafariBars(); },{passive:true});
+    window.visualViewport?.addEventListener("resize",()=>{ if (!interactionLocked) { syncVisualViewportFrame(); layoutGrid(); } },{passive:true});
     /* لا نطوي شريط Safari عند كل touchend؛ تغيّر الـ visual viewport في لحظة
        اللمسة الأولى كان قد ينقل النقرة إلى البطاقة التي فوقها. */
 
