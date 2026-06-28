@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v75-cover-modes-wheel-finish -->
+  <!-- version: open-box-v76-last-box-reveal-hold -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -2349,6 +2349,7 @@
     let currentCoverMode = "disabled";
     let finishSequenceToken = 0;
     let finishSequenceTimers = [];
+    let lastBoxFinishTimer = null;
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
     openBoxAudio.setEnabled(boxSoundEnabled);
@@ -2373,6 +2374,7 @@
     const ZOOM_IN_MOTION_MS = 3300;
     const ZOOM_OUT_MOTION_MS = 3200;
     const SCATTER_LEAD_MS = 120;
+    const LAST_BOX_REVEAL_HOLD_MS = 2400;
     const MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
 
     const THEME_BOX_COLORS = {
@@ -3949,7 +3951,11 @@
         await wait(1320);
 
         if (items.length > 0 && opened.size >= items.length) {
-          window.setTimeout(showEndCelebration, 220);
+          if (lastBoxFinishTimer) window.clearTimeout(lastBoxFinishTimer);
+          lastBoxFinishTimer = window.setTimeout(()=>{
+            lastBoxFinishTimer = null;
+            showEndCelebration();
+          }, LAST_BOX_REVEAL_HOLD_MS);
         }
       } finally {
         boxInteractionLocked = false;
@@ -4037,6 +4043,12 @@
     }
 
 
+    function clearLastBoxFinishTimer(){
+      if (!lastBoxFinishTimer) return;
+      window.clearTimeout(lastBoxFinishTimer);
+      lastBoxFinishTimer = null;
+    }
+
     function clearFinishSequenceTimers(){
       finishSequenceTimers.forEach((timer)=>clearTimeout(timer));
       finishSequenceTimers = [];
@@ -4060,6 +4072,7 @@
     }
 
     async function showEndCelebration(){
+      clearLastBoxFinishTimer();
       const token = ++finishSequenceToken;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4079,6 +4092,7 @@
     }
 
     function hideEndCelebration(){
+      clearLastBoxFinishTimer();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4457,6 +4471,7 @@
 
       startGate?.classList.add("is-visible");
       startGate?.setAttribute("aria-hidden","false");
+      clearLastBoxFinishTimer();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4467,6 +4482,7 @@
     }
 
     window.addEventListener("pagehide",()=>{
+      clearLastBoxFinishTimer();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       openBoxAudio.stopNamed("finish");
