@@ -25,8 +25,8 @@
       --arrow-focus-scale:1;
       --arrow-focus-x:0px;
       --wheel-arrow-color:#111111;
-      --wheel-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif;
-      --wheel-font-weight:800;
+      --wheel-font:"Noto Naskh Arabic","Traditional Arabic","Noto Serif Arabic",serif;
+      --wheel-font-weight:700;
     }
 
     *{
@@ -538,7 +538,11 @@
       top:50%;
       transform:translate(-50%,-50%) scale(var(--visual-zoom-inverse, 1));
       width:18.5%;
-      aspect-ratio:1/1;
+      height:18.5%;
+      min-width:0;
+      min-height:0;
+      flex:none;
+      aspect-ratio:auto;
       border-radius:50%;
       background:#fff;
       border:4px solid rgba(0,0,0,.10);
@@ -560,6 +564,11 @@
 
     .wheel-center.has-question{
       width:26%;
+      height:26%;
+      min-width:0;
+      min-height:0;
+      flex:none;
+      aspect-ratio:auto;
       font-size:clamp(15px, 3.10vmin, 34px);
       line-height:1.16;
       padding:clamp(10px, 1.85vmin, 20px);
@@ -918,6 +927,7 @@
 
       .wheel-center.has-question{
         width:25.5%;
+        height:25.5%;
         font-size:clamp(13px, 3.25vmin, 30px);
         padding:clamp(8px, 1.8vmin, 18px);
       }
@@ -1438,7 +1448,7 @@
   </style>
 </head>
 <body>
-  <main class="wheel-page intro-playing" id="wheelPage" data-font="cairo">
+  <main class="wheel-page intro-playing" id="wheelPage" data-font="noto-naskh">
     <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
     <img class="wheel-logo" src="logo.PNG" alt="" aria-hidden="true" />
 
@@ -2160,7 +2170,7 @@
 
     function normalizeWheelFont(value){
       const font = String(value || "").trim().toLowerCase();
-      return WHEEL_FONT_IDS.has(font) ? font : "cairo";
+      return WHEEL_FONT_IDS.has(font) ? font : "noto-naskh";
     }
 
     function normalizeWheelHex(value,fallback="#111111"){
@@ -2353,7 +2363,7 @@
         entries: [],
         centerQuestionEnabled:false,
         centerQuestion:"",
-        fontFamily:"cairo",
+        fontFamily:"noto-naskh",
         arrowColor:"#111111",
         soundEnabled:true,
         sounds:{ enabled:true, mode:"files" }
@@ -2904,27 +2914,21 @@
 
         const imageSize = Math.min(imageWidth, imageHeight);
 
-        let lines = textLength <= 8 ? 1 : textLength <= 18 ? 2 : textLength <= 34 ? 3 : 4;
-        lines = clamp(lines, 1, liveMedium ? 4 : 3);
-
-        const maxFont = size * (
-          liveSmall ? 0.066 :
-          liveMedium ? 0.052 :
-          liveLarge ? 0.039 :
-          0.029
-        ) * (textLength <= 8 ? 1.10 : textLength > 38 ? 0.92 : 1);
-
-        const fit = fitWheelTextBox(textLabelWidth * 0.98, textLabelHeight * 0.98, textLength, hasMultipleWords, {
-          maxFont,
-          minFont: liveSmall ? 11.6 : liveMedium ? 9.4 : liveLarge ? 7.6 : 6.6,
-          maxLines: lines,
-          lineHeight: 1.10
-        });
-
-        lines = fit.lines;
-        const fontSize = fit.fontSize;
-        const requiredTextHeight = fontSize * 1.16 * lines + size * (liveSmall ? 0.012 : liveMedium ? 0.010 : 0.008);
-        textLabelHeight = Math.max(textLabelHeight, requiredTextHeight);
+        /*
+          حجم أساسي موحّد لكل أقسام العجلة.
+          يبدأ كل نص بالحجم نفسه، ويصغّر القياس الفعلي النصوص الطويلة فقط.
+        */
+        const lines = (liveSmall || liveMedium) ? 4 : 3;
+        const fontSize = clamp(
+          size * (
+            liveSmall ? 0.066 :
+            liveMedium ? 0.052 :
+            liveLarge ? 0.039 :
+            0.029
+          ),
+          liveSmall ? 11.6 : liveMedium ? 9.4 : liveLarge ? 7.6 : 6.6,
+          size * 0.072
+        );
 
         return {
           splitMixed: true,
@@ -2968,39 +2972,28 @@
         const midRadius = textInnerEdge + radialWidth / 2;
         const textArc = (2 * Math.PI * Math.max(midRadius, textInnerEdge + 1)) * (step / 360);
 
-        let lines = textLength <= 8
-          ? 1
-          : textLength <= 20
-            ? 2
-            : textLength <= 38
-              ? 3
-              : 4;
-        lines = clamp(lines, 1, liveMedium ? 4 : 3);
+        const lines = (liveSmall || liveMedium) ? 4 : 3;
 
-        let labelHeight = clamp(
+        const labelHeight = clamp(
           textArc * (liveSmall ? 0.760 : liveMedium ? 0.640 : liveLarge ? 0.515 : 0.405),
           size * (liveSmall ? 0.092 : liveMedium ? 0.072 : liveLarge ? 0.054 : 0.042),
           size * (liveSmall ? 0.265 : liveMedium ? 0.205 : liveLarge ? 0.154 : 0.116)
         );
 
-        const maxFont = size * (
-          liveSmall ? 0.060 :
-          liveMedium ? 0.047 :
-          liveLarge ? 0.035 :
-          0.026
-        ) * (textLength <= 8 ? 1.10 : textLength > 44 ? 0.92 : 1);
-
-        const fit = fitWheelTextBox(radialWidth * 0.96, labelHeight * 0.96, textLength, hasMultipleWords, {
-          maxFont,
-          minFont: liveSmall ? 10.2 : liveMedium ? 8.6 : liveLarge ? 7.2 : 6.4,
-          maxLines: lines,
-          lineHeight: 1.10
-        });
-
-        lines = fit.lines;
-        const fontSize = fit.fontSize;
-        const requiredHeight = fontSize * 1.16 * lines + size * (liveSmall ? 0.014 : liveMedium ? 0.011 : 0.009);
-        labelHeight = Math.max(labelHeight, requiredHeight);
+        /*
+          كل نص يبدأ بحجم موحّد حسب عدد الأقسام فقط.
+          لا يوجد أي تصغير مسبق بناءً على عدد الحروف أو وجود مسافات.
+        */
+        const fontSize = clamp(
+          size * (
+            liveSmall ? 0.060 :
+            liveMedium ? 0.047 :
+            liveLarge ? 0.035 :
+            0.026
+          ),
+          liveSmall ? 10.2 : liveMedium ? 8.6 : liveLarge ? 7.2 : 6.4,
+          size * 0.066
+        );
 
         return {
           midRadius,
@@ -3425,6 +3418,16 @@
       wheelPage.style.setProperty("--arrow-top", `${geometry.arrowTop}px`);
       wheelPage.style.setProperty("--arrow-w", `${geometry.arrowW}px`);
       wheelPage.style.setProperty("--arrow-h", `${geometry.arrowH}px`);
+
+      /* تثبيت دائرة المنتصف كمربع حقيقي؛ الخط لا يستطيع تمديدها إلى شكل بيضاوي. */
+      if (wheelCenter) {
+        const centerRatio = payload?.centerQuestionEnabled
+          ? ((geometry.viewportW || 0) > (geometry.viewportH || 0) ? 0.255 : 0.26)
+          : 0.185;
+        const centerSize = Math.max(44, Math.round(geometry.size * centerRatio));
+        wheelCenter.style.width = `${centerSize}px`;
+        wheelCenter.style.height = `${centerSize}px`;
+      }
     }
 
     /* Wordwall-style zoom.
@@ -3707,7 +3710,7 @@
     async function refitAfterWheelFontLoad(){
       const token = ++wheelFontFitToken;
       const fontId = normalizeWheelFont(payload?.fontFamily);
-      const config = WHEEL_FONT_LOAD_CONFIG[fontId] || WHEEL_FONT_LOAD_CONFIG.cairo;
+      const config = WHEEL_FONT_LOAD_CONFIG[fontId] || WHEEL_FONT_LOAD_CONFIG["noto-naskh"];
       try {
         if (document.fonts?.load) {
           await document.fonts.load(`${config.weight} 32px "${config.family}"`);
@@ -3750,25 +3753,36 @@
       if (!wheelCenter.classList.contains("has-question")) return;
 
       const question = String(wheelCenter.textContent || "").trim();
-      const length = question.length;
+      if (!question) return;
+
       wheelCenter.style.fontSize = "";
+      wheelCenter.style.whiteSpace = "normal";
+      wheelCenter.style.wordBreak = "normal";
+      wheelCenter.style.overflowWrap = "break-word";
+      wheelCenter.style.overflow = "hidden";
 
-      let size = parseFloat(getComputedStyle(wheelCenter).fontSize || "20");
-      const maxSize = size;
-      const minSize = length > 52 ? 9 : length > 34 ? 10 : 11;
+      const computed = getComputedStyle(wheelCenter);
+      const maxSize = Math.max(12, parseFloat(computed.fontSize || "20"));
+      const minSize = question.length > 60 ? 8.5 : question.length > 38 ? 9.5 : 10.5;
 
-      // Short center questions should look important, like Wordwall.
-      if (length && length <= 18) {
-        size = Math.min(maxSize * 1.08, maxSize + 3);
-        wheelCenter.style.fontSize = `${size}px`;
+      let low = minSize;
+      let high = maxSize;
+      let best = minSize;
+
+      for (let step = 0; step < 16; step += 1) {
+        const mid = (low + high) / 2;
+        wheelCenter.style.fontSize = `${mid}px`;
+        const fits = wheelCenter.scrollWidth <= wheelCenter.clientWidth + 1 &&
+                     wheelCenter.scrollHeight <= wheelCenter.clientHeight + 1;
+        if (fits) {
+          best = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
       }
 
-      for (let i = 0; i < 20; i++) {
-        if (wheelCenter.scrollWidth <= wheelCenter.clientWidth + 2 && wheelCenter.scrollHeight <= wheelCenter.clientHeight + 2) break;
-        size -= 1;
-        if (size < minSize) break;
-        wheelCenter.style.fontSize = `${size}px`;
-      }
+      wheelCenter.style.fontSize = `${Math.max(minSize, best * 0.985).toFixed(2)}px`;
     }
 
     function clearSelected(){
