@@ -630,10 +630,233 @@
     @media(prefers-reduced-motion:reduce){
       .order-token,.accepted-token,.drop-check,.wrong-mark,.group-celebration,.overlay-card{animation-duration:.01ms!important;transition-duration:.01ms!important}
     }
+  
+
+    /* الواجهة قبل بدء اللعبة: نفس بوابة التشغيل المعتمدة في افتح الصندوق. */
+    .order-page.pre-start .groups-canvas,
+    .order-page.pre-start .game-logo,
+    .order-page.pre-start .fixed-controls{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+    }
+
+    .groups-canvas,
+    .game-logo,
+    .fixed-controls{
+      transition:opacity .28s ease,visibility .28s ease;
+    }
+
+    .back-btn{
+      pointer-events:auto;
+      position:absolute;
+      left:clamp(16px,2.6vw,34px);
+      bottom:0;
+      min-width:clamp(78px,8vw,108px);
+      height:clamp(34px,4.8vh,44px);
+      border:2.5px solid #111;
+      border-radius:11px;
+      background:#efd553;
+      color:#111;
+      font-size:clamp(14px,1.7vw,19px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 clamp(15px,2vw,24px);
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .back-btn:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.20);
+    }
+
+    .start-gate .celebration-card{
+      position:relative;
+      width:min(520px,86vw);
+      min-height:clamp(250px,40vh,370px);
+      border:2px solid rgba(255,255,255,.86);
+      border-radius:28px;
+      background:rgba(255,255,255,.78);
+      -webkit-backdrop-filter:blur(9px);
+      backdrop-filter:blur(9px);
+      box-shadow:0 18px 45px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.72);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:clamp(22px,4.6vw,44px);
+      pointer-events:auto;
+      animation:startCardPop .62s cubic-bezier(.2,1.12,.22,1) both;
+      overflow:hidden;
+    }
+
+    .start-gate .celebration-card::before{
+      content:"";
+      position:absolute;
+      width:92%;
+      aspect-ratio:1;
+      left:50%;
+      top:45%;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(239,213,83,.32) 0%,rgba(239,213,83,.14) 34%,rgba(255,255,255,0) 68%);
+      animation:startGlow 2.4s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .start-gate .celebration-icon{
+      position:relative;
+      z-index:1;
+      width:clamp(92px,17vw,144px);
+      height:clamp(92px,17vw,144px);
+      margin-bottom:clamp(12px,2.6vw,20px);
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.15));
+      animation:startIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s;
+    }
+
+    .start-gate .celebration-title{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:#102b57;
+      font-size:clamp(34px,6.2vw,64px);
+      line-height:1.05;
+      font-weight:900;
+      text-shadow:0 2px 0 rgba(255,255,255,.70);
+    }
+
+    .start-gate .celebration-subtitle{
+      position:relative;
+      z-index:1;
+      margin:clamp(8px,1.7vw,14px) 0 0;
+      color:#26364a;
+      font-size:clamp(17px,2.7vw,28px);
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .start-gate .celebration-actions{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:clamp(22px,4vw,34px);
+    }
+
+    .start-gate .activity-start-btn{
+      min-width:clamp(150px,23vw,220px);
+      height:clamp(44px,6.4vh,58px);
+      border:3px solid #111;
+      border-radius:15px;
+      background:linear-gradient(180deg,#2fa7f2 0%,#1688d3 56%,#0d6fb4 100%);
+      color:#fff;
+      font-size:clamp(17px,2.5vw,25px);
+      font-weight:900;
+      line-height:1;
+      padding:0 clamp(20px,3vw,32px);
+      box-shadow:0 5px 0 rgba(0,0,0,.22);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .start-gate .celebration-spark{
+      position:absolute;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 0 0 4px rgba(255,255,255,.28),0 0 18px rgba(239,213,83,.86);
+      animation:startSpark 1.8s ease-in-out infinite;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .start-gate .spark-one{left:18%;top:26%;animation-delay:.1s}
+    .start-gate .spark-two{right:17%;top:31%;animation-delay:.55s}
+    .start-gate .spark-three{left:24%;bottom:24%;animation-delay:.85s}
+    .start-gate .spark-four{right:23%;bottom:27%;animation-delay:1.15s}
+
+    /* لا تعاد حركة الحروف المثبتة عند العمل على كلمة أخرى. */
+    .accepted-token{animation:none}
+    .accepted-token.is-new{animation:acceptedPop .26s cubic-bezier(.2,.9,.2,1) both}
+
+    /* اكتمال كل كلمة مستقل: حرفًا بعد حرف، ثم تكبر الكلمة كلها قليلًا. */
+    .order-group.is-completing .accepted-token{
+      animation:completedLetterWave .46s cubic-bezier(.18,.92,.2,1) both;
+      animation-delay:calc(var(--wave-index,0) * 120ms);
+    }
+
+    .order-group.is-completing .slot-tray,
+    .order-group.is-completing .sequence-shell{
+      animation:completedWholeWord .42s cubic-bezier(.18,.92,.2,1) both;
+      animation-delay:calc((var(--wave-count,1) - 1) * 120ms + 470ms);
+    }
+
+    .group-celebration{display:none!important}
+
+    @keyframes completedLetterWave{
+      0%,100%{transform:scale(1)}
+      48%{transform:scale(1.17) translateY(-4px)}
+    }
+
+    @keyframes completedWholeWord{
+      0%,100%{transform:scale(1)}
+      55%{transform:scale(1.055)}
+    }
+
+    @keyframes startCardPop{
+      0%{opacity:0;transform:scale(.82) translateY(20px)}
+      70%{opacity:1;transform:scale(1.035) translateY(0)}
+      100%{opacity:1;transform:scale(1) translateY(0)}
+    }
+
+    @keyframes startIconPop{
+      0%{opacity:0;transform:scale(.5) rotate(-12deg)}
+      72%{opacity:1;transform:scale(1.12) rotate(3deg)}
+      100%{opacity:1;transform:scale(1) rotate(0)}
+    }
+
+    @keyframes startGlow{
+      0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}
+    }
+
+    @keyframes startSpark{
+      0%,100%{opacity:.25;transform:scale(.72)}
+      45%{opacity:1;transform:scale(1.22)}
+    }
+
+    @media(max-width:430px){
+      .start-gate .celebration-card{
+        width:min(360px,88vw);
+        min-height:clamp(250px,42vh,360px);
+        border-radius:24px;
+      }
+      .back-btn{left:12px;height:40px;min-width:82px;font-size:15px;padding:0 14px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      .order-group.is-completing .accepted-token,
+      .order-group.is-completing .slot-tray,
+      .order-group.is-completing .sequence-shell,
+      .start-gate .celebration-card,
+      .start-gate .celebration-icon{
+        animation-duration:.01ms!important;
+        animation-delay:0ms!important;
+      }
+    }
+
   </style>
 </head>
 <body>
-  <main class="order-page theme-classic" id="orderPage" data-font="default">
+  <main class="order-page theme-classic pre-start" id="orderPage" data-font="default">
     <div class="theme-background" aria-hidden="true"></div>
     <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
 
@@ -642,18 +865,35 @@
     </section>
 
     <nav class="fixed-controls" aria-label="التنقل بين الأسئلة">
+      <button class="back-btn" id="backBtn" type="button">رجوع</button>
       <div class="right-controls" id="questionNavigation">
         <button class="control-btn previous-btn" id="previousBtn" type="button">السابق</button>
         <button class="control-btn next-btn" id="nextBtn" type="button" disabled>التالي</button>
       </div>
     </nav>
 
-    <section class="activity-overlay is-visible" id="startGate" aria-hidden="false">
-      <div class="overlay-card" role="dialog" aria-modal="true">
-        <div class="overlay-icon" aria-hidden="true">↔️</div>
-        <h1 class="overlay-title">الترتيب</h1>
-        <p class="overlay-text">اضغط للبدء وتشغيل الصوت</p>
-        <button class="start-btn" id="startBtn" type="button">تشغيل</button>
+    <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
+      <div class="celebration-card activity-start-card" role="dialog" aria-modal="true" aria-labelledby="startGateTitle">
+        <span class="celebration-spark spark-one" aria-hidden="true"></span>
+        <span class="celebration-spark spark-two" aria-hidden="true"></span>
+        <span class="celebration-spark spark-three" aria-hidden="true"></span>
+        <span class="celebration-spark spark-four" aria-hidden="true"></span>
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="startBlue" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#2fa7f2"/>
+              <stop offset="100%" stop-color="#0d6fb4"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.76)" stroke="rgba(255,255,255,.92)" stroke-width="5"/>
+          <circle cx="60" cy="60" r="35" fill="url(#startBlue)"/>
+          <path d="M52 42l27 18-27 18z" fill="#fff"/>
+        </svg>
+        <h1 class="celebration-title" id="startGateTitle">ابدأ اللعبة</h1>
+        <p class="celebration-subtitle">اضغط للبدء وتشغيل الصوت</p>
+        <div class="celebration-actions">
+          <button class="start-btn activity-start-btn" id="startBtn" type="button">تشغيل</button>
+        </div>
       </div>
     </section>
 
@@ -681,6 +921,7 @@
     const page = document.getElementById("orderPage");
     const stage = document.getElementById("stage");
     const groupsCanvas = document.getElementById("groupsCanvas");
+    const backBtn = document.getElementById("backBtn");
     const previousBtn = document.getElementById("previousBtn");
     const nextBtn = document.getElementById("nextBtn");
     const startGate = document.getElementById("startGate");
@@ -967,9 +1208,10 @@
       return String(item.content);
     }
 
-    function createAccepted(item){
+    function createAccepted(item,slotIndex,group){
       const accepted = document.createElement("div");
-      accepted.className = `accepted-token ${item.type === "word" ? "word-token" : ""} ${item.type === "image" ? "image-token" : ""}`.trim();
+      accepted.className = `accepted-token ${item.type === "word" ? "word-token" : ""} ${item.type === "image" ? "image-token" : ""} ${group?.lastAcceptedSlot === slotIndex ? "is-new" : ""}`.trim();
+      accepted.style.setProperty("--wave-index",String(slotIndex));
       if (item.type === "image") {
         const image = document.createElement("img");
         image.src = item.content.data;
@@ -982,12 +1224,12 @@
       return accepted;
     }
 
-    function selectItem(groupIndex,itemId){
+    function answerFirstEmptySlot(groupIndex,itemId){
       const group = state.groups[groupIndex];
       if (!group || group.completed || !group.bank.includes(itemId)) return;
-      if (selectedItem?.groupIndex === groupIndex && selectedItem?.itemId === itemId) selectedItem = null;
-      else selectedItem = {groupIndex,itemId};
-      render();
+      const slotIndex = group.slots.findIndex((slotId)=>!slotId);
+      if (slotIndex < 0) return;
+      acceptItem(groupIndex,itemId,slotIndex);
     }
 
     function flashWrong(groupIndex,itemId,slotIndex){
@@ -1017,10 +1259,11 @@
       sfx.play("complete",1,.06);
       state.completed = state.groups.every((entry)=>entry.completed);
       render();
+      const waveDuration = Math.max(900,group.items.length * 120 + 680);
       window.setTimeout(()=>{
         group.celebrating = false;
         render();
-      },1650);
+      },waveDuration);
     }
 
     function acceptItem(groupIndex,itemId,slotIndex){
@@ -1042,7 +1285,7 @@
       window.setTimeout(()=>{
         if (group.lastAcceptedSlot === slotIndex) {
           group.lastAcceptedSlot = -1;
-          render();
+          if (!group.celebrating) render();
         }
       },650);
 
@@ -1072,7 +1315,7 @@
       attachPointerDrag(token,item);
       token.addEventListener("click",()=>{
         if (Date.now() < suppressClickUntil) return;
-        selectItem(item.groupIndex,item.id);
+        answerFirstEmptySlot(item.groupIndex,item.id);
       });
       return token;
     }
@@ -1178,7 +1421,7 @@
 
       if (id) {
         const item = itemById(group,id);
-        if (item) slot.appendChild(createAccepted(item));
+        if (item) slot.appendChild(createAccepted(item,slotIndex,group));
         if (group.lastAcceptedSlot === slotIndex) {
           const check = document.createElement("span");
           check.className = "drop-check";
@@ -1187,16 +1430,13 @@
         }
       }
 
-      slot.addEventListener("click",()=>{
-        if (!selectedItem || selectedItem.groupIndex !== groupIndex || id || group.completed) return;
-        acceptItem(groupIndex,selectedItem.itemId,slotIndex);
-      });
       return slot;
     }
 
     function renderLetterGroup(group,groupIndex){
       const wrapper = document.createElement("section");
-      wrapper.className = `order-group ${group.wrongPulse ? "show-wrong" : ""} ${group.celebrating ? "is-celebrating" : ""}`.trim();
+      wrapper.className = `order-group ${group.wrongPulse ? "show-wrong" : ""} ${group.celebrating ? "is-completing" : ""}`.trim();
+      wrapper.style.setProperty("--wave-count",String(group.items.length));
       wrapper.dir = state.direction;
 
       const bank = document.createElement("div");
@@ -1217,17 +1457,14 @@
       wrong.textContent = "×";
       tray.appendChild(wrong);
 
-      const celebration = document.createElement("div");
-      celebration.className = "group-celebration";
-      celebration.innerHTML = `<span class="celebration-word">ممتاز!</span><span class="celebration-points">+${group.items.length}</span>`;
-
-      wrapper.append(bank,tray,celebration);
+      wrapper.append(bank,tray);
       return wrapper;
     }
 
     function renderSequenceGroup(group,groupIndex){
       const wrapper = document.createElement("section");
-      wrapper.className = `order-group ${group.wrongPulse ? "show-wrong" : ""} ${group.celebrating ? "is-celebrating" : ""}`.trim();
+      wrapper.className = `order-group ${group.wrongPulse ? "show-wrong" : ""} ${group.celebrating ? "is-completing" : ""}`.trim();
+      wrapper.style.setProperty("--wave-count",String(group.items.length));
       wrapper.dir = state.direction;
 
       const bank = document.createElement("div");
@@ -1257,11 +1494,7 @@
       wrong.textContent = "×";
       sequence.appendChild(wrong);
 
-      const celebration = document.createElement("div");
-      celebration.className = "group-celebration";
-      celebration.innerHTML = `<span class="celebration-word">ممتاز!</span><span class="celebration-points">+${group.items.length}</span>`;
-
-      wrapper.append(bank,sequence,celebration);
+      wrapper.append(bank,sequence);
       return wrapper;
     }
 
@@ -1362,6 +1595,19 @@
       showQuestion(questionIndex + 1);
     }
 
+    function goToOrderSettings(){
+      try{
+        const requested = getParam("return");
+        const target = requested || "index.html#orderSetup";
+        const url = new URL(target,window.location.href);
+        if (url.origin === window.location.origin) {
+          window.location.href = `${url.pathname}${url.search}${url.hash || "#orderSetup"}`;
+          return;
+        }
+      }catch(_){}
+      window.location.href = "index.html#orderSetup";
+    }
+
     function restart(){
       finishView.classList.remove("is-visible");
       finishView.setAttribute("aria-hidden","true");
@@ -1369,6 +1615,7 @@
       showQuestion(0);
     }
 
+    backBtn.addEventListener("click",goToOrderSettings);
     previousBtn.addEventListener("click",goPrevious);
     nextBtn.addEventListener("click",goNext);
     restartBtn.addEventListener("click",restart);
@@ -1377,6 +1624,7 @@
       event.preventDefault();
       event.stopPropagation();
       sfx.unlock();
+      page.classList.remove("pre-start");
       startGate.classList.remove("is-visible");
       startGate.setAttribute("aria-hidden","true");
       collapseSafariBars();
