@@ -5,6 +5,9 @@
 <!-- version: index-wheel-final-polish-v49 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@800&family=Tajawal:wght@800&family=Noto+Kufi+Arabic:wght@800&family=Noto+Naskh+Arabic:wght@700&display=swap" rel="stylesheet">
 <title>صندوق الالعاب التعليمية</title>
 <style>
     :root{
@@ -9497,11 +9500,10 @@
       content:none !important;
     }
 
-    .wheel-setup[data-quiz-font="sans-serif"]{--choices-font:Arial,Helvetica,Tahoma,sans-serif}
-    .wheel-setup[data-quiz-font="poppins"]{--choices-font:"Poppins","Arial Rounded MT Bold",Arial,Tahoma,sans-serif}
-    .wheel-setup[data-quiz-font="serif"]{--choices-font:Georgia,"Times New Roman","Traditional Arabic",serif}
-    .wheel-setup[data-quiz-font="comic"]{--choices-font:"Comic Sans MS","Comic Sans","Arial Rounded MT Bold",Tahoma,cursive}
-    .wheel-setup[data-quiz-font="primary"]{--choices-font:"Arial Rounded MT Bold","Trebuchet MS",Tahoma,Arial,sans-serif}
+    .wheel-setup[data-quiz-font="cairo"]{--choices-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+    .wheel-setup[data-quiz-font="tajawal"]{--choices-font:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+    .wheel-setup[data-quiz-font="noto-kufi"]{--choices-font:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+    .wheel-setup[data-quiz-font="noto-naskh"]{--choices-font:"Noto Naskh Arabic","Traditional Arabic",serif}
 
     .wheel-setup .choices-advanced-panel.is-open{max-height:360px !important}
 
@@ -9530,6 +9532,21 @@
       pointer-events:none !important;
     }
     .wheel-items-editor.is-removing-entry .remove-entry-btn{pointer-events:none;opacity:.58}
+
+
+
+    /* Safari iPhone: لا نسمح للشريط السفلي بالقفز فوق لوحة المفاتيح. */
+    body.keyboard-open .bottom-bar{
+      display:none !important;
+    }
+    body.keyboard-open .page{
+      padding-bottom:max(18px,var(--safe-bottom)) !important;
+    }
+    body.keyboard-open input,
+    body.keyboard-open textarea,
+    body.keyboard-open [contenteditable="true"]{
+      scroll-margin-bottom:24px;
+    }
 
 </style>
 </head>
@@ -9755,14 +9772,10 @@
               <strong>نوع الخط</strong>
             </label>
             <select class="quiz-font-select" id="wheelFontSelect">
-              <option value="default">افتراضي</option>
-              <option value="sans-serif">Sans-Serif</option>
-              <option value="poppins">Poppins</option>
-              <option value="serif">Serif</option>
-              <option value="comic">Comic</option>
-              <option value="primary">Primary</option>
-              <option value="arial">Arial</option>
-              <option value="traditional">عربي تقليدي</option>
+              <option value="cairo">كايرو</option>
+              <option value="tajawal">تجوال</option>
+              <option value="noto-kufi">نوتو كوفي</option>
+              <option value="noto-naskh">نوتو نسخ</option>
             </select>
           </div>
           <div class="choices-advanced-row">
@@ -10337,11 +10350,11 @@
     return GAME_THEME_IDS.has(value) ? value : "classic";
   }
 
-  const WHEEL_FONT_IDS = new Set(["default","sans-serif","poppins","serif","comic","primary","arial","traditional"]);
+  const WHEEL_FONT_IDS = new Set(["cairo","tajawal","noto-kufi","noto-naskh"]);
 
   function normalizeWheelFont(value){
     const font = String(value || "").trim().toLowerCase();
-    return WHEEL_FONT_IDS.has(font) ? font : "default";
+    return WHEEL_FONT_IDS.has(font) ? font : "cairo";
   }
 
   function normalizeWheelHex(value,fallback="#111111"){
@@ -10357,7 +10370,7 @@
   let wheelTheme = "classic";
   let wheelEntries = [];
   let wheelSoundEnabled = true;
-  let wheelFont = "default";
+  let wheelFont = "cairo";
   let wheelArrowColor = "#111111";
   let boxCoverMode = "disabled";
   let wheelAdvancedOpen = false;
@@ -14451,5 +14464,41 @@
   if (window.location.hash === "#orderSetup") openSetup();
 })();
 </script>
+
+<script>
+(() => {
+  const editableSelector = 'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]';
+  let closeTimer = 0;
+
+  function isEditable(element){
+    return Boolean(element && element.matches && element.matches(editableSelector));
+  }
+
+  function syncKeyboardState(){
+    const focused = isEditable(document.activeElement);
+    document.body.classList.toggle('keyboard-open', focused);
+  }
+
+  document.addEventListener('focusin', (event) => {
+    if (!isEditable(event.target)) return;
+    clearTimeout(closeTimer);
+    document.body.classList.add('keyboard-open');
+    requestAnimationFrame(() => {
+      try { event.target.scrollIntoView({ block:'center', behavior:'smooth' }); } catch (_) {}
+    });
+  }, true);
+
+  document.addEventListener('focusout', () => {
+    clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(syncKeyboardState, 220);
+  }, true);
+
+  window.visualViewport?.addEventListener('resize', syncKeyboardState, { passive:true });
+  window.visualViewport?.addEventListener('scroll', syncKeyboardState, { passive:true });
+  window.addEventListener('pageshow', syncKeyboardState, { passive:true });
+  window.addEventListener('pagehide', () => document.body.classList.remove('keyboard-open'), { passive:true });
+})();
+</script>
+
 </body>
 </html>

@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@800&family=Tajawal:wght@800&family=Noto+Kufi+Arabic:wght@800&family=Noto+Naskh+Arabic:wght@700&display=swap" rel="stylesheet">
   <title>العجلة الدوارة - صندوق الألعاب التعليمية</title>
   <style>
     :root{
@@ -22,7 +25,8 @@
       --arrow-focus-scale:1;
       --arrow-focus-x:0px;
       --wheel-arrow-color:#111111;
-      --wheel-font:Tahoma,Arial,"Segoe UI",sans-serif;
+      --wheel-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+      --wheel-font-weight:800;
     }
 
     *{
@@ -1256,17 +1260,25 @@
 
 
 
-    /* الخطوط الإضافية مع إبقاء الخط الحالي افتراضيًا. */
-    .wheel-page[data-font="default"]{--wheel-font:Tahoma,Arial,"Segoe UI",sans-serif}
-    .wheel-page[data-font="sans-serif"]{--wheel-font:Arial,Helvetica,Tahoma,sans-serif}
-    .wheel-page[data-font="poppins"]{--wheel-font:"Poppins","Arial Rounded MT Bold",Arial,Tahoma,sans-serif}
-    .wheel-page[data-font="serif"]{--wheel-font:Georgia,"Times New Roman","Traditional Arabic",serif}
-    .wheel-page[data-font="comic"]{--wheel-font:"Comic Sans MS","Comic Sans","Arial Rounded MT Bold",Tahoma,cursive}
-    .wheel-page[data-font="primary"]{--wheel-font:"Arial Rounded MT Bold","Trebuchet MS",Tahoma,Arial,sans-serif}
-    .wheel-page[data-font="arial"]{--wheel-font:Arial,Tahoma,sans-serif}
-    .wheel-page[data-font="traditional"]{--wheel-font:"Traditional Arabic","Simplified Arabic",Tahoma,serif}
+    /* الخطوط العربية الأربعة المعتمدة للعجلة. */
+    .wheel-page[data-font="cairo"]{
+      --wheel-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+      --wheel-font-weight:800;
+    }
+    .wheel-page[data-font="tajawal"]{
+      --wheel-font:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+      --wheel-font-weight:800;
+    }
+    .wheel-page[data-font="noto-kufi"]{
+      --wheel-font:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+      --wheel-font-weight:800;
+    }
+    .wheel-page[data-font="noto-naskh"]{
+      --wheel-font:"Noto Naskh Arabic","Traditional Arabic","Noto Serif Arabic",serif;
+      --wheel-font-weight:700;
+    }
 
-    /* وضوح نصوص العجلة، خصوصًا العربية على Safari. */
+    /* وضوح النص مع السماح له بالالتفاف؛ القياس النهائي يتم فعليًا بالجافاسكربت. */
     .wheel-label,
     .wheel-label-content,
     .wheel-text{
@@ -1278,22 +1290,20 @@
     .wheel-label-content{will-change:auto}
     .wheel-text{
       display:block;
-      max-height:calc(var(--line-clamp,4) * 1.18em);
-      line-height:1.18;
+      max-width:100%;
+      max-height:100%;
+      line-height:1.08;
       font-family:var(--wheel-font);
-      font-weight:900;
+      font-weight:var(--wheel-font-weight,800);
       letter-spacing:0;
       text-shadow:0 2px 3px rgba(0,0,0,.34);
-      word-break:normal;
+      white-space:normal;
+      word-break:keep-all;
       overflow-wrap:normal;
+      overflow:hidden;
     }
     .wheel-label.dark .wheel-text{
       text-shadow:0 1px 0 rgba(255,255,255,.82),0 2px 3px rgba(255,255,255,.35);
-    }
-    .wheel-text.text-short{
-      white-space:nowrap;
-      overflow:visible;
-      max-height:none;
     }
 
     /* بداية ونهاية مطابقـتان لصفحة الترتيب في الحجم والحركة. */
@@ -1417,7 +1427,7 @@
 </style>
 </head>
 <body>
-  <main class="wheel-page intro-playing" id="wheelPage" data-font="default">
+  <main class="wheel-page intro-playing" id="wheelPage" data-font="cairo">
     <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
     <img class="wheel-logo" src="logo.PNG" alt="" aria-hidden="true" />
 
@@ -2128,11 +2138,11 @@
     };
 
     /* تعريف خيارات الخط قبل قراءة بيانات النشاط لتجنب توقف JavaScript عند التشغيل. */
-    const WHEEL_FONT_IDS = new Set(["default","sans-serif","poppins","serif","comic","primary","arial","traditional"]);
+    const WHEEL_FONT_IDS = new Set(["cairo","tajawal","noto-kufi","noto-naskh"]);
 
     function normalizeWheelFont(value){
       const font = String(value || "").trim().toLowerCase();
-      return WHEEL_FONT_IDS.has(font) ? font : "default";
+      return WHEEL_FONT_IDS.has(font) ? font : "cairo";
     }
 
     function normalizeWheelHex(value,fallback="#111111"){
@@ -2181,6 +2191,7 @@
       if (!wheelPage) return;
       wheelPage.dataset.font = normalizeWheelFont(payload?.fontFamily);
       wheelPage.style.setProperty("--wheel-arrow-color",normalizeWheelHex(payload?.arrowColor,"#111111"));
+      void refitAfterWheelFontLoad();
     }
 
     function applyWheelTheme(theme){
@@ -2324,7 +2335,7 @@
         entries: [],
         centerQuestionEnabled:false,
         centerQuestion:"",
-        fontFamily:"default",
+        fontFamily:"cairo",
         arrowColor:"#111111",
         soundEnabled:true,
         sounds:{ enabled:true, mode:"files" }
@@ -3193,7 +3204,7 @@
       function createTextElement(entry, index){
         const textEl = document.createElement("div");
         const value = textForEntry(entry,index);
-        textEl.className = `wheel-text ${String(value).trim().length <= 18 ? "text-short" : "text-long"}`;
+        textEl.className = "wheel-text";
         const isArabic = /[\u0600-\u06FF]/.test(value);
         textEl.setAttribute("dir",isArabic ? "rtl" : "auto");
         if (isArabic) textEl.setAttribute("lang","ar");
@@ -3512,6 +3523,7 @@
       applyLayoutGeometry(geometry);
       configureZoom(geometry);
       positionLabels();
+      scheduleWheelTextFit();
     }
 
     function positionLabels(){
@@ -3574,6 +3586,119 @@
       });
 
       updateLabelDirections();
+    }
+
+    const WHEEL_FONT_LOAD_CONFIG = {
+      "cairo": { family:"Cairo", weight:800 },
+      "tajawal": { family:"Tajawal", weight:800 },
+      "noto-kufi": { family:"Noto Kufi Arabic", weight:800 },
+      "noto-naskh": { family:"Noto Naskh Arabic", weight:700 }
+    };
+
+    let wheelTextFitFrame = 0;
+    let wheelFontFitToken = 0;
+
+    function scheduleWheelTextFit(){
+      if (wheelTextFitFrame) cancelAnimationFrame(wheelTextFitFrame);
+      wheelTextFitFrame = requestAnimationFrame(()=>{
+        wheelTextFitFrame = requestAnimationFrame(()=>{
+          wheelTextFitFrame = 0;
+          fitAllWheelText();
+        });
+      });
+    }
+
+    function wheelTextFits(textEl, boxWidth, boxHeight, maxLines, fontSize){
+      textEl.style.fontSize = `${fontSize}px`;
+      const lineHeight = fontSize * 1.08;
+      const measuredLines = Math.max(1, Math.ceil((textEl.scrollHeight - 0.5) / Math.max(1, lineHeight)));
+      return textEl.scrollWidth <= boxWidth + 0.75 &&
+             textEl.scrollHeight <= boxHeight + 0.75 &&
+             measuredLines <= maxLines;
+    }
+
+    function fitWheelTextElement(textEl){
+      if (!textEl) return;
+      const value = String(textEl.textContent || "").trim();
+      if (!value) return;
+
+      const label = textEl.closest(".wheel-label");
+      const content = textEl.closest(".wheel-label-content");
+      if (!label || !content) return;
+
+      const isMixed = label.classList.contains("mixed-text-label");
+      const contentStyle = getComputedStyle(content);
+      const labelStyle = getComputedStyle(label);
+      const horizontalPadding = (parseFloat(contentStyle.paddingLeft) || 0) + (parseFloat(contentStyle.paddingRight) || 0);
+      const verticalPadding = (parseFloat(contentStyle.paddingTop) || 0) + (parseFloat(contentStyle.paddingBottom) || 0);
+      const declaredTextMax = parseFloat(labelStyle.getPropertyValue("--text-max")) || 0;
+
+      const boxWidth = Math.max(10, Math.min(
+        Math.max(10, content.clientWidth - horizontalPadding - 4),
+        isMixed && declaredTextMax > 0 ? declaredTextMax : Number.POSITIVE_INFINITY
+      ));
+      const boxHeight = Math.max(10, content.clientHeight - verticalPadding - 4);
+      const declaredFont = parseFloat(labelStyle.getPropertyValue("--font-size")) || parseFloat(getComputedStyle(textEl).fontSize) || 18;
+      const maxLines = Math.max(1, parseInt(labelStyle.getPropertyValue("--line-clamp"),10) || 3);
+      const minFont = Math.max(6.5, Math.min(10, declaredFont * .45));
+      const hasSpaces = /\s/.test(value);
+
+      textEl.style.display = "block";
+      textEl.style.webkitLineClamp = "unset";
+      textEl.style.lineClamp = "unset";
+      textEl.style.lineHeight = "1.08";
+      textEl.style.overflow = "visible";
+      textEl.style.maxHeight = "none";
+      textEl.style.width = isMixed ? `${boxWidth}px` : "100%";
+      textEl.style.maxWidth = `${boxWidth}px`;
+      textEl.style.whiteSpace = hasSpaces ? "normal" : "nowrap";
+      textEl.style.wordBreak = hasSpaces ? "keep-all" : "normal";
+      textEl.style.overflowWrap = "normal";
+
+      let low = minFont;
+      let high = Math.max(minFont, declaredFont);
+      let best = minFont;
+
+      for (let step = 0; step < 14; step += 1) {
+        const mid = (low + high) / 2;
+        if (wheelTextFits(textEl, boxWidth, boxHeight, maxLines, mid)) {
+          best = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+
+      if (!wheelTextFits(textEl, boxWidth, boxHeight, maxLines, best)) {
+        textEl.style.whiteSpace = "normal";
+        textEl.style.wordBreak = "break-word";
+        textEl.style.overflowWrap = "anywhere";
+        best = minFont;
+      }
+
+      const safeSize = Math.max(minFont, best * .96);
+      textEl.style.fontSize = `${safeSize.toFixed(2)}px`;
+      textEl.style.maxHeight = `${boxHeight}px`;
+      textEl.style.overflow = "hidden";
+    }
+
+    function fitAllWheelText(){
+      labelLayer?.querySelectorAll(".wheel-text").forEach(fitWheelTextElement);
+    }
+
+    async function refitAfterWheelFontLoad(){
+      const token = ++wheelFontFitToken;
+      const fontId = normalizeWheelFont(payload?.fontFamily);
+      const config = WHEEL_FONT_LOAD_CONFIG[fontId] || WHEEL_FONT_LOAD_CONFIG.cairo;
+      try {
+        if (document.fonts?.load) {
+          await document.fonts.load(`${config.weight} 32px "${config.family}"`);
+          await document.fonts.ready;
+        }
+      } catch (_) {}
+      if (token !== wheelFontFitToken) return;
+      scheduleWheelTextFit();
+      requestAnimationFrame(fitCenterText);
     }
 
     function updateLabelDirections(){
@@ -4159,6 +4284,7 @@
     buildWheel();
     updateLayout();
     fitCenterText();
+    void refitAfterWheelFontLoad();
     collapseSafariBars();
     let wheelGameStarted = false;
 
