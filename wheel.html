@@ -1424,23 +1424,14 @@
       #endCelebration .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
     }
 
-
-    /* wheel-58: إظهار النصوص العربية كاملة بدون ظلال أو قص علوي/سفلي. */
-    .wheel-label.text-only,
-    .wheel-label.text-only .wheel-label-content,
-    .wheel-label.mixed-text-label,
-    .wheel-label.mixed-text-label .wheel-label-content{
-      overflow:visible !important;
-    }
-
+  
+    /* wheel-59: حجم نص طبيعي مع حماية حروف العربية من القص وإزالة أي ظل. */
     .wheel-text,
     .wheel-label.dark .wheel-text{
       text-shadow:none !important;
-      line-height:1.24 !important;
-      padding-block:.14em !important;
+      line-height:1.16 !important;
+      padding-block:.05em !important;
       padding-inline:2px !important;
-      overflow:visible !important;
-      max-height:none !important;
       box-sizing:border-box !important;
     }
 
@@ -1636,7 +1627,7 @@
         tick: "sounds/wheel-tick.mp3?v=63",
         select: "sounds/match-shuffle-end.mp3?v=1",
         resume: "sounds/match-card-flip.mp3?v=1",
-        remove: "sounds/wheel-remove.mp3?v=63",
+        remove: "sounds/wheel-section-delete.mp3?v=1",
         intro: "sounds/wheel-intro.mp3?v=63",
         win: "sounds/wheel-win.mp3?v=63",
         finish: "sounds/match-finish.mp3?v=1"
@@ -2932,7 +2923,7 @@
 
         lines = fit.lines;
         const fontSize = fit.fontSize;
-        const requiredTextHeight = fontSize * 1.24 * lines + size * (liveSmall ? 0.012 : liveMedium ? 0.010 : 0.008);
+        const requiredTextHeight = fontSize * 1.16 * lines + size * (liveSmall ? 0.012 : liveMedium ? 0.010 : 0.008);
         textLabelHeight = Math.max(textLabelHeight, requiredTextHeight);
 
         return {
@@ -3008,7 +2999,7 @@
 
         lines = fit.lines;
         const fontSize = fit.fontSize;
-        const requiredHeight = fontSize * 1.24 * lines + size * (liveSmall ? 0.014 : liveMedium ? 0.011 : 0.009);
+        const requiredHeight = fontSize * 1.16 * lines + size * (liveSmall ? 0.014 : liveMedium ? 0.011 : 0.009);
         labelHeight = Math.max(labelHeight, requiredHeight);
 
         return {
@@ -3637,7 +3628,7 @@
 
     function wheelTextFits(textEl, boxWidth, boxHeight, maxLines, fontSize){
       textEl.style.fontSize = `${fontSize}px`;
-      const lineHeight = fontSize * 1.24;
+      const lineHeight = fontSize * 1.16;
       const measuredLines = Math.max(1, Math.ceil((textEl.scrollHeight - 0.5) / Math.max(1, lineHeight)));
       return textEl.scrollWidth <= boxWidth + 0.75 &&
              textEl.scrollHeight <= boxHeight + 0.75 &&
@@ -3673,10 +3664,9 @@
       textEl.style.display = "block";
       textEl.style.webkitLineClamp = "unset";
       textEl.style.lineClamp = "unset";
-      textEl.style.lineHeight = "1.24";
+      textEl.style.lineHeight = "1.16";
       textEl.style.overflow = "visible";
       textEl.style.maxHeight = "none";
-      textEl.style.paddingBlock = `${Math.max(2, declaredFont * 0.14)}px`;
       textEl.style.width = isMixed ? `${boxWidth}px` : "100%";
       textEl.style.maxWidth = `${boxWidth}px`;
       textEl.style.whiteSpace = hasSpaces ? "normal" : "nowrap";
@@ -3704,10 +3694,10 @@
         best = minFont;
       }
 
-      const safeSize = Math.max(minFont, best * .92);
+      const safeSize = Math.max(minFont, best * .985);
       textEl.style.fontSize = `${safeSize.toFixed(2)}px`;
-      textEl.style.maxHeight = "none";
-      textEl.style.overflow = "visible";
+      textEl.style.maxHeight = `${boxHeight}px`;
+      textEl.style.overflow = "hidden";
     }
 
     function fitAllWheelText(){
@@ -4155,9 +4145,8 @@
       resumeWheelZoomOnly();
     });
 
-    document.getElementById("removeBtn").addEventListener("click", ()=>{
-      wheelAudio.unlock();
-      wheelAudio.playButton();
+    document.getElementById("removeBtn").addEventListener("click", async ()=>{
+      await wheelAudio.unlock();
       eliminateSelectedSection();
     });
 
