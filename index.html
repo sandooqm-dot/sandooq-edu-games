@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-wheel-final-polish-v49 -->
+<!-- version: index-open-box-settings-v50 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9548,6 +9548,56 @@
       scroll-margin-bottom:24px;
     }
 
+    /* open-box-v50: صورة المعاينة وخيارات الغلاف الكبيرة وإخفاء لون السهم. */
+    .template-cover.open-box-cover{
+      background:#fff url("open-box-classic.webp?v=1") center/cover no-repeat !important;
+    }
+
+    body[data-setup-template="open-box"] .wheel-setup .theme-art.classic{
+      background:#fff url("open-box-classic.webp?v=1") center/cover no-repeat !important;
+    }
+    body[data-setup-template="open-box"] .wheel-setup .theme-art.classic::before,
+    body[data-setup-template="open-box"] .wheel-setup .theme-art.classic::after{
+      display:none !important;
+      content:none !important;
+    }
+
+    body[data-setup-template="open-box"] .wheel-arrow-color-row{
+      display:none !important;
+    }
+
+    body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .setup-toggle-grid{
+      display:grid !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      width:100% !important;
+      gap:9px !important;
+    }
+
+    body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .choices-mode-btn{
+      width:100% !important;
+      min-width:0 !important;
+      min-height:58px !important;
+      padding:9px 10px !important;
+      border:2px solid var(--ink) !important;
+      border-radius:15px !important;
+    }
+
+    body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .choices-mode-btn strong{
+      font-size:clamp(15px,1.45vw,18px) !important;
+      line-height:1.15 !important;
+      white-space:normal !important;
+      text-align:center !important;
+    }
+
+    @media(max-width:760px){
+      body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .choices-mode-btn{
+        min-height:58px !important;
+      }
+      body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .choices-mode-btn strong{
+        font-size:clamp(14px,3.8vw,17px) !important;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -9624,7 +9674,7 @@
 </div>
 </button>
 <button class="template-card" data-template="open-box" type="button">
-<div aria-hidden="true" class="template-cover empty"></div>
+<div aria-hidden="true" class="template-cover open-box-cover"></div>
 <div class="template-content">
 <h3 class="template-title">افتح الصندوق</h3>
 <p class="template-desc">صناديق تكشف سؤالًا أو صورة.</p>
@@ -9744,6 +9794,8 @@
             <div aria-label="نوع محتوى الغلاف" class="choices-mode-grid setup-toggle-grid">
               <button class="choices-mode-btn active" data-cover-type="text" type="button"><strong>نص</strong></button>
               <button class="choices-mode-btn" data-cover-type="image" type="button"><strong>صورة</strong></button>
+              <button class="choices-mode-btn" data-cover-type="arabic-numbers" type="button"><strong>أرقام عربية</strong></button>
+              <button class="choices-mode-btn" data-cover-type="english-numbers" type="button"><strong>أرقام إنجليزية</strong></button>
             </div>
           </div>
         </div>
@@ -9778,7 +9830,7 @@
               <option value="noto-naskh">نوتو نسخ</option>
             </select>
           </div>
-          <div class="choices-advanced-row">
+          <div class="choices-advanced-row wheel-arrow-color-row">
             <div class="choices-advanced-label"><strong>لون السهم</strong></div>
             <div class="match-color-control">
               <button class="match-color-change" id="wheelArrowColorChangeBtn" type="button">تغيير</button>
@@ -10567,7 +10619,9 @@
 
   function normalizeOpenBoxCoverMode(value){
     const mode = String(value || "").trim().toLowerCase();
-    return ["disabled", "text", "image"].includes(mode) ? mode : "disabled";
+    return ["disabled", "text", "image", "arabic-numbers", "english-numbers"].includes(mode)
+      ? mode
+      : "disabled";
   }
 
   function cleanOpenBoxEntryForModes(entry, contentType = wheelContentType, coverMode = boxCoverMode){
@@ -10889,7 +10943,9 @@
       btn.classList.toggle(
         "active",
         btn.getAttribute("data-cover-type") === (
-          boxCoverMode === "image" ? "image" : "text"
+          ["image", "arabic-numbers", "english-numbers"].includes(boxCoverMode)
+            ? boxCoverMode
+            : "text"
         )
       );
     });
@@ -10981,6 +11037,7 @@
 
   function addCoverFields(box, entry, index){
     if (currentGameTemplate !== "open-box" || boxCoverMode === "disabled") return;
+    if (!["text", "image"].includes(boxCoverMode)) return;
 
     const group = document.createElement("div");
     group.className = "cover-entry-group";
@@ -11349,7 +11406,9 @@
   document.querySelectorAll("[data-template='open-box']").forEach((btn)=>{
     btn.addEventListener("click", ()=> {
       currentGameTemplate = "open-box";
-      if (boxCoverMode !== "image" && boxCoverMode !== "text") boxCoverMode = "disabled";
+      if (!["image", "text", "arabic-numbers", "english-numbers"].includes(boxCoverMode)) {
+        boxCoverMode = "disabled";
+      }
       applySetupMode();
       openScreen("wheelSetupScreen");
       renderWheelEntries();
@@ -11437,7 +11496,7 @@
       if (currentGameTemplate === "open-box") {
         syncWheelEntriesFromDom();
         boxCoverMode = enabled
-          ? normalizeOpenBoxCoverMode(boxCoverMode === "image" ? "image" : "text")
+          ? normalizeOpenBoxCoverMode(boxCoverMode === "disabled" ? "text" : boxCoverMode)
           : "disabled";
         cleanOpenBoxEntriesInPlace();
         applySetupMode();
@@ -11456,7 +11515,7 @@
     btn.addEventListener("click", ()=>{
       if (currentGameTemplate !== "open-box") return;
       syncWheelEntriesFromDom();
-      boxCoverMode = btn.getAttribute("data-cover-type") === "image" ? "image" : "text";
+      boxCoverMode = normalizeOpenBoxCoverMode(btn.getAttribute("data-cover-type") || "text");
       cleanOpenBoxEntriesInPlace();
       applySetupMode();
       renderWheelEntries();

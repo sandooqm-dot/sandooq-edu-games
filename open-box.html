@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v74-start-end -->
+  <!-- version: open-box-v75-cover-modes-wheel-finish -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1768,6 +1768,124 @@
       }
     }
 
+    /* open-box-v75: البداية والنهاية مطابقتان للعجلة في الحجم والحركة والتوقيت. */
+    .start-gate .celebration-card,
+    #endCelebration .finish-card{
+      width:min(390px,82vw) !important;
+      min-height:0 !important;
+      max-height:calc(100dvh - max(20px,var(--safe-top)) - max(20px,var(--safe-bottom))) !important;
+      padding:clamp(16px,2.8vw,24px) !important;
+      border-radius:clamp(20px,2.4vw,26px) !important;
+    }
+    .start-gate .celebration-icon,
+    #endCelebration .finish-trophy{
+      width:clamp(76px,12vw,106px) !important;
+      height:clamp(76px,12vw,106px) !important;
+      margin-bottom:clamp(6px,1.2vw,10px) !important;
+    }
+    .start-gate .celebration-title,
+    #endCelebration .finish-title{
+      font-size:clamp(30px,4.8vw,48px) !important;
+      line-height:1.02 !important;
+    }
+    .start-gate .celebration-subtitle,
+    #endCelebration .finish-subtitle{
+      margin-top:clamp(6px,1.1vw,10px) !important;
+      font-size:clamp(15px,2.1vw,22px) !important;
+      line-height:1.25 !important;
+    }
+    .start-gate .celebration-actions,
+    #endCelebration .finish-actions{
+      margin-top:clamp(14px,2.2vw,20px) !important;
+      gap:clamp(8px,1.2vw,12px) !important;
+      flex-wrap:nowrap !important;
+    }
+    .start-gate .activity-start-btn{
+      min-width:clamp(136px,20vw,184px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(16px,2.1vw,21px) !important;
+      padding-inline:clamp(16px,2.4vw,24px) !important;
+    }
+    #endCelebration .finish-actions button{
+      min-width:clamp(104px,15vw,145px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(15px,2vw,20px) !important;
+      padding-inline:clamp(12px,1.8vw,20px) !important;
+    }
+
+    .start-gate .celebration-card{animation:startCardPop .62s cubic-bezier(.2,1.12,.22,1) both !important}
+    .start-gate .celebration-card::before{animation:startGlow 2.4s ease-in-out infinite !important}
+    .start-gate .celebration-icon{animation:startIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s !important}
+    .start-gate .celebration-spark{animation:startSpark 1.8s ease-in-out infinite !important}
+
+    #endCelebration{
+      background:rgba(17,17,17,.14);
+      z-index:220;
+    }
+    #endCelebration .finish-card{
+      animation:none;
+      opacity:0;
+      transform:translate3d(0,18px,0) scale(.965);
+      transform-origin:center;
+    }
+    .game-page.ended #endCelebration .finish-card{animation:finishPanelIn .52s cubic-bezier(.2,.9,.2,1) both}
+    #endCelebration .finish-trophy{
+      animation:none !important;
+      opacity:0;
+      transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);
+      transform-origin:center;
+      filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.12));
+      will-change:transform,opacity,filter;
+    }
+    #endCelebration.finish-sequence-start .finish-trophy{animation:finishTrophyArrival 2.52s cubic-bezier(.16,.82,.18,1) both !important}
+    #endCelebration .finish-title,
+    #endCelebration .finish-subtitle{visibility:hidden;opacity:0;will-change:transform,opacity,filter}
+    #endCelebration.finish-message-in .finish-title{visibility:visible;animation:finishTitleBurst .68s cubic-bezier(.16,1.22,.2,1) both}
+    #endCelebration.finish-message-in .finish-subtitle{visibility:visible;animation:finishSubtitleBurst .62s cubic-bezier(.18,1.08,.2,1) both .055s}
+    #endCelebration .finish-actions{
+      visibility:hidden;
+      opacity:0;
+      transform:translate3d(0,28px,0) scale(.94);
+      pointer-events:none;
+      will-change:transform,opacity;
+    }
+    #endCelebration.finish-actions-in .finish-actions{visibility:visible;pointer-events:auto;animation:finishActionsRise .62s cubic-bezier(.18,1.08,.2,1) both}
+    #endCelebration .finish-confetti{opacity:0;transition:none}
+    #endCelebration .finish-confetti span{animation:none;opacity:0}
+    #endCelebration.finish-confetti-on .finish-confetti{opacity:1}
+    #endCelebration.finish-confetti-on .finish-confetti span{
+      animation:finishConfettiBurst 2.45s cubic-bezier(.18,.72,.22,1) 1 both;
+      animation-delay:0s !important;
+    }
+    #endCelebration.finish-confetti-on .finish-confetti span:nth-child(3n+2){animation-delay:.055s !important}
+    #endCelebration.finish-confetti-on .finish-confetti span:nth-child(3n){animation-delay:.11s !important}
+
+    @keyframes startCardPop{0%{opacity:0;transform:scale(.82) translateY(20px)}70%{opacity:1;transform:scale(1.035) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes startIconPop{0%{opacity:0;transform:scale(.5) rotate(-12deg)}72%{opacity:1;transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+    @keyframes startGlow{0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+    @keyframes startSpark{0%,100%{opacity:.25;transform:scale(.72)}45%{opacity:1;transform:scale(1.22)}}
+    @keyframes finishPanelIn{0%{opacity:0;transform:translate3d(0,18px,0) scale(.965)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishTrophyArrival{0%{opacity:0;transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.10))}18%{opacity:1;filter:blur(1.5px) drop-shadow(0 10px 18px rgba(0,0,0,.16))}62%{opacity:1;transform:translate3d(-10%,7%,0) scale(1.13) rotate(-7deg);filter:blur(0) drop-shadow(0 10px 18px rgba(0,0,0,.17))}77%{transform:translate3d(5%,-4%,0) scale(.965) rotate(3deg)}89%{transform:translate3d(-2%,2%,0) scale(1.025) rotate(-1.2deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0) drop-shadow(0 8px 14px rgba(0,0,0,.15))}}
+    @keyframes finishTitleBurst{0%{opacity:0;transform:translate3d(0,24px,0) scale(.22) rotate(-3deg);filter:blur(8px)}55%{opacity:1;transform:translate3d(0,-3px,0) scale(1.16) rotate(1deg);filter:blur(0)}78%{transform:translate3d(0,1px,0) scale(.97) rotate(-.35deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0)}}
+    @keyframes finishSubtitleBurst{0%{opacity:0;transform:translate3d(0,18px,0) scale(.72);filter:blur(5px)}62%{opacity:1;transform:translate3d(0,-2px,0) scale(1.055);filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+    @keyframes finishActionsRise{0%{opacity:0;transform:translate3d(0,28px,0) scale(.94)}70%{opacity:1;transform:translate3d(0,-3px,0) scale(1.02)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishConfettiBurst{0%{opacity:0;transform:translate3d(0,-9vh,0) rotate(var(--confetti-rotate,0deg)) scale(.55)}8%{opacity:.96}72%{opacity:.92}100%{opacity:0;transform:translate3d(var(--confetti-drift,0px),108vh,0) rotate(calc(var(--confetti-rotate,0deg) + 620deg)) scale(1)}}
+
+    @media(max-height:520px) and (orientation:landscape){
+      .start-gate .celebration-card,
+      #endCelebration .finish-card{width:min(360px,78vw) !important;padding:12px 18px !important;border-radius:20px !important}
+      .start-gate .celebration-icon,
+      #endCelebration .finish-trophy{width:72px !important;height:72px !important;margin-bottom:5px !important}
+      .start-gate .celebration-title,
+      #endCelebration .finish-title{font-size:34px !important}
+      .start-gate .celebration-subtitle,
+      #endCelebration .finish-subtitle{margin-top:5px !important;font-size:17px !important}
+      .start-gate .celebration-actions,
+      #endCelebration .finish-actions{margin-top:10px !important}
+      .start-gate .activity-start-btn,
+      #endCelebration .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
+    }
+
 </style>
 </head>
 <body>
@@ -1812,65 +1930,69 @@
     </section>
 
     <section class="activity-overlay end-celebration" id="endCelebration" aria-hidden="true">
-      <div class="celebration-confetti" aria-hidden="true">
-        <span style="left:4%; --confetti-color:#1688d3; --confetti-duration:3.60s; --confetti-delay:0.00s; --confetti-drift:-54px; --confetti-rotate:12deg"></span>
-    <span style="left:11%; --confetti-color:#f47a45; --confetti-duration:3.93s; --confetti-delay:-0.23s; --confetti-drift:-36px; --confetti-rotate:43deg"></span>
-    <span style="left:18%; --confetti-color:#e91e63; --confetti-duration:4.26s; --confetti-delay:-0.46s; --confetti-drift:-18px; --confetti-rotate:74deg"></span>
-    <span style="left:25%; --confetti-color:#43a047; --confetti-duration:4.59s; --confetti-delay:-0.69s; --confetti-drift:0px; --confetti-rotate:105deg"></span>
-    <span style="left:32%; --confetti-color:#8e24aa; --confetti-duration:4.92s; --confetti-delay:-0.92s; --confetti-drift:18px; --confetti-rotate:136deg"></span>
-    <span style="left:39%; --confetti-color:#ffd166; --confetti-duration:5.25s; --confetti-delay:-1.15s; --confetti-drift:36px; --confetti-rotate:167deg"></span>
-    <span style="left:46%; --confetti-color:#06b6d4; --confetti-duration:3.92s; --confetti-delay:-1.38s; --confetti-drift:54px; --confetti-rotate:18deg"></span>
-    <span style="left:53%; --confetti-color:#efd553; --confetti-duration:4.25s; --confetti-delay:-1.61s; --confetti-drift:-54px; --confetti-rotate:49deg"></span>
-    <span style="left:60%; --confetti-color:#1688d3; --confetti-duration:4.58s; --confetti-delay:-1.84s; --confetti-drift:-36px; --confetti-rotate:80deg"></span>
-    <span style="left:67%; --confetti-color:#f47a45; --confetti-duration:4.91s; --confetti-delay:-2.07s; --confetti-drift:-18px; --confetti-rotate:111deg"></span>
-    <span style="left:74%; --confetti-color:#e91e63; --confetti-duration:5.24s; --confetti-delay:-2.30s; --confetti-drift:0px; --confetti-rotate:142deg"></span>
-    <span style="left:81%; --confetti-color:#43a047; --confetti-duration:3.91s; --confetti-delay:-2.53s; --confetti-drift:18px; --confetti-rotate:173deg"></span>
-    <span style="left:88%; --confetti-color:#8e24aa; --confetti-duration:4.24s; --confetti-delay:-2.76s; --confetti-drift:36px; --confetti-rotate:24deg"></span>
-    <span style="left:95%; --confetti-color:#ffd166; --confetti-duration:4.57s; --confetti-delay:-2.99s; --confetti-drift:54px; --confetti-rotate:55deg"></span>
-    <span style="left:9%; --confetti-color:#06b6d4; --confetti-duration:4.90s; --confetti-delay:-0.12s; --confetti-drift:-54px; --confetti-rotate:86deg"></span>
-    <span style="left:16%; --confetti-color:#efd553; --confetti-duration:5.23s; --confetti-delay:-0.35s; --confetti-drift:-36px; --confetti-rotate:117deg"></span>
-    <span style="left:23%; --confetti-color:#1688d3; --confetti-duration:3.90s; --confetti-delay:-0.58s; --confetti-drift:-18px; --confetti-rotate:148deg"></span>
-    <span style="left:30%; --confetti-color:#f47a45; --confetti-duration:4.23s; --confetti-delay:-0.81s; --confetti-drift:0px; --confetti-rotate:179deg"></span>
-    <span style="left:37%; --confetti-color:#e91e63; --confetti-duration:4.56s; --confetti-delay:-1.04s; --confetti-drift:18px; --confetti-rotate:30deg"></span>
-    <span style="left:44%; --confetti-color:#43a047; --confetti-duration:4.89s; --confetti-delay:-1.27s; --confetti-drift:36px; --confetti-rotate:61deg"></span>
-    <span style="left:51%; --confetti-color:#8e24aa; --confetti-duration:5.22s; --confetti-delay:-1.50s; --confetti-drift:54px; --confetti-rotate:92deg"></span>
-    <span style="left:58%; --confetti-color:#ffd166; --confetti-duration:3.89s; --confetti-delay:-1.73s; --confetti-drift:-54px; --confetti-rotate:123deg"></span>
-    <span style="left:65%; --confetti-color:#06b6d4; --confetti-duration:4.22s; --confetti-delay:-1.96s; --confetti-drift:-36px; --confetti-rotate:154deg"></span>
-    <span style="left:72%; --confetti-color:#efd553; --confetti-duration:4.55s; --confetti-delay:-2.19s; --confetti-drift:-18px; --confetti-rotate:5deg"></span>
-    <span style="left:79%; --confetti-color:#1688d3; --confetti-duration:4.88s; --confetti-delay:-2.42s; --confetti-drift:0px; --confetti-rotate:36deg"></span>
-    <span style="left:86%; --confetti-color:#f47a45; --confetti-duration:5.21s; --confetti-delay:-2.65s; --confetti-drift:18px; --confetti-rotate:67deg"></span>
-    <span style="left:93%; --confetti-color:#e91e63; --confetti-duration:3.88s; --confetti-delay:-2.88s; --confetti-drift:36px; --confetti-rotate:98deg"></span>
-    <span style="left:7%; --confetti-color:#43a047; --confetti-duration:4.21s; --confetti-delay:-0.01s; --confetti-drift:54px; --confetti-rotate:129deg"></span>
+      <div class="celebration-confetti finish-confetti" aria-hidden="true">
+        <span style="left:9%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-0.23s; --confetti-drift:-36px; --confetti-rotate:31deg"></span>
+        <span style="left:16%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-0.46s; --confetti-drift:-18px; --confetti-rotate:62deg"></span>
+        <span style="left:23%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-0.69s; --confetti-drift:0px; --confetti-rotate:93deg"></span>
+        <span style="left:30%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.92s; --confetti-drift:18px; --confetti-rotate:124deg"></span>
+        <span style="left:37%; --confetti-color:#8e24aa; --confetti-duration:5.25s; --confetti-delay:-1.15s; --confetti-drift:36px; --confetti-rotate:155deg"></span>
+        <span style="left:44%; --confetti-color:#ffd166; --confetti-duration:3.60s; --confetti-delay:-1.38s; --confetti-drift:54px; --confetti-rotate:6deg"></span>
+        <span style="left:51%; --confetti-color:#06b6d4; --confetti-duration:3.93s; --confetti-delay:-1.61s; --confetti-drift:-54px; --confetti-rotate:37deg"></span>
+        <span style="left:58%; --confetti-color:#efd553; --confetti-duration:4.26s; --confetti-delay:-1.84s; --confetti-drift:-36px; --confetti-rotate:68deg"></span>
+        <span style="left:65%; --confetti-color:#1688d3; --confetti-duration:4.59s; --confetti-delay:-2.07s; --confetti-drift:-18px; --confetti-rotate:99deg"></span>
+        <span style="left:72%; --confetti-color:#f47a45; --confetti-duration:4.92s; --confetti-delay:-2.30s; --confetti-drift:0px; --confetti-rotate:130deg"></span>
+        <span style="left:79%; --confetti-color:#e91e63; --confetti-duration:5.25s; --confetti-delay:-2.53s; --confetti-drift:18px; --confetti-rotate:161deg"></span>
+        <span style="left:86%; --confetti-color:#43a047; --confetti-duration:3.60s; --confetti-delay:-2.76s; --confetti-drift:36px; --confetti-rotate:12deg"></span>
+        <span style="left:93%; --confetti-color:#8e24aa; --confetti-duration:3.93s; --confetti-delay:-2.99s; --confetti-drift:54px; --confetti-rotate:43deg"></span>
+        <span style="left:4%; --confetti-color:#ffd166; --confetti-duration:4.26s; --confetti-delay:-0.02s; --confetti-drift:-54px; --confetti-rotate:74deg"></span>
+        <span style="left:11%; --confetti-color:#06b6d4; --confetti-duration:4.59s; --confetti-delay:-0.25s; --confetti-drift:-36px; --confetti-rotate:105deg"></span>
+        <span style="left:18%; --confetti-color:#efd553; --confetti-duration:4.92s; --confetti-delay:-0.48s; --confetti-drift:-18px; --confetti-rotate:136deg"></span>
+        <span style="left:25%; --confetti-color:#1688d3; --confetti-duration:5.25s; --confetti-delay:-0.71s; --confetti-drift:0px; --confetti-rotate:167deg"></span>
+        <span style="left:32%; --confetti-color:#f47a45; --confetti-duration:3.60s; --confetti-delay:-0.94s; --confetti-drift:18px; --confetti-rotate:18deg"></span>
+        <span style="left:39%; --confetti-color:#e91e63; --confetti-duration:3.93s; --confetti-delay:-1.17s; --confetti-drift:36px; --confetti-rotate:49deg"></span>
+        <span style="left:46%; --confetti-color:#43a047; --confetti-duration:4.26s; --confetti-delay:-1.40s; --confetti-drift:54px; --confetti-rotate:80deg"></span>
+        <span style="left:53%; --confetti-color:#8e24aa; --confetti-duration:4.59s; --confetti-delay:-1.63s; --confetti-drift:-54px; --confetti-rotate:111deg"></span>
+        <span style="left:60%; --confetti-color:#ffd166; --confetti-duration:4.92s; --confetti-delay:-1.86s; --confetti-drift:-36px; --confetti-rotate:142deg"></span>
+        <span style="left:67%; --confetti-color:#06b6d4; --confetti-duration:5.25s; --confetti-delay:-2.09s; --confetti-drift:-18px; --confetti-rotate:173deg"></span>
+        <span style="left:74%; --confetti-color:#efd553; --confetti-duration:3.60s; --confetti-delay:-2.32s; --confetti-drift:0px; --confetti-rotate:24deg"></span>
+        <span style="left:81%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-2.55s; --confetti-drift:18px; --confetti-rotate:55deg"></span>
+        <span style="left:88%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-2.78s; --confetti-drift:36px; --confetti-rotate:86deg"></span>
+        <span style="left:95%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-3.01s; --confetti-drift:54px; --confetti-rotate:117deg"></span>
+        <span style="left:6%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.04s; --confetti-drift:-54px; --confetti-rotate:148deg"></span>
       </div>
-      <div class="celebration-card" role="status" aria-live="polite">
+
+      <div class="celebration-card finish-card" role="status" aria-live="polite">
         <span class="celebration-spark spark-one" aria-hidden="true"></span>
         <span class="celebration-spark spark-two" aria-hidden="true"></span>
         <span class="celebration-spark spark-three" aria-hidden="true"></span>
         <span class="celebration-spark spark-four" aria-hidden="true"></span>
-        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
-      <defs>
-        <linearGradient id="finishGold" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stop-color="#fff08a"/>
-          <stop offset="45%" stop-color="#efd553"/>
-          <stop offset="100%" stop-color="#f4a51f"/>
-        </linearGradient>
-        <linearGradient id="finishBlue" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stop-color="#24a6ef"/>
-          <stop offset="100%" stop-color="#116eb5"/>
-        </linearGradient>
-      </defs>
-      <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.72)" stroke="rgba(255,255,255,.90)" stroke-width="5"/>
-      <path d="M38 26h44v13c0 22-8 35-22 38C46 74 38 61 38 39V26z" fill="url(#finishGold)" stroke="#111" stroke-opacity=".16" stroke-width="2"/>
-      <path d="M38 36H23c1 17 9 28 22 30" fill="none" stroke="url(#finishGold)" stroke-width="8" stroke-linecap="round"/>
-      <path d="M82 36h15c-1 17-9 28-22 30" fill="none" stroke="url(#finishGold)" stroke-width="8" stroke-linecap="round"/>
-      <path d="M55 76h10v13H55z" fill="#e7a51d"/>
-      <path d="M42 89h36v10H42z" fill="url(#finishBlue)"/>
-      <path d="M36 99h48v8H36z" fill="#102b57" opacity=".92"/>
-      <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
-    </svg>
-        <h1 class="celebration-title">أحسنتم!</h1>
-        <p class="celebration-subtitle">انتهى النشاط بنجاح</p>
-        <div class="celebration-actions">
+
+        <svg class="celebration-icon finish-trophy" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="cupGold" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#fff08a"/>
+              <stop offset="45%" stop-color="#efd553"/>
+              <stop offset="100%" stop-color="#f4a51f"/>
+            </linearGradient>
+            <linearGradient id="cupBlue" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#24a6ef"/>
+              <stop offset="100%" stop-color="#116eb5"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.72)" stroke="rgba(255,255,255,.90)" stroke-width="5"/>
+          <path d="M38 26h44v13c0 22-8 35-22 38C46 74 38 61 38 39V26z" fill="url(#cupGold)" stroke="#111" stroke-opacity=".16" stroke-width="2"/>
+          <path d="M38 36H23c1 17 9 28 22 30" fill="none" stroke="url(#cupGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M82 36h15c-1 17-9 28-22 30" fill="none" stroke="url(#cupGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M55 76h10v13H55z" fill="#e7a51d"/>
+          <path d="M42 89h36v10H42z" fill="url(#cupBlue)" rx="5"/>
+          <path d="M36 99h48v8H36z" fill="#102b57" opacity=".92"/>
+          <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
+        </svg>
+
+        <h1 class="celebration-title finish-title">أحسنتم!</h1>
+        <p class="celebration-subtitle finish-subtitle">انتهى النشاط بنجاح</p>
+
+        <div class="celebration-actions finish-actions">
           <button class="restart-btn" type="button" id="endRestartBtn">إعادة</button>
           <button class="home-btn" type="button" id="endHomeBtn">الصفحة الرئيسية</button>
         </div>
@@ -1928,7 +2050,8 @@
       const SOUND_FILES = {
         open: "sounds/open-box-open.mp3?v=1",
         go: "sounds/open-box-go.mp3?v=2",
-        return: "sounds/open-box-return.mp3?v=2"
+        return: "sounds/open-box-return.mp3?v=2",
+        finish: "sounds/match-finish.mp3?v=1"
       };
 
       const VOLUMES = {
@@ -2030,14 +2153,47 @@
         if (!enabled) stopAll();
       }
 
+      function stopNamed(name){
+        const audio = cache[name];
+        if (!audio) return;
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (_) {}
+      }
+
+      function ready(name){
+        const audio = getAudio(name);
+        if (!audio || audio.readyState >= 2) return Promise.resolve();
+        return new Promise((resolve)=>{
+          let done = false;
+          const finish = ()=>{
+            if (done) return;
+            done = true;
+            audio.removeEventListener("loadeddata",finish);
+            audio.removeEventListener("canplaythrough",finish);
+            audio.removeEventListener("error",finish);
+            resolve();
+          };
+          audio.addEventListener("loadeddata",finish,{once:true});
+          audio.addEventListener("canplaythrough",finish,{once:true});
+          audio.addEventListener("error",finish,{once:true});
+          try { audio.load(); } catch (_) {}
+          window.setTimeout(finish,900);
+        });
+      }
+
       return {
         unlock,
         preload,
         setEnabled,
         stopAll,
+        stopNamed,
+        ready,
         playOpen: ()=> playNamed("open"),
         playGo: ()=> playNamed("go"),
-        playReturn: ()=> playNamed("return")
+        playReturn: ()=> playNamed("return"),
+        playFinish: ()=> playNamed("finish")
       };
     })();
 
@@ -2191,6 +2347,8 @@
 
     let currentContentType = "text";
     let currentCoverMode = "disabled";
+    let finishSequenceToken = 0;
+    let finishSequenceTimers = [];
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
     openBoxAudio.setEnabled(boxSoundEnabled);
@@ -2505,7 +2663,9 @@
         (!Array.isArray(payload) && payload.coverMode) || ""
       ).trim().toLowerCase();
 
-      if (["disabled", "text", "image"].includes(explicit)) return explicit;
+      if (["disabled", "text", "image", "arabic-numbers", "english-numbers"].includes(explicit)) {
+        return explicit;
+      }
 
       const hasCoverImage = source.some((entry)=>
         Boolean(entry?.coverImageData || entry?.coverImage || entry?.coverImageName)
@@ -3091,7 +3251,10 @@
 
       const number = document.createElement("span");
       number.className = "panel-number";
-      number.textContent = String(index + 1);
+      const value = String(index + 1);
+      number.textContent = currentCoverMode === "arabic-numbers"
+        ? value.replace(/[0-9]/g,(digit)=>"٠١٢٣٤٥٦٧٨٩"[Number(digit)])
+        : value;
       return number;
     }
 
@@ -3874,22 +4037,62 @@
     }
 
 
-    function showEndCelebration(){
-      page.classList.add("activity-ended");
+    function clearFinishSequenceTimers(){
+      finishSequenceTimers.forEach((timer)=>clearTimeout(timer));
+      finishSequenceTimers = [];
+    }
+
+    function resetFinishSequenceClasses(){
+      endCelebration?.classList.remove(
+        "finish-sequence-start",
+        "finish-message-in",
+        "finish-actions-in",
+        "finish-confetti-on"
+      );
+    }
+
+    function queueFinishStep(token, delay, classNames){
+      const timer = window.setTimeout(()=>{
+        if (token !== finishSequenceToken) return;
+        classNames.forEach((className)=>endCelebration?.classList.add(className));
+      },delay);
+      finishSequenceTimers.push(timer);
+    }
+
+    async function showEndCelebration(){
+      const token = ++finishSequenceToken;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
+      page.classList.add("activity-ended","ended");
       endCelebration?.classList.add("is-visible");
       endCelebration?.setAttribute("aria-hidden","false");
       boxInteractionLocked = true;
+      await openBoxAudio.ready("finish");
+      if (token !== finishSequenceToken) return;
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      if (token !== finishSequenceToken) return;
+      endCelebration?.classList.add("finish-sequence-start");
+      openBoxAudio.playFinish();
+      queueFinishStep(token,2680,["finish-message-in","finish-confetti-on"]);
+      queueFinishStep(token,3180,["finish-actions-in"]);
       collapseSafariBars({ refresh:false });
     }
 
     function hideEndCelebration(){
-      page.classList.remove("activity-ended");
+      finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
+      openBoxAudio.stopNamed("finish");
+      page.classList.remove("activity-ended","ended");
       endCelebration?.classList.remove("is-visible");
       endCelebration?.setAttribute("aria-hidden","true");
       boxInteractionLocked = false;
     }
 
     function goHomePage(){
+      finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      openBoxAudio.stopNamed("finish");
       themeIntroAudio.stop();
       try {
         window.location.assign(new URL("index.html",window.location.href).href);
@@ -4254,9 +4457,20 @@
 
       startGate?.classList.add("is-visible");
       startGate?.setAttribute("aria-hidden","false");
+      finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
+      page.classList.remove("activity-ended","ended");
       endCelebration?.classList.remove("is-visible");
       endCelebration?.setAttribute("aria-hidden","true");
+      void openBoxAudio.ready("finish");
     }
+
+    window.addEventListener("pagehide",()=>{
+      finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      openBoxAudio.stopNamed("finish");
+    },{passive:true});
 
     initializeOpenBoxGame();
   </script>
