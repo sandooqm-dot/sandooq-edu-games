@@ -1,10 +1,9 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: wheel-start-gate-v63 -->
-  <meta charset="utf-8" />
+<meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>العجلة الدوارة - wheel-audio-files-v61</title>
+  <title>العجلة الدوارة - صندوق الألعاب التعليمية</title>
   <style>
     :root{
       --safe-top: env(safe-area-inset-top, 0px);
@@ -22,12 +21,14 @@
       --arrow-h:80px;
       --arrow-focus-scale:1;
       --arrow-focus-x:0px;
+      --wheel-arrow-color:#111111;
+      --wheel-font:Tahoma,Arial,"Segoe UI",sans-serif;
     }
 
     *{
       box-sizing:border-box;
       -webkit-tap-highlight-color:transparent;
-      font-family:Tahoma, Arial, "Segoe UI", sans-serif;
+      font-family:var(--wheel-font);
     }
 
     html,body{
@@ -253,7 +254,7 @@
       transform-origin:right center;
       width:var(--arrow-w);
       height:var(--arrow-h);
-      background:#111;
+      background:var(--wheel-arrow-color,#111);
       clip-path:polygon(0 37%, 58% 37%, 58% 13%, 100% 50%, 58% 87%, 58% 63%, 0 63%);
       filter:drop-shadow(0 1px 0 rgba(0,0,0,.22));
       z-index:30;
@@ -1253,10 +1254,170 @@
       }
     }
 
+
+
+    /* الخطوط الإضافية مع إبقاء الخط الحالي افتراضيًا. */
+    .wheel-page[data-font="default"]{--wheel-font:Tahoma,Arial,"Segoe UI",sans-serif}
+    .wheel-page[data-font="sans-serif"]{--wheel-font:Arial,Helvetica,Tahoma,sans-serif}
+    .wheel-page[data-font="poppins"]{--wheel-font:"Poppins","Arial Rounded MT Bold",Arial,Tahoma,sans-serif}
+    .wheel-page[data-font="serif"]{--wheel-font:Georgia,"Times New Roman","Traditional Arabic",serif}
+    .wheel-page[data-font="comic"]{--wheel-font:"Comic Sans MS","Comic Sans","Arial Rounded MT Bold",Tahoma,cursive}
+    .wheel-page[data-font="primary"]{--wheel-font:"Arial Rounded MT Bold","Trebuchet MS",Tahoma,Arial,sans-serif}
+    .wheel-page[data-font="arial"]{--wheel-font:Arial,Tahoma,sans-serif}
+    .wheel-page[data-font="traditional"]{--wheel-font:"Traditional Arabic","Simplified Arabic",Tahoma,serif}
+
+    /* وضوح نصوص العجلة، خصوصًا العربية على Safari. */
+    .wheel-label,
+    .wheel-label-content,
+    .wheel-text{
+      -webkit-font-smoothing:antialiased;
+      text-rendering:geometricPrecision;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+    .wheel-label-content{will-change:auto}
+    .wheel-text{
+      display:block;
+      max-height:calc(var(--line-clamp,4) * 1.18em);
+      line-height:1.18;
+      font-family:var(--wheel-font);
+      font-weight:900;
+      letter-spacing:0;
+      text-shadow:0 2px 3px rgba(0,0,0,.34);
+      word-break:normal;
+      overflow-wrap:normal;
+    }
+    .wheel-label.dark .wheel-text{
+      text-shadow:0 1px 0 rgba(255,255,255,.82),0 2px 3px rgba(255,255,255,.35);
+    }
+    .wheel-text.text-short{
+      white-space:nowrap;
+      overflow:visible;
+      max-height:none;
+    }
+
+    /* بداية ونهاية مطابقـتان لصفحة الترتيب في الحجم والحركة. */
+    .start-gate .celebration-card,
+    #endCelebration .finish-card{
+      width:min(390px,82vw) !important;
+      min-height:0 !important;
+      max-height:calc(100dvh - max(20px,var(--safe-top)) - max(20px,var(--safe-bottom))) !important;
+      padding:clamp(16px,2.8vw,24px) !important;
+      border-radius:clamp(20px,2.4vw,26px) !important;
+    }
+    .start-gate .celebration-icon,
+    #endCelebration .finish-trophy{
+      width:clamp(76px,12vw,106px) !important;
+      height:clamp(76px,12vw,106px) !important;
+      margin-bottom:clamp(6px,1.2vw,10px) !important;
+    }
+    .start-gate .celebration-title,
+    #endCelebration .finish-title{
+      font-size:clamp(30px,4.8vw,48px) !important;
+      line-height:1.02 !important;
+    }
+    .start-gate .celebration-subtitle,
+    #endCelebration .finish-subtitle{
+      margin-top:clamp(6px,1.1vw,10px) !important;
+      font-size:clamp(15px,2.1vw,22px) !important;
+      line-height:1.25 !important;
+    }
+    .start-gate .celebration-actions,
+    #endCelebration .finish-actions{
+      margin-top:clamp(14px,2.2vw,20px) !important;
+      gap:clamp(8px,1.2vw,12px) !important;
+      flex-wrap:nowrap !important;
+    }
+    .start-gate .activity-start-btn{
+      min-width:clamp(136px,20vw,184px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(16px,2.1vw,21px) !important;
+      padding-inline:clamp(16px,2.4vw,24px) !important;
+    }
+    #endCelebration .finish-actions button{
+      min-width:clamp(104px,15vw,145px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(15px,2vw,20px) !important;
+      padding-inline:clamp(12px,1.8vw,20px) !important;
+    }
+
+    .start-gate .celebration-card{animation:startCardPop .62s cubic-bezier(.2,1.12,.22,1) both !important}
+    .start-gate .celebration-card::before{animation:startGlow 2.4s ease-in-out infinite !important}
+    .start-gate .celebration-icon{animation:startIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s !important}
+    .start-gate .celebration-spark{animation:startSpark 1.8s ease-in-out infinite !important}
+
+    #endCelebration{
+      background:rgba(17,17,17,.14);
+      z-index:220;
+    }
+    #endCelebration .finish-card{
+      animation:none;
+      opacity:0;
+      transform:translate3d(0,18px,0) scale(.965);
+      transform-origin:center;
+    }
+    .wheel-page.ended #endCelebration .finish-card{animation:finishPanelIn .52s cubic-bezier(.2,.9,.2,1) both}
+    #endCelebration .finish-trophy{
+      animation:none !important;
+      opacity:0;
+      transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);
+      transform-origin:center;
+      filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.12));
+      will-change:transform,opacity,filter;
+    }
+    #endCelebration.finish-sequence-start .finish-trophy{animation:finishTrophyArrival 2.52s cubic-bezier(.16,.82,.18,1) both !important}
+    #endCelebration .finish-title,
+    #endCelebration .finish-subtitle{visibility:hidden;opacity:0;will-change:transform,opacity,filter}
+    #endCelebration.finish-message-in .finish-title{visibility:visible;animation:finishTitleBurst .68s cubic-bezier(.16,1.22,.2,1) both}
+    #endCelebration.finish-message-in .finish-subtitle{visibility:visible;animation:finishSubtitleBurst .62s cubic-bezier(.18,1.08,.2,1) both .055s}
+    #endCelebration .finish-actions{
+      visibility:hidden;
+      opacity:0;
+      transform:translate3d(0,28px,0) scale(.94);
+      pointer-events:none;
+      will-change:transform,opacity;
+    }
+    #endCelebration.finish-actions-in .finish-actions{visibility:visible;pointer-events:auto;animation:finishActionsRise .62s cubic-bezier(.18,1.08,.2,1) both}
+    #endCelebration .finish-confetti{opacity:0;transition:none}
+    #endCelebration .finish-confetti span{animation:none;opacity:0}
+    #endCelebration.finish-confetti-on .finish-confetti{opacity:1}
+    #endCelebration.finish-confetti-on .finish-confetti span{
+      animation:finishConfettiBurst 2.45s cubic-bezier(.18,.72,.22,1) 1 both;
+      animation-delay:0s !important;
+    }
+    #endCelebration.finish-confetti-on .finish-confetti span:nth-child(3n+2){animation-delay:.055s !important}
+    #endCelebration.finish-confetti-on .finish-confetti span:nth-child(3n){animation-delay:.11s !important}
+
+    @keyframes startCardPop{0%{opacity:0;transform:scale(.82) translateY(20px)}70%{opacity:1;transform:scale(1.035) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes startIconPop{0%{opacity:0;transform:scale(.5) rotate(-12deg)}72%{opacity:1;transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+    @keyframes startGlow{0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+    @keyframes startSpark{0%,100%{opacity:.25;transform:scale(.72)}45%{opacity:1;transform:scale(1.22)}}
+    @keyframes finishPanelIn{0%{opacity:0;transform:translate3d(0,18px,0) scale(.965)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishTrophyArrival{0%{opacity:0;transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.10))}18%{opacity:1;filter:blur(1.5px) drop-shadow(0 10px 18px rgba(0,0,0,.16))}62%{opacity:1;transform:translate3d(-10%,7%,0) scale(1.13) rotate(-7deg);filter:blur(0) drop-shadow(0 10px 18px rgba(0,0,0,.17))}77%{transform:translate3d(5%,-4%,0) scale(.965) rotate(3deg)}89%{transform:translate3d(-2%,2%,0) scale(1.025) rotate(-1.2deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0) drop-shadow(0 8px 14px rgba(0,0,0,.15))}}
+    @keyframes finishTitleBurst{0%{opacity:0;transform:translate3d(0,24px,0) scale(.22) rotate(-3deg);filter:blur(8px)}55%{opacity:1;transform:translate3d(0,-3px,0) scale(1.16) rotate(1deg);filter:blur(0)}78%{transform:translate3d(0,1px,0) scale(.97) rotate(-.35deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0)}}
+    @keyframes finishSubtitleBurst{0%{opacity:0;transform:translate3d(0,18px,0) scale(.72);filter:blur(5px)}62%{opacity:1;transform:translate3d(0,-2px,0) scale(1.055);filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+    @keyframes finishActionsRise{0%{opacity:0;transform:translate3d(0,28px,0) scale(.94)}70%{opacity:1;transform:translate3d(0,-3px,0) scale(1.02)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishConfettiBurst{0%{opacity:0;transform:translate3d(0,-9vh,0) rotate(var(--confetti-rotate,0deg)) scale(.55)}8%{opacity:.96}72%{opacity:.92}100%{opacity:0;transform:translate3d(var(--confetti-drift,0px),108vh,0) rotate(calc(var(--confetti-rotate,0deg) + 620deg)) scale(1)}}
+
+    @media(max-height:520px) and (orientation:landscape){
+      .start-gate .celebration-card,
+      #endCelebration .finish-card{width:min(360px,78vw) !important;padding:12px 18px !important;border-radius:20px !important}
+      .start-gate .celebration-icon,
+      #endCelebration .finish-trophy{width:72px !important;height:72px !important;margin-bottom:5px !important}
+      .start-gate .celebration-title,
+      #endCelebration .finish-title{font-size:34px !important}
+      .start-gate .celebration-subtitle,
+      #endCelebration .finish-subtitle{margin-top:5px !important;font-size:17px !important}
+      .start-gate .celebration-actions,
+      #endCelebration .finish-actions{margin-top:10px !important}
+      .start-gate .activity-start-btn,
+      #endCelebration .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
+    }
+
 </style>
 </head>
 <body>
-  <main class="wheel-page intro-playing" id="wheelPage">
+  <main class="wheel-page intro-playing" id="wheelPage" data-font="default">
     <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
     <img class="wheel-logo" src="logo.PNG" alt="" aria-hidden="true" />
 
@@ -1315,7 +1476,7 @@
     </section>
 
     <section class="end-celebration" id="endCelebration" aria-hidden="true">
-      <div class="celebration-confetti" aria-hidden="true">
+      <div class="celebration-confetti finish-confetti" aria-hidden="true">
         <span style="left:9%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-0.23s; --confetti-drift:-36px; --confetti-rotate:31deg"></span>
         <span style="left:16%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-0.46s; --confetti-drift:-18px; --confetti-rotate:62deg"></span>
         <span style="left:23%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-0.69s; --confetti-drift:0px; --confetti-rotate:93deg"></span>
@@ -1346,13 +1507,13 @@
         <span style="left:6%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.04s; --confetti-drift:-54px; --confetti-rotate:148deg"></span>
       </div>
 
-      <div class="celebration-card" role="status" aria-live="polite">
+      <div class="celebration-card finish-card" role="status" aria-live="polite">
         <span class="celebration-spark spark-one" aria-hidden="true"></span>
         <span class="celebration-spark spark-two" aria-hidden="true"></span>
         <span class="celebration-spark spark-three" aria-hidden="true"></span>
         <span class="celebration-spark spark-four" aria-hidden="true"></span>
 
-        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+        <svg class="celebration-icon finish-trophy" viewBox="0 0 120 120" aria-hidden="true">
           <defs>
             <linearGradient id="cupGold" x1="0" x2="0" y1="0" y2="1">
               <stop offset="0%" stop-color="#fff08a"/>
@@ -1374,10 +1535,10 @@
           <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
         </svg>
 
-        <h1 class="celebration-title">أحسنتم!</h1>
-        <p class="celebration-subtitle">انتهى النشاط بنجاح</p>
+        <h1 class="celebration-title finish-title">أحسنتم!</h1>
+        <p class="celebration-subtitle finish-subtitle">انتهى النشاط بنجاح</p>
 
-        <div class="celebration-actions">
+        <div class="celebration-actions finish-actions">
           <button class="restart-btn" type="button" id="restartBtn">إعادة</button>
           <button class="home-btn" type="button" id="homeBtn">الصفحة الرئيسية</button>
         </div>
@@ -1446,7 +1607,8 @@
         select: "sounds/wheel-select.mp3?v=63",
         remove: "sounds/wheel-remove.mp3?v=63",
         intro: "sounds/wheel-intro.mp3?v=63",
-        win: "sounds/wheel-win.mp3?v=63"
+        win: "sounds/wheel-win.mp3?v=63",
+        finish: "sounds/match-finish.mp3?v=1"
       };
 
       let enabled = true;
@@ -1699,6 +1861,37 @@
         playNamed("win");
       }
 
+      function playFinish(){
+        playNamed("finish");
+      }
+
+      function stopNamed(name){
+        const audio = cache[name];
+        if (!audio) return;
+        try { audio.pause(); audio.currentTime = 0; } catch (_) {}
+      }
+
+      function ready(name){
+        const audio = getAudio(name);
+        if (!audio || audio.readyState >= 2) return Promise.resolve();
+        return new Promise((resolve)=>{
+          let done = false;
+          const finish = ()=>{
+            if (done) return;
+            done = true;
+            audio.removeEventListener("loadeddata",finish);
+            audio.removeEventListener("canplaythrough",finish);
+            audio.removeEventListener("error",finish);
+            resolve();
+          };
+          audio.addEventListener("loadeddata",finish,{once:true});
+          audio.addEventListener("canplaythrough",finish,{once:true});
+          audio.addEventListener("error",finish,{once:true});
+          try { audio.load(); } catch (_) {}
+          window.setTimeout(finish,900);
+        });
+      }
+
       function beginTicks(){
         preload();
         tickingActive = true;
@@ -1742,7 +1935,10 @@
         playSelect,
         playRemove,
         playIntro,
-        playWin
+        playWin,
+        playFinish,
+        stopNamed,
+        ready
       };
     })();
 
@@ -1934,6 +2130,8 @@
     let payload = readPayload();
     let initialPayloadSnapshot = clonePayload(payload);
     let activityEnded = false;
+    let finishSequenceToken = 0;
+    let finishSequenceTimers = [];
     let rotation = 0;
     let selectedIndex = -1;
     let initialLayoutCount = 0;
@@ -1962,6 +2160,12 @@
     const restartBtn = document.getElementById("restartBtn");
     const homeBtn = document.getElementById("homeBtn");
     const fixedControls = document.querySelector(".fixed-controls");
+
+    function applyWheelAppearance(){
+      if (!wheelPage) return;
+      wheelPage.dataset.font = normalizeWheelFont(payload?.fontFamily);
+      wheelPage.style.setProperty("--wheel-arrow-color",normalizeWheelHex(payload?.arrowColor,"#111111"));
+    }
 
     function applyWheelTheme(theme){
       if (!wheelPage) return;
@@ -2104,9 +2308,26 @@
         entries: [],
         centerQuestionEnabled:false,
         centerQuestion:"",
+        fontFamily:"default",
+        arrowColor:"#111111",
         soundEnabled:true,
         sounds:{ enabled:true, mode:"files" }
       }));
+    }
+
+    const WHEEL_FONT_IDS = new Set(["default","sans-serif","poppins","serif","comic","primary","arial","traditional"]);
+
+    function normalizeWheelFont(value){
+      const font = String(value || "").trim().toLowerCase();
+      return WHEEL_FONT_IDS.has(font) ? font : "default";
+    }
+
+    function normalizeWheelHex(value,fallback="#111111"){
+      const raw = String(value || "").trim();
+      const short = raw.match(/^#?([0-9a-f]{3})$/i);
+      if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
+      const full = raw.match(/^#?([0-9a-f]{6})$/i);
+      return full ? `#${full[1]}`.toLowerCase() : fallback;
     }
 
     function normalizePayload(data){
@@ -2124,6 +2345,8 @@
         entries,
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
         centerQuestion: String(data.centerQuestion || ""),
+        fontFamily: normalizeWheelFont(data.fontFamily),
+        arrowColor: normalizeWheelHex(data.arrowColor,"#111111"),
         soundEnabled: normalizeSoundEnabled(data),
         sounds: {
           enabled: normalizeSoundEnabled(data),
@@ -2326,6 +2549,8 @@
           : [],
         centerQuestionEnabled: Boolean(data.centerQuestionEnabled),
         centerQuestion: String(data.centerQuestion || ""),
+        fontFamily: normalizeWheelFont(data.fontFamily),
+        arrowColor: normalizeWheelHex(data.arrowColor,"#111111"),
         soundEnabled: normalizeSoundEnabled(data),
         sounds: {
           enabled: normalizeSoundEnabled(data),
@@ -2334,7 +2559,24 @@
       };
     }
 
-    function showEndCelebration(){
+    function clearFinishSequenceTimers(){
+      finishSequenceTimers.forEach((timer)=>clearTimeout(timer));
+      finishSequenceTimers = [];
+    }
+
+    function resetFinishSequenceClasses(){
+      endCelebration?.classList.remove("finish-sequence-start","finish-message-in","finish-actions-in","finish-confetti-on");
+    }
+
+    function queueFinishStep(token,delay,classNames){
+      const timer = window.setTimeout(()=>{
+        if (token !== finishSequenceToken) return;
+        classNames.forEach((className)=>endCelebration?.classList.add(className));
+      },delay);
+      finishSequenceTimers.push(timer);
+    }
+
+    async function showEndCelebration(){
       activityEnded = true;
       cancelAnimation();
       cancelZoomAnimation();
@@ -2345,14 +2587,28 @@
       wheelShell.classList.remove("zoom", "merging");
       clearSelected();
       setVisualZoomScale(1);
+      const token = ++finishSequenceToken;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
       wheelPage.classList.add("ended");
       endCelebration?.setAttribute("aria-hidden", "false");
-      wheelAudio.playWin();
+      await wheelAudio.ready("finish");
+      if (token !== finishSequenceToken) return;
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      if (token !== finishSequenceToken) return;
+      endCelebration?.classList.add("finish-sequence-start");
+      wheelAudio.playFinish();
+      queueFinishStep(token,2680,["finish-message-in","finish-confetti-on"]);
+      queueFinishStep(token,3180,["finish-actions-in"]);
       collapseSafariBars();
     }
 
     function hideEndCelebration(){
       activityEnded = false;
+      finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
+      wheelAudio.stopNamed("finish");
       wheelPage.classList.remove("ended");
       endCelebration?.setAttribute("aria-hidden", "true");
     }
@@ -2360,6 +2616,7 @@
     function restartActivity(){
       payload = clonePayload(initialPayloadSnapshot);
       applyWheelTheme(payload.theme);
+      applyWheelAppearance();
       rotation = 0;
       selectedIndex = -1;
       initialLayoutCount = 0;
@@ -2876,8 +3133,8 @@
       }
 
       let maxFont = size * (count <= 5 ? 0.052 : count <= 8 ? 0.040 : count <= 12 ? 0.030 : 0.022);
-      maxFont *= 1.08;
-      let fontSize = Math.min(labelHeight * 0.505, maxFont);
+      maxFont *= 1.18;
+      let fontSize = Math.min(labelHeight * 0.60, maxFont);
 
       if (textLength > 58) fontSize *= 0.72;
       else if (textLength > 42) fontSize *= 0.82;
@@ -2889,7 +3146,7 @@
       // wheel-14: boost short and medium text only, while long text remains smaller.
       fontSize *= textLength > 42 ? 1.00 : textLength > 26 ? 1.03 : textLength > 14 ? 1.06 : 1.08;
 
-      fontSize = clamp(fontSize, count <= 8 ? 10.5 : count <= 12 ? 8.5 : 7, maxFont);
+      fontSize = clamp(fontSize, count <= 8 ? 12.5 : count <= 12 ? 11 : 8.5, maxFont);
 
       const gap = clamp(size * 0.014, 5, 10);
       const lines = count <= 8 ? 4 : count <= 12 ? 3 : 3;
@@ -2934,9 +3191,12 @@
 
       function createTextElement(entry, index){
         const textEl = document.createElement("div");
-        textEl.className = "wheel-text";
-        textEl.setAttribute("dir", "rtl");
-        textEl.textContent = textForEntry(entry, index);
+        const value = textForEntry(entry,index);
+        textEl.className = `wheel-text ${String(value).trim().length <= 18 ? "text-short" : "text-long"}`;
+        const isArabic = /[\u0600-\u06FF]/.test(value);
+        textEl.setAttribute("dir",isArabic ? "rtl" : "auto");
+        if (isArabic) textEl.setAttribute("lang","ar");
+        textEl.textContent = value;
         return textEl;
       }
 
@@ -3753,6 +4013,7 @@
       restartActivity();
     });
     homeBtn?.addEventListener("click", (event)=>{
+      wheelAudio.stopNamed("finish");
       wheelAudio.unlock();
       wheelAudio.playButton();
       goHomePage(event);
@@ -3764,6 +4025,7 @@
     });
 
     document.getElementById("backBtn").addEventListener("click", ()=>{
+      wheelAudio.stopNamed("finish");
       wheelAudio.unlock();
       wheelAudio.playButton();
       persistPayload();
@@ -3891,6 +4153,7 @@
     wheelAudio.setEnabled(payload.soundEnabled !== false);
     themeIntroAudio.setEnabled(normalizeSoundEnabled(payload));
     applyWheelTheme(payload.theme);
+    applyWheelAppearance();
     setVisualZoomScale(1);
     buildWheel();
     updateLayout();
@@ -3914,7 +4177,14 @@
     }
 
     startGameBtn?.addEventListener("click", startWheelFromGate);
+    window.addEventListener("pagehide",()=>{
+      finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      wheelAudio.stopNamed("finish");
+      themeIntroAudio.stop();
+    },{passive:true});
     themeIntroAudio.preload(payload.theme);
+    wheelAudio.ready("finish");
   </script>
 </body>
 </html>

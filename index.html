@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-order-setup-v59 -->
+<!-- version: index-wheel-final-polish-v49 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -9481,6 +9481,56 @@
       }
     }
 
+
+
+    /* اللمسات النهائية للعجلة: صورة كلاسيكي، الخطوط، لون السهم، وحذف واضح. */
+    .template-cover.wheel-cover{
+      background:#fff url("wheel-classic.webp?v=1") center/cover no-repeat !important;
+    }
+
+    .wheel-setup .theme-art.classic{
+      background:#fff url("wheel-classic.webp?v=1") center/cover no-repeat !important;
+    }
+    .wheel-setup .theme-art.classic::before,
+    .wheel-setup .theme-art.classic::after{
+      display:none !important;
+      content:none !important;
+    }
+
+    .wheel-setup[data-quiz-font="sans-serif"]{--choices-font:Arial,Helvetica,Tahoma,sans-serif}
+    .wheel-setup[data-quiz-font="poppins"]{--choices-font:"Poppins","Arial Rounded MT Bold",Arial,Tahoma,sans-serif}
+    .wheel-setup[data-quiz-font="serif"]{--choices-font:Georgia,"Times New Roman","Traditional Arabic",serif}
+    .wheel-setup[data-quiz-font="comic"]{--choices-font:"Comic Sans MS","Comic Sans","Arial Rounded MT Bold",Tahoma,cursive}
+    .wheel-setup[data-quiz-font="primary"]{--choices-font:"Arial Rounded MT Bold","Trebuchet MS",Tahoma,Arial,sans-serif}
+
+    .wheel-setup .choices-advanced-panel.is-open{max-height:360px !important}
+
+    .wheel-setup .wheel-entry{
+      transform-origin:center top;
+      transition:height .34s cubic-bezier(.2,.75,.2,1),
+                 padding .34s cubic-bezier(.2,.75,.2,1),
+                 margin .34s cubic-bezier(.2,.75,.2,1),
+                 border-width .28s ease,
+                 opacity .22s ease,
+                 transform .30s cubic-bezier(.2,.75,.2,1);
+    }
+    .wheel-setup .wheel-entry.is-removing{
+      height:0 !important;
+      min-height:0 !important;
+      padding-top:0 !important;
+      padding-bottom:0 !important;
+      margin-top:0 !important;
+      margin-bottom:0 !important;
+      border-top-width:0 !important;
+      border-bottom-width:0 !important;
+      gap:0 !important;
+      opacity:0 !important;
+      transform:translateY(-14px) scale(.975) !important;
+      overflow:hidden !important;
+      pointer-events:none !important;
+    }
+    .wheel-items-editor.is-removing-entry .remove-entry-btn{pointer-events:none;opacity:.58}
+
 </style>
 </head>
 <body>
@@ -9550,7 +9600,7 @@
 <h2 class="screen-title">إنشاء لعبة جديدة</h2>
 <div class="template-list">
 <button class="template-card" data-template="wheel" type="button">
-<div aria-hidden="true" class="template-cover"></div>
+<div aria-hidden="true" class="template-cover wheel-cover"></div>
 <div class="template-content">
 <h3 class="template-title">العجلة الدوارة</h3>
 <p class="template-desc">عجلة للنصوص أو الصور.</p>
@@ -9610,7 +9660,7 @@
 
       <div class="choices-theme-list" hidden id="themeListPanel">
         <div class="choices-theme-card active" data-wheel-theme="classic">
-          <span class="theme-art classic"></span><span class="choices-theme-name">خلفية بيضاء</span><button class="choices-theme-activate" type="button">تفعيل</button>
+          <span class="theme-art classic"></span><span class="choices-theme-name">كلاسيكي</span><button class="choices-theme-activate" type="button">تفعيل</button>
         </div>
         <div class="choices-theme-card" data-wheel-theme="classroom">
           <span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button>
@@ -9705,10 +9755,22 @@
               <strong>نوع الخط</strong>
             </label>
             <select class="quiz-font-select" id="wheelFontSelect">
-              <option value="default">خط اللعبة</option>
+              <option value="default">افتراضي</option>
+              <option value="sans-serif">Sans-Serif</option>
+              <option value="poppins">Poppins</option>
+              <option value="serif">Serif</option>
+              <option value="comic">Comic</option>
+              <option value="primary">Primary</option>
               <option value="arial">Arial</option>
               <option value="traditional">عربي تقليدي</option>
             </select>
+          </div>
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>لون السهم</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" id="wheelArrowColorChangeBtn" type="button">تغيير</button>
+              <span class="match-color-swatch" id="wheelArrowColorSwatch" aria-label="لون سهم العجلة المختار"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -10244,8 +10306,10 @@
   const wheelAdvancedPanel = document.getElementById("wheelAdvancedPanel");
   const wheelSoundToggleBtn = document.getElementById("wheelSoundToggleBtn");
   const wheelFontSelect = document.getElementById("wheelFontSelect");
+  const wheelArrowColorChangeBtn = document.getElementById("wheelArrowColorChangeBtn");
+  const wheelArrowColorSwatch = document.getElementById("wheelArrowColorSwatch");
   const THEME_LABELS = {
-    classic: "خلفية بيضاء",
+    classic: "كلاسيكي",
     classroom: "فصل مدرسي",
     "sky-clouds": "سماء وغيوم",
     forest: "غابة",
@@ -10273,12 +10337,28 @@
     return GAME_THEME_IDS.has(value) ? value : "classic";
   }
 
+  const WHEEL_FONT_IDS = new Set(["default","sans-serif","poppins","serif","comic","primary","arial","traditional"]);
+
+  function normalizeWheelFont(value){
+    const font = String(value || "").trim().toLowerCase();
+    return WHEEL_FONT_IDS.has(font) ? font : "default";
+  }
+
+  function normalizeWheelHex(value,fallback="#111111"){
+    const raw = String(value || "").trim();
+    const short = raw.match(/^#?([0-9a-f]{3})$/i);
+    if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
+    const full = raw.match(/^#?([0-9a-f]{6})$/i);
+    return full ? `#${full[1]}`.toLowerCase() : fallback;
+  }
+
   let currentGameTemplate = "wheel";
   let wheelContentType = "text";
   let wheelTheme = "classic";
   let wheelEntries = [];
   let wheelSoundEnabled = true;
   let wheelFont = "default";
+  let wheelArrowColor = "#111111";
   let boxCoverMode = "disabled";
   let wheelAdvancedOpen = false;
   let setupTextEditorOverlay = null;
@@ -10340,6 +10420,8 @@
     if (wheelFontSelect) {
       wheelFontSelect.value = wheelFont;
     }
+    wheelArrowColor = normalizeWheelHex(wheelArrowColor,"#111111");
+    if (wheelArrowColorSwatch) wheelArrowColorSwatch.style.background = wheelArrowColor;
 
     if (wheelSetupScreen) {
       wheelSetupScreen.dataset.quizFont = wheelFont;
@@ -10576,6 +10658,7 @@
       coverMode: currentGameTemplate === "open-box" ? boxCoverMode : "disabled",
       soundEnabled: wheelSoundEnabled,
       fontFamily: wheelFont,
+      arrowColor: normalizeWheelHex(wheelArrowColor,"#111111"),
       sounds: {
         enabled: wheelSoundEnabled,
         mode: "files"
@@ -10613,9 +10696,8 @@
         coverImageData: entry.coverImageData || ""
       }));
       wheelSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
-      wheelFont = ["default","arial","traditional"].includes(draft.fontFamily)
-        ? draft.fontFamily
-        : "default";
+      wheelFont = normalizeWheelFont(draft.fontFamily);
+      wheelArrowColor = normalizeWheelHex(draft.arrowColor,"#111111");
       boxCoverMode = normalizeOpenBoxCoverMode(draft.coverMode || "disabled");
       cleanOpenBoxEntriesInPlace();
       syncSoundUi();
@@ -11000,10 +11082,22 @@
       );
 
       remove.addEventListener("click",()=>{
-        wheelEntries.splice(index,1);
-        if (!wheelEntries.length) wheelEntries = [createEntry()];
-        renderWheelEntries();
-        saveDraft();
+        if (box.classList.contains("is-removing")) return;
+        const height = Math.max(1,box.getBoundingClientRect().height);
+        box.style.height = `${height}px`;
+        box.style.overflow = "hidden";
+        wheelItemsEditor.classList.add("is-removing-entry");
+        remove.disabled = true;
+        requestAnimationFrame(()=>{
+          requestAnimationFrame(()=>box.classList.add("is-removing"));
+        });
+        window.setTimeout(()=>{
+          wheelEntries.splice(index,1);
+          if (!wheelEntries.length) wheelEntries = [createEntry()];
+          wheelItemsEditor.classList.remove("is-removing-entry");
+          renderWheelEntries();
+          saveDraft();
+        },360);
       });
 
       head.append(number,remove);
@@ -11117,6 +11211,7 @@
       selectedTheme,
       gameName: String(wheelGameNameInput?.value || "").trim(),
       fontFamily: wheelFont,
+      arrowColor: normalizeWheelHex(wheelArrowColor,"#111111"),
       entries,
       centerQuestionEnabled: Boolean(questionPanel?.classList.contains("enabled")),
       centerQuestion: String(centerQuestionInput?.value || "").trim(),
@@ -11368,11 +11463,23 @@
   });
 
   wheelFontSelect?.addEventListener("change",()=>{
-    wheelFont = ["default","arial","traditional"].includes(wheelFontSelect.value)
-      ? wheelFontSelect.value
-      : "default";
+    wheelFont = normalizeWheelFont(wheelFontSelect.value);
     syncSoundUi();
     saveDraft();
+  });
+
+  wheelArrowColorChangeBtn?.addEventListener("click",()=>{
+    if (typeof window.openSharedGameColorPicker !== "function") return;
+    window.openSharedGameColorPicker({
+      title:"لون سهم العجلة",
+      color:wheelArrowColor,
+      fallback:"#111111",
+      onChange:(color)=>{
+        wheelArrowColor = normalizeWheelHex(color,"#111111");
+        syncSoundUi();
+        saveDraft();
+      }
+    });
   });
 
   setupCenterReviewBtn?.addEventListener("click",()=>{
