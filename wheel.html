@@ -2127,6 +2127,22 @@
       screenY: 0
     };
 
+    /* تعريف خيارات الخط قبل قراءة بيانات النشاط لتجنب توقف JavaScript عند التشغيل. */
+    const WHEEL_FONT_IDS = new Set(["default","sans-serif","poppins","serif","comic","primary","arial","traditional"]);
+
+    function normalizeWheelFont(value){
+      const font = String(value || "").trim().toLowerCase();
+      return WHEEL_FONT_IDS.has(font) ? font : "default";
+    }
+
+    function normalizeWheelHex(value,fallback="#111111"){
+      const raw = String(value || "").trim();
+      const short = raw.match(/^#?([0-9a-f]{3})$/i);
+      if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
+      const full = raw.match(/^#?([0-9a-f]{6})$/i);
+      return full ? `#${full[1]}`.toLowerCase() : fallback;
+    }
+
     let payload = readPayload();
     let initialPayloadSnapshot = clonePayload(payload);
     let activityEnded = false;
@@ -2313,21 +2329,6 @@
         soundEnabled:true,
         sounds:{ enabled:true, mode:"files" }
       }));
-    }
-
-    const WHEEL_FONT_IDS = new Set(["default","sans-serif","poppins","serif","comic","primary","arial","traditional"]);
-
-    function normalizeWheelFont(value){
-      const font = String(value || "").trim().toLowerCase();
-      return WHEEL_FONT_IDS.has(font) ? font : "default";
-    }
-
-    function normalizeWheelHex(value,fallback="#111111"){
-      const raw = String(value || "").trim();
-      const short = raw.match(/^#?([0-9a-f]{3})$/i);
-      if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
-      const full = raw.match(/^#?([0-9a-f]{6})$/i);
-      return full ? `#${full[1]}`.toLowerCase() : fallback;
     }
 
     function normalizePayload(data){
