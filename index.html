@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-order-setup-v58 -->
+<!-- version: index-order-setup-v59 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -9246,8 +9246,20 @@
       display:grid;
       gap:clamp(14px,1.8vw,22px);
     }
+    .order-setup .choices-config-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
     .order-content-grid{
       grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    .order-language-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+    .order-color-row[hidden]{
+      display:none !important;
+    }
+    .order-setup .choices-advanced-panel.is-open{
+      max-height:480px;
     }
     .order-questions-editor{
       display:grid;
@@ -9314,6 +9326,9 @@
       outline:none;
       resize:vertical;
       text-align:right;
+    }
+    .order-answer-input[dir="ltr"]{
+      text-align:left;
     }
     .order-mode-note{
       margin:0;
@@ -9434,7 +9449,9 @@
         border-radius:22px;
       }
       .order-setup-body{gap:12px;margin-top:14px}
+      .order-setup .choices-config-grid{grid-template-columns:1fr}
       .order-content-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+      .order-language-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
       .order-content-grid .choices-mode-btn{
         min-height:66px;
         padding:7px 4px;
@@ -10072,6 +10089,14 @@
             <button class="choices-mode-btn" data-order-content-mode="images" type="button"><strong>صور</strong></button>
           </div>
         </div>
+
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">لغة المحتوى</h4>
+          <div class="choices-mode-grid order-language-grid" aria-label="لغة محتوى لعبة الترتيب">
+            <button class="choices-mode-btn active" data-order-language="ar" type="button"><strong>العربية</strong></button>
+            <button class="choices-mode-btn" data-order-language="en" type="button"><strong>الإنجليزية</strong></button>
+          </div>
+        </div>
       </div>
 
       <button class="choices-advanced-toggle" id="orderAdvancedToggleBtn" type="button" aria-expanded="false">
@@ -10097,6 +10122,27 @@
               <option value="arial">Arial</option>
               <option value="traditional">عربي تقليدي</option>
             </select>
+          </div>
+          <div class="choices-advanced-row order-color-row" id="orderTextColorRow">
+            <div class="choices-advanced-label"><strong id="orderTextColorLabel">لون النص</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-order-color-target="text" type="button">تغيير</button>
+              <span class="match-color-swatch" id="orderTextColorSwatch" aria-label="لون النص المختار"></span>
+            </div>
+          </div>
+          <div class="choices-advanced-row order-color-row" id="orderBeforeColorRow">
+            <div class="choices-advanced-label"><strong id="orderBeforeColorLabel">لون بطاقة الحرف قبل الترتيب</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-order-color-target="before" type="button">تغيير</button>
+              <span class="match-color-swatch" id="orderBeforeColorSwatch" aria-label="اللون قبل الترتيب"></span>
+            </div>
+          </div>
+          <div class="choices-advanced-row order-color-row" id="orderAfterColorRow">
+            <div class="choices-advanced-label"><strong id="orderAfterColorLabel">لون بطاقة الحرف بعد الترتيب</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-order-color-target="after" type="button">تغيير</button>
+              <span class="match-color-swatch" id="orderAfterColorSwatch" aria-label="اللون بعد الترتيب"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -10364,11 +10410,14 @@
     document.body.appendChild(setupTextEditorOverlay);
   }
 
-  function openSetupTextEditor({value,maxLength,onSave,placeholder}){
+  function openSetupTextEditor({value,maxLength,onSave,placeholder,dir="auto",lang=""}){
     ensureSetupTextEditor();
     setupTextEditorTextarea.maxLength = maxLength;
     setupTextEditorTextarea.value = String(value || "");
     setupTextEditorTextarea.placeholder = String(placeholder || "");
+    setupTextEditorTextarea.dir = dir === "ltr" ? "ltr" : (dir === "rtl" ? "rtl" : "auto");
+    if (lang) setupTextEditorTextarea.lang = String(lang);
+    else setupTextEditorTextarea.removeAttribute("lang");
     setupTextEditorSaveHandler = onSave;
     setupTextEditorOverlay.classList.add("is-open");
     setupTextEditorOverlay.setAttribute("aria-hidden","false");
@@ -12634,6 +12683,7 @@
   let matchPickerHue = 340;
   let matchPickerSaturation = 80;
   let matchPickerValue = 91;
+  let externalColorPicker = null;
   let matchAdvancedOpen = false;
   let matchPairs = [];
   let matchPairSequence = 0;
@@ -12694,17 +12744,26 @@
   }
 
   function activeMatchColor(){
+    if (externalColorPicker) return externalColorPicker.value;
     return activeMatchColorTarget === "text" ? matchTextColor : matchCardColor;
   }
 
   function setActiveMatchColor(value,{save=true}={}){
-    const fallback = activeMatchColorTarget === "text" ? "#ffffff" : "#e82f70";
+    const fallback = externalColorPicker
+      ? externalColorPicker.fallback
+      : (activeMatchColorTarget === "text" ? "#ffffff" : "#e82f70");
     const color = normalizeMatchHex(value,fallback);
-    if (activeMatchColorTarget === "text") matchTextColor = color;
-    else matchCardColor = color;
+    if (externalColorPicker) {
+      externalColorPicker.value = color;
+      externalColorPicker.onChange?.(color);
+    } else if (activeMatchColorTarget === "text") {
+      matchTextColor = color;
+    } else {
+      matchCardColor = color;
+    }
     updateMatchColorUI();
     syncMatchPickerFromColor(color);
-    if (save) saveMatchDraft();
+    if (save && !externalColorPicker) saveMatchDraft();
   }
 
   function updateMatchColorUI(){
@@ -12747,6 +12806,7 @@
   }
 
   function openMatchColorPicker(target){
+    externalColorPicker = null;
     activeMatchColorTarget = target === "text" ? "text" : "card";
     if (matchColorModalTitle) matchColorModalTitle.textContent = activeMatchColorTarget === "text" ? "لون النص" : "لون البطاقات";
     setMatchColorPickerMode("fixed");
@@ -12764,8 +12824,28 @@
       matchColorModal.hidden = true;
       matchColorModal.setAttribute("aria-hidden","true");
     }
+    externalColorPicker = null;
     document.body.style.overflow = "";
   }
+
+  window.openSharedGameColorPicker = ({title="اختيار اللون",color="#000000",fallback="#000000",onChange}={})=>{
+    const normalizedFallback = normalizeMatchHex(fallback,"#000000");
+    externalColorPicker = {
+      title:String(title || "اختيار اللون"),
+      value:normalizeMatchHex(color,normalizedFallback),
+      fallback:normalizedFallback,
+      onChange:typeof onChange === "function" ? onChange : null
+    };
+    if (matchColorModalTitle) matchColorModalTitle.textContent = externalColorPicker.title;
+    setMatchColorPickerMode("fixed");
+    updateMatchColorUI();
+    syncMatchPickerFromColor(externalColorPicker.value);
+    if (matchColorModal) {
+      matchColorModal.hidden = false;
+      matchColorModal.setAttribute("aria-hidden","false");
+    }
+    document.body.style.overflow = "hidden";
+  };
 
   function buildMatchFixedColors(){
     if (!matchFixedColorsGrid || matchFixedColorsGrid.children.length) return;
@@ -13562,11 +13642,23 @@
   const advancedPanel = document.getElementById("orderAdvancedPanel");
   const soundToggle = document.getElementById("orderSoundToggleBtn");
   const fontSelect = document.getElementById("orderFontSelect");
+  const textColorRow = document.getElementById("orderTextColorRow");
+  const textColorSwatch = document.getElementById("orderTextColorSwatch");
+  const beforeColorSwatch = document.getElementById("orderBeforeColorSwatch");
+  const afterColorSwatch = document.getElementById("orderAfterColorSwatch");
+  const beforeColorLabel = document.getElementById("orderBeforeColorLabel");
+  const afterColorLabel = document.getElementById("orderAfterColorLabel");
 
   let theme = "classic";
   let contentMode = "letters";
+  let contentLanguage = "ar";
   let soundEnabled = true;
   let fontFamily = "default";
+  let textColor = "#111111";
+  let beforeColor = "#b7b0ac";
+  let afterColor = "#f5aa2d";
+  let imageBeforeColor = "#241a43";
+  let imageAfterColor = "#241a43";
   let advancedOpen = false;
   let questions = [];
   let questionSequence = 0;
@@ -13596,6 +13688,18 @@
     return ["letters","words","images"].includes(value) ? value : "letters";
   }
 
+  function normalizeLanguage(value){
+    return value === "en" ? "en" : "ar";
+  }
+
+  function normalizeOrderHex(value,fallback){
+    const raw = String(value || "").trim();
+    const short = raw.match(/^#?([0-9a-f]{3})$/i);
+    if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
+    const full = raw.match(/^#?([0-9a-f]{6})$/i);
+    return full ? `#${full[1]}`.toLowerCase() : fallback;
+  }
+
   function blankImage(){
     return {name:"",data:""};
   }
@@ -13605,7 +13709,7 @@
     return {
       id:`order-question-${Date.now()}-${questionSequence}`,
       text:"",
-      images:[blankImage(),blankImage(),blankImage()]
+      images:[blankImage(),blankImage()]
     };
   }
 
@@ -13615,7 +13719,8 @@
       name:String(image?.name || image?.imageName || ""),
       data:String(image?.data || image?.imageData || image?.image || "")
     }));
-    while (images.length < 3) images.push(blankImage());
+    while (images.length > ORDER_MIN_IMAGES && !images.at(-1)?.data && !images.at(-1)?.name) images.pop();
+    while (images.length < ORDER_MIN_IMAGES) images.push(blankImage());
     return {
       id:String(raw?.id || `order-question-${index + 1}`),
       text:String(raw?.text || raw?.answer || ""),
@@ -13632,9 +13737,16 @@
       theme,
       selectedTheme:theme,
       contentMode,
+      contentLanguage,
+      language:contentLanguage,
       soundEnabled,
       sounds:{enabled:soundEnabled},
       fontFamily,
+      textColor:normalizeOrderHex(textColor,"#111111"),
+      beforeColor:normalizeOrderHex(beforeColor,"#b7b0ac"),
+      afterColor:normalizeOrderHex(afterColor,"#f5aa2d"),
+      imageBeforeColor:normalizeOrderHex(imageBeforeColor,"#241a43"),
+      imageAfterColor:normalizeOrderHex(imageAfterColor,"#241a43"),
       questions:questions.map((question)=>({
         id:question.id,
         text:String(question.text || ""),
@@ -13660,10 +13772,16 @@
       const draft = JSON.parse(raw);
       theme = normalizeTheme(draft.theme || draft.selectedTheme);
       contentMode = normalizeMode(draft.contentMode);
+      contentLanguage = normalizeLanguage(draft.contentLanguage || draft.language);
       soundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
       fontFamily = ["default","arial","traditional"].includes(draft.fontFamily)
         ? draft.fontFamily
         : "default";
+      textColor = normalizeOrderHex(draft.textColor,"#111111");
+      beforeColor = normalizeOrderHex(draft.beforeColor,"#b7b0ac");
+      afterColor = normalizeOrderHex(draft.afterColor,"#f5aa2d");
+      imageBeforeColor = normalizeOrderHex(draft.imageBeforeColor,"#241a43");
+      imageAfterColor = normalizeOrderHex(draft.imageAfterColor,"#241a43");
       questions = Array.isArray(draft.questions)
         ? draft.questions.slice(0,ORDER_MAX_QUESTIONS).map(normalizeQuestion)
         : [];
@@ -13686,6 +13804,79 @@
     document.querySelectorAll("[data-order-content-mode]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.orderContentMode === contentMode);
     });
+    document.querySelectorAll("[data-order-language]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.orderLanguage === contentLanguage);
+    });
+    updateOrderColorUI();
+  }
+
+  function activeBeforeColor(){
+    return contentMode === "images" ? imageBeforeColor : beforeColor;
+  }
+
+  function activeAfterColor(){
+    return contentMode === "images" ? imageAfterColor : afterColor;
+  }
+
+  function updateOrderColorUI(){
+    const isImages = contentMode === "images";
+    if (textColorRow) textColorRow.hidden = isImages;
+    if (beforeColorLabel) {
+      beforeColorLabel.textContent = isImages
+        ? "لون إطار الصورة قبل الترتيب"
+        : (contentMode === "words" ? "لون بطاقة الكلمة قبل الترتيب" : "لون بطاقة الحرف قبل الترتيب");
+    }
+    if (afterColorLabel) {
+      afterColorLabel.textContent = isImages
+        ? "لون إطار الصورة بعد الترتيب"
+        : (contentMode === "words" ? "لون بطاقة الكلمة بعد الترتيب" : "لون بطاقة الحرف بعد الترتيب");
+    }
+    if (textColorSwatch) textColorSwatch.style.background = normalizeOrderHex(textColor,"#111111");
+    if (beforeColorSwatch) beforeColorSwatch.style.background = activeBeforeColor();
+    if (afterColorSwatch) afterColorSwatch.style.background = activeAfterColor();
+  }
+
+  function setOrderColor(target,color){
+    const normalized = normalizeOrderHex(color,"#111111");
+    if (target === "text") textColor = normalized;
+    else if (target === "before") {
+      if (contentMode === "images") imageBeforeColor = normalized;
+      else beforeColor = normalized;
+    } else if (contentMode === "images") imageAfterColor = normalized;
+    else afterColor = normalized;
+    updateOrderColorUI();
+    saveDraft();
+  }
+
+  function openOrderColorPicker(target){
+    const isImages = contentMode === "images";
+    const config = target === "text"
+      ? {title:"لون النص",color:textColor,fallback:"#111111"}
+      : target === "before"
+        ? {
+            title:isImages ? "لون إطار الصورة قبل الترتيب" : (contentMode === "words" ? "لون بطاقة الكلمة قبل الترتيب" : "لون بطاقة الحرف قبل الترتيب"),
+            color:activeBeforeColor(),
+            fallback:isImages ? "#241a43" : "#b7b0ac"
+          }
+        : {
+            title:isImages ? "لون إطار الصورة بعد الترتيب" : (contentMode === "words" ? "لون بطاقة الكلمة بعد الترتيب" : "لون بطاقة الحرف بعد الترتيب"),
+            color:activeAfterColor(),
+            fallback:isImages ? "#241a43" : "#f5aa2d"
+          };
+
+    if (typeof window.openSharedGameColorPicker === "function") {
+      window.openSharedGameColorPicker({
+        ...config,
+        onChange:(color)=>setOrderColor(target,color)
+      });
+      return;
+    }
+
+    const fallbackPicker = document.createElement("input");
+    fallbackPicker.type = "color";
+    fallbackPicker.value = normalizeOrderHex(config.color,config.fallback);
+    fallbackPicker.addEventListener("input",()=>setOrderColor(target,fallbackPicker.value));
+    fallbackPicker.click();
   }
 
   function updateAdvancedUI(){
@@ -13703,6 +13894,7 @@
 
     if (fontSelect) fontSelect.value = fontFamily;
     if (setup) setup.dataset.orderFont = fontFamily;
+    updateOrderColorUI();
   }
 
   function readImage(file){
@@ -13748,8 +13940,8 @@
     const label = document.createElement("label");
     label.className = "order-answer-label";
     label.textContent = contentMode === "letters"
-      ? "اكتب العبارة التي تريد ترتيب حروفها"
-      : "اكتب الجملة أو العناصر بالترتيب الصحيح";
+      ? "لإضافة أكثر من كلمة ضع مسافة بين الكلمات"
+      : "اكتب الجملة، وستفصل اللعبة كلماتها بالمسافات";
 
     const row = document.createElement("div");
     row.className = "order-text-row";
@@ -13758,11 +13950,16 @@
     input.className = "order-answer-input";
     input.rows = 2;
     input.maxLength = 180;
-    input.placeholder = contentMode === "letters"
-      ? "مثال: لعبة سباق الحروف"
-      : "مثال: ذهب أحمد إلى البقالة";
+    const english = contentLanguage === "en";
+    input.placeholder = english
+      ? (contentMode === "letters" ? "Example: SCHOOL" : "Example: Ahmed went to school")
+      : (contentMode === "letters"
+          ? "اكتب الكلمة التي تريد ترتيب حروفها"
+          : "اكتب الجملة التي تريد ترتيب كلماتها");
     input.value = question.text || "";
-    input.dir = "auto";
+    input.dir = english ? "ltr" : "rtl";
+    input.lang = english ? "en" : "ar";
+    input.autocapitalize = english && contentMode === "letters" ? "characters" : "sentences";
     input.addEventListener("input",()=>{
       questions[index].text = input.value;
       saveDraft();
@@ -13783,6 +13980,8 @@
           value:input.value,
           maxLength:180,
           placeholder:input.placeholder,
+          dir:english ? "ltr" : "rtl",
+          lang:english ? "en" : "ar",
           onSave:(value)=>{
             input.value = value;
             questions[index].text = value;
@@ -13794,14 +13993,8 @@
       }
     });
 
-    const note = document.createElement("p");
-    note.className = "order-mode-note";
-    note.textContent = contentMode === "letters"
-      ? "اكتب العبارة مرة واحدة؛ تفصل اللعبة الكلمات بالمسافات وتخلط حروف كل كلمة تلقائيًا."
-      : "اكتب العبارة مرة واحدة؛ تفصل اللعبة الكلمات بالمسافات وتخلطها تلقائيًا.";
-
     row.append(input,review);
-    card.append(label,row,note);
+    card.append(label,row);
   }
 
   function renderImageQuestion(card,question,questionIndex){
@@ -13921,7 +14114,7 @@
 
       if (contentMode === "images") {
         if (!Array.isArray(question.images)) question.images = [];
-        while (question.images.length < 3) question.images.push(blankImage());
+        while (question.images.length < ORDER_MIN_IMAGES) question.images.push(blankImage());
         renderImageQuestion(card,question,index);
       } else {
         renderTextQuestion(card,question,index);
@@ -14078,6 +14271,19 @@
       renderQuestions();
       saveDraft();
     });
+  });
+
+  document.querySelectorAll("[data-order-language]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      contentLanguage = normalizeLanguage(button.dataset.orderLanguage);
+      updateModeUI();
+      renderQuestions();
+      saveDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-order-color-target]").forEach((button)=>{
+    button.addEventListener("click",()=>openOrderColorPicker(button.dataset.orderColorTarget));
   });
 
   themeToggle?.addEventListener("click",()=>{

@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- version: order-v2 -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -19,6 +20,10 @@
       --tile-orange:#f5aa2d;
       --tile-orange-light:#ffc45d;
       --tile-orange-dark:#c6780d;
+      --order-text-color:#111111;
+      --order-image-before-color:#241a43;
+      --order-image-after-color:#241a43;
+      --order-direction:rtl;
       --yellow:#efd553;
       --blue:#1688d3;
       --green:#28ad6d;
@@ -196,7 +201,7 @@
       align-content:center;
       justify-content:center;
       gap:var(--group-gap) clamp(28px,5vw,74px);
-      direction:rtl;
+      direction:var(--order-direction,rtl);
       transform-origin:center;
       transform:scale(var(--order-fit-scale,1));
       will-change:transform,opacity;
@@ -233,7 +238,7 @@
       border-radius:clamp(11px,1.35vw,19px);
       background:
         linear-gradient(145deg,var(--tile-gray-light) 0%,var(--tile-gray) 58%,var(--tile-gray-dark) 100%);
-      color:#111;
+      color:var(--order-text-color,#111);
       box-shadow:
         inset 0 2px 0 rgba(255,255,255,.34),
         inset 0 -3px 5px rgba(0,0,0,.10),
@@ -285,6 +290,7 @@
       width:clamp(84px,13vw,148px);
       height:clamp(84px,13vw,148px);
       padding:clamp(5px,.65vw,9px);
+      border-color:var(--order-image-before-color,var(--navy));
     }
 
     .order-token img{
@@ -363,7 +369,7 @@
       border-radius:clamp(9px,1.05vw,15px);
       background:
         linear-gradient(145deg,var(--tile-orange-light) 0%,var(--tile-orange) 60%,var(--tile-orange-dark) 100%);
-      color:#111;
+      color:var(--order-text-color,#111);
       box-shadow:
         inset 0 2px 0 rgba(255,255,255,.38),
         inset 0 -3px 5px rgba(0,0,0,.08);
@@ -385,7 +391,7 @@
       overflow-wrap:anywhere;
     }
 
-    .accepted-token.image-token{padding:4px}
+    .accepted-token.image-token{padding:4px;border-color:var(--order-image-after-color,var(--navy))}
     .accepted-token img{width:100%;height:100%;object-fit:contain;border-radius:8px;background:#fff}
 
     .drop-check{
@@ -491,6 +497,7 @@
 
     .sequence-shell .order-slot::after{bottom:10%;width:62%}
     .sequence-shell .order-slot.image-slot{width:clamp(92px,14vw,168px);height:clamp(92px,14vw,168px)}
+    .sequence-shell .order-slot.image-slot.is-filled{border-color:var(--order-image-after-color,var(--navy))}
 
     .sequence-arrow{
       color:var(--navy);
@@ -1314,6 +1321,23 @@
       return THEMES.includes(theme) ? theme : "classic";
     }
 
+    function normalizeHex(value,fallback){
+      const raw = String(value || "").trim();
+      const short = raw.match(/^#?([0-9a-f]{3})$/i);
+      if (short) return `#${short[1].split("").map((char)=>char + char).join("")}`.toLowerCase();
+      const full = raw.match(/^#?([0-9a-f]{6})$/i);
+      return full ? `#${full[1]}`.toLowerCase() : fallback;
+    }
+
+    function normalizeLanguage(value,questions,mode){
+      if (value === "en" || value === "ar") return value;
+      if (mode !== "images") {
+        const combined = (questions || []).map((question)=>question.text).join(" ");
+        return detectDirection(combined) === "ltr" ? "en" : "ar";
+      }
+      return "ar";
+    }
+
     function normalizePayload(raw){
       const mode = ["letters","words","images"].includes(raw?.contentMode) ? raw.contentMode : "letters";
       const questions = (Array.isArray(raw?.questions) ? raw.questions : []).map((question,index)=>({
@@ -1330,8 +1354,14 @@
         gameName:String(raw?.gameName || raw?.name || "الترتيب").trim() || "الترتيب",
         theme:normalizeTheme(raw?.theme || raw?.selectedTheme || getParam("theme")),
         contentMode:mode,
+        contentLanguage:normalizeLanguage(raw?.contentLanguage || raw?.language,questions,mode),
         soundEnabled:raw?.soundEnabled !== false && (!raw?.sounds || raw.sounds.enabled !== false),
         fontFamily:["default","arial","traditional"].includes(raw?.fontFamily) ? raw.fontFamily : "default",
+        textColor:normalizeHex(raw?.textColor,"#111111"),
+        beforeColor:normalizeHex(raw?.beforeColor,"#b7b0ac"),
+        afterColor:normalizeHex(raw?.afterColor,"#f5aa2d"),
+        imageBeforeColor:normalizeHex(raw?.imageBeforeColor,"#241a43"),
+        imageAfterColor:normalizeHex(raw?.imageAfterColor,"#241a43"),
         questions
       };
     }
@@ -1341,6 +1371,7 @@
         gameName:"الترتيب",
         theme:getParam("theme") || "classroom",
         contentMode:"letters",
+        contentLanguage:"ar",
         questions:[{text:"لعبة سباق الحروف"}]
       });
     }
@@ -1365,6 +1396,36 @@
         request.onsuccess = ()=>resolve(request.result?.payload || null);
         request.onerror = ()=>reject(request.error || new Error("read failed"));
       });
+    }
+
+    function mixHex(hex,target,amount){
+      const source = normalizeHex(hex,"#000000").slice(1);
+      const destination = normalizeHex(target,"#000000").slice(1);
+      const ratio = Math.max(0,Math.min(1,Number(amount) || 0));
+      const mixed = [0,2,4].map((offset)=>{
+        const from = parseInt(source.slice(offset,offset + 2),16);
+        const to = parseInt(destination.slice(offset,offset + 2),16);
+        return Math.round(from + (to - from) * ratio).toString(16).padStart(2,"0");
+      }).join("");
+      return `#${mixed}`;
+    }
+
+    function applyPayloadAppearance(){
+      const before = normalizeHex(payload?.beforeColor,"#b7b0ac");
+      const after = normalizeHex(payload?.afterColor,"#f5aa2d");
+      const direction = payload?.contentLanguage === "en" ? "ltr" : "rtl";
+      page.style.setProperty("--order-direction",direction);
+      page.style.setProperty("--order-text-color",normalizeHex(payload?.textColor,"#111111"));
+      page.style.setProperty("--tile-gray",before);
+      page.style.setProperty("--tile-gray-light",mixHex(before,"#ffffff",.30));
+      page.style.setProperty("--tile-gray-dark",mixHex(before,"#000000",.34));
+      page.style.setProperty("--tile-orange",after);
+      page.style.setProperty("--tile-orange-light",mixHex(after,"#ffffff",.28));
+      page.style.setProperty("--tile-orange-dark",mixHex(after,"#000000",.30));
+      page.style.setProperty("--order-image-before-color",normalizeHex(payload?.imageBeforeColor,"#241a43"));
+      page.style.setProperty("--order-image-after-color",normalizeHex(payload?.imageAfterColor,"#241a43"));
+      page.dataset.language = payload?.contentLanguage || "ar";
+      groupsCanvas.lang = payload?.contentLanguage === "en" ? "en" : "ar";
     }
 
     async function loadPayload(){
@@ -1399,6 +1460,7 @@
       THEMES.forEach((theme)=>page.classList.remove(`theme-${theme}`));
       page.classList.add(`theme-${payload.theme}`);
       page.dataset.font = payload.fontFamily;
+      applyPayloadAppearance();
     }
 
     function cleanText(value){
@@ -1457,11 +1519,12 @@
     function createState(index){
       const question = payload.questions[index];
       const mode = payload.contentMode;
-      const direction = mode === "images" ? "rtl" : detectDirection(question.text);
+      const direction = payload.contentLanguage === "en" ? "ltr" : "rtl";
       let groups = [];
 
       if (mode === "letters") {
-        groups = cleanText(question.text).split(/\s+/).filter(Boolean).map((word,groupIndex)=>
+        const sourceText = direction === "ltr" ? cleanText(question.text).toLocaleUpperCase("en") : cleanText(question.text);
+        groups = sourceText.split(/\s+/).filter(Boolean).map((word,groupIndex)=>
           makeGroup(graphemes(word),groupIndex,"letter")
         );
       } else if (mode === "words") {
@@ -1975,10 +2038,12 @@
       wrapper.className = `order-group ${group.wrongPulse ? "show-wrong" : ""} ${group.celebrating ? "is-completing" : ""}`.trim();
       wrapper.style.setProperty("--wave-count",String(group.items.length));
       wrapper.dir = state.direction;
+      wrapper.style.direction = state.direction;
 
       const bank = document.createElement("div");
       bank.className = "token-bank";
       bank.dir = state.direction;
+      bank.style.direction = state.direction;
       group.bank.forEach((id)=>{
         const item = itemById(group,id);
         if (item) bank.appendChild(createToken(item));
@@ -1987,6 +2052,7 @@
       const tray = document.createElement("div");
       tray.className = "slot-tray";
       tray.dir = state.direction;
+      tray.style.direction = state.direction;
       group.slots.forEach((_,slotIndex)=>tray.appendChild(createSlot(group,groupIndex,slotIndex,"letter")));
 
       wrapper.append(bank,tray);
@@ -1998,10 +2064,12 @@
       wrapper.className = `order-group ${group.wrongPulse ? "show-wrong" : ""} ${group.celebrating ? "is-completing" : ""}`.trim();
       wrapper.style.setProperty("--wave-count",String(group.items.length));
       wrapper.dir = state.direction;
+      wrapper.style.direction = state.direction;
 
       const bank = document.createElement("div");
       bank.className = "token-bank";
       bank.dir = state.direction;
+      bank.style.direction = state.direction;
       group.bank.forEach((id)=>{
         const item = itemById(group,id);
         if (item) bank.appendChild(createToken(item));
@@ -2010,6 +2078,7 @@
       const sequence = document.createElement("div");
       sequence.className = "sequence-shell";
       sequence.dir = state.direction;
+      sequence.style.direction = state.direction;
       group.slots.forEach((_,slotIndex)=>{
         sequence.appendChild(createSlot(group,groupIndex,slotIndex,group.items[0]?.type || "word"));
         if (slotIndex < group.slots.length - 1) {
@@ -2035,6 +2104,8 @@
     function render(){
       groupsCanvas.textContent = "";
       groupsCanvas.dir = state.direction;
+      groupsCanvas.style.direction = state.direction;
+      page.style.setProperty("--order-direction",state.direction);
       groupsCanvas.classList.toggle("is-sequence-mode",payload.contentMode !== "letters");
       state.groups.forEach((group,index)=>{
         groupsCanvas.appendChild(payload.contentMode === "letters"
