@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-match-setup-v57-remove-matched-color-range-fix -->
+<!-- version: index-order-setup-v58 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <title>صندوق الالعاب التعليمية</title>
@@ -9198,6 +9198,272 @@
       .match-color-change{min-width:68px}
     }
 
+
+    /* إعداد لعبة الترتيب */
+    .template-cover.order-cover{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(4px,.8vw,10px);
+      padding:10px;
+      background:linear-gradient(145deg,#fff7bf,#f6cf47);
+    }
+    .template-cover.order-cover span{
+      width:clamp(24px,4vw,44px);
+      aspect-ratio:1;
+      border:2px solid #111;
+      border-radius:10px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:#111;
+      font-size:clamp(16px,2.4vw,28px);
+      font-weight:950;
+      box-shadow:0 4px 0 rgba(0,0,0,.16);
+    }
+    .template-cover.order-cover i{
+      color:#111;
+      font-style:normal;
+      font-size:clamp(16px,2.2vw,26px);
+      font-weight:950;
+    }
+
+    .order-setup{
+      display:none;
+      width:min(1180px,92%);
+      margin:0 auto;
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:26px;
+      padding:clamp(18px,2.4vw,28px);
+      position:relative;
+      z-index:5;
+    }
+    .order-setup.active{display:block}
+    .order-setup-body{
+      margin-top:clamp(16px,2vw,24px);
+      display:grid;
+      gap:clamp(14px,1.8vw,22px);
+    }
+    .order-content-grid{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    .order-questions-editor{
+      display:grid;
+      gap:14px;
+    }
+    .order-question-card{
+      position:relative;
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#fff;
+      padding:clamp(14px,1.8vw,20px);
+      display:grid;
+      gap:14px;
+      box-shadow:0 5px 0 rgba(0,0,0,.08);
+    }
+    .order-question-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .order-question-title{
+      margin:0;
+      font-size:clamp(18px,2vw,27px);
+      font-weight:950;
+    }
+    .order-remove-question{
+      width:36px;
+      height:36px;
+      border:2px solid var(--ink);
+      border-radius:50%;
+      background:#ff4d4f;
+      color:#fff;
+      font-size:24px;
+      font-weight:950;
+      line-height:1;
+      cursor:pointer;
+    }
+    .order-remove-question:disabled{
+      opacity:.35;
+      cursor:default;
+    }
+    .order-answer-label{
+      color:#222;
+      font-size:clamp(14px,1.5vw,19px);
+      font-weight:900;
+    }
+    .order-text-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:9px;
+      align-items:center;
+    }
+    .order-answer-input{
+      width:100%;
+      min-height:52px;
+      border:3px solid var(--ink);
+      border-radius:17px;
+      padding:10px 14px;
+      background:#fff;
+      color:#111;
+      font-size:clamp(16px,1.7vw,22px);
+      font-weight:750;
+      outline:none;
+      resize:vertical;
+      text-align:right;
+    }
+    .order-mode-note{
+      margin:0;
+      color:#666;
+      font-size:clamp(12px,1.3vw,16px);
+      font-weight:700;
+      line-height:1.6;
+    }
+    .order-images-editor{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+    }
+    .order-image-entry{
+      position:relative;
+      min-height:154px;
+      border:2px dashed rgba(17,17,17,.45);
+      border-radius:17px;
+      background:#fafafa;
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      overflow:hidden;
+    }
+    .order-image-entry img{
+      width:100%;
+      height:94px;
+      object-fit:contain;
+      border-radius:10px;
+      background:#fff;
+    }
+    .order-image-input{display:none}
+    .order-image-pick{
+      width:100%;
+      min-height:42px;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:#fff;
+      color:#111;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      padding:6px 10px;
+    }
+    .order-image-remove{
+      position:absolute;
+      top:6px;
+      left:6px;
+      width:28px;
+      height:28px;
+      border:2px solid var(--ink);
+      border-radius:50%;
+      background:#ff4d4f;
+      color:#fff;
+      font-size:18px;
+      font-weight:950;
+      line-height:1;
+      cursor:pointer;
+      z-index:2;
+    }
+    .order-image-index{
+      position:absolute;
+      top:7px;
+      right:8px;
+      min-width:28px;
+      height:28px;
+      border:2px solid var(--ink);
+      border-radius:999px;
+      background:var(--title-yellow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 7px;
+      font-size:13px;
+      font-weight:950;
+      z-index:2;
+    }
+    .order-add-image{
+      min-height:46px;
+      border:3px solid var(--ink);
+      border-radius:15px;
+      background:#fff;
+      color:#111;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .order-add-question{
+      min-width:170px;
+      min-height:48px;
+      margin:16px auto 0;
+      border:3px solid var(--ink);
+      border-radius:17px;
+      background:var(--blue-bar);
+      color:#fff;
+      font-size:17px;
+      font-weight:900;
+      padding:8px 20px;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+    }
+    .order-add-question[hidden]{display:none!important}
+    .order-setup[data-order-font="arial"],
+    .order-setup[data-order-font="arial"] *{font-family:Arial,sans-serif}
+    .order-setup[data-order-font="traditional"],
+    .order-setup[data-order-font="traditional"] *{font-family:"Traditional Arabic","Arabic Typesetting",Tahoma,Arial,sans-serif}
+
+    @media(max-width:760px){
+      .order-setup{
+        width:92%;
+        padding:16px 12px;
+        border-radius:22px;
+      }
+      .order-setup-body{gap:12px;margin-top:14px}
+      .order-content-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+      .order-content-grid .choices-mode-btn{
+        min-height:66px;
+        padding:7px 4px;
+      }
+      .order-content-grid .choices-mode-btn strong{
+        font-size:clamp(14px,3.7vw,18px);
+      }
+      .order-question-card{
+        padding:12px;
+        border-radius:18px;
+      }
+      .order-question-title{font-size:18px}
+      .order-answer-input{
+        min-height:46px;
+        font-size:15px;
+        border-radius:14px;
+      }
+      .order-images-editor{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:9px;
+      }
+      .order-image-entry{min-height:138px;padding:8px}
+      .order-image-entry img{height:80px}
+      .order-add-question{
+        min-height:44px;
+        font-size:15px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -9287,32 +9553,20 @@
 <p class="template-desc">أسئلة متعددة الخيارات.</p>
 </div>
 </button>
-<button class="template-card" data-template="true-false" type="button">
-<div aria-hidden="true" class="template-cover empty"></div>
-<div class="template-content">
-<h3 class="template-title">صح أو خطأ</h3>
-<p class="template-desc">عبارات بإجابة صح أو خطأ.</p>
-</div>
-</button>
 <button class="template-card" data-template="matching" type="button">
 <div aria-hidden="true" class="template-cover empty"></div>
 <div class="template-content">
 <h3 class="template-title">المطابقة</h3>
-<p class="template-desc">أنشئ أزواجًا متطابقة أو مختلفة، واقلب البطاقات للعثور على كل زوج</p>
+<p class="template-desc">اقلب البطاقات واعثر على كل زوج.</p>
 </div>
 </button>
-<button class="template-card" data-template="sort" type="button">
-<div aria-hidden="true" class="template-cover empty"></div>
-<div class="template-content">
-<h3 class="template-title">التصنيف</h3>
-<p class="template-desc">رتّب العناصر داخل مجموعات.</p>
+<button class="template-card" data-template="order" type="button">
+<div aria-hidden="true" class="template-cover order-cover">
+  <span>٣</span><i>←</i><span>٢</span><i>←</i><span>١</span>
 </div>
-</button>
-<button class="template-card" data-template="guess-image" type="button">
-<div aria-hidden="true" class="template-cover empty"></div>
 <div class="template-content">
-<h3 class="template-title">خمن الصورة</h3>
-<p class="template-desc">اعرض صورة وخمّن الإجابة.</p>
+<h3 class="template-title">الترتيب</h3>
+<p class="template-desc">رتّب الحروف أو الكلمات أو الصور.</p>
 </div>
 </button>
 </div>
@@ -9755,6 +10009,114 @@
 
 
 
+<section class="order-setup" id="orderSetupScreen" data-order-font="default">
+  <div class="game-name-panel">
+    <div class="game-name-head">
+      <span class="game-name-title">ادخل اسم اللعبة</span>
+      <span class="game-name-note">سيتم حفظ اللعبة في الألعاب المحفوظة بهذا الاسم</span>
+    </div>
+    <input class="game-name-input" id="orderGameNameInput" maxlength="60" placeholder="اكتب اسم اللعبة هنا.." type="text"/>
+  </div>
+
+  <div class="order-setup-body">
+    <section class="choices-section choices-theme-section">
+      <div class="choices-theme-current">
+        <div class="choices-theme-title-wrap">
+          <h3 class="choices-section-title">اختر ثيم اللعبة</h3>
+        </div>
+        <button class="choices-theme-change" id="toggleOrderThemeListBtn" type="button">تغيير</button>
+        <span aria-hidden="true" class="choices-theme-preview theme-art classic" id="orderCurrentThemePreview"></span>
+      </div>
+      <div class="choices-theme-list" hidden id="orderThemeListPanel">
+<div class="choices-theme-card active" data-order-theme="classic">
+          <span class="theme-art classic"></span><span class="choices-theme-name">خلفية بيضاء</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="classroom">
+          <span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="sky-clouds">
+          <span class="theme-art sky-clouds"></span><span class="choices-theme-name">سماء وغيوم</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="forest">
+          <span class="theme-art forest"></span><span class="choices-theme-name">غابة</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="math">
+          <span class="theme-art math"></span><span class="choices-theme-name">رياضيات</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="english">
+          <span class="theme-art english"></span><span class="choices-theme-name">انجليزي</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="flowers">
+          <span class="theme-art flowers"></span><span class="choices-theme-name">ازهار وورود</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="national-day">
+          <span class="theme-art national-day"></span><span class="choices-theme-name">اليوم الوطني</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+        <div class="choices-theme-card" data-order-theme="founding-day">
+          <span class="theme-art founding-day"></span><span class="choices-theme-name">يوم التأسيس</span><button class="choices-theme-activate" type="button">تفعيل</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">إعدادات طريقة اللعب</h3>
+      </div>
+
+      <div class="choices-config-grid">
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع المحتوى</h4>
+          <div class="choices-mode-grid order-content-grid" aria-label="نوع محتوى لعبة الترتيب">
+            <button class="choices-mode-btn active" data-order-content-mode="letters" type="button"><strong>حروف</strong></button>
+            <button class="choices-mode-btn" data-order-content-mode="words" type="button"><strong>كلمات</strong></button>
+            <button class="choices-mode-btn" data-order-content-mode="images" type="button"><strong>صور</strong></button>
+          </div>
+        </div>
+      </div>
+
+      <button class="choices-advanced-toggle" id="orderAdvancedToggleBtn" type="button" aria-expanded="false">
+        <span>⚙ الإعدادات المتقدمة</span>
+        <span class="choices-advanced-action" aria-hidden="true">
+          <span class="choices-advanced-arrow">▼</span>
+          <span class="choices-advanced-action-text" id="orderAdvancedActionText">عرض</span>
+        </span>
+      </button>
+
+      <div class="choices-advanced-panel" id="orderAdvancedPanel" aria-hidden="true">
+        <div class="choices-advanced-inner">
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>أصوات اللعبة</strong></div>
+            <button class="quiz-sound-toggle is-on" id="orderSoundToggleBtn" type="button" aria-pressed="true" aria-label="إيقاف أصوات اللعبة">
+              <span>×</span><span>✓</span>
+            </button>
+          </div>
+          <div class="choices-advanced-row">
+            <label class="choices-advanced-label" for="orderFontSelect"><strong>نوع الخط</strong></label>
+            <select class="quiz-font-select" id="orderFontSelect">
+              <option value="default">خط اللعبة</option>
+              <option value="arial">Arial</option>
+              <option value="traditional">عربي تقليدي</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">فقرات الترتيب</h3>
+      </div>
+      <div class="order-questions-editor" id="orderQuestionsEditor"></div>
+      <button class="order-add-question" id="addOrderQuestionBtn" type="button"><span>＋</span><span>إضافة سؤال</span></button>
+    </section>
+
+    <div class="choices-actions">
+      <button class="choices-test-btn" id="testOrderBtn" type="button">اختبار اللعبة</button>
+      <button class="choices-save-btn" id="saveOrderBtn" type="button">حفظ اللعبة</button>
+    </div>
+  </div>
+</section>
+
 <div class="match-color-modal" id="matchColorModal" hidden aria-hidden="true">
   <div class="match-color-backdrop" data-match-color-close></div>
   <section class="match-color-dialog" role="dialog" aria-modal="true" aria-labelledby="matchColorModalTitle">
@@ -9812,7 +10174,7 @@
   const OPEN_BOX_PAGE_URL = "open-box.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
-  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
   const wheelItemsEditor = document.getElementById("wheelItemsEditor");
@@ -13175,5 +13537,606 @@
 })();
 </script>
 
+
+<script>
+(() => {
+  "use strict";
+
+  const ORDER_PAYLOAD_KEY = "sandooq_order_payload_v1";
+  const ORDER_DRAFT_KEY = "sandooq_order_draft_v1";
+  const ORDER_PAGE_URL = "order.html";
+  const ORDER_MAX_QUESTIONS = 30;
+  const ORDER_MIN_IMAGES = 2;
+  const ORDER_MAX_IMAGES = 12;
+  const ORDER_SAVED_REGISTRY_KEY = "sandooq_edu_saved_games_v1";
+
+  const setup = document.getElementById("orderSetupScreen");
+  const gameNameInput = document.getElementById("orderGameNameInput");
+  const themeList = document.getElementById("orderThemeListPanel");
+  const themeToggle = document.getElementById("toggleOrderThemeListBtn");
+  const themePreview = document.getElementById("orderCurrentThemePreview");
+  const questionsEditor = document.getElementById("orderQuestionsEditor");
+  const addQuestionBtn = document.getElementById("addOrderQuestionBtn");
+  const advancedToggle = document.getElementById("orderAdvancedToggleBtn");
+  const advancedActionText = document.getElementById("orderAdvancedActionText");
+  const advancedPanel = document.getElementById("orderAdvancedPanel");
+  const soundToggle = document.getElementById("orderSoundToggleBtn");
+  const fontSelect = document.getElementById("orderFontSelect");
+
+  let theme = "classic";
+  let contentMode = "letters";
+  let soundEnabled = true;
+  let fontFamily = "default";
+  let advancedOpen = false;
+  let questions = [];
+  let questionSequence = 0;
+
+  const THEME_NAMES = {
+    classic:"خلفية بيضاء",
+    classroom:"فصل مدرسي",
+    "sky-clouds":"سماء وغيوم",
+    forest:"غابة",
+    math:"رياضيات",
+    english:"انجليزي",
+    flowers:"ازهار وورود",
+    "national-day":"اليوم الوطني",
+    "founding-day":"يوم التأسيس"
+  };
+
+  function normalizeTheme(value){
+    if (typeof window.normalizeGameTheme === "function") {
+      return window.normalizeGameTheme(value);
+    }
+    return Object.prototype.hasOwnProperty.call(THEME_NAMES,String(value || ""))
+      ? String(value)
+      : "classic";
+  }
+
+  function normalizeMode(value){
+    return ["letters","words","images"].includes(value) ? value : "letters";
+  }
+
+  function blankImage(){
+    return {name:"",data:""};
+  }
+
+  function createQuestion(){
+    questionSequence += 1;
+    return {
+      id:`order-question-${Date.now()}-${questionSequence}`,
+      text:"",
+      images:[blankImage(),blankImage(),blankImage()]
+    };
+  }
+
+  function normalizeQuestion(raw,index){
+    const rawImages = Array.isArray(raw?.images) ? raw.images : [];
+    const images = rawImages.slice(0,ORDER_MAX_IMAGES).map((image)=>({
+      name:String(image?.name || image?.imageName || ""),
+      data:String(image?.data || image?.imageData || image?.image || "")
+    }));
+    while (images.length < 3) images.push(blankImage());
+    return {
+      id:String(raw?.id || `order-question-${index + 1}`),
+      text:String(raw?.text || raw?.answer || ""),
+      images
+    };
+  }
+
+  function draftPayload(){
+    return {
+      gameType:"order",
+      gameTemplate:"order",
+      name:String(gameNameInput?.value || "").trim(),
+      gameName:String(gameNameInput?.value || "").trim(),
+      theme,
+      selectedTheme:theme,
+      contentMode,
+      soundEnabled,
+      sounds:{enabled:soundEnabled},
+      fontFamily,
+      questions:questions.map((question)=>({
+        id:question.id,
+        text:String(question.text || ""),
+        images:question.images.map((image)=>({
+          name:String(image.name || ""),
+          data:String(image.data || "")
+        }))
+      })),
+      updatedAt:Date.now()
+    };
+  }
+
+  function saveDraft(){
+    try {
+      sessionStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(draftPayload()));
+    } catch (_) {}
+  }
+
+  function loadDraft(){
+    try {
+      const raw = sessionStorage.getItem(ORDER_DRAFT_KEY);
+      if (!raw) return;
+      const draft = JSON.parse(raw);
+      theme = normalizeTheme(draft.theme || draft.selectedTheme);
+      contentMode = normalizeMode(draft.contentMode);
+      soundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
+      fontFamily = ["default","arial","traditional"].includes(draft.fontFamily)
+        ? draft.fontFamily
+        : "default";
+      questions = Array.isArray(draft.questions)
+        ? draft.questions.slice(0,ORDER_MAX_QUESTIONS).map(normalizeQuestion)
+        : [];
+      if (gameNameInput) gameNameInput.value = String(draft.name || draft.gameName || "");
+    } catch (_) {}
+  }
+
+  function updateThemeUI(){
+    theme = normalizeTheme(theme);
+    if (themePreview) {
+      themePreview.className = `choices-theme-preview theme-art ${theme}`;
+      themePreview.setAttribute("aria-label",THEME_NAMES[theme] || THEME_NAMES.classic);
+    }
+    themeList?.querySelectorAll("[data-order-theme]").forEach((card)=>{
+      card.classList.toggle("active",card.dataset.orderTheme === theme);
+    });
+  }
+
+  function updateModeUI(){
+    document.querySelectorAll("[data-order-content-mode]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.orderContentMode === contentMode);
+    });
+  }
+
+  function updateAdvancedUI(){
+    advancedToggle?.setAttribute("aria-expanded",advancedOpen ? "true" : "false");
+    advancedPanel?.classList.toggle("is-open",advancedOpen);
+    advancedPanel?.setAttribute("aria-hidden",advancedOpen ? "false" : "true");
+    if (advancedActionText) advancedActionText.textContent = advancedOpen ? "إخفاء" : "عرض";
+
+    soundToggle?.classList.toggle("is-on",soundEnabled);
+    soundToggle?.setAttribute("aria-pressed",soundEnabled ? "true" : "false");
+    soundToggle?.setAttribute(
+      "aria-label",
+      soundEnabled ? "إيقاف أصوات اللعبة" : "تشغيل أصوات اللعبة"
+    );
+
+    if (fontSelect) fontSelect.value = fontFamily;
+    if (setup) setup.dataset.orderFont = fontFamily;
+  }
+
+  function readImage(file){
+    return new Promise((resolve)=>{
+      if (!file || !String(file.type || "").startsWith("image/")) {
+        resolve({name:"",data:""});
+        return;
+      }
+      const reader = new FileReader();
+      reader.onerror = ()=>resolve({name:"",data:""});
+      reader.onload = ()=>{
+        const original = String(reader.result || "");
+        const image = new Image();
+        image.onerror = ()=>resolve({name:file.name || "صورة",data:original});
+        image.onload = ()=>{
+          try {
+            const maxSide = 1000;
+            const ratio = Math.min(1,maxSide / Math.max(image.naturalWidth || 1,image.naturalHeight || 1));
+            const width = Math.max(1,Math.round((image.naturalWidth || 1) * ratio));
+            const height = Math.max(1,Math.round((image.naturalHeight || 1) * ratio));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d",{alpha:false});
+            context.fillStyle = "#fff";
+            context.fillRect(0,0,width,height);
+            context.drawImage(image,0,0,width,height);
+            resolve({
+              name:file.name || "صورة",
+              data:canvas.toDataURL("image/jpeg",.82)
+            });
+          } catch (_) {
+            resolve({name:file.name || "صورة",data:original});
+          }
+        };
+        image.src = original;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function renderTextQuestion(card,question,index){
+    const label = document.createElement("label");
+    label.className = "order-answer-label";
+    label.textContent = contentMode === "letters"
+      ? "اكتب العبارة التي تريد ترتيب حروفها"
+      : "اكتب الجملة أو العناصر بالترتيب الصحيح";
+
+    const row = document.createElement("div");
+    row.className = "order-text-row";
+
+    const input = document.createElement("textarea");
+    input.className = "order-answer-input";
+    input.rows = 2;
+    input.maxLength = 180;
+    input.placeholder = contentMode === "letters"
+      ? "مثال: لعبة سباق الحروف"
+      : "مثال: ذهب أحمد إلى البقالة";
+    input.value = question.text || "";
+    input.dir = "auto";
+    input.addEventListener("input",()=>{
+      questions[index].text = input.value;
+      saveDraft();
+    });
+
+    const review = document.createElement("button");
+    review.type = "button";
+    review.className = "quiz-text-review-btn";
+    review.setAttribute("aria-label",`مراجعة السؤال ${index + 1}`);
+    review.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6S2.5 12 2.5 12Z"></path>' +
+      '<circle cx="12" cy="12" r="2.8"></circle>' +
+      '</svg>';
+    review.addEventListener("click",()=>{
+      if (typeof window.openSetupTextEditor === "function") {
+        window.openSetupTextEditor({
+          value:input.value,
+          maxLength:180,
+          placeholder:input.placeholder,
+          onSave:(value)=>{
+            input.value = value;
+            questions[index].text = value;
+            saveDraft();
+          }
+        });
+      } else {
+        input.focus();
+      }
+    });
+
+    const note = document.createElement("p");
+    note.className = "order-mode-note";
+    note.textContent = contentMode === "letters"
+      ? "اكتب العبارة مرة واحدة؛ تفصل اللعبة الكلمات بالمسافات وتخلط حروف كل كلمة تلقائيًا."
+      : "اكتب العبارة مرة واحدة؛ تفصل اللعبة الكلمات بالمسافات وتخلطها تلقائيًا.";
+
+    row.append(input,review);
+    card.append(label,row,note);
+  }
+
+  function renderImageQuestion(card,question,questionIndex){
+    const label = document.createElement("div");
+    label.className = "order-answer-label";
+    label.textContent = "أضف الصور بالترتيب الصحيح";
+
+    const note = document.createElement("p");
+    note.className = "order-mode-note";
+    note.textContent = "ترتيب الصور هنا هو الإجابة الصحيحة، وستظهر الصور متلخبطة عند بدء اللعبة.";
+
+    const editor = document.createElement("div");
+    editor.className = "order-images-editor";
+
+    question.images.forEach((image,imageIndex)=>{
+      const entry = document.createElement("div");
+      entry.className = "order-image-entry";
+
+      const indexBadge = document.createElement("span");
+      indexBadge.className = "order-image-index";
+      indexBadge.textContent = String(imageIndex + 1);
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "order-image-remove";
+      remove.textContent = "×";
+      remove.disabled = question.images.length <= ORDER_MIN_IMAGES;
+      remove.setAttribute("aria-label",`حذف الصورة ${imageIndex + 1}`);
+      remove.addEventListener("click",()=>{
+        if (questions[questionIndex].images.length <= ORDER_MIN_IMAGES) return;
+        questions[questionIndex].images.splice(imageIndex,1);
+        renderQuestions();
+        saveDraft();
+      });
+
+      const preview = document.createElement("img");
+      preview.alt = "";
+      if (image.data) {
+        preview.src = image.data;
+      } else {
+        preview.removeAttribute("src");
+        preview.style.display = "none";
+      }
+
+      const file = document.createElement("input");
+      file.type = "file";
+      file.accept = "image/*";
+      file.className = "order-image-input";
+
+      const pick = document.createElement("button");
+      pick.type = "button";
+      pick.className = "order-image-pick";
+      pick.textContent = image.data ? "تغيير الصورة" : "اختيار صورة";
+      pick.addEventListener("click",()=>file.click());
+
+      file.addEventListener("change",async()=>{
+        const selected = file.files?.[0];
+        if (!selected) return;
+        pick.disabled = true;
+        pick.textContent = "جارٍ التجهيز...";
+        const result = await readImage(selected);
+        questions[questionIndex].images[imageIndex] = result;
+        renderQuestions();
+        saveDraft();
+      });
+
+      entry.append(indexBadge,remove,preview,pick,file);
+      editor.appendChild(entry);
+    });
+
+    const addImage = document.createElement("button");
+    addImage.type = "button";
+    addImage.className = "order-add-image";
+    addImage.textContent = "＋ إضافة صورة";
+    addImage.hidden = question.images.length >= ORDER_MAX_IMAGES;
+    addImage.addEventListener("click",()=>{
+      if (questions[questionIndex].images.length >= ORDER_MAX_IMAGES) return;
+      questions[questionIndex].images.push(blankImage());
+      renderQuestions();
+      saveDraft();
+    });
+
+    card.append(label,note,editor,addImage);
+  }
+
+  function renderQuestions(){
+    if (!questionsEditor) return;
+    if (!questions.length) questions = [createQuestion()];
+    questionsEditor.textContent = "";
+
+    questions.forEach((question,index)=>{
+      const card = document.createElement("article");
+      card.className = "order-question-card";
+
+      const head = document.createElement("div");
+      head.className = "order-question-head";
+
+      const title = document.createElement("h4");
+      title.className = "order-question-title";
+      title.textContent = `السؤال ${index + 1}`;
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "order-remove-question";
+      remove.textContent = "×";
+      remove.disabled = questions.length <= 1;
+      remove.setAttribute("aria-label",`حذف السؤال ${index + 1}`);
+      remove.addEventListener("click",()=>{
+        if (questions.length <= 1) return;
+        questions.splice(index,1);
+        renderQuestions();
+        saveDraft();
+      });
+
+      head.append(title,remove);
+      card.appendChild(head);
+
+      if (contentMode === "images") {
+        if (!Array.isArray(question.images)) question.images = [];
+        while (question.images.length < 3) question.images.push(blankImage());
+        renderImageQuestion(card,question,index);
+      } else {
+        renderTextQuestion(card,question,index);
+      }
+
+      questionsEditor.appendChild(card);
+    });
+
+    if (addQuestionBtn) addQuestionBtn.hidden = questions.length >= ORDER_MAX_QUESTIONS;
+  }
+
+  function cleanText(value){
+    return String(value || "").replace(/\s+/g," ").trim();
+  }
+
+  function validate(){
+    if (!questions.length) {
+      alert("يرجى إضافة سؤال واحد على الأقل.");
+      return false;
+    }
+
+    for (let index=0; index<questions.length; index+=1) {
+      const question = questions[index];
+      if (contentMode === "letters") {
+        const text = cleanText(question.text);
+        const characters = Array.from(text.replace(/\s/g,""));
+        if (characters.length < 2) {
+          alert(`يرجى كتابة حرفين على الأقل في السؤال ${index + 1}.`);
+          return false;
+        }
+      } else if (contentMode === "words") {
+        const words = cleanText(question.text).split(/\s+/).filter(Boolean);
+        if (words.length < 2) {
+          alert(`يرجى كتابة كلمتين على الأقل في السؤال ${index + 1}.`);
+          return false;
+        }
+      } else {
+        const images = question.images.filter((image)=>Boolean(image.data));
+        if (images.length < ORDER_MIN_IMAGES) {
+          alert(`يرجى إضافة صورتين على الأقل في السؤال ${index + 1}.`);
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function buildPayload(payloadId = ""){
+    return {
+      ...draftPayload(),
+      payloadId,
+      questions:questions.map((question,index)=>({
+        id:`question-${index + 1}`,
+        text:contentMode === "images" ? "" : cleanText(question.text),
+        images:contentMode === "images"
+          ? question.images.filter((image)=>Boolean(image.data)).map((image)=>({
+              name:String(image.name || ""),
+              data:String(image.data || "")
+            }))
+          : []
+      })),
+      updatedAt:Date.now()
+    };
+  }
+
+  async function persistPayload(payloadId,payload){
+    try {
+      Object.keys(sessionStorage).forEach((key)=>{
+        if (key.startsWith(`${ORDER_PAYLOAD_KEY}_`)) sessionStorage.removeItem(key);
+      });
+      sessionStorage.removeItem(ORDER_PAYLOAD_KEY);
+      sessionStorage.setItem(`${ORDER_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
+      sessionStorage.setItem(ORDER_PAYLOAD_KEY,JSON.stringify(payload));
+      sessionStorage.setItem(ORDER_DRAFT_KEY,JSON.stringify(payload));
+    } catch (_) {}
+
+    try {
+      if (typeof window.savePayloadToIndexedDB === "function") {
+        await window.savePayloadToIndexedDB(`order:${payloadId}`,payload);
+      }
+    } catch (_) {}
+  }
+
+  async function openGame(){
+    if (!validate()) return;
+    const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2,9)}`;
+    const payload = buildPayload(payloadId);
+    await persistPayload(payloadId,payload);
+
+    const url = new URL(ORDER_PAGE_URL,window.location.href);
+    url.searchParams.set("payloadId",payloadId);
+    url.searchParams.set("theme",theme);
+    url.searchParams.set("return","index.html#orderSetup");
+    url.searchParams.set("v",String(Date.now()));
+    window.location.href = `${url.pathname}${url.search}`;
+  }
+
+  function updateSavedRegistry(storageKey,payload){
+    try {
+      const raw = localStorage.getItem(ORDER_SAVED_REGISTRY_KEY);
+      const registry = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(registry) ? registry : [];
+      const record = {
+        id:storageKey,
+        storageKey,
+        gameType:"order",
+        name:payload.name || payload.gameName || "لعبة الترتيب",
+        updatedAt:payload.updatedAt
+      };
+      const existingIndex = list.findIndex((item)=>item?.storageKey === storageKey);
+      if (existingIndex >= 0) list[existingIndex] = record;
+      else list.unshift(record);
+      localStorage.setItem(ORDER_SAVED_REGISTRY_KEY,JSON.stringify(list.slice(0,200)));
+    } catch (_) {}
+  }
+
+  async function saveGame(){
+    if (!validate()) return;
+    const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+    const payload = buildPayload(savedId);
+    const storageKey = `saved:order:${savedId}`;
+    saveDraft();
+
+    try {
+      if (typeof window.savePayloadToIndexedDB === "function") {
+        await window.savePayloadToIndexedDB(storageKey,payload);
+      }
+      updateSavedRegistry(storageKey,payload);
+      alert("تم حفظ لعبة الترتيب.");
+    } catch (_) {
+      alert("تعذر حفظ اللعبة على هذا الجهاز. حاول مرة أخرى.");
+    }
+  }
+
+  function openSetup(){
+    if (!questions.length) questions = [createQuestion()];
+    updateThemeUI();
+    updateModeUI();
+    updateAdvancedUI();
+    renderQuestions();
+    if (typeof window.openScreen === "function") window.openScreen("orderSetupScreen");
+  }
+
+  window.openOrderSetupScreen = openSetup;
+
+  document.querySelectorAll("[data-template='order']").forEach((button)=>{
+    button.addEventListener("click",openSetup);
+  });
+
+  document.querySelectorAll("[data-order-content-mode]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      contentMode = normalizeMode(button.dataset.orderContentMode);
+      updateModeUI();
+      renderQuestions();
+      saveDraft();
+    });
+  });
+
+  themeToggle?.addEventListener("click",()=>{
+    if (themeList) themeList.hidden = !themeList.hidden;
+  });
+
+  themeList?.querySelectorAll(".choices-theme-activate").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      const card = button.closest("[data-order-theme]");
+      if (!card) return;
+      theme = normalizeTheme(card.dataset.orderTheme);
+      updateThemeUI();
+      themeList.hidden = true;
+      saveDraft();
+    });
+  });
+
+  advancedToggle?.addEventListener("click",()=>{
+    advancedOpen = !advancedOpen;
+    updateAdvancedUI();
+  });
+
+  soundToggle?.addEventListener("click",()=>{
+    soundEnabled = !soundEnabled;
+    updateAdvancedUI();
+    saveDraft();
+  });
+
+  fontSelect?.addEventListener("change",()=>{
+    fontFamily = ["default","arial","traditional"].includes(fontSelect.value)
+      ? fontSelect.value
+      : "default";
+    updateAdvancedUI();
+    saveDraft();
+  });
+
+  addQuestionBtn?.addEventListener("click",()=>{
+    if (questions.length >= ORDER_MAX_QUESTIONS) return;
+    questions.push(createQuestion());
+    renderQuestions();
+    saveDraft();
+    window.setTimeout(()=>{
+      questionsEditor?.lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"});
+    },40);
+  });
+
+  gameNameInput?.addEventListener("input",saveDraft);
+  document.getElementById("testOrderBtn")?.addEventListener("click",openGame);
+  document.getElementById("saveOrderBtn")?.addEventListener("click",saveGame);
+
+  loadDraft();
+  if (!questions.length) questions = [createQuestion()];
+  updateThemeUI();
+  updateModeUI();
+  updateAdvancedUI();
+  renderQuestions();
+
+  if (window.location.hash === "#orderSetup") openSetup();
+})();
+</script>
 </body>
 </html>
