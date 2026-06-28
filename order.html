@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: order-v2 -->
+<!-- version: order-v3 -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -254,12 +254,22 @@
       line-height:1;
       cursor:grab;
       touch-action:none;
+      -webkit-user-select:none;
+      user-select:none;
+      -webkit-touch-callout:none;
+      -webkit-user-drag:none;
       overflow:hidden;
       transform:translate3d(0,0,0);
+      will-change:transform,filter;
       transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
     }
 
     .order-token:active{cursor:grabbing}
+
+    .order-token.is-pointer-active{
+      transform:translateY(-2px) scale(1.035);
+      filter:brightness(1.055);
+    }
 
     .order-token.is-selected{
       transform:translateY(-5px) scale(1.06);
@@ -613,14 +623,23 @@
 
     .drag-ghost{
       position:fixed;
+      left:0;
+      top:0;
       z-index:9999;
       pointer-events:none;
       margin:0;
-      transform:translate(-50%,-50%) scale(1.04);
+      transform:translate3d(0,0,0) translate(-50%,-50%) scale(1.04);
       opacity:.96;
       transition:none!important;
-      will-change:left,top,transform,opacity;
+      will-change:transform,opacity;
       contain:layout paint style;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+    }
+
+    .order-page.is-dragging,
+    .order-page.is-dragging *{
+      cursor:grabbing!important;
     }
 
     @keyframes tokenWrong{
@@ -1859,115 +1878,197 @@
       const slot = groupsCanvas.querySelector(`[data-group-index="${groupIndex}"][data-slot-index="${slotIndex}"]`);
       if (!slot || slot.classList.contains("is-filled")) return null;
       const rect = slot.getBoundingClientRect();
-      const radius = Math.min(66,Math.max(36,Math.min(rect.width,rect.height) * .68));
+      const radius = Math.min(82,Math.max(44,Math.min(rect.width,rect.height) * .82));
       const dx = Math.max(rect.left - clientX,0,clientX - rect.right);
       const dy = Math.max(rect.top - clientY,0,clientY - rect.bottom);
       if (Math.hypot(dx,dy) > radius) return null;
       return {slot,slotIndex,rect};
     }
 
+    function findExpandedHitToken(clientX,clientY,pointerType){
+      const extra = pointerType === "touch" || pointerType === "pen" ? 11 : 6;
+      let bestToken = null;
+      let bestScore = Number.POSITIVE_INFINITY;
+
+      groupsCanvas.querySelectorAll(".order-token").forEach((token)=>{
+        const groupIndex = Number(token.dataset.groupIndex);
+        if (!Number.isInteger(groupIndex) || state.groups[groupIndex]?.completed) return;
+        const rect = token.getBoundingClientRect();
+        const dx = Math.max(rect.left - clientX,0,clientX - rect.right);
+        const dy = Math.max(rect.top - clientY,0,clientY - rect.bottom);
+        const edgeDistance = Math.hypot(dx,dy);
+        if (edgeDistance > extra) return;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const centerDistance = Math.hypot(centerX - clientX,centerY - clientY);
+        const score = edgeDistance * 1000 + centerDistance;
+        if (score < bestScore) {
+          bestScore = score;
+          bestToken = token;
+        }
+      });
+
+      return bestToken;
+    }
+
     function attachPointerDrag(element,item){
       let pointerId = null;
+      let pointerType = "";
       let startX = 0;
       let startY = 0;
+      let lastX = 0;
+      let lastY = 0;
       let sourceRect = null;
+      let dragThreshold = 4;
+      let ghostOffsetY = 0;
       let dragging = false;
       let settling = false;
       let ghost = null;
+      let activeTargetSlot = null;
       let settleTimer = 0;
+      let watchdogTimer = 0;
       let moveFrame = 0;
       let pendingX = 0;
       let pendingY = 0;
+      let globalListenersAttached = false;
 
-      const clearTargets = ()=>groupsCanvas.querySelectorAll(".order-slot.drag-over").forEach((slot)=>slot.classList.remove("drag-over"));
+      const setTargetSlot = (slot)=>{
+        if (activeTargetSlot === slot) return;
+        activeTargetSlot?.classList.remove("drag-over");
+        activeTargetSlot = slot || null;
+        activeTargetSlot?.classList.add("drag-over");
+      };
+
       const paintGhost = ()=>{
         moveFrame = 0;
         if (!ghost) return;
-        ghost.style.left = `${pendingX}px`;
-        ghost.style.top = `${pendingY}px`;
+        ghost.style.transform = `translate3d(${pendingX}px,${pendingY}px,0) translate(-50%,-50%) scale(1.04)`;
       };
+
       const queueGhost = (x,y)=>{
         pendingX = x;
         pendingY = y;
         if (!moveFrame) moveFrame = requestAnimationFrame(paintGhost);
       };
+
+      const refreshWatchdog = ()=>{
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        watchdogTimer = window.setTimeout(()=>{
+          if (activeDragCleanup === cleanup) cleanup();
+        },15000);
+      };
+
+      const removeGlobalListeners = ()=>{
+        if (!globalListenersAttached) return;
+        globalListenersAttached = false;
+        window.removeEventListener("pointermove",handleMove,true);
+        window.removeEventListener("pointerup",finish,true);
+        window.removeEventListener("pointercancel",cancelFromPointer,true);
+        document.removeEventListener("pointerup",finish,true);
+        document.removeEventListener("pointercancel",cancelFromPointer,true);
+      };
+
+      const addGlobalListeners = ()=>{
+        if (globalListenersAttached) return;
+        globalListenersAttached = true;
+        window.addEventListener("pointermove",handleMove,{capture:true,passive:false});
+        window.addEventListener("pointerup",finish,{capture:true,passive:false});
+        window.addEventListener("pointercancel",cancelFromPointer,{capture:true,passive:false});
+        document.addEventListener("pointerup",finish,{capture:true,passive:false});
+        document.addEventListener("pointercancel",cancelFromPointer,{capture:true,passive:false});
+      };
+
       const cleanup = ()=>{
-        clearTargets();
+        removeGlobalListeners();
+        setTargetSlot(null);
         if (moveFrame) cancelAnimationFrame(moveFrame);
         moveFrame = 0;
         if (settleTimer) clearTimeout(settleTimer);
         settleTimer = 0;
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        watchdogTimer = 0;
         try{
           if (pointerId !== null && element.hasPointerCapture?.(pointerId)) element.releasePointerCapture(pointerId);
         }catch(_){}
-        element.classList.remove("is-drag-source");
+        element.classList.remove("is-pointer-active","is-drag-source");
+        page.classList.remove("is-dragging");
         ghost?.getAnimations?.().forEach((animation)=>animation.cancel());
         ghost?.remove();
         ghost = null;
         pointerId = null;
+        pointerType = "";
         dragging = false;
         settling = false;
         if (activeDragCleanup === cleanup) activeDragCleanup = null;
       };
 
-      element.addEventListener("pointerdown",(event)=>{
-        if (event.button > 0 || state.groups[item.groupIndex]?.completed) return;
-        cancelActiveDrag();
-        pointerId = event.pointerId;
-        startX = event.clientX;
-        startY = event.clientY;
-        sourceRect = element.getBoundingClientRect();
-        activeDragCleanup = cleanup;
-        try{element.setPointerCapture?.(pointerId)}catch(_){}
-      });
+      const makeGhost = (clientX,clientY)=>{
+        dragging = true;
+        ghost = element.cloneNode(true);
+        ghost.classList.remove("is-selected","is-pointer-active","is-drag-source");
+        ghost.classList.add("drag-ghost");
+        ghost.removeAttribute("id");
+        ghost.setAttribute("aria-hidden","true");
+        ghost.tabIndex = -1;
+        ghost.style.width = `${sourceRect.width}px`;
+        ghost.style.height = `${sourceRect.height}px`;
+        document.body.appendChild(ghost);
+        element.classList.add("is-drag-source");
+        page.classList.add("is-dragging");
+        queueGhost(clientX,clientY - ghostOffsetY);
+      };
 
-      element.addEventListener("pointermove",(event)=>{
-        if (event.pointerId !== pointerId) return;
-        const distance = Math.hypot(event.clientX - startX,event.clientY - startY);
-        if (!dragging && distance > 6) {
-          dragging = true;
-          ghost = element.cloneNode(true);
-          ghost.classList.remove("is-selected","is-drag-source");
-          ghost.classList.add("drag-ghost");
-          ghost.style.width = `${sourceRect.width}px`;
-          ghost.style.height = `${sourceRect.height}px`;
-          document.body.appendChild(ghost);
-          element.classList.add("is-drag-source");
-        }
+      const handleMove = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        const samples = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : null;
+        const point = samples?.length ? samples[samples.length - 1] : event;
+        lastX = point.clientX;
+        lastY = point.clientY;
+        refreshWatchdog();
+
+        const distance = Math.hypot(lastX - startX,lastY - startY);
+        if (!dragging && distance >= dragThreshold) makeGhost(lastX,lastY);
         if (!dragging || !ghost) return;
-        queueGhost(event.clientX,event.clientY);
-        clearTargets();
-        const target = magneticTarget(item.groupIndex,event.clientX,event.clientY);
-        target?.slot.classList.add("drag-over");
-        event.preventDefault();
-      });
+
+        queueGhost(lastX,lastY - ghostOffsetY);
+        const target = magneticTarget(item.groupIndex,lastX,lastY);
+        setTargetSlot(target?.slot || null);
+        if (event.cancelable) event.preventDefault();
+      };
 
       const animateBackAndCleanup = (clientX,clientY)=>{
         if (!ghost || !sourceRect) {
           cleanup();
           return;
         }
+        const fromY = clientY - ghostOffsetY;
         const centerX = sourceRect.left + sourceRect.width / 2;
         const centerY = sourceRect.top + sourceRect.height / 2;
         ghost.animate([
-          {left:`${clientX}px`,top:`${clientY}px`,transform:"translate(-50%,-50%) scale(1.04)",opacity:.96},
-          {left:`${centerX}px`,top:`${centerY}px`,transform:"translate(-50%,-50%) scale(1)",opacity:.20}
-        ],{duration:250,easing:"cubic-bezier(.22,.72,.24,1)",fill:"forwards"});
-        settleTimer = window.setTimeout(cleanup,245);
+          {transform:`translate3d(${clientX}px,${fromY}px,0) translate(-50%,-50%) scale(1.04)`,opacity:.96},
+          {transform:`translate3d(${centerX}px,${centerY}px,0) translate(-50%,-50%) scale(1)`,opacity:.18}
+        ],{duration:220,easing:"cubic-bezier(.22,.72,.24,1)",fill:"forwards"});
+        settleTimer = window.setTimeout(cleanup,215);
       };
 
       const finish = (event)=>{
-        if (event.pointerId !== pointerId) return;
+        if (event.pointerId !== pointerId || settling) return;
+        if (event.cancelable) event.preventDefault();
+        lastX = Number.isFinite(event.clientX) ? event.clientX : lastX;
+        lastY = Number.isFinite(event.clientY) ? event.clientY : lastY;
+
         if (!dragging) {
+          suppressClickUntil = Date.now() + 420;
           cleanup();
+          answerFirstEmptySlot(item.groupIndex,item.id);
           return;
         }
 
-        suppressClickUntil = Date.now() + 420;
+        suppressClickUntil = Date.now() + 520;
         settling = true;
-        const target = magneticTarget(item.groupIndex,event.clientX,event.clientY);
+        const target = magneticTarget(item.groupIndex,lastX,lastY);
         if (!target) {
-          animateBackAndCleanup(event.clientX,event.clientY);
+          animateBackAndCleanup(lastX,lastY);
           return;
         }
 
@@ -1976,14 +2077,14 @@
         const destination = correct ? target.rect : sourceRect;
         const centerX = destination.left + destination.width / 2;
         const centerY = destination.top + destination.height / 2;
+        const fromY = lastY - ghostOffsetY;
 
-        clearTargets();
-        target.slot.classList.add("drag-over");
+        setTargetSlot(target.slot);
         ghost?.animate([
-          {left:`${event.clientX}px`,top:`${event.clientY}px`,transform:"translate(-50%,-50%) scale(1.04)",opacity:.96},
-          {left:`${centerX}px`,top:`${centerY}px`,transform:`translate(-50%,-50%) scale(${correct ? .90 : 1})`,opacity:correct ? .28 : .82}
+          {transform:`translate3d(${lastX}px,${fromY}px,0) translate(-50%,-50%) scale(1.04)`,opacity:.96},
+          {transform:`translate3d(${centerX}px,${centerY}px,0) translate(-50%,-50%) scale(${correct ? .90 : 1})`,opacity:correct ? .26 : .80}
         ],{
-          duration:correct ? 165 : 300,
+          duration:correct ? 145 : 245,
           easing:correct ? "cubic-bezier(.18,.82,.18,1)" : "cubic-bezier(.22,.72,.24,1)",
           fill:"forwards"
         });
@@ -1992,14 +2093,40 @@
           if (correct) acceptItem(item.groupIndex,item.id,target.slotIndex);
           else flashWrong(item.groupIndex,item.id);
           cleanup();
-        },correct ? 150 : 285);
+        },correct ? 135 : 230);
       };
 
-      element.addEventListener("pointerup",finish);
-      element.addEventListener("pointercancel",cleanup);
-      element.addEventListener("lostpointercapture",()=>{
-        if (!settling && dragging && activeDragCleanup === cleanup) cleanup();
-      });
+      const cancelFromPointer = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        if (event.cancelable) event.preventDefault();
+        cleanup();
+      };
+
+      const begin = (event)=>{
+        if (pointerId !== null || event.button > 0 || state.groups[item.groupIndex]?.completed) return;
+        if (event.cancelable) event.preventDefault();
+        cancelActiveDrag();
+        pointerId = event.pointerId;
+        pointerType = event.pointerType || "";
+        startX = lastX = event.clientX;
+        startY = lastY = event.clientY;
+        sourceRect = element.getBoundingClientRect();
+        dragThreshold = pointerType === "touch" || pointerType === "pen" ? 3 : 4;
+        ghostOffsetY = pointerType === "touch" || pointerType === "pen"
+          ? Math.min(32,Math.max(18,sourceRect.height * .34))
+          : 0;
+        element.classList.add("is-pointer-active");
+        activeDragCleanup = cleanup;
+        addGlobalListeners();
+        refreshWatchdog();
+        try{element.setPointerCapture?.(pointerId)}catch(_){}
+      };
+
+      element.__orderBeginDrag = begin;
+      element.draggable = false;
+      element.addEventListener("pointerdown",begin,{passive:false});
+      element.addEventListener("dragstart",(event)=>event.preventDefault());
+      element.addEventListener("contextmenu",(event)=>event.preventDefault());
     }
 
     function createSlot(group,groupIndex,slotIndex,itemType){
@@ -2365,6 +2492,15 @@
       questionStates = [];
       showQuestion(0);
     }
+
+    stage.addEventListener("pointerdown",(event)=>{
+      if (event.button > 0 || activeDragCleanup) return;
+      const directToken = event.target instanceof Element ? event.target.closest(".order-token") : null;
+      if (directToken) return;
+      const nearbyToken = findExpandedHitToken(event.clientX,event.clientY,event.pointerType);
+      if (!nearbyToken || typeof nearbyToken.__orderBeginDrag !== "function") return;
+      nearbyToken.__orderBeginDrag(event);
+    },{capture:true,passive:false});
 
     backBtn.addEventListener("click",goToOrderSettings);
     previousBtn.addEventListener("click",goPrevious);
