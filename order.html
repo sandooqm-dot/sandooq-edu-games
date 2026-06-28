@@ -293,8 +293,9 @@
     .order-slot.is-filled::after{opacity:0}
 
     .order-slot.drag-over{
-      background:rgba(22,136,211,.14);
-      transform:scale(1.07);
+      background:rgba(22,136,211,.18);
+      transform:scale(1.09);
+      box-shadow:0 0 0 clamp(5px,.65vw,9px) rgba(22,136,211,.22);
     }
 
     .order-slot.is-wrong-target{
@@ -355,17 +356,20 @@
 
     .wrong-mark{
       position:absolute;
-      z-index:8;
+      z-index:18;
       left:50%;
       top:50%;
-      color:#fff;
+      color:#f04747;
       font-family:Arial,sans-serif;
-      font-size:clamp(64px,calc(var(--tile-size) * 1.35),134px);
+      font-size:clamp(52px,calc(var(--tile-size) * 1.08),108px);
       font-weight:1000;
       line-height:.8;
       text-shadow:
-        0 4px 0 rgba(17,17,17,.32),
-        0 10px 18px rgba(0,0,0,.22);
+        0 3px 0 rgba(255,255,255,.98),
+        3px 0 0 rgba(255,255,255,.98),
+        -3px 0 0 rgba(255,255,255,.98),
+        0 -3px 0 rgba(255,255,255,.98),
+        0 8px 15px rgba(0,0,0,.24);
       transform:translate(-50%,-50%) scale(.25);
       opacity:0;
       pointer-events:none;
@@ -541,15 +545,22 @@
     .start-btn,.restart-btn{background:var(--blue);color:#fff}
     .home-btn{background:var(--yellow);color:#111}
 
+    .order-token.is-drag-source{
+      opacity:.22;
+      transform:scale(.96);
+      filter:saturate(.75);
+    }
+
     .drag-ghost{
       position:fixed;
       z-index:9999;
       pointer-events:none;
       margin:0;
       transform:translate(-50%,-50%) scale(1.04);
-      opacity:.94;
+      opacity:.96;
       transition:none!important;
       will-change:left,top,transform,opacity;
+      contain:layout paint style;
     }
 
     @keyframes tokenWrong{
@@ -942,6 +953,7 @@
     let state = null;
     let selectedItem = null;
     let suppressClickUntil = 0;
+    let activeDragCleanup = null;
     let safariTimers = [];
     let layoutFrame = 0;
 
@@ -1089,7 +1101,8 @@
         completed:false,
         celebrating:false,
         lastAcceptedSlot:-1,
-        wrongPulse:false
+        wrongPulse:false,
+        wrongSlotIndex:-1
       };
     }
 
@@ -1232,10 +1245,17 @@
       acceptItem(groupIndex,itemId,slotIndex);
     }
 
-    function flashWrong(groupIndex,itemId,slotIndex){
+    function firstEmptySlotIndex(group){
+      return group?.slots?.findIndex((slotId)=>!slotId) ?? -1;
+    }
+
+    function flashWrong(groupIndex,itemId){
       const group = state.groups[groupIndex];
       if (!group) return;
+      const slotIndex = firstEmptySlotIndex(group);
+      if (slotIndex < 0) return;
       group.wrongPulse = true;
+      group.wrongSlotIndex = slotIndex;
       sfx.play("wrong",1);
       render();
       requestAnimationFrame(()=>{
@@ -1246,6 +1266,7 @@
       });
       window.setTimeout(()=>{
         group.wrongPulse = false;
+        group.wrongSlotIndex = -1;
         selectedItem = null;
         render();
       },620);
@@ -1271,7 +1292,7 @@
       const item = itemById(group,itemId);
       if (!group || !item || group.completed || group.slots[slotIndex]) return false;
       if (!isCorrectForSlot(group,item,slotIndex)) {
-        flashWrong(groupIndex,itemId,slotIndex);
+        flashWrong(groupIndex,itemId);
         return false;
       }
 
@@ -1320,52 +1341,119 @@
       return token;
     }
 
+    function cancelActiveDrag(){
+      const cleanup = activeDragCleanup;
+      activeDragCleanup = null;
+      try{cleanup?.()}catch(_){}
+      document.querySelectorAll(".drag-ghost").forEach((node)=>node.remove());
+      groupsCanvas.querySelectorAll(".order-slot.drag-over").forEach((slot)=>slot.classList.remove("drag-over"));
+      groupsCanvas.querySelectorAll(".order-token.is-drag-source").forEach((token)=>token.classList.remove("is-drag-source"));
+    }
+
+    function magneticTarget(groupIndex,clientX,clientY){
+      const group = state.groups[groupIndex];
+      if (!group || group.completed) return null;
+      const slotIndex = firstEmptySlotIndex(group);
+      if (slotIndex < 0) return null;
+      const slot = groupsCanvas.querySelector(`[data-group-index="${groupIndex}"][data-slot-index="${slotIndex}"]`);
+      if (!slot || slot.classList.contains("is-filled")) return null;
+      const rect = slot.getBoundingClientRect();
+      const radius = Math.min(66,Math.max(36,Math.min(rect.width,rect.height) * .68));
+      const dx = Math.max(rect.left - clientX,0,clientX - rect.right);
+      const dy = Math.max(rect.top - clientY,0,clientY - rect.bottom);
+      if (Math.hypot(dx,dy) > radius) return null;
+      return {slot,slotIndex,rect};
+    }
+
     function attachPointerDrag(element,item){
       let pointerId = null;
       let startX = 0;
       let startY = 0;
       let sourceRect = null;
       let dragging = false;
+      let settling = false;
       let ghost = null;
+      let settleTimer = 0;
+      let moveFrame = 0;
+      let pendingX = 0;
+      let pendingY = 0;
 
       const clearTargets = ()=>groupsCanvas.querySelectorAll(".order-slot.drag-over").forEach((slot)=>slot.classList.remove("drag-over"));
+      const paintGhost = ()=>{
+        moveFrame = 0;
+        if (!ghost) return;
+        ghost.style.left = `${pendingX}px`;
+        ghost.style.top = `${pendingY}px`;
+      };
+      const queueGhost = (x,y)=>{
+        pendingX = x;
+        pendingY = y;
+        if (!moveFrame) moveFrame = requestAnimationFrame(paintGhost);
+      };
       const cleanup = ()=>{
         clearTargets();
+        if (moveFrame) cancelAnimationFrame(moveFrame);
+        moveFrame = 0;
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = 0;
+        try{
+          if (pointerId !== null && element.hasPointerCapture?.(pointerId)) element.releasePointerCapture(pointerId);
+        }catch(_){}
+        element.classList.remove("is-drag-source");
+        ghost?.getAnimations?.().forEach((animation)=>animation.cancel());
         ghost?.remove();
         ghost = null;
         pointerId = null;
         dragging = false;
+        settling = false;
+        if (activeDragCleanup === cleanup) activeDragCleanup = null;
       };
 
       element.addEventListener("pointerdown",(event)=>{
         if (event.button > 0 || state.groups[item.groupIndex]?.completed) return;
+        cancelActiveDrag();
         pointerId = event.pointerId;
         startX = event.clientX;
         startY = event.clientY;
         sourceRect = element.getBoundingClientRect();
-        element.setPointerCapture?.(pointerId);
+        activeDragCleanup = cleanup;
+        try{element.setPointerCapture?.(pointerId)}catch(_){}
       });
 
       element.addEventListener("pointermove",(event)=>{
         if (event.pointerId !== pointerId) return;
         const distance = Math.hypot(event.clientX - startX,event.clientY - startY);
-        if (!dragging && distance > 7) {
+        if (!dragging && distance > 6) {
           dragging = true;
           ghost = element.cloneNode(true);
-          ghost.classList.remove("is-selected");
+          ghost.classList.remove("is-selected","is-drag-source");
           ghost.classList.add("drag-ghost");
           ghost.style.width = `${sourceRect.width}px`;
           ghost.style.height = `${sourceRect.height}px`;
           document.body.appendChild(ghost);
+          element.classList.add("is-drag-source");
         }
         if (!dragging || !ghost) return;
-        ghost.style.left = `${event.clientX}px`;
-        ghost.style.top = `${event.clientY}px`;
+        queueGhost(event.clientX,event.clientY);
         clearTargets();
-        const target = document.elementFromPoint(event.clientX,event.clientY)?.closest(".order-slot");
-        if (target && Number(target.dataset.groupIndex) === item.groupIndex && !target.classList.contains("is-filled")) target.classList.add("drag-over");
+        const target = magneticTarget(item.groupIndex,event.clientX,event.clientY);
+        target?.slot.classList.add("drag-over");
         event.preventDefault();
       });
+
+      const animateBackAndCleanup = (clientX,clientY)=>{
+        if (!ghost || !sourceRect) {
+          cleanup();
+          return;
+        }
+        const centerX = sourceRect.left + sourceRect.width / 2;
+        const centerY = sourceRect.top + sourceRect.height / 2;
+        ghost.animate([
+          {left:`${clientX}px`,top:`${clientY}px`,transform:"translate(-50%,-50%) scale(1.04)",opacity:.96},
+          {left:`${centerX}px`,top:`${centerY}px`,transform:"translate(-50%,-50%) scale(1)",opacity:.20}
+        ],{duration:250,easing:"cubic-bezier(.22,.72,.24,1)",fill:"forwards"});
+        settleTimer = window.setTimeout(cleanup,245);
+      };
 
       const finish = (event)=>{
         if (event.pointerId !== pointerId) return;
@@ -1374,40 +1462,43 @@
           return;
         }
 
-        suppressClickUntil = Date.now() + 380;
-        const target = document.elementFromPoint(event.clientX,event.clientY)?.closest(".order-slot");
-        if (!target || Number(target.dataset.groupIndex) !== item.groupIndex || target.classList.contains("is-filled")) {
-          cleanup();
+        suppressClickUntil = Date.now() + 420;
+        settling = true;
+        const target = magneticTarget(item.groupIndex,event.clientX,event.clientY);
+        if (!target) {
+          animateBackAndCleanup(event.clientX,event.clientY);
           return;
         }
 
-        const slotIndex = Number(target.dataset.slotIndex);
         const group = state.groups[item.groupIndex];
-        const correct = isCorrectForSlot(group,item,slotIndex);
+        const correct = isCorrectForSlot(group,item,target.slotIndex);
+        const destination = correct ? target.rect : sourceRect;
+        const centerX = destination.left + destination.width / 2;
+        const centerY = destination.top + destination.height / 2;
 
-        if (ghost && sourceRect) {
-          const targetRect = correct ? target.getBoundingClientRect() : sourceRect;
-          const centerX = targetRect.left + targetRect.width / 2;
-          const centerY = targetRect.top + targetRect.height / 2;
-          ghost.animate([
-            {left:`${event.clientX}px`,top:`${event.clientY}px`,transform:"translate(-50%,-50%) scale(1.04)",opacity:.94},
-            {left:`${centerX}px`,top:`${centerY}px`,transform:`translate(-50%,-50%) scale(${correct ? .92 : 1})`,opacity:correct ? .35 : .88}
-          ],{
-            duration:correct ? 190 : 430,
-            easing:correct ? "cubic-bezier(.2,.8,.2,1)" : "cubic-bezier(.22,.72,.24,1)",
-            fill:"forwards"
-          });
-        }
+        clearTargets();
+        target.slot.classList.add("drag-over");
+        ghost?.animate([
+          {left:`${event.clientX}px`,top:`${event.clientY}px`,transform:"translate(-50%,-50%) scale(1.04)",opacity:.96},
+          {left:`${centerX}px`,top:`${centerY}px`,transform:`translate(-50%,-50%) scale(${correct ? .90 : 1})`,opacity:correct ? .28 : .82}
+        ],{
+          duration:correct ? 165 : 300,
+          easing:correct ? "cubic-bezier(.18,.82,.18,1)" : "cubic-bezier(.22,.72,.24,1)",
+          fill:"forwards"
+        });
 
-        window.setTimeout(()=>{
-          if (correct) acceptItem(item.groupIndex,item.id,slotIndex);
-          else flashWrong(item.groupIndex,item.id,slotIndex);
+        settleTimer = window.setTimeout(()=>{
+          if (correct) acceptItem(item.groupIndex,item.id,target.slotIndex);
+          else flashWrong(item.groupIndex,item.id);
           cleanup();
-        },correct ? 175 : 390);
+        },correct ? 150 : 285);
       };
 
       element.addEventListener("pointerup",finish);
       element.addEventListener("pointercancel",cleanup);
+      element.addEventListener("lostpointercapture",()=>{
+        if (!settling && dragging && activeDragCleanup === cleanup) cleanup();
+      });
     }
 
     function createSlot(group,groupIndex,slotIndex,itemType){
@@ -1428,6 +1519,14 @@
           check.textContent = "✓";
           slot.appendChild(check);
         }
+      }
+
+      if (group.wrongPulse && group.wrongSlotIndex === slotIndex) {
+        slot.classList.add("show-wrong");
+        const wrong = document.createElement("span");
+        wrong.className = "wrong-mark";
+        wrong.textContent = "×";
+        slot.appendChild(wrong);
       }
 
       return slot;
@@ -1451,11 +1550,6 @@
       tray.className = "slot-tray";
       tray.dir = state.direction;
       group.slots.forEach((_,slotIndex)=>tray.appendChild(createSlot(group,groupIndex,slotIndex,"letter")));
-
-      const wrong = document.createElement("span");
-      wrong.className = "wrong-mark";
-      wrong.textContent = "×";
-      tray.appendChild(wrong);
 
       wrapper.append(bank,tray);
       return wrapper;
@@ -1488,11 +1582,6 @@
           sequence.appendChild(arrow);
         }
       });
-
-      const wrong = document.createElement("span");
-      wrong.className = "wrong-mark";
-      wrong.textContent = "×";
-      sequence.appendChild(wrong);
 
       wrapper.append(bank,sequence);
       return wrapper;
@@ -1573,6 +1662,7 @@
 
     function showQuestion(index){
       if (!Number.isInteger(index) || index < 0 || index >= payload.questions.length) return;
+      cancelActiveDrag();
       questionIndex = index;
       selectedItem = null;
       currentState();
@@ -1596,6 +1686,7 @@
     }
 
     function goToOrderSettings(){
+      cancelActiveDrag();
       try{
         const requested = getParam("return");
         const target = requested || "index.html#orderSetup";
@@ -1609,6 +1700,7 @@
     }
 
     function restart(){
+      cancelActiveDrag();
       finishView.classList.remove("is-visible");
       finishView.setAttribute("aria-hidden","true");
       questionStates = [];
@@ -1631,8 +1723,14 @@
       scheduleLayout(80);
     });
 
-    window.addEventListener("resize",()=>scheduleLayout(34),{passive:true});
-    window.addEventListener("orientationchange",()=>window.setTimeout(()=>{collapseSafariBars();scheduleLayout(80)},160),{passive:true});
+    window.addEventListener("resize",()=>{cancelActiveDrag();scheduleLayout(34)},{passive:true});
+    window.addEventListener("orientationchange",()=>{
+      cancelActiveDrag();
+      window.setTimeout(()=>{collapseSafariBars();scheduleLayout(80)},160);
+    },{passive:true});
+    window.addEventListener("blur",cancelActiveDrag,{passive:true});
+    window.addEventListener("pagehide",cancelActiveDrag,{passive:true});
+    document.addEventListener("visibilitychange",()=>{if (document.hidden) cancelActiveDrag()});
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize",()=>scheduleLayout(34),{passive:true});
       window.visualViewport.addEventListener("scroll",()=>scheduleLayout(34),{passive:true});
