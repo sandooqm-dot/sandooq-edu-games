@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-choices-classic-fonts-v53 -->
+<!-- version: index-match-classic-fonts-v54 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -8879,14 +8879,24 @@
       font-weight:800;
     }
 
-    .match-setup[data-match-font="arial"],
-    .match-setup[data-match-font="arial"] *{
-      font-family:Arial,sans-serif !important;
+    .match-setup[data-match-font="cairo"],
+    .match-setup[data-match-font="cairo"] *{
+      font-family:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif !important;
     }
 
-    .match-setup[data-match-font="traditional"],
-    .match-setup[data-match-font="traditional"] *{
-      font-family:"Traditional Arabic","Arabic Typesetting",Tahoma,Arial,sans-serif !important;
+    .match-setup[data-match-font="tajawal"],
+    .match-setup[data-match-font="tajawal"] *{
+      font-family:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif !important;
+    }
+
+    .match-setup[data-match-font="noto-kufi"],
+    .match-setup[data-match-font="noto-kufi"] *{
+      font-family:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif !important;
+    }
+
+    .match-setup[data-match-font="noto-naskh"],
+    .match-setup[data-match-font="noto-naskh"] *{
+      font-family:"Noto Naskh Arabic","Traditional Arabic",Tahoma,serif !important;
     }
 
     @media(max-width:900px){
@@ -9727,6 +9737,22 @@
       }
     }
 
+
+
+    /* match-v54: معاينة كلاسيكي للعبة المطابقة وخطوطها المعتمدة. */
+    .template-cover.match-cover{
+      background:#fff url("match-classic.webp?v=1") center/cover no-repeat !important;
+    }
+
+    .match-setup .theme-art.classic{
+      background:#fff url("match-classic.webp?v=1") center/cover no-repeat !important;
+    }
+    .match-setup .theme-art.classic::before,
+    .match-setup .theme-art.classic::after{
+      display:none !important;
+      content:none !important;
+    }
+
 </style>
 </head>
 <body>
@@ -9817,7 +9843,7 @@
 </div>
 </button>
 <button class="template-card" data-template="matching" type="button">
-<div aria-hidden="true" class="template-cover empty"></div>
+<div aria-hidden="true" class="template-cover match-cover"></div>
 <div class="template-content">
 <h3 class="template-title">المطابقة</h3>
 <p class="template-desc">اقلب البطاقات واعثر على كل زوج.</p>
@@ -10134,7 +10160,7 @@
 </section>
 
 
-<section class="choices-setup match-setup" id="matchSetupScreen" data-match-font="default">
+<section class="choices-setup match-setup" id="matchSetupScreen" data-match-font="noto-naskh">
   <div class="game-name-panel">
     <div class="game-name-head">
       <span class="game-name-title">ادخل اسم اللعبة</span>
@@ -10155,7 +10181,7 @@
 
       <div class="choices-theme-list" hidden id="matchThemeListPanel">
         <div class="choices-theme-card active" data-match-theme="classic">
-          <span class="theme-art classic"></span><span class="choices-theme-name">خلفية بيضاء</span><button class="choices-theme-activate" type="button">تفعيل</button>
+          <span class="theme-art classic"></span><span class="choices-theme-name">كلاسيكي</span><button class="choices-theme-activate" type="button">تفعيل</button>
         </div>
         <div class="choices-theme-card" data-match-theme="classroom">
           <span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button>
@@ -10243,9 +10269,10 @@
           <div class="choices-advanced-row">
             <label class="choices-advanced-label" for="matchFontSelect"><strong>نوع الخط</strong></label>
             <select class="quiz-font-select" id="matchFontSelect">
-              <option value="default">خط اللعبة</option>
-              <option value="arial">Arial</option>
-              <option value="traditional">عربي تقليدي</option>
+              <option value="cairo">كايرو</option>
+              <option value="tajawal">تجوال</option>
+              <option value="noto-kufi">نوتو كوفي</option>
+              <option value="noto-naskh">نوتو نسخ</option>
             </select>
           </div>
           <div class="choices-advanced-row">
@@ -12984,7 +13011,7 @@
   let matchCoverMode = "english-numbers";
   let matchSoundEnabled = true;
   let matchRemoveMatchedCards = true;
-  let matchFont = "default";
+  let matchFont = "noto-naskh";
   let matchCardColor = "#e82f70";
   let matchTextColor = "#ffffff";
   let activeMatchColorTarget = "card";
@@ -13270,7 +13297,7 @@
 
     if (matchCurrentThemePreview) {
       matchCurrentThemePreview.className = `choices-theme-preview theme-art ${theme}`;
-      matchCurrentThemePreview.setAttribute("aria-label",THEME_LABELS?.[theme] || "خلفية بيضاء");
+      matchCurrentThemePreview.setAttribute("aria-label",theme === "classic" ? "كلاسيكي" : (THEME_LABELS?.[theme] || "كلاسيكي"));
     }
 
     matchThemeListPanel?.querySelectorAll("[data-match-theme]").forEach((card)=>{
@@ -13374,7 +13401,7 @@
       enforceMatchCoverModeForMatching();
       matchSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
       matchRemoveMatchedCards = draft.removeMatchedCards !== false;
-      matchFont = ["default","arial","traditional"].includes(draft.fontFamily) ? draft.fontFamily : "default";
+      matchFont = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(draft.fontFamily) ? draft.fontFamily : "noto-naskh";
       matchCardColor = normalizeMatchHex(draft.cardColor,"#e82f70");
       matchTextColor = normalizeMatchHex(draft.textColor,"#ffffff");
       matchPairs = Array.isArray(draft.pairs)
@@ -13862,9 +13889,9 @@
   });
 
   matchFontSelect?.addEventListener("change",()=>{
-    matchFont = ["default","arial","traditional"].includes(matchFontSelect.value)
+    matchFont = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(matchFontSelect.value)
       ? matchFontSelect.value
-      : "default";
+      : "noto-naskh";
     updateMatchAdvancedUI();
     saveMatchDraft();
   });
