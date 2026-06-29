@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v42-fonts-classic-start-end-v42 -->
+  <!-- version: choices-v43-finish-sequence-box-question-stability -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3538,47 +3538,124 @@
       display:none !important;
     }
 
+    /* choices-v43: البداية والنهاية مطابقتان لصفحة افتح الصندوق. */
     .start-gate .celebration-card,
     #finishView .finish-card{
-      width:min(360px,78vw) !important;
-      padding:12px 18px !important;
-      border-radius:20px !important;
+      width:min(390px,82vw) !important;
+      min-height:0 !important;
+      max-height:calc(100dvh - max(20px,var(--safe-top)) - max(20px,var(--safe-bottom))) !important;
+      padding:clamp(16px,2.8vw,24px) !important;
+      border-radius:clamp(20px,2.4vw,26px) !important;
     }
     .start-gate .celebration-icon,
     #finishView .finish-trophy{
-      width:72px !important;
-      height:72px !important;
-      margin-bottom:5px !important;
+      width:clamp(76px,12vw,106px) !important;
+      height:clamp(76px,12vw,106px) !important;
+      margin-bottom:clamp(6px,1.2vw,10px) !important;
     }
     .start-gate .celebration-title,
-    #finishView .finish-title{font-size:34px !important}
+    #finishView .finish-title{
+      font-size:clamp(30px,4.8vw,48px) !important;
+      line-height:1.02 !important;
+    }
     .start-gate .celebration-subtitle,
-    #finishView .finish-subtitle{margin-top:5px !important;font-size:17px !important}
+    #finishView .finish-subtitle{
+      margin-top:clamp(6px,1.1vw,10px) !important;
+      font-size:clamp(15px,2.1vw,22px) !important;
+      line-height:1.25 !important;
+    }
     .start-gate .celebration-actions,
-    #finishView .finish-actions{margin-top:10px !important}
-    .start-gate .activity-start-btn,
-    #finishView .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
+    #finishView .finish-actions{
+      margin-top:clamp(14px,2.2vw,20px) !important;
+      gap:clamp(8px,1.2vw,12px) !important;
+      flex-wrap:nowrap !important;
+    }
+    .start-gate .activity-start-btn{
+      min-width:clamp(136px,20vw,184px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(16px,2.1vw,21px) !important;
+      padding-inline:clamp(16px,2.4vw,24px) !important;
+    }
+    #finishView .finish-actions button{
+      min-width:clamp(104px,15vw,145px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(15px,2vw,20px) !important;
+      padding-inline:clamp(12px,1.8vw,20px) !important;
+    }
 
-    #finishView{overflow:hidden}
+    .start-gate .celebration-card{animation:startCardPop .62s cubic-bezier(.2,1.12,.22,1) both !important}
+    .start-gate .celebration-card::before{animation:startGlow 2.4s ease-in-out infinite !important}
+    .start-gate .celebration-icon{animation:startIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s !important}
+    .start-gate .celebration-spark{animation:startSpark 1.8s ease-in-out infinite !important}
+
+    #finishView{
+      background:rgba(17,17,17,.14);
+      z-index:220;
+      overflow:hidden;
+    }
+    #finishView .finish-card{
+      animation:none;
+      opacity:0;
+      transform:translate3d(0,18px,0) scale(.965);
+      transform-origin:center;
+    }
     .game-page.ended #finishView .finish-card{animation:finishPanelIn .52s cubic-bezier(.2,.9,.2,1) both}
-    #finishView .finish-trophy{opacity:0;transform:translate3d(0,-14px,0) scale(.6);filter:drop-shadow(0 4px 12px rgba(0,0,0,.18))}
+    #finishView .finish-trophy{
+      animation:none !important;
+      opacity:0;
+      transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);
+      transform-origin:center;
+      filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.12));
+      will-change:transform,opacity,filter;
+    }
     #finishView.finish-sequence-start .finish-trophy{animation:finishTrophyArrival 2.52s cubic-bezier(.16,.82,.18,1) both !important}
     #finishView .finish-title,
     #finishView .finish-subtitle{visibility:hidden;opacity:0;will-change:transform,opacity,filter}
     #finishView.finish-message-in .finish-title{visibility:visible;animation:finishTitleBurst .68s cubic-bezier(.16,1.22,.2,1) both}
     #finishView.finish-message-in .finish-subtitle{visibility:visible;animation:finishSubtitleBurst .62s cubic-bezier(.18,1.08,.2,1) both .055s}
-    #finishView .finish-actions{visibility:hidden;opacity:0;pointer-events:none;transform:translate3d(0,14px,0) scale(.96);will-change:transform,opacity}
+    #finishView .finish-actions{
+      visibility:hidden;
+      opacity:0;
+      transform:translate3d(0,28px,0) scale(.94);
+      pointer-events:none;
+      will-change:transform,opacity;
+    }
     #finishView.finish-actions-in .finish-actions{visibility:visible;pointer-events:auto;animation:finishActionsRise .62s cubic-bezier(.18,1.08,.2,1) both}
     #finishView .finish-confetti{opacity:0;transition:none}
     #finishView .finish-confetti span{animation:none;opacity:0}
     #finishView.finish-confetti-on .finish-confetti{opacity:1}
     #finishView.finish-confetti-on .finish-confetti span{
-      opacity:1;
-      animation:celebrationConfetti var(--confetti-duration,3.8s) linear infinite;
-      animation-delay:var(--confetti-delay,0s) !important;
+      animation:finishConfettiBurst 2.45s cubic-bezier(.18,.72,.22,1) 1 both;
+      animation-delay:0s !important;
     }
     #finishView.finish-confetti-on .finish-confetti span:nth-child(3n+2){animation-delay:.055s !important}
     #finishView.finish-confetti-on .finish-confetti span:nth-child(3n){animation-delay:.11s !important}
+
+    @keyframes startCardPop{0%{opacity:0;transform:scale(.82) translateY(20px)}70%{opacity:1;transform:scale(1.035) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes startIconPop{0%{opacity:0;transform:scale(.5) rotate(-12deg)}72%{opacity:1;transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+    @keyframes startGlow{0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+    @keyframes startSpark{0%,100%{opacity:.25;transform:scale(.72)}45%{opacity:1;transform:scale(1.22)}}
+    @keyframes finishPanelIn{0%{opacity:0;transform:translate3d(0,18px,0) scale(.965)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishTrophyArrival{0%{opacity:0;transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.10))}18%{opacity:1;filter:blur(1.5px) drop-shadow(0 10px 18px rgba(0,0,0,.16))}62%{opacity:1;transform:translate3d(-10%,7%,0) scale(1.13) rotate(-7deg);filter:blur(0) drop-shadow(0 10px 18px rgba(0,0,0,.17))}77%{transform:translate3d(5%,-4%,0) scale(.965) rotate(3deg)}89%{transform:translate3d(-2%,2%,0) scale(1.025) rotate(-1.2deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0) drop-shadow(0 8px 14px rgba(0,0,0,.15))}}
+    @keyframes finishTitleBurst{0%{opacity:0;transform:translate3d(0,24px,0) scale(.22) rotate(-3deg);filter:blur(8px)}55%{opacity:1;transform:translate3d(0,-3px,0) scale(1.16) rotate(1deg);filter:blur(0)}78%{transform:translate3d(0,1px,0) scale(.97) rotate(-.35deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0)}}
+    @keyframes finishSubtitleBurst{0%{opacity:0;transform:translate3d(0,18px,0) scale(.72);filter:blur(5px)}62%{opacity:1;transform:translate3d(0,-2px,0) scale(1.055);filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+    @keyframes finishActionsRise{0%{opacity:0;transform:translate3d(0,28px,0) scale(.94)}70%{opacity:1;transform:translate3d(0,-3px,0) scale(1.02)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishConfettiBurst{0%{opacity:0;transform:translate3d(0,-9vh,0) rotate(var(--confetti-rotate,0deg)) scale(.55)}8%{opacity:.96}72%{opacity:.92}100%{opacity:0;transform:translate3d(var(--confetti-drift,0px),108vh,0) rotate(calc(var(--confetti-rotate,0deg) + 620deg)) scale(1)}}
+
+    @media(max-height:520px) and (orientation:landscape){
+      .start-gate .celebration-card,
+      #finishView .finish-card{width:min(360px,78vw) !important;padding:12px 18px !important;border-radius:20px !important}
+      .start-gate .celebration-icon,
+      #finishView .finish-trophy{width:72px !important;height:72px !important;margin-bottom:5px !important}
+      .start-gate .celebration-title,
+      #finishView .finish-title{font-size:34px !important}
+      .start-gate .celebration-subtitle,
+      #finishView .finish-subtitle{margin-top:5px !important;font-size:17px !important}
+      .start-gate .celebration-actions,
+      #finishView .finish-actions{margin-top:10px !important}
+      .start-gate .activity-start-btn,
+      #finishView .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
+    }
 
 </style>
 </head>
@@ -4080,11 +4157,43 @@
         if (!enabled) stopAll();
       }
 
+      function stopNamed(name){
+        const audio = cache[name];
+        if (!audio) return;
+        try {
+          audio.pause();
+          audio.currentTime = 0;
+        } catch (_) {}
+      }
+
+      function ready(name){
+        const audio = getAudio(name);
+        if (!audio || audio.readyState >= 2) return Promise.resolve();
+        return new Promise((resolve)=>{
+          let settled = false;
+          const finish = ()=>{
+            if (settled) return;
+            settled = true;
+            audio.removeEventListener("loadeddata",finish);
+            audio.removeEventListener("canplaythrough",finish);
+            audio.removeEventListener("error",finish);
+            resolve();
+          };
+          audio.addEventListener("loadeddata",finish,{once:true});
+          audio.addEventListener("canplaythrough",finish,{once:true});
+          audio.addEventListener("error",finish,{once:true});
+          try { audio.load(); } catch (_) { finish(); }
+          window.setTimeout(finish,900);
+        });
+      }
+
       return {
         unlock,
         preload,
         setEnabled,
         stopAll,
+        stopNamed,
+        ready,
         playOpen: ()=> playNamed("open"),
         playGo: ()=> playNamed("go"),
         playReturn: ()=> playNamed("return"),
@@ -5316,10 +5425,33 @@
       openQuestionImageZoom(src);
     }
 
+    function resetQuestionSceneAnimations(){
+      const elements = [
+        questionCard,
+        ...choicesGrid.querySelectorAll(".choice-card")
+      ];
+      elements.forEach((element)=>{
+        if (!element) return;
+        if (typeof element.getAnimations === "function") {
+          element.getAnimations().forEach((animation)=>{
+            try { animation.cancel(); } catch (_) {}
+          });
+        }
+        element.style.removeProperty("animation");
+        element.style.removeProperty("transform");
+        element.style.removeProperty("opacity");
+        element.style.removeProperty("visibility");
+        element.style.removeProperty("display");
+        element.style.removeProperty("will-change");
+        element.style.removeProperty("z-index");
+      });
+    }
+
     function renderQuestion(index){
       const item = questions[index];
       if (!item) return;
 
+      resetQuestionSceneAnimations();
       activeQuestionIndex = index;
       directQuestionIndex = index;
       const questionWasCompleted =
@@ -6150,6 +6282,19 @@
             animation.finished.catch(()=>{})
           )
       );
+
+      elements.forEach((element)=>{
+        if (typeof element.getAnimations === "function") {
+          element.getAnimations().forEach((animation)=>{
+            try { animation.cancel(); } catch (_) {}
+          });
+        }
+        element.style.setProperty("animation","none","important");
+        element.style.opacity = "0";
+        element.style.transform = "translate3d(0,0,0) scale(1)";
+        element.style.visibility = "visible";
+        element.style.willChange = "";
+      });
     }
 
     async function openQuestionFromCard(index,source){
@@ -6176,6 +6321,10 @@
 
       page.classList.add("box-question-sequence");
       renderQuestion(index);
+      questionCard.style.setProperty("animation","none","important");
+      questionCard.style.opacity = "1";
+      questionCard.style.transform = "translate3d(0,0,0) scale(1)";
+      questionCard.style.visibility = "visible";
       questionNavigation.hidden = true;
       fitCurrentSceneText();
 
@@ -6268,6 +6417,7 @@
       }
 
       page.classList.remove("box-return-sequence");
+      resetQuestionSceneAnimations();
       questionBoxFocusedIndex = -1;
       questionBoxSelected = null;
       activeSourceCard = null;
@@ -6307,44 +6457,58 @@
 
 
     let finishSequenceToken = 0;
+    let finishSequenceTimers = [];
 
-    async function showEndCelebration(){
-      const token = ++finishSequenceToken;
-      interactionLocked = true;
-      answerLocked = true;
-      page.classList.add("activity-ended","ended");
+    function clearFinishSequenceTimers(){
+      finishSequenceTimers.forEach((timer)=>clearTimeout(timer));
+      finishSequenceTimers = [];
+    }
+
+    function resetFinishSequenceClasses(){
       finishView?.classList.remove(
         "finish-sequence-start",
         "finish-message-in",
         "finish-actions-in",
         "finish-confetti-on"
       );
+    }
+
+    function queueFinishStep(token,delay,classNames){
+      const timer = window.setTimeout(()=>{
+        if (token !== finishSequenceToken) return;
+        classNames.forEach((className)=>finishView?.classList.add(className));
+      },delay);
+      finishSequenceTimers.push(timer);
+    }
+
+    async function showEndCelebration(){
+      const token = ++finishSequenceToken;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
+      interactionLocked = true;
+      answerLocked = true;
+      page.classList.add("activity-ended","ended");
       finishView?.classList.add("is-visible");
       finishView?.setAttribute("aria-hidden","false");
       questionNavigation.hidden = true;
-      collapseSafariBars({ refresh:false });
-      choicesAudio.playFinish?.();
+      await choicesAudio.ready("finish");
+      if (token !== finishSequenceToken) return;
       await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
       if (token !== finishSequenceToken) return;
       finishView?.classList.add("finish-sequence-start");
-      await wait(1700);
-      if (token !== finishSequenceToken) return;
-      finishView?.classList.add("finish-message-in");
-      await wait(520);
-      if (token !== finishSequenceToken) return;
-      finishView?.classList.add("finish-actions-in","finish-confetti-on");
+      choicesAudio.playFinish();
+      queueFinishStep(token,2680,["finish-message-in","finish-confetti-on"]);
+      queueFinishStep(token,3180,["finish-actions-in"]);
+      collapseSafariBars({ refresh:false });
     }
 
     function hideEndCelebration(){
       finishSequenceToken += 1;
+      clearFinishSequenceTimers();
+      resetFinishSequenceClasses();
+      choicesAudio.stopNamed("finish");
       page.classList.remove("activity-ended","ended");
-      finishView?.classList.remove(
-        "is-visible",
-        "finish-sequence-start",
-        "finish-message-in",
-        "finish-actions-in",
-        "finish-confetti-on"
-      );
+      finishView?.classList.remove("is-visible");
       finishView?.setAttribute("aria-hidden","true");
     }
 
