@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v40-direct-completion-and-fixed-back -->
+  <!-- version: choices-v41-manual-finish-direct-restart-mark-layer -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -792,6 +792,7 @@
     }
 
     .back-btn,
+    .finish-btn,
     .right-controls .control-btn{
       pointer-events:auto;
       position:absolute;
@@ -818,6 +819,21 @@
       min-width:clamp(78px,8vw,108px);
     }
 
+    .finish-btn{
+      right:clamp(16px,2.8vw,42px);
+      background:#e84f4f;
+      color:#fff;
+      min-width:clamp(78px,8vw,110px);
+    }
+
+    .right-controls.question-navigation{
+      right:calc(
+        clamp(16px,2.8vw,42px) +
+        clamp(78px,8vw,110px) +
+        clamp(8px,1vw,12px)
+      );
+    }
+
     .right-controls .control-btn{
       position:static;
       bottom:auto;
@@ -841,6 +857,7 @@
     }
 
     .back-btn:active,
+    .finish-btn:active,
     .right-controls .control-btn:active{
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.20);
@@ -909,6 +926,7 @@
       }
 
       .back-btn,
+      .finish-btn,
       .right-controls .control-btn{
         height:38px;
         border-width:2px;
@@ -960,6 +978,7 @@
       }
 
       .back-btn,
+      .finish-btn,
       .right-controls .control-btn{
         height:clamp(32px,8vh,42px);
         border-width:2px;
@@ -2729,6 +2748,35 @@
     }
 
 
+    /* v41: علامة الصور فوق الصورة والإطار بدل اختفائها خلف زاوية البطاقة. */
+    .choice-card.has-visible-mark,
+    .choices-grid.is-image-choices .choice-card.is-image-choice.has-visible-mark{
+      z-index:24 !important;
+      overflow:visible !important;
+      isolation:isolate;
+    }
+
+    .choice-card.is-image-choice .choice-fit-zone{
+      position:relative;
+      z-index:1;
+    }
+
+    .choice-card.is-image-choice .answer-mark{
+      --mark-corner-left:clamp(15px,1.25vw,22px);
+      --mark-corner-top:clamp(15px,1.25vw,22px);
+      --mark-corner-scale:.44;
+      z-index:40 !important;
+      filter:drop-shadow(0 4px 5px rgba(0,0,0,.30));
+    }
+
+    @media (max-width:560px){
+      .choice-card.is-image-choice .answer-mark{
+        --mark-corner-left:12px;
+        --mark-corner-top:12px;
+        --mark-corner-scale:.40;
+      }
+    }
+
     /* v24: تباعد طبيعي وواضح بين سطور السؤال والإجابات. */
     .question-text{
       line-height:1.34 !important;
@@ -3467,7 +3515,8 @@
       pointer-events:auto !important;
     }
 
-    .game-page.activity-ended .right-controls{
+    .game-page.activity-ended .right-controls,
+    .game-page.activity-ended .finish-btn{
       display:none !important;
     }
 
@@ -3607,6 +3656,7 @@
 
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
+      <button class="control-btn finish-btn" id="finishBtn" type="button">إنهاء</button>
 
       <div class="right-controls question-navigation" id="questionNavigation" hidden>
         <button class="control-btn previous-btn" id="previousBtn" type="button">السابق</button>
@@ -3847,6 +3897,7 @@
     const endHomeBtn = document.getElementById("endHomeBtn");
     const burstLayer = document.getElementById("burstLayer");
     const backBtn = document.getElementById("backBtn");
+    const finishBtn = document.getElementById("finishBtn");
     const questionNavigation = document.getElementById("questionNavigation");
     const nextBtn = document.getElementById("nextBtn");
     const previousBtn = document.getElementById("previousBtn");
@@ -5367,23 +5418,6 @@
         });
         questionView.classList.add("is-answered");
 
-        const directActivityCompleted =
-          displayMode !== "cards" &&
-          questions.length > 0 &&
-          questions.every((_,questionIndex)=> completed.has(questionIndex));
-
-        if (directActivityCompleted) {
-          window.setTimeout(()=>{
-            if (
-              displayMode !== "cards" &&
-              questions.length > 0 &&
-              questions.every((_,questionIndex)=> completed.has(questionIndex))
-            ) {
-              showEndCelebration();
-            }
-          },900);
-        }
-
         updateNavigationButtons();
         return;
       }
@@ -6162,13 +6196,6 @@
       updateNavigationButtons();
       collapseSafariBars();
 
-      if (
-        markCompleted &&
-        questions.length > 0 &&
-        completed.size >= questions.length
-      ) {
-        window.setTimeout(showEndCelebration, 260);
-      }
     }
 
     function clearDirectFirstScenePresentation(){
@@ -6218,6 +6245,22 @@
       closeQuestionImageZoom();
       hideEndCelebration();
 
+      if (directIntroFrameId) {
+        cancelAnimationFrame(directIntroFrameId);
+        directIntroFrameId = null;
+      }
+      directIntroRunning = false;
+
+      page.classList.remove(
+        "direct-intro-playing",
+        "direct-intro-camera",
+        "direct-intro-done",
+        "direct-intro-elements-entering",
+        "direct-navigation-playing",
+        "direct-first-settled",
+        "box-return-sequence"
+      );
+
       completed.clear();
       activeQuestionIndex = -1;
       activeSourceCard = null;
@@ -6236,6 +6279,32 @@
       } else {
         cardsView.classList.add("is-hidden");
         renderQuestion(0);
+
+        /*
+          الإعادة في الوضع المباشر يجب أن تعيد السؤال فورًا.
+          إزالة حالات الانترو وحدها لا تكفي لأن العناصر الجديدة تبدأ opacity:0.
+        */
+        requestAnimationFrame(()=>{
+          questionCard.getAnimations().forEach((animation)=>{
+            try { animation.cancel(); } catch (_) {}
+          });
+          questionCard.style.animation = "none";
+          questionCard.style.transform = "translateY(0) scale(1)";
+          questionCard.style.opacity = "1";
+          questionCard.style.willChange = "";
+
+          choicesGrid.querySelectorAll(".choice-card").forEach((card)=>{
+            card.getAnimations().forEach((animation)=>{
+              try { animation.cancel(); } catch (_) {}
+            });
+            card.style.animation = "none";
+            card.style.transform = "translateY(0) scale(1)";
+            card.style.opacity = "1";
+            card.style.willChange = "";
+          });
+
+          fitCurrentSceneText();
+        });
       }
 
       updateNavigationButtons();
@@ -7109,6 +7178,12 @@
     }
 
     startGameBtn?.addEventListener("click", startChoicesFromGate);
+    finishBtn?.addEventListener("click",(event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      choicesAudio.unlock();
+      showEndCelebration();
+    });
     endRestartBtn?.addEventListener("click",(event)=>{
       event.preventDefault();
       event.stopPropagation();
