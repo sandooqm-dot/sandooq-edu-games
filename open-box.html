@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v76-last-box-reveal-hold -->
+  <!-- version: open-box-v77-manual-finish-national-text -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -1031,7 +1031,8 @@
     }
 
     .back-btn,
-    .reset-btn{
+    .reset-btn,
+    .finish-btn{
       pointer-events:auto;
       position:absolute;
       bottom:0;
@@ -1057,7 +1058,8 @@
       min-width:clamp(78px, 8vw, 108px);
     }
 
-    .right-controls .reset-btn{
+    .right-controls .reset-btn,
+    .right-controls .finish-btn{
       position:static;
       bottom:auto;
     }
@@ -1068,11 +1070,18 @@
       min-width:clamp(78px, 8vw, 110px);
     }
 
+    .finish-btn{
+      background:#e84f4f;
+      color:#fff;
+      min-width:clamp(78px, 8vw, 110px);
+    }
+
 
 
 
     .back-btn:active,
-    .reset-btn:active{
+    .reset-btn:active,
+    .finish-btn:active{
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.20);
     }
@@ -1103,7 +1112,8 @@
       }
 
       .back-btn,
-      .reset-btn{
+      .reset-btn,
+      .finish-btn{
         height:38px;
         border-width:2px;
         border-radius:10px;
@@ -1134,7 +1144,8 @@
       }
 
       .back-btn,
-      .reset-btn{
+      .reset-btn,
+      .finish-btn{
         height:clamp(32px, 8vh, 42px);
         border-width:2px;
         border-radius:10px;
@@ -1900,6 +1911,7 @@
     <footer class="fixed-controls">
       <button class="back-btn" id="backBtn" type="button">رجوع</button>
       <div class="right-controls">
+        <button class="finish-btn" id="finishBtn" type="button">إنهاء</button>
         <button class="reset-btn" id="resetBtn" type="button">إعادة</button>
       </div>
     </footer>
@@ -2031,6 +2043,7 @@
     const stage = document.getElementById("stage");
     const grid = document.getElementById("boxGrid");
     const resetBtn = document.getElementById("resetBtn");
+    const finishBtn = document.getElementById("finishBtn");
     const backBtn = document.getElementById("backBtn");
     const fixedControls = document.querySelector(".fixed-controls");
     const startGate = document.getElementById("startGate");
@@ -2349,7 +2362,6 @@
     let currentCoverMode = "disabled";
     let finishSequenceToken = 0;
     let finishSequenceTimers = [];
-    let lastBoxFinishTimer = null;
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
     openBoxAudio.setEnabled(boxSoundEnabled);
@@ -2374,7 +2386,6 @@
     const ZOOM_IN_MOTION_MS = 3300;
     const ZOOM_OUT_MOTION_MS = 3200;
     const SCATTER_LEAD_MS = 120;
-    const LAST_BOX_REVEAL_HOLD_MS = 2400;
     const MOTION_EASING = "cubic-bezier(.37,0,.63,1)";
 
     const THEME_BOX_COLORS = {
@@ -2502,9 +2513,9 @@
         اللون شديد الفاتح فقط يأخذ نصًا داكنًا.
       */
       const resultSurfaceIsVeryLight = colorBrightness(baseColor) >= 235;
-      const resultTextColor = resultSurfaceIsVeryLight
-        ? (themeId === "national-day" ? "#083D2B" : "#34261F")
-        : "#FFFFFF";
+      const resultTextColor = themeId === "national-day"
+        ? "#FFFFFF"
+        : (resultSurfaceIsVeryLight ? "#34261F" : "#FFFFFF");
       const resultTextIsLight = colorBrightness(resultTextColor) > 170;
 
       return {
@@ -3949,14 +3960,6 @@
 
         // نمنع رجوع المشهد أثناء اكتمال حركة الغطاء.
         await wait(1320);
-
-        if (items.length > 0 && opened.size >= items.length) {
-          if (lastBoxFinishTimer) window.clearTimeout(lastBoxFinishTimer);
-          lastBoxFinishTimer = window.setTimeout(()=>{
-            lastBoxFinishTimer = null;
-            showEndCelebration();
-          }, LAST_BOX_REVEAL_HOLD_MS);
-        }
       } finally {
         boxInteractionLocked = false;
         if (pendingViewportLayout && !introLayoutFrozen) {
@@ -4043,12 +4046,6 @@
     }
 
 
-    function clearLastBoxFinishTimer(){
-      if (!lastBoxFinishTimer) return;
-      window.clearTimeout(lastBoxFinishTimer);
-      lastBoxFinishTimer = null;
-    }
-
     function clearFinishSequenceTimers(){
       finishSequenceTimers.forEach((timer)=>clearTimeout(timer));
       finishSequenceTimers = [];
@@ -4072,7 +4069,6 @@
     }
 
     async function showEndCelebration(){
-      clearLastBoxFinishTimer();
       const token = ++finishSequenceToken;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4092,7 +4088,6 @@
     }
 
     function hideEndCelebration(){
-      clearLastBoxFinishTimer();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4235,6 +4230,12 @@
       goHomePage();
     });
 
+    finishBtn?.addEventListener("click", async (event)=>{
+      event.preventDefault();
+      event.stopPropagation();
+      openBoxAudio.unlock();
+      await showEndCelebration();
+    });
     resetBtn.addEventListener("click", resetBoxes);
     backBtn.addEventListener("click", goBack);
     page.addEventListener("click", handleSceneTap);
@@ -4471,7 +4472,6 @@
 
       startGate?.classList.add("is-visible");
       startGate?.setAttribute("aria-hidden","false");
-      clearLastBoxFinishTimer();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4482,7 +4482,6 @@
     }
 
     window.addEventListener("pagehide",()=>{
-      clearLastBoxFinishTimer();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       openBoxAudio.stopNamed("finish");
