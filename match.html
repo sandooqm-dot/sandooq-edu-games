@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v20-approved-fonts -->
+  <!-- version: match-v21-open-box-mixed-start-end-size -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -519,43 +519,35 @@
       overflow:hidden;
     }
 
+    /* نفس توزيع الصور مع النصوص المعتمد داخل محتوى افتح الصندوق. */
     .front-content.mixed-content{
       display:grid;
       grid-template-columns:minmax(0,1fr);
-      grid-template-rows:minmax(0,var(--mixed-image-track,1.12fr)) minmax(0,var(--mixed-text-track,1.08fr));
+      grid-template-rows:minmax(0,67fr) minmax(0,33fr);
       align-items:stretch;
       justify-items:stretch;
-      gap:clamp(1px,calc(var(--card-size) * .014),3px);
+      gap:1%;
       padding:clamp(2px,calc(var(--card-size) * .018),4px);
-      --mixed-image-scale:1.08;
     }
 
-    /* النص القصير يأخذ حجمًا بصريًا كبيرًا، مع إبقاء الصورة واضحة وكبيرة.
-       لا نقلص الاثنين إلا كلما زاد طول النص فعلًا. */
-    .front-content.mixed-short{
-      --mixed-image-track:1.18fr;
-      --mixed-text-track:1.02fr;
-      --mixed-image-scale:1.13;
+    .front-content.mixed-content.mixed-short{
+      grid-template-rows:minmax(0,74fr) minmax(0,26fr);
     }
-    .front-content.mixed-medium{
-      --mixed-image-track:1.04fr;
-      --mixed-text-track:1.16fr;
-      --mixed-image-scale:1.10;
+
+    .front-content.mixed-content.mixed-medium{
+      grid-template-rows:minmax(0,66fr) minmax(0,34fr);
     }
-    .front-content.mixed-long{
-      --mixed-image-track:.82fr;
-      --mixed-text-track:1.38fr;
-      --mixed-image-scale:1.05;
+
+    .front-content.mixed-content.mixed-long{
+      grid-template-rows:minmax(0,57fr) minmax(0,43fr);
     }
-    .front-content.mixed-xlong{
-      --mixed-image-track:.64fr;
-      --mixed-text-track:1.56fr;
-      --mixed-image-scale:1.01;
+
+    .front-content.mixed-content.mixed-xlong{
+      grid-template-rows:minmax(0,49fr) minmax(0,51fr);
     }
-    .front-content.mixed-force-text{
-      --mixed-image-track:.50fr;
-      --mixed-text-track:1.70fr;
-      --mixed-image-scale:.98;
+
+    .front-content.mixed-content.mixed-force-text{
+      grid-template-rows:minmax(0,40fr) minmax(0,60fr);
     }
 
     .front-image-zone .front-image{
@@ -566,8 +558,22 @@
       flex:none;
       object-fit:contain;
       object-position:center;
-      transform:scale(var(--mixed-image-scale,1));
+      transform:none;
       transform-origin:center;
+    }
+
+    .front-content.mixed-content .front-image-zone{
+      padding:0 1%;
+      align-items:flex-start;
+    }
+
+    .front-content.mixed-content .front-image{
+      object-position:center top;
+    }
+
+    .front-content.mixed-content .front-text-zone{
+      padding:0 2% 1%;
+      align-items:center;
     }
 
     .front-text-zone .front-text{
@@ -581,8 +587,8 @@
       padding:0 clamp(2px,calc(var(--card-size) * .018),4px);
       white-space:normal;
       word-break:normal;
-      overflow-wrap:break-word;
-      line-height:1.08;
+      overflow-wrap:normal;
+      line-height:1.04;
       text-align:center;
       direction:rtl;
     }
@@ -1021,6 +1027,96 @@
       .back-btn{height:38px;min-width:96px;font-size:15px}
     }
 
+    /* match-v21: حجم البداية والنهاية مطابق لصفحة افتح الصندوق. */
+    #startGate .celebration-card,
+    #finishView .finish-card{
+      width:min(390px,82vw) !important;
+      min-height:0 !important;
+      max-height:calc(100dvh - max(20px,var(--safe-top)) - max(20px,var(--safe-bottom))) !important;
+      padding:clamp(16px,2.8vw,24px) !important;
+      border-radius:clamp(20px,2.4vw,26px) !important;
+    }
+
+    #startGate .celebration-icon,
+    #finishView .finish-trophy{
+      width:clamp(76px,12vw,106px) !important;
+      height:clamp(76px,12vw,106px) !important;
+      margin-bottom:clamp(6px,1.2vw,10px) !important;
+    }
+
+    #startGate .celebration-title,
+    #finishView .finish-title{
+      font-size:clamp(30px,4.8vw,48px) !important;
+      line-height:1.02 !important;
+    }
+
+    #startGate .celebration-subtitle,
+    #finishView .finish-subtitle{
+      margin-top:clamp(6px,1.1vw,10px) !important;
+      font-size:clamp(15px,2.1vw,22px) !important;
+      line-height:1.25 !important;
+    }
+
+    #startGate .celebration-actions,
+    #finishView .finish-actions{
+      margin-top:clamp(14px,2.2vw,20px) !important;
+      gap:clamp(8px,1.2vw,12px) !important;
+      flex-wrap:nowrap !important;
+    }
+
+    #startBtn{
+      min-width:clamp(136px,20vw,184px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(16px,2.1vw,21px) !important;
+      padding-inline:clamp(16px,2.4vw,24px) !important;
+    }
+
+    #finishView .finish-actions button{
+      min-width:clamp(104px,15vw,145px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(15px,2vw,20px) !important;
+      padding-inline:clamp(12px,1.8vw,20px) !important;
+    }
+
+    @media(max-height:520px) and (orientation:landscape){
+      #startGate .celebration-card,
+      #finishView .finish-card{
+        width:min(360px,78vw) !important;
+        padding:12px 18px !important;
+        border-radius:20px !important;
+      }
+
+      #startGate .celebration-icon,
+      #finishView .finish-trophy{
+        width:72px !important;
+        height:72px !important;
+        margin-bottom:5px !important;
+      }
+
+      #startGate .celebration-title,
+      #finishView .finish-title{
+        font-size:34px !important;
+      }
+
+      #startGate .celebration-subtitle,
+      #finishView .finish-subtitle{
+        margin-top:5px !important;
+        font-size:17px !important;
+      }
+
+      #startGate .celebration-actions,
+      #finishView .finish-actions{
+        margin-top:10px !important;
+      }
+
+      #startBtn,
+      #finishView .finish-actions button{
+        height:38px !important;
+        min-height:38px !important;
+        font-size:16px !important;
+      }
+    }
+
     @media(prefers-reduced-motion:reduce){
       .card-inner{transition-duration:.01ms}
       .match-card.is-cover-switching .card-back,
@@ -1077,8 +1173,8 @@
       </div>
     </section>
 
-    <section class="activity-overlay is-visible" id="startGate" aria-hidden="false">
-      <div class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+    <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
+      <div class="celebration-card activity-start-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
         <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
           <defs><linearGradient id="startBlue" x1="0" x2="1" y1="0" y2="1"><stop offset="0%" stop-color="#2fa7f2"/><stop offset="100%" stop-color="#0d6fb4"/></linearGradient></defs>
           <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.76)" stroke="rgba(255,255,255,.92)" stroke-width="5"/>
@@ -1088,7 +1184,7 @@
         <h1 class="celebration-title" id="startTitle">ابدأ اللعبة</h1>
         <p class="celebration-subtitle">اضغط للبدء وتشغيل الصوت</p>
         <div class="celebration-actions">
-          <button class="restart-btn" type="button" id="startBtn">تشغيل</button>
+          <button class="restart-btn activity-start-btn" type="button" id="startBtn">تشغيل</button>
         </div>
       </div>
     </section>
@@ -1878,11 +1974,11 @@
 
       if (hasImage && hasText) {
         const textLength = Array.from(cleanText.replace(/\s+/g," ")).length;
-        const lengthClass = textLength <= 22
+        const lengthClass = textLength <= 18
           ? "mixed-short"
-          : textLength <= 48
+          : textLength <= 42
             ? "mixed-medium"
-            : textLength <= 82
+            : textLength <= 78
               ? "mixed-long"
               : "mixed-xlong";
         container.classList.add("mixed-content",lengthClass);
@@ -1925,19 +2021,13 @@
       let minFont;
 
       if (mode === "mixed") {
-        if (content?.classList.contains("mixed-short")) {
-          maxFont = Math.min(cardSize * .255,availableWidth * .34,48);
-          minFont = Math.max(20,Math.min(cardSize * .135,29));
-        } else if (content?.classList.contains("mixed-medium")) {
-          maxFont = Math.min(cardSize * .225,availableWidth * .31,43);
-          minFont = Math.max(18,Math.min(cardSize * .108,24));
-        } else if (content?.classList.contains("mixed-long")) {
-          maxFont = Math.min(cardSize * .195,availableWidth * .28,37);
-          minFont = Math.max(15,Math.min(cardSize * .086,19));
-        } else {
-          maxFont = Math.min(cardSize * .17,availableWidth * .25,32);
-          minFont = Math.max(13,Math.min(cardSize * .072,16));
-        }
+        maxFont = Math.min(
+          cardSize * .26,
+          availableWidth * .27,
+          availableHeight * .68,
+          40
+        );
+        minFont = Math.max(7,Math.min(cardSize * .05,11));
       } else {
         const cleanLength = Array.from(String(element.textContent || "").trim().replace(/\s+/g," ")).length;
         if (cleanLength <= 16) {
@@ -1958,8 +2048,8 @@
       element.style.overflow = "visible";
       element.style.whiteSpace = "normal";
       element.style.wordBreak = "normal";
-      element.style.overflowWrap = "break-word";
-      element.style.lineHeight = mode === "mixed" ? "1.08" : "1.13";
+      element.style.overflowWrap = mode === "mixed" ? "normal" : "break-word";
+      element.style.lineHeight = mode === "mixed" ? "1.04" : "1.13";
 
       let low = minFont;
       let high = Math.max(minFont,maxFont);
