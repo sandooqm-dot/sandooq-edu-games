@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-open-box-cover-layout-v52 -->
+<!-- version: index-choices-classic-fonts-v53 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -5176,12 +5176,20 @@
       display:block;
     }
 
-    .choices-setup[data-quiz-font="arial"]{
-      --choices-font:Arial, Tahoma, sans-serif;
+    .choices-setup[data-quiz-font="cairo"]{
+      --choices-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif;
     }
 
-    .choices-setup[data-quiz-font="traditional"]{
-      --choices-font:"Traditional Arabic", "Simplified Arabic", Tahoma, serif;
+    .choices-setup[data-quiz-font="tajawal"]{
+      --choices-font:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+    }
+
+    .choices-setup[data-quiz-font="noto-kufi"]{
+      --choices-font:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+    }
+
+    .choices-setup[data-quiz-font="noto-naskh"]{
+      --choices-font:"Noto Naskh Arabic","Traditional Arabic",serif;
     }
 
     .choices-setup,
@@ -9566,6 +9574,20 @@
       display:none !important;
     }
 
+    /* choices-v53: معاينة كلاسيكي للعبة الاختيارات + نفس خطوط العجلة. */
+    .template-cover.quiz-cover{
+      background:#fff url("choices-classic.webp?v=1") center/cover no-repeat !important;
+    }
+
+    body[data-setup-template="quiz"] .choices-setup .theme-art.classic{
+      background:#fff url("choices-classic.webp?v=1") center/cover no-repeat !important;
+    }
+    body[data-setup-template="quiz"] .choices-setup .theme-art.classic::before,
+    body[data-setup-template="quiz"] .choices-setup .theme-art.classic::after{
+      display:none !important;
+      content:none !important;
+    }
+
     body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .setup-toggle-grid{
       display:grid !important;
       grid-template-columns:repeat(2,minmax(0,1fr)) !important;
@@ -9788,7 +9810,7 @@
 </div>
 </button>
 <button class="template-card" data-template="quiz" type="button">
-<div aria-hidden="true" class="template-cover empty"></div>
+<div aria-hidden="true" class="template-cover quiz-cover"></div>
 <div class="template-content">
 <h3 class="template-title">اختيارات</h3>
 <p class="template-desc">أسئلة متعددة الخيارات.</p>
@@ -9991,7 +10013,7 @@
 
       <div class="choices-theme-list" hidden id="quizThemeListPanel">
         <div class="choices-theme-card active" data-quiz-theme="classic">
-          <span class="theme-art classic"></span><span class="choices-theme-name">خلفية بيضاء</span><button class="choices-theme-activate" type="button">تفعيل</button>
+          <span class="theme-art classic"></span><span class="choices-theme-name">كلاسيكي</span><button class="choices-theme-activate" type="button">تفعيل</button>
         </div>
         <div class="choices-theme-card" data-quiz-theme="classroom">
           <span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button>
@@ -10085,9 +10107,10 @@
               <strong>نوع الخط</strong>
             </label>
             <select class="quiz-font-select" id="quizFontSelect">
-              <option value="default">خط اللعبة</option>
-              <option value="arial">Arial</option>
-              <option value="traditional">عربي تقليدي</option>
+              <option value="cairo">كايرو</option>
+              <option value="tajawal">تجوال</option>
+              <option value="noto-kufi">نوتو كوفي</option>
+              <option value="noto-naskh">نوتو نسخ</option>
             </select>
           </div>
         </div>
@@ -11741,7 +11764,7 @@
   let quizQuestions = [];
   let activeQuizQuestionIndex = 0;
   let quizSoundsEnabled = true;
-  let quizFont = "default";
+  let quizFont = "noto-naskh";
   let quizAdvancedOpen = false;
   let pendingQuizQuestionEnter = -1;
   let pendingQuizChoiceEnter = "";
@@ -12626,9 +12649,9 @@
         ? draft.coverType
         : "english-numbers";
       quizSoundsEnabled = draft.soundEnabled !== false;
-      quizFont = ["default","arial","traditional"].includes(draft.fontFamily)
+      quizFont = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(draft.fontFamily)
         ? draft.fontFamily
-        : "default";
+        : "noto-naskh";
       activeQuizQuestionIndex = Number.isInteger(draft.activeQuestionIndex)
         ? draft.activeQuestionIndex
         : 0;
@@ -12883,11 +12906,11 @@
   });
 
   quizFontSelect?.addEventListener("change",()=>{
-    quizFont = ["default","arial","traditional"].includes(
+    quizFont = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(
       quizFontSelect.value
     )
       ? quizFontSelect.value
-      : "default";
+      : "noto-naskh";
 
     updateQuizAdvancedUI();
     saveQuizDraft();

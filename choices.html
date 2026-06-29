@@ -1,13 +1,17 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: choices-v41-manual-finish-direct-restart-mark-layer -->
+  <!-- version: choices-v42-fonts-classic-start-end-v42 -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
     content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
   />
   <title>الاختيارات - صندوق الألعاب التعليمية</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Tajawal:wght@400;700;800&family=Noto+Kufi+Arabic:wght@400;700;800&family=Noto+Naskh+Arabic:wght@400;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root{
@@ -24,12 +28,13 @@
       --red:#f04747;
       --logo-w:clamp(86px,9.2vw,148px);
       --card-radius:clamp(14px,1.6vw,24px);
+      --game-font:"Noto Naskh Arabic",Tahoma,Arial,"Segoe UI",sans-serif;
     }
 
     *{
       box-sizing:border-box;
       -webkit-tap-highlight-color:transparent;
-      font-family:Tahoma,Arial,"Segoe UI",sans-serif;
+      font-family:var(--game-font);
     }
 
     html,
@@ -74,6 +79,19 @@
       user-select:none;
       touch-action:none;
       isolation:isolate;
+    }
+
+    .game-page[data-game-font="cairo"]{
+      --game-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+    }
+    .game-page[data-game-font="tajawal"]{
+      --game-font:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+    }
+    .game-page[data-game-font="noto-kufi"]{
+      --game-font:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+    }
+    .game-page[data-game-font="noto-naskh"]{
+      --game-font:"Noto Naskh Arabic","Traditional Arabic",Tahoma,serif;
     }
 
     .theme-background{
@@ -3520,6 +3538,48 @@
       display:none !important;
     }
 
+    .start-gate .celebration-card,
+    #finishView .finish-card{
+      width:min(360px,78vw) !important;
+      padding:12px 18px !important;
+      border-radius:20px !important;
+    }
+    .start-gate .celebration-icon,
+    #finishView .finish-trophy{
+      width:72px !important;
+      height:72px !important;
+      margin-bottom:5px !important;
+    }
+    .start-gate .celebration-title,
+    #finishView .finish-title{font-size:34px !important}
+    .start-gate .celebration-subtitle,
+    #finishView .finish-subtitle{margin-top:5px !important;font-size:17px !important}
+    .start-gate .celebration-actions,
+    #finishView .finish-actions{margin-top:10px !important}
+    .start-gate .activity-start-btn,
+    #finishView .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
+
+    #finishView{overflow:hidden}
+    .game-page.ended #finishView .finish-card{animation:finishPanelIn .52s cubic-bezier(.2,.9,.2,1) both}
+    #finishView .finish-trophy{opacity:0;transform:translate3d(0,-14px,0) scale(.6);filter:drop-shadow(0 4px 12px rgba(0,0,0,.18))}
+    #finishView.finish-sequence-start .finish-trophy{animation:finishTrophyArrival 2.52s cubic-bezier(.16,.82,.18,1) both !important}
+    #finishView .finish-title,
+    #finishView .finish-subtitle{visibility:hidden;opacity:0;will-change:transform,opacity,filter}
+    #finishView.finish-message-in .finish-title{visibility:visible;animation:finishTitleBurst .68s cubic-bezier(.16,1.22,.2,1) both}
+    #finishView.finish-message-in .finish-subtitle{visibility:visible;animation:finishSubtitleBurst .62s cubic-bezier(.18,1.08,.2,1) both .055s}
+    #finishView .finish-actions{visibility:hidden;opacity:0;pointer-events:none;transform:translate3d(0,14px,0) scale(.96);will-change:transform,opacity}
+    #finishView.finish-actions-in .finish-actions{visibility:visible;pointer-events:auto;animation:finishActionsRise .62s cubic-bezier(.18,1.08,.2,1) both}
+    #finishView .finish-confetti{opacity:0;transition:none}
+    #finishView .finish-confetti span{animation:none;opacity:0}
+    #finishView.finish-confetti-on .finish-confetti{opacity:1}
+    #finishView.finish-confetti-on .finish-confetti span{
+      opacity:1;
+      animation:celebrationConfetti var(--confetti-duration,3.8s) linear infinite;
+      animation-delay:var(--confetti-delay,0s) !important;
+    }
+    #finishView.finish-confetti-on .finish-confetti span:nth-child(3n+2){animation-delay:.055s !important}
+    #finishView.finish-confetti-on .finish-confetti span:nth-child(3n){animation-delay:.11s !important}
+
 </style>
 </head>
 
@@ -3544,7 +3604,7 @@
         <div class="choices-grid" id="choicesGrid"></div>
       </section>
       <section class="activity-overlay end-celebration" id="finishView" aria-hidden="true">
-        <div class="celebration-confetti" aria-hidden="true">
+        <div class="celebration-confetti finish-confetti" aria-hidden="true">
           <span style="left:4%; --confetti-color:#1688d3; --confetti-duration:3.60s; --confetti-delay:0.00s; --confetti-drift:-54px; --confetti-rotate:12deg"></span>
       <span style="left:11%; --confetti-color:#f47a45; --confetti-duration:3.93s; --confetti-delay:-0.23s; --confetti-drift:-36px; --confetti-rotate:43deg"></span>
       <span style="left:18%; --confetti-color:#e91e63; --confetti-duration:4.26s; --confetti-delay:-0.46s; --confetti-drift:-18px; --confetti-rotate:74deg"></span>
@@ -3574,12 +3634,12 @@
       <span style="left:93%; --confetti-color:#e91e63; --confetti-duration:3.88s; --confetti-delay:-2.88s; --confetti-drift:36px; --confetti-rotate:98deg"></span>
       <span style="left:7%; --confetti-color:#43a047; --confetti-duration:4.21s; --confetti-delay:-0.01s; --confetti-drift:54px; --confetti-rotate:129deg"></span>
         </div>
-        <div class="celebration-card" role="status" aria-live="polite">
+        <div class="celebration-card finish-card" role="status" aria-live="polite">
           <span class="celebration-spark spark-one" aria-hidden="true"></span>
           <span class="celebration-spark spark-two" aria-hidden="true"></span>
           <span class="celebration-spark spark-three" aria-hidden="true"></span>
           <span class="celebration-spark spark-four" aria-hidden="true"></span>
-          <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <svg class="celebration-icon finish-trophy" viewBox="0 0 120 120" aria-hidden="true">
         <defs>
           <linearGradient id="finishGold" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stop-color="#fff08a"/>
@@ -3600,9 +3660,9 @@
         <path d="M36 99h48v8H36z" fill="#102b57" opacity=".92"/>
         <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
       </svg>
-          <h1 class="celebration-title">أحسنتم!</h1>
-          <p class="celebration-subtitle">انتهى النشاط بنجاح</p>
-          <div class="celebration-actions">
+          <h1 class="celebration-title finish-title">أحسنتم!</h1>
+          <p class="celebration-subtitle finish-subtitle">انتهى النشاط بنجاح</p>
+          <div class="celebration-actions finish-actions">
             <button class="restart-btn" type="button" id="endRestartBtn">إعادة</button>
             <button class="home-btn" type="button" id="endHomeBtn">الصفحة الرئيسية</button>
           </div>
@@ -3917,21 +3977,24 @@
         open: "sounds/open-box-open.mp3?v=1",
         go: "sounds/open-box-go.mp3?v=2",
         return: "sounds/open-box-return.mp3?v=2",
-        wrong: "sounds/choice-wrong.mp3?v=1"
+        wrong: "sounds/choice-wrong.mp3?v=1",
+        finish: "sounds/match-finish.mp3?v=1"
       };
 
       const VOLUMES = {
         open: 1,
         go: 1,
         return: 1,
-        wrong: 1
+        wrong: 1,
+        finish: 1
       };
 
       const START_OFFSETS = {
         open: 0,
         go: 0,
         return: 0,
-        wrong: 0
+        wrong: 0,
+        finish: 0
       };
 
       const cache = {};
@@ -4025,7 +4088,8 @@
         playOpen: ()=> playNamed("open"),
         playGo: ()=> playNamed("go"),
         playReturn: ()=> playNamed("return"),
-        playWrong: ()=> playNamed("wrong")
+        playWrong: ()=> playNamed("wrong"),
+        playFinish: ()=> playNamed("finish")
       };
     })();
 
@@ -4178,6 +4242,7 @@
     })();
 
     let currentTheme = "classroom";
+    let currentFont = "noto-naskh";
     let displayMode = "cards";
     let coverType = "english-numbers";
     let questions = [];
@@ -4233,6 +4298,15 @@
       } catch (_) {
         return "";
       }
+    }
+
+    function normalizeFont(value){
+      const raw = String(value || "").trim().toLowerCase();
+      if (["cairo","كايرو"].includes(raw)) return "cairo";
+      if (["tajawal","تجوال"].includes(raw)) return "tajawal";
+      if (["noto-kufi","noto kufi","نوتو كوفي"].includes(raw)) return "noto-kufi";
+      if (["noto-naskh","noto naskh","default","traditional","arial","خط اللعبة","نوتو نسخ"].includes(raw)) return "noto-naskh";
+      return "noto-naskh";
     }
 
     function normalizeTheme(value){
@@ -4497,6 +4571,7 @@
 
       questions = clean;
       currentTheme = normalizeTheme(payload?.theme || currentTheme);
+      currentFont = normalizeFont(payload?.fontFamily || payload?.font || currentFont);
       displayMode = normalizeDisplayMode(payload || {});
       coverType = normalizeCoverType(payload || {});
       quizSoundEnabled = normalizeSoundEnabled(payload);
@@ -4538,6 +4613,7 @@
         choices:item.choices.map((choice)=>({ ...choice }))
       }));
       currentTheme = normalizeTheme(getUrlParam("theme") || "classroom");
+      currentFont = normalizeFont(getUrlParam("font") || "noto-naskh");
       displayMode = getUrlParam("mode") === "cards" ? "cards" : "direct";
       quizSoundEnabled = true;
       choicesAudio.setEnabled(true);
@@ -4547,6 +4623,11 @@
     function applyTheme(){
       THEMES.forEach((theme)=> page.classList.remove(`theme-${theme}`));
       page.classList.add(`theme-${currentTheme}`);
+    }
+
+    function applyFont(){
+      if (!page) return;
+      page.dataset.gameFont = normalizeFont(currentFont);
     }
 
     function getVisualViewportMetrics(){
@@ -6225,19 +6306,45 @@
     }
 
 
-    function showEndCelebration(){
+    let finishSequenceToken = 0;
+
+    async function showEndCelebration(){
+      const token = ++finishSequenceToken;
       interactionLocked = true;
       answerLocked = true;
-      page.classList.add("activity-ended");
+      page.classList.add("activity-ended","ended");
+      finishView?.classList.remove(
+        "finish-sequence-start",
+        "finish-message-in",
+        "finish-actions-in",
+        "finish-confetti-on"
+      );
       finishView?.classList.add("is-visible");
       finishView?.setAttribute("aria-hidden","false");
       questionNavigation.hidden = true;
       collapseSafariBars({ refresh:false });
+      choicesAudio.playFinish?.();
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      if (token !== finishSequenceToken) return;
+      finishView?.classList.add("finish-sequence-start");
+      await wait(1700);
+      if (token !== finishSequenceToken) return;
+      finishView?.classList.add("finish-message-in");
+      await wait(520);
+      if (token !== finishSequenceToken) return;
+      finishView?.classList.add("finish-actions-in","finish-confetti-on");
     }
 
     function hideEndCelebration(){
-      page.classList.remove("activity-ended");
-      finishView?.classList.remove("is-visible");
+      finishSequenceToken += 1;
+      page.classList.remove("activity-ended","ended");
+      finishView?.classList.remove(
+        "is-visible",
+        "finish-sequence-start",
+        "finish-message-in",
+        "finish-actions-in",
+        "finish-confetti-on"
+      );
       finishView?.setAttribute("aria-hidden","true");
     }
 
@@ -7128,6 +7235,7 @@
       choicesAudio.preload();
       themeIntroAudio.setEnabled(quizSoundEnabled);
       applyTheme();
+      applyFont();
 
       if (displayMode === "cards") {
         interactionLocked = true;
