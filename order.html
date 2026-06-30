@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: order-v8-restore-v55-drag -->
+<!-- version: order-v10-drag-from-order5 -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -615,10 +615,10 @@
     .start-btn,.restart-btn{background:var(--blue);color:#fff}
     .home-btn{background:var(--yellow);color:#111}
 
-    .order-token.is-dragging-source{
-      opacity:.24;
-      filter:saturate(.7);
+    .order-token.is-drag-source{
+      opacity:.22;
       transform:scale(.96);
+      filter:saturate(.75);
     }
 
     .drag-ghost{
@@ -628,10 +628,11 @@
       z-index:9999;
       pointer-events:none;
       margin:0;
-      opacity:.94;
+      transform:translate3d(0,0,0) translate(-50%,-50%) scale(1.04);
+      opacity:.96;
       transition:none!important;
       will-change:transform,opacity;
-      contain:layout paint;
+      contain:layout paint style;
       backface-visibility:hidden;
       -webkit-backface-visibility:hidden;
     }
@@ -2023,221 +2024,264 @@
       try{cleanup?.()}catch(_){}
       document.querySelectorAll(".drag-ghost").forEach((node)=>node.remove());
       groupsCanvas.querySelectorAll(".order-slot.drag-over").forEach((slot)=>slot.classList.remove("drag-over"));
-      groupsCanvas.querySelectorAll(".order-token.is-drag-source,.order-token.is-dragging-source").forEach((token)=>token.classList.remove("is-drag-source","is-dragging-source"));
+      groupsCanvas.querySelectorAll(".order-token.is-drag-source").forEach((token)=>token.classList.remove("is-drag-source"));
     }
 
-    function requiredSlotElement(groupIndex){
+    function magneticTarget(groupIndex,clientX,clientY){
       const group = state.groups[groupIndex];
+      if (!group || group.completed) return null;
       const slotIndex = firstEmptySlotIndex(group);
       if (slotIndex < 0) return null;
-      return groupsCanvas.querySelector(
-        `.order-slot[data-group-index="${groupIndex}"][data-slot-index="${slotIndex}"]`
-      );
+      const slot = groupsCanvas.querySelector(`[data-group-index="${groupIndex}"][data-slot-index="${slotIndex}"]`);
+      if (!slot || slot.classList.contains("is-filled")) return null;
+      const rect = slot.getBoundingClientRect();
+      const radius = Math.min(82,Math.max(44,Math.min(rect.width,rect.height) * .82));
+      const dx = Math.max(rect.left - clientX,0,clientX - rect.right);
+      const dy = Math.max(rect.top - clientY,0,clientY - rect.bottom);
+      if (Math.hypot(dx,dy) > radius) return null;
+      return {slot,slotIndex,rect};
     }
 
-    function isInsideMagneticZone(slot,clientX,clientY){
-      if (!slot) return false;
-      const rect = slot.getBoundingClientRect();
-      const expandX = Math.max(34,Math.min(74,rect.width * .72));
-      const expandY = Math.max(34,Math.min(74,rect.height * .72));
-      return (
-        clientX >= rect.left - expandX &&
-        clientX <= rect.right + expandX &&
-        clientY >= rect.top - expandY &&
-        clientY <= rect.bottom + expandY
-      );
+    function findExpandedHitToken(clientX,clientY,pointerType){
+      const extra = pointerType === "touch" || pointerType === "pen" ? 11 : 6;
+      let bestToken = null;
+      let bestScore = Number.POSITIVE_INFINITY;
+
+      groupsCanvas.querySelectorAll(".order-token").forEach((token)=>{
+        const groupIndex = Number(token.dataset.groupIndex);
+        if (!Number.isInteger(groupIndex) || state.groups[groupIndex]?.completed) return;
+        const rect = token.getBoundingClientRect();
+        const dx = Math.max(rect.left - clientX,0,clientX - rect.right);
+        const dy = Math.max(rect.top - clientY,0,clientY - rect.bottom);
+        const edgeDistance = Math.hypot(dx,dy);
+        if (edgeDistance > extra) return;
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const centerDistance = Math.hypot(centerX - clientX,centerY - clientY);
+        const score = edgeDistance * 1000 + centerDistance;
+        if (score < bestScore) {
+          bestScore = score;
+          bestToken = token;
+        }
+      });
+
+      return bestToken;
     }
 
     function attachPointerDrag(element,item){
       let pointerId = null;
+      let pointerType = "";
       let startX = 0;
       let startY = 0;
+      let lastX = 0;
+      let lastY = 0;
       let sourceRect = null;
+      let dragThreshold = 4;
+      let ghostOffsetY = 0;
       let dragging = false;
-      let finishing = false;
+      let settling = false;
       let ghost = null;
+      let activeTargetSlot = null;
+      let settleTimer = 0;
+      let watchdogTimer = 0;
       let moveFrame = 0;
-      let latestX = 0;
-      let latestY = 0;
-      let windowListenersAttached = false;
+      let pendingX = 0;
+      let pendingY = 0;
+      let globalListenersAttached = false;
 
-      const clearTargets = ()=>{
-        groupsCanvas.querySelectorAll(".order-slot.drag-over")
-          .forEach((slot)=>slot.classList.remove("drag-over"));
+      const setTargetSlot = (slot)=>{
+        if (activeTargetSlot === slot) return;
+        activeTargetSlot?.classList.remove("drag-over");
+        activeTargetSlot = slot || null;
+        activeTargetSlot?.classList.add("drag-over");
       };
 
-      const removeWindowListeners = ()=>{
-        if (!windowListenersAttached) return;
+      const paintGhost = ()=>{
+        moveFrame = 0;
+        if (!ghost) return;
+        ghost.style.transform = `translate3d(${pendingX}px,${pendingY}px,0) translate(-50%,-50%) scale(1.04)`;
+      };
+
+      const queueGhost = (x,y)=>{
+        pendingX = x;
+        pendingY = y;
+        if (!moveFrame) moveFrame = requestAnimationFrame(paintGhost);
+      };
+
+      const refreshWatchdog = ()=>{
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        watchdogTimer = window.setTimeout(()=>{
+          if (activeDragCleanup === cleanup) cleanup();
+        },15000);
+      };
+
+      const removeGlobalListeners = ()=>{
+        if (!globalListenersAttached) return;
+        globalListenersAttached = false;
+        window.removeEventListener("pointermove",handleMove,true);
         window.removeEventListener("pointerup",finish,true);
-        window.removeEventListener("pointercancel",cancelDrag,true);
-        windowListenersAttached = false;
+        window.removeEventListener("pointercancel",cancelFromPointer,true);
+        document.removeEventListener("pointerup",finish,true);
+        document.removeEventListener("pointercancel",cancelFromPointer,true);
+      };
+
+      const addGlobalListeners = ()=>{
+        if (globalListenersAttached) return;
+        globalListenersAttached = true;
+        window.addEventListener("pointermove",handleMove,{capture:true,passive:false});
+        window.addEventListener("pointerup",finish,{capture:true,passive:false});
+        window.addEventListener("pointercancel",cancelFromPointer,{capture:true,passive:false});
+        document.addEventListener("pointerup",finish,{capture:true,passive:false});
+        document.addEventListener("pointercancel",cancelFromPointer,{capture:true,passive:false});
       };
 
       const cleanup = ()=>{
-        clearTargets();
+        removeGlobalListeners();
+        setTargetSlot(null);
         if (moveFrame) cancelAnimationFrame(moveFrame);
         moveFrame = 0;
-        removeWindowListeners();
+        if (settleTimer) clearTimeout(settleTimer);
+        settleTimer = 0;
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        watchdogTimer = 0;
         try{
-          if (pointerId !== null && element.hasPointerCapture?.(pointerId)) {
-            element.releasePointerCapture(pointerId);
-          }
+          if (pointerId !== null && element.hasPointerCapture?.(pointerId)) element.releasePointerCapture(pointerId);
         }catch(_){}
-        element.classList.remove("is-dragging-source","is-drag-source","is-pointer-active");
+        element.classList.remove("is-pointer-active","is-drag-source");
         page.classList.remove("is-dragging");
         ghost?.getAnimations?.().forEach((animation)=>animation.cancel());
         ghost?.remove();
         ghost = null;
         pointerId = null;
+        pointerType = "";
         dragging = false;
-        finishing = false;
+        settling = false;
         if (activeDragCleanup === cleanup) activeDragCleanup = null;
       };
 
-      const positionGhost = (clientX,clientY)=>{
-        if (!ghost || !sourceRect) return;
-        latestX = clientX;
-        latestY = clientY;
-        if (moveFrame) return;
-        moveFrame = requestAnimationFrame(()=>{
-          moveFrame = 0;
-          if (!ghost || !sourceRect) return;
-          const x = latestX - sourceRect.width / 2;
-          const y = latestY - sourceRect.height / 2;
-          ghost.style.transform = `translate3d(${x}px,${y}px,0) scale(1.04)`;
-        });
+      const makeGhost = (clientX,clientY)=>{
+        dragging = true;
+        ghost = element.cloneNode(true);
+        ghost.classList.remove("is-selected","is-pointer-active","is-drag-source");
+        ghost.classList.add("drag-ghost");
+        ghost.removeAttribute("id");
+        ghost.setAttribute("aria-hidden","true");
+        ghost.tabIndex = -1;
+        ghost.style.width = `${sourceRect.width}px`;
+        ghost.style.height = `${sourceRect.height}px`;
+        document.body.appendChild(ghost);
+        element.classList.add("is-drag-source");
+        page.classList.add("is-dragging");
+        queueGhost(clientX,clientY - ghostOffsetY);
       };
 
-      const magneticTargetAt = (clientX,clientY)=>{
-        const slot = requiredSlotElement(item.groupIndex);
-        return isInsideMagneticZone(slot,clientX,clientY) ? slot : null;
+      const handleMove = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        const samples = typeof event.getCoalescedEvents === "function" ? event.getCoalescedEvents() : null;
+        const point = samples?.length ? samples[samples.length - 1] : event;
+        lastX = point.clientX;
+        lastY = point.clientY;
+        refreshWatchdog();
+
+        const distance = Math.hypot(lastX - startX,lastY - startY);
+        if (!dragging && distance >= dragThreshold) makeGhost(lastX,lastY);
+        if (!dragging || !ghost) return;
+
+        queueGhost(lastX,lastY - ghostOffsetY);
+        const target = magneticTarget(item.groupIndex,lastX,lastY);
+        setTargetSlot(target?.slot || null);
+        if (event.cancelable) event.preventDefault();
       };
 
-      const cancelDrag = (event)=>{
-        if (pointerId === null) return;
-        if (event?.pointerId !== undefined && event.pointerId !== pointerId) return;
-        cleanup();
-      };
-
-      const finish = (event)=>{
-        if (pointerId === null || finishing) return;
-        if (event.pointerId !== pointerId) return;
-
-        if (!dragging) {
+      const animateBackAndCleanup = (clientX,clientY)=>{
+        if (!ghost || !sourceRect) {
           cleanup();
           return;
         }
+        const fromY = clientY - ghostOffsetY;
+        const centerX = sourceRect.left + sourceRect.width / 2;
+        const centerY = sourceRect.top + sourceRect.height / 2;
+        ghost.animate([
+          {transform:`translate3d(${clientX}px,${fromY}px,0) translate(-50%,-50%) scale(1.04)`,opacity:.96},
+          {transform:`translate3d(${centerX}px,${centerY}px,0) translate(-50%,-50%) scale(1)`,opacity:.18}
+        ],{duration:220,easing:"cubic-bezier(.22,.72,.24,1)",fill:"forwards"});
+        settleTimer = window.setTimeout(cleanup,215);
+      };
 
-        finishing = true;
-        suppressClickUntil = Date.now() + 420;
-        clearTargets();
+      const finish = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        if (event.cancelable) event.preventDefault();
+        lastX = Number.isFinite(event.clientX) ? event.clientX : lastX;
+        lastY = Number.isFinite(event.clientY) ? event.clientY : lastY;
 
-        const target = magneticTargetAt(event.clientX,event.clientY);
-        const group = state.groups[item.groupIndex];
-        const slotIndex = firstEmptySlotIndex(group);
-
-        if (!target || slotIndex < 0) {
-          if (ghost && sourceRect) {
-            const x = sourceRect.left;
-            const y = sourceRect.top;
-            ghost.animate([
-              {transform:ghost.style.transform || `translate3d(${event.clientX - sourceRect.width/2}px,${event.clientY - sourceRect.height/2}px,0) scale(1.04)`,opacity:.94},
-              {transform:`translate3d(${x}px,${y}px,0) scale(1)`,opacity:.18}
-            ],{
-              duration:260,
-              easing:"cubic-bezier(.22,.72,.24,1)",
-              fill:"forwards"
-            });
-            window.setTimeout(cleanup,245);
-          } else {
-            cleanup();
-          }
+        if (!dragging) {
+          suppressClickUntil = Date.now() + 420;
+          cleanup();
+          answerFirstEmptySlot(item.groupIndex,item.id);
           return;
         }
 
-        const correct = isCorrectForSlot(group,item,slotIndex);
-        const targetRect = target.getBoundingClientRect();
-
-        if (ghost && sourceRect) {
-          const targetX = targetRect.left + (targetRect.width - sourceRect.width) / 2;
-          const targetY = targetRect.top + (targetRect.height - sourceRect.height) / 2;
-          const sourceX = sourceRect.left;
-          const sourceY = sourceRect.top;
-
-          ghost.animate([
-            {transform:ghost.style.transform || `translate3d(${event.clientX - sourceRect.width/2}px,${event.clientY - sourceRect.height/2}px,0) scale(1.04)`,opacity:.94},
-            correct
-              ? {transform:`translate3d(${targetX}px,${targetY}px,0) scale(.92)`,opacity:.28}
-              : {transform:`translate3d(${sourceX}px,${sourceY}px,0) scale(1)`,opacity:.20}
-          ],{
-            duration:correct ? 180 : 330,
-            easing:correct ? "cubic-bezier(.18,.84,.2,1)" : "cubic-bezier(.22,.72,.24,1)",
-            fill:"forwards"
-          });
+        suppressClickUntil = Date.now() + 520;
+        settling = true;
+        const target = magneticTarget(item.groupIndex,lastX,lastY);
+        if (!target) {
+          animateBackAndCleanup(lastX,lastY);
+          return;
         }
 
-        if (correct) {
-          window.setTimeout(()=>{
-            acceptItem(item.groupIndex,item.id,slotIndex);
-            cleanup();
-          },165);
-        } else {
-          flashWrong(item.groupIndex,item.id);
-          window.setTimeout(cleanup,315);
-        }
+        const group = state.groups[item.groupIndex];
+        const correct = isCorrectForSlot(group,item,target.slotIndex);
+        const destination = correct ? target.rect : sourceRect;
+        const centerX = destination.left + destination.width / 2;
+        const centerY = destination.top + destination.height / 2;
+        const fromY = lastY - ghostOffsetY;
+
+        setTargetSlot(target.slot);
+        ghost?.animate([
+          {transform:`translate3d(${lastX}px,${fromY}px,0) translate(-50%,-50%) scale(1.04)`,opacity:.96},
+          {transform:`translate3d(${centerX}px,${centerY}px,0) translate(-50%,-50%) scale(${correct ? .90 : 1})`,opacity:correct ? .26 : .80}
+        ],{
+          duration:correct ? 145 : 245,
+          easing:correct ? "cubic-bezier(.18,.82,.18,1)" : "cubic-bezier(.22,.72,.24,1)",
+          fill:"forwards"
+        });
+
+        settleTimer = window.setTimeout(()=>{
+          if (correct) acceptItem(item.groupIndex,item.id,target.slotIndex);
+          else flashWrong(item.groupIndex,item.id);
+          cleanup();
+        },correct ? 135 : 230);
+      };
+
+      const cancelFromPointer = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        if (event.cancelable) event.preventDefault();
+        cleanup();
       };
 
       const begin = (event)=>{
         if (pointerId !== null || event.button > 0 || state.groups[item.groupIndex]?.completed) return;
-        activeDragCleanup?.();
-        activeDragCleanup = cleanup;
+        if (event.cancelable) event.preventDefault();
+        cancelActiveDrag();
         pointerId = event.pointerId;
-        startX = event.clientX;
-        startY = event.clientY;
-        latestX = startX;
-        latestY = startY;
+        pointerType = event.pointerType || "";
+        startX = lastX = event.clientX;
+        startY = lastY = event.clientY;
         sourceRect = element.getBoundingClientRect();
+        dragThreshold = pointerType === "touch" || pointerType === "pen" ? 3 : 4;
+        ghostOffsetY = pointerType === "touch" || pointerType === "pen"
+          ? Math.min(32,Math.max(18,sourceRect.height * .34))
+          : 0;
+        element.classList.add("is-pointer-active");
+        activeDragCleanup = cleanup;
+        addGlobalListeners();
+        refreshWatchdog();
         try{element.setPointerCapture?.(pointerId)}catch(_){}
-        window.addEventListener("pointerup",finish,true);
-        window.addEventListener("pointercancel",cancelDrag,true);
-        windowListenersAttached = true;
       };
 
       element.__orderBeginDrag = begin;
       element.draggable = false;
       element.addEventListener("pointerdown",begin,{passive:false});
-      element.addEventListener("pointermove",(event)=>{
-        if (event.pointerId !== pointerId || finishing) return;
-        const distance = Math.hypot(event.clientX - startX,event.clientY - startY);
-
-        if (!dragging && distance > 6) {
-          dragging = true;
-          ghost = element.cloneNode(true);
-          ghost.classList.remove("is-selected","is-pointer-active","is-drag-source");
-          ghost.classList.add("drag-ghost");
-          ghost.removeAttribute("id");
-          ghost.setAttribute("aria-hidden","true");
-          ghost.tabIndex = -1;
-          ghost.style.width = `${sourceRect.width}px`;
-          ghost.style.height = `${sourceRect.height}px`;
-          document.body.appendChild(ghost);
-          element.classList.add("is-dragging-source");
-          page.classList.add("is-dragging");
-          positionGhost(event.clientX,event.clientY);
-        }
-
-        if (!dragging || !ghost) return;
-        positionGhost(event.clientX,event.clientY);
-        clearTargets();
-        magneticTargetAt(event.clientX,event.clientY)?.classList.add("drag-over");
-        if (event.cancelable) event.preventDefault();
-      },{passive:false});
-
-      element.addEventListener("pointerup",finish);
-      element.addEventListener("pointercancel",cancelDrag);
-      element.addEventListener("lostpointercapture",(event)=>{
-        if (event.pointerId === pointerId && !finishing) cleanup();
-      });
       element.addEventListener("dragstart",(event)=>event.preventDefault());
       element.addEventListener("contextmenu",(event)=>event.preventDefault());
     }
@@ -2615,6 +2659,15 @@
       questionStates = [];
       showQuestion(0);
     }
+
+    stage.addEventListener("pointerdown",(event)=>{
+      if (event.button > 0 || activeDragCleanup) return;
+      const directToken = event.target instanceof Element ? event.target.closest(".order-token") : null;
+      if (directToken) return;
+      const nearbyToken = findExpandedHitToken(event.clientX,event.clientY,event.pointerType);
+      if (!nearbyToken || typeof nearbyToken.__orderBeginDrag !== "function") return;
+      nearbyToken.__orderBeginDrag(event);
+    },{capture:true,passive:false});
 
     backBtn.addEventListener("click",goToOrderSettings);
     previousBtn.addEventListener("click",goPrevious);
