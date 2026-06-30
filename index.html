@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-order-theme-font-buttons-v57 -->
+<!-- version: index-order-space-input-v58 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14349,6 +14349,14 @@
       .join(" ");
   }
 
+  function limitOrderTextWhileTyping(value){
+    const raw = String(value || "").replace(/[\r\n]+/g," ");
+    const words = Array.from(raw.matchAll(/\S+/g));
+    if (words.length <= ORDER_MAX_ITEMS) return raw;
+    const lastAllowed = words[ORDER_MAX_ITEMS - 1];
+    return raw.slice(0,lastAllowed.index + lastAllowed[0].length);
+  }
+
   function normalizeOrderHex(value,fallback){
     const raw = String(value || "").trim();
     const short = raw.match(/^#?([0-9a-f]{3})$/i);
@@ -14618,8 +14626,12 @@
     input.lang = english ? "en" : "ar";
     input.autocapitalize = english && contentMode === "letters" ? "characters" : "sentences";
     input.addEventListener("input",()=>{
-      const limitedValue = limitOrderText(input.value);
-      if (input.value !== limitedValue) input.value = limitedValue;
+      const limitedValue = limitOrderTextWhileTyping(input.value);
+      if (input.value !== limitedValue) {
+        const cursor = Math.min(input.selectionStart ?? limitedValue.length,limitedValue.length);
+        input.value = limitedValue;
+        try { input.setSelectionRange(cursor,cursor); } catch (_) {}
+      }
       questions[index].text = limitedValue;
       saveDraft();
     });
