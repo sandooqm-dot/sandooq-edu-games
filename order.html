@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: order-v12-fonts -->
+<!-- version: order-v13-letter-balanced-rows -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -1362,6 +1362,50 @@
       animation:none !important;
       outline:none !important;
     }
+
+
+    /* order-v13: توزيع كلمات نمط الحروف على صفين متوازنين وواضحين. */
+    .groups-canvas.is-letters-mode{
+      flex-direction:column;
+      flex-wrap:nowrap;
+      align-items:center;
+      align-content:center;
+      justify-content:center;
+      gap:clamp(22px,3.2vw,42px);
+    }
+
+    .letter-groups-row{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(24px,4vw,62px);
+      direction:inherit;
+    }
+
+    .letter-groups-row .order-group{
+      flex:0 0 auto;
+    }
+
+    @media(max-width:760px){
+      .groups-canvas.is-letters-mode{
+        gap:clamp(18px,5vw,30px);
+      }
+
+      .letter-groups-row{
+        gap:clamp(14px,3.8vw,26px);
+      }
+    }
+
+    @media(max-height:560px) and (orientation:landscape){
+      .groups-canvas.is-letters-mode{
+        gap:14px;
+      }
+
+      .letter-groups-row{
+        gap:clamp(16px,3vw,34px);
+      }
+    }
 </style>
 </head>
 <body>
@@ -2417,17 +2461,51 @@
       nextBtn.textContent = questionIndex >= payload.questions.length - 1 ? "إنهاء" : "التالي";
     }
 
+    function getBalancedLetterRows(groupCount){
+      const count = Math.max(0,Math.min(ORDER_MAX_ITEMS,Number(groupCount) || 0));
+      if (count <= 2) return count ? [count] : [];
+      const topCount = Math.ceil(count / 2);
+      return [topCount,count - topCount];
+    }
+
+    function renderLetterRows(){
+      const rowSizes = getBalancedLetterRows(state.groups.length);
+      let groupIndex = 0;
+
+      rowSizes.forEach((rowSize)=>{
+        const row = document.createElement("div");
+        row.className = "letter-groups-row";
+        row.dir = state.direction;
+        row.style.direction = state.direction;
+
+        for (let offset=0; offset<rowSize; offset+=1) {
+          const group = state.groups[groupIndex];
+          if (group) row.appendChild(renderLetterGroup(group,groupIndex));
+          groupIndex += 1;
+        }
+
+        groupsCanvas.appendChild(row);
+      });
+    }
+
     function render(){
       groupsCanvas.textContent = "";
       groupsCanvas.dir = state.direction;
       groupsCanvas.style.direction = state.direction;
       page.style.setProperty("--order-direction",state.direction);
-      groupsCanvas.classList.toggle("is-sequence-mode",payload.contentMode !== "letters");
-      state.groups.forEach((group,index)=>{
-        groupsCanvas.appendChild(payload.contentMode === "letters"
-          ? renderLetterGroup(group,index)
-          : renderSequenceGroup(group,index));
-      });
+
+      const isLettersMode = payload.contentMode === "letters";
+      groupsCanvas.classList.toggle("is-letters-mode",isLettersMode);
+      groupsCanvas.classList.toggle("is-sequence-mode",!isLettersMode);
+
+      if (isLettersMode) {
+        renderLetterRows();
+      } else {
+        state.groups.forEach((group,index)=>{
+          groupsCanvas.appendChild(renderSequenceGroup(group,index));
+        });
+      }
+
       updateNavigation();
       scheduleLayout();
     }
