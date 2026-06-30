@@ -1,10 +1,13 @@
 <!doctype html>
-<!-- version: order-v11-drag-order5-css-cascade-fix -->
+<!-- version: order-v12-fonts -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <title>الترتيب - صندوق الألعاب التعليمية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Tajawal:wght@400;700;800&family=Noto+Kufi+Arabic:wght@400;700;800&family=Noto+Naskh+Arabic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -28,7 +31,7 @@
       --blue:#1688d3;
       --green:#28ad6d;
       --intro-bg-final-scale:1.12;
-      --game-font:Tahoma,Arial,"Segoe UI",sans-serif;
+      --game-font:"Noto Naskh Arabic",Tahoma,Arial,"Segoe UI",sans-serif;
       --tile-size:clamp(48px,7vw,92px);
       --tile-gap:clamp(7px,1vw,13px);
       --group-gap:clamp(24px,4vw,54px);
@@ -80,8 +83,10 @@
       isolation:isolate;
     }
 
-    .order-page[data-font="arial"]{--game-font:Arial,sans-serif}
-    .order-page[data-font="traditional"]{--game-font:"Traditional Arabic","Arabic Typesetting",Tahoma,Arial,sans-serif}
+    .order-page[data-font="cairo"]{--game-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+    .order-page[data-font="tajawal"]{--game-font:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+    .order-page[data-font="noto-kufi"]{--game-font:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+    .order-page[data-font="noto-naskh"]{--game-font:"Noto Naskh Arabic","Traditional Arabic",Tahoma,serif}
 
     .theme-background{
       position:absolute;
@@ -1360,7 +1365,7 @@
 </style>
 </head>
 <body>
-  <main class="order-page theme-classic pre-start" id="orderPage" data-font="default">
+  <main class="order-page theme-classic pre-start" id="orderPage" data-font="noto-naskh">
     <div class="theme-background" aria-hidden="true"></div>
     <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
 
@@ -1495,6 +1500,15 @@
       return THEMES.includes(theme) ? theme : "classic";
     }
 
+    function normalizeFont(value){
+      const raw = String(value || "").trim().toLowerCase();
+      if (["cairo","كايرو"].includes(raw)) return "cairo";
+      if (["tajawal","تجوال"].includes(raw)) return "tajawal";
+      if (["noto-kufi","noto kufi","نوتو كوفي"].includes(raw)) return "noto-kufi";
+      if (["noto-naskh","noto naskh","default","arial","traditional","خط اللعبة","نوتو نسخ"].includes(raw)) return "noto-naskh";
+      return "noto-naskh";
+    }
+
     function normalizeHex(value,fallback){
       const raw = String(value || "").trim();
       const short = raw.match(/^#?([0-9a-f]{3})$/i);
@@ -1539,7 +1553,7 @@
         contentMode:mode,
         contentLanguage:normalizeLanguage(raw?.contentLanguage || raw?.language,questions,mode),
         soundEnabled:raw?.soundEnabled !== false && (!raw?.sounds || raw.sounds.enabled !== false),
-        fontFamily:["default","arial","traditional"].includes(raw?.fontFamily) ? raw.fontFamily : "default",
+        fontFamily:normalizeFont(raw?.fontFamily),
         textColor:normalizeHex(raw?.textColor,"#111111"),
         beforeColor:normalizeHex(raw?.beforeColor,"#b7b0ac"),
         afterColor:normalizeHex(raw?.afterColor,"#f5aa2d"),

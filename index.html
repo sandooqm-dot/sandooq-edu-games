@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-order-max8-v58 -->
+<!-- version: index-order-theme-font-buttons-v57 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9202,32 +9202,20 @@
 
     /* إعداد لعبة الترتيب */
     .template-cover.order-cover{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:clamp(4px,.8vw,10px);
-      padding:10px;
-      background:linear-gradient(145deg,#fff7bf,#f6cf47);
+      background:#fff url("order-classic.webp?v=1") center/cover no-repeat !important;
     }
-    .template-cover.order-cover span{
-      width:clamp(24px,4vw,44px);
-      aspect-ratio:1;
-      border:2px solid #111;
-      border-radius:10px;
-      background:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#111;
-      font-size:clamp(16px,2.4vw,28px);
-      font-weight:950;
-      box-shadow:0 4px 0 rgba(0,0,0,.16);
-    }
+    .template-cover.order-cover span,
     .template-cover.order-cover i{
-      color:#111;
-      font-style:normal;
-      font-size:clamp(16px,2.2vw,26px);
-      font-weight:950;
+      display:none !important;
+    }
+
+    .order-setup .theme-art.classic{
+      background:#fff url("order-classic.webp?v=1") center/cover no-repeat !important;
+    }
+    .order-setup .theme-art.classic::before,
+    .order-setup .theme-art.classic::after{
+      display:none !important;
+      content:none !important;
     }
 
     .order-setup{
@@ -9288,16 +9276,24 @@
       font-weight:950;
     }
     .order-remove-question{
-      width:36px;
-      height:36px;
+      min-width:76px;
+      width:auto;
+      height:34px;
       border:2px solid var(--ink);
-      border-radius:50%;
-      background:#ff4d4f;
+      border-radius:12px;
+      background:#f04f55;
       color:#fff;
-      font-size:24px;
+      padding:0 11px;
+      font-family:Tahoma,Arial,"Segoe UI",sans-serif;
+      font-size:13px;
       font-weight:950;
       line-height:1;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
       cursor:pointer;
+      box-shadow:none;
     }
     .order-remove-question:disabled{
       opacity:.35;
@@ -9377,6 +9373,10 @@
       cursor:pointer;
       padding:6px 10px;
     }
+    .order-image-pick.has-image{
+      background:var(--orange) !important;
+      color:#fff !important;
+    }
     .order-image-remove{
       position:absolute;
       top:6px;
@@ -9411,37 +9411,48 @@
       z-index:2;
     }
     .order-add-image{
-      min-height:46px;
-      border:3px solid var(--ink);
-      border-radius:15px;
-      background:#fff;
-      color:#111;
-      font-size:16px;
-      font-weight:900;
-      cursor:pointer;
-    }
-    .order-add-question{
-      min-width:170px;
-      min-height:48px;
-      margin:16px auto 0;
-      border:3px solid var(--ink);
-      border-radius:17px;
-      background:var(--blue-bar);
+      width:auto;
+      min-width:132px;
+      height:38px;
+      min-height:38px;
+      margin:2px auto 0;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:#1688d3;
       color:#fff;
-      font-size:17px;
-      font-weight:900;
-      padding:8px 20px;
-      cursor:pointer;
+      padding:0 13px;
+      font-size:13px;
+      font-weight:950;
+      line-height:1;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:8px;
+      gap:5px;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.14);
+    }
+    .order-add-question{
+      width:auto;
+      height:40px;
+      min-height:40px;
+      margin:14px auto 0;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:var(--title-yellow);
+      color:#111;
+      padding:0 13px;
+      font-size:13px;
+      font-weight:950;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:5px;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.15);
+      white-space:nowrap;
     }
     .order-add-question[hidden]{display:none!important}
-    .order-setup[data-order-font="arial"],
-    .order-setup[data-order-font="arial"] *{font-family:Arial,sans-serif}
-    .order-setup[data-order-font="traditional"],
-    .order-setup[data-order-font="traditional"] *{font-family:"Traditional Arabic","Arabic Typesetting",Tahoma,Arial,sans-serif}
 
     @media(max-width:760px){
       .order-setup{
@@ -9477,8 +9488,11 @@
       .order-image-entry{min-height:138px;padding:8px}
       .order-image-entry img{height:80px}
       .order-add-question{
-        min-height:44px;
-        font-size:15px;
+        height:40px;
+        min-height:40px;
+        font-size:13px;
+        border-radius:13px;
+        padding:0 13px;
       }
     }
 
@@ -10045,9 +10059,7 @@
 </div>
 </button>
 <button class="template-card" data-template="order" type="button">
-<div aria-hidden="true" class="template-cover order-cover">
-  <span>٣</span><i>←</i><span>٢</span><i>←</i><span>١</span>
-</div>
+<div aria-hidden="true" class="template-cover order-cover"></div>
 <div class="template-content">
 <h3 class="template-title">الترتيب</h3>
 <p class="template-desc">رتّب الحروف أو الكلمات أو الصور.</p>
@@ -10505,7 +10517,7 @@
 
 
 
-<section class="order-setup" id="orderSetupScreen" data-order-font="default">
+<section class="order-setup" id="orderSetupScreen">
   <div class="game-name-panel">
     <div class="game-name-head">
       <span class="game-name-title">ادخل اسم اللعبة</span>
@@ -10525,7 +10537,7 @@
       </div>
       <div class="choices-theme-list" hidden id="orderThemeListPanel">
 <div class="choices-theme-card active" data-order-theme="classic">
-          <span class="theme-art classic"></span><span class="choices-theme-name">خلفية بيضاء</span><button class="choices-theme-activate" type="button">تفعيل</button>
+          <span class="theme-art classic"></span><span class="choices-theme-name">كلاسيكي</span><button class="choices-theme-activate" type="button">تفعيل</button>
         </div>
         <div class="choices-theme-card" data-order-theme="classroom">
           <span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button>
@@ -10597,9 +10609,10 @@
           <div class="choices-advanced-row">
             <label class="choices-advanced-label" for="orderFontSelect"><strong>نوع الخط</strong></label>
             <select class="quiz-font-select" id="orderFontSelect">
-              <option value="default">خط اللعبة</option>
-              <option value="arial">Arial</option>
-              <option value="traditional">عربي تقليدي</option>
+              <option value="cairo">كايرو</option>
+              <option value="tajawal">تجوال</option>
+              <option value="noto-kufi">نوتو كوفي</option>
+              <option value="noto-naskh">نوتو نسخ</option>
             </select>
           </div>
           <div class="choices-advanced-row order-color-row" id="orderTextColorRow">
@@ -14288,7 +14301,7 @@
   let contentMode = "letters";
   let contentLanguage = "ar";
   let soundEnabled = true;
-  let fontFamily = "default";
+  let fontFamily = "noto-naskh";
   let textColor = "#111111";
   let beforeColor = "#b7b0ac";
   let afterColor = "#f5aa2d";
@@ -14299,7 +14312,7 @@
   let questionSequence = 0;
 
   const THEME_NAMES = {
-    classic:"خلفية بيضاء",
+    classic:"كلاسيكي",
     classroom:"فصل مدرسي",
     "sky-clouds":"سماء وغيوم",
     forest:"غابة",
@@ -14418,9 +14431,9 @@
       contentMode = normalizeMode(draft.contentMode);
       contentLanguage = normalizeLanguage(draft.contentLanguage || draft.language);
       soundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
-      fontFamily = ["default","arial","traditional"].includes(draft.fontFamily)
+      fontFamily = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(draft.fontFamily)
         ? draft.fontFamily
-        : "default";
+        : "noto-naskh";
       textColor = normalizeOrderHex(draft.textColor,"#111111");
       beforeColor = normalizeOrderHex(draft.beforeColor,"#b7b0ac");
       afterColor = normalizeOrderHex(draft.afterColor,"#f5aa2d");
@@ -14537,7 +14550,6 @@
     );
 
     if (fontSelect) fontSelect.value = fontFamily;
-    if (setup) setup.dataset.orderFont = fontFamily;
     updateOrderColorUI();
   }
 
@@ -14694,7 +14706,7 @@
 
       const pick = document.createElement("button");
       pick.type = "button";
-      pick.className = "order-image-pick";
+      pick.className = `order-image-pick${image.data ? " has-image" : ""}`;
       pick.textContent = image.data ? "تغيير الصورة" : "اختيار صورة";
       pick.addEventListener("click",()=>file.click());
 
@@ -14716,7 +14728,7 @@
     const addImage = document.createElement("button");
     addImage.type = "button";
     addImage.className = "order-add-image";
-    addImage.textContent = "＋ إضافة صورة";
+    addImage.innerHTML = "<span>＋</span><span>إضافة صورة</span>";
     addImage.hidden = question.images.length >= ORDER_MAX_IMAGES;
     addImage.addEventListener("click",()=>{
       if (questions[questionIndex].images.length >= ORDER_MAX_IMAGES) return;
@@ -14747,7 +14759,7 @@
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "order-remove-question";
-      remove.textContent = "×";
+      remove.innerHTML = "<span>×</span><span>إزالة</span>";
       remove.disabled = questions.length <= 1;
       remove.setAttribute("aria-label",`حذف السؤال ${index + 1}`);
       remove.addEventListener("click",()=>{
@@ -14964,9 +14976,9 @@
   });
 
   fontSelect?.addEventListener("change",()=>{
-    fontFamily = ["default","arial","traditional"].includes(fontSelect.value)
+    fontFamily = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(fontSelect.value)
       ? fontSelect.value
-      : "default";
+      : "noto-naskh";
     updateAdvancedUI();
     saveDraft();
   });
