@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: order-v14-smart-letter-layout -->
+<!-- version: order-v15-stable-initial-letter-layout -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -2636,6 +2636,39 @@
       });
     }
 
+    function selectedGameFontFamily(){
+      const fontKey = String(payload?.fontFamily || page?.dataset?.font || "noto-naskh");
+      const families = {
+        "cairo":"Cairo",
+        "tajawal":"Tajawal",
+        "noto-kufi":"Noto Kufi Arabic",
+        "noto-naskh":"Noto Naskh Arabic"
+      };
+      return families[fontKey] || families["noto-naskh"];
+    }
+
+    async function waitForSelectedGameFont(timeoutMs=3200){
+      if (!document.fonts) return;
+      const family = selectedGameFontFamily();
+      const sample = payload?.contentLanguage === "en" ? "ABCDEFGHIJKLMNOPQRSTUVWXYZ" : "ابتثجحخدذرزسشصضطظعغفقكلمنهوي";
+      const ready = Promise.all([
+        document.fonts.load(`800 48px "${family}"`,sample),
+        document.fonts.ready
+      ]).catch(()=>{});
+      const timeout = new Promise((resolve)=>window.setTimeout(resolve,timeoutMs));
+      await Promise.race([ready,timeout]);
+    }
+
+    async function stabilizeVisibleLetterLayout(){
+      if (payload?.contentMode !== "letters" || !state) return;
+      await waitForSelectedGameFont();
+      syncVisualViewportFrame();
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      render();
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      fitCanvas();
+    }
+
     function render(){
       groupsCanvas.textContent = "";
       groupsCanvas.dir = state.direction;
@@ -2858,6 +2891,7 @@
       await wait(260);
       await wait(780);
 
+      await stabilizeVisibleLetterLayout();
       syncVisualViewportFrame();
       fitCanvas();
       await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
@@ -2986,11 +3020,17 @@
       sfx.close();
     });
 
-    loadPayload().then(()=>{
+    loadPayload().then(async()=>{
       questionStates = [];
       themeAudio.preload(payload.theme);
       void sfx.ready("finish");
+      await waitForSelectedGameFont();
       showQuestion(0);
+      await new Promise((resolve)=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      if (payload.contentMode === "letters") {
+        render();
+        fitCanvas();
+      }
       collapseSafariBars();
     });
   })();
