@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-match-font-preview-only-v57 -->
+<!-- version: index-order-max8-v58 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14261,7 +14261,8 @@
   const ORDER_PAGE_URL = "order.html";
   const ORDER_MAX_QUESTIONS = 30;
   const ORDER_MIN_IMAGES = 2;
-  const ORDER_MAX_IMAGES = 12;
+  const ORDER_MAX_ITEMS = 8;
+  const ORDER_MAX_IMAGES = ORDER_MAX_ITEMS;
   const ORDER_SAVED_REGISTRY_KEY = "sandooq_edu_saved_games_v1";
 
   const setup = document.getElementById("orderSetupScreen");
@@ -14326,6 +14327,15 @@
     return value === "en" ? "en" : "ar";
   }
 
+  function limitOrderText(value){
+    return String(value || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0,ORDER_MAX_ITEMS)
+      .join(" ");
+  }
+
   function normalizeOrderHex(value,fallback){
     const raw = String(value || "").trim();
     const short = raw.match(/^#?([0-9a-f]{3})$/i);
@@ -14357,7 +14367,7 @@
     while (images.length < ORDER_MIN_IMAGES) images.push(blankImage());
     return {
       id:String(raw?.id || `order-question-${index + 1}`),
-      text:String(raw?.text || raw?.answer || ""),
+      text:limitOrderText(raw?.text || raw?.answer || ""),
       images
     };
   }
@@ -14383,8 +14393,8 @@
       imageAfterColor:normalizeOrderHex(imageAfterColor,"#241a43"),
       questions:questions.map((question)=>({
         id:question.id,
-        text:String(question.text || ""),
-        images:question.images.map((image)=>({
+        text:limitOrderText(question.text),
+        images:question.images.slice(0,ORDER_MAX_IMAGES).map((image)=>({
           name:String(image.name || ""),
           data:String(image.data || "")
         }))
@@ -14590,12 +14600,15 @@
       : (contentMode === "letters"
           ? "اكتب الكلمة التي تريد ترتيب حروفها"
           : "اكتب الجملة التي تريد ترتيب كلماتها");
-    input.value = question.text || "";
+    input.value = limitOrderText(question.text);
+    questions[index].text = input.value;
     input.dir = english ? "ltr" : "rtl";
     input.lang = english ? "en" : "ar";
     input.autocapitalize = english && contentMode === "letters" ? "characters" : "sentences";
     input.addEventListener("input",()=>{
-      questions[index].text = input.value;
+      const limitedValue = limitOrderText(input.value);
+      if (input.value !== limitedValue) input.value = limitedValue;
+      questions[index].text = limitedValue;
       saveDraft();
     });
 
@@ -14617,8 +14630,9 @@
           dir:english ? "ltr" : "rtl",
           lang:english ? "en" : "ar",
           onSave:(value)=>{
-            input.value = value;
-            questions[index].text = value;
+            const limitedValue = limitOrderText(value);
+            input.value = limitedValue;
+            questions[index].text = limitedValue;
             saveDraft();
           }
         });
@@ -14773,6 +14787,7 @@
     for (let index=0; index<questions.length; index+=1) {
       const question = questions[index];
       if (contentMode === "letters") {
+        question.text = limitOrderText(question.text);
         const text = cleanText(question.text);
         const characters = Array.from(text.replace(/\s/g,""));
         if (characters.length < 2) {
@@ -14780,12 +14795,14 @@
           return false;
         }
       } else if (contentMode === "words") {
+        question.text = limitOrderText(question.text);
         const words = cleanText(question.text).split(/\s+/).filter(Boolean);
         if (words.length < 2) {
           alert(`يرجى كتابة كلمتين على الأقل في السؤال ${index + 1}.`);
           return false;
         }
       } else {
+        question.images = question.images.slice(0,ORDER_MAX_IMAGES);
         const images = question.images.filter((image)=>Boolean(image.data));
         if (images.length < ORDER_MIN_IMAGES) {
           alert(`يرجى إضافة صورتين على الأقل في السؤال ${index + 1}.`);
@@ -14802,9 +14819,9 @@
       payloadId,
       questions:questions.map((question,index)=>({
         id:`question-${index + 1}`,
-        text:contentMode === "images" ? "" : cleanText(question.text),
+        text:contentMode === "images" ? "" : limitOrderText(question.text),
         images:contentMode === "images"
-          ? question.images.filter((image)=>Boolean(image.data)).map((image)=>({
+          ? question.images.slice(0,ORDER_MAX_IMAGES).filter((image)=>Boolean(image.data)).map((image)=>({
               name:String(image.name || ""),
               data:String(image.data || "")
             }))

@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: order-v3 -->
+<!-- version: order-v7-max8-flat-layout -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -1203,6 +1203,99 @@
       }
     }
 
+  
+
+    /* order-v7: حد أقصى 8 عناصر، صفوف مرتبة، وصناديق بألوان مسطحة دون ظلال. */
+    .sequence-shell{
+      width:100%;
+      flex-direction:column;
+      flex-wrap:nowrap;
+      gap:clamp(12px,1.7vw,22px);
+    }
+
+    .sequence-row{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(8px,1.2vw,16px);
+      direction:inherit;
+    }
+
+    .order-token{
+      background:var(--tile-gray) !important;
+      box-shadow:none !important;
+      text-shadow:none !important;
+      filter:none !important;
+      transition:transform .16s ease !important;
+    }
+
+    .order-token.image-token{
+      background:#fff !important;
+    }
+
+    .order-token.is-pointer-active,
+    .order-token.is-selected{
+      filter:none !important;
+      box-shadow:none !important;
+    }
+
+    .order-token.is-selected{
+      outline:clamp(3px,.38vw,5px) solid rgba(22,136,211,.5);
+      outline-offset:2px;
+    }
+
+    .slot-tray,
+    .sequence-shell .order-slot,
+    .accepted-token{
+      box-shadow:none !important;
+      text-shadow:none !important;
+    }
+
+    .accepted-token{
+      background:var(--tile-orange) !important;
+    }
+
+    .accepted-token.image-token{
+      background:#fff !important;
+    }
+
+    .drop-check,
+    .wrong-mark,
+    .celebration-word,
+    .celebration-points,
+    .sequence-arrow{
+      text-shadow:none !important;
+    }
+
+    .order-page[data-content-mode="images"] .order-group{
+      width:100%;
+      max-width:1500px;
+    }
+
+    .order-page[data-content-mode="images"] .token-bank{
+      width:100%;
+      flex-wrap:nowrap;
+      justify-content:center;
+      gap:clamp(5px,.75vw,11px);
+    }
+
+    .order-page[data-content-mode="images"] .order-token.image-token{
+      width:clamp(76px,9.5vw,148px);
+      height:clamp(76px,9.5vw,148px);
+      min-width:0;
+    }
+
+    @media(max-width:760px){
+      .sequence-shell{gap:10px}
+      .sequence-row{gap:7px}
+      .order-page[data-content-mode="images"] .token-bank{gap:4px}
+      .order-page[data-content-mode="images"] .order-token.image-token{
+        width:clamp(58px,17vw,104px);
+        height:clamp(58px,17vw,104px);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1293,6 +1386,7 @@
 
     const PAYLOAD_KEY = "sandooq_order_payload_v1";
     const DRAFT_KEY = "sandooq_order_draft_v1";
+    const ORDER_MAX_ITEMS = 8;
     const THEMES = ["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
 
     const page = document.getElementById("orderPage");
@@ -1357,12 +1451,21 @@
       return "ar";
     }
 
+    function limitOrderItemsText(value){
+      return String(value || "")
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0,ORDER_MAX_ITEMS)
+        .join(" ");
+    }
+
     function normalizePayload(raw){
       const mode = ["letters","words","images"].includes(raw?.contentMode) ? raw.contentMode : "letters";
       const questions = (Array.isArray(raw?.questions) ? raw.questions : []).map((question,index)=>({
         id:String(question?.id || `question-${index + 1}`),
-        text:String(question?.text || ""),
-        images:(Array.isArray(question?.images) ? question.images : []).map((image,imageIndex)=>({
+        text:limitOrderItemsText(question?.text || ""),
+        images:(Array.isArray(question?.images) ? question.images : []).slice(0,ORDER_MAX_ITEMS).map((image,imageIndex)=>({
           id:`image-${index}-${imageIndex}`,
           name:String(image?.name || image?.imageName || ""),
           data:String(image?.data || image?.imageData || image?.image || "")
@@ -1436,14 +1539,15 @@
       page.style.setProperty("--order-direction",direction);
       page.style.setProperty("--order-text-color",normalizeHex(payload?.textColor,"#111111"));
       page.style.setProperty("--tile-gray",before);
-      page.style.setProperty("--tile-gray-light",mixHex(before,"#ffffff",.30));
-      page.style.setProperty("--tile-gray-dark",mixHex(before,"#000000",.34));
+      page.style.setProperty("--tile-gray-light",before);
+      page.style.setProperty("--tile-gray-dark",before);
       page.style.setProperty("--tile-orange",after);
-      page.style.setProperty("--tile-orange-light",mixHex(after,"#ffffff",.28));
-      page.style.setProperty("--tile-orange-dark",mixHex(after,"#000000",.30));
+      page.style.setProperty("--tile-orange-light",after);
+      page.style.setProperty("--tile-orange-dark",after);
       page.style.setProperty("--order-image-before-color",normalizeHex(payload?.imageBeforeColor,"#241a43"));
       page.style.setProperty("--order-image-after-color",normalizeHex(payload?.imageAfterColor,"#241a43"));
       page.dataset.language = payload?.contentLanguage || "ar";
+      page.dataset.contentMode = payload?.contentMode || "letters";
       groupsCanvas.lang = payload?.contentLanguage === "en" ? "en" : "ar";
     }
 
@@ -1543,13 +1647,13 @@
 
       if (mode === "letters") {
         const sourceText = direction === "ltr" ? cleanText(question.text).toLocaleUpperCase("en") : cleanText(question.text);
-        groups = sourceText.split(/\s+/).filter(Boolean).map((word,groupIndex)=>
+        groups = sourceText.split(/\s+/).filter(Boolean).slice(0,ORDER_MAX_ITEMS).map((word,groupIndex)=>
           makeGroup(graphemes(word),groupIndex,"letter")
         );
       } else if (mode === "words") {
-        groups = [makeGroup(cleanText(question.text).split(/\s+/).filter(Boolean),0,"word")];
+        groups = [makeGroup(cleanText(question.text).split(/\s+/).filter(Boolean).slice(0,ORDER_MAX_ITEMS),0,"word")];
       } else {
-        groups = [makeGroup(question.images,0,"image")];
+        groups = [makeGroup(question.images.slice(0,ORDER_MAX_ITEMS),0,"image")];
       }
 
       return {direction,groups,completed:false};
@@ -2206,16 +2310,26 @@
       sequence.className = "sequence-shell";
       sequence.dir = state.direction;
       sequence.style.direction = state.direction;
-      group.slots.forEach((_,slotIndex)=>{
-        sequence.appendChild(createSlot(group,groupIndex,slotIndex,group.items[0]?.type || "word"));
-        if (slotIndex < group.slots.length - 1) {
-          const arrow = document.createElement("span");
-          arrow.className = "sequence-arrow";
-          arrow.textContent = state.direction === "rtl" ? "←" : "→";
-          arrow.setAttribute("aria-hidden","true");
-          sequence.appendChild(arrow);
+
+      const slotsPerRow = 4;
+      for (let rowStart=0; rowStart<group.slots.length; rowStart+=slotsPerRow) {
+        const row = document.createElement("div");
+        row.className = "sequence-row";
+        row.dir = state.direction;
+        row.style.direction = state.direction;
+        const rowEnd = Math.min(group.slots.length,rowStart + slotsPerRow);
+        for (let slotIndex=rowStart; slotIndex<rowEnd; slotIndex+=1) {
+          row.appendChild(createSlot(group,groupIndex,slotIndex,group.items[0]?.type || "word"));
+          if (slotIndex < rowEnd - 1) {
+            const arrow = document.createElement("span");
+            arrow.className = "sequence-arrow";
+            arrow.textContent = state.direction === "rtl" ? "←" : "→";
+            arrow.setAttribute("aria-hidden","true");
+            row.appendChild(arrow);
+          }
         }
-      });
+        sequence.appendChild(row);
+      }
 
       wrapper.append(bank,sequence);
       return wrapper;
