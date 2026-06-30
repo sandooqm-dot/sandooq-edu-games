@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: order-v13-letter-balanced-rows -->
+<!-- version: order-v14-smart-letter-layout -->
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
@@ -1364,7 +1364,7 @@
     }
 
 
-    /* order-v13: توزيع كلمات نمط الحروف على صفين متوازنين وواضحين. */
+    /* order-v14: توزيع ذكي لكلمات نمط الحروف حسب العرض الحقيقي لكل كلمة. */
     .groups-canvas.is-letters-mode{
       flex-direction:column;
       flex-wrap:nowrap;
@@ -1375,8 +1375,10 @@
     }
 
     .letter-groups-row{
-      width:100%;
+      width:max-content;
+      max-width:none;
       display:flex;
+      flex-wrap:nowrap;
       align-items:center;
       justify-content:center;
       gap:clamp(24px,4vw,62px);
@@ -1385,6 +1387,20 @@
 
     .letter-groups-row .order-group{
       flex:0 0 auto;
+    }
+
+    .letter-groups-measure{
+      position:absolute;
+      left:0;
+      top:0;
+      z-index:-1;
+      display:flex;
+      align-items:flex-start;
+      gap:0;
+      width:max-content;
+      visibility:hidden;
+      pointer-events:none;
+      transform:none!important;
     }
 
     @media(max-width:760px){
@@ -2461,26 +2477,158 @@
       nextBtn.textContent = questionIndex >= payload.questions.length - 1 ? "إنهاء" : "التالي";
     }
 
-    function getBalancedLetterRows(groupCount){
-      const count = Math.max(0,Math.min(ORDER_MAX_ITEMS,Number(groupCount) || 0));
-      if (count <= 2) return count ? [count] : [];
-      const topCount = Math.ceil(count / 2);
-      return [topCount,count - topCount];
+    function cssPixels(value){
+      const parsed = Number.parseFloat(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function stageContentSize(){
+      syncVisualViewportFrame();
+      const style = getComputedStyle(stage);
+      return {
+        width:Math.max(1,stage.clientWidth - cssPixels(style.paddingLeft) - cssPixels(style.paddingRight)),
+        height:Math.max(1,stage.clientHeight - cssPixels(style.paddingTop) - cssPixels(style.paddingBottom))
+      };
+    }
+
+    function createLetterPartitions(total){
+      const count = Math.max(0,Math.min(ORDER_MAX_ITEMS,Number(total) || 0));
+      if (!count) return [];
+      if (count <= 2) return [[count]];
+
+      const partitions = [];
+      const minimumRows = 2;
+      const maximumRows = Math.min(4,Math.ceil(count / 2));
+
+      const walk = (remaining,sizes)=>{
+        if (!remaining) {
+          if (sizes.length >= minimumRows && sizes.length <= maximumRows) partitions.push(sizes.slice());
+          return;
+        }
+        if (sizes.length >= maximumRows) return;
+
+        const rowsLeftAfterThis = maximumRows - sizes.length - 1;
+        const maxSize = Math.min(4,remaining);
+        for (let size=maxSize; size>=1; size-=1) {
+          const nextRemaining = remaining - size;
+          if (nextRemaining < 0) continue;
+          if (nextRemaining > rowsLeftAfterThis * 4) continue;
+          if (nextRemaining > 0 && rowsLeftAfterThis < 1) continue;
+          walk(nextRemaining,[...sizes,size]);
+        }
+      };
+
+      walk(count,[]);
+      return partitions;
+    }
+
+    function chooseLetterRowSizes(metrics,horizontalGap,verticalGap){
+      const count = metrics.length;
+      if (!count) return [];
+      if (count <= 2) return [count];
+
+      const available = stageContentSize();
+      const partitions = createLetterPartitions(count);
+      let best = null;
+
+      partitions.forEach((sizes)=>{
+        let cursor = 0;
+        let maxRowWidth = 0;
+        let totalHeight = 0;
+        let orphanRows = 0;
+
+        sizes.forEach((size,rowIndex)=>{
+          const slice = metrics.slice(cursor,cursor + size);
+          cursor += size;
+          const rowWidth = slice.reduce((sum,item)=>sum + item.width,0) + horizontalGap * Math.max(0,size - 1);
+          const rowHeight = slice.reduce((max,item)=>Math.max(max,item.height),0);
+          maxRowWidth = Math.max(maxRowWidth,rowWidth);
+          totalHeight += rowHeight;
+          if (rowIndex > 0) totalHeight += verticalGap;
+          if (size === 1) orphanRows += 1;
+        });
+
+        const fitScale = Math.max(.01,Math.min(1,available.width / Math.max(1,maxRowWidth),available.height / Math.max(1,totalHeight)));
+        const largest = Math.max(...sizes);
+        const smallest = Math.min(...sizes);
+        const imbalance = largest - smallest;
+        const candidate = {
+          sizes,
+          fitScale,
+          orphanRows,
+          imbalance,
+          rows:sizes.length,
+          maxRowWidth,
+          totalHeight
+        };
+
+        if (!best) {
+          best = candidate;
+          return;
+        }
+
+        const scaleDifference = candidate.fitScale - best.fitScale;
+        if (scaleDifference > .008) {
+          best = candidate;
+          return;
+        }
+        if (scaleDifference < -.008) return;
+
+        if (candidate.orphanRows !== best.orphanRows) {
+          if (candidate.orphanRows < best.orphanRows) best = candidate;
+          return;
+        }
+        if (candidate.imbalance !== best.imbalance) {
+          if (candidate.imbalance < best.imbalance) best = candidate;
+          return;
+        }
+        if (candidate.rows !== best.rows) {
+          if (candidate.rows < best.rows) best = candidate;
+          return;
+        }
+        if (candidate.maxRowWidth < best.maxRowWidth) best = candidate;
+      });
+
+      return best?.sizes || [Math.ceil(count / 2),Math.floor(count / 2)];
     }
 
     function renderLetterRows(){
-      const rowSizes = getBalancedLetterRows(state.groups.length);
-      let groupIndex = 0;
+      groupsCanvas.style.setProperty("--order-fit-scale","1");
+      const renderedGroups = state.groups.map((group,groupIndex)=>renderLetterGroup(group,groupIndex));
+      const measure = document.createElement("div");
+      measure.className = "letter-groups-measure";
+      measure.dir = state.direction;
+      measure.style.direction = state.direction;
+      renderedGroups.forEach((group)=>measure.appendChild(group));
+      groupsCanvas.appendChild(measure);
 
+      const probeRow = document.createElement("div");
+      probeRow.className = "letter-groups-row";
+      probeRow.style.position = "absolute";
+      probeRow.style.visibility = "hidden";
+      groupsCanvas.appendChild(probeRow);
+      const horizontalGap = cssPixels(getComputedStyle(probeRow).columnGap);
+      const verticalGap = cssPixels(getComputedStyle(groupsCanvas).rowGap);
+      probeRow.remove();
+
+      const metrics = renderedGroups.map((group)=>({
+        width:Math.ceil(group.getBoundingClientRect().width),
+        height:Math.ceil(group.getBoundingClientRect().height)
+      }));
+      const rowSizes = chooseLetterRowSizes(metrics,horizontalGap,verticalGap);
+      measure.remove();
+
+      let groupIndex = 0;
       rowSizes.forEach((rowSize)=>{
         const row = document.createElement("div");
         row.className = "letter-groups-row";
         row.dir = state.direction;
         row.style.direction = state.direction;
+        row.dataset.groupCount = String(rowSize);
 
         for (let offset=0; offset<rowSize; offset+=1) {
-          const group = state.groups[groupIndex];
-          if (group) row.appendChild(renderLetterGroup(group,groupIndex));
+          const group = renderedGroups[groupIndex];
+          if (group) row.appendChild(group);
           groupIndex += 1;
         }
 
@@ -2536,11 +2684,31 @@
     function fitCanvas(){
       syncVisualViewportFrame();
       groupsCanvas.style.setProperty("--order-fit-scale","1");
-      const availableWidth = Math.max(1,stage.clientWidth - 20);
-      const availableHeight = Math.max(1,stage.clientHeight - 104);
-      const width = Math.max(1,groupsCanvas.scrollWidth);
-      const height = Math.max(1,groupsCanvas.scrollHeight);
-      const scale = Math.max(.54,Math.min(1,availableWidth / width,availableHeight / height));
+      const available = stageContentSize();
+      let width = Math.max(1,groupsCanvas.scrollWidth);
+      let height = Math.max(1,groupsCanvas.scrollHeight);
+
+      if (groupsCanvas.classList.contains("is-letters-mode")) {
+        const canvasRect = groupsCanvas.getBoundingClientRect();
+        const rows = Array.from(groupsCanvas.children).filter((child)=>child.classList?.contains("letter-groups-row"));
+        if (rows.length) {
+          let minLeft = 0;
+          let maxRight = canvasRect.width;
+          let minTop = 0;
+          let maxBottom = canvasRect.height;
+          rows.forEach((row)=>{
+            const rect = row.getBoundingClientRect();
+            minLeft = Math.min(minLeft,rect.left - canvasRect.left);
+            maxRight = Math.max(maxRight,rect.right - canvasRect.left);
+            minTop = Math.min(minTop,rect.top - canvasRect.top);
+            maxBottom = Math.max(maxBottom,rect.bottom - canvasRect.top);
+          });
+          width = Math.max(1,maxRight - minLeft);
+          height = Math.max(1,maxBottom - minTop);
+        }
+      }
+
+      const scale = Math.max(.54,Math.min(1,available.width / width,available.height / height));
       groupsCanvas.style.setProperty("--order-fit-scale",scale.toFixed(4));
     }
 
