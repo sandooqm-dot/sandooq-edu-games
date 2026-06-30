@@ -1296,6 +1296,59 @@
       }
     }
 
+
+    /* order-v8: إصلاح السحب، توحيد أحجام الصور، إزالة الإطار الداخلي، وإضافة مسافة واضحة. */
+    .order-group{
+      gap:clamp(18px,2.4vw,34px) !important;
+    }
+
+    .order-slot.drag-over{
+      box-shadow:none !important;
+    }
+
+    .order-page[data-content-mode="images"]{
+      --image-order-size:clamp(
+        72px,
+        calc((var(--visual-viewport-width, 100vw) - 180px) / 8),
+        168px
+      );
+    }
+
+    .order-page[data-content-mode="images"] .order-token.image-token,
+    .order-page[data-content-mode="images"] .sequence-shell .order-slot.image-slot{
+      width:var(--image-order-size) !important;
+      height:var(--image-order-size) !important;
+      min-width:var(--image-order-size) !important;
+      min-height:var(--image-order-size) !important;
+    }
+
+    .order-page[data-content-mode="images"] .accepted-token.image-token{
+      width:100% !important;
+      height:100% !important;
+      min-width:0 !important;
+      min-height:0 !important;
+      border:0 !important;
+      border-radius:0 !important;
+      padding:clamp(5px,.65vw,9px) !important;
+      background:#fff !important;
+      box-shadow:none !important;
+    }
+
+    .order-page[data-content-mode="images"] .accepted-token.image-token img{
+      width:100% !important;
+      height:100% !important;
+      object-fit:contain !important;
+      border:0 !important;
+      box-shadow:none !important;
+      background:#fff !important;
+    }
+
+    @media(max-width:760px){
+      .order-group{
+        gap:clamp(16px,4.8vw,24px) !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2116,10 +2169,19 @@
         ghost.tabIndex = -1;
         ghost.style.width = `${sourceRect.width}px`;
         ghost.style.height = `${sourceRect.height}px`;
+
+        const initialX = clientX;
+        const initialY = clientY - ghostOffsetY;
+        pendingX = initialX;
+        pendingY = initialY;
+        ghost.style.transform = `translate3d(${initialX}px,${initialY}px,0) translate(-50%,-50%) scale(1.04)`;
+        ghost.style.visibility = "hidden";
         document.body.appendChild(ghost);
+        ghost.getBoundingClientRect();
+        ghost.style.visibility = "visible";
+
         element.classList.add("is-drag-source");
         page.classList.add("is-dragging");
-        queueGhost(clientX,clientY - ghostOffsetY);
       };
 
       const handleMove = (event)=>{
