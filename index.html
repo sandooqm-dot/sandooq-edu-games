@@ -2,12 +2,12 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-export-save-flow-v62 -->
+<!-- version: index-cairo-compact-home-help-v63 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@800&family=Tajawal:wght@800&family=Noto+Kufi+Arabic:wght@800&family=Noto+Naskh+Arabic:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@800&family=Noto+Kufi+Arabic:wght@800&family=Noto+Naskh+Arabic:wght@700&display=swap" rel="stylesheet">
 <title>صندوق الالعاب التعليمية</title>
 <style>
     :root{
@@ -10190,54 +10190,291 @@
       .sg-backup-actions{display:grid;grid-template-columns:1fr;max-width:310px;margin-inline:auto}
     }
 
+
+
+    /* v63: خط واجهات index، الصفحة الرئيسية المضغوطة، التعليمات والزخارف. */
+    :root{ --interface-font:"Cairo",Tahoma,Arial,"Segoe UI",sans-serif; }
+
+    #homeShell,
+    #homeShell *,
+    #createScreen,
+    #createScreen *,
+    #wheelSetupScreen,
+    #wheelSetupScreen *,
+    #choicesSetupScreen,
+    #choicesSetupScreen *,
+    #matchSetupScreen,
+    #matchSetupScreen *,
+    #orderSetupScreen,
+    #orderSetupScreen *,
+    #savedScreen,
+    #savedScreen *,
+    #backupScreen,
+    #backupScreen *,
+    #settingsScreen,
+    #settingsScreen *,
+    .bottom-bar,
+    .bottom-bar *,
+    .match-color-modal,
+    .match-color-modal *,
+    .sg-modal,
+    .sg-modal *,
+    .sg-choice-modal,
+    .sg-choice-modal *,
+    .quiz-text-editor-overlay,
+    .quiz-text-editor-overlay *{
+      font-family:var(--interface-font) !important;
+    }
+
+    .title-pill{
+      width:fit-content !important;
+      max-width:92% !important;
+      min-height:50px !important;
+      padding:9px clamp(30px,5vw,72px) !important;
+      font-size:clamp(23px,2.45vw,35px) !important;
+      font-weight:800 !important;
+    }
+
+    #homeShell{
+      gap:clamp(12px,1.45vw,18px) !important;
+      justify-content:flex-start;
+    }
+
+    #homeShell .play-shell{
+      width:min(720px,82%) !important;
+      margin-top:clamp(10px,1.7vw,20px) !important;
+      padding:8px !important;
+      border-radius:24px !important;
+    }
+
+    #homeShell .play-card{
+      min-height:0 !important;
+      padding:clamp(12px,1.5vw,17px) clamp(14px,2vw,24px) !important;
+      gap:10px !important;
+      border-radius:20px !important;
+    }
+
+    #homeShell .select-wrap{
+      width:min(580px,94%) !important;
+      height:48px !important;
+    }
+
+    #homeShell .select-wrap select{
+      color:#777 !important;
+      font-weight:700 !important;
+    }
+
+    #homeShell .select-wrap select.has-selection{
+      color:#111 !important;
+    }
+
+    #homeShell .start-btn{
+      min-width:174px !important;
+      height:43px !important;
+      font-weight:800 !important;
+    }
+
+    .home-actions-grid{
+      width:min(760px,76%) !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      gap:clamp(10px,1.4vw,16px) clamp(16px,2vw,24px) !important;
+      margin-top:clamp(8px,1vw,12px) !important;
+      margin-bottom:auto !important;
+    }
+
+    .home-actions-grid .menu-btn{
+      min-height:58px !important;
+      font-weight:700 !important;
+    }
+
+    .edu-decor{
+      position:absolute;
+      pointer-events:none;
+      z-index:0;
+      transform-origin:center;
+      will-change:transform,opacity;
+    }
+    body.subpage .edu-decor{display:none !important}
+    .edu-rings{left:2.5%;top:4%;width:clamp(58px,7vw,104px);animation:eduFloat 8s ease-in-out infinite}
+    .edu-spark{right:3%;top:3%;width:clamp(62px,7.2vw,112px);animation:eduTwinkle 7s ease-in-out infinite}
+    .edu-dots{left:6%;top:34%;width:clamp(54px,6vw,88px);animation:eduFloat 9s ease-in-out -2s infinite}
+    .edu-zigzag{right:-1%;top:36%;width:clamp(100px,13vw,190px);animation:eduDrift 10s ease-in-out infinite}
+    .edu-burst{left:3%;bottom:16%;width:clamp(56px,6.5vw,96px);animation:eduSpin 18s linear infinite}
+    .edu-shapes{right:4%;bottom:13%;width:clamp(72px,8vw,124px);animation:eduFloat 8.5s ease-in-out -3s infinite}
+
+    @keyframes eduFloat{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-9px) rotate(2deg)}}
+    @keyframes eduTwinkle{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.08);opacity:1}}
+    @keyframes eduDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(-10px)}}
+    @keyframes eduSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+    .help-screen{max-width:980px !important}
+    .help-intro{margin-bottom:15px !important}
+    .help-search-wrap{
+      position:relative;
+      width:min(720px,100%);
+      margin:0 auto 18px;
+    }
+    .help-search-input{
+      width:100%;
+      min-height:54px;
+      border:3px solid var(--ink);
+      border-radius:19px;
+      background:#fff;
+      color:#111;
+      outline:none;
+      padding:0 54px 0 18px;
+      font-size:clamp(16px,1.55vw,21px);
+      font-weight:600;
+      text-align:right;
+    }
+    .help-search-input:focus{box-shadow:0 0 0 5px rgba(239,213,83,.42)}
+    .help-search-icon{
+      position:absolute;
+      right:18px;
+      top:50%;
+      transform:translateY(-52%);
+      font-size:29px;
+      font-weight:800;
+      color:#555;
+      pointer-events:none;
+    }
+    .help-empty{
+      margin:12px auto 0;
+      max-width:720px;
+      text-align:center;
+      color:#8b2a2a;
+      background:#fff0f0;
+      border:2px solid #f05d5b;
+      border-radius:15px;
+      padding:11px 14px;
+      font-weight:700;
+    }
+    .help-list{
+      width:min(820px,100%);
+      margin:0 auto;
+      display:grid;
+      gap:11px;
+    }
+    .help-item{
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#fff;
+      overflow:hidden;
+      transition:border-color .18s ease,background .18s ease;
+    }
+    .help-item.is-match{border-color:#e66a35;background:#fffaf0}
+    .help-item[hidden]{display:none !important}
+    .help-item summary{
+      list-style:none;
+      min-height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      cursor:pointer;
+      padding:12px 17px;
+      font-size:clamp(17px,1.65vw,23px);
+      font-weight:800;
+      user-select:none;
+    }
+    .help-item summary::-webkit-details-marker{display:none}
+    .help-arrow{font-size:18px;transition:transform .18s ease}
+    .help-item[open] .help-arrow{transform:rotate(180deg)}
+    .help-item ul{
+      margin:0;
+      padding:2px 42px 17px 20px;
+      border-top:2px solid #e5e5e5;
+      color:#333;
+      font-size:clamp(15px,1.35vw,19px);
+      font-weight:600;
+      line-height:1.85;
+    }
+    .help-item li{margin-top:8px}
+
+    @media(max-width:760px){
+      .title-pill{
+        width:fit-content !important;
+        max-width:94% !important;
+        min-height:40px !important;
+        padding:7px 25px !important;
+        font-size:clamp(18px,4.5vw,23px) !important;
+      }
+      #homeShell .play-shell{width:92% !important;margin-top:6px !important;padding:6px !important}
+      #homeShell .play-card{padding:10px !important;gap:8px !important}
+      #homeShell .select-wrap{width:100% !important;height:42px !important}
+      #homeShell .start-btn{height:39px !important;min-width:145px !important}
+      .home-actions-grid{
+        width:92% !important;
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:9px !important;
+      }
+      .home-actions-grid .menu-btn{
+        min-height:48px !important;
+        padding:8px 7px !important;
+        font-size:clamp(14px,3.7vw,18px) !important;
+      }
+      .edu-rings{left:1%;top:5%;width:52px}
+      .edu-spark{right:1%;top:4%;width:55px}
+      .edu-dots{left:0;top:39%;width:46px;opacity:.72}
+      .edu-zigzag{right:-8%;top:43%;width:96px;opacity:.72}
+      .edu-burst{left:1%;bottom:12%;width:48px;opacity:.75}
+      .edu-shapes{right:1%;bottom:11%;width:58px;opacity:.75}
+      .help-screen{width:94% !important;padding:16px 11px !important}
+      .help-search-input{min-height:48px;border-radius:16px;padding-right:48px;font-size:15px}
+      .help-search-icon{right:15px;font-size:25px}
+      .help-list{gap:9px}
+      .help-item{border-radius:16px}
+      .help-item summary{min-height:50px;padding:10px 13px;font-size:16px}
+      .help-item ul{padding:2px 29px 14px 15px;font-size:14px;line-height:1.75}
+    }
+
+    @media(max-width:360px){
+      .home-actions-grid{grid-template-columns:1fr !important}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      .edu-decor{animation:none !important}
+      .help-arrow{transition:none !important}
+    }
+
 </style>
 </head>
 <body>
 <main class="page">
-<!-- زخارف الصفحة الرئيسية فقط -->
-<svg aria-hidden="true" class="decor coil" viewbox="0 0 120 130">
-<g fill="none" stroke-linecap="round" stroke-width="2.4">
-<ellipse cx="30" cy="46" rx="18" ry="38" stroke="#2c9a65"></ellipse>
-<ellipse cx="36" cy="50" rx="18" ry="38" stroke="#2c9a65"></ellipse>
-<ellipse cx="46" cy="54" rx="18" ry="38" stroke="#1c1c1c"></ellipse>
-<ellipse cx="56" cy="58" rx="18" ry="38" stroke="#2c9a65"></ellipse>
-<ellipse cx="66" cy="62" rx="18" ry="38" stroke="#1c1c1c"></ellipse>
-<ellipse cx="76" cy="66" rx="18" ry="38" stroke="#2c9a65"></ellipse>
-</g>
+<!-- زخارف تعليمية متوازنة للصفحة الرئيسية فقط -->
+<svg aria-hidden="true" class="edu-decor edu-rings" viewBox="0 0 120 120">
+  <g fill="none" stroke="#2ca66f" stroke-width="4">
+    <circle cx="42" cy="60" r="27"></circle><circle cx="57" cy="60" r="27"></circle><circle cx="72" cy="60" r="27"></circle>
+  </g>
 </svg>
-<svg aria-hidden="true" class="decor stars" viewbox="0 0 160 120">
-<g fill="#ff8748" stroke="#111" stroke-width="2.3">
-<path d="M28 62 Q52 52 56 20 Q60 52 86 62 Q60 70 56 104 Q50 70 28 62Z"></path>
-<path d="M94 40 Q116 30 120 2 Q124 30 148 40 Q124 48 120 84 Q114 48 94 40Z"></path>
-</g>
+<svg aria-hidden="true" class="edu-decor edu-spark" viewBox="0 0 120 120">
+  <g fill="#ff8748" stroke="#111" stroke-width="3">
+    <path d="M18 66 Q49 56 56 18 Q63 56 96 66 Q63 76 56 108 Q49 76 18 66Z"></path>
+    <path d="M78 27 Q91 23 95 9 Q99 23 112 27 Q99 32 95 47 Q91 32 78 27Z"></path>
+  </g>
 </svg>
-<svg aria-hidden="true" class="decor flower" viewbox="0 0 90 90">
-<g fill="#f5cd42" stroke="#111" stroke-width="2.2">
-<ellipse cx="45" cy="18" rx="10" ry="22"></ellipse>
-<ellipse cx="45" cy="72" rx="10" ry="22"></ellipse>
-<ellipse cx="18" cy="45" rx="22" ry="10"></ellipse>
-<ellipse cx="72" cy="45" rx="22" ry="10"></ellipse>
-<ellipse cx="25" cy="25" rx="10" ry="22" transform="rotate(-45 25 25)"></ellipse>
-<ellipse cx="65" cy="65" rx="10" ry="22" transform="rotate(-45 65 65)"></ellipse>
-<ellipse cx="65" cy="25" rx="10" ry="22" transform="rotate(45 65 25)"></ellipse>
-<ellipse cx="25" cy="65" rx="10" ry="22" transform="rotate(45 25 65)"></ellipse>
-</g>
+<svg aria-hidden="true" class="edu-decor edu-dots" viewBox="0 0 120 120">
+  <circle cx="25" cy="36" r="10" fill="#efd553" stroke="#111" stroke-width="3"></circle>
+  <circle cx="58" cy="62" r="8" fill="#5e88db" stroke="#111" stroke-width="3"></circle>
+  <circle cx="91" cy="35" r="7" fill="#ea5aa1" stroke="#111" stroke-width="3"></circle>
+  <circle cx="87" cy="88" r="11" fill="#4dbc72" stroke="#111" stroke-width="3"></circle>
 </svg>
-<svg aria-hidden="true" class="decor wave" viewbox="0 0 220 120">
-<path d="M-8 75 C28 28, 68 118, 102 74 S170 28, 214 92" fill="none" stroke="#111" stroke-linecap="round" stroke-width="10"></path>
-<path d="M-8 71 C28 24, 68 114, 102 70 S170 24, 214 88" fill="none" stroke="#4dbc72" stroke-linecap="round" stroke-width="18"></path>
-<circle cx="214" cy="88" fill="#111" r="9"></circle>
+<svg aria-hidden="true" class="edu-decor edu-zigzag" viewBox="0 0 180 90">
+  <path d="M8 58 L38 28 L68 58 L98 28 L128 58 L158 28 L174 44" fill="none" stroke="#5e88db" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"></path>
+  <circle cx="8" cy="58" r="7" fill="#111"></circle><circle cx="174" cy="44" r="7" fill="#111"></circle>
 </svg>
-<svg aria-hidden="true" class="decor splash" viewbox="0 0 140 140">
-<g fill="#ea5aa1" stroke="#111" stroke-width="2.4">
-<path d="M70 10 C78 24 80 40 88 48 C98 44 110 40 124 44 C118 54 108 62 106 72 C116 78 126 88 130 100 C118 100 106 98 96 102 C96 114 94 124 86 132 C78 122 72 112 64 108 C56 118 50 126 38 132 C36 120 38 110 34 100 C22 102 12 100 4 94 C14 86 26 80 32 72 C22 64 12 54 10 42 C24 40 36 42 46 38 C48 26 54 16 62 10 C66 18 68 24 70 10Z"></path>
-</g>
+<svg aria-hidden="true" class="edu-decor edu-burst" viewBox="0 0 120 120">
+  <path d="M60 8 L69 36 L93 22 L84 49 L113 51 L87 65 L108 84 L78 79 L80 110 L62 85 L45 111 L46 80 L16 87 L38 66 L10 53 L39 50 L29 22 L53 37Z" fill="#ea5aa1" stroke="#111" stroke-width="3"></path>
+</svg>
+<svg aria-hidden="true" class="edu-decor edu-shapes" viewBox="0 0 150 120">
+  <rect x="16" y="22" width="26" height="26" rx="7" fill="#efd553" stroke="#111" stroke-width="3" transform="rotate(-12 29 35)"></rect>
+  <path d="M72 22 L94 61 L50 61 Z" fill="#f47a45" stroke="#111" stroke-width="3"></path>
+  <circle cx="113" cy="83" r="18" fill="#4dbc72" stroke="#111" stroke-width="3"></circle>
 </svg>
 <section class="shell" id="homeShell">
 <div class="title-pill">صندوق الالعاب التعليمية</div>
 <div class="play-shell">
 <div class="play-card">
-<h2 class="play-title">اختر اللعبة لعرضها</h2>
 <div class="select-wrap">
 <select id="savedGameSelect" aria-label="اختر لعبة محفوظة">
 <option value="">لا توجد ألعاب محفوظة</option>
@@ -10246,13 +10483,11 @@
 <button class="start-btn" id="startSavedGameBtn" type="button" disabled>إبدأ اللعبة</button>
 </div>
 </div>
-<div class="cards-grid primary-grid">
+<div class="cards-grid home-actions-grid">
 <button class="menu-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
 <button class="menu-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
-</div>
-<div class="cards-grid secondary-grid">
 <button class="menu-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
-<button class="menu-btn" data-open-screen="settingsScreen">الإعدادات</button>
+<button class="menu-btn" data-open-screen="settingsScreen">الشرح والتعليمات</button>
 </div>
 </section>
 <section class="screen" id="createScreen">
@@ -10927,9 +11162,72 @@
 </div>
 <p class="sg-backup-status" id="backupStatus" role="status" aria-live="polite"></p>
 </section>
-<section class="screen" id="settingsScreen">
-<h2 class="screen-title">الإعدادات</h2>
-<p class="screen-note">تحكم بالصوت وطريقة العرض داخل اللعبة.</p>
+<section class="screen help-screen" id="settingsScreen">
+<h2 class="screen-title">الشرح والتعليمات</h2>
+<p class="screen-note help-intro">اكتب ما تبحث عنه، أو افتح القسم المطلوب من السهم.</p>
+<div class="help-search-wrap">
+  <span class="help-search-icon" aria-hidden="true">⌕</span>
+  <input class="help-search-input" id="helpSearchInput" type="search" inputmode="search" autocomplete="off" placeholder="ابحث عن حفظ، استيراد، صور، تشغيل..." aria-label="البحث في الشرح والتعليمات"/>
+</div>
+<p class="help-empty" id="helpSearchEmpty" hidden>لم نجد شرحًا مطابقًا. جرّب كلمة أقصر مثل: حفظ، صورة، تشغيل أو استيراد.</p>
+<div class="help-list" id="helpList">
+  <details class="help-item" data-keywords="بداية البدء سريع اول مرة خطوات انشاء اختبار حفظ">
+    <summary><span>البدء السريع</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>اضغط <strong>إنشاء لعبة جديدة</strong> واختر نوع اللعبة.</li><li>اكتب اسم اللعبة وأدخل المحتوى المطلوب.</li><li>اضغط <strong>اختبار اللعبة</strong> لمراجعتها، ثم ارجع وعدّل عند الحاجة.</li><li>عندما تصبح جاهزة اضغط <strong>حفظ اللعبة</strong>.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="انشاء لعبة جديدة قالب عجلة صندوق اختيارات مطابقة ترتيب نوع اللعبة">
+    <summary><span>إنشاء لعبة جديدة واختيار القالب</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li><strong>العجلة:</strong> لاختيار سؤال أو عنصر عشوائي.</li><li><strong>افتح الصندوق:</strong> لكشف نص أو صورة عند فتح كل صندوق.</li><li><strong>الاختيارات:</strong> لأسئلة متعددة الخيارات.</li><li><strong>المطابقة:</strong> للبحث عن الأزواج المتطابقة.</li><li><strong>الترتيب:</strong> لترتيب الحروف أو الكلمات أو الصور.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="اسم اللعبة تسمية حفظ الاسم قائمة الالعاب المحفوظة">
+    <summary><span>اسم اللعبة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>اكتب اسمًا واضحًا يسهّل العثور على اللعبة لاحقًا، مثل: مراجعة الوحدة الثالثة.</li><li>لا يمكن حفظ اللعبة دون اسم.</li><li>إذا تكرر الاسم، تستطيع تحديث اللعبة الموجودة أو حفظ نسخة جديدة.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="صور صورة جوال ايفون ايباد كمبيوتر لابتوب ملفات مكتبة الصور رفع تغيير png jpg jpeg webp">
+    <summary><span>إضافة الصور من الجوال والآيباد والكمبيوتر</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li><strong>الجوال والآيباد:</strong> اضغط اختيار صورة، ثم اخترها من مكتبة الصور أو تطبيق الملفات.</li><li><strong>الكمبيوتر:</strong> اضغط اختيار صورة، وحدد الملف من المجلد ثم اضغط فتح.</li><li>يمكنك الضغط على <strong>تغيير الصورة</strong> لاستبدالها قبل الحفظ.</li><li>يفضّل استخدام صور واضحة بصيغة PNG أو JPG أو WEBP.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="اختبار تجربة تعديل رجوع مدخلات مسودة مؤقتة قبل العرض">
+    <summary><span>اختبار اللعبة والرجوع للتعديل</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>زر <strong>اختبار اللعبة</strong> يعرض النشاط كما سيظهر للطلاب.</li><li>زر الرجوع يعيدك إلى الإعدادات مع بقاء المدخلات والصور.</li><li>الاختبار لا يضيف لعبة جديدة إلى الألعاب المحفوظة.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="حفظ اللعبة محفوظة جاهزة تحديث نسخة اسم">
+    <summary><span>حفظ اللعبة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>بعد الانتهاء اضغط <strong>حفظ اللعبة</strong>.</li><li>تظهر اللعبة مباشرة في <strong>العابي المحفوظة</strong> وفي قائمة التشغيل الرئيسية.</li><li>عند تعديل لعبة محفوظة، يحفظ الزر التعديلات على اللعبة نفسها.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="تشغيل عرض ابدا اللعبة اختيار لعبة محفوظة الرئيسية">
+    <summary><span>تشغيل لعبة محفوظة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>من الصفحة الرئيسية افتح قائمة الألعاب المحفوظة.</li><li>اختر اللعبة المطلوبة، ثم اضغط <strong>إبدأ اللعبة</strong>.</li><li>تفتح اللعبة مباشرة دون العودة إلى صفحة الإعدادات.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="العابي المحفوظة تشغيل تعديل حذف ادارة لعبة">
+    <summary><span>إدارة العابي المحفوظة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li><strong>تشغيل:</strong> يبدأ النشاط مباشرة.</li><li><strong>تعديل:</strong> يعيد فتح جميع محتويات اللعبة وإعداداتها.</li><li><strong>حذف:</strong> يزيل اللعبة بعد طلب التأكيد.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="تصدير استيراد نسخة احتياطية json حفظ في الملفات سفاري نقل جهاز آخر مشاركة ملف">
+    <summary><span>التصدير والاستيراد</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li><strong>التصدير:</strong> ينشئ ملفًا واحدًا يحتوي جميع ألعابك وصورها وإعداداتها.</li><li>في الآيفون والآيباد اختر <strong>حفظ في الملفات</strong> من نافذة المشاركة.</li><li><strong>الاستيراد:</strong> اختر ملف النسخة الاحتياطية، وستُضاف ألعابه إلى الجهاز الحالي.</li><li>لا تعدّل محتوى ملف JSON يدويًا حتى لا يتعذر استيراده.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="نقل جهاز جهاز آخر متصفح آيفون آيباد كمبيوتر نسخة احتياطية">
+    <summary><span>نقل الألعاب إلى جهاز آخر</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>صدّر الألعاب من الجهاز الأول واحفظ الملف في تطبيق الملفات أو أرسله لنفسك.</li><li>افتح المنصة في الجهاز الثاني، ثم اختر <strong>التصدير والاستيراد</strong>.</li><li>اضغط <strong>استيراد الألعاب</strong> وحدد الملف الذي صدّرته.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="حفظ محلي خصوصية داخل الجهاز متصفح حذف البيانات خاص خفي انترنت كلاودفلير">
+    <summary><span>الحفظ داخل الجهاز والخصوصية</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>الألعاب محفوظة محليًا داخل الجهاز والمتصفح المستخدم.</li><li>لا تُرسل الأسئلة أو الصور إلى خادم خارجي.</li><li>قد تختفي الألعاب عند مسح بيانات المتصفح أو استخدام التصفح الخاص.</li><li>صدّر نسخة احتياطية دوريًا لحماية ألعابك.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="شاشة بروجكتر عرض تلفزيون كمبيوتر ايباد ملء الشاشة افقي">
+    <summary><span>العرض على الشاشة أو البروجكتر</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>افتح اللعبة من الكمبيوتر أو الآيباد المتصل بالشاشة.</li><li>استخدم الوضع الأفقي وملء الشاشة للحصول على أفضل مساحة عرض.</li><li>اختبر النشاط مرة واحدة قبل الحصة للتأكد من الصور والصوت.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="ثيم خلفية خط كايرو تجوال نسخ كوفي صوت اصوات لون">
+    <summary><span>الثيمات والخطوط والأصوات</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>الثيم يغيّر خلفية اللعبة ومظهر البداية والنهاية.</li><li>نوع الخط المختار يطبّق على محتوى اللعبة عند التشغيل فقط.</li><li>يمكن تشغيل أصوات اللعبة أو تعطيلها من الإعدادات المتقدمة.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="مشكلة لا تظهر الصور لا توجد لعبة تنزيل سفاري استيراد خطا حل تحديث">
+    <summary><span>حل المشكلات الشائعة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li><strong>اللعبة لا تظهر في القائمة:</strong> تأكد أنك ضغطت حفظ اللعبة، ثم حدّث الصفحة مرة واحدة.</li><li><strong>الصورة لا تظهر:</strong> أعد اختيارها وتأكد أن الملف صورة صالحة.</li><li><strong>ملف التصدير غير موجود في الآيفون:</strong> أعد التصدير واختر حفظ في الملفات.</li><li><strong>الاستيراد لا يعمل:</strong> استخدم ملف JSON صادرًا من المنصة دون تعديله.</li></ul>
+  </details>
+</div>
 </section>
 </main>
 <div class="bottom-bar">
@@ -16200,6 +16498,81 @@
   window.visualViewport?.addEventListener('scroll', syncKeyboardState, { passive:true });
   window.addEventListener('pageshow', syncKeyboardState, { passive:true });
   window.addEventListener('pagehide', () => document.body.classList.remove('keyboard-open'), { passive:true });
+})();
+</script>
+
+
+<script>
+(() => {
+  "use strict";
+
+  function normalizeArabic(value){
+    return String(value || "")
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+      .replace(/ـ/g, "")
+      .replace(/[إأآٱ]/g, "ا")
+      .replace(/ؤ/g, "و")
+      .replace(/ئ/g, "ي")
+      .replace(/ى/g, "ي")
+      .replace(/ة/g, "ه")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  function syncSavedGameSelectState(){
+    const select = document.getElementById("savedGameSelect");
+    if (!select) return;
+    select.classList.toggle("has-selection", Boolean(select.value));
+  }
+
+  function initSavedGameSelectState(){
+    const select = document.getElementById("savedGameSelect");
+    if (!select) return;
+    select.addEventListener("change", syncSavedGameSelectState);
+    new MutationObserver(syncSavedGameSelectState).observe(select, {childList:true,subtree:true});
+    syncSavedGameSelectState();
+  }
+
+  function initHelpSearch(){
+    const input = document.getElementById("helpSearchInput");
+    const empty = document.getElementById("helpSearchEmpty");
+    const items = Array.from(document.querySelectorAll("#helpList .help-item"));
+    if (!input || !items.length) return;
+
+    const searchable = items.map((item) => ({
+      item,
+      text: normalizeArabic(`${item.dataset.keywords || ""} ${item.textContent || ""}`)
+    }));
+
+    const update = () => {
+      const query = normalizeArabic(input.value);
+      let matches = 0;
+      searchable.forEach(({item,text}) => {
+        const matched = !query || text.includes(query);
+        item.hidden = !matched;
+        item.classList.toggle("is-match", Boolean(query && matched));
+        if (query && matched) item.open = true;
+        matches += matched ? 1 : 0;
+      });
+      if (empty) empty.hidden = !query || matches > 0;
+    };
+
+    input.addEventListener("input", update);
+    input.addEventListener("search", update);
+    update();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      initSavedGameSelectState();
+      initHelpSearch();
+    }, {once:true});
+  } else {
+    initSavedGameSelectState();
+    initHelpSearch();
+  }
 })();
 </script>
 
