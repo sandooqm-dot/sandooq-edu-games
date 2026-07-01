@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-saved-games-system-v60 -->
+<!-- version: index-arabic-export-filename-v61 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10100,6 +10100,44 @@
     .sg-choice-copy{background:var(--title-yellow)}
     .sg-choice-cancel{background:#eee}
 
+    .sg-export-name-field{
+      display:grid;
+      gap:8px;
+      margin:16px 0 18px;
+      text-align:right;
+    }
+    .sg-export-name-label{
+      font-size:15px;
+      font-weight:900;
+      color:#222;
+    }
+    .sg-export-name-input{
+      width:100%;
+      min-height:50px;
+      border:3px solid var(--ink);
+      border-radius:15px;
+      background:#fff;
+      color:#111;
+      padding:8px 14px;
+      text-align:center;
+      direction:rtl;
+      font-size:clamp(16px,3.7vw,20px);
+      font-weight:800;
+      outline:none;
+    }
+    .sg-export-name-input:focus{
+      box-shadow:0 0 0 4px rgba(239,213,83,.42);
+    }
+    .sg-export-name-hint{
+      margin:0;
+      color:#666;
+      text-align:center;
+      font-size:13px;
+      font-weight:750;
+      line-height:1.6;
+    }
+    .sg-export-confirm{background:var(--title-yellow)}
+
     @media(max-width:760px){
       .sg-saved-card{grid-template-columns:1fr;padding:13px;border-radius:19px}
       .sg-saved-actions{justify-content:stretch;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -10884,6 +10922,7 @@
 
   let saving = false;
   let duplicateResolver = null;
+  let exportNameResolver = null;
 
   function normalizeType(value){
     const type = String(value || "").trim().toLowerCase();
@@ -11282,6 +11321,101 @@
     return records;
   }
 
+  function exportDateStamp(date = new Date()){
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2,"0");
+    const day = String(date.getDate()).padStart(2,"0");
+    return `${year}-${month}-${day}`;
+  }
+
+  function defaultExportBaseName(){
+    return `نسخة ألعاب صندوق التعليم - ${exportDateStamp()}`;
+  }
+
+  function sanitizeExportBaseName(value){
+    let name = String(value || "")
+      .replace(/\.json$/i,"")
+      .replace(/[\u0000-\u001f\u007f]/g," ")
+      .replace(/[\\/:*?"<>|]/g,"-")
+      .replace(/\s+/g," ")
+      .replace(/[. ]+$/g,"")
+      .trim();
+    if (name.length > 120) name = name.slice(0,120).replace(/[. ]+$/g,"").trim();
+    return name || defaultExportBaseName();
+  }
+
+  function ensureExportNameModal(){
+    let modal = document.getElementById("sgExportNameModal");
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.id = "sgExportNameModal";
+    modal.className = "sg-choice-modal";
+    modal.setAttribute("aria-hidden","true");
+    modal.innerHTML = `
+      <section class="sg-choice-dialog" role="dialog" aria-modal="true" aria-labelledby="sgExportNameTitle">
+        <h3 class="sg-choice-title" id="sgExportNameTitle">اسم ملف النسخة الاحتياطية</h3>
+        <p class="sg-choice-text">اكتب اسمًا واضحًا ليسهل العثور على الملف عند نقله إلى جهاز آخر.</p>
+        <label class="sg-export-name-field">
+          <span class="sg-export-name-label">اسم الملف</span>
+          <input class="sg-export-name-input" id="sgExportNameInput" type="text" maxlength="120" autocomplete="off" enterkeyhint="done" />
+          <span class="sg-export-name-hint">ستُضاف صيغة .json تلقائيًا.</span>
+        </label>
+        <div class="sg-choice-actions">
+          <button class="sg-export-confirm" type="button" data-export-name-action="confirm">تصدير</button>
+          <button class="sg-choice-cancel" type="button" data-export-name-action="cancel">إلغاء</button>
+        </div>
+      </section>`;
+    document.body.appendChild(modal);
+
+    const finish = (value)=>{
+      if (!exportNameResolver) return;
+      const resolve = exportNameResolver;
+      exportNameResolver = null;
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden","true");
+      resolve(value);
+    };
+
+    modal.addEventListener("click",(event)=>{
+      const action = event.target.closest("[data-export-name-action]")?.dataset.exportNameAction;
+      if (action === "confirm") {
+        const input = modal.querySelector("#sgExportNameInput");
+        finish(sanitizeExportBaseName(input?.value));
+      } else if (action === "cancel" || event.target === modal) {
+        finish(null);
+      }
+    });
+
+    modal.addEventListener("keydown",(event)=>{
+      if (!modal.classList.contains("is-open")) return;
+      if (event.key === "Enter") {
+        event.preventDefault();
+        const input = modal.querySelector("#sgExportNameInput");
+        finish(sanitizeExportBaseName(input?.value));
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        finish(null);
+      }
+    });
+    return modal;
+  }
+
+  function chooseExportFileName(){
+    const modal = ensureExportNameModal();
+    const input = modal.querySelector("#sgExportNameInput");
+    if (input) input.value = defaultExportBaseName();
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden","false");
+    return new Promise((resolve)=>{
+      exportNameResolver = resolve;
+      requestAnimationFrame(()=>{
+        if (!input) return;
+        input.focus({preventScroll:true});
+        input.select();
+      });
+    });
+  }
+
   async function exportGames(){
     const status = document.getElementById("backupStatus");
     const records = readRegistry();
@@ -11289,6 +11423,8 @@
       alert("لا توجد ألعاب محفوظة لتصديرها.");
       return;
     }
+    const exportBaseName = await chooseExportFileName();
+    if (exportBaseName === null) return;
     if (status) status.textContent = "جارٍ تجهيز النسخة الاحتياطية...";
     try {
       const games = [];
@@ -11304,9 +11440,8 @@
       };
       const blob = new Blob([JSON.stringify(backup)],{type:"application/json;charset=utf-8"});
       const link = document.createElement("a");
-      const day = new Date().toISOString().slice(0,10);
       link.href = URL.createObjectURL(blob);
-      link.download = `sandooq-games-backup-${day}.json`;
+      link.download = `${sanitizeExportBaseName(exportBaseName)}.json`;
       document.body.appendChild(link);
       link.click();
       link.remove();
