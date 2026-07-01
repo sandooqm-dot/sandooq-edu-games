@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-order-space-input-v58 -->
+<!-- version: index-settings-back-to-games-v59 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10713,6 +10713,7 @@
   const OPEN_BOX_MAX_ITEMS = 30;
 
   const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen"]);
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
   const wheelItemsEditor = document.getElementById("wheelItemsEditor");
@@ -10797,6 +10798,7 @@
 
   function openScreen(id){
     const isSubpage = Boolean(id);
+    const isGameSetup = gameSetupScreens.has(id);
     document.body.classList.toggle("subpage", isSubpage);
 
     screens.forEach((sid)=>{
@@ -10805,6 +10807,7 @@
     });
 
     if (homeShell) homeShell.style.display = isSubpage ? "none" : "flex";
+    if (homeButton) homeButton.textContent = isGameSetup ? "العودة للالعاب" : "الرئيسية";
     try { window.scrollTo({ top:0, behavior:"auto" }); } catch (_) { window.scrollTo(0, 0); }
   }
 
@@ -11954,6 +11957,13 @@
   });
 
   homeButton.addEventListener("click", ()=>{
+    const activeScreen = screens.find((sid)=>document.getElementById(sid)?.classList.contains("active")) || "";
+
+    if (gameSetupScreens.has(activeScreen)) {
+      openScreen("createScreen");
+      return;
+    }
+
     if (document.body.classList.contains("subpage")) {
       openScreen("");
       return;
