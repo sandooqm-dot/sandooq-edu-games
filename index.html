@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-settings-back-to-games-v59 -->
+<!-- version: index-saved-games-system-v60 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9962,7 +9962,152 @@
       }
     }
 
-  </style>
+  
+
+    /* v60: نظام الألعاب المحفوظة المحلي. */
+    .start-btn:disabled{
+      opacity:.46;
+      cursor:not-allowed;
+      box-shadow:none;
+      filter:saturate(.45);
+    }
+
+    .sg-saved-list{
+      display:grid;
+      gap:clamp(12px,1.7vw,18px);
+      margin-top:clamp(12px,1.6vw,18px);
+    }
+
+    .sg-empty-state{
+      margin:0;
+      padding:clamp(24px,5vw,46px) 16px;
+      border:3px dashed #aaa;
+      border-radius:22px;
+      background:#fafafa;
+      color:#555;
+      text-align:center;
+      font-size:clamp(17px,2vw,24px);
+      font-weight:800;
+      line-height:1.7;
+    }
+
+    .sg-saved-card{
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#fff;
+      padding:clamp(14px,1.8vw,20px);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:14px 18px;
+      align-items:center;
+    }
+
+    .sg-saved-info{min-width:0}
+    .sg-saved-name{
+      margin:0;
+      font-size:clamp(21px,2.5vw,32px);
+      font-weight:900;
+      line-height:1.25;
+      overflow-wrap:anywhere;
+    }
+    .sg-saved-meta{
+      margin:6px 0 0;
+      color:#595959;
+      font-size:clamp(13px,1.45vw,18px);
+      font-weight:750;
+      line-height:1.5;
+    }
+
+    .sg-saved-actions{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .sg-game-action,
+    .sg-backup-btn{
+      min-height:44px;
+      border:3px solid var(--ink);
+      border-radius:15px;
+      padding:7px 18px;
+      color:#111;
+      font-size:clamp(15px,1.55vw,19px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.17);
+      white-space:nowrap;
+    }
+    .sg-game-action:active,
+    .sg-backup-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.17)}
+    .sg-play-game{background:var(--blue-bar);color:#fff}
+    .sg-edit-game{background:var(--title-yellow)}
+    .sg-delete-game{background:#f05d5b;color:#fff}
+
+    .sg-backup-actions{
+      margin-top:22px;
+      display:flex;
+      justify-content:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .sg-export-btn{background:var(--title-yellow)}
+    .sg-import-btn{background:var(--blue-bar);color:#fff}
+    .sg-backup-status{
+      min-height:24px;
+      margin:16px 0 0;
+      text-align:center;
+      color:#333;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .sg-choice-modal{
+      position:fixed;
+      inset:0;
+      z-index:5000;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:rgba(17,17,17,.42);
+      direction:rtl;
+    }
+    .sg-choice-modal.is-open{display:flex}
+    .sg-choice-dialog{
+      width:min(470px,92vw);
+      border:3px solid var(--ink);
+      border-radius:24px;
+      background:#fff;
+      padding:22px;
+      text-align:center;
+      box-shadow:0 18px 45px rgba(0,0,0,.24);
+    }
+    .sg-choice-title{margin:0;font-size:clamp(22px,4vw,30px);font-weight:900}
+    .sg-choice-text{margin:12px 0 20px;color:#444;font-size:clamp(15px,3.5vw,19px);font-weight:750;line-height:1.7}
+    .sg-choice-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+    .sg-choice-actions button{
+      min-height:43px;
+      border:3px solid var(--ink);
+      border-radius:14px;
+      padding:7px 14px;
+      font-size:15px;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .sg-choice-update{background:var(--orange);color:#fff}
+    .sg-choice-copy{background:var(--title-yellow)}
+    .sg-choice-cancel{background:#eee}
+
+    @media(max-width:760px){
+      .sg-saved-card{grid-template-columns:1fr;padding:13px;border-radius:19px}
+      .sg-saved-actions{justify-content:stretch;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+      .sg-game-action{padding-inline:7px;font-size:14px;min-width:0}
+      .sg-backup-actions{display:grid;grid-template-columns:1fr;max-width:310px;margin-inline:auto}
+    }
+
+</style>
 </head>
 <body>
 <main class="page">
@@ -10011,11 +10156,11 @@
 <div class="play-card">
 <h2 class="play-title">اختر اللعبة لعرضها</h2>
 <div class="select-wrap">
-<select id="savedGameSelect">
-<option value="demo-wheel">درس العلوم / العجلة الدوارة</option>
+<select id="savedGameSelect" aria-label="اختر لعبة محفوظة">
+<option value="">لا توجد ألعاب محفوظة</option>
 </select>
 </div>
-<button class="start-btn" type="button">إبدأ اللعبة</button>
+<button class="start-btn" id="startSavedGameBtn" type="button" disabled>إبدأ اللعبة</button>
 </div>
 </div>
 <div class="cards-grid primary-grid">
@@ -10687,11 +10832,17 @@
 
 <section class="screen" id="savedScreen">
 <h2 class="screen-title">العابي المحفوظة</h2>
-<p class="screen-note">ستظهر ألعابك المحفوظة هنا.</p>
+<div class="sg-saved-list" id="savedGamesList" aria-live="polite"></div>
 </section>
 <section class="screen" id="backupScreen">
 <h2 class="screen-title">التصدير والاستيراد</h2>
-<p class="screen-note">صدّر ألعابك كملف أو استوردها على جهاز آخر.</p>
+<p class="screen-note">احتفظ بنسخة من ألعابك أو انقلها إلى جهاز ومتصفح آخر.</p>
+<div class="sg-backup-actions">
+  <button class="sg-backup-btn sg-export-btn" id="exportSavedGamesBtn" type="button">تصدير الألعاب</button>
+  <button class="sg-backup-btn sg-import-btn" id="importSavedGamesBtn" type="button">استيراد الألعاب</button>
+  <input id="importSavedGamesInput" type="file" accept="application/json,.json" hidden>
+</div>
+<p class="sg-backup-status" id="backupStatus" role="status" aria-live="polite"></p>
 </section>
 <section class="screen" id="settingsScreen">
 <h2 class="screen-title">الإعدادات</h2>
@@ -10702,6 +10853,569 @@
 <button class="home-btn" id="homeButton" type="button">الرئيسية</button>
 </div>
 
+
+<script>
+(() => {
+  "use strict";
+
+  const REGISTRY_KEY = "sandooq_edu_saved_games_v1";
+  const EDITING_KEY = "sandooq_edu_editing_game_v1";
+  const PENDING_EDIT_KEY = "sandooq_edu_pending_edit_v1";
+  const DB_NAME = "sandooq_edu_games_v1";
+  const DB_VERSION = 1;
+  const STORE_NAME = "payloads";
+  const SCHEMA_VERSION = 1;
+
+  const TYPE_LABELS = {
+    wheel:"العجلة الدوارة",
+    "open-box":"افتح الصندوق",
+    quiz:"الاختيارات",
+    match:"المطابقة",
+    order:"الترتيب"
+  };
+
+  const TYPE_CONFIG = {
+    wheel:{ page:"wheel.html", payloadKey:"sandooq_wheel_payload_v1", draftKey:"sandooq_wheel_draft_v1", hash:"#wheelSetup", dbPrefix:"wheel" },
+    "open-box":{ page:"open-box.html", payloadKey:"sandooq_open_box_payload_v1", draftKey:"sandooq_wheel_draft_v1", extraDraftKey:"sandooq_open_box_draft_v1", hash:"#wheelSetup", dbPrefix:"open-box" },
+    quiz:{ page:"choices.html", payloadKey:"sandooq_quiz_payload_v1", draftKey:"sandooq_quiz_draft_v2", hash:"#choicesSetup", dbPrefix:"quiz" },
+    match:{ page:"match.html", payloadKey:"sandooq_match_payload_v1", draftKey:"sandooq_match_draft_v1", hash:"#matchSetup", dbPrefix:"match" },
+    order:{ page:"order.html", payloadKey:"sandooq_order_payload_v1", draftKey:"sandooq_order_draft_v1", hash:"#orderSetup", dbPrefix:"order" }
+  };
+
+  let saving = false;
+  let duplicateResolver = null;
+
+  function normalizeType(value){
+    const type = String(value || "").trim().toLowerCase();
+    if (["matching","match-game"].includes(type)) return "match";
+    if (["choices","choice","quiz-game"].includes(type)) return "quiz";
+    if (["openbox","open_box","box"].includes(type)) return "open-box";
+    return TYPE_CONFIG[type] ? type : "";
+  }
+
+  function clone(value){
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function openDb(){
+    return new Promise((resolve,reject)=>{
+      const request = indexedDB.open(DB_NAME,DB_VERSION);
+      request.onupgradeneeded = ()=>{
+        const db = request.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME,{keyPath:"key"});
+        }
+      };
+      request.onsuccess = ()=>resolve(request.result);
+      request.onerror = ()=>reject(request.error || new Error("indexedDB failed"));
+    });
+  }
+
+  async function writePayload(key,payload){
+    const db = await openDb();
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction(STORE_NAME,"readwrite");
+      tx.objectStore(STORE_NAME).put({key,payload,updatedAt:Date.now()});
+      tx.oncomplete = ()=>{ db.close(); resolve(true); };
+      tx.onerror = ()=>{ const error = tx.error; db.close(); reject(error || new Error("save failed")); };
+      tx.onabort = ()=>{ const error = tx.error; db.close(); reject(error || new Error("save aborted")); };
+    });
+  }
+
+  async function readPayload(key){
+    const db = await openDb();
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction(STORE_NAME,"readonly");
+      const request = tx.objectStore(STORE_NAME).get(key);
+      request.onsuccess = ()=>{ const value = request.result?.payload || null; db.close(); resolve(value); };
+      request.onerror = ()=>{ const error = request.error; db.close(); reject(error || new Error("read failed")); };
+    });
+  }
+
+  async function deletePayload(key){
+    const db = await openDb();
+    return new Promise((resolve,reject)=>{
+      const tx = db.transaction(STORE_NAME,"readwrite");
+      tx.objectStore(STORE_NAME).delete(key);
+      tx.oncomplete = ()=>{ db.close(); resolve(true); };
+      tx.onerror = ()=>{ const error = tx.error; db.close(); reject(error || new Error("delete failed")); };
+    });
+  }
+
+  function readRegistry(){
+    try {
+      const parsed = JSON.parse(localStorage.getItem(REGISTRY_KEY) || "[]");
+      if (!Array.isArray(parsed)) return [];
+      const seen = new Set();
+      return parsed
+        .map((record)=>{
+          const gameType = normalizeType(record?.gameType || record?.type);
+          const storageKey = String(record?.storageKey || record?.id || "");
+          if (!gameType || !storageKey || seen.has(storageKey)) return null;
+          seen.add(storageKey);
+          return {
+            id:String(record?.id || storageKey),
+            storageKey,
+            gameType,
+            name:String(record?.name || TYPE_LABELS[gameType] || "لعبة محفوظة").trim() || TYPE_LABELS[gameType],
+            createdAt:Number(record?.createdAt) || Number(record?.updatedAt) || Date.now(),
+            updatedAt:Number(record?.updatedAt) || Date.now(),
+            schemaVersion:Number(record?.schemaVersion) || 1
+          };
+        })
+        .filter(Boolean)
+        .sort((a,b)=>b.updatedAt-a.updatedAt);
+    } catch (_) {
+      return [];
+    }
+  }
+
+  function writeRegistry(records){
+    const clean = Array.isArray(records) ? records.slice(0,500) : [];
+    localStorage.setItem(REGISTRY_KEY,JSON.stringify(clean));
+  }
+
+  function currentEditingRecord(records,gameType){
+    try {
+      const marker = JSON.parse(sessionStorage.getItem(EDITING_KEY) || "null");
+      if (!marker) return null;
+      const markerType = normalizeType(marker.gameType);
+      if (markerType !== gameType) return null;
+      return records.find((record)=>record.storageKey === marker.storageKey) || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function ensureDuplicateModal(){
+    let modal = document.getElementById("sgDuplicateModal");
+    if (modal) return modal;
+    modal = document.createElement("div");
+    modal.id = "sgDuplicateModal";
+    modal.className = "sg-choice-modal";
+    modal.setAttribute("aria-hidden","true");
+    modal.innerHTML = `
+      <section class="sg-choice-dialog" role="dialog" aria-modal="true" aria-labelledby="sgDuplicateTitle">
+        <h3 class="sg-choice-title" id="sgDuplicateTitle">اسم اللعبة مستخدم</h3>
+        <p class="sg-choice-text" id="sgDuplicateText"></p>
+        <div class="sg-choice-actions">
+          <button class="sg-choice-update" type="button" data-sg-choice="update">تحديث الموجودة</button>
+          <button class="sg-choice-copy" type="button" data-sg-choice="copy">حفظ نسخة جديدة</button>
+          <button class="sg-choice-cancel" type="button" data-sg-choice="cancel">إلغاء</button>
+        </div>
+      </section>`;
+    document.body.appendChild(modal);
+    modal.addEventListener("click",(event)=>{
+      const choice = event.target.closest("[data-sg-choice]")?.dataset.sgChoice;
+      if (!choice || !duplicateResolver) return;
+      const resolve = duplicateResolver;
+      duplicateResolver = null;
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden","true");
+      resolve(choice);
+    });
+    return modal;
+  }
+
+  function chooseDuplicate(name){
+    const modal = ensureDuplicateModal();
+    const text = modal.querySelector("#sgDuplicateText");
+    if (text) text.textContent = `توجد لعبة محفوظة باسم «${name}». اختر تحديثها أو حفظ نسخة أخرى.`;
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden","false");
+    return new Promise((resolve)=>{ duplicateResolver = resolve; });
+  }
+
+  function makeSavedId(){
+    return `saved_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+  }
+
+  async function saveGame({gameType,name,payload}){
+    gameType = normalizeType(gameType);
+    name = String(name || "").trim();
+    if (!gameType || !TYPE_CONFIG[gameType]) {
+      alert("تعذر تحديد نوع اللعبة.");
+      return false;
+    }
+    if (!name) {
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
+      return false;
+    }
+    if (!payload || typeof payload !== "object" || saving) return false;
+
+    saving = true;
+    try {
+      let records = readRegistry();
+      let target = currentEditingRecord(records,gameType);
+
+      if (!target) {
+        const normalizedName = name.toLocaleLowerCase("ar");
+        const duplicate = records.find((record)=>
+          record.gameType === gameType && record.name.trim().toLocaleLowerCase("ar") === normalizedName
+        );
+        if (duplicate) {
+          const choice = await chooseDuplicate(name);
+          if (choice === "cancel") return false;
+          if (choice === "update") target = duplicate;
+        }
+      }
+
+      const now = Date.now();
+      const savedId = target
+        ? String(target.storageKey).split(":").pop()
+        : makeSavedId();
+      const storageKey = target?.storageKey || `saved:${gameType}:${savedId}`;
+      const cleanPayload = clone(payload);
+      cleanPayload.gameType = gameType;
+      cleanPayload.gameTemplate = gameType;
+      cleanPayload.name = name;
+      cleanPayload.gameName = name;
+      cleanPayload.payloadId = savedId;
+      cleanPayload.savedSchemaVersion = SCHEMA_VERSION;
+      cleanPayload.createdAt = target?.createdAt || Number(cleanPayload.createdAt) || now;
+      cleanPayload.updatedAt = now;
+
+      await writePayload(storageKey,cleanPayload);
+
+      const record = {
+        id:target?.id || savedId,
+        storageKey,
+        gameType,
+        name,
+        createdAt:target?.createdAt || now,
+        updatedAt:now,
+        schemaVersion:SCHEMA_VERSION
+      };
+      const existingIndex = records.findIndex((item)=>item.storageKey === storageKey);
+      if (existingIndex >= 0) records[existingIndex] = record;
+      else records.unshift(record);
+      records.sort((a,b)=>b.updatedAt-a.updatedAt);
+      writeRegistry(records);
+      sessionStorage.setItem(EDITING_KEY,JSON.stringify({storageKey,gameType}));
+      refreshUi();
+      alert(target ? "تم تحديث اللعبة المحفوظة." : "تم حفظ اللعبة في ألعابي المحفوظة.");
+      return true;
+    } catch (error) {
+      console.error("Saved game error",error);
+      alert("تعذر حفظ اللعبة على هذا الجهاز. تأكد من توفر مساحة تخزين وحاول مرة أخرى.");
+      return false;
+    } finally {
+      saving = false;
+    }
+  }
+
+  async function launchRecord(record){
+    try {
+      const gameType = normalizeType(record?.gameType);
+      const config = TYPE_CONFIG[gameType];
+      if (!config) throw new Error("unsupported game type");
+      const stored = await readPayload(record.storageKey);
+      if (!stored) throw new Error("missing payload");
+      const runtimeId = `play_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      const payload = clone(stored);
+      payload.payloadId = runtimeId;
+      payload.gameType = gameType;
+      payload.gameTemplate = gameType;
+
+      try {
+        Object.keys(sessionStorage).forEach((key)=>{
+          if (key.startsWith(`${config.payloadKey}_`)) sessionStorage.removeItem(key);
+        });
+        sessionStorage.removeItem(config.payloadKey);
+        sessionStorage.setItem(`${config.payloadKey}_${runtimeId}`,JSON.stringify(payload));
+        sessionStorage.setItem(config.payloadKey,JSON.stringify(payload));
+      } catch (_) {
+        /* IndexedDB هو المصدر الأساسي عند كبر الصور. */
+      }
+      await writePayload(`${config.dbPrefix}:${runtimeId}`,payload);
+
+      const url = new URL(config.page,window.location.href);
+      url.searchParams.set("payloadId",runtimeId);
+      url.searchParams.set("theme",String(payload.theme || payload.selectedTheme || "classic"));
+      if (gameType === "open-box") url.searchParams.set("intro","1");
+      if (gameType === "quiz") url.searchParams.set("mode",String(payload.displayMode || "direct"));
+      if (["quiz","match","order"].includes(gameType)) url.searchParams.set("return","index.html");
+      url.searchParams.set("v",String(Date.now()));
+      window.location.href = `${url.pathname}${url.search}`;
+    } catch (error) {
+      console.error("Launch saved game error",error);
+      alert("تعذر تشغيل اللعبة المحفوظة. قد تكون بياناتها حُذفت من المتصفح.");
+    }
+  }
+
+  async function beginEdit(record){
+    const gameType = normalizeType(record?.gameType);
+    const config = TYPE_CONFIG[gameType];
+    if (!config) return;
+    try {
+      const payload = await readPayload(record.storageKey);
+      if (!payload) throw new Error("missing payload");
+      sessionStorage.setItem(EDITING_KEY,JSON.stringify({storageKey:record.storageKey,gameType}));
+      sessionStorage.setItem(PENDING_EDIT_KEY,JSON.stringify({storageKey:record.storageKey,gameType}));
+      const url = new URL(window.location.href);
+      url.searchParams.set("edit",String(Date.now()));
+      url.hash = config.hash;
+      window.location.href = `${url.pathname}${url.search}${url.hash}`;
+    } catch (error) {
+      console.error("Edit saved game error",error);
+      alert("تعذر فتح اللعبة للتعديل. قد تكون بياناتها حُذفت من المتصفح.");
+    }
+  }
+
+  async function consumePendingEdit(expectedTypes){
+    const allowed = new Set((Array.isArray(expectedTypes) ? expectedTypes : [expectedTypes]).map(normalizeType));
+    let marker = null;
+    try { marker = JSON.parse(sessionStorage.getItem(PENDING_EDIT_KEY) || "null"); } catch (_) {}
+    const gameType = normalizeType(marker?.gameType);
+    if (!marker?.storageKey || !allowed.has(gameType)) return null;
+    const payload = await readPayload(marker.storageKey);
+    if (!payload) return null;
+    sessionStorage.removeItem(PENDING_EDIT_KEY);
+    return {record:{storageKey:marker.storageKey,gameType},payload:clone(payload)};
+  }
+
+  async function removeRecord(record){
+    if (!record) return;
+    if (!window.confirm(`هل تريد حذف لعبة «${record.name}»؟`)) return;
+    try {
+      await deletePayload(record.storageKey);
+      const records = readRegistry().filter((item)=>item.storageKey !== record.storageKey);
+      writeRegistry(records);
+      try {
+        const editing = JSON.parse(sessionStorage.getItem(EDITING_KEY) || "null");
+        if (editing?.storageKey === record.storageKey) sessionStorage.removeItem(EDITING_KEY);
+      } catch (_) {}
+      refreshUi();
+    } catch (error) {
+      console.error("Delete saved game error",error);
+      alert("تعذر حذف اللعبة.");
+    }
+  }
+
+  function formatDate(timestamp){
+    try {
+      return new Intl.DateTimeFormat("ar-SA",{year:"numeric",month:"short",day:"numeric"}).format(new Date(timestamp));
+    } catch (_) {
+      return new Date(timestamp).toLocaleDateString();
+    }
+  }
+
+  function renderHomeSelect(records){
+    const select = document.getElementById("savedGameSelect");
+    const start = document.getElementById("startSavedGameBtn");
+    if (!select || !start) return;
+    const previous = select.value;
+    select.textContent = "";
+    if (!records.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "لا توجد ألعاب محفوظة";
+      select.appendChild(option);
+      start.disabled = true;
+      return;
+    }
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "اختر لعبة محفوظة";
+    select.appendChild(placeholder);
+    records.forEach((record)=>{
+      const option = document.createElement("option");
+      option.value = record.storageKey;
+      option.textContent = `${record.name} — ${TYPE_LABELS[record.gameType]}`;
+      select.appendChild(option);
+    });
+    if (records.some((record)=>record.storageKey === previous)) select.value = previous;
+    start.disabled = !select.value;
+  }
+
+  function renderSavedList(records){
+    const list = document.getElementById("savedGamesList");
+    if (!list) return;
+    list.textContent = "";
+    if (!records.length) {
+      const empty = document.createElement("p");
+      empty.className = "sg-empty-state";
+      empty.textContent = "لا توجد ألعاب محفوظة حتى الآن. أنشئ لعبة ثم اضغط حفظ اللعبة.";
+      list.appendChild(empty);
+      return;
+    }
+    records.forEach((record)=>{
+      const card = document.createElement("article");
+      card.className = "sg-saved-card";
+      const info = document.createElement("div");
+      info.className = "sg-saved-info";
+      const title = document.createElement("h3");
+      title.className = "sg-saved-name";
+      title.textContent = record.name;
+      const meta = document.createElement("p");
+      meta.className = "sg-saved-meta";
+      meta.textContent = `${TYPE_LABELS[record.gameType]} — آخر تعديل ${formatDate(record.updatedAt)}`;
+      info.append(title,meta);
+
+      const actions = document.createElement("div");
+      actions.className = "sg-saved-actions";
+      const play = document.createElement("button");
+      play.type = "button";
+      play.className = "sg-game-action sg-play-game";
+      play.textContent = "تشغيل";
+      play.addEventListener("click",()=>launchRecord(record));
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.className = "sg-game-action sg-edit-game";
+      edit.textContent = "تعديل";
+      edit.addEventListener("click",()=>beginEdit(record));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "sg-game-action sg-delete-game";
+      remove.textContent = "حذف";
+      remove.addEventListener("click",()=>removeRecord(record));
+      actions.append(play,edit,remove);
+      card.append(info,actions);
+      list.appendChild(card);
+    });
+  }
+
+  function refreshUi(){
+    const records = readRegistry();
+    renderHomeSelect(records);
+    renderSavedList(records);
+    return records;
+  }
+
+  async function exportGames(){
+    const status = document.getElementById("backupStatus");
+    const records = readRegistry();
+    if (!records.length) {
+      alert("لا توجد ألعاب محفوظة لتصديرها.");
+      return;
+    }
+    if (status) status.textContent = "جارٍ تجهيز النسخة الاحتياطية...";
+    try {
+      const games = [];
+      for (const record of records) {
+        const payload = await readPayload(record.storageKey);
+        if (payload) games.push({record,payload});
+      }
+      const backup = {
+        app:"sandooq-edu-games",
+        version:1,
+        exportedAt:new Date().toISOString(),
+        games
+      };
+      const blob = new Blob([JSON.stringify(backup)],{type:"application/json;charset=utf-8"});
+      const link = document.createElement("a");
+      const day = new Date().toISOString().slice(0,10);
+      link.href = URL.createObjectURL(blob);
+      link.download = `sandooq-games-backup-${day}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+      if (status) status.textContent = `تم تصدير ${games.length} لعبة.`;
+    } catch (error) {
+      console.error("Export error",error);
+      if (status) status.textContent = "تعذر تصدير الألعاب.";
+      alert("تعذر إنشاء النسخة الاحتياطية.");
+    }
+  }
+
+  function uniqueImportedName(records,type,baseName){
+    const used = new Set(records.filter((r)=>r.gameType===type).map((r)=>r.name.trim().toLocaleLowerCase("ar")));
+    if (!used.has(baseName.trim().toLocaleLowerCase("ar"))) return baseName;
+    let index = 1;
+    while (true) {
+      const candidate = index === 1 ? `${baseName} - نسخة مستوردة` : `${baseName} - نسخة مستوردة ${index}`;
+      if (!used.has(candidate.toLocaleLowerCase("ar"))) return candidate;
+      index += 1;
+    }
+  }
+
+  async function importGames(file){
+    const status = document.getElementById("backupStatus");
+    if (!file) return;
+    if (status) status.textContent = "جارٍ استيراد الألعاب...";
+    try {
+      const data = JSON.parse(await file.text());
+      if (data?.app !== "sandooq-edu-games" || !Array.isArray(data.games)) throw new Error("invalid backup");
+      const records = readRegistry();
+      let imported = 0;
+      for (const item of data.games) {
+        const gameType = normalizeType(item?.record?.gameType || item?.payload?.gameType || item?.payload?.gameTemplate);
+        if (!gameType || !item?.payload || typeof item.payload !== "object") continue;
+        const originalName = String(item.record?.name || item.payload?.name || item.payload?.gameName || TYPE_LABELS[gameType]).trim();
+        const name = uniqueImportedName(records,gameType,originalName || TYPE_LABELS[gameType]);
+        const savedId = makeSavedId();
+        const storageKey = `saved:${gameType}:${savedId}`;
+        const now = Date.now();
+        const payload = clone(item.payload);
+        payload.gameType = gameType;
+        payload.gameTemplate = gameType;
+        payload.name = name;
+        payload.gameName = name;
+        payload.payloadId = savedId;
+        payload.savedSchemaVersion = SCHEMA_VERSION;
+        payload.createdAt = Number(item.record?.createdAt) || now;
+        payload.updatedAt = now;
+        await writePayload(storageKey,payload);
+        records.push({id:savedId,storageKey,gameType,name,createdAt:payload.createdAt,updatedAt:now,schemaVersion:SCHEMA_VERSION});
+        imported += 1;
+      }
+      records.sort((a,b)=>b.updatedAt-a.updatedAt);
+      writeRegistry(records);
+      refreshUi();
+      if (status) status.textContent = `تم استيراد ${imported} لعبة.`;
+      alert(imported ? `تم استيراد ${imported} لعبة بنجاح.` : "لم يتم العثور على ألعاب صالحة داخل الملف.");
+    } catch (error) {
+      console.error("Import error",error);
+      if (status) status.textContent = "ملف الاستيراد غير صالح.";
+      alert("تعذر استيراد الملف. تأكد أنه ملف نسخة احتياطية صادر من المنصة.");
+    }
+  }
+
+  function initUi(){
+    const select = document.getElementById("savedGameSelect");
+    const start = document.getElementById("startSavedGameBtn");
+    select?.addEventListener("change",()=>{ if (start) start.disabled = !select.value; });
+    start?.addEventListener("click",()=>{
+      const record = readRegistry().find((item)=>item.storageKey === select?.value);
+      if (record) launchRecord(record);
+    });
+
+    document.querySelectorAll("[data-open-screen='savedScreen']").forEach((button)=>{
+      button.addEventListener("click",()=>setTimeout(refreshUi,0));
+    });
+    document.querySelectorAll("[data-template]").forEach((button)=>{
+      button.addEventListener("click",()=>{
+        sessionStorage.removeItem(EDITING_KEY);
+        sessionStorage.removeItem(PENDING_EDIT_KEY);
+      },true);
+    });
+
+    document.getElementById("exportSavedGamesBtn")?.addEventListener("click",exportGames);
+    const importButton = document.getElementById("importSavedGamesBtn");
+    const importInput = document.getElementById("importSavedGamesInput");
+    importButton?.addEventListener("click",()=>importInput?.click());
+    importInput?.addEventListener("change",async()=>{
+      const file = importInput.files?.[0];
+      await importGames(file);
+      importInput.value = "";
+    });
+    refreshUi();
+  }
+
+  window.SandooqSavedGames = {
+    saveGame,
+    refreshUi,
+    readRegistry,
+    readPayload,
+    launchRecord,
+    beginEdit,
+    consumePendingEdit
+  };
+
+  initUi();
+})();
+</script>
 
 <script>
   const WEBSITE_HOME_URL = "https://sandooq-games.com/";
@@ -11108,11 +11822,14 @@
     } catch (_) {}
   }
 
-  function loadDraft(){
+  function loadDraft(providedDraft = null){
     try {
-      const raw = sessionStorage.getItem(WHEEL_DRAFT_KEY);
-      if (!raw) return false;
-      const draft = JSON.parse(raw);
+      let draft = providedDraft;
+      if (!draft) {
+        const raw = sessionStorage.getItem(WHEEL_DRAFT_KEY);
+        if (!raw) return false;
+        draft = JSON.parse(raw);
+      }
       if (!draft || typeof draft !== "object") return false;
 
       currentGameTemplate = draft.gameTemplate === "open-box" || draft.template === "open-box" ? "open-box" : "wheel";
@@ -11949,11 +12666,84 @@
   wheelGameNameInput?.addEventListener("input", saveDraft);
 
   document.getElementById("testWheelBtn")?.addEventListener("click", openCurrentGamePage);
-  document.querySelector(".start-btn")?.addEventListener("click", openCurrentGamePage);
+  /* تشغيل اللعبة المحفوظة يُدار من نظام الألعاب المحفوظة v60. */
 
-  document.getElementById("saveWheelBtn")?.addEventListener("click", ()=>{
+  document.getElementById("saveWheelBtn")?.addEventListener("click", async ()=>{
+    syncWheelEntriesFromDom();
+    cleanOpenBoxEntriesInPlace();
+
+    const name = String(wheelGameNameInput?.value || "").trim();
+    if (!name) {
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
+      wheelGameNameInput?.focus();
+      return;
+    }
+
+    const filledEntries = getFilledEntries();
+    const entries = currentGameTemplate === "open-box"
+      ? filledEntries.slice(0,OPEN_BOX_MAX_ITEMS)
+      : filledEntries;
+    if (!entries.length) {
+      alert(currentGameTemplate === "open-box"
+        ? "يرجى ادخال عناصر الصندوق اولاً"
+        : "يرجى ادخال محتويات العجلة اولاً");
+      return;
+    }
+
     saveDraft();
-    alert("تم حفظ اللعبة.");
+    const selectedTheme = normalizeGameTheme(wheelTheme);
+    const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+    const isOpenBox = currentGameTemplate === "open-box";
+    const payload = isOpenBox
+      ? {
+          gameType:"open-box",
+          gameTemplate:"open-box",
+          payloadVersion:2,
+          strictModes:true,
+          type:normalizeOpenBoxContentType(wheelContentType),
+          contentType:normalizeOpenBoxContentType(wheelContentType),
+          theme:selectedTheme,
+          wheelTheme:selectedTheme,
+          selectedTheme,
+          intro:true,
+          introMode:"wheel-camera",
+          name,
+          gameName:name,
+          fontFamily:wheelFont,
+          soundEnabled:wheelSoundEnabled,
+          sounds:{enabled:wheelSoundEnabled,mode:"files"},
+          entries,
+          coverMode:normalizeOpenBoxCoverMode(boxCoverMode),
+          payloadId:savedId,
+          updatedAt:Date.now()
+        }
+      : {
+          gameType:"wheel",
+          gameTemplate:"wheel",
+          payloadVersion:1,
+          type:wheelContentType,
+          contentType:wheelContentType,
+          theme:selectedTheme,
+          wheelTheme:selectedTheme,
+          selectedTheme,
+          name,
+          gameName:name,
+          fontFamily:wheelFont,
+          arrowColor:normalizeWheelHex(wheelArrowColor,"#111111"),
+          entries,
+          centerQuestionEnabled:Boolean(questionPanel?.classList.contains("enabled")),
+          centerQuestion:String(centerQuestionInput?.value || "").trim(),
+          soundEnabled:wheelSoundEnabled,
+          sounds:{enabled:wheelSoundEnabled,mode:"files"},
+          payloadId:savedId,
+          updatedAt:Date.now()
+        };
+
+    await window.SandooqSavedGames?.saveGame({
+      gameType:isOpenBox ? "open-box" : "wheel",
+      name,
+      payload
+    });
   });
 
   homeButton.addEventListener("click", ()=>{
@@ -11984,6 +12774,14 @@
   if (window.location.hash === "#wheelSetup") {
     openScreen("wheelSetupScreen");
   }
+
+  (async()=>{
+    const pending = await window.SandooqSavedGames?.consumePendingEdit(["wheel","open-box"]);
+    if (!pending?.payload) return;
+    if (loadDraft(pending.payload)) {
+      openScreen("wheelSetupScreen");
+    }
+  })();
 </script>
 
 <script>
@@ -12887,11 +13685,14 @@
     } catch (_) {}
   }
 
-  function loadQuizDraft(){
+  function loadQuizDraft(providedDraft = null){
     try {
-      const raw = sessionStorage.getItem(QUIZ_DRAFT_KEY);
-      if (!raw) return false;
-      const draft = JSON.parse(raw);
+      let draft = providedDraft;
+      if (!draft) {
+        const raw = sessionStorage.getItem(QUIZ_DRAFT_KEY);
+        if (!raw) return false;
+        draft = JSON.parse(raw);
+      }
       if (!draft || draft.gameTemplate !== "quiz") return false;
 
       quizGameNameInput.value = String(draft.gameName || "");
@@ -12991,12 +13792,13 @@
     return true;
   }
 
-  async function openQuizPage(){
-    if (!validateQuiz()) return;
-
-    const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2,9)}`;
-    const payload = {
+  function buildQuizPayload(payloadId = ""){
+    return {
       ...quizDraftPayload(),
+      gameType:"quiz",
+      gameTemplate:"quiz",
+      name:String(quizGameNameInput?.value || "").trim(),
+      gameName:String(quizGameNameInput?.value || "").trim(),
       payloadId,
       questions:quizQuestions.map((question)=>({
         coverText:quizDisplayMode === "cards" && quizCoverType === "text"
@@ -13020,9 +13822,16 @@
           isCorrect:index === question.correctChoiceIndex
         })),
         correctChoiceIndex:question.correctChoiceIndex
-      }))
+      })),
+      updatedAt:Date.now()
     };
+  }
 
+  async function openQuizPage(){
+    if (!validateQuiz()) return;
+
+    const payloadId = `${Date.now()}_${Math.random().toString(36).slice(2,9)}`;
+    const payload = buildQuizPayload(payloadId);
     try {
       Object.keys(sessionStorage).forEach((key)=>{
         if (key.startsWith(`${QUIZ_PAYLOAD_KEY}_`)) sessionStorage.removeItem(key);
@@ -13174,10 +13983,21 @@
 
   quizGameNameInput?.addEventListener("input",saveQuizDraft);
   document.getElementById("testQuizBtn")?.addEventListener("click",openQuizPage);
-  document.getElementById("saveQuizBtn")?.addEventListener("click",()=>{
+  document.getElementById("saveQuizBtn")?.addEventListener("click",async()=>{
     if (!validateQuiz()) return;
+    const name = String(quizGameNameInput?.value || "").trim();
+    if (!name) {
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
+      quizGameNameInput?.focus();
+      return;
+    }
     saveQuizDraft();
-    alert("تم حفظ لعبة الاختيارات.");
+    const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+    await window.SandooqSavedGames?.saveGame({
+      gameType:"quiz",
+      name,
+      payload:buildQuizPayload(savedId)
+    });
   });
 
   loadQuizDraft();
@@ -13190,6 +14010,14 @@
   if (window.location.hash === "#choicesSetup") {
     openQuizSetup();
   }
+
+  (async()=>{
+    const pending = await window.SandooqSavedGames?.consumePendingEdit("quiz");
+    if (!pending?.payload) return;
+    if (loadQuizDraft(pending.payload)) {
+      openQuizSetup();
+    }
+  })();
 })();
 </script>
 
@@ -13682,8 +14510,22 @@
   }
 
   async function loadMatchDraft(){
+    let pendingDraft = null;
     let indexedDraft = null;
     let sessionDraft = null;
+
+    try {
+      pendingDraft = (await window.SandooqSavedGames?.consumePendingEdit("match"))?.payload || null;
+    } catch (_) {}
+
+    if (isValidMatchDraft(pendingDraft)) {
+      const applied = applyMatchDraft(pendingDraft);
+      if (applied) {
+        queueMatchDraftIndexedSave(pendingDraft).catch(()=>false);
+        try { sessionStorage.setItem(MATCH_DRAFT_KEY,JSON.stringify(pendingDraft)); } catch (_) {}
+        return true;
+      }
+    }
 
     try {
       if (typeof readPayloadFromIndexedDB === "function") {
@@ -14095,19 +14937,16 @@
 
   async function saveMatchGame(){
     if (!validateMatchSetup()) return;
+    const name = String(matchGameNameInput?.value || "").trim();
+    if (!name) {
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
+      matchGameNameInput?.focus();
+      return;
+    }
     await saveMatchDraft({immediate:true});
     const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
     const payload = buildMatchPayload(savedId);
-    const storageKey = `saved:match:${savedId}`;
-    try {
-      if (typeof savePayloadToIndexedDB === "function") {
-        await savePayloadToIndexedDB(storageKey,payload);
-      }
-      updateMatchSavedRegistry(storageKey,payload);
-      alert("تم حفظ لعبة المطابقة.");
-    } catch (_) {
-      alert("تعذر حفظ اللعبة على هذا الجهاز. حاول مرة أخرى.");
-    }
+    await window.SandooqSavedGames?.saveGame({gameType:"match",name,payload});
   }
 
   function openMatchSetup(){
@@ -14440,11 +15279,14 @@
     } catch (_) {}
   }
 
-  function loadDraft(){
+  function loadDraft(providedDraft = null){
     try {
-      const raw = sessionStorage.getItem(ORDER_DRAFT_KEY);
-      if (!raw) return;
-      const draft = JSON.parse(raw);
+      let draft = providedDraft;
+      if (!draft) {
+        const raw = sessionStorage.getItem(ORDER_DRAFT_KEY);
+        if (!raw) return false;
+        draft = JSON.parse(raw);
+      }
       theme = normalizeTheme(draft.theme || draft.selectedTheme);
       contentMode = normalizeMode(draft.contentMode);
       contentLanguage = normalizeLanguage(draft.contentLanguage || draft.language);
@@ -14461,7 +15303,8 @@
         ? draft.questions.slice(0,ORDER_MAX_QUESTIONS).map(normalizeQuestion)
         : [];
       if (gameNameInput) gameNameInput.value = String(draft.name || draft.gameName || "");
-    } catch (_) {}
+      return true;
+    } catch (_) { return false; }
   }
 
   function updateThemeUI(){
@@ -14918,20 +15761,16 @@
 
   async function saveGame(){
     if (!validate()) return;
+    const name = String(gameNameInput?.value || "").trim();
+    if (!name) {
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
+      gameNameInput?.focus();
+      return;
+    }
     const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
     const payload = buildPayload(savedId);
-    const storageKey = `saved:order:${savedId}`;
     saveDraft();
-
-    try {
-      if (typeof window.savePayloadToIndexedDB === "function") {
-        await window.savePayloadToIndexedDB(storageKey,payload);
-      }
-      updateSavedRegistry(storageKey,payload);
-      alert("تم حفظ لعبة الترتيب.");
-    } catch (_) {
-      alert("تعذر حفظ اللعبة على هذا الجهاز. حاول مرة أخرى.");
-    }
+    await window.SandooqSavedGames?.saveGame({gameType:"order",name,payload});
   }
 
   function openSetup(){
@@ -15027,6 +15866,18 @@
   renderQuestions();
 
   if (window.location.hash === "#orderSetup") openSetup();
+
+  (async()=>{
+    const pending = await window.SandooqSavedGames?.consumePendingEdit("order");
+    if (!pending?.payload) return;
+    if (loadDraft(pending.payload)) {
+      updateThemeUI();
+      updateModeUI();
+      updateAdvancedUI();
+      renderQuestions();
+      openSetup();
+    }
+  })();
 })();
 </script>
 
