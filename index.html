@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-cairo-compact-home-help-v63 -->
+<!-- version: index-help-save-warning-v64 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10437,6 +10437,158 @@
       .help-arrow{transition:none !important}
     }
 
+
+    /* v64: رؤوس التعليمات الملونة وتنبيه الحفظ من المتصفح العادي. */
+    .help-item summary{
+      background:var(--orange) !important;
+      color:#fff !important;
+    }
+    .help-item summary .help-arrow{
+      color:#fff !important;
+    }
+    .help-item[open] summary,
+    .help-item.is-match summary{
+      background:var(--orange) !important;
+      color:#fff !important;
+    }
+    .help-item ul{
+      background:#fff !important;
+      color:#222 !important;
+    }
+    .help-item.is-match{
+      border-color:var(--ink) !important;
+      background:#fff !important;
+    }
+
+    .save-warning-overlay{
+      position:fixed;
+      inset:0;
+      z-index:2400;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(17,17,17,.48);
+      direction:rtl;
+    }
+    .save-warning-overlay.is-open{display:flex}
+    .save-warning-dialog{
+      width:min(92vw,520px);
+      border:4px solid var(--ink);
+      border-radius:26px;
+      background:#fff;
+      padding:22px 20px 20px;
+      text-align:center;
+      box-shadow:0 18px 46px rgba(0,0,0,.28);
+      font-family:var(--interface-font) !important;
+    }
+    .save-warning-icon{
+      width:62px;
+      height:62px;
+      margin:0 auto 12px;
+      border:3px solid var(--ink);
+      border-radius:50%;
+      background:var(--title-yellow);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:34px;
+      font-weight:800;
+      line-height:1;
+    }
+    .save-warning-title{
+      margin:0 0 10px;
+      font-size:clamp(23px,3vw,32px);
+      font-weight:800;
+      line-height:1.25;
+    }
+    .save-warning-text{
+      margin:0 auto;
+      max-width:430px;
+      color:#333;
+      font-size:clamp(15px,1.6vw,19px);
+      font-weight:600;
+      line-height:1.8;
+    }
+    .save-warning-text strong{color:#b3261e}
+    .save-warning-actions{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    }
+    .save-warning-btn{
+      min-height:50px;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      color:#111;
+      font-size:clamp(16px,1.7vw,20px);
+      font-weight:800;
+      cursor:pointer;
+    }
+    .save-warning-cancel{background:#f6f6f6}
+    .save-warning-confirm{background:var(--title-yellow)}
+    .save-warning-confirm:disabled{
+      opacity:.62;
+      cursor:wait;
+    }
+    .save-success-state[hidden],
+    .save-warning-state[hidden]{display:none !important}
+    .save-success-icon{
+      width:78px;
+      height:78px;
+      margin:0 auto 13px;
+      border:4px solid var(--ink);
+      border-radius:50%;
+      background:var(--green);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:48px;
+      font-weight:900;
+      line-height:1;
+      animation:saveSuccessPop .38s ease both;
+    }
+    .save-success-title{
+      margin:0 0 8px;
+      font-size:clamp(24px,3vw,34px);
+      font-weight:800;
+    }
+    .save-success-text{
+      margin:0;
+      color:#333;
+      font-size:clamp(15px,1.7vw,19px);
+      font-weight:700;
+      line-height:1.7;
+    }
+    .save-success-done{
+      width:100%;
+      min-height:50px;
+      margin-top:18px;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:var(--orange);
+      color:#fff;
+      font-size:clamp(16px,1.7vw,20px);
+      font-weight:800;
+      cursor:pointer;
+    }
+    @keyframes saveSuccessPop{
+      from{transform:scale(.72);opacity:0}
+      to{transform:scale(1);opacity:1}
+    }
+    @media(max-width:760px){
+      .save-warning-dialog{padding:19px 15px 16px;border-radius:22px}
+      .save-warning-icon{width:55px;height:55px;font-size:30px}
+      .save-warning-actions{gap:9px}
+      .save-warning-btn,.save-success-done{min-height:46px;border-radius:16px}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .save-success-icon{animation:none !important}
+    }
+
 </style>
 </head>
 <body>
@@ -11171,6 +11323,33 @@
 </div>
 <p class="help-empty" id="helpSearchEmpty" hidden>لم نجد شرحًا مطابقًا. جرّب كلمة أقصر مثل: حفظ، صورة، تشغيل أو استيراد.</p>
 <div class="help-list" id="helpList">
+  <details class="help-item" open data-keywords="تنبيه مهم متصفح عادي خاص خفي برايفت انكوجنيتو سفاري كروم حفظ العاب اختفاء">
+    <summary><span>تنبيه مهم: استخدم المتصفح العادي</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul>
+      <li><strong>لا تستخدم التصفح الخاص أو الخفي عند إنشاء الألعاب أو حفظها.</strong></li>
+      <li>في التصفح الخاص يعتبرك المتصفح مستخدمًا مؤقتًا، وقد تختفي الألعاب والمسودات بعد إغلاق الصفحة.</li>
+      <li><strong>Safari في الآيفون والآيباد:</strong> افتح زر علامات التبويب، ثم اختر مجموعة علامات التبويب العادية بدل مجموعة <strong>خاص</strong>.</li>
+      <li><strong>Chrome:</strong> افتح علامة تبويب عادية، ولا تستخدم علامة التبويب المتخفية ذات رمز القبعة والنظارة.</li>
+      <li><strong>الكمبيوتر:</strong> استخدم نافذة المتصفح العادية، وليس نافذة Private أو Incognito.</li>
+      <li>صدّر نسخة احتياطية بعد تجهيز ألعابك المهمة، ولا تمسح بيانات المتصفح قبل التصدير.</li>
+    </ul>
+  </details>
+  <details class="help-item" data-keywords="جهازين جهازان ترخيص مشاركة حساب حظر تلقائي دخول اجهزة">
+    <summary><span>تنبيه الأجهزة والترخيص</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul>
+      <li>الترخيص مخصص للمشتري ويُسمح باستخدام اللعبة على جهازين فقط.</li>
+      <li>لا تشارك رابط الدخول أو بيانات الوصول مع أشخاص آخرين.</li>
+      <li>تجاوز الحد المسموح للأجهزة قد يؤدي إلى حظر تلقائي للوصول إلى اللعبة.</li>
+    </ul>
+  </details>
+  <details class="help-item" data-keywords="دخول منصة الالعاب متجر رابط الموقع sandooq games تسجيل الدخول شراء">
+    <summary><span>الدخول الصحيح إلى منصة الألعاب</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul>
+      <li>ادخل إلى ألعابك من منصة الدخول الرسمية: <strong>https://sandooq-games.com</strong></li>
+      <li>يمكنك أيضًا الدخول من رابط الألعاب الموجود في المتجر بعد الشراء.</li>
+      <li>لا تعتمد على رابط داخلي محفوظ لصفحة لعبة منفردة؛ ابدأ دائمًا من منصة الدخول لضمان التحقق من الوصول.</li>
+    </ul>
+  </details>
   <details class="help-item" data-keywords="بداية البدء سريع اول مرة خطوات انشاء اختبار حفظ">
     <summary><span>البدء السريع</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
     <ul><li>اضغط <strong>إنشاء لعبة جديدة</strong> واختر نوع اللعبة.</li><li>اكتب اسم اللعبة وأدخل المحتوى المطلوب.</li><li>اضغط <strong>اختبار اللعبة</strong> لمراجعتها، ثم ارجع وعدّل عند الحاجة.</li><li>عندما تصبح جاهزة اضغط <strong>حفظ اللعبة</strong>.</li></ul>
@@ -11191,9 +11370,13 @@
     <summary><span>اختبار اللعبة والرجوع للتعديل</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
     <ul><li>زر <strong>اختبار اللعبة</strong> يعرض النشاط كما سيظهر للطلاب.</li><li>زر الرجوع يعيدك إلى الإعدادات مع بقاء المدخلات والصور.</li><li>الاختبار لا يضيف لعبة جديدة إلى الألعاب المحفوظة.</li></ul>
   </details>
-  <details class="help-item" data-keywords="حفظ اللعبة محفوظة جاهزة تحديث نسخة اسم">
+  <details class="help-item" data-keywords="حفظ اللعبة محفوظة جاهزة تحديث نسخة اسم تفريغ المدخلات">
     <summary><span>حفظ اللعبة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
-    <ul><li>بعد الانتهاء اضغط <strong>حفظ اللعبة</strong>.</li><li>تظهر اللعبة مباشرة في <strong>العابي المحفوظة</strong> وفي قائمة التشغيل الرئيسية.</li><li>عند تعديل لعبة محفوظة، يحفظ الزر التعديلات على اللعبة نفسها.</li></ul>
+    <ul><li>بعد الانتهاء اضغط <strong>حفظ اللعبة</strong>.</li><li>سيظهر تنبيه يذكّرك باستخدام المتصفح العادي، ثم اضغط <strong>حفظ اللعبة</strong> داخل التنبيه.</li><li>بعد نجاح الحفظ تظهر علامة تأكيد، وتنتقل اللعبة إلى <strong>العابي المحفوظة</strong>.</li><li>تُفرغ مدخلات صفحة الإنشاء بعد نجاح الحفظ حتى تبدأ لعبة جديدة بصفحة نظيفة.</li><li>عند تعديل لعبة محفوظة، يحفظ الزر التعديلات على اللعبة نفسها ثم تُفرغ صفحة الإعدادات.</li></ul>
+  </details>
+  <details class="help-item" data-keywords="اين اجد اللعبة حفظت محفوظة قائمة الرئيسية العابي المحفوظة">
+    <summary><span>أين أجد اللعبة التي حفظتها؟</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul><li>من الصفحة الرئيسية افتح قائمة الألعاب المحفوظة، واختر اسم اللعبة ثم اضغط <strong>إبدأ اللعبة</strong>.</li><li>يمكنك أيضًا فتح <strong>العابي المحفوظة</strong> لتشغيل اللعبة أو تعديلها أو حذفها.</li></ul>
   </details>
   <details class="help-item" data-keywords="تشغيل عرض ابدا اللعبة اختيار لعبة محفوظة الرئيسية">
     <summary><span>تشغيل لعبة محفوظة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
@@ -11205,15 +11388,15 @@
   </details>
   <details class="help-item" data-keywords="تصدير استيراد نسخة احتياطية json حفظ في الملفات سفاري نقل جهاز آخر مشاركة ملف">
     <summary><span>التصدير والاستيراد</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
-    <ul><li><strong>التصدير:</strong> ينشئ ملفًا واحدًا يحتوي جميع ألعابك وصورها وإعداداتها.</li><li>في الآيفون والآيباد اختر <strong>حفظ في الملفات</strong> من نافذة المشاركة.</li><li><strong>الاستيراد:</strong> اختر ملف النسخة الاحتياطية، وستُضاف ألعابه إلى الجهاز الحالي.</li><li>لا تعدّل محتوى ملف JSON يدويًا حتى لا يتعذر استيراده.</li></ul>
+    <ul><li><strong>التصدير:</strong> ينشئ ملفًا واحدًا يحتوي جميع ألعابك وصورها وإعداداتها.</li><li>في الآيفون والآيباد اختر <strong>حفظ في الملفات</strong> من نافذة المشاركة.</li><li><strong>الاستيراد:</strong> افتح صفحة التصدير والاستيراد، واضغط <strong>استيراد الألعاب</strong> ثم اختر ملف JSON الذي صدّرته سابقًا.</li><li>بعد الاستيراد ستظهر الألعاب في <strong>العابي المحفوظة</strong> وفي القائمة الرئيسية.</li><li>لا تعدّل محتوى ملف JSON يدويًا حتى لا يتعذر استيراده.</li></ul>
   </details>
   <details class="help-item" data-keywords="نقل جهاز جهاز آخر متصفح آيفون آيباد كمبيوتر نسخة احتياطية">
     <summary><span>نقل الألعاب إلى جهاز آخر</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
-    <ul><li>صدّر الألعاب من الجهاز الأول واحفظ الملف في تطبيق الملفات أو أرسله لنفسك.</li><li>افتح المنصة في الجهاز الثاني، ثم اختر <strong>التصدير والاستيراد</strong>.</li><li>اضغط <strong>استيراد الألعاب</strong> وحدد الملف الذي صدّرته.</li></ul>
+    <ul><li>صدّر الألعاب من الجهاز الأول واحفظ الملف في تطبيق الملفات أو أرسله لنفسك.</li><li>افتح المنصة في الجهاز الثاني من المتصفح العادي، ثم اختر <strong>التصدير والاستيراد</strong>.</li><li>اضغط <strong>استيراد الألعاب</strong> وحدد الملف الذي صدّرته.</li></ul>
   </details>
   <details class="help-item" data-keywords="حفظ محلي خصوصية داخل الجهاز متصفح حذف البيانات خاص خفي انترنت كلاودفلير">
     <summary><span>الحفظ داخل الجهاز والخصوصية</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
-    <ul><li>الألعاب محفوظة محليًا داخل الجهاز والمتصفح المستخدم.</li><li>لا تُرسل الأسئلة أو الصور إلى خادم خارجي.</li><li>قد تختفي الألعاب عند مسح بيانات المتصفح أو استخدام التصفح الخاص.</li><li>صدّر نسخة احتياطية دوريًا لحماية ألعابك.</li></ul>
+    <ul><li>الألعاب محفوظة محليًا داخل الجهاز والمتصفح المستخدم.</li><li>لا تُرسل الأسئلة أو الصور إلى خادم خارجي.</li><li>فتح المنصة من متصفح آخر لا يعرض ألعاب المتصفح الأول إلا بعد تصديرها واستيرادها.</li><li>قد تختفي الألعاب عند مسح بيانات المتصفح أو استخدام التصفح الخاص.</li><li>صدّر نسخة احتياطية دوريًا لحماية ألعابك.</li></ul>
   </details>
   <details class="help-item" data-keywords="شاشة بروجكتر عرض تلفزيون كمبيوتر ايباد ملء الشاشة افقي">
     <summary><span>العرض على الشاشة أو البروجكتر</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
@@ -11223,13 +11406,44 @@
     <summary><span>الثيمات والخطوط والأصوات</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
     <ul><li>الثيم يغيّر خلفية اللعبة ومظهر البداية والنهاية.</li><li>نوع الخط المختار يطبّق على محتوى اللعبة عند التشغيل فقط.</li><li>يمكن تشغيل أصوات اللعبة أو تعطيلها من الإعدادات المتقدمة.</li></ul>
   </details>
-  <details class="help-item" data-keywords="مشكلة لا تظهر الصور لا توجد لعبة تنزيل سفاري استيراد خطا حل تحديث">
-    <summary><span>حل المشكلات الشائعة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
-    <ul><li><strong>اللعبة لا تظهر في القائمة:</strong> تأكد أنك ضغطت حفظ اللعبة، ثم حدّث الصفحة مرة واحدة.</li><li><strong>الصورة لا تظهر:</strong> أعد اختيارها وتأكد أن الملف صورة صالحة.</li><li><strong>ملف التصدير غير موجود في الآيفون:</strong> أعد التصدير واختر حفظ في الملفات.</li><li><strong>الاستيراد لا يعمل:</strong> استخدم ملف JSON صادرًا من المنصة دون تعديله.</li></ul>
+  <details class="help-item" data-keywords="اسئلة شائعة سؤال لا تظهر الصور لا توجد لعبة تنزيل سفاري استيراد خطا تحديث زر ابدا تعديل نقل">
+    <summary><span>الأسئلة الشائعة</span><span class="help-arrow" aria-hidden="true">▼</span></summary>
+    <ul>
+      <li><strong>حفظت اللعبة ولم أجدها:</strong> تأكد أنك تستخدم المتصفح العادي نفسه، ثم افتح <strong>العابي المحفوظة</strong>.</li>
+      <li><strong>زر إبدأ اللعبة غير فعال:</strong> اختر لعبة محفوظة أولًا من القائمة.</li>
+      <li><strong>كيف أعدّل لعبة محفوظة؟</strong> افتح <strong>العابي المحفوظة</strong> واضغط <strong>تعديل</strong>.</li>
+      <li><strong>الصورة لا تظهر:</strong> أعد اختيارها وتأكد أن الملف صورة صالحة بصيغة PNG أو JPG أو WEBP.</li>
+      <li><strong>ملف التصدير غير موجود في الآيفون:</strong> أعد التصدير واختر <strong>حفظ في الملفات</strong>.</li>
+      <li><strong>كيف أستورد النسخة؟</strong> افتح <strong>التصدير والاستيراد</strong>، واضغط <strong>استيراد الألعاب</strong> ثم اختر ملف JSON.</li>
+      <li><strong>دخلت من جهاز أو متصفح آخر ولم أجد ألعابي:</strong> صدّرها من الجهاز الأول ثم استوردها في الجهاز الجديد.</li>
+      <li><strong>اختفت الألعاب بعد إغلاق الصفحة:</strong> غالبًا تم استخدام التصفح الخاص أو تم مسح بيانات المتصفح.</li>
+    </ul>
   </details>
 </div>
 </section>
 </main>
+<div class="save-warning-overlay" id="saveWarningOverlay" aria-hidden="true">
+  <section class="save-warning-dialog" role="dialog" aria-modal="true" aria-labelledby="saveWarningTitle">
+    <div class="save-warning-state" id="saveWarningState">
+      <div class="save-warning-icon" aria-hidden="true">!</div>
+      <h3 class="save-warning-title" id="saveWarningTitle">تنبيه قبل حفظ اللعبة</h3>
+      <p class="save-warning-text">
+        تأكد أنك تستخدم <strong>المتصفح العادي</strong> وليس التصفح الخاص أو الخفي.
+        التصفح الخاص قد يحذف اللعبة بعد إغلاق الصفحة ولا يمكن استعادتها.
+      </p>
+      <div class="save-warning-actions">
+        <button class="save-warning-btn save-warning-cancel" id="saveWarningCancelBtn" type="button">إلغاء</button>
+        <button class="save-warning-btn save-warning-confirm" id="saveWarningConfirmBtn" type="button">حفظ اللعبة</button>
+      </div>
+    </div>
+    <div class="save-success-state" id="saveSuccessState" hidden>
+      <div class="save-success-icon" aria-hidden="true">✓</div>
+      <h3 class="save-success-title">تم حفظ اللعبة</h3>
+      <p class="save-success-text">تم حفظ اللعبة في الالعاب المحفوظة بنجاح.</p>
+      <button class="save-success-done" id="saveSuccessDoneBtn" type="button">العودة للرئيسية</button>
+    </div>
+  </section>
+</div>
 <div class="bottom-bar">
 <button class="home-btn" id="homeButton" type="button">الرئيسية</button>
 </div>
@@ -11475,7 +11689,6 @@
       writeRegistry(records);
       sessionStorage.setItem(EDITING_KEY,JSON.stringify({storageKey,gameType}));
       refreshUi();
-      alert(target ? "تم تحديث اللعبة المحفوظة." : "تم حفظ اللعبة في ألعابي المحفوظة.");
       return true;
     } catch (error) {
       console.error("Saved game error",error);
@@ -13324,11 +13537,19 @@
           updatedAt:Date.now()
         };
 
-    await window.SandooqSavedGames?.saveGame({
+    const wheelSaveTask = ()=>window.SandooqSavedGames?.saveGame({
       gameType:isOpenBox ? "open-box" : "wheel",
       name,
       payload
     });
+    if (window.SandooqSaveFlow?.run) {
+      await window.SandooqSaveFlow.run({
+        gameType:isOpenBox ? "open-box" : "wheel",
+        saveTask:wheelSaveTask
+      });
+    } else {
+      await wheelSaveTask();
+    }
   });
 
   homeButton.addEventListener("click", ()=>{
@@ -14578,11 +14799,16 @@
     }
     saveQuizDraft();
     const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
-    await window.SandooqSavedGames?.saveGame({
+    const quizSaveTask = ()=>window.SandooqSavedGames?.saveGame({
       gameType:"quiz",
       name,
       payload:buildQuizPayload(savedId)
     });
+    if (window.SandooqSaveFlow?.run) {
+      await window.SandooqSaveFlow.run({gameType:"quiz",saveTask:quizSaveTask});
+    } else {
+      await quizSaveTask();
+    }
   });
 
   loadQuizDraft();
@@ -15531,7 +15757,12 @@
     await saveMatchDraft({immediate:true});
     const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
     const payload = buildMatchPayload(savedId);
-    await window.SandooqSavedGames?.saveGame({gameType:"match",name,payload});
+    const matchSaveTask = ()=>window.SandooqSavedGames?.saveGame({gameType:"match",name,payload});
+    if (window.SandooqSaveFlow?.run) {
+      await window.SandooqSaveFlow.run({gameType:"match",saveTask:matchSaveTask});
+    } else {
+      await matchSaveTask();
+    }
   }
 
   function openMatchSetup(){
@@ -16355,7 +16586,12 @@
     const savedId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
     const payload = buildPayload(savedId);
     saveDraft();
-    await window.SandooqSavedGames?.saveGame({gameType:"order",name,payload});
+    const orderSaveTask = ()=>window.SandooqSavedGames?.saveGame({gameType:"order",name,payload});
+    if (window.SandooqSaveFlow?.run) {
+      await window.SandooqSaveFlow.run({gameType:"order",saveTask:orderSaveTask});
+    } else {
+      await orderSaveTask();
+    }
   }
 
   function openSetup(){
@@ -16573,6 +16809,162 @@
     initSavedGameSelectState();
     initHelpSearch();
   }
+})();
+</script>
+
+
+<script>
+(() => {
+  "use strict";
+
+  const overlay = document.getElementById("saveWarningOverlay");
+  const warningState = document.getElementById("saveWarningState");
+  const successState = document.getElementById("saveSuccessState");
+  const cancelButton = document.getElementById("saveWarningCancelBtn");
+  const confirmButton = document.getElementById("saveWarningConfirmBtn");
+  const doneButton = document.getElementById("saveSuccessDoneBtn");
+
+  const DRAFT_KEYS = {
+    wheel:["sandooq_wheel_draft_v1"],
+    "open-box":["sandooq_wheel_draft_v1","sandooq_open_box_draft_v1"],
+    quiz:["sandooq_quiz_draft_v2"],
+    match:["sandooq_match_draft_v1"],
+    order:["sandooq_order_draft_v1"]
+  };
+
+  const INDEXED_DRAFT_KEYS = {
+    match:["draft:match"]
+  };
+
+  let confirmResolver = null;
+  let busy = false;
+
+  function setOpen(open){
+    if (!overlay) return;
+    overlay.classList.toggle("is-open",open);
+    overlay.setAttribute("aria-hidden",open ? "false" : "true");
+    document.body.style.overflow = open ? "hidden" : "";
+  }
+
+  function showWarning(){
+    if (!overlay || !warningState || !successState) return Promise.resolve(true);
+    warningState.hidden = false;
+    successState.hidden = true;
+    if (confirmButton) {
+      confirmButton.disabled = false;
+      confirmButton.textContent = "حفظ اللعبة";
+    }
+    busy = false;
+    setOpen(true);
+    return new Promise((resolve)=>{ confirmResolver = resolve; });
+  }
+
+  function resolveWarning(choice){
+    if (!confirmResolver) return;
+    const resolve = confirmResolver;
+    confirmResolver = null;
+    resolve(Boolean(choice));
+  }
+
+  cancelButton?.addEventListener("click",()=>{
+    if (busy) return;
+    setOpen(false);
+    resolveWarning(false);
+  });
+
+  confirmButton?.addEventListener("click",()=>{
+    if (busy) return;
+    busy = true;
+    confirmButton.disabled = true;
+    confirmButton.textContent = "جارٍ الحفظ...";
+    setOpen(false);
+    resolveWarning(true);
+  });
+
+  function deleteIndexedKeys(keys){
+    if (!keys?.length || !("indexedDB" in window)) return Promise.resolve();
+    return new Promise((resolve)=>{
+      const request = indexedDB.open("sandooq_edu_games_v1",1);
+      request.onerror = ()=>resolve();
+      request.onupgradeneeded = ()=>{
+        const db = request.result;
+        if (!db.objectStoreNames.contains("payloads")) {
+          db.createObjectStore("payloads",{keyPath:"key"});
+        }
+      };
+      request.onsuccess = ()=>{
+        const db = request.result;
+        try {
+          const tx = db.transaction("payloads","readwrite");
+          const store = tx.objectStore("payloads");
+          keys.forEach((key)=>store.delete(key));
+          tx.oncomplete = ()=>{ db.close(); resolve(); };
+          tx.onerror = ()=>{ db.close(); resolve(); };
+          tx.onabort = ()=>{ db.close(); resolve(); };
+        } catch (_) {
+          db.close();
+          resolve();
+        }
+      };
+    });
+  }
+
+  async function clearDraft(gameType){
+    const keys = DRAFT_KEYS[gameType] || [];
+    keys.forEach((key)=>{
+      try { sessionStorage.removeItem(key); } catch (_) {}
+      try { localStorage.removeItem(key); } catch (_) {}
+    });
+    try { sessionStorage.removeItem("sandooq_edu_editing_game_v1"); } catch (_) {}
+    try { sessionStorage.removeItem("sandooq_edu_pending_edit_v1"); } catch (_) {}
+    await deleteIndexedKeys(INDEXED_DRAFT_KEYS[gameType] || []);
+  }
+
+  function showSuccess(){
+    if (!overlay || !warningState || !successState) return;
+    warningState.hidden = true;
+    successState.hidden = false;
+    busy = false;
+    setOpen(true);
+    try { doneButton?.focus({preventScroll:true}); } catch (_) { doneButton?.focus(); }
+  }
+
+  function goHomeClean(){
+    const target = new URL(window.location.href);
+    target.search = "";
+    target.hash = "";
+    window.location.replace(target.pathname);
+  }
+
+  doneButton?.addEventListener("click",()=>{
+    setOpen(false);
+    goHomeClean();
+  });
+
+  async function run({gameType,saveTask}){
+    if (typeof saveTask !== "function") return false;
+    const approved = await showWarning();
+    if (!approved) return false;
+
+    let saved = false;
+    try {
+      saved = Boolean(await saveTask());
+    } catch (error) {
+      console.error("Save flow error",error);
+      saved = false;
+    }
+
+    if (!saved) {
+      busy = false;
+      return false;
+    }
+
+    await clearDraft(gameType);
+    showSuccess();
+    return true;
+  }
+
+  window.SandooqSaveFlow = {run};
 })();
 </script>
 
