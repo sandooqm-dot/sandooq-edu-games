@@ -67,7 +67,9 @@ function shouldProtect(request, pathname) {
     return false;
   }
 
-  return lower === "/" || lower.endsWith(".html");
+  // Cloudflare Pages redirects files such as /wheel.html to /wheel.
+  // Protect every remaining non-static route, including extensionless game pages.
+  return true;
 }
 
 async function verifyEducationAccess(request, currentUrl) {
@@ -390,3 +392,5 @@ function decodeURIComponentSafe(value) {
     return value;
   }
 }
+
+// VERSION: education-middleware-v9-extensionless-routes
