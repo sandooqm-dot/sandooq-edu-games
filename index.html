@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-arabic-export-filename-v61 -->
+<!-- version: index-export-save-flow-v62 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10111,32 +10111,77 @@
       font-weight:900;
       color:#222;
     }
-    .sg-export-name-input{
+    .sg-export-name-composer{
       width:100%;
-      min-height:50px;
+      min-height:52px;
+      display:flex;
+      align-items:stretch;
+      direction:rtl;
       border:3px solid var(--ink);
       border-radius:15px;
       background:#fff;
+      overflow:hidden;
+    }
+    .sg-export-name-composer:focus-within{
+      box-shadow:0 0 0 4px rgba(239,213,83,.42);
+    }
+    .sg-export-name-prefix{
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px 12px;
+      border-left:2px solid var(--ink);
+      background:#f8f1ce;
       color:#111;
-      padding:8px 14px;
-      text-align:center;
+      white-space:nowrap;
+      font-size:clamp(14px,3.2vw,18px);
+      font-weight:900;
+    }
+    .sg-export-name-input{
+      min-width:0;
+      flex:1 1 auto;
+      min-height:48px;
+      border:0;
+      border-radius:0;
+      background:#fff;
+      color:#111;
+      padding:8px 12px;
+      text-align:right;
       direction:rtl;
       font-size:clamp(16px,3.7vw,20px);
       font-weight:800;
       outline:none;
+      box-shadow:none;
     }
-    .sg-export-name-input:focus{
-      box-shadow:0 0 0 4px rgba(239,213,83,.42);
-    }
-    .sg-export-name-hint{
+    .sg-export-name-error{
+      display:none;
       margin:0;
-      color:#666;
+      color:#c62828;
       text-align:center;
       font-size:13px;
-      font-weight:750;
-      line-height:1.6;
+      font-weight:900;
+      line-height:1.5;
     }
-    .sg-export-confirm{background:var(--title-yellow)}
+    .sg-export-name-error.is-visible{display:block}
+    .sg-export-confirm{background:var(--title-yellow);color:#111 !important}
+    #sgExportNameModal .sg-choice-cancel{color:#111 !important}
+    #sgExportNameModal button:disabled,
+    #sgExportNameModal input:disabled{
+      opacity:.58;
+      cursor:wait;
+    }
+
+    @media(max-width:430px){
+      .sg-export-name-prefix{
+        padding-inline:8px;
+        font-size:13px;
+      }
+      .sg-export-name-input{
+        padding-inline:8px;
+        font-size:15px;
+      }
+    }
 
     @media(max-width:760px){
       .sg-saved-card{grid-template-columns:1fr;padding:13px;border-radius:19px}
@@ -10922,7 +10967,7 @@
 
   let saving = false;
   let duplicateResolver = null;
-  let exportNameResolver = null;
+  let exportModalState = null;
 
   function normalizeType(value){
     const type = String(value || "").trim().toLowerCase();
@@ -11321,6 +11366,8 @@
     return records;
   }
 
+  const EXPORT_FILE_PREFIX = "العاب تعليمية - ";
+
   function exportDateStamp(date = new Date()){
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2,"0");
@@ -11328,20 +11375,136 @@
     return `${year}-${month}-${day}`;
   }
 
-  function defaultExportBaseName(){
-    return `نسخة ألعاب صندوق التعليم - ${exportDateStamp()}`;
+  function defaultExportSuffix(){
+    return exportDateStamp();
   }
 
-  function sanitizeExportBaseName(value){
+  function sanitizeExportSuffix(value){
     let name = String(value || "")
       .replace(/\.json$/i,"")
+      .replace(/^\s*العاب\s+تعليمية\s*-?\s*/u,"")
       .replace(/[\u0000-\u001f\u007f]/g," ")
       .replace(/[\\/:*?"<>|]/g,"-")
       .replace(/\s+/g," ")
       .replace(/[. ]+$/g,"")
       .trim();
-    if (name.length > 120) name = name.slice(0,120).replace(/[. ]+$/g,"").trim();
-    return name || defaultExportBaseName();
+    if (name.length > 90) name = name.slice(0,90).replace(/[. ]+$/g,"").trim();
+    return name;
+  }
+
+  function isValidExportSuffix(value){
+    const name = sanitizeExportSuffix(value);
+    return Boolean(name && /[A-Za-z0-9\u0600-\u06FF]/.test(name));
+  }
+
+  function buildExportFileName(value){
+    const suffix = sanitizeExportSuffix(value);
+    return `${EXPORT_FILE_PREFIX}${suffix || defaultExportSuffix()}.json`;
+  }
+
+  function isAppleMobileDevice(){
+    const ua = navigator.userAgent || "";
+    return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  }
+
+  function directDownloadBlob(blob,fileName){
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    link.rel = "noopener";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    return Promise.resolve({mode:"download"});
+  }
+
+  function deliverExportBlob(blob,fileName){
+    if (isAppleMobileDevice() && typeof File === "function" && navigator.share && navigator.canShare) {
+      const file = new File([blob],fileName,{type:"application/json;charset=utf-8",lastModified:Date.now()});
+      let canShareFiles = false;
+      try {
+        canShareFiles = navigator.canShare({files:[file]});
+      } catch (_) {
+        canShareFiles = false;
+      }
+      if (canShareFiles) {
+        try {
+          const shareResult = navigator.share({
+            files:[file],
+            title:fileName
+          });
+          return Promise.resolve(shareResult).then(()=>({mode:"share"}));
+        } catch (_) {
+          return directDownloadBlob(blob,fileName);
+        }
+      }
+    }
+    return directDownloadBlob(blob,fileName);
+  }
+
+  function setExportModalBusy(modal,busy){
+    modal.querySelectorAll("button,input").forEach((element)=>{
+      element.disabled = Boolean(busy);
+    });
+  }
+
+  function setExportModalError(modal,message = ""){
+    const errorBox = modal.querySelector("#sgExportNameError");
+    if (!errorBox) return;
+    errorBox.textContent = message;
+    errorBox.classList.toggle("is-visible",Boolean(message));
+  }
+
+  function closeExportNameModal(modal){
+    exportModalState = null;
+    setExportModalBusy(modal,false);
+    setExportModalError(modal,"");
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden","true");
+  }
+
+  function confirmExportFromModal(modal){
+    const state = exportModalState;
+    if (!state || state.busy) return;
+    const input = modal.querySelector("#sgExportNameInput");
+    const suffix = sanitizeExportSuffix(input?.value);
+    if (!isValidExportSuffix(suffix)) {
+      setExportModalError(modal,"اكتب اسمًا واضحًا للملف ثم حاول مرة أخرى.");
+      input?.focus({preventScroll:true});
+      input?.select();
+      return;
+    }
+
+    const fileName = buildExportFileName(suffix);
+    state.busy = true;
+    setExportModalBusy(modal,true);
+    setExportModalError(modal,"");
+
+    /* يجب استدعاء الحفظ من ضغطة المستخدم نفسها حتى لا يمنعه Safari. */
+    deliverExportBlob(state.blob,fileName).then((result)=>{
+      const status = state.status;
+      const gamesCount = state.gamesCount;
+      closeExportNameModal(modal);
+      if (status) {
+        status.textContent = result.mode === "share"
+          ? `اكتملت عملية حفظ أو مشاركة الملف «${fileName}» (${gamesCount} لعبة).`
+          : `بدأ تنزيل الملف «${fileName}» (${gamesCount} لعبة).`;
+      }
+    }).catch((error)=>{
+      console.error("Export delivery error",error);
+      state.busy = false;
+      setExportModalBusy(modal,false);
+      const cancelled = error?.name === "AbortError";
+      setExportModalError(
+        modal,
+        cancelled
+          ? "تم إلغاء الحفظ. اضغط تصدير للمحاولة مرة أخرى."
+          : "تعذر فتح الحفظ. غيّر الاسم أو حاول مرة أخرى."
+      );
+    });
   }
 
   function ensureExportNameModal(){
@@ -11357,8 +11520,11 @@
         <p class="sg-choice-text">اكتب اسمًا واضحًا ليسهل العثور على الملف عند نقله إلى جهاز آخر.</p>
         <label class="sg-export-name-field">
           <span class="sg-export-name-label">اسم الملف</span>
-          <input class="sg-export-name-input" id="sgExportNameInput" type="text" maxlength="120" autocomplete="off" enterkeyhint="done" />
-          <span class="sg-export-name-hint">ستُضاف صيغة .json تلقائيًا.</span>
+          <span class="sg-export-name-composer">
+            <span class="sg-export-name-prefix" aria-hidden="true">العاب تعليمية -</span>
+            <input class="sg-export-name-input" id="sgExportNameInput" type="text" maxlength="90" autocomplete="off" enterkeyhint="done" placeholder="اكتب اسم النسخة" />
+          </span>
+          <span class="sg-export-name-error" id="sgExportNameError" role="alert"></span>
         </label>
         <div class="sg-choice-actions">
           <button class="sg-export-confirm" type="button" data-export-name-action="confirm">تصدير</button>
@@ -11367,22 +11533,12 @@
       </section>`;
     document.body.appendChild(modal);
 
-    const finish = (value)=>{
-      if (!exportNameResolver) return;
-      const resolve = exportNameResolver;
-      exportNameResolver = null;
-      modal.classList.remove("is-open");
-      modal.setAttribute("aria-hidden","true");
-      resolve(value);
-    };
-
     modal.addEventListener("click",(event)=>{
       const action = event.target.closest("[data-export-name-action]")?.dataset.exportNameAction;
       if (action === "confirm") {
-        const input = modal.querySelector("#sgExportNameInput");
-        finish(sanitizeExportBaseName(input?.value));
-      } else if (action === "cancel" || event.target === modal) {
-        finish(null);
+        confirmExportFromModal(modal);
+      } else if ((action === "cancel" || event.target === modal) && !exportModalState?.busy) {
+        closeExportNameModal(modal);
       }
     });
 
@@ -11390,29 +11546,32 @@
       if (!modal.classList.contains("is-open")) return;
       if (event.key === "Enter") {
         event.preventDefault();
-        const input = modal.querySelector("#sgExportNameInput");
-        finish(sanitizeExportBaseName(input?.value));
-      } else if (event.key === "Escape") {
+        confirmExportFromModal(modal);
+      } else if (event.key === "Escape" && !exportModalState?.busy) {
         event.preventDefault();
-        finish(null);
+        closeExportNameModal(modal);
       }
+    });
+
+    modal.querySelector("#sgExportNameInput")?.addEventListener("input",()=>{
+      setExportModalError(modal,"");
     });
     return modal;
   }
 
-  function chooseExportFileName(){
+  function openExportNameModal(blob,gamesCount,status){
     const modal = ensureExportNameModal();
     const input = modal.querySelector("#sgExportNameInput");
-    if (input) input.value = defaultExportBaseName();
+    exportModalState = {blob,gamesCount,status,busy:false};
+    setExportModalBusy(modal,false);
+    setExportModalError(modal,"");
+    if (input) input.value = defaultExportSuffix();
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden","false");
-    return new Promise((resolve)=>{
-      exportNameResolver = resolve;
-      requestAnimationFrame(()=>{
-        if (!input) return;
-        input.focus({preventScroll:true});
-        input.select();
-      });
+    requestAnimationFrame(()=>{
+      if (!input) return;
+      input.focus({preventScroll:true});
+      input.select();
     });
   }
 
@@ -11423,8 +11582,6 @@
       alert("لا توجد ألعاب محفوظة لتصديرها.");
       return;
     }
-    const exportBaseName = await chooseExportFileName();
-    if (exportBaseName === null) return;
     if (status) status.textContent = "جارٍ تجهيز النسخة الاحتياطية...";
     try {
       const games = [];
@@ -11432,6 +11589,7 @@
         const payload = await readPayload(record.storageKey);
         if (payload) games.push({record,payload});
       }
+      if (!games.length) throw new Error("No exportable games");
       const backup = {
         app:"sandooq-edu-games",
         version:1,
@@ -11439,14 +11597,8 @@
         games
       };
       const blob = new Blob([JSON.stringify(backup)],{type:"application/json;charset=utf-8"});
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `${sanitizeExportBaseName(exportBaseName)}.json`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setTimeout(()=>URL.revokeObjectURL(link.href),1000);
-      if (status) status.textContent = `تم تصدير ${games.length} لعبة.`;
+      if (status) status.textContent = "اكتب اسم الملف ثم اضغط تصدير.";
+      openExportNameModal(blob,games.length,status);
     } catch (error) {
       console.error("Export error",error);
       if (status) status.textContent = "تعذر تصدير الألعاب.";
