@@ -174,6 +174,7 @@
 
     .unit img.body{
       position:absolute;
+      z-index:3;
       left:0;
       bottom:0;
       width:100%;
@@ -191,10 +192,10 @@
     .coal{width:calc(var(--train-h) * 195 / 311)}
     .loco{width:calc(var(--train-h) * 485 / 311)}
 
-    /* العجلات مرسومة CSS وليست صورًا، حتى تدور بشكل دائري صحيح ومكانها مضبوط فوق عجلات الصورة. */
+    /* train-5: العجلات الثابتة أزيلت من صور القطار، وهذه العجلات المتحركة تركب فوق مواقعها الأصلية بدقة. */
     .wheel{
       position:absolute;
-      z-index:8;
+      z-index:2;
       aspect-ratio:1/1;
       border-radius:50%;
       pointer-events:none;
@@ -210,21 +211,20 @@
 
     @keyframes wheelSpin{to{transform:rotate(360deg)}}
 
-    /* train-4: ضبط دقيق لمراكز العجلات فوق عجلات الصور الأصلية.
-       القياسات مبنية كنسب من عرض كل عربة حتى تبقى ثابتة مع تغيير الحجم. */
-    .car .wheel{width:12.4%;bottom:5.35%}
-    .car .w1{left:9.95%}.car .w2{left:27.65%}.car .w3{left:62.25%}.car .w4{left:79.20%}
+    /* train-5: المواضع محسوبة من الصورة الأصلية بعد إزالة العجلات الثابتة. */
+    .car .wheel{width:13.85%;bottom:4.50%}
+    .car .w1{left:9.74%}.car .w2{left:27.44%}.car .w3{left:60.77%}.car .w4{left:78.72%}
 
-    .passenger .wheel{width:12.0%;bottom:5.55%}
-    .passenger .w1{left:14.10%}.passenger .w2{left:29.30%}.passenger .w3{left:60.75%}.passenger .w4{left:76.50%}
+    .passenger .wheel{width:13.92%;bottom:4.50%}
+    .passenger .w1{left:11.08%}.passenger .w2{left:27.32%}.passenger .w3{left:59.54%}.passenger .w4{left:77.32%}
 
-    .coal .wheel{width:24.0%;bottom:5.20%}
-    .coal .w1{left:27.50%}.coal .w2{left:59.30%}
+    .coal .wheel{width:27.70%;bottom:4.50%}
+    .coal .w1{left:29.74%}.coal .w2{left:60.51%}
 
     .loco .wheel{animation-duration:.86s}
-    .loco .big{width:23.7%;left:8.15%;bottom:9.45%;animation-duration:1s}
-    .loco .mid{width:17.0%;left:42.90%;bottom:7.35%;animation-duration:.86s}
-    .loco .small{width:17.1%;left:66.90%;bottom:7.35%;animation-duration:.82s}
+    .loco .big{width:23.10%;left:7.84%;bottom:6.43%;animation-duration:1s}
+    .loco .mid{width:18.15%;left:40.82%;bottom:9.32%;animation-duration:.86s}
+    .loco .small{width:18.15%;left:64.12%;bottom:9.32%;animation-duration:.82s}
 
     @media (orientation:landscape){
       :root{--train-h:clamp(110px, 29dvh, 190px)}
