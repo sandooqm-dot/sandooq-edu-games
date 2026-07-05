@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 18</title>
+  <title>قطار الإجابات - إصدار 19</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -176,10 +176,10 @@
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
       href:"train-track.webp",
-      x:-44,
-      y:585,
-      width:1368,
-      height:102,
+      x:-70,
+      y:600,
+      width:1420,
+      height:78,
       preserveAspectRatio:"none"
     }, track);
     // دعم إضافي لبعض نسخ Safari عند قراءة صور SVG image.
@@ -191,13 +191,13 @@
     const train = el("g", {id:"locomotiveStatic"});
 
     // القاطرة الآن ثابتة بدون حركة. العجلات مضافة كصور مستقلة استعدادًا للتحريك لاحقًا.
-    const bodyX = 724;
-    const bodyY = 333;
-    const bodyW = 500;
-    const bodyH = 288;
+    const bodyX = 738;
+    const bodyY = 365;
+    const bodyW = 430;
+    const bodyH = 248;
 
-    const wheelLayer = el("g", {id:"wheelLayer"}, train);
     const bodyLayer = el("g", {id:"engineBodyLayer"}, train);
+    const wheelLayer = el("g", {id:"wheelLayer"}, train);
 
     function addWheel(x, y, size, cls){
       const wheel = el("image", {
@@ -213,11 +213,11 @@
       return wheel;
     }
 
-    // عجلة كبيرة تحت مؤخرة/كابينة السائق + ثلاث عجلات أصغر تحت جسم القطار، بنفس منطق الصورة المرجعية.
-    addWheel(bodyX + 66, 503, 114, "train-wheel train-wheel-large");
-    addWheel(bodyX + 250, 564, 54, "train-wheel train-wheel-small");
-    addWheel(bodyX + 327, 564, 54, "train-wheel train-wheel-small");
-    addWheel(bodyX + 404, 564, 54, "train-wheel train-wheel-small");
+    // عجلة كبيرة ظاهرة خارج جسم القاطرة + ثلاث عجلات صغيرة أوضح تحت جسم القطار، بدون حركة حاليًا.
+    addWheel(bodyX + 54, 506, 104, "train-wheel train-wheel-large");
+    addWheel(bodyX + 222, 560, 64, "train-wheel train-wheel-small");
+    addWheel(bodyX + 300, 560, 64, "train-wheel train-wheel-small");
+    addWheel(bodyX + 378, 560, 64, "train-wheel train-wheel-small");
 
     const engine = el("image", {
       href:"train-engine.webp",
