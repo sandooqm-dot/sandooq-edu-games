@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 17</title>
+  <title>قطار الإجابات - إصدار 18</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -186,10 +186,56 @@
     trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp");
   }
 
+
+  function locomotive(){
+    const train = el("g", {id:"locomotiveStatic"});
+
+    // القاطرة الآن ثابتة بدون حركة. العجلات مضافة كصور مستقلة استعدادًا للتحريك لاحقًا.
+    const bodyX = 724;
+    const bodyY = 333;
+    const bodyW = 500;
+    const bodyH = 288;
+
+    const wheelLayer = el("g", {id:"wheelLayer"}, train);
+    const bodyLayer = el("g", {id:"engineBodyLayer"}, train);
+
+    function addWheel(x, y, size, cls){
+      const wheel = el("image", {
+        href:"train-wheel.webp",
+        x:x,
+        y:y,
+        width:size,
+        height:size,
+        preserveAspectRatio:"xMidYMid meet",
+        class:cls || "train-wheel"
+      }, wheelLayer);
+      wheel.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wheel.webp");
+      return wheel;
+    }
+
+    // عجلة كبيرة تحت مؤخرة/كابينة السائق + ثلاث عجلات أصغر تحت جسم القطار، بنفس منطق الصورة المرجعية.
+    addWheel(bodyX + 66, 503, 114, "train-wheel train-wheel-large");
+    addWheel(bodyX + 250, 564, 54, "train-wheel train-wheel-small");
+    addWheel(bodyX + 327, 564, 54, "train-wheel train-wheel-small");
+    addWheel(bodyX + 404, 564, 54, "train-wheel train-wheel-small");
+
+    const engine = el("image", {
+      href:"train-engine.webp",
+      x:bodyX,
+      y:bodyY,
+      width:bodyW,
+      height:bodyH,
+      preserveAspectRatio:"xMidYMid meet",
+      id:"engineBody"
+    }, bodyLayer);
+    engine.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine.webp");
+  }
+
   function build(){
     clear();
     defs();
     background();
+    locomotive();
   }
 
   build();
