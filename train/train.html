@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 16</title>
+  <title>قطار الإجابات - إصدار 17</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -174,14 +174,16 @@
     makeBush(bg, 760, 504, 1);
 
     const track = el("g", {id:"track"}, bg);
-    el("image", {
-      href:"train-track-16.webp",
+    const trackImage = el("image", {
+      href:"train-track.webp",
       x:-44,
       y:585,
       width:1368,
       height:102,
       preserveAspectRatio:"none"
     }, track);
+    // دعم إضافي لبعض نسخ Safari عند قراءة صور SVG image.
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp");
   }
 
   function build(){
