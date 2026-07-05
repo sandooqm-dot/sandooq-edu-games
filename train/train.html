@@ -3,31 +3,26 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 15</title>
+  <title>قطار الإجابات - إصدار 16</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
       --safe-bottom:env(safe-area-inset-bottom,0px);
-      --sky:#cbd6ee;
+      --sky-top:#bfcae6;
+      --sky-mid:#dce3f2;
       --sand:#d7a464;
       --sand2:#bd7f42;
-      --ink:#17131b;
-      --gold:#f0c85b;
-      --gold2:#fff2a3;
-      --rail:#422819;
-      --red:#bd302a;
-      --blue:#2f529b;
-      --wood:#7d481f;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
     html,body{
       margin:0;
       width:100%;
       min-height:100%;
       background:#d9ecff;
-      color:#fff;
       font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+      -webkit-text-size-adjust:100%;
     }
 
     body{
@@ -36,9 +31,14 @@
       overflow-y:auto;
       overscroll-behavior-y:none;
       -webkit-overflow-scrolling:touch;
-      -webkit-text-size-adjust:100%;
     }
-    body::after{content:"";display:block;height:120px;pointer-events:none}
+
+    body::after{
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
+    }
 
     .train-page{
       position:sticky;
@@ -51,39 +51,8 @@
       user-select:none;
       touch-action:none;
       background:
-        radial-gradient(circle at 19% 14%,rgba(255,255,255,.34) 0 8%,transparent 20%),
-        radial-gradient(circle at 76% 12%,rgba(255,255,255,.22) 0 7%,transparent 18%),
-        linear-gradient(180deg,#bfcae6 0%,#dce3f2 45%,#ead5ac 46%,var(--sand) 72%,var(--sand2) 100%);
+        linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 45%,#ead5ac 46%,var(--sand) 72%,var(--sand2) 100%);
     }
-
-    .hud{
-      position:absolute;
-      z-index:80;
-      top:calc(9px + var(--safe-top));
-      left:clamp(8px,2.4vw,22px);
-      right:clamp(8px,2.4vw,22px);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      pointer-events:none;
-    }
-
-    .pill{
-      background:rgba(72,79,128,.86);
-      border:1px solid rgba(255,255,255,.35);
-      border-radius:16px;
-      box-shadow:0 7px 18px rgba(31,35,83,.15), inset 0 1px 0 rgba(255,255,255,.2);
-      padding:9px 15px;
-      color:#fff;
-      font-size:clamp(14px,2.45vw,26px);
-      font-weight:900;
-      line-height:1;
-      white-space:nowrap;
-      backdrop-filter:blur(6px);
-    }
-    .score{direction:ltr;min-width:70px;text-align:center}
-    .timer{direction:ltr;min-width:78px;text-align:center}
 
     .stage{
       position:absolute;
@@ -92,135 +61,14 @@
       width:100%;
       height:100%;
       display:block;
-      overflow:visible;
-      touch-action:none;
-      pointer-events:auto;
-    }
-
-    .hit{cursor:pointer;pointer-events:auto}
-
-    .label-text{
-      font-weight:950;
-      font-size:42px;
-      fill:#ffdc64;
-      paint-order:stroke;
-      stroke:#5f2117;
-      stroke-width:6px;
-      stroke-linejoin:round;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      direction:rtl;
-      unicode-bidi:plaintext;
-      font-family:"Noto Naskh Arabic","Traditional Arabic",Tahoma,Arial,sans-serif;
-    }
-
-    .small-label{
-      font-weight:900;
-      font-size:23px;
-      fill:#fff8d2;
-      paint-order:stroke;
-      stroke:#421d12;
-      stroke-width:4px;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      direction:rtl;
-      unicode-bidi:plaintext;
-    }
-
-    .balloon-text{
-      font-weight:950;
-      font-size:30px;
-      fill:#20223a;
-      paint-order:stroke;
-      stroke:#fff;
-      stroke-width:3px;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      direction:rtl;
-      unicode-bidi:plaintext;
-    }
-
-    .crate-text{
-      font-weight:950;
-      font-size:20px;
-      fill:#fff2b4;
-      paint-order:stroke;
-      stroke:#442415;
-      stroke-width:3px;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      direction:rtl;
-      unicode-bidi:plaintext;
-    }
-
-    .pop-text{
-      font-weight:1000;
-      font-size:42px;
-      fill:#c7272e;
-      paint-order:stroke;
-      stroke:#fff2a8;
-      stroke-width:8px;
-      text-anchor:middle;
-      dominant-baseline:middle;
-      letter-spacing:1px;
-    }
-
-    .score-pop{
-      font-weight:1000;
-      font-size:42px;
-      fill:#f5d85d;
-      paint-order:stroke;
-      stroke:#7a2818;
-      stroke-width:5px;
-      text-anchor:middle;
-      dominant-baseline:middle;
-    }
-
-    .wheel-spin{
-      animation:wheelSpin 1.3s linear infinite;
-      transform-box:fill-box;
-      transform-origin:center;
-      will-change:transform;
-    }
-    @keyframes wheelSpin{to{transform:rotate(360deg)}}
-
-    .train-soft-bob{
-      animation:trainSoftBob 2.2s ease-in-out infinite;
-      transform-box:fill-box;
-      transform-origin:center;
-      will-change:transform;
-    }
-    @keyframes trainSoftBob{
-      0%,100%{transform:translateY(0)}
-      50%{transform:translateY(1.2px)}
-    }
-
-    .sleepers-move{
-      animation:sleepersMove 6.5s linear infinite;
-      will-change:transform;
-    }
-    @keyframes sleepersMove{to{transform:translateX(-116px)}}
-
-    @media (orientation:portrait){
-      .pill{font-size:16px;padding:8px 12px}
-      .score{min-width:62px}
-      .timer{min-width:70px}
-    }
-
-    @media (prefers-reduced-motion:reduce){
-      .wheel-spin,.train-soft-bob,.sleepers-move{animation:none}
+      overflow:hidden;
+      pointer-events:none;
     }
   </style>
 </head>
 <body>
   <main class="train-page" id="page">
-    <div class="hud">
-      <div class="pill score" id="score">0 ✓</div>
-      <div class="pill title">قطار الإجابات</div>
-      <div class="pill timer" id="timer">0:29</div>
-    </div>
-
-    <svg class="stage" id="stage" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" role="img" aria-label="لعبة قطار الإجابات"></svg>
+    <svg class="stage" id="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="خلفية وسكة قطار الإجابات"></svg>
   </main>
 
 <script>
@@ -228,51 +76,12 @@
   "use strict";
 
   const svg = document.getElementById("stage");
-  const scoreEl = document.getElementById("score");
-  const timerEl = document.getElementById("timer");
   const NS = "http://www.w3.org/2000/svg";
-  const W = 1280;
-  const H = 720;
-
-  const state = {
-    score: 0,
-    timeLeft: 29,
-    balloon: null,
-    crate: null,
-    locked: false,
-    last: performance.now()
-  };
-
-  const wagon = {
-    x: 320,
-    y: 446,
-    w: 410,
-    h: 132,
-    floor: 544,
-    leftWall: 354,
-    rightWall: 696,
-    label: "العربة ١",
-    spots: []
-  };
-
-  const questions = [
-    "ما عاصمة المملكة؟",
-    "رتّب الكلمات",
-    "ما أجمل الدرس!",
-    "أكمل الجملة",
-    "أين الكتاب؟"
-  ];
-  let questionIndex = 0;
 
   function el(name, attrs = {}, parent = svg){
     const node = document.createElementNS(NS, name);
     Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
     parent.appendChild(node);
-    return node;
-  }
-
-  function setAttrs(node, attrs){
-    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
     return node;
   }
 
@@ -283,144 +92,38 @@
   function defs(){
     const d = el("defs");
 
-    const lin = (id, stops, attrs = {}) => {
-      const gradient = el("linearGradient", Object.assign({id, x1:"0", y1:"0", x2:"0", y2:"1"}, attrs), d);
-      stops.forEach(stop => el("stop", stop, gradient));
-      return gradient;
-    };
+    const scene = el("linearGradient", {id:"sceneGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#bfcae6"}, scene);
+    el("stop", {offset:"45%", "stop-color":"#dce3f2"}, scene);
+    el("stop", {offset:"46%", "stop-color":"#ead5ac"}, scene);
+    el("stop", {offset:"72%", "stop-color":"#d7a464"}, scene);
+    el("stop", {offset:"100%", "stop-color":"#bd7f42"}, scene);
 
-    const rad = (id, stops, attrs = {}) => {
-      const gradient = el("radialGradient", Object.assign({id, cx:"35%", cy:"25%", r:"72%"}, attrs), d);
-      stops.forEach(stop => el("stop", stop, gradient));
-      return gradient;
-    };
+    const sand = el("linearGradient", {id:"sandGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#e7c188"}, sand);
+    el("stop", {offset:"100%", "stop-color":"#b47538"}, sand);
 
-    lin("sandGrad", [
-      {offset:"0%", "stop-color":"#e7c188"},
-      {offset:"100%", "stop-color":"#b47538"}
-    ]);
-
-    lin("wagonBody", [
-      {offset:"0%", "stop-color":"#f05b4c"},
-      {offset:"55%", "stop-color":"#bd302a"},
-      {offset:"100%", "stop-color":"#6f1716"}
-    ]);
-
-    lin("locoRed", [
-      {offset:"0%", "stop-color":"#f6674e"},
-      {offset:"52%", "stop-color":"#be2f29"},
-      {offset:"100%", "stop-color":"#681616"}
-    ]);
-
-    lin("blueBody", [
-      {offset:"0%", "stop-color":"#5c75bd"},
-      {offset:"55%", "stop-color":"#334b92"},
-      {offset:"100%", "stop-color":"#1d285c"}
-    ]);
-
-    lin("goldH", [
-      {offset:"0%", "stop-color":"#fff3a5"},
-      {offset:"25%", "stop-color":"#e6bb4f"},
-      {offset:"70%", "stop-color":"#9e6922"},
-      {offset:"100%", "stop-color":"#fff0a0"}
-    ], {x1:"0", y1:"0", x2:"1", y2:"0"});
-
-    lin("darkMetal", [
-      {offset:"0%", "stop-color":"#3f342b"},
-      {offset:"100%", "stop-color":"#120f0c"}
-    ]);
-
-    lin("woodBox", [
-      {offset:"0%", "stop-color":"#a56533"},
-      {offset:"50%", "stop-color":"#75421f"},
-      {offset:"100%", "stop-color":"#4c2915"}
-    ]);
-
-    lin("woodLight", [
-      {offset:"0%", "stop-color":"#dca462"},
-      {offset:"100%", "stop-color":"#7b441e"}
-    ], {x1:"0", y1:"0", x2:"1", y2:"1"});
-
-    lin("glass", [
-      {offset:"0%", "stop-color":"#caefff"},
-      {offset:"100%", "stop-color":"#397a8c"}
-    ]);
-
-    rad("wheelGold", [
-      {offset:"0%", "stop-color":"#fff2b3"},
-      {offset:"43%", "stop-color":"#d8a24e"},
-      {offset:"72%", "stop-color":"#805018"},
-      {offset:"100%", "stop-color":"#eac76b"}
-    ]);
-
-    rad("balloonGrad", [
-      {offset:"0%", "stop-color":"#f1f5ff"},
-      {offset:"58%", "stop-color":"#c2c9da"},
-      {offset:"100%", "stop-color":"#79849a"}
-    ]);
-
-    const shadow = el("filter", {id:"softShadow", x:"-20%", y:"-20%", width:"140%", height:"140%"}, d);
-    el("feDropShadow", {dx:"0", dy:"6", stdDeviation:"4", "flood-color":"#000", "flood-opacity":".22"}, shadow);
-
-    const glow = el("filter", {id:"softGlow", x:"-40%", y:"-40%", width:"180%", height:"180%"}, d);
-    el("feDropShadow", {dx:"0", dy:"0", stdDeviation:"5", "flood-color":"#fff3a0", "flood-opacity":".65"}, glow);
-
-    const clip = el("clipPath", {id:"wagonClip"}, d);
-    el("rect", {
-      x:wagon.x + 34,
-      y:wagon.y + 30,
-      width:wagon.w - 68,
-      height:wagon.h - 42,
-      rx:12,
-      ry:12
-    }, clip);
-  }
-
-  function background(){
-    const bg = el("g", {id:"background"});
-
-    el("path", {
-      d:"M0 314 C58 240 116 306 176 198 C230 101 282 210 335 116 C392 230 448 146 517 270 C582 150 642 212 716 100 C785 230 840 166 916 304 C990 190 1047 260 1120 150 C1190 250 1240 210 1280 270 L1280 426 L0 426 Z",
-      fill:"#7d86aa",
-      opacity:".31"
-    }, bg);
-
-    el("path", {
-      d:"M0 360 C100 302 170 343 260 238 C352 150 403 302 492 228 C590 310 674 252 752 330 C834 242 926 304 1005 216 C1085 346 1160 260 1280 332 L1280 426 L0 426 Z",
-      fill:"#afa0ad",
-      opacity:".44"
-    }, bg);
-
-    makeCloud(bg, 110, 128, .72);
-    makeCloud(bg, 394, 98, .62);
-    makeCloud(bg, 778, 115, .68);
-    makeCloud(bg, 1070, 142, .58);
-
-    el("rect", {x:0, y:402, width:1280, height:205, fill:"url(#sandGrad)", opacity:".58"}, bg);
-    makeCactus(bg, 250, 444, .95);
-    makeCactus(bg, 890, 436, 1.05);
-    makeBush(bg, 760, 504, 1);
-
-    const track = el("g", {id:"track"}, bg);
-    el("image", {
-      href:"train-track.webp",
-      x:0,
-      y:604,
-      width:1280,
-      height:92,
-      preserveAspectRatio:"none"
-    }, track);
+    const softShadow = el("filter", {id:"softShadow", x:"-20%", y:"-20%", width:"140%", height:"140%"}, d);
+    el("feDropShadow", {dx:"0", dy:"5", stdDeviation:"4", "flood-color":"#000", "flood-opacity":".16"}, softShadow);
   }
 
   function makeCloud(parent, x, y, scale){
     const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, opacity:".78"}, parent);
     [[0,0,20],[22,-6,30],[52,-2,24],[76,6,18],[24,16,25],[58,15,22]].forEach(([cx, cy, r]) => {
-      el("circle", {cx, cy, r, fill:"#eef3fa", stroke:"#b2bdcd", "stroke-width":2, opacity:".85"}, g);
+      el("circle", {
+        cx,
+        cy,
+        r,
+        fill:"#eef3fa",
+        stroke:"#b2bdcd",
+        "stroke-width":2,
+        opacity:".85"
+      }, g);
     });
   }
 
   function makeCactus(parent, x, y, scale){
-    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`}, parent);
+    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, filter:"url(#softShadow)"}, parent);
     el("rect", {x:-10, y:-70, width:20, height:80, rx:10, fill:"#4c8b53", stroke:"#39703f", "stroke-width":3}, g);
     el("path", {d:"M-9 -44 C-45 -52 -43 -6 -20 -7", fill:"none", stroke:"#4c8b53", "stroke-width":16, "stroke-linecap":"round"}, g);
     el("path", {d:"M8 -54 C45 -64 47 -20 20 -19", fill:"none", stroke:"#4c8b53", "stroke-width":15, "stroke-linecap":"round"}, g);
@@ -428,412 +131,66 @@
   }
 
   function makeBush(parent, x, y, scale){
-    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`}, parent);
+    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, filter:"url(#softShadow)"}, parent);
     [[-22,0,20],[0,-8,28],[26,0,19],[10,9,16]].forEach(([cx,cy,r]) => {
       el("circle", {cx, cy, r, fill:"#8faa52", opacity:".88"}, g);
     });
   }
 
-  function ornateWheel(parent, cx, cy, r){
-    const outer = el("g", {transform:`translate(${cx} ${cy})`, filter:"url(#softShadow)"}, parent);
-    const g = el("g", {class:"wheel-spin"}, outer);
-    el("circle", {cx:0, cy:0, r, fill:"url(#wheelGold)", stroke:"#4f2c13", "stroke-width":Math.max(2, r * .08)}, g);
-    for(let i = 0; i < 12; i++){
-      const a = Math.PI * 2 * i / 12;
-      el("line", {
-        x1:Math.cos(a) * r * .24,
-        y1:Math.sin(a) * r * .24,
-        x2:Math.cos(a) * r * .78,
-        y2:Math.sin(a) * r * .78,
-        stroke:"#714616",
-        "stroke-width":Math.max(2, r * .08),
-        "stroke-linecap":"round"
-      }, g);
-      el("line", {
-        x1:Math.cos(a + .03) * r * .29,
-        y1:Math.sin(a + .03) * r * .29,
-        x2:Math.cos(a + .03) * r * .66,
-        y2:Math.sin(a + .03) * r * .66,
-        stroke:"#ffe28a",
-        "stroke-width":Math.max(1, r * .035),
-        "stroke-linecap":"round",
-        opacity:".75"
-      }, g);
-    }
-    el("circle", {cx:0, cy:0, r:r * .28, fill:"#b72825", stroke:"#4f2c13", "stroke-width":Math.max(2, r * .06)}, g);
-    el("circle", {cx:0, cy:0, r:r * .1, fill:"#18130f"}, g);
-  }
+  function background(){
+    const bg = el("g", {id:"background"});
 
-  function drawTrain(){
-    const train = el("g", {id:"train", class:"train-soft-bob", filter:"url(#softShadow)"});
-    const parked = el("g", {id:"parkedCrates"}, train);
+    el("rect", {x:0, y:0, width:1280, height:720, fill:"url(#sceneGrad)"}, bg);
 
-    drawAnswerWagon(train);
-    el("rect", {x:748, y:558, width:32, height:10, rx:4, fill:"#1d1713", stroke:"url(#goldH)", "stroke-width":2}, train);
-    drawPassenger(train, 778, 456);
-    el("rect", {x:1026, y:558, width:32, height:10, rx:4, fill:"#1d1713", stroke:"url(#goldH)", "stroke-width":2}, train);
-    drawLocomotive(train, 1042, 421);
-
-    return {train, parked};
-  }
-
-  function drawAnswerWagon(parent){
-    const z = wagon;
-    ornateWheel(parent, z.x + 72, 590, 20);
-    ornateWheel(parent, z.x + 132, 590, 20);
-    ornateWheel(parent, z.x + 280, 590, 20);
-    ornateWheel(parent, z.x + 340, 590, 20);
-
-    el("rect", {x:z.x + 10, y:570, width:z.w + 12, height:18, rx:5, fill:"url(#goldH)", stroke:"#684016", "stroke-width":2}, parent);
     el("path", {
-      d:`M${z.x} ${z.y + 10} L${z.x + z.w} ${z.y + 10} L${z.x + z.w - 28} ${z.y + z.h} L${z.x + 28} ${z.y + z.h} Z`,
-      fill:"url(#wagonBody)",
-      stroke:"url(#goldH)",
-      "stroke-width":6,
-      "stroke-linejoin":"round"
-    }, parent);
+      d:"M-120 314 C-55 240 40 306 116 198 C185 101 246 210 318 116 C392 230 448 146 517 270 C582 150 642 212 716 100 C785 230 840 166 916 304 C990 190 1047 260 1120 150 C1190 250 1295 210 1400 270 L1400 426 L-120 426 Z",
+      fill:"#7d86aa",
+      opacity:".31"
+    }, bg);
 
-    // interior compartment, clearly open and wide.
+    el("path", {
+      d:"M-120 360 C0 302 110 343 230 238 C352 150 403 302 492 228 C590 310 674 252 752 330 C834 242 926 304 1005 216 C1085 346 1185 260 1400 332 L1400 426 L-120 426 Z",
+      fill:"#afa0ad",
+      opacity:".44"
+    }, bg);
+
+    makeCloud(bg, 105, 126, .72);
+    makeCloud(bg, 390, 95, .62);
+    makeCloud(bg, 780, 112, .68);
+    makeCloud(bg, 1075, 142, .58);
+    makeCloud(bg, 1240, 96, .5);
+
     el("rect", {
-      x:z.x + 34,
-      y:z.y + 32,
-      width:z.w - 68,
-      height:z.h - 48,
-      rx:12,
-      fill:"rgba(28,12,10,.17)",
-      stroke:"rgba(255,255,255,.25)",
-      "stroke-width":3
-    }, parent);
+      x:-20,
+      y:402,
+      width:1320,
+      height:245,
+      fill:"url(#sandGrad)",
+      opacity:".58"
+    }, bg);
 
-    // side walls so the crate appears trapped inside the wagon.
-    el("rect", {x:z.x + 20, y:z.y + 28, width:20, height:z.h - 38, rx:7, fill:"rgba(41,16,14,.36)"}, parent);
-    el("rect", {x:z.x + z.w - 40, y:z.y + 28, width:20, height:z.h - 38, rx:7, fill:"rgba(41,16,14,.36)"}, parent);
+    makeCactus(bg, 250, 444, .95);
+    makeCactus(bg, 890, 436, 1.05);
+    makeBush(bg, 760, 504, 1);
 
-    el("line", {x1:z.x + 18, y1:z.y + 23, x2:z.x + z.w - 18, y2:z.y + 23, stroke:"url(#goldH)", "stroke-width":10, "stroke-linecap":"round"}, parent);
-    el("line", {x1:z.x + 34, y1:z.y + z.h - 16, x2:z.x + z.w - 34, y2:z.y + z.h - 16, stroke:"url(#goldH)", "stroke-width":8, "stroke-linecap":"round"}, parent);
-
-    el("text", {x:z.x + z.w / 2, y:z.y + z.h - 42, class:"label-text"}, parent).textContent = z.label;
+    const track = el("g", {id:"track"}, bg);
+    el("image", {
+      href:"train-track-16.webp",
+      x:-44,
+      y:585,
+      width:1368,
+      height:102,
+      preserveAspectRatio:"none"
+    }, track);
   }
-
-  function drawPassenger(parent, x, y){
-    ornateWheel(parent, x + 44, 590, 17);
-    ornateWheel(parent, x + 92, 590, 17);
-    ornateWheel(parent, x + 186, 590, 17);
-    ornateWheel(parent, x + 234, 590, 17);
-
-    el("rect", {x:x + 6, y:570, width:266, height:16, rx:5, fill:"url(#goldH)", stroke:"#684016", "stroke-width":2}, parent);
-    el("rect", {x:x + 18, y:y, width:240, height:94, rx:9, fill:"url(#blueBody)", stroke:"url(#goldH)", "stroke-width":5}, parent);
-    el("line", {x1:x + 20, y1:y - 7, x2:x + 258, y2:y - 7, stroke:"url(#goldH)", "stroke-width":13, "stroke-linecap":"round"}, parent);
-
-    for(let i = 0; i < 5; i++){
-      const wx = x + 40 + i * 40;
-      el("rect", {x:wx, y:y + 18, width:29, height:40, rx:7, fill:"url(#glass)", stroke:"#7c511f", "stroke-width":3}, parent);
-    }
-
-    el("path", {d:`M${x + 72} ${y + 75} C${x + 112} ${y + 95} ${x + 158} ${y + 95} ${x + 200} ${y + 75}`, fill:"none", stroke:"url(#goldH)", "stroke-width":5, "stroke-linecap":"round"}, parent);
-  }
-
-  function drawLocomotive(parent, x, y){
-    ornateWheel(parent, x + 72, 575, 42);
-    ornateWheel(parent, x + 177, 586, 26);
-    ornateWheel(parent, x + 250, 586, 26);
-
-    el("path", {d:`M${x + 14} 555 L${x + 318} 555 L${x + 318} 576 L${x + 14} 576 Z`, fill:"url(#goldH)", stroke:"#6d4214", "stroke-width":3}, parent);
-    el("rect", {x:x + 22, y:y + 64, width:94, height:124, rx:7, fill:"url(#locoRed)", stroke:"url(#goldH)", "stroke-width":6}, parent);
-    el("rect", {x:x + 36, y:y + 14, width:66, height:55, rx:5, fill:"#b52225", stroke:"url(#goldH)", "stroke-width":5}, parent);
-    el("text", {x:x + 69, y:y + 43, fill:"#ffdf6b", "font-size":41, "font-weight":950, "text-anchor":"middle", "dominant-baseline":"middle"}, parent).textContent = "1";
-    el("path", {d:`M${x + 16} ${y + 12} L${x + 115} ${y + 12} L${x + 129} ${y + 27} L${x + 5} ${y + 27} Z`, fill:"url(#darkMetal)", stroke:"url(#goldH)", "stroke-width":3}, parent);
-    el("path", {d:`M${x + 108} ${y + 94} L${x + 296} ${y + 94} Q${x + 312} ${y + 94} ${x + 312} ${y + 112} L${x + 312} ${y + 160} Q${x + 312} ${y + 178} ${x + 296} ${y + 178} L${x + 108} ${y + 178} Z`, fill:"url(#locoRed)", stroke:"url(#goldH)", "stroke-width":5}, parent);
-    el("line", {x1:x + 122, y1:y + 129, x2:x + 292, y2:y + 129, stroke:"url(#goldH)", "stroke-width":5, "stroke-linecap":"round"}, parent);
-    el("path", {d:`M${x + 292} ${y + 82} C${x + 325} ${y + 92} ${x + 325} ${y + 186} ${x + 292} ${y + 192} C${x + 270} ${y + 166} ${x + 270} ${y + 108} ${x + 292} ${y + 82}Z`, fill:"url(#darkMetal)", stroke:"#2a1b14", "stroke-width":3}, parent);
-    el("path", {d:`M${x + 160} ${y + 78} C${x + 166} ${y + 55} ${x + 214} ${y + 55} ${x + 220} ${y + 78} Z`, fill:"url(#darkMetal)", stroke:"url(#goldH)", "stroke-width":4}, parent);
-    el("rect", {x:x + 246, y:y + 26, width:34, height:70, rx:5, fill:"url(#darkMetal)", stroke:"url(#goldH)", "stroke-width":4}, parent);
-    el("ellipse", {cx:x + 263, cy:y + 25, rx:24, ry:9, fill:"url(#darkMetal)", stroke:"url(#goldH)", "stroke-width":4}, parent);
-    el("path", {d:`M${x + 308} ${y + 174} L${x + 366} 575 L${x + 315} 575 Z`, fill:"url(#goldH)", stroke:"#6d4214", "stroke-width":3, "stroke-linejoin":"round"}, parent);
-  }
-
-  function createBalloon(text){
-    const x = 180 + Math.random() * 720;
-    const y = 138 + Math.random() * 50;
-    const g = el("g", {class:"hit", transform:`translate(${x} ${y})`, filter:"url(#softShadow)"}, layers.balloonLayer);
-
-    el("ellipse", {cx:0, cy:0, rx:108, ry:44, fill:"url(#balloonGrad)", stroke:"#657084", "stroke-width":3}, g);
-    el("ellipse", {cx:-32, cy:-15, rx:63, ry:17, fill:"#fff", opacity:".44"}, g);
-    el("path", {d:"M -108 -1 C -138 -20 -140 20 -108 1 M108 0 L143 -26 L134 0 L143 26 Z", fill:"#8b96ad", stroke:"#657084", "stroke-width":2.5}, g);
-    el("rect", {x:-38, y:41, width:76, height:20, rx:4, fill:"#6f6871", stroke:"#49434c", "stroke-width":2.5}, g);
-    el("line", {x1:-58, y1:26, x2:-26, y2:42, stroke:"#77717a", "stroke-width":3}, g);
-    el("line", {x1:58, y1:26, x2:26, y2:42, stroke:"#77717a", "stroke-width":3}, g);
-    el("text", {x:0, y:1, class:"balloon-text"}, g).textContent = text;
-
-    const item = {
-      node:g,
-      text,
-      x,
-      baseY:y,
-      y,
-      vx:72,
-      phase:Math.random() * Math.PI * 2,
-      popped:false
-    };
-
-    g.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      popBalloon(item);
-    }, {passive:false});
-
-    state.balloon = item;
-  }
-
-  function createCrate(parent, text, scale = 1){
-    const g = el("g", {class:"crate", transform:`scale(${scale})`}, parent);
-    el("rect", {x:-48, y:-38, width:96, height:76, rx:6, fill:"url(#woodBox)", stroke:"#3b2111", "stroke-width":4}, g);
-    el("rect", {x:-40, y:-30, width:80, height:60, rx:3, fill:"#8f5328", stroke:"#5c3117", "stroke-width":2}, g);
-
-    [-15, 8].forEach(yy => {
-      el("line", {x1:-40, y1:yy, x2:40, y2:yy, stroke:"#4f2b16", "stroke-width":3, opacity:".72"}, g);
-    });
-
-    [-18, 18].forEach(xx => {
-      el("line", {x1:xx, y1:-30, x2:xx, y2:30, stroke:"#4f2b16", "stroke-width":3, opacity:".72"}, g);
-    });
-
-    el("path", {d:"M -41 -30 L41 30 M41 -30 L-41 30", stroke:"url(#woodLight)", "stroke-width":5, opacity:".62"}, g);
-    el("text", {x:0, y:2, class:"crate-text"}, g).textContent = text;
-    return g;
-  }
-
-  function popBalloon(item){
-    if(state.locked || state.crate || item.popped) return;
-
-    item.popped = true;
-    state.locked = true;
-    const x = item.x;
-    const y = item.y;
-
-    popEffect(x, y);
-
-    if(item.node) item.node.remove();
-
-    const node = createCrate(layers.physicsLayer, item.text, 1);
-    state.crate = {
-      node,
-      text:item.text,
-      x,
-      y:y + 58,
-      vx:52,
-      vy:100,
-      rot:-8,
-      vr:250,
-      bounceCount:0,
-      settled:false
-    };
-
-    setAttrs(node, {transform:`translate(${state.crate.x} ${state.crate.y}) rotate(${state.crate.rot})`});
-  }
-
-  function popEffect(x, y){
-    const g = el("g", {transform:`translate(${x} ${y})`, filter:"url(#softGlow)"}, layers.fxLayer);
-    el("text", {x:0, y:-8, class:"pop-text"}, g).textContent = "POP";
-
-    for(let i = 0; i < 14; i++){
-      const a = Math.PI * 2 * i / 14;
-      el("line", {
-        x1:Math.cos(a) * 32,
-        y1:Math.sin(a) * 22,
-        x2:Math.cos(a) * 62,
-        y2:Math.sin(a) * 44,
-        stroke:i % 2 ? "#fff3a0" : "#d5322d",
-        "stroke-width":5,
-        "stroke-linecap":"round"
-      }, g);
-    }
-
-    smoke(x - 28, y + 8, .72);
-    smoke(x + 34, y - 12, .58);
-    animateLife(g, .62, life => `translate(${x} ${y - life * 30}) scale(${1 + life * .35})`);
-  }
-
-  function smoke(x, y, scale = 1){
-    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, opacity:".9"}, layers.fxLayer);
-
-    [[-18,0,15],[-4,-8,20],[15,-2,17],[30,5,13],[5,11,15]].forEach(([cx,cy,r]) => {
-      el("circle", {cx, cy, r, fill:"#b7c3c9", stroke:"#899aa4", "stroke-width":2, opacity:".86"}, g);
-    });
-
-    animateLife(g, 1.15, life => `translate(${x} ${y - life * 32}) scale(${scale * (1 + life * .34)})`, .9);
-  }
-
-  function scoreBurst(x, y, text){
-    const g = el("g", {transform:`translate(${x} ${y})`}, layers.fxLayer);
-    el("text", {x:0, y:0, class:"score-pop"}, g).textContent = text;
-    animateLife(g, 1.05, life => `translate(${x} ${y - life * 60}) scale(${1 + life * .12})`);
-  }
-
-  function animateLife(node, duration, transformFn, startOpacity = 1){
-    const start = performance.now();
-
-    function step(now){
-      const life = Math.min(1, (now - start) / (duration * 1000));
-      node.setAttribute("opacity", String(Math.max(0, startOpacity * (1 - life))));
-      node.setAttribute("transform", transformFn(life));
-      if(life >= 1) node.remove();
-      else requestAnimationFrame(step);
-    }
-
-    requestAnimationFrame(step);
-  }
-
-  function updateBalloon(dt, now){
-    const item = state.balloon;
-    if(!item || item.popped || !item.node) return;
-
-    item.x += item.vx * dt;
-    item.y = item.baseY + Math.sin(now / 520 + item.phase) * 16;
-
-    if(item.x > 1120){
-      item.x = 150;
-      item.baseY = 132 + Math.random() * 62;
-      item.phase = Math.random() * Math.PI * 2;
-    }
-
-    setAttrs(item.node, {transform:`translate(${item.x} ${item.y})`});
-  }
-
-  function updateCrate(dt){
-    const c = state.crate;
-    if(!c || c.settled) return;
-
-    c.vy += 2200 * dt;
-    c.x += c.vx * dt;
-    c.y += c.vy * dt;
-    c.rot += c.vr * dt;
-
-    // side walls if the crate enters the wagon.
-    const insideX = c.x > wagon.leftWall && c.x < wagon.rightWall;
-    const aroundWagonY = c.y > wagon.y + 18 && c.y < wagon.floor + 70;
-
-    if(aroundWagonY){
-      if(c.x < wagon.leftWall){
-        c.x = wagon.leftWall;
-        c.vx = Math.abs(c.vx) * .42;
-        c.vr *= -.42;
-      }
-      if(c.x > wagon.rightWall){
-        c.x = wagon.rightWall;
-        c.vx = -Math.abs(c.vx) * .42;
-        c.vr *= -.42;
-      }
-    }
-
-    if(insideX && c.y + 38 >= wagon.floor){
-      c.y = wagon.floor - 38;
-
-      if(Math.abs(c.vy) > 170 && c.bounceCount < 3){
-        c.vy = -Math.abs(c.vy) * .31;
-        c.vx *= .42;
-        c.vr *= -.48;
-        c.bounceCount += 1;
-        smoke(c.x, c.y + 26, .28);
-      } else {
-        settleCrate(c);
-        return;
-      }
-    }
-
-    // If it misses, reset gently instead of freezing.
-    if(c.y > 720 || c.x > 1280){
-      c.node.remove();
-      state.crate = null;
-      state.locked = false;
-      nextBalloon();
-      return;
-    }
-
-    setAttrs(c.node, {transform:`translate(${c.x} ${c.y}) rotate(${c.rot})`});
-  }
-
-  function settleCrate(crate){
-    crate.settled = true;
-
-    const spot = getNextSpot();
-    const wrap = el("g", {"clip-path":"url(#wagonClip)"}, layers.parkedLayer);
-    const parked = createCrate(wrap, crate.text, .68);
-    setAttrs(parked, {transform:`translate(${spot.x} ${spot.y}) rotate(${spot.rot})`});
-
-    crate.node.remove();
-    state.crate = null;
-
-    state.score += 10;
-    scoreEl.textContent = state.score + " ✓";
-    scoreBurst(spot.x - 45, spot.y - 46, "+10");
-    smoke(spot.x + 18, spot.y + 18, .42);
-
-    setTimeout(() => {
-      state.locked = false;
-      nextBalloon();
-    }, 520);
-  }
-
-  function getNextSpot(){
-    const index = wagon.spots.length;
-    const col = index % 4;
-    const row = Math.floor(index / 4);
-    const x = wagon.x + 76 + col * 78;
-    const y = wagon.y + 76 - row * 10;
-    const rot = [-8, 7, -4, 9, -7, 5, -2, 6][index % 8];
-    const spot = {x, y, rot};
-    wagon.spots.push(spot);
-    return spot;
-  }
-
-  function nextBalloon(){
-    if(state.balloon && state.balloon.node) state.balloon.node.remove();
-    const text = questions[questionIndex % questions.length];
-    questionIndex += 1;
-    createBalloon(text);
-  }
-
-  function startTimer(){
-    setInterval(() => {
-      state.timeLeft = Math.max(0, state.timeLeft - 1);
-      const minutes = Math.floor(state.timeLeft / 60);
-      const seconds = String(state.timeLeft % 60).padStart(2, "0");
-      timerEl.textContent = `${minutes}:${seconds}`;
-    }, 1000);
-  }
-
-  let layers;
 
   function build(){
     clear();
     defs();
     background();
-
-    layers = {
-      trainLayer:el("g", {id:"trainLayer"}),
-      physicsLayer:el("g", {id:"physicsLayer"}),
-      balloonLayer:el("g", {id:"balloonLayer"}),
-      fxLayer:el("g", {id:"fxLayer"})
-    };
-
-    const trainData = drawTrain();
-    layers.trainLayer.appendChild(trainData.train);
-    layers.parkedLayer = trainData.parked;
-
-    nextBalloon();
-    startTimer();
-  }
-
-  function loop(now){
-    const dt = Math.min(.028, (now - state.last) / 1000);
-    state.last = now;
-    updateBalloon(dt, now);
-    updateCrate(dt);
-    requestAnimationFrame(loop);
   }
 
   build();
-  requestAnimationFrame(loop);
 })();
 </script>
 </body>
