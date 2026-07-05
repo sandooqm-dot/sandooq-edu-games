@@ -3,20 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 8</title>
+  <title>قطار الإجابات - إصدار 9</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
       --safe-bottom:env(safe-area-inset-bottom,0px);
-      --sky1:#cfe8ff;
-      --sky2:#eef8ff;
-      --sand1:#f5d9a2;
-      --sand2:#c58c52;
-      --rail:#5b3a22;
+      --sky1:#cfdef0;
+      --sky2:#eef6ff;
+      --sand1:#eac895;
+      --sand2:#c58b55;
+      --rail:#50331f;
       --hud:#696e9f;
       --gold:#f4ce61;
-      --red:#bd2424;
-      --red-dark:#7b1215;
+      --red:#bb2628;
+      --red-dark:#721316;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -29,7 +29,6 @@
       font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
     }
 
-    /* نفس طريقة صفحة العجلة: مساحة تمرير بسيطة للجسم، والمشهد مثبت sticky حتى يطوي Safari الشريط. */
     body{
       min-height:calc(100dvh + 160px);
       overflow-x:hidden;
@@ -39,12 +38,7 @@
       -webkit-text-size-adjust:100%;
     }
 
-    body::after{
-      content:"";
-      display:block;
-      height:160px;
-      pointer-events:none;
-    }
+    body::after{content:"";display:block;height:160px;pointer-events:none}
 
     .train-page{
       position:sticky;
@@ -57,9 +51,17 @@
       user-select:none;
       touch-action:none;
       background:
-        radial-gradient(circle at 19% 18%,rgba(255,255,255,.50) 0 10%,transparent 22%),
-        radial-gradient(circle at 78% 16%,rgba(255,255,255,.34) 0 8%,transparent 18%),
+        radial-gradient(circle at 19% 18%,rgba(255,255,255,.38) 0 10%,transparent 22%),
+        radial-gradient(circle at 78% 16%,rgba(255,255,255,.26) 0 8%,transparent 18%),
         linear-gradient(180deg,var(--sky1) 0 54%,var(--sky2) 54.2% 55.3%,var(--sand1) 55.4%,var(--sand2) 100%);
+    }
+
+    .mountains{
+      position:absolute;
+      inset:0 0 33% 0;
+      z-index:0;
+      opacity:.34;
+      pointer-events:none;
     }
 
     .hud{
@@ -88,14 +90,11 @@
       white-space:nowrap;
       backdrop-filter:blur(6px);
     }
-
     .score{direction:ltr;min-width:70px;text-align:center}
 
     .ground{
       position:absolute;
-      left:0;
-      right:0;
-      bottom:0;
+      left:0;right:0;bottom:0;
       height:23%;
       min-height:92px;
       z-index:1;
@@ -104,38 +103,19 @@
       animation:groundMove 12s linear infinite;
       pointer-events:none;
     }
-
     @keyframes groundMove{from{background-position:0 0}to{background-position:-900px 0}}
 
     .rails{
       position:absolute;
-      left:0;
-      right:0;
+      left:0;right:0;
       bottom:calc(36px + var(--safe-bottom));
       height:28px;
       z-index:5;
       pointer-events:none;
     }
-
-    .rail-line{
-      position:absolute;
-      left:0;
-      right:0;
-      height:7px;
-      border-radius:9px;
-      background:var(--rail);
-      box-shadow:0 2px 0 rgba(255,255,255,.18) inset,0 2px 5px rgba(0,0,0,.14);
-    }
+    .rail-line{position:absolute;left:0;right:0;height:7px;border-radius:9px;background:var(--rail);box-shadow:0 2px 0 rgba(255,255,255,.18) inset,0 2px 5px rgba(0,0,0,.14)}
     .rail-line.top{top:2px}.rail-line.bottom{bottom:2px}
-    .sleepers{
-      position:absolute;
-      left:0;
-      right:0;
-      top:8px;
-      height:14px;
-      background:repeating-linear-gradient(90deg,transparent 0 34px,#9a6d42 34px 66px,transparent 66px 100px);
-      animation:sleeperMove 5s linear infinite;
-    }
+    .sleepers{position:absolute;left:0;right:0;top:8px;height:14px;background:repeating-linear-gradient(90deg,transparent 0 34px,#9a6d42 34px 66px,transparent 66px 100px);animation:sleeperMove 5s linear infinite}
     @keyframes sleeperMove{from{background-position:0 0}to{background-position:-700px 0}}
 
     .train-stage{
@@ -144,28 +124,14 @@
       left:50%;
       transform:translateX(-50%);
       bottom:calc(42px + var(--safe-bottom));
-      width:min(96vw, 1900px);
-      height:clamp(150px, 28dvh, 270px);
+      width:min(98vw, 1920px);
+      height:clamp(158px, 31dvh, 292px);
       pointer-events:none;
     }
+    .train-svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 8px 9px rgba(0,0,0,.16))}
 
-    .train-svg{
-      width:100%;
-      height:100%;
-      display:block;
-      overflow:visible;
-      filter:drop-shadow(0 8px 8px rgba(0,0,0,.16));
-    }
-
-    .wheel{
-      animation:wheelSpin 1s linear infinite;
-      transform-box:fill-box;
-      transform-origin:center;
-      will-change:transform;
-    }
-    .wheel.small{animation-duration:.78s}
-    .wheel.medium{animation-duration:.88s}
-    .wheel.large{animation-duration:1.06s}
+    .wheel-spin{animation:wheelSpin 1s linear infinite;transform-box:fill-box;transform-origin:center;will-change:transform}
+    .wheel-spin.small{animation-duration:.78s}.wheel-spin.medium{animation-duration:.88s}.wheel-spin.large{animation-duration:1.06s}
     @keyframes wheelSpin{to{transform:rotate(360deg)}}
 
     .label-text{
@@ -183,39 +149,34 @@
       font-family:"Noto Naskh Arabic","Traditional Arabic",Tahoma,Arial,sans-serif;
     }
 
-    .car-hit-panel{
-      fill:rgba(255,255,255,0);
-      pointer-events:none;
-    }
-
     @media (orientation:landscape){
-      .train-stage{height:clamp(170px, 33dvh, 300px);bottom:calc(34px + var(--safe-bottom));width:96vw}
+      .train-stage{height:clamp(178px, 35dvh, 318px);bottom:calc(34px + var(--safe-bottom));width:98vw}
       .rails{bottom:calc(26px + var(--safe-bottom))}
       .pill{font-size:clamp(14px,3.2vh,24px);padding:8px 15px;border-radius:15px}
     }
-
     @media (max-width:430px){
       .hud{top:calc(10px + var(--safe-top));left:12px;right:12px}
       .pill{font-size:16px;padding:8px 13px;border-radius:15px}
       .score{min-width:62px}
-      .train-stage{width:98vw;height:clamp(138px, 21dvh, 220px);bottom:calc(44px + var(--safe-bottom))}
+      .train-stage{width:99vw;height:clamp(145px, 23dvh, 226px);bottom:calc(44px + var(--safe-bottom))}
       .rails{bottom:calc(34px + var(--safe-bottom))}
     }
   </style>
 </head>
 <body>
   <main class="train-page" id="page">
+    <svg class="mountains" viewBox="0 0 1200 520" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 420 C70 315 128 370 197 250 C255 145 302 230 352 115 C405 255 465 170 520 310 C590 172 662 220 714 110 C782 245 848 160 920 320 C995 230 1055 300 1200 210 L1200 520 L0 520 Z" fill="#8e90ad"/>
+      <path d="M0 460 C88 375 140 400 220 300 C300 205 345 330 430 230 C505 330 590 250 675 340 C740 250 820 295 890 210 C980 360 1050 285 1200 338 L1200 520 L0 520 Z" fill="#b0a0ad" opacity=".72"/>
+    </svg>
+
     <div class="hud">
       <div class="pill score">0 ✓</div>
       <div class="pill title">قطار الإجابات</div>
     </div>
 
     <div class="ground" aria-hidden="true"></div>
-    <div class="rails" aria-hidden="true">
-      <div class="rail-line top"></div>
-      <div class="sleepers"></div>
-      <div class="rail-line bottom"></div>
-    </div>
+    <div class="rails" aria-hidden="true"><div class="rail-line top"></div><div class="sleepers"></div><div class="rail-line bottom"></div></div>
 
     <div class="train-stage" aria-hidden="true">
       <svg class="train-svg" id="trainSvg" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax meet" role="img" aria-label="قطار الإجابات"></svg>
@@ -236,156 +197,148 @@
 
     function defs(){
       const d = el('defs');
-      const mkGrad = (id, stops) => {
-        const g = el('linearGradient', {id, x1:'0', y1:'0', x2:'0', y2:'1'}, d);
+      const lin = (id, stops, attrs={}) => {
+        const g = el('linearGradient', Object.assign({id, x1:'0', y1:'0', x2:'0', y2:'1'}, attrs), d);
         stops.forEach(s => el('stop', s, g));
       };
-      mkGrad('redBody', [
-        {'offset':'0%', 'stop-color':'#e44a3e'},
-        {'offset':'42%', 'stop-color':'#be2424'},
-        {'offset':'100%', 'stop-color':'#761017'}
-      ]);
-      mkGrad('redPanel', [
-        {'offset':'0%', 'stop-color':'#d93631'},
-        {'offset':'58%', 'stop-color':'#b51c22'},
-        {'offset':'100%', 'stop-color':'#8b1418'}
-      ]);
-      mkGrad('gold', [
-        {'offset':'0%', 'stop-color':'#fff0a9'},
-        {'offset':'42%', 'stop-color':'#d6a340'},
-        {'offset':'100%', 'stop-color':'#7f511c'}
-      ]);
-      mkGrad('darkMetal', [
-        {'offset':'0%', 'stop-color':'#2f2923'},
-        {'offset':'100%', 'stop-color':'#0d0b0a'}
-      ]);
-      mkGrad('glass', [
-        {'offset':'0%', 'stop-color':'#bdf2ff'},
-        {'offset':'100%', 'stop-color':'#3a7b8b'}
-      ]);
-      const shadow = el('filter', {id:'softShadow', x:'-20%', y:'-20%', width:'140%', height:'150%'}, d);
-      el('feDropShadow', {'dx':'0','dy':'4','stdDeviation':'3','flood-color':'#000','flood-opacity':'.22'}, shadow);
+      const rad = (id, stops) => {
+        const g = el('radialGradient', {id, cx:'35%', cy:'24%', r:'75%'}, d);
+        stops.forEach(s => el('stop', s, g));
+      };
+      lin('redBody', [{'offset':'0%','stop-color':'#ee5a4c'},{'offset':'45%','stop-color':'#bd2424'},{'offset':'100%','stop-color':'#671014'}]);
+      lin('redPanel', [{'offset':'0%','stop-color':'#d63a34'},{'offset':'52%','stop-color':'#b51e22'},{'offset':'100%','stop-color':'#8b1418'}]);
+      lin('gold', [{'offset':'0%','stop-color':'#fff2a7'},{'offset':'42%','stop-color':'#d8a33b'},{'offset':'100%','stop-color':'#7d4d17'}]);
+      lin('goldH', [{'offset':'0%','stop-color':'#fff3b3'},{'offset':'22%','stop-color':'#f2ca61'},{'offset':'62%','stop-color':'#a97225'},{'offset':'100%','stop-color':'#fff1a4'}], {x1:'0',y1:'0',x2:'1',y2:'0'});
+      lin('darkMetal', [{'offset':'0%','stop-color':'#332b25'},{'offset':'100%','stop-color':'#0e0c0a'}]);
+      lin('glass', [{'offset':'0%','stop-color':'#bdf2ff'},{'offset':'100%','stop-color':'#3a7b8b'}]);
+      rad('wheelGold', [{'offset':'0%','stop-color':'#fff5bb'},{'offset':'42%','stop-color':'#d1a052'},{'offset':'70%','stop-color':'#8a5a22'},{'offset':'100%','stop-color':'#e7bd62'}]);
+      const glow = el('filter', {id:'innerGlow', x:'-20%', y:'-20%', width:'140%', height:'140%'}, d);
+      el('feDropShadow', {'dx':'0','dy':'2','stdDeviation':'1.5','flood-color':'#000','flood-opacity':'.24'}, glow);
     }
 
     function roundRect(x,y,w,h,r,fill,stroke='url(#gold)',sw=4,parent=svg){
       return el('rect',{x,y,width:w,height:h,rx:r,ry:r,fill,stroke,'stroke-width':sw},parent);
     }
 
-    function wheel(cx, cy, r, cls='medium'){
-      const g = el('g', {class:'wheel '+cls});
-      el('circle',{cx,cy,r,fill:'url(#gold)',stroke:'#5f3b15','stroke-width':3},g);
-      el('circle',{cx,cy,r:r*0.72,fill:'none',stroke:'#8a5a1f','stroke-width':4},g);
-      for(let i=0;i<18;i++){
-        const a = (Math.PI*2*i)/18;
-        const x1 = cx + Math.cos(a)*r*0.19;
-        const y1 = cy + Math.sin(a)*r*0.19;
-        const x2 = cx + Math.cos(a)*r*0.82;
-        const y2 = cy + Math.sin(a)*r*0.82;
-        el('line',{x1,y1,x2,y2,stroke:'#f1c461','stroke-width':4,'stroke-linecap':'round'},g);
-        el('line',{x1,y1,x2,y2,stroke:'#7b4d19','stroke-width':1.2,'stroke-linecap':'round','opacity':.45},g);
+    function ornateWheel(cx, cy, r, cls='medium'){
+      const outer = el('g', {transform:`translate(${cx} ${cy})`});
+      const g = el('g', {class:'wheel-spin '+cls}, outer);
+      el('circle',{cx:0,cy:0,r:r,fill:'url(#wheelGold)',stroke:'#5b3715','stroke-width':Math.max(2,r*.06)},g);
+      el('circle',{cx:0,cy:0,r:r*.83,fill:'none',stroke:'#f7d986','stroke-width':Math.max(2,r*.055)},g);
+      el('circle',{cx:0,cy:0,r:r*.70,fill:'none',stroke:'#6d441a','stroke-width':Math.max(1.4,r*.034),'opacity':.78},g);
+      for(let i=0;i<20;i++){
+        const a = (Math.PI*2*i)/20;
+        const x1 = Math.cos(a)*r*.23, y1 = Math.sin(a)*r*.23;
+        const x2 = Math.cos(a)*r*.79, y2 = Math.sin(a)*r*.79;
+        el('line',{x1,y1,x2,y2,stroke:'#e5b65e','stroke-width':Math.max(2.4,r*.085),'stroke-linecap':'round'},g);
+        el('line',{x1:x1*1.02,y1:y1*1.02,x2:x2*1.02,y2:y2*1.02,stroke:'#7a4a19','stroke-width':Math.max(1,r*.025),'stroke-linecap':'round','opacity':.45},g);
       }
-      el('circle',{cx,cy,r:r*0.21,fill:'#b21f24',stroke:'#4c2918','stroke-width':4},g);
-      el('circle',{cx,cy,r:r*0.09,fill:'#181310',stroke:'#f5d66d','stroke-width':2},g);
-      return g;
+      el('circle',{cx:0,cy:0,r:r*.26,fill:'url(#gold)',stroke:'#533018','stroke-width':Math.max(2,r*.055)},g);
+      el('circle',{cx:0,cy:0,r:r*.17,fill:'#b93131',stroke:'#5c2e20','stroke-width':Math.max(1.5,r*.035)},g);
+      el('circle',{cx:0,cy:0,r:r*.08,fill:'#111',stroke:'#f6db78','stroke-width':Math.max(1.2,r*.03)},g);
+      el('path',{d:`M ${-r*.58} ${-r*.58} C ${-r*.24} ${-r*.82} ${r*.35} ${-r*.76} ${r*.68} ${-r*.35}`,fill:'none',stroke:'#fff5ba','stroke-width':Math.max(1.2,r*.04),'opacity':.42,'stroke-linecap':'round'},g);
+      return outer;
+    }
+
+    function coupler(x,y=214){
+      el('rect',{x:x-5,y:y,width:22,height:9,rx:4,fill:'#2b1d19',stroke:'url(#gold)','stroke-width':1.4});
+      el('circle',{cx:x-8,cy:y+4.5,r:6,fill:'#2b1d19'});
+      el('circle',{cx:x+19,cy:y+4.5,r:6,fill:'#2b1d19'});
     }
 
     function answerCar(x, label){
       const g = el('g', {class:'answer-car', 'data-label':label});
-      // wheels first so body naturally covers the upper part.
-      wheel(x+57, 244, 18, 'small');
-      wheel(x+95, 244, 18, 'small');
-      wheel(x+187, 244, 18, 'small');
-      wheel(x+225, 244, 18, 'small');
-      el('rect',{x:x+18,y:222,width:248,height:18,rx:5,fill:'url(#gold)',stroke:'#6d4214','stroke-width':2},g);
-      el('path',{d:`M ${x+20} 112 L ${x+260} 112 L ${x+248} 210 L ${x+35} 210 Z`,fill:'url(#redBody)',stroke:'url(#gold)','stroke-width':5,'stroke-linejoin':'round'},g);
-      el('path',{d:`M ${x+38} 132 L ${x+242} 132 L ${x+232} 195 L ${x+48} 195 Z`,fill:'url(#redPanel)',stroke:'#7d1416','stroke-width':3,'opacity':.9},g);
-      el('line',{x1:x+17,y1:106,x2:x+262,y2:106,stroke:'url(#gold)','stroke-width':10,'stroke-linecap':'round'},g);
-      el('line',{x1:x+24,y1:214,x2:x+258,y2:214,stroke:'url(#gold)','stroke-width':6,'stroke-linecap':'round'},g);
+      // lower axle/wheels like the old game: wheels partially tucked under the wagon.
+      ornateWheel(x+54, 246, 17, 'small');
+      ornateWheel(x+91, 246, 17, 'small');
+      ornateWheel(x+188, 246, 17, 'small');
+      ornateWheel(x+226, 246, 17, 'small');
+      el('rect',{x:x+16,y:224,width:252,height:16,rx:5,fill:'url(#goldH)',stroke:'#694116','stroke-width':2},g);
+      el('path',{d:`M ${x+19} 112 L ${x+262} 112 L ${x+250} 210 L ${x+35} 210 Z`,fill:'url(#redBody)',stroke:'url(#gold)','stroke-width':5,'stroke-linejoin':'round'},g);
+      el('path',{d:`M ${x+40} 134 L ${x+241} 134 L ${x+231} 194 L ${x+50} 194 Z`,fill:'url(#redPanel)',stroke:'#812025','stroke-width':3,'opacity':.92},g);
+      el('line',{x1:x+17,y1:106,x2:x+264,y2:106,stroke:'url(#goldH)','stroke-width':11,'stroke-linecap':'round'},g);
+      el('line',{x1:x+25,y1:215,x2:x+259,y2:215,stroke:'url(#goldH)','stroke-width':7,'stroke-linecap':'round'},g);
+      // small golden corner ornaments.
+      [['45','138'],['226','138'],['52','190'],['230','190']].forEach(([ox,oy],i)=>{
+        const sx=x+Number(ox), sy=Number(oy), flip=i%2?-1:1;
+        el('path',{d:`M ${sx} ${sy} q ${12*flip} 0 ${12*flip} ${-10} q ${0} ${10} ${10*flip} ${10}`,fill:'none',stroke:'url(#gold)','stroke-width':2.3,'stroke-linecap':'round'},g);
+      });
       el('text',{x:x+140,y:162,class:'label-text'},g).textContent = label;
-      el('rect',{x:x+35,y:118,width:210,height:88,class:'car-hit-panel'},g);
       return g;
     }
 
     function passenger(x){
       const g = el('g', {class:'passenger'});
-      wheel(x+48,244,17,'small'); wheel(x+88,244,17,'small'); wheel(x+188,244,17,'small'); wheel(x+228,244,17,'small');
-      el('rect',{x:x+16,y:218,width:255,height:18,rx:5,fill:'url(#gold)',stroke:'#6d4214','stroke-width':2},g);
-      roundRect(x+28,108,232,98,8,'url(#redBody)','url(#gold)',5,g);
-      el('line',{x1:x+28,y1:102,x2:x+260,y2:102,stroke:'url(#gold)','stroke-width':14,'stroke-linecap':'round'},g);
+      ornateWheel(x+47,246,16,'small'); ornateWheel(x+86,246,16,'small'); ornateWheel(x+190,246,16,'small'); ornateWheel(x+229,246,16,'small');
+      el('rect',{x:x+16,y:222,width:260,height:17,rx:5,fill:'url(#goldH)',stroke:'#6d4214','stroke-width':2},g);
+      roundRect(x+28,108,236,98,8,'url(#redBody)','url(#gold)',5,g);
+      el('line',{x1:x+29,y1:101,x2:x+263,y2:101,stroke:'url(#goldH)','stroke-width':15,'stroke-linecap':'round'},g);
       for(let i=0;i<5;i++){
-        const wx = x+49+i*39;
-        roundRect(wx,126,28,42,7,'url(#glass)','#7f511c',3,g);
-        el('path',{d:`M ${wx+4} 166 C ${wx+10} 151 ${wx+22} 151 ${wx+27} 166`,fill:'#244d57',opacity:.35},g);
+        const wx=x+49+i*40;
+        roundRect(wx,125,29,43,8,'url(#glass)','#7f511c',3,g);
+        el('path',{d:`M ${wx+5} 166 C ${wx+10} 151 ${wx+23} 151 ${wx+28} 166`,fill:'#244d57',opacity:.38},g);
       }
-      el('path',{d:`M ${x+95} 187 C ${x+125} 202 ${x+165} 202 ${x+195} 187`,fill:'none',stroke:'url(#gold)','stroke-width':5,'stroke-linecap':'round'},g);
+      el('path',{d:`M ${x+94} 187 C ${x+124} 202 ${x+168} 202 ${x+198} 187`,fill:'none',stroke:'url(#gold)','stroke-width':5,'stroke-linecap':'round'},g);
+      el('circle',{cx:x+146,cy:189,r:7,fill:'url(#gold)',stroke:'#754618','stroke-width':2},g);
       return g;
     }
 
     function coalCar(x){
       const g = el('g', {class:'coal'});
-      wheel(x+44,244,17,'small'); wheel(x+92,244,17,'small');
-      el('rect',{x:x+15,y:218,width:125,height:18,rx:5,fill:'url(#gold)',stroke:'#6d4214','stroke-width':2},g);
-      roundRect(x+23,143,108,66,6,'url(#redBody)','url(#gold)',5,g);
-      for(let i=0;i<18;i++){
-        const cx = x+30+(i%9)*11;
-        const cy = 137 - Math.floor(i/9)*7 - (i%2)*3;
+      ornateWheel(x+44,246,16,'small'); ornateWheel(x+93,246,16,'small');
+      el('rect',{x:x+14,y:222,width:130,height:17,rx:5,fill:'url(#goldH)',stroke:'#6d4214','stroke-width':2},g);
+      roundRect(x+23,143,110,66,6,'url(#redBody)','url(#gold)',5,g);
+      for(let i=0;i<20;i++){
+        const cx=x+31+(i%10)*10.5;
+        const cy=137-Math.floor(i/10)*7-(i%2)*3;
         el('circle',{cx,cy,r:9,fill:'#191614',opacity:.95},g);
       }
-      el('path',{d:`M ${x+51} 178 C ${x+70} 158 ${x+91} 158 ${x+108} 178 C ${x+92} 196 ${x+68} 196 ${x+51} 178 Z`,fill:'none',stroke:'url(#gold)','stroke-width':4},g);
+      el('path',{d:`M ${x+49} 178 C ${x+70} 158 ${x+92} 158 ${x+110} 178 C ${x+93} 197 ${x+67} 197 ${x+49} 178 Z`,fill:'none',stroke:'url(#gold)','stroke-width':4},g);
+      el('circle',{cx:x+80,cy:178,r:8,fill:'url(#gold)',stroke:'#784917','stroke-width':2},g);
       return g;
     }
 
     function locomotive(x){
       const g = el('g', {class:'loco'});
-      wheel(x+78,230,44,'large');
-      wheel(x+180,238,30,'medium');
-      wheel(x+260,238,30,'medium');
-      // base
-      el('path',{d:`M ${x+20} 218 L ${x+312} 218 L ${x+314} 235 L ${x+20} 235 Z`,fill:'url(#gold)',stroke:'#6d4214','stroke-width':3},g);
-      // cab
+      // Draw wheels before chassis so the upper parts tuck under the frame.
+      ornateWheel(x+78,230,45,'large');
+      ornateWheel(x+181,238,29,'medium');
+      ornateWheel(x+260,238,29,'medium');
+      el('path',{d:`M ${x+18} 218 L ${x+316} 218 L ${x+318} 236 L ${x+18} 236 Z`,fill:'url(#goldH)',stroke:'#6d4214','stroke-width':3},g);
       roundRect(x+24,84,98,128,5,'url(#redBody)','url(#gold)',6,g);
       el('rect',{x:x+38,y:34,width:70,height:55,rx:4,fill:'#b21f24',stroke:'url(#gold)','stroke-width':5},g);
       el('text',{x:x+73,y:64,fill:'#f9df76','font-size':44,'font-weight':900,'text-anchor':'middle','dominant-baseline':'middle'},g).textContent='1';
-      el('path',{d:`M ${x+22} 32 L ${x+120} 32 L ${x+134} 47 L ${x+12} 47 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
-      // boiler
-      roundRect(x+114,118,183,76,13,'url(#redBody)','url(#gold)',5,g);
-      el('line',{x1:x+128,y1:152,x2:x+286,y2:152,stroke:'url(#gold)','stroke-width':5,'stroke-linecap':'round'},g);
-      el('line',{x1:x+128,y1:180,x2:x+286,y2:180,stroke:'url(#gold)','stroke-width':4,'stroke-linecap':'round'},g);
-      el('path',{d:`M ${x+295} 104 C ${x+322} 110 ${x+322} 203 ${x+295} 210 C ${x+278} 190 ${x+278} 124 ${x+295} 104 Z`,fill:'url(#darkMetal)',stroke:'#2a1b14','stroke-width':3},g);
-      for(let i=0;i<7;i++) el('circle',{cx:x+302,cy:123+i*12,r:3.2,fill:'#443127'},g);
-      // domes and smokestacks
-      el('path',{d:`M ${x+165} 103 C ${x+168} 80 ${x+218} 80 ${x+221} 103 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
-      el('rect',{x:x+174,y:96,width:38,height:14,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
-      el('rect',{x:x+124,y:76,width:32,height:42,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
-      el('path',{d:`M ${x+120} 70 C ${x+125} 58 ${x+156} 58 ${x+161} 70 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
-      el('rect',{x:x+247,y:47,width:34,height:70,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
-      el('ellipse',{cx:x+264,cy:46,rx:24,ry:9,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
-      // cowcatcher
-      el('path',{d:`M ${x+307} 195 L ${x+365} 233 L ${x+314} 233 Z`,fill:'url(#gold)',stroke:'#6d4214','stroke-width':3,'stroke-linejoin':'round'},g);
-      for(let i=0;i<6;i++) el('line',{x1:x+315+i*8,y1:203,x2:x+325+i*7,y2:230,stroke:'#7b4d19','stroke-width':3,'stroke-linecap':'round'},g);
+      el('path',{d:`M ${x+22} 32 L ${x+121} 32 L ${x+134} 47 L ${x+11} 47 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('path',{d:`M ${x+114} 116 L ${x+295} 116 Q ${x+310} 116 ${x+310} 132 L ${x+310} 181 Q ${x+310} 196 ${x+295} 196 L ${x+114} 196 Z`,fill:'url(#redBody)',stroke:'url(#gold)','stroke-width':5},g);
+      el('line',{x1:x+127,y1:151,x2:x+290,y2:151,stroke:'url(#goldH)','stroke-width':5,'stroke-linecap':'round'},g);
+      el('line',{x1:x+127,y1:181,x2:x+290,y2:181,stroke:'url(#goldH)','stroke-width':4,'stroke-linecap':'round'},g);
+      el('path',{d:`M ${x+297} 104 C ${x+324} 110 ${x+324} 203 ${x+297} 210 C ${x+278} 190 ${x+278} 124 ${x+297} 104 Z`,fill:'url(#darkMetal)',stroke:'#2a1b14','stroke-width':3},g);
+      for(let i=0;i<8;i++) el('circle',{cx:x+305,cy:120+i*12,r:3,fill:'#49372d'},g);
+      // domes and chimneys, close to old train silhouette.
+      el('path',{d:`M ${x+166} 102 C ${x+170} 80 ${x+219} 80 ${x+222} 102 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
+      el('rect',{x:x+174,y:96,width:39,height:15,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('rect',{x:x+124,y:76,width:33,height:42,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('path',{d:`M ${x+120} 70 C ${x+125} 58 ${x+157} 58 ${x+162} 70 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('rect',{x:x+248,y:47,width:34,height:70,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
+      el('ellipse',{cx:x+265,cy:46,rx:24,ry:9,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
+      // horizontal gold handrails.
+      el('line',{x1:x+18,y1:113,x2:x+298,y2:113,stroke:'url(#goldH)','stroke-width':5,'stroke-linecap':'round'},g);
+      el('line',{x1:x+24,y1:212,x2:x+306,y2:212,stroke:'url(#goldH)','stroke-width':6,'stroke-linecap':'round'},g);
+      // cowcatcher.
+      el('path',{d:`M ${x+307} 194 L ${x+367} 233 L ${x+315} 233 Z`,fill:'url(#gold)',stroke:'#6d4214','stroke-width':3,'stroke-linejoin':'round'},g);
+      for(let i=0;i<6;i++) el('line',{x1:x+316+i*8,y1:203,x2:x+326+i*7,y2:230,stroke:'#7b4d19','stroke-width':3,'stroke-linecap':'round'},g);
       return g;
-    }
-
-    function coupler(x,y=214){
-      el('rect',{x:x-5,y:y,width:20,height:8,rx:3,fill:'#2b1d19',stroke:'url(#gold)','stroke-width':1.4});
-      el('circle',{cx:x-7,cy:y+4,r:6,fill:'#2b1d19'});
-      el('circle',{cx:x+17,cy:y+4,r:6,fill:'#2b1d19'});
     }
 
     function buildTrain(){
       svg.innerHTML='';
       defs();
-      let x = 16;
-      categories.forEach((c, idx) => {
-        answerCar(x, c);
-        coupler(x+270);
-        x += 282;
-      });
-      passenger(x); coupler(x+276); x += 288;
-      coalCar(x); coupler(x+150); x += 158;
+      let x=16;
+      categories.forEach(c=>{answerCar(x,c); coupler(x+270); x+=282;});
+      passenger(x); coupler(x+276); x+=288;
+      coalCar(x); coupler(x+150); x+=158;
       locomotive(x);
-      const totalW = x + 390;
-      svg.setAttribute('viewBox', `0 0 ${totalW} 300`);
+      svg.setAttribute('viewBox', `0 0 ${x+392} 300`);
     }
 
     buildTrain();
