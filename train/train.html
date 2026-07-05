@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 14</title>
+  <title>قطار الإجابات - إصدار 15</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -402,22 +402,14 @@
     makeBush(bg, 760, 504, 1);
 
     const track = el("g", {id:"track"}, bg);
-    el("rect", {x:0, y:620, width:1280, height:10, rx:5, fill:"#442817"}, track);
-    el("rect", {x:0, y:648, width:1280, height:10, rx:5, fill:"#442817"}, track);
-
-    const sleepers = el("g", {id:"sleepers", class:"sleepers-move"}, track);
-    for(let i = -116; i < 1450; i += 58){
-      el("rect", {
-        x:i,
-        y:626,
-        width:34,
-        height:31,
-        rx:3,
-        fill:"#996837",
-        opacity:".9",
-        transform:`rotate(-10 ${i + 17} 642)`
-      }, sleepers);
-    }
+    el("image", {
+      href:"train-track.webp",
+      x:0,
+      y:604,
+      width:1280,
+      height:92,
+      preserveAspectRatio:"none"
+    }, track);
   }
 
   function makeCloud(parent, x, y, scale){
