@@ -3,129 +3,312 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 2</title>
+  <title>قطار الإجابات - إصدار 3</title>
   <style>
     :root{
-      --app-height:100svh;
       --safe-top:env(safe-area-inset-top,0px);
       --safe-bottom:env(safe-area-inset-bottom,0px);
-      --sky1:#cfe7ff;
-      --sky2:#eaf6ff;
-      --sand1:#f6deb6;
-      --sand2:#c99b66;
-      --rail:#5c3e24;
-      --gold:#d6a62c;
+      --train-h:clamp(74px, 13.5vw, 150px);
+      --train-scale:1;
+      --sky1:#cfe8ff;
+      --sky2:#edf8ff;
+      --sand1:#f6ddad;
+      --sand2:#c8955d;
+      --rail:#5d3e25;
+      --hud:#6d719c;
+      --gold:#ead06c;
+      --gold-dark:#8c5e1d;
     }
+
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#d9ecff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:#fff;touch-action:manipulation;overscroll-behavior:none;}
-    body{position:fixed;inset:0;}
-    .game{position:fixed;inset:0;width:100vw;height:var(--app-height);min-height:480px;overflow:hidden;background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 52%,var(--sand1) 52.2%,var(--sand2) 100%);}
-    .game::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 18% 20%,rgba(255,255,255,.45) 0 9%,transparent 18%),radial-gradient(circle at 78% 18%,rgba(255,255,255,.32) 0 7%,transparent 16%),linear-gradient(180deg,transparent 0 50%,rgba(255,255,255,.12) 50% 50.4%,transparent 50.5%);opacity:.55;}
-    .hud{position:absolute;z-index:30;top:calc(12px + var(--safe-top));left:16px;right:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
-    .pill{background:rgba(73,79,129,.72);border:1px solid rgba(255,255,255,.28);box-shadow:0 8px 18px rgba(35,38,88,.12),inset 0 1px 0 rgba(255,255,255,.18);border-radius:18px;padding:10px 18px;font-size:clamp(17px,2.4vw,28px);font-weight:900;line-height:1;backdrop-filter:blur(6px);}
-    .score{direction:ltr;min-width:72px;text-align:center}
-    .title{max-width:70vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .ground-lines{position:absolute;left:0;right:0;bottom:0;height:18%;min-height:82px;pointer-events:none;background:repeating-linear-gradient(90deg,rgba(70,45,25,.22) 0 65px,rgba(70,45,25,.06) 65px 130px);animation:groundMove 8s linear infinite;opacity:.62;}
-    @keyframes groundMove{from{background-position:0 0}to{background-position:-900px 0}}
-    .rails{position:absolute;left:0;right:0;bottom:calc(54px + var(--safe-bottom));height:28px;z-index:4;}
-    .rail-line{position:absolute;left:0;right:0;height:7px;background:var(--rail);border-radius:8px;box-shadow:0 2px 0 rgba(255,255,255,.16) inset,0 2px 5px rgba(0,0,0,.12);}
-    .rail-line.top{top:2px}.rail-line.bottom{bottom:2px}
-    .sleepers{position:absolute;left:0;right:0;top:8px;height:13px;background:repeating-linear-gradient(90deg,transparent 0 34px,#8b6037 34px 64px,transparent 64px 98px);animation:sleeperMove 3.5s linear infinite;}
-    @keyframes sleeperMove{from{background-position:0 0}to{background-position:-700px 0}}
-    .train-wrap{position:absolute;z-index:12;left:50%;bottom:calc(62px + var(--safe-bottom));transform:translateX(-50%);width:min(1900px,160vw);height:260px;display:flex;align-items:flex-end;justify-content:center;direction:ltr;overflow:visible;}
-    .unit{position:relative;height:230px;flex:0 0 auto;margin-left:-5px;filter:drop-shadow(0 10px 10px rgba(0,0,0,.22));}
-    .unit img.body{position:absolute;left:0;bottom:0;width:100%;height:100%;object-fit:contain;object-position:bottom center;display:block;pointer-events:none;user-select:none;}
-    .car{width:23%;min-width:270px}.passenger{width:20%;min-width:238px}.coal{width:10%;min-width:115px}.loco{width:25%;min-width:300px}
-    .wheel{position:absolute;z-index:4;aspect-ratio:1/1;border-radius:50%;background-size:contain;background-repeat:no-repeat;background-position:center;animation:wheelSpin .75s linear infinite;pointer-events:none;}
-    @keyframes wheelSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    .car .wheel{width:15.3%;bottom:7.2%;background-image:url('wheelCar.png')}
-    .car .w1{left:12.2%}.car .w2{left:26.8%}.car .w3{left:70.4%}.car .w4{left:84.8%}
-    .passenger .wheel{width:14.5%;bottom:7.4%;background-image:url('wheelCar.png')}
-    .passenger .w1{left:15%}.passenger .w2{left:28%}.passenger .w3{left:70%}.passenger .w4{left:83%}
-    .coal .wheel{width:32%;bottom:7.6%;background-image:url('wheelCar.png')}
-    .coal .w1{left:17%}.coal .w2{left:57%}
-    .loco .wheel.big{width:25%;bottom:6.3%;background-image:url('wheelL.png');animation-duration:.95s}
-    .loco .wheel.mid{width:20%;bottom:7.9%;background-image:url('wheelM.png');animation-duration:.82s}
-    .loco .wheel.small{width:14%;bottom:8.2%;background-image:url('wheelS.png');animation-duration:.72s}
-    .loco .w1{left:9%}.loco .w2{left:45%}.loco .w3{left:71%}
-    .car-label{position:absolute;z-index:22;transform:translate(-50%,-50%);font-weight:950;font-size:clamp(19px,2.4vw,34px);color:#f8df6b;text-shadow:0 3px 2px #3a2162,0 0 7px rgba(0,0,0,.52);white-space:nowrap;pointer-events:none;line-height:1.1;max-width:240px;text-align:center;}
-    @media(max-width:800px){
-      .hud{top:calc(10px + var(--safe-top));left:14px;right:14px}.pill{padding:9px 14px;border-radius:17px}.train-wrap{width:220vw;height:222px;bottom:calc(58px + var(--safe-bottom));}.unit{height:194px}.car{min-width:250px}.passenger{min-width:220px}.coal{min-width:112px}.loco{min-width:290px}.rails{bottom:calc(48px + var(--safe-bottom));}.car-label{font-size:clamp(18px,5vw,28px);max-width:200px}
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:100%;
+      background:#d9ecff;
+      color:#fff;
+      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
     }
-    @media(max-height:560px){.train-wrap{height:205px}.unit{height:180px}.rails{bottom:calc(40px + var(--safe-bottom));}.train-wrap{bottom:calc(50px + var(--safe-bottom));}.pill{font-size:16px;padding:8px 12px}}
+
+    /* نفس طريقة صفحة العجلة: الصفحة نفسها sticky وباقي body يعطي مساحة بسيطة لسفاري حتى يطوي الشريط. */
+    body{
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
+    }
+
+    .train-page{
+      position:sticky;
+      top:0;
+      width:100%;
+      height:100dvh;
+      min-height:100dvh;
+      overflow:hidden;
+      direction:ltr;
+      user-select:none;
+      touch-action:none;
+      background:
+        radial-gradient(circle at 20% 20%,rgba(255,255,255,.50) 0 10%,transparent 22%),
+        radial-gradient(circle at 78% 18%,rgba(255,255,255,.35) 0 8%,transparent 18%),
+        linear-gradient(180deg,var(--sky1) 0 55%,var(--sky2) 55.2% 56%,var(--sand1) 56.1%,var(--sand2) 100%);
+    }
+
+    .hud{
+      position:absolute;
+      z-index:40;
+      top:calc(12px + var(--safe-top));
+      left:clamp(12px,3vw,24px);
+      right:clamp(12px,3vw,24px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      pointer-events:none;
+    }
+
+    .pill{
+      background:rgba(101,106,155,.88);
+      border:1px solid rgba(255,255,255,.32);
+      box-shadow:0 8px 18px rgba(36,42,91,.14), inset 0 1px 0 rgba(255,255,255,.18);
+      border-radius:18px;
+      padding:10px 18px;
+      color:#fff;
+      font-size:clamp(16px,2.4vw,28px);
+      font-weight:900;
+      line-height:1;
+      white-space:nowrap;
+      backdrop-filter:blur(6px);
+    }
+
+    .score{direction:ltr;min-width:70px;text-align:center}
+
+    .ground{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:22%;
+      min-height:88px;
+      z-index:1;
+      background:repeating-linear-gradient(90deg,rgba(78,48,24,.17) 0 64px,rgba(78,48,24,.05) 64px 128px);
+      opacity:.65;
+      animation:groundMove 12s linear infinite;
+      pointer-events:none;
+    }
+
+    @keyframes groundMove{from{background-position:0 0}to{background-position:-900px 0}}
+
+    .rails{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:calc(34px + var(--safe-bottom));
+      height:26px;
+      z-index:5;
+      pointer-events:none;
+    }
+
+    .rail-line{
+      position:absolute;
+      left:0;
+      right:0;
+      height:7px;
+      border-radius:9px;
+      background:var(--rail);
+      box-shadow:0 2px 0 rgba(255,255,255,.18) inset,0 2px 5px rgba(0,0,0,.14);
+    }
+    .rail-line.top{top:2px}.rail-line.bottom{bottom:2px}
+    .sleepers{
+      position:absolute;
+      left:0;
+      right:0;
+      top:8px;
+      height:13px;
+      background:repeating-linear-gradient(90deg,transparent 0 34px,#9a6d42 34px 66px,transparent 66px 100px);
+      animation:sleeperMove 5s linear infinite;
+    }
+    @keyframes sleeperMove{from{background-position:0 0}to{background-position:-700px 0}}
+
+    .train-camera{
+      position:absolute;
+      z-index:12;
+      left:0;
+      right:0;
+      bottom:calc(44px + var(--safe-bottom));
+      height:calc(var(--train-h) + 12px);
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      overflow:visible;
+      pointer-events:none;
+      direction:ltr;
+    }
+
+    .train-set{
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      direction:ltr;
+      transform:scale(var(--train-scale));
+      transform-origin:center bottom;
+      will-change:transform;
+    }
+
+    .unit{
+      position:relative;
+      height:var(--train-h);
+      flex:0 0 auto;
+      margin-left:-2px;
+      filter:drop-shadow(0 8px 9px rgba(0,0,0,.18));
+    }
+
+    .unit img.body{
+      position:absolute;
+      left:0;
+      bottom:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      object-position:bottom center;
+      display:block;
+      pointer-events:none;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .car{width:calc(var(--train-h) * 390 / 311)}
+    .passenger{width:calc(var(--train-h) * 388 / 311)}
+    .coal{width:calc(var(--train-h) * 195 / 311)}
+    .loco{width:calc(var(--train-h) * 485 / 311)}
+
+    /* العجلات مرسومة CSS وليست صورًا، حتى تدور بشكل دائري صحيح ومكانها مضبوط فوق عجلات الصورة. */
+    .wheel{
+      position:absolute;
+      z-index:8;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      pointer-events:none;
+      animation:wheelSpin .8s linear infinite;
+      transform-origin:center center;
+      background:
+        radial-gradient(circle at center,#fff4a6 0 8%,#b98220 9% 15%,transparent 16%),
+        repeating-conic-gradient(from 0deg,#f4d871 0 5deg,transparent 6deg 29deg),
+        radial-gradient(circle at center,transparent 0 45%,#f7d876 46% 55%,#6d4214 56% 67%,#e3b847 68% 78%,transparent 79%);
+      border:1.5px solid rgba(70,40,12,.82);
+      box-shadow:inset 0 0 0 2px rgba(255,236,134,.38),0 2px 3px rgba(0,0,0,.18);
+    }
+
+    @keyframes wheelSpin{to{transform:rotate(360deg)}}
+
+    .car .wheel{width:14.35%;bottom:5.4%}
+    .car .w1{left:9.0%}.car .w2{left:26.6%}.car .w3{left:64.0%}.car .w4{left:81.5%}
+
+    .passenger .wheel{width:14.0%;bottom:5.2%}
+    .passenger .w1{left:12.4%}.passenger .w2{left:29.5%}.passenger .w3{left:66.8%}.passenger .w4{left:83.2%}
+
+    .coal .wheel{width:28.5%;bottom:5.3%}
+    .coal .w1{left:25.2%}.coal .w2{left:59.2%}
+
+    .loco .wheel{bottom:5.2%;animation-duration:.86s}
+    .loco .big{width:21.5%;left:12.5%;bottom:2.8%;animation-duration:1s}
+    .loco .mid{width:16.8%;left:44.8%;animation-duration:.86s}
+    .loco .small{width:16.3%;left:69.6%;animation-duration:.82s}
+
+    @media (orientation:landscape){
+      :root{--train-h:clamp(110px, 29dvh, 190px)}
+      .rails{bottom:calc(24px + var(--safe-bottom))}
+      .train-camera{bottom:calc(34px + var(--safe-bottom))}
+      .pill{font-size:clamp(14px,3.2vh,24px);padding:8px 15px;border-radius:15px}
+    }
+
+    @media (max-width:430px){
+      .hud{top:calc(10px + var(--safe-top));left:12px;right:12px}
+      .pill{font-size:16px;padding:8px 13px;border-radius:15px}
+      .score{min-width:62px}
+      .rails{bottom:calc(32px + var(--safe-bottom))}
+      .train-camera{bottom:calc(42px + var(--safe-bottom))}
+    }
   </style>
 </head>
 <body>
-  <main class="game" id="game">
-    <div class="hud"><div class="pill title">قطار الإجابات</div><div class="pill score">0 ✓</div></div>
-    <div class="ground-lines"></div>
-    <div class="rails"><div class="rail-line top"></div><div class="sleepers"></div><div class="rail-line bottom"></div></div>
-    <div class="train-wrap" id="train"></div>
-  </main>
-  <script>
-    (function setAppHeight(){
-      const root=document.documentElement;
-      function update(){
-        const h=(window.visualViewport&&window.visualViewport.height)?window.visualViewport.height:window.innerHeight;
-        root.style.setProperty('--app-height',h+'px');
-      }
-      update();
-      window.addEventListener('resize',update,{passive:true});
-      window.addEventListener('orientationchange',()=>setTimeout(update,250),{passive:true});
-      if(window.visualViewport) window.visualViewport.addEventListener('resize',update,{passive:true});
-    })();
+  <main class="train-page" id="page">
+    <div class="hud">
+      <div class="pill score">0 ✓</div>
+      <div class="pill title">قطار الإجابات</div>
+    </div>
 
+    <div class="ground" aria-hidden="true"></div>
+    <div class="rails" aria-hidden="true">
+      <div class="rail-line top"></div>
+      <div class="sleepers"></div>
+      <div class="rail-line bottom"></div>
+    </div>
+
+    <div class="train-camera" aria-hidden="true">
+      <div class="train-set" id="train"></div>
+    </div>
+  </main>
+
+  <script>
     const categories = ['استفهام','تعجب','أمر'];
     const train = document.getElementById('train');
-    const game = document.getElementById('game');
 
     function makeUnit(kind, src, alt){
-      const unit=document.createElement('div');
-      unit.className='unit '+kind;
-      const img=document.createElement('img');
-      img.className='body';
-      img.src=src;
-      img.alt=alt;
+      const unit = document.createElement('div');
+      unit.className = 'unit ' + kind;
+      const img = document.createElement('img');
+      img.className = 'body';
+      img.src = src;
+      img.alt = alt;
       unit.appendChild(img);
-      addWheels(unit,kind);
+      addWheels(unit, kind);
       train.appendChild(unit);
       return unit;
     }
-    function addWheel(unit,cls){
-      const w=document.createElement('span');
-      w.className='wheel '+cls;
+
+    function addWheel(unit, cls){
+      const w = document.createElement('span');
+      w.className = 'wheel ' + cls;
       unit.appendChild(w);
     }
-    function addWheels(unit,kind){
-      if(kind==='car' || kind==='passenger') ['w1','w2','w3','w4'].forEach(c=>addWheel(unit,c));
-      if(kind==='coal') ['w1','w2'].forEach(c=>addWheel(unit,c));
-      if(kind==='loco') { addWheel(unit,'big w1'); addWheel(unit,'mid w2'); addWheel(unit,'small w3'); }
+
+    function addWheels(unit, kind){
+      if(kind === 'car' || kind === 'passenger') ['w1','w2','w3','w4'].forEach(c => addWheel(unit,c));
+      if(kind === 'coal') ['w1','w2'].forEach(c => addWheel(unit,c));
+      if(kind === 'loco') { addWheel(unit,'big'); addWheel(unit,'mid'); addWheel(unit,'small'); }
     }
+
     function buildTrain(){
-      train.innerHTML='';
-      categories.forEach(()=>makeUnit('car','car.png','عربة سؤال'));
+      train.innerHTML = '';
+      categories.forEach(() => makeUnit('car','car.png','عربة إجابة'));
       makeUnit('passenger','passenger.png','مقطورة ركاب');
-      makeUnit('coal','coal.png','عربة فحم');
+      makeUnit('coal','coal.png','عربة الفحم');
       makeUnit('loco','loco.png','القاطرة');
-      requestAnimationFrame(placeLabels);
+      requestAnimationFrame(fitTrain);
     }
-    function placeLabels(){
-      document.querySelectorAll('.car-label').forEach(e=>e.remove());
-      const cars=[...train.querySelectorAll('.unit.car')];
-      cars.forEach((car,idx)=>{
-        const r=car.getBoundingClientRect();
-        const g=game.getBoundingClientRect();
-        const label=document.createElement('div');
-        label.className='car-label';
-        label.textContent=categories[idx]||'';
-        label.style.left=(r.left-g.left+r.width/2)+'px';
-        label.style.top=(r.top-g.top+r.height*0.51)+'px';
-        game.appendChild(label);
-      });
+
+    function fitTrain(){
+      const rawWidth = train.scrollWidth;
+      const viewport = window.innerWidth || document.documentElement.clientWidth || 390;
+      const portrait = window.innerHeight > window.innerWidth;
+      const target = viewport * (portrait ? 1.08 : 0.96);
+      const scale = rawWidth > 0 ? Math.min(1, target / rawWidth) : 1;
+      document.documentElement.style.setProperty('--train-scale', scale.toFixed(4));
     }
+
     buildTrain();
-    addEventListener('resize',()=>requestAnimationFrame(placeLabels),{passive:true});
-    addEventListener('orientationchange',()=>setTimeout(()=>requestAnimationFrame(placeLabels),260),{passive:true});
+    addEventListener('resize', () => requestAnimationFrame(fitTrain), {passive:true});
+    addEventListener('orientationchange', () => setTimeout(() => requestAnimationFrame(fitTrain), 260), {passive:true});
   </script>
 </body>
 </html>
