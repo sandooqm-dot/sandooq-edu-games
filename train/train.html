@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>قطار الإجابات - إصدار 1</title>
+  <style>
+    :root{
+      --bg1:#cfe7ff;--bg2:#fff3d7;--rail:#6f5131;--gold:#d6a62c;--blue:#1d2380;
+    }
+    *{box-sizing:border-box} body{margin:0;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;background:#d9ecff;color:#fff;}
+    .game{position:relative;width:100vw;height:100svh;min-height:520px;overflow:hidden;background:linear-gradient(#cfe7ff 0%,#eaf4ff 48%,#f6deb6 49%,#c99b66 100%);}
+    .hud{position:absolute;z-index:20;top:16px;left:18px;right:18px;display:flex;gap:12px;align-items:center;justify-content:space-between;pointer-events:none}
+    .pill{background:rgba(20,23,71,.55);border:1px solid rgba(255,255,255,.25);border-radius:18px;padding:10px 16px;font-size:20px;font-weight:800;backdrop-filter:blur(6px)}
+    .title{font-size:22px} .score{direction:ltr}
+    .mountains,.mountains2,.ground-lines{position:absolute;inset:auto 0 0 0;pointer-events:none}
+    .mountains{height:48%;bottom:29%;opacity:.38;background:linear-gradient(135deg,transparent 0 20%,#7b8fb8 20% 30%,transparent 30% 100%),linear-gradient(45deg,transparent 0 28%,#6f82a8 28% 42%,transparent 42% 100%);background-size:360px 100%,460px 100%;animation:bgMove 32s linear infinite;}
+    .mountains2{height:38%;bottom:30%;opacity:.25;background:linear-gradient(140deg,transparent 0 22%,#8da0c8 22% 35%,transparent 35% 100%);background-size:260px 100%;animation:bgMove 48s linear infinite reverse;}
+    .ground-lines{height:95px;bottom:0;background:repeating-linear-gradient(90deg,rgba(70,45,25,.22) 0 60px,rgba(70,45,25,.06) 60px 120px);animation:bgMove 8s linear infinite;}
+    @keyframes bgMove{from{background-position:0 0}to{background-position:-1000px 0}}
+    .rails{position:absolute;left:0;right:0;bottom:64px;height:26px;z-index:3}
+    .rail-line{position:absolute;left:0;right:0;height:6px;background:#5c3e24;border-radius:6px;box-shadow:0 2px 0 rgba(255,255,255,.15) inset}
+    .rail-line.top{top:2px}.rail-line.bottom{bottom:2px}
+    .sleepers{position:absolute;left:0;right:0;top:8px;height:12px;background:repeating-linear-gradient(90deg,transparent 0 35px,#8b6037 35px 64px,transparent 64px 100px);animation:bgMove 3.5s linear infinite}
+    .train-wrap{position:absolute;z-index:10;left:50%;bottom:66px;transform:translateX(-50%);width:min(1900px,142vw);height:270px;display:flex;align-items:flex-end;justify-content:center;direction:ltr;animation:trainBob 1.4s ease-in-out infinite;}
+    @keyframes trainBob{0%,100%{translate:0 0}50%{translate:0 2px}}
+    .part{height:230px;object-fit:contain;object-position:bottom center;display:block;margin-left:-4px;filter:drop-shadow(0 10px 10px rgba(0,0,0,.22));}
+    .question-car{width:21%;min-width:250px}.passenger{width:20%;min-width:245px}.coal{width:10%;min-width:118px}.loco{width:25%;min-width:300px}
+    .car-label{position:absolute;bottom:86px;z-index:12;transform:translateX(-50%);font-weight:900;font-size:clamp(18px,2.2vw,32px);color:#f8df6b;text-shadow:0 3px 2px #3a2162,0 0 6px rgba(0,0,0,.45);white-space:nowrap;pointer-events:none}
+    .note{position:absolute;right:18px;bottom:18px;z-index:30;background:rgba(0,0,0,.38);border-radius:14px;padding:10px 14px;font-size:14px;color:#fff;max-width:520px;line-height:1.6}
+    @media(max-width:800px){.pill{font-size:16px;padding:8px 12px}.title{font-size:17px}.train-wrap{width:175vw;height:230px}.part{height:190px}.rails{bottom:56px}.car-label{bottom:75px}.note{font-size:12px;max-width:80vw}}
+  </style>
+</head>
+<body>
+  <main class="game" id="game">
+    <div class="mountains"></div><div class="mountains2"></div><div class="ground-lines"></div>
+    <div class="hud"><div class="pill title">قطار الإجابات</div><div class="pill score">0 ✓</div></div>
+    <div class="rails"><div class="rail-line top"></div><div class="sleepers"></div><div class="rail-line bottom"></div></div>
+    <div class="train-wrap" id="train"></div>
+    <div class="note">هذه نسخة تركيب مبدئية: القاطرة + الفحم + الركاب + عربات الأسئلة تتولد حسب عدد التصنيفات. الخطوة التالية: فصل عجلات القاطرة/العربات للتحريك الدقيق ثم إضافة البالونات والسقوط.</div>
+  </main>
+  <script>
+    const categories = ['استفهام','تعجب','أمر']; // غيّر العدد هنا وسيزيد/ينقص عدد العربات
+    const train = document.getElementById('train');
+    function addPart(src, cls, alt){ const img=document.createElement('img'); img.className='part '+cls; img.src=src; img.alt=alt; train.appendChild(img); return img; }
+    function buildTrain(){
+      train.innerHTML='';
+      categories.forEach((cat,idx)=> addPart('car.png','question-car','عربة سؤال'));
+      addPart('passenger.png','passenger','مقطورة ركاب');
+      addPart('coal.png','coal','عربة فحم');
+      addPart('loco.png','loco','القاطرة');
+      requestAnimationFrame(placeLabels);
+    }
+    function placeLabels(){
+      document.querySelectorAll('.car-label').forEach(e=>e.remove());
+      const cars=[...train.querySelectorAll('.question-car')];
+      cars.forEach((car,idx)=>{
+        const r=car.getBoundingClientRect();
+        const label=document.createElement('div');
+        label.className='car-label';
+        label.textContent=categories[idx]||'';
+        label.style.left=(r.left+r.width/2)+'px';
+        document.getElementById('game').appendChild(label);
+      });
+    }
+    buildTrain();
+    addEventListener('resize',()=>requestAnimationFrame(placeLabels));
+  </script>
+</body>
+</html>
