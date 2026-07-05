@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 4</title>
+  <title>قطار الإجابات - إصدار 6</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -192,39 +192,78 @@
     .coal{width:calc(var(--train-h) * 195 / 311)}
     .loco{width:calc(var(--train-h) * 485 / 311)}
 
-    /* train-5: العجلات الثابتة أزيلت من صور القطار، وهذه العجلات المتحركة تركب فوق مواقعها الأصلية بدقة. */
+    /* train-6: العجلات الآن صور مستقلة مأخوذة من نفس القطار ومركبة على فتحات العجلات بدقة. */
     .wheel{
       position:absolute;
       z-index:2;
       aspect-ratio:1/1;
       border-radius:50%;
       pointer-events:none;
-      animation:wheelSpin .8s linear infinite;
+      animation:wheelSpin .82s linear infinite;
       transform-origin:center center;
-      background:
-        radial-gradient(circle at center,#fff4a6 0 8%,#b98220 9% 15%,transparent 16%),
-        repeating-conic-gradient(from 0deg,#f4d871 0 5deg,transparent 6deg 29deg),
-        radial-gradient(circle at center,transparent 0 45%,#f7d876 46% 55%,#6d4214 56% 67%,#e3b847 68% 78%,transparent 79%);
-      border:1.5px solid rgba(70,40,12,.82);
-      box-shadow:inset 0 0 0 2px rgba(255,236,134,.38),0 2px 3px rgba(0,0,0,.18);
+      background-size:contain;
+      background-repeat:no-repeat;
+      background-position:center center;
+      filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));
+      will-change:transform;
     }
 
     @keyframes wheelSpin{to{transform:rotate(360deg)}}
 
-    /* train-5: المواضع محسوبة من الصورة الأصلية بعد إزالة العجلات الثابتة. */
-    .car .wheel{width:13.85%;bottom:4.50%}
-    .car .w1{left:9.74%}.car .w2{left:27.44%}.car .w3{left:60.77%}.car .w4{left:78.72%}
+    /* عربات الإجابات: نفس مواقع عجلات الصورة الأصلية بعد إزالة العجلات الثابتة. */
+    .car .wheel{
+      width:13.846%;
+      bottom:5.466%;
+      background-image:url('wheelCar.png');
+    }
+    .car .w1{left:10.000%}
+    .car .w2{left:27.692%}
+    .car .w3{left:61.795%}
+    .car .w4{left:78.974%}
 
-    .passenger .wheel{width:13.92%;bottom:4.50%}
-    .passenger .w1{left:11.08%}.passenger .w2{left:27.32%}.passenger .w3{left:59.54%}.passenger .w4{left:77.32%}
+    /* مقطورة الركاب. */
+    .passenger .wheel{
+      width:13.918%;
+      bottom:5.145%;
+      background-image:url('wheelCar.png');
+    }
+    .passenger .w1{left:13.660%}
+    .passenger .w2{left:30.155%}
+    .passenger .w3{left:60.309%}
+    .passenger .w4{left:76.804%}
 
-    .coal .wheel{width:27.70%;bottom:4.50%}
-    .coal .w1{left:29.74%}.coal .w2{left:60.51%}
+    /* عربة الفحم. */
+    .coal .wheel{
+      width:27.692%;
+      bottom:5.145%;
+      background-image:url('wheelCar.png');
+    }
+    .coal .w1{left:28.205%}
+    .coal .w2{left:63.077%}
 
-    .loco .wheel{animation-duration:.86s}
-    .loco .big{width:23.10%;left:7.84%;bottom:6.43%;animation-duration:1s}
-    .loco .mid{width:18.15%;left:40.82%;bottom:9.32%;animation-duration:.86s}
-    .loco .small{width:18.15%;left:64.12%;bottom:9.32%;animation-duration:.82s}
+    /* القاطرة. */
+    .loco .wheel{animation-duration:.88s}
+    .loco .big{
+      width:25.979%;
+      left:8.247%;
+      bottom:8.682%;
+      background-image:url('wheelL.png');
+      animation-duration:1.02s;
+    }
+    .loco .mid{
+      width:18.144%;
+      left:42.268%;
+      bottom:7.717%;
+      background-image:url('wheelM.png');
+      animation-duration:.88s;
+    }
+    .loco .small{
+      width:18.144%;
+      left:66.804%;
+      bottom:7.717%;
+      background-image:url('wheelS.png');
+      animation-duration:.84s;
+    }
 
     @media (orientation:landscape){
       :root{--train-h:clamp(110px, 29dvh, 190px)}
