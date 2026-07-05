@@ -343,151 +343,236 @@
       passenger(x); coupler(x+276); x+=288;
       coalCar(x); coupler(x+150); x+=158;
       locomotive(x);
-      svg.setAttribute('viewBox', `0 -210 ${x+392} 510`);
+      svg.setAttribute('viewBox', `0 -340 ${x+392} 640`);
     }
 
 
-    function drawBlimp(parent, x, y, text){
-      const g = el('g', {class:'balloon-hit', transform:`translate(${x} ${y})`}, parent);
-      // train-11: منطاد كبير وواضح في أعلى الشاشة، قريب من حجم عربة القطار كما في الفيديو.
-      el('ellipse',{cx:0,cy:0,rx:122,ry:54,fill:'#b9c1d3',stroke:'#586073','stroke-width':4},g);
-      el('ellipse',{cx:-34,cy:-16,rx:68,ry:22,fill:'#eef5ff',opacity:.38},g);
-      el('ellipse',{cx:18,cy:12,rx:82,ry:20,fill:'#828ca5',opacity:.18},g);
-      el('path',{d:'M -123 0 C -150 -15 -150 15 -123 0 M 122 0 L 160 -29 L 151 0 L 160 29 Z',fill:'#8e98b0',stroke:'#586073','stroke-width':3},g);
-      el('rect',{x:-43,y:48,width:86,height:22,rx:5,fill:'#77717a',stroke:'#504a55','stroke-width':3},g);
-      el('line',{x1:-68,y1:32,x2:-30,y2:52,stroke:'#77717a','stroke-width':4},g);
-      el('line',{x1:68,y1:32,x2:30,y2:52,stroke:'#77717a','stroke-width':4},g);
+    function drawBlimp(parent, x, y, text, scale=1){
+      const g = el('g', {class:'balloon-hit', transform:`translate(${x} ${y}) scale(${scale})`}, parent);
+      // train-12: منطاد كبير يتحرك في خط متموج مثل الفيديو، وحجمه قريب من عربة القطار.
+      el('ellipse',{cx:0,cy:0,rx:124,ry:52,fill:'#b9c2d4',stroke:'#596375','stroke-width':4},g);
+      el('ellipse',{cx:-36,cy:-18,rx:72,ry:21,fill:'#eef6ff',opacity:.42},g);
+      el('path',{d:'M -124 -2 C -155 -22 -156 20 -124 2 M 124 0 L 164 -31 L 153 0 L 164 31 Z',fill:'#8c96af',stroke:'#596375','stroke-width':3},g);
+      el('path',{d:'M -86 36 C -42 58 43 58 88 36',fill:'none',stroke:'#7b808e','stroke-width':5,'stroke-linecap':'round',opacity:.72},g);
+      el('rect',{x:-44,y:48,width:88,height:22,rx:5,fill:'#77717a',stroke:'#504a55','stroke-width':3},g);
+      el('line',{x1:-70,y1:31,x2:-30,y2:52,stroke:'#77717a','stroke-width':4},g);
+      el('line',{x1:70,y1:31,x2:30,y2:52,stroke:'#77717a','stroke-width':4},g);
       const t = el('text',{x:0,y:2,class:'game-note',style:'font-size:43px;stroke-width:5px'},g);
       t.textContent = text;
       return g;
     }
 
     function drawWoodenBox(parent, x, y, text){
-      const g = el('g', {transform:`translate(${x} ${y})`}, parent);
-      el('rect',{x:-42,y:-30,width:84,height:60,rx:6,fill:'#8b4d25',stroke:'#4b2b17','stroke-width':4},g);
-      el('rect',{x:-35,y:-23,width:70,height:46,rx:3,fill:'#9f6131',stroke:'#6b3d1f','stroke-width':2},g);
-      el('line',{x1:-35,y1:-5,x2:35,y2:-5,stroke:'#6b3d1f','stroke-width':3},g);
-      el('line',{x1:-13,y1:-23,x2:-13,y2:23,stroke:'#6b3d1f','stroke-width':3},g);
-      el('line',{x1:14,y1:-23,x2:14,y2:23,stroke:'#6b3d1f','stroke-width':3},g);
-      el('path',{d:'M -36 -23 L 36 23 M 36 -23 L -36 23',stroke:'#d69b58','stroke-width':4,'opacity':.62},g);
-      const tx=el('text',{x:0,y:3,class:'box-text',style:'font-size:18px'},g);
+      const g = el('g', {transform:`translate(${x} ${y}) rotate(0)`, class:'falling-crate'} , parent);
+      // صندوق خشبي أكبر وأقرب لشكل الفيديو.
+      el('rect',{x:-54,y:-38,width:108,height:76,rx:6,fill:'#704019',stroke:'#3f2413','stroke-width':4},g);
+      el('rect',{x:-47,y:-31,width:94,height:62,rx:3,fill:'#8b562d',stroke:'#5b351c','stroke-width':2},g);
+      for(let yy=-20; yy<=20; yy+=20){
+        el('line',{x1:-47,y1:yy,x2:47,y2:yy,stroke:'#56311a','stroke-width':3,opacity:.75},g);
+      }
+      el('line',{x1:-21,y1:-31,x2:-21,y2:31,stroke:'#56311a','stroke-width':3},g);
+      el('line',{x1:21,y1:-31,x2:21,y2:31,stroke:'#56311a','stroke-width':3},g);
+      el('path',{d:'M -49 -31 L 49 31 M 49 -31 L -49 31',stroke:'#d29b5b','stroke-width':5,'opacity':.58},g);
+      const tx=el('text',{x:0,y:3,class:'box-text',style:'font-size:25px;stroke-width:4px'},g);
       tx.textContent=text;
       return g;
     }
 
     function popEffect(parent, x, y){
       const g = el('g', {transform:`translate(${x} ${y})`}, parent);
-      el('text',{x:0,y:-4,class:'pop-text'},g).textContent='POP';
-      for(let i=0;i<10;i++){
-        const a=(Math.PI*2*i)/10;
-        el('line',{x1:Math.cos(a)*30,y1:Math.sin(a)*20,x2:Math.cos(a)*52,y2:Math.sin(a)*36,stroke:i%2?'#fff3a0':'#d72a2a','stroke-width':4,'stroke-linecap':'round'},g);
+      el('text',{x:0,y:-8,class:'pop-text',style:'font-size:45px'},g).textContent='POP';
+      for(let i=0;i<14;i++){
+        const a=(Math.PI*2*i)/14;
+        el('line',{x1:Math.cos(a)*36,y1:Math.sin(a)*25,x2:Math.cos(a)*70,y2:Math.sin(a)*48,stroke:i%2?'#fff3a0':'#d72a2a','stroke-width':5,'stroke-linecap':'round'},g);
       }
+      smokePuff(parent, x-34, y+8, .95);
+      smokePuff(parent, x+34, y-12, .7);
       let life=0;
-      function step(dt){
-        life += dt;
-        g.setAttribute('opacity', Math.max(0, 1-life/0.62));
-        g.setAttribute('transform', `translate(${x} ${y-life*20}) scale(${1+life*.35})`);
-        if(life>.62) g.remove();
-        else requestAnimationFrame(tick);
-      }
       let last=performance.now();
-      function tick(now){step(Math.min(.04,(now-last)/1000));last=now;}
+      function tick(now){
+        const dt=Math.min(.04,(now-last)/1000); last=now; life+=dt;
+        g.setAttribute('opacity', Math.max(0, 1-life/0.55));
+        g.setAttribute('transform', `translate(${x} ${y-life*26}) scale(${1+life*.5})`);
+        if(life>.55) g.remove(); else requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function smokePuff(parent, x, y, scale=1){
+      const g = el('g', {transform:`translate(${x} ${y}) scale(${scale})`, opacity:.92}, parent);
+      const pts=[[-22,2,18],[-8,-9,22],[12,-4,20],[28,4,15],[4,12,18]];
+      pts.forEach(([cx,cy,r])=>el('circle',{cx,cy,r,fill:'#b7c7ce',stroke:'#89a0ab','stroke-width':2,opacity:.88},g));
+      let life=0,last=performance.now();
+      function tick(now){
+        const dt=Math.min(.04,(now-last)/1000); last=now; life+=dt;
+        g.setAttribute('opacity', Math.max(0, .88-life/1.25));
+        g.setAttribute('transform',`translate(${x} ${y-life*26}) scale(${scale*(1+life*.28)})`);
+        if(life>1.25) g.remove(); else requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function scoreBurst(parent, x, y, amount){
+      const g = el('g', {transform:`translate(${x} ${y})`}, parent);
+      el('text',{x:0,y:0,class:'label-text',style:'font-size:48px;stroke-width:5px'},g).textContent = amount > 5 ? '+10' : '+5';
+      let life=0,last=performance.now();
+      function tick(now){
+        const dt=Math.min(.04,(now-last)/1000); last=now; life+=dt;
+        g.setAttribute('opacity', Math.max(0, 1-life/1.1));
+        g.setAttribute('transform',`translate(${x} ${y-life*55}) scale(${1+life*.12})`);
+        if(life>1.1) g.remove(); else requestAnimationFrame(tick);
+      }
       requestAnimationFrame(tick);
     }
 
     function initDropDemo(){
       const scoreEl = document.getElementById('score');
       const layer = el('g', {id:'playLayer'});
-      const target = {label:'تعجب', x1:16+282+38, x2:16+282+246, top:112, catchY:165};
-      const item = {text:'ماذا!', answer:'تعجب'};
+      const boxesLayer = el('g', {id:'parkedBoxes'});
+      // مواقع عربات الإجابات داخل الـSVG، نستخدمها للصندوق الحر عند الاصطدام.
+      const zones = [
+        {label:'استفهام', x1:16+35, x2:16+248, top:112, floor:154, center:16+140},
+        {label:'تعجب', x1:16+282+35, x2:16+282+248, top:112, floor:154, center:16+282+140},
+        {label:'أمر', x1:16+282*2+35, x2:16+282*2+248, top:112, floor:154, center:16+282*2+140}
+      ];
+      const items = [
+        {text:'ماذا!', answer:'تعجب', x:250, y:-254, vx:93, phase:0.2, scale:1.03},
+        {text:'أين؟', answer:'استفهام', x:650, y:-205, vx:82, phase:2.0, scale:.96},
+        {text:'اكتب', answer:'أمر', x:1000, y:-272, vx:78, phase:4.4, scale:.92}
+      ];
       let score = 0;
-      let balloon = null;
-      let bx = 1180, by = -135, bv = -96;
-      let popped = false;
-      let crate = null;
-      let cx=0, cy=0, vx=0, vy=0, rot=0, vr=0;
-      let landed = false;
+      let crates=[];
+      let balloons=[];
+      let locked=false;
 
-      function resetBalloon(){
-        if(balloon) balloon.remove();
-        balloon = drawBlimp(layer, bx, by, item.text);
-        balloon.addEventListener('pointerdown', onPop, {passive:false});
-        popped=false;
-        crate=null;
-        landed=false;
+      function makeBalloon(item){
+        const b = drawBlimp(layer, item.x, item.y, item.text, item.scale);
+        item.node = b;
+        b.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          popBalloon(item);
+        }, {passive:false});
+        balloons.push(item);
       }
 
-      function onPop(e){
-        e.preventDefault();
-        if(popped) return;
-        popped = true;
-        const x = bx, y = by + 70;
-        popEffect(layer, x, by);
-        balloon.remove();
-        balloon=null;
-        crate = drawWoodenBox(layer, x, y, item.text);
-        cx=x; cy=y; vx=bv*.20; vy=58; rot=0; vr=(Math.random()>.5?1:-1)*150;
+      function popBalloon(item){
+        if(locked || !item.node || item.popped) return;
+        item.popped=true;
+        const x=item.x, y=item.currentY || item.y;
+        popEffect(layer,x,y);
+        item.node.remove(); item.node=null;
+        const crate = drawWoodenBox(layer, x, y+64, item.text);
+        crates.push({node:crate, item, x, y:y+64, vx:item.vx*.18, vy:380, rot:-8, vr:(Math.random()>.5?1:-1)*(410+Math.random()*140), settled:false, bounceCount:0});
       }
 
-      function showMessage(txt, good){
-        const m = el('g', {transform:'translate(600 58)'});
-        el('rect',{x:-135,y:-28,width:270,height:56,rx:18,fill:good?'rgba(42,140,70,.88)':'rgba(169,55,47,.88)',stroke:'#fff','stroke-width':2},m);
-        const t=el('text',{x:0,y:2,class:'game-note',style:'font-size:24px;stroke-width:3px'},m); t.textContent=txt;
-        setTimeout(()=>m.remove(),1200);
+      function resetItem(item, delay=850){
+        setTimeout(()=>{
+          item.popped=false;
+          item.x = 1220 + Math.random()*260;
+          item.phase += Math.PI*.73;
+          makeBalloon(item);
+        }, delay);
       }
 
-      function updateCrate(dt){
-        if(!crate || landed) return;
-        vy += 980 * dt;
-        cx += vx * dt;
-        cy += vy * dt;
-        rot += vr * dt;
+      function parkCrate(c, z, good){
+        c.settled=true;
+        locked=true;
+        const parkX = Math.max(z.x1+58, Math.min(z.x2-58, c.x));
+        const parkY = z.top - 9;
+        const rot = c.vx >= 0 ? 10 : -12;
+        c.node.setAttribute('transform',`translate(${parkX} ${parkY}) rotate(${rot})`);
+        boxesLayer.appendChild(c.node);
+        if(good){
+          score += 10;
+          scoreEl.textContent = score + ' ✓';
+          scoreBurst(layer, parkX-82, z.top-24, 10);
+          smokePuff(layer, parkX+30, z.top-22, .55);
+        } else {
+          scoreBurst(layer, parkX-56, z.top-22, 5);
+        }
+        crates = crates.filter(x=>x!==c);
+        setTimeout(()=>{locked=false; resetItem(c.item, 600);}, 760);
+      }
 
-        // If the box reaches the open wagon level, evaluate where it landed.
-        if(cy + 30 >= target.top){
-          if(cx >= target.x1 && cx <= target.x2){
-            landed = true;
-            cy = target.catchY;
-            vx=0; vy=0; rot = Math.max(-9, Math.min(9, rot));
-            crate.setAttribute('transform',`translate(${cx} ${cy}) rotate(${rot})`);
-            score += 1;
-            scoreEl.textContent = score + ' ✓';
-            showMessage('إجابة صحيحة', true);
-            // train-11: الصندوق لا يختفي؛ يثبت داخل عربة الإجابة مثل الفيديو.
-            const parked = crate;
-            crate = null;
-            setTimeout(()=>{ bx=1180; resetBalloon(); }, 900);
-            return;
+      function bounceOnHardObject(c){
+        c.vy = -Math.abs(c.vy)*0.42;
+        c.vx *= .58;
+        c.vr *= -0.62;
+        c.bounceCount++;
+        smokePuff(layer,c.x,c.y+28,.32);
+      }
+
+      function updateCrates(dt){
+        for(const c of [...crates]){
+          if(c.settled) continue;
+          // train-12: سقوط سريع وحر، بدون خط مسار مقيد.
+          c.vy += 2650*dt;
+          c.x += c.vx*dt;
+          c.y += c.vy*dt;
+          c.rot += c.vr*dt;
+
+          const z = zones.find(z=>c.x>=z.x1 && c.x<=z.x2);
+          if(z && c.y + 38 >= z.top){
+            if(c.item.answer === z.label){
+              if(c.bounceCount < 1 && c.vy > 620){
+                bounceOnHardObject(c);
+              } else {
+                parkCrate(c,z,true);
+                continue;
+              }
+            } else {
+              // إذا سقط في عربة خاطئة يرتطم ثم يكمل/يرجع مثل الفيديو.
+              if(c.bounceCount < 2){ bounceOnHardObject(c); }
+              else { parkCrate(c,z,false); continue; }
+            }
           }
-          // hit a wrong place: bounce once like a wooden box.
-          if(cy < 220){
-            vy = -Math.abs(vy)*.38;
-            vx *= .76;
-            vr *= -0.68;
+
+          // ارتطام خفيف بالخط/الأرض بعد تجاوز العربات، ثم يختفي إذا فات القطار.
+          if(c.y > 238){
+            if(c.bounceCount < 2){
+              c.y = 238;
+              bounceOnHardObject(c);
+            } else {
+              c.node.remove();
+              crates = crates.filter(x=>x!==c);
+              resetItem(c.item, 520);
+              continue;
+            }
+          }
+          if(c.x < -120 || c.x > 1420 || c.y > 330){
+            c.node.remove();
+            crates = crates.filter(x=>x!==c);
+            resetItem(c.item, 520);
+            continue;
+          }
+          c.node.setAttribute('transform',`translate(${c.x} ${c.y}) rotate(${c.rot})`);
+        }
+      }
+
+      function updateBalloons(dt, now){
+        for(const item of balloons){
+          if(item.popped || !item.node) continue;
+          item.x += item.vx*dt;
+          // خط متموج واضح: المنطاد يرتفع وينزل أثناء الحركة.
+          item.currentY = item.y + Math.sin(now/470 + item.phase)*34 + Math.sin(now/210 + item.phase)*8;
+          item.node.setAttribute('transform',`translate(${item.x} ${item.currentY}) scale(${item.scale})`);
+          if(item.x > 1350){
+            item.node.remove(); item.node=null;
+            item.x = -220 - Math.random()*220;
+            makeBalloon(item);
           }
         }
-        if(cy > 285 || cx < -70){
-          showMessage('حاول مرة ثانية', false);
-          if(crate){crate.remove();crate=null;}
-          bx=1180;
-          setTimeout(resetBalloon,450);
-          return;
-        }
-        crate.setAttribute('transform',`translate(${cx} ${cy}) rotate(${rot})`);
+        balloons = balloons.filter(b=>b.node);
       }
 
-      let last = performance.now();
+      items.forEach(makeBalloon);
+      let last=performance.now();
       function loop(now){
-        const dt = Math.min(.034,(now-last)/1000); last=now;
-        if(!popped){
-          bx += bv*dt;
-          if(bx < -190) bx = 1180;
-          if(balloon) balloon.setAttribute('transform',`translate(${bx} ${by + Math.sin(now/420)*5})`);
-        }
-        updateCrate(dt);
+        const dt=Math.min(.032,(now-last)/1000); last=now;
+        updateBalloons(dt, now);
+        updateCrates(dt);
         requestAnimationFrame(loop);
       }
-      resetBalloon();
       requestAnimationFrame(loop);
     }
 
