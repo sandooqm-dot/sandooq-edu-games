@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 3</title>
+  <title>قطار الإجابات - إصدار 4</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -210,19 +210,21 @@
 
     @keyframes wheelSpin{to{transform:rotate(360deg)}}
 
-    .car .wheel{width:14.35%;bottom:5.4%}
-    .car .w1{left:9.0%}.car .w2{left:26.6%}.car .w3{left:64.0%}.car .w4{left:81.5%}
+    /* train-4: ضبط دقيق لمراكز العجلات فوق عجلات الصور الأصلية.
+       القياسات مبنية كنسب من عرض كل عربة حتى تبقى ثابتة مع تغيير الحجم. */
+    .car .wheel{width:12.4%;bottom:5.35%}
+    .car .w1{left:9.95%}.car .w2{left:27.65%}.car .w3{left:62.25%}.car .w4{left:79.20%}
 
-    .passenger .wheel{width:14.0%;bottom:5.2%}
-    .passenger .w1{left:12.4%}.passenger .w2{left:29.5%}.passenger .w3{left:66.8%}.passenger .w4{left:83.2%}
+    .passenger .wheel{width:12.0%;bottom:5.55%}
+    .passenger .w1{left:14.10%}.passenger .w2{left:29.30%}.passenger .w3{left:60.75%}.passenger .w4{left:76.50%}
 
-    .coal .wheel{width:28.5%;bottom:5.3%}
-    .coal .w1{left:25.2%}.coal .w2{left:59.2%}
+    .coal .wheel{width:24.0%;bottom:5.20%}
+    .coal .w1{left:27.50%}.coal .w2{left:59.30%}
 
-    .loco .wheel{bottom:5.2%;animation-duration:.86s}
-    .loco .big{width:21.5%;left:12.5%;bottom:2.8%;animation-duration:1s}
-    .loco .mid{width:16.8%;left:44.8%;animation-duration:.86s}
-    .loco .small{width:16.3%;left:69.6%;animation-duration:.82s}
+    .loco .wheel{animation-duration:.86s}
+    .loco .big{width:23.7%;left:8.15%;bottom:9.45%;animation-duration:1s}
+    .loco .mid{width:17.0%;left:42.90%;bottom:7.35%;animation-duration:.86s}
+    .loco .small{width:17.1%;left:66.90%;bottom:7.35%;animation-duration:.82s}
 
     @media (orientation:landscape){
       :root{--train-h:clamp(110px, 29dvh, 190px)}
@@ -301,7 +303,7 @@
       const rawWidth = train.scrollWidth;
       const viewport = window.innerWidth || document.documentElement.clientWidth || 390;
       const portrait = window.innerHeight > window.innerWidth;
-      const target = viewport * (portrait ? 1.08 : 0.96);
+      const target = viewport * (portrait ? 0.98 : 0.96);
       const scale = rawWidth > 0 ? Math.min(1, target / rawWidth) : 1;
       document.documentElement.style.setProperty('--train-scale', scale.toFixed(4));
     }
