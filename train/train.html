@@ -3,21 +3,20 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 6</title>
+  <title>قطار الإجابات - إصدار 8</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
       --safe-bottom:env(safe-area-inset-bottom,0px);
-      --train-h:clamp(74px, 13.5vw, 150px);
-      --train-scale:1;
       --sky1:#cfe8ff;
-      --sky2:#edf8ff;
-      --sand1:#f6ddad;
-      --sand2:#c8955d;
-      --rail:#5d3e25;
-      --hud:#6d719c;
-      --gold:#ead06c;
-      --gold-dark:#8c5e1d;
+      --sky2:#eef8ff;
+      --sand1:#f5d9a2;
+      --sand2:#c58c52;
+      --rail:#5b3a22;
+      --hud:#696e9f;
+      --gold:#f4ce61;
+      --red:#bd2424;
+      --red-dark:#7b1215;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -30,7 +29,7 @@
       font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
     }
 
-    /* نفس طريقة صفحة العجلة: الصفحة نفسها sticky وباقي body يعطي مساحة بسيطة لسفاري حتى يطوي الشريط. */
+    /* نفس طريقة صفحة العجلة: مساحة تمرير بسيطة للجسم، والمشهد مثبت sticky حتى يطوي Safari الشريط. */
     body{
       min-height:calc(100dvh + 160px);
       overflow-x:hidden;
@@ -58,9 +57,9 @@
       user-select:none;
       touch-action:none;
       background:
-        radial-gradient(circle at 20% 20%,rgba(255,255,255,.50) 0 10%,transparent 22%),
-        radial-gradient(circle at 78% 18%,rgba(255,255,255,.35) 0 8%,transparent 18%),
-        linear-gradient(180deg,var(--sky1) 0 55%,var(--sky2) 55.2% 56%,var(--sand1) 56.1%,var(--sand2) 100%);
+        radial-gradient(circle at 19% 18%,rgba(255,255,255,.50) 0 10%,transparent 22%),
+        radial-gradient(circle at 78% 16%,rgba(255,255,255,.34) 0 8%,transparent 18%),
+        linear-gradient(180deg,var(--sky1) 0 54%,var(--sky2) 54.2% 55.3%,var(--sand1) 55.4%,var(--sand2) 100%);
     }
 
     .hud{
@@ -97,11 +96,11 @@
       left:0;
       right:0;
       bottom:0;
-      height:22%;
-      min-height:88px;
+      height:23%;
+      min-height:92px;
       z-index:1;
-      background:repeating-linear-gradient(90deg,rgba(78,48,24,.17) 0 64px,rgba(78,48,24,.05) 64px 128px);
-      opacity:.65;
+      background:repeating-linear-gradient(90deg,rgba(78,48,24,.18) 0 74px,rgba(78,48,24,.05) 74px 148px);
+      opacity:.62;
       animation:groundMove 12s linear infinite;
       pointer-events:none;
     }
@@ -112,8 +111,8 @@
       position:absolute;
       left:0;
       right:0;
-      bottom:calc(34px + var(--safe-bottom));
-      height:26px;
+      bottom:calc(36px + var(--safe-bottom));
+      height:28px;
       z-index:5;
       pointer-events:none;
     }
@@ -133,142 +132,65 @@
       left:0;
       right:0;
       top:8px;
-      height:13px;
+      height:14px;
       background:repeating-linear-gradient(90deg,transparent 0 34px,#9a6d42 34px 66px,transparent 66px 100px);
       animation:sleeperMove 5s linear infinite;
     }
     @keyframes sleeperMove{from{background-position:0 0}to{background-position:-700px 0}}
 
-    .train-camera{
+    .train-stage{
       position:absolute;
       z-index:12;
-      left:0;
-      right:0;
-      bottom:calc(44px + var(--safe-bottom));
-      height:calc(var(--train-h) + 12px);
-      display:flex;
-      align-items:flex-end;
-      justify-content:center;
-      overflow:visible;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:calc(42px + var(--safe-bottom));
+      width:min(96vw, 1900px);
+      height:clamp(150px, 28dvh, 270px);
       pointer-events:none;
-      direction:ltr;
     }
 
-    .train-set{
-      display:flex;
-      align-items:flex-end;
-      justify-content:center;
-      direction:ltr;
-      transform:scale(var(--train-scale));
-      transform-origin:center bottom;
-      will-change:transform;
-    }
-
-    .unit{
-      position:relative;
-      height:var(--train-h);
-      flex:0 0 auto;
-      margin-left:-2px;
-      filter:drop-shadow(0 8px 9px rgba(0,0,0,.18));
-    }
-
-    .unit img.body{
-      position:absolute;
-      z-index:3;
-      left:0;
-      bottom:0;
+    .train-svg{
       width:100%;
       height:100%;
-      object-fit:contain;
-      object-position:bottom center;
       display:block;
-      pointer-events:none;
-      user-select:none;
-      -webkit-user-drag:none;
+      overflow:visible;
+      filter:drop-shadow(0 8px 8px rgba(0,0,0,.16));
     }
 
-    .car{width:calc(var(--train-h) * 390 / 311)}
-    .passenger{width:calc(var(--train-h) * 388 / 311)}
-    .coal{width:calc(var(--train-h) * 195 / 311)}
-    .loco{width:calc(var(--train-h) * 485 / 311)}
-
-    /* train-6: العجلات الآن صور مستقلة مأخوذة من نفس القطار ومركبة على فتحات العجلات بدقة. */
     .wheel{
-      position:absolute;
-      z-index:2;
-      aspect-ratio:1/1;
-      border-radius:50%;
-      pointer-events:none;
-      animation:wheelSpin .82s linear infinite;
-      transform-origin:center center;
-      background-size:contain;
-      background-repeat:no-repeat;
-      background-position:center center;
-      filter:drop-shadow(0 1px 1px rgba(0,0,0,.18));
+      animation:wheelSpin 1s linear infinite;
+      transform-box:fill-box;
+      transform-origin:center;
       will-change:transform;
     }
-
+    .wheel.small{animation-duration:.78s}
+    .wheel.medium{animation-duration:.88s}
+    .wheel.large{animation-duration:1.06s}
     @keyframes wheelSpin{to{transform:rotate(360deg)}}
 
-    /* عربات الإجابات: نفس مواقع عجلات الصورة الأصلية بعد إزالة العجلات الثابتة. */
-    .car .wheel{
-      width:13.846%;
-      bottom:5.466%;
-      background-image:url('wheelCar.png');
+    .label-text{
+      font-weight:900;
+      font-size:42px;
+      fill:#f8db72;
+      paint-order:stroke;
+      stroke:#7a2a18;
+      stroke-width:5px;
+      stroke-linejoin:round;
+      direction:rtl;
+      unicode-bidi:plaintext;
+      dominant-baseline:middle;
+      text-anchor:middle;
+      font-family:"Noto Naskh Arabic","Traditional Arabic",Tahoma,Arial,sans-serif;
     }
-    .car .w1{left:10.000%}
-    .car .w2{left:27.692%}
-    .car .w3{left:61.795%}
-    .car .w4{left:78.974%}
 
-    /* مقطورة الركاب. */
-    .passenger .wheel{
-      width:13.918%;
-      bottom:5.145%;
-      background-image:url('wheelCar.png');
-    }
-    .passenger .w1{left:13.660%}
-    .passenger .w2{left:30.155%}
-    .passenger .w3{left:60.309%}
-    .passenger .w4{left:76.804%}
-
-    /* عربة الفحم. */
-    .coal .wheel{
-      width:27.692%;
-      bottom:5.145%;
-      background-image:url('wheelCar.png');
-    }
-    .coal .w1{left:28.205%}
-    .coal .w2{left:63.077%}
-
-    /* القاطرة. */
-    .loco .wheel{animation-duration:.88s}
-    .loco .big{
-      width:25.979%;
-      left:9.350%;
-      bottom:8.682%;
-      background-image:url('wheelL.png');
-      animation-duration:1.02s;
-    }
-    .loco .mid{
-      width:18.144%;
-      left:42.268%;
-      bottom:7.717%;
-      background-image:url('wheelM.png');
-      animation-duration:.88s;
-    }
-    .loco .small{
-      width:18.144%;
-      left:66.804%;
-      bottom:7.717%;
-      background-image:url('wheelS.png');
-      animation-duration:.84s;
+    .car-hit-panel{
+      fill:rgba(255,255,255,0);
+      pointer-events:none;
     }
 
     @media (orientation:landscape){
-      :root{--train-h:clamp(110px, 29dvh, 190px)}
-      .rails{bottom:calc(24px + var(--safe-bottom))}
-      .train-camera{bottom:calc(34px + var(--safe-bottom))}
+      .train-stage{height:clamp(170px, 33dvh, 300px);bottom:calc(34px + var(--safe-bottom));width:96vw}
+      .rails{bottom:calc(26px + var(--safe-bottom))}
       .pill{font-size:clamp(14px,3.2vh,24px);padding:8px 15px;border-radius:15px}
     }
 
@@ -276,8 +198,8 @@
       .hud{top:calc(10px + var(--safe-top));left:12px;right:12px}
       .pill{font-size:16px;padding:8px 13px;border-radius:15px}
       .score{min-width:62px}
-      .rails{bottom:calc(32px + var(--safe-bottom))}
-      .train-camera{bottom:calc(42px + var(--safe-bottom))}
+      .train-stage{width:98vw;height:clamp(138px, 21dvh, 220px);bottom:calc(44px + var(--safe-bottom))}
+      .rails{bottom:calc(34px + var(--safe-bottom))}
     }
   </style>
 </head>
@@ -295,61 +217,178 @@
       <div class="rail-line bottom"></div>
     </div>
 
-    <div class="train-camera" aria-hidden="true">
-      <div class="train-set" id="train"></div>
+    <div class="train-stage" aria-hidden="true">
+      <svg class="train-svg" id="trainSvg" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax meet" role="img" aria-label="قطار الإجابات"></svg>
     </div>
   </main>
 
   <script>
     const categories = ['استفهام','تعجب','أمر'];
-    const train = document.getElementById('train');
+    const svg = document.getElementById('trainSvg');
+    const NS = 'http://www.w3.org/2000/svg';
 
-    function makeUnit(kind, src, alt){
-      const unit = document.createElement('div');
-      unit.className = 'unit ' + kind;
-      const img = document.createElement('img');
-      img.className = 'body';
-      img.src = src;
-      img.alt = alt;
-      unit.appendChild(img);
-      addWheels(unit, kind);
-      train.appendChild(unit);
-      return unit;
+    function el(name, attrs = {}, parent = svg){
+      const node = document.createElementNS(NS, name);
+      Object.entries(attrs).forEach(([k,v]) => node.setAttribute(k, v));
+      parent.appendChild(node);
+      return node;
     }
 
-    function addWheel(unit, cls){
-      const w = document.createElement('span');
-      w.className = 'wheel ' + cls;
-      unit.appendChild(w);
+    function defs(){
+      const d = el('defs');
+      const mkGrad = (id, stops) => {
+        const g = el('linearGradient', {id, x1:'0', y1:'0', x2:'0', y2:'1'}, d);
+        stops.forEach(s => el('stop', s, g));
+      };
+      mkGrad('redBody', [
+        {'offset':'0%', 'stop-color':'#e44a3e'},
+        {'offset':'42%', 'stop-color':'#be2424'},
+        {'offset':'100%', 'stop-color':'#761017'}
+      ]);
+      mkGrad('redPanel', [
+        {'offset':'0%', 'stop-color':'#d93631'},
+        {'offset':'58%', 'stop-color':'#b51c22'},
+        {'offset':'100%', 'stop-color':'#8b1418'}
+      ]);
+      mkGrad('gold', [
+        {'offset':'0%', 'stop-color':'#fff0a9'},
+        {'offset':'42%', 'stop-color':'#d6a340'},
+        {'offset':'100%', 'stop-color':'#7f511c'}
+      ]);
+      mkGrad('darkMetal', [
+        {'offset':'0%', 'stop-color':'#2f2923'},
+        {'offset':'100%', 'stop-color':'#0d0b0a'}
+      ]);
+      mkGrad('glass', [
+        {'offset':'0%', 'stop-color':'#bdf2ff'},
+        {'offset':'100%', 'stop-color':'#3a7b8b'}
+      ]);
+      const shadow = el('filter', {id:'softShadow', x:'-20%', y:'-20%', width:'140%', height:'150%'}, d);
+      el('feDropShadow', {'dx':'0','dy':'4','stdDeviation':'3','flood-color':'#000','flood-opacity':'.22'}, shadow);
     }
 
-    function addWheels(unit, kind){
-      if(kind === 'car' || kind === 'passenger') ['w1','w2','w3','w4'].forEach(c => addWheel(unit,c));
-      if(kind === 'coal') ['w1','w2'].forEach(c => addWheel(unit,c));
-      if(kind === 'loco') { addWheel(unit,'big'); addWheel(unit,'mid'); addWheel(unit,'small'); }
+    function roundRect(x,y,w,h,r,fill,stroke='url(#gold)',sw=4,parent=svg){
+      return el('rect',{x,y,width:w,height:h,rx:r,ry:r,fill,stroke,'stroke-width':sw},parent);
+    }
+
+    function wheel(cx, cy, r, cls='medium'){
+      const g = el('g', {class:'wheel '+cls});
+      el('circle',{cx,cy,r,fill:'url(#gold)',stroke:'#5f3b15','stroke-width':3},g);
+      el('circle',{cx,cy,r:r*0.72,fill:'none',stroke:'#8a5a1f','stroke-width':4},g);
+      for(let i=0;i<18;i++){
+        const a = (Math.PI*2*i)/18;
+        const x1 = cx + Math.cos(a)*r*0.19;
+        const y1 = cy + Math.sin(a)*r*0.19;
+        const x2 = cx + Math.cos(a)*r*0.82;
+        const y2 = cy + Math.sin(a)*r*0.82;
+        el('line',{x1,y1,x2,y2,stroke:'#f1c461','stroke-width':4,'stroke-linecap':'round'},g);
+        el('line',{x1,y1,x2,y2,stroke:'#7b4d19','stroke-width':1.2,'stroke-linecap':'round','opacity':.45},g);
+      }
+      el('circle',{cx,cy,r:r*0.21,fill:'#b21f24',stroke:'#4c2918','stroke-width':4},g);
+      el('circle',{cx,cy,r:r*0.09,fill:'#181310',stroke:'#f5d66d','stroke-width':2},g);
+      return g;
+    }
+
+    function answerCar(x, label){
+      const g = el('g', {class:'answer-car', 'data-label':label});
+      // wheels first so body naturally covers the upper part.
+      wheel(x+57, 244, 18, 'small');
+      wheel(x+95, 244, 18, 'small');
+      wheel(x+187, 244, 18, 'small');
+      wheel(x+225, 244, 18, 'small');
+      el('rect',{x:x+18,y:222,width:248,height:18,rx:5,fill:'url(#gold)',stroke:'#6d4214','stroke-width':2},g);
+      el('path',{d:`M ${x+20} 112 L ${x+260} 112 L ${x+248} 210 L ${x+35} 210 Z`,fill:'url(#redBody)',stroke:'url(#gold)','stroke-width':5,'stroke-linejoin':'round'},g);
+      el('path',{d:`M ${x+38} 132 L ${x+242} 132 L ${x+232} 195 L ${x+48} 195 Z`,fill:'url(#redPanel)',stroke:'#7d1416','stroke-width':3,'opacity':.9},g);
+      el('line',{x1:x+17,y1:106,x2:x+262,y2:106,stroke:'url(#gold)','stroke-width':10,'stroke-linecap':'round'},g);
+      el('line',{x1:x+24,y1:214,x2:x+258,y2:214,stroke:'url(#gold)','stroke-width':6,'stroke-linecap':'round'},g);
+      el('text',{x:x+140,y:162,class:'label-text'},g).textContent = label;
+      el('rect',{x:x+35,y:118,width:210,height:88,class:'car-hit-panel'},g);
+      return g;
+    }
+
+    function passenger(x){
+      const g = el('g', {class:'passenger'});
+      wheel(x+48,244,17,'small'); wheel(x+88,244,17,'small'); wheel(x+188,244,17,'small'); wheel(x+228,244,17,'small');
+      el('rect',{x:x+16,y:218,width:255,height:18,rx:5,fill:'url(#gold)',stroke:'#6d4214','stroke-width':2},g);
+      roundRect(x+28,108,232,98,8,'url(#redBody)','url(#gold)',5,g);
+      el('line',{x1:x+28,y1:102,x2:x+260,y2:102,stroke:'url(#gold)','stroke-width':14,'stroke-linecap':'round'},g);
+      for(let i=0;i<5;i++){
+        const wx = x+49+i*39;
+        roundRect(wx,126,28,42,7,'url(#glass)','#7f511c',3,g);
+        el('path',{d:`M ${wx+4} 166 C ${wx+10} 151 ${wx+22} 151 ${wx+27} 166`,fill:'#244d57',opacity:.35},g);
+      }
+      el('path',{d:`M ${x+95} 187 C ${x+125} 202 ${x+165} 202 ${x+195} 187`,fill:'none',stroke:'url(#gold)','stroke-width':5,'stroke-linecap':'round'},g);
+      return g;
+    }
+
+    function coalCar(x){
+      const g = el('g', {class:'coal'});
+      wheel(x+44,244,17,'small'); wheel(x+92,244,17,'small');
+      el('rect',{x:x+15,y:218,width:125,height:18,rx:5,fill:'url(#gold)',stroke:'#6d4214','stroke-width':2},g);
+      roundRect(x+23,143,108,66,6,'url(#redBody)','url(#gold)',5,g);
+      for(let i=0;i<18;i++){
+        const cx = x+30+(i%9)*11;
+        const cy = 137 - Math.floor(i/9)*7 - (i%2)*3;
+        el('circle',{cx,cy,r:9,fill:'#191614',opacity:.95},g);
+      }
+      el('path',{d:`M ${x+51} 178 C ${x+70} 158 ${x+91} 158 ${x+108} 178 C ${x+92} 196 ${x+68} 196 ${x+51} 178 Z`,fill:'none',stroke:'url(#gold)','stroke-width':4},g);
+      return g;
+    }
+
+    function locomotive(x){
+      const g = el('g', {class:'loco'});
+      wheel(x+78,230,44,'large');
+      wheel(x+180,238,30,'medium');
+      wheel(x+260,238,30,'medium');
+      // base
+      el('path',{d:`M ${x+20} 218 L ${x+312} 218 L ${x+314} 235 L ${x+20} 235 Z`,fill:'url(#gold)',stroke:'#6d4214','stroke-width':3},g);
+      // cab
+      roundRect(x+24,84,98,128,5,'url(#redBody)','url(#gold)',6,g);
+      el('rect',{x:x+38,y:34,width:70,height:55,rx:4,fill:'#b21f24',stroke:'url(#gold)','stroke-width':5},g);
+      el('text',{x:x+73,y:64,fill:'#f9df76','font-size':44,'font-weight':900,'text-anchor':'middle','dominant-baseline':'middle'},g).textContent='1';
+      el('path',{d:`M ${x+22} 32 L ${x+120} 32 L ${x+134} 47 L ${x+12} 47 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      // boiler
+      roundRect(x+114,118,183,76,13,'url(#redBody)','url(#gold)',5,g);
+      el('line',{x1:x+128,y1:152,x2:x+286,y2:152,stroke:'url(#gold)','stroke-width':5,'stroke-linecap':'round'},g);
+      el('line',{x1:x+128,y1:180,x2:x+286,y2:180,stroke:'url(#gold)','stroke-width':4,'stroke-linecap':'round'},g);
+      el('path',{d:`M ${x+295} 104 C ${x+322} 110 ${x+322} 203 ${x+295} 210 C ${x+278} 190 ${x+278} 124 ${x+295} 104 Z`,fill:'url(#darkMetal)',stroke:'#2a1b14','stroke-width':3},g);
+      for(let i=0;i<7;i++) el('circle',{cx:x+302,cy:123+i*12,r:3.2,fill:'#443127'},g);
+      // domes and smokestacks
+      el('path',{d:`M ${x+165} 103 C ${x+168} 80 ${x+218} 80 ${x+221} 103 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
+      el('rect',{x:x+174,y:96,width:38,height:14,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('rect',{x:x+124,y:76,width:32,height:42,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('path',{d:`M ${x+120} 70 C ${x+125} 58 ${x+156} 58 ${x+161} 70 Z`,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':3},g);
+      el('rect',{x:x+247,y:47,width:34,height:70,rx:5,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
+      el('ellipse',{cx:x+264,cy:46,rx:24,ry:9,fill:'url(#darkMetal)',stroke:'url(#gold)','stroke-width':4},g);
+      // cowcatcher
+      el('path',{d:`M ${x+307} 195 L ${x+365} 233 L ${x+314} 233 Z`,fill:'url(#gold)',stroke:'#6d4214','stroke-width':3,'stroke-linejoin':'round'},g);
+      for(let i=0;i<6;i++) el('line',{x1:x+315+i*8,y1:203,x2:x+325+i*7,y2:230,stroke:'#7b4d19','stroke-width':3,'stroke-linecap':'round'},g);
+      return g;
+    }
+
+    function coupler(x,y=214){
+      el('rect',{x:x-5,y:y,width:20,height:8,rx:3,fill:'#2b1d19',stroke:'url(#gold)','stroke-width':1.4});
+      el('circle',{cx:x-7,cy:y+4,r:6,fill:'#2b1d19'});
+      el('circle',{cx:x+17,cy:y+4,r:6,fill:'#2b1d19'});
     }
 
     function buildTrain(){
-      train.innerHTML = '';
-      categories.forEach(() => makeUnit('car','car.png','عربة إجابة'));
-      makeUnit('passenger','passenger.png','مقطورة ركاب');
-      makeUnit('coal','coal.png','عربة الفحم');
-      makeUnit('loco','loco.png','القاطرة');
-      requestAnimationFrame(fitTrain);
-    }
-
-    function fitTrain(){
-      const rawWidth = train.scrollWidth;
-      const viewport = window.innerWidth || document.documentElement.clientWidth || 390;
-      const portrait = window.innerHeight > window.innerWidth;
-      const target = viewport * (portrait ? 0.98 : 0.96);
-      const scale = rawWidth > 0 ? Math.min(1, target / rawWidth) : 1;
-      document.documentElement.style.setProperty('--train-scale', scale.toFixed(4));
+      svg.innerHTML='';
+      defs();
+      let x = 16;
+      categories.forEach((c, idx) => {
+        answerCar(x, c);
+        coupler(x+270);
+        x += 282;
+      });
+      passenger(x); coupler(x+276); x += 288;
+      coalCar(x); coupler(x+150); x += 158;
+      locomotive(x);
+      const totalW = x + 390;
+      svg.setAttribute('viewBox', `0 0 ${totalW} 300`);
     }
 
     buildTrain();
-    addEventListener('resize', () => requestAnimationFrame(fitTrain), {passive:true});
-    addEventListener('orientationchange', () => setTimeout(() => requestAnimationFrame(fitTrain), 260), {passive:true});
   </script>
 </body>
 </html>
