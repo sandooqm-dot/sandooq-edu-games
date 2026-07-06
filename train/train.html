@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 20</title>
+  <title>قطار الإجابات - إصدار 21</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -175,32 +175,32 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=20",
+      href:"train-track.webp?v=21",
       x:-90,
-      y:624,
+      y:630,
       width:1460,
-      height:58,
+      height:48,
       preserveAspectRatio:"none"
     }, track);
     // دعم إضافي لبعض نسخ Safari عند قراءة صور SVG image + كسر الكاش بعد تعديل المقاسات.
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=20");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=21");
   }
 
 
   function locomotive(){
     const train = el("g", {id:"locomotiveStatic"});
 
-    // إصدار 20: تصغير واضح للقطار والسكة، وإظهار العجلة الكبيرة خارج جسم القاطرة،
-    // مع ثلاث عجلات صغيرة ظاهرة تحت جسم القاطرة بدون أي حركة حاليًا.
-    const bodyX = 740;
-    const bodyY = 386;
-    const bodyW = 370;
-    const bodyH = 219;
+    // إصدار 21: ضبط مواضع العجلات لتجلس على السكة مثل المرجع،
+    // بدون حركة حاليًا وبدون تغيير الخلفية.
+    const bodyX = 760;
+    const bodyY = 404;
+    const bodyW = 330;
+    const bodyH = 195;
 
     const bodyLayer = el("g", {id:"engineBodyLayer"}, train);
 
     const engine = el("image", {
-      href:"train-engine.webp?v=20",
+      href:"train-engine.webp?v=21",
       x:bodyX,
       y:bodyY,
       width:bodyW,
@@ -208,14 +208,14 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"engineBody"
     }, bodyLayer);
-    engine.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine.webp?v=20");
+    engine.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine.webp?v=21");
 
     // نضع العجلات بعد جسم القطار في ترتيب SVG حتى تظهر فوق/خارج الجسم بوضوح عند الحاجة.
     const wheelLayer = el("g", {id:"wheelLayer"}, train);
 
     function addWheel(x, y, size, cls){
       const wheel = el("image", {
-        href:"train-wheel.webp?v=20",
+        href:"train-wheel.webp?v=21",
         x:x,
         y:y,
         width:size,
@@ -223,17 +223,17 @@
         preserveAspectRatio:"xMidYMid meet",
         class:cls || "train-wheel"
       }, wheelLayer);
-      wheel.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wheel.webp?v=20");
+      wheel.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wheel.webp?v=21");
       return wheel;
     }
 
-    // العجلة الكبيرة: أخرجناها أكثر للأسفل واليسار حتى لا تبدو مدفونة خلف القاطرة.
-    addWheel(bodyX + 48, 492, 126, "train-wheel train-wheel-large");
+    // العجلة الكبيرة: أصغر وأنزل قليلًا حتى تكون خارج الجسم وتلامس السكة بصريًا مثل المرجع.
+    addWheel(bodyX + 42, 520, 108, "train-wheel train-wheel-large");
 
-    // ثلاث عجلات صغيرة، أكبر قليلًا، ومرتبة تحت جسم القطار بنفس فكرة المرجع.
-    addWheel(bodyX + 224, 556, 66, "train-wheel train-wheel-small");
-    addWheel(bodyX + 284, 556, 66, "train-wheel train-wheel-small");
-    addWheel(bodyX + 344, 556, 66, "train-wheel train-wheel-small");
+    // ثلاث عجلات صغيرة تحت جسم القاطرة، بحجم ومكان أقرب للصورة المرجعية.
+    addWheel(bodyX + 214, 586, 48, "train-wheel train-wheel-small");
+    addWheel(bodyX + 268, 586, 48, "train-wheel train-wheel-small");
+    addWheel(bodyX + 322, 586, 48, "train-wheel train-wheel-small");
   }
 
   function build(){
