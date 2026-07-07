@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 49</title>
+  <title>قطار الإجابات - إصدار 50</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 49:
+    // إصدار 50:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -466,11 +466,18 @@
     setTimeout(() => burst.remove(), 520);
   }
 
+  const BOX = {
+    left:46,
+    right:58,
+    top:32,
+    bottom:42
+  };
+
   function getBoxCollisionInfo(state){
-    const boxTop = state.y - 32;
-    const boxBottom = state.y + 42;
-    const boxLeft = state.x - 46;
-    const boxRight = state.x + 58;
+    const boxTop = state.y - BOX.top;
+    const boxBottom = state.y + BOX.bottom;
+    const boxLeft = state.x - BOX.left;
+    const boxRight = state.x + BOX.right;
     const boxCenterX = state.x;
     const boxCenterY = state.y + 5;
 
@@ -482,10 +489,8 @@
       boxCenterX,
       boxCenterY,
       bottomPoint:{x:boxCenterX, y:boxBottom},
-      leftBottom:{x:boxLeft + 14, y:boxBottom},
-      rightBottom:{x:boxRight - 14, y:boxBottom},
-      leftPoint:{x:boxLeft, y:boxCenterY},
-      rightPoint:{x:boxRight, y:boxCenterY}
+      leftBottom:{x:boxLeft + 13, y:boxBottom},
+      rightBottom:{x:boxRight - 13, y:boxBottom}
     };
   }
 
@@ -511,85 +516,165 @@
     return {type, ...rect, ...meta};
   }
 
+  function makeSurface(rect, meta = {}){
+    return makeZone("surface", rect, meta);
+  }
+
+  function makeWall(rect, meta = {}){
+    return makeZone("wall", rect, meta);
+  }
+
+  function makeWell(rect, meta = {}){
+    return makeZone("well", rect, meta);
+  }
+
   function buildCollisionMap(){
     collisionMap.length = 0;
 
-    // السكة والأرض: انفجار واختفاء إذا لم يدخل الصندوق في حوض العربة.
-    collisionMap.push(makeZone("track", {
+    collisionMap.push(makeSurface({
       left:-90,
       right:1380,
-      top:602,
-      bottom:642
-    }, {name:"track"}));
+      y:604,
+      thickness:38
+    }, {
+      kind:"track",
+      name:"track"
+    }));
 
     trainCarRegistry.forEach((car, index) => {
       if(!car || car.type !== "answer") return;
 
       const well = {
-        left:car.x + 44,
-        right:car.x + car.width - 44,
-        top:car.y + 30,
-        bottom:car.y + car.height - 20
+        left:car.x + 62,
+        right:car.x + car.width - 62,
+        top:car.y + 16,
+        bottom:car.y + car.height - 24
       };
 
-      // الحوض الحقيقي: لا يلتقط الصندوق إلا إذا دخل بوضوح إلى الداخل.
-      collisionMap.push(makeZone("wagon-well", well, {
+      // فتحة الحوض فقط. لا يوجد جذب للمركز.
+      collisionMap.push(makeWell(well, {
         car,
         index,
-        name:`wagon-well-${index}`
+        name:`wagon-well-${index}`,
+        floorY:car.y + 52
       }));
 
-      // حافة العربة: ليست مغناطيسًا. تضرب الصندوق وتجعله ينزلق تدريجيًا.
-      collisionMap.push(makeZone("wagon-rim", {
-        left:car.x + 24,
-        right:car.x + car.width - 24,
-        top:car.y + 5,
-        bottom:car.y + 34
-      }, {car, index, name:`wagon-rim-${index}`}));
+      // حافتان فقط حول فتحة الحوض، حتى يدخل الصندوق إذا سقط داخل الفتحة.
+      collisionMap.push(makeSurface({
+        left:car.x + 8,
+        right:well.left + 12,
+        y:car.y + 9,
+        thickness:30
+      }, {
+        kind:"wagon-rim",
+        side:"left-rim",
+        slideX:32,
+        friction:.70,
+        bounce:.035,
+        car,
+        index,
+        name:`wagon-left-rim-${index}`
+      }));
 
-      // جوانب وجسم العربة كأجسام صلبة.
-      collisionMap.push(makeZone("wagon-solid", {
+      collisionMap.push(makeSurface({
+        left:well.right - 12,
+        right:car.x + car.width - 8,
+        y:car.y + 9,
+        thickness:30
+      }, {
+        kind:"wagon-rim",
+        side:"right-rim",
+        slideX:-42,
+        friction:.70,
+        bounce:.035,
+        car,
+        index,
+        name:`wagon-right-rim-${index}`
+      }));
+
+      // جدران العربة الخارجية فقط كأجسام صلبة.
+      collisionMap.push(makeWall({
         left:car.x + 2,
-        right:car.x + 44,
-        top:car.y + 24,
-        bottom:car.y + car.height + 2
-      }, {car, index, side:"left", name:`wagon-left-wall-${index}`}));
+        right:car.x + 38,
+        top:car.y + 22,
+        bottom:car.y + car.height + 4
+      }, {
+        kind:"wagon-wall",
+        side:"left",
+        car,
+        index,
+        name:`wagon-left-wall-${index}`
+      }));
 
-      collisionMap.push(makeZone("wagon-solid", {
-        left:car.x + car.width - 44,
+      collisionMap.push(makeWall({
+        left:car.x + car.width - 38,
         right:car.x + car.width - 2,
-        top:car.y + 24,
-        bottom:car.y + car.height + 2
-      }, {car, index, side:"right", name:`wagon-right-wall-${index}`}));
+        top:car.y + 22,
+        bottom:car.y + car.height + 4
+      }, {
+        kind:"wagon-wall",
+        side:"right",
+        car,
+        index,
+        name:`wagon-right-wall-${index}`
+      }));
 
-      collisionMap.push(makeZone("wagon-solid", {
-        left:car.x + 34,
-        right:car.x + car.width - 34,
-        top:car.y + car.height - 24,
-        bottom:car.y + car.height + 6
-      }, {car, index, side:"bottom", name:`wagon-bottom-${index}`}));
+      collisionMap.push(makeSurface({
+        left:car.x + 28,
+        right:car.x + car.width - 28,
+        y:car.y + car.height - 18,
+        thickness:28
+      }, {
+        kind:"wagon-base",
+        friction:.62,
+        bounce:.02,
+        car,
+        index,
+        name:`wagon-base-${index}`
+      }));
     });
 
-    // مناطق صلبة موسعة للقاطرة، خصوصًا المقدمة والقاعدة حتى لا يخترقها الصندوق.
-    const locomotiveZones = [
-      {name:"locomotive-cabin", left:770, right:910, top:424, bottom:600},
-      {name:"locomotive-roof", left:785, right:895, top:400, bottom:465},
-      {name:"locomotive-boiler", left:885, right:1088, top:448, bottom:592},
-      {name:"locomotive-front-face", left:1062, right:1146, top:438, bottom:604},
-      {name:"locomotive-nose", left:1116, right:1190, top:502, bottom:614},
-      {name:"locomotive-plow", left:1084, right:1198, top:548, bottom:628},
-      {name:"locomotive-base", left:772, right:1144, top:555, bottom:620},
-      {name:"locomotive-big-wheel-solid", left:780, right:890, top:510, bottom:618},
-      {name:"locomotive-small-wheels-solid", left:895, right:1080, top:548, bottom:618}
-    ];
+    // أسطح القاطرة. هذه ليست مستطيلات دفع عشوائية، بل خطوط علوية تمتص الصدمة وتزحلق الصندوق.
+    [
+      {name:"locomotive-roof", left:790, right:898, y:425, friction:.64, bounce:.025, slideX:-82},
+      {name:"locomotive-cabin-face", left:772, right:912, y:470, friction:.64, bounce:.025, slideX:-90},
+      {name:"locomotive-boiler-top", left:895, right:1088, y:458, friction:.62, bounce:.02, slideX:-105},
+      {name:"locomotive-front-top", left:1070, right:1168, y:500, friction:.58, bounce:.018, slideX:-132},
+      {name:"locomotive-plow-top", left:1088, right:1204, y:552, friction:.54, bounce:.012, slideX:-150},
+      {name:"locomotive-base-top", left:780, right:1148, y:558, friction:.58, bounce:.015, slideX:-118},
+      {name:"locomotive-wheel-line", left:790, right:1084, y:570, friction:.54, bounce:.012, slideX:-120}
+    ].forEach(surface => {
+      collisionMap.push(makeSurface({
+        left:surface.left,
+        right:surface.right,
+        y:surface.y,
+        thickness:34
+      }, {
+        kind:"locomotive",
+        name:surface.name,
+        friction:surface.friction,
+        bounce:surface.bounce,
+        slideX:surface.slideX
+      }));
+    });
 
-    locomotiveZones.forEach(zone => {
-      collisionMap.push(makeZone("locomotive-solid", {
-        left:zone.left,
-        right:zone.right,
-        top:zone.top,
-        bottom:zone.bottom
-      }, {name:zone.name}));
+    // الجدران الأمامية/الخلفية للقاطرة لمنع الاختراق.
+    [
+      {name:"locomotive-front-wall", left:1128, right:1208, top:470, bottom:620, side:"right", pushX:-185},
+      {name:"locomotive-cabin-wall", left:765, right:802, top:430, bottom:602, side:"left", pushX:-95},
+      {name:"locomotive-body-wall", left:1062, right:1112, top:448, bottom:604, side:"right", pushX:-160}
+    ].forEach(wall => {
+      collisionMap.push(makeWall({
+        left:wall.left,
+        right:wall.right,
+        top:wall.top,
+        bottom:wall.bottom
+      }, {
+        kind:"locomotive-wall",
+        name:wall.name,
+        side:wall.side,
+        pushX:wall.pushX
+      }));
     });
   }
 
@@ -598,178 +683,170 @@
     collisionDebugLayer.innerHTML = "";
 
     const colors = {
-      "track":"#ff7a00",
-      "wagon-well":"#00c853",
-      "wagon-rim":"#00b0ff",
-      "wagon-solid":"#ff1744",
-      "locomotive-solid":"#aa00ff"
+      "surface":"#00b0ff",
+      "well":"#00c853",
+      "wall":"#ff1744"
     };
 
     collisionMap.forEach(zone => {
-      el("rect", {
-        x:zone.left,
-        y:zone.top,
-        width:zone.right - zone.left,
-        height:zone.bottom - zone.top,
-        fill:colors[zone.type] || "#fff",
-        opacity:".16",
-        stroke:colors[zone.type] || "#fff",
-        "stroke-width":2
-      }, collisionDebugLayer);
+      if(zone.type === "surface"){
+        el("rect", {
+          x:zone.left,
+          y:zone.y,
+          width:zone.right - zone.left,
+          height:zone.thickness || 22,
+          fill:zone.kind === "track" ? "#ff7a00" : colors.surface,
+          opacity:".16",
+          stroke:zone.kind === "track" ? "#ff7a00" : colors.surface,
+          "stroke-width":2
+        }, collisionDebugLayer);
+      }else{
+        el("rect", {
+          x:zone.left,
+          y:zone.top,
+          width:zone.right - zone.left,
+          height:zone.bottom - zone.top,
+          fill:colors[zone.type] || "#fff",
+          opacity:".16",
+          stroke:colors[zone.type] || "#fff",
+          "stroke-width":2
+        }, collisionDebugLayer);
+      }
     });
   }
 
-  function getBoxRect(state){
+  function getSurfaceHit(state){
     const info = getBoxCollisionInfo(state);
-    return {
+    const prevBottom = (state.prevY || state.y) + BOX.bottom;
+    const boxRect = {
       left:info.boxLeft,
       right:info.boxRight,
       top:info.boxTop,
       bottom:info.boxBottom
     };
+
+    // لا نسمح للأسطح أن تلتقط الصندوق من بعيد، فقط عند عبور القاع لخط السطح.
+    for(const zone of collisionMap){
+      if(zone.type !== "surface") continue;
+      if(zone.kind === "track") continue;
+
+      const overlapsX = info.boxRight > zone.left && info.boxLeft < zone.right;
+      const crossedTop = prevBottom <= zone.y + 10 && info.boxBottom >= zone.y;
+      const shallowContact = info.boxBottom >= zone.y && info.boxBottom <= zone.y + (zone.thickness || 28);
+
+      if(overlapsX && (crossedTop || shallowContact) && state.vy > 0){
+        return zone;
+      }
+    }
+
+    for(const zone of collisionMap){
+      if(zone.type !== "wall") continue;
+      if(rectsOverlap(boxRect, zone)){
+        return zone;
+      }
+    }
+
+    return null;
   }
 
-  function getCollisionAtState(state){
+  function getWellHit(state){
     const info = getBoxCollisionInfo(state);
-    const boxRect = getBoxRect(state);
 
-    // 1) الأجزاء الصلبة أولًا حتى لا يخترق الصندوق مقدمة القاطرة أو جوانب العربات.
     for(const zone of collisionMap){
-      if((zone.type === "locomotive-solid" || zone.type === "wagon-solid") &&
-        rectsOverlap(boxRect, zone) &&
-        state.vy > 0){
-        return {zone, info};
-      }
-    }
+      if(zone.type !== "well") continue;
 
-    // 2) الحافة: تصطدم ثم تنزلق، ولا يتم سحب الصندوق مباشرة للحوض.
-    for(const zone of collisionMap){
-      if(zone.type !== "wagon-rim") continue;
-      const bottomHitsRim =
-        info.boxBottom >= zone.top &&
-        info.boxBottom <= zone.bottom + 16 &&
-        rectsOverlap(boxRect, zone) &&
-        state.vy > 0;
-
-      if(bottomHitsRim){
-        return {zone, info};
-      }
-    }
-
-    // 3) الحوض: لا يلتقط إلا عندما يكون قاع الصندوق داخل الحوض فعليًا.
-    for(const zone of collisionMap){
-      if(zone.type !== "wagon-well") continue;
-
-      const insideByBottom =
+      const bottomInside =
         rectContainsPoint(zone, info.bottomPoint) ||
         rectContainsPoint(zone, info.leftBottom) ||
         rectContainsPoint(zone, info.rightBottom);
 
-      const deepEnough = info.boxBottom > zone.top + 18;
+      const deepEnough = info.boxBottom >= zone.top + 18;
+      const centerInside = info.boxCenterX >= zone.left + 10 && info.boxCenterX <= zone.right - 10;
 
-      if(insideByBottom && deepEnough && state.vy > 0){
-        return {zone, info};
+      if(bottomInside && deepEnough && centerInside && state.vy > 0){
+        return zone;
       }
     }
 
-    // 4) السكة أخيرًا.
+    return null;
+  }
+
+  function getTrackHit(state){
+    const info = getBoxCollisionInfo(state);
+
     for(const zone of collisionMap){
-      if(zone.type === "track" && info.boxBottom >= zone.top && state.vy > 0){
-        return {zone, info};
+      if(zone.type !== "surface" || zone.kind !== "track") continue;
+      if(info.boxBottom >= zone.y && state.vy > 0){
+        return zone;
       }
     }
 
     return null;
   }
 
-  function findWagonCatchTarget(state){
-    const hit = getCollisionAtState(state);
-    if(!hit || hit.zone.type !== "wagon-well") return null;
-    return hit.zone.car || null;
-  }
+  function applySurfacePhysics(state, zone){
+    const sameSurface = state.lastSurface === zone.name && state.surfaceHold > 0;
+    state.lastSurface = zone.name;
+    state.surfaceHold = .12;
 
-  function getTrainSolidHit(state){
-    if(state.solidBounces >= 3) return null;
-    const hit = getCollisionAtState(state);
-    if(!hit) return null;
-
-    if(hit.zone.type === "locomotive-solid" || hit.zone.type === "wagon-solid" || hit.zone.type === "wagon-rim"){
-      return hit.zone;
-    }
-
-    return null;
-  }
-
-  function getTrackImpact(state){
-    const hit = getCollisionAtState(state);
-    return hit && hit.zone.type === "track" ? hit.zone : null;
-  }
-
-  function applySolidResponse(state, zone){
-    state.solidBounces += 1;
-
-    if(zone.type === "wagon-rim"){
-      // ضربة الحافة: نزول أقل + انزلاق تدريجي للداخل، بدون سحب مغناطيسي.
-      const center = zone.car ? zone.car.targetArea.centerX : state.x - 80;
-      const desiredVx = clamp((center - state.x) * 1.15, -185, 105);
-      state.vx = state.vx * .38 + desiredVx * .62;
-      state.vy = Math.max(42, state.vy * .28);
-      state.vr = state.vx < 0 ? -130 : 115;
-      state.y = Math.min(state.y, zone.top - 39);
-      state.rotation += state.vx < 0 ? -8 : 8;
+    if(zone.type === "wall"){
+      const push = zone.pushX ?? (zone.side === "right" ? -130 : 80);
+      state.vx = state.vx * .42 + push;
+      state.vy = Math.max(24, state.vy * .24);
+      state.vr = clamp(state.vr + push * .42, -145, 115);
+      state.x += push < 0 ? -6 : 6;
       return;
     }
 
-    if(zone.type === "locomotive-solid"){
-      // القاطرة جسم صلب: دفع واضح للخلف/لليسار مثل الفيديو.
-      state.vx = Math.min(state.vx, -245);
-      state.vy = Math.max(48, state.vy * .22);
-      state.vr = -175;
-      state.rotation -= 12;
-      state.y = Math.min(state.y, zone.top - 41);
-      return;
+    const incomingVy = state.vy;
+    const bounce = sameSurface ? 0 : (zone.bounce ?? .025);
+    const friction = zone.friction ?? .62;
+    const slideX = zone.slideX ?? 0;
+
+    state.y = zone.y - BOX.bottom;
+
+    // لا نستخدم نط ثابت. إذا الطاقة ضعيفة، الصندوق يلتصق/ينزلق بدل أن يقفز.
+    if(Math.abs(incomingVy) < 160 || sameSurface){
+      state.vy = 0;
+    }else{
+      state.vy = -Math.min(34, Math.abs(incomingVy) * bounce);
     }
 
-    // جسم العربة من الخارج: ارتداد خفيف ثم استمرار سقوطه.
-    state.vx = zone.side === "right" ? Math.min(state.vx, -190) : Math.max(state.vx, 84);
-    state.vy = Math.max(46, state.vy * .34);
-    state.vr = zone.side === "right" ? -155 : 135;
-    state.rotation += zone.side === "right" ? -8 : 8;
-    state.y = Math.min(state.y, zone.top - 41);
+    state.vx = state.vx * friction + slideX * (1 - friction);
+    state.vr = clamp(state.vr * .70 + state.vx * .20, -130, 110);
+
+    // احتكاك على السطح: إذا بطأ جدًا، يستمر بالانزلاق الخفيف باتجاه حركة القطار/اليسار.
+    if(zone.kind === "locomotive" && Math.abs(state.vx) < 54){
+      state.vx = -54;
+    }
   }
 
-  function settleBoxIntoWagon(startState, car, textLines){
+  function settleBoxIntoWagon(startState, well, textLines){
     const layer = settledObjectsLayer || fallingObjectsLayer || svg;
     const box = answerBox(layer, textLines);
+    const car = well.car;
 
-    // لا نسحب الصندوق إلى منتصف العربة بسرعة.
-    // نثبته قريبًا من نقطة دخوله حتى يبدو كأنه وقع داخل الحوض.
-    const minX = car.x + 70;
-    const maxX = car.x + car.width - 70;
-    const projectedX = startState.x + startState.vx * .10;
-    const targetX = clamp(projectedX, minX, maxX);
-    const targetY = car.y + 26 + (Math.random() * 8 - 4);
-    const targetRotation = clamp(startState.rotation * .45, -18, 18);
+    const targetX = clamp(startState.x + startState.vx * .035, well.left + 30, well.right - 30);
+    const targetY = car.y + 31 + (Math.random() * 6 - 3);
+    const targetRotation = clamp(startState.rotation * .32, -16, 16);
 
     const startX = startState.x;
     const startY = startState.y;
     const startRotation = startState.rotation;
     const startedAt = performance.now();
-    const duration = 620;
+    const duration = 420;
 
-    function easeOutBack(t){
-      const c1 = 1.35;
-      const c3 = c1 + 1;
-      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    function easeOutCubic(t){
+      return 1 - Math.pow(1 - t, 3);
     }
 
     function frame(now){
       const t = Math.min(1, (now - startedAt) / duration);
-      const e = easeOutBack(t);
+      const e = easeOutCubic(t);
 
-      // دخول ناعم للحوض، بدون قفزة أو سحب واضح.
+      // تثبيت قصير جدًا قريب من نقطة الدخول، بدون سحب واضح للمركز.
       const x = startX + (targetX - startX) * e;
-      const y = startY + (targetY - startY) * e + Math.sin(t * Math.PI) * 8;
+      const y = startY + (targetY - startY) * e;
       const r = startRotation + (targetRotation - startRotation) * e;
 
       box.setAttribute(
@@ -792,13 +869,17 @@
     const state = {
       x:startX,
       y:startY + 54,
-      vx:-118,       // ميل لليسار بسبب حركة البالون/الرياح
-      vy:22,         // يبدأ نزوله خفيفًا ثم تتسارع الجاذبية
-      gravity:710,
-      wind:-18,
+      prevX:startX,
+      prevY:startY + 54,
+      vx:-104,
+      vy:18,
+      gravity:760,
+      wind:-10,
+      airDrag:.992,
       rotation:-8,
-      vr:-54,
-      solidBounces:0,
+      vr:-42,
+      lastSurface:null,
+      surfaceHold:0,
       lastTime:performance.now()
     };
 
@@ -810,28 +891,36 @@
     }
 
     function step(dt){
+      state.surfaceHold = Math.max(0, state.surfaceHold - dt);
+
+      state.prevX = state.x;
+      state.prevY = state.y;
+
       state.vx += state.wind * dt;
       state.vy += state.gravity * dt;
+      state.vx *= Math.pow(state.airDrag, dt * 60);
+      state.vr *= Math.pow(.988, dt * 60);
+
       state.x += state.vx * dt;
       state.y += state.vy * dt;
       state.rotation += state.vr * dt;
 
-      const catchTarget = findWagonCatchTarget(state);
-      if(catchTarget){
+      const wellHit = getWellHit(state);
+      if(wellHit){
         box.remove();
-        settleBoxIntoWagon(state, catchTarget, textLines);
+        settleBoxIntoWagon(state, wellHit, textLines);
         return "settled";
       }
 
-      const solidHit = getTrainSolidHit(state);
-      if(solidHit){
-        applySolidResponse(state, solidHit);
+      const surfaceHit = getSurfaceHit(state);
+      if(surfaceHit){
+        applySurfacePhysics(state, surfaceHit);
         return "continue";
       }
 
-      if(getTrackImpact(state) || state.x < -180){
+      if(getTrackHit(state) || state.x < -180){
         box.remove();
-        trackImpactBurst(fallingObjectsLayer || svg, state.x, Math.min(state.y + 42, 610));
+        trackImpactBurst(fallingObjectsLayer || svg, state.x, Math.min(state.y + BOX.bottom, 610));
         return "done";
       }
 
@@ -842,9 +931,9 @@
       let remaining = Math.min(0.045, (now - state.lastTime) / 1000);
       state.lastTime = now;
 
-      // خطوات صغيرة داخل كل فريم لمنع اختراق مقدمة القاطرة أو حافة العربة.
+      // خطوات صغيرة جدًا حتى لا يخترق الصندوق القطار ولا يعطي نطة مكررة.
       while(remaining > 0){
-        const dt = Math.min(0.012, remaining);
+        const dt = Math.min(0.008, remaining);
         remaining -= dt;
         const result = step(dt);
         if(result === "settled" || result === "done"){
@@ -1041,17 +1130,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=49",
+      href:"train-track.webp?v=50",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=49");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=50");
   }
 
-  function addWheel(layer, cx, cy, size, version = 49){
+  function addWheel(layer, cx, cy, size, version = 50){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1140,7 +1229,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=49",
+      href:"train-wagon.webp?v=50",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1148,7 +1237,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=49");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=50");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1181,7 +1270,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=49",
+        href:"train-wagon.webp?v=50",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1189,7 +1278,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=49");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=50");
 
       el("text", {
         x:car.centerX,
@@ -1214,7 +1303,7 @@
   }
 
   function locomotive(train){
-    // إصدار 49:
+    // إصدار 50:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1224,7 +1313,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=49",
+      href:"train-engine-transparent.png?v=50",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1232,7 +1321,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=49");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=50");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
