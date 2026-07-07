@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 33</title>
+  <title>قطار الإجابات - إصدار 34</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -186,17 +186,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=33",
+      href:"train-track.webp?v=34",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=33");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=34");
   }
 
-  function addWheel(layer, cx, cy, size, version = 33){
+  function addWheel(layer, cx, cy, size, version = 34){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -228,7 +228,7 @@
 
     const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=33",
+      href:"train-wagon.webp?v=34",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -236,7 +236,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"wagonBody"
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=33");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=34");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -255,16 +255,18 @@
   }
 
   function locomotive(train){
-    // إصدار 33:
-    // تصغير القاطرة ورفعها وموازنة مواقع العجلات لتطابق الصورة المرجعية بشكل أقرب.
-    const locoX = 744;
+    // إصدار 34:
+    // ضبط القاطرة لتقترب أكثر من الصورة المرجعية:
+    // زيادة المسافة بينها وبين العربة، تكبير العجلة الكبيرة،
+    // تكبير العجلات الثلاث الصغيرة 3%، زيادة التباعد بينها، وإرجاعها للخلف قليلًا.
+    const locoX = 768;
     const locoY = 430;
     const locoW = 320;
     const locoH = 179;
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=33",
+      href:"train-engine-transparent.png?v=34",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -272,23 +274,25 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=33");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=34");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
-    // عجلة كبيرة خلفية وثلاث عجلات أمامية بأحجام ومسافات أقرب للمرجع.
-    const largeWheelSize = 72;
+    // عجلة كبيرة خلفية: تم تكبيرها وتقريب موضعها من المرجع.
+    const largeWheelSize = 84;
     const largeWheelCx = locoX + 54;
-    const largeWheelCy = 574;
-    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 33);
+    const largeWheelCy = 572;
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 34);
 
-    const smallWheelSize = 36;
+    // العجلات الثلاث الصغيرة: تكبير 3% تقريبًا، زيادة التباعد،
+    // وإرجاعها للخلف قليلًا داخل جسم القاطرة.
+    const smallWheelSize = 37;
     const smallWheelCy = 589;
-    const smallStartX = locoX + 171;
-    const smallGap = 43;
-    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 33);
-    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 33);
-    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 33);
+    const smallStartX = locoX + 160;
+    const smallGap = 50;
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 34);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 34);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 34);
   }
 
   function build(){
