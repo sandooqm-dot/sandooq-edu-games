@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 51</title>
+  <title>قطار الإجابات - إصدار 52</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 51:
+    // إصدار 52:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -620,16 +620,18 @@
     // الدحرجة مسموحة فقط على السطح العلوي الصغير لمقصورة السائق.
     // بقية مقطورة السائق صلبة وتتسبب في تكسر الصندوق.
     collisionMap.push(makeSlide({
-      left:790,
-      right:898,
+      // أعلى مقطورة السائق فقط: المنطقة المسموح فيها بالتدحرج.
+      // بقية القاطرة صلبة وتكسر الصندوق.
+      left:770,
+      right:930,
       y:424,
-      thickness:24
+      thickness:28
     }, {
       kind:"driver-roof",
-      slideX:-72,
-      slideDuration:.34,
-      friction:.86,
-      name:"driver-roof-short-slide"
+      slideX:-156,
+      slideDuration:.78,
+      friction:.965,
+      name:"driver-roof-controlled-roll"
     }));
 
     // أجزاء القاطرة الصلبة: اصطدام مباشر = تكسر واختفاء.
@@ -641,7 +643,7 @@
       {name:"engine-plow", left:1084, right:1210, top:548, bottom:632},
       {name:"engine-base", left:770, right:1150, top:558, bottom:622},
       {name:"engine-wheels-solid", left:780, right:1088, top:552, bottom:622},
-      {name:"chimney-solid", left:870, right:918, top:382, bottom:464}
+      {name:"chimney-solid", left:892, right:926, top:382, bottom:418}
     ].forEach(zone => {
       collisionMap.push(makeBreak({
         left:zone.left,
@@ -781,8 +783,8 @@
 
     // يظهر الصندوق كأنه داخل الحوض: جزء ظاهر وجزء مخفي خلف واجهة العربة.
     const targetX = clamp(startState.x + startState.vx * .018, well.left + 34, well.right - 34);
-    const targetY = car.y + 13 + (Math.random() * 5 - 2.5);
-    const targetRotation = clamp(startState.rotation * .30, -14, 14);
+    const targetY = car.y + 7 + (Math.random() * 5 - 2.5);
+    const targetRotation = clamp(startState.rotation * .34, -18, 18);
 
     const startX = startState.x;
     const startY = startState.y;
@@ -886,8 +888,13 @@
       state.slideTime -= dt;
 
       state.vx *= Math.pow(zone.friction || .84, dt * 60);
-      state.vx += (zone.kind === "driver-roof" ? -10 : 0) * dt;
-      state.vr *= Math.pow(.965, dt * 60);
+      state.vx += (zone.kind === "driver-roof" ? -34 : 0) * dt;
+      state.vr *= Math.pow(.972, dt * 60);
+
+      // دوران الصندوق ناتج من الحركة الأفقية على السطح، وليس حركة مرسومة إلى هدف.
+      if(zone.kind === "driver-roof"){
+        state.vr = clamp(state.vr + state.vx * .018, -155, 115);
+      }
 
       state.x += state.vx * dt;
       state.y = zone.y - BOX.bottom;
@@ -1119,17 +1126,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=51",
+      href:"train-track.webp?v=52",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=51");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=52");
   }
 
-  function addWheel(layer, cx, cy, size, version = 51){
+  function addWheel(layer, cx, cy, size, version = 52){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1218,7 +1225,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=51",
+      href:"train-wagon.webp?v=52",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1226,7 +1233,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=51");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=52");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1259,7 +1266,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=51",
+        href:"train-wagon.webp?v=52",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1267,7 +1274,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=51");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=52");
 
       el("text", {
         x:car.centerX,
@@ -1292,7 +1299,7 @@
   }
 
   function locomotive(train){
-    // إصدار 51:
+    // إصدار 52:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1302,7 +1309,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=51",
+      href:"train-engine-transparent.png?v=52",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1310,7 +1317,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=51");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=52");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1346,9 +1353,9 @@
     locomotive(train);
 
     // طبقة الصناديق التي استقرت داخل أحواض العربات.
-    // تأتي فوق القطار الأصلي، ثم تغطيها واجهة العربة لتظهر كأنها داخل الحوض.
-    settledObjectsLayer = el("g", {id:"settledObjectsLayer"});
-    wagonForegroundCoverLayer = el("g", {id:"wagonForegroundCoverLayer"});
+    // توضع داخل trainScene حتى تتحرك مع الحركة الخفيفة للقطار.
+    settledObjectsLayer = el("g", {id:"settledObjectsLayer"}, train);
+    wagonForegroundCoverLayer = el("g", {id:"wagonForegroundCoverLayer"}, train);
     renderWagonForegroundCovers();
 
     // خريطة تصادم غير مرئية للقطار: أحواض، حواف، جسم القاطرة، السكة.
@@ -1356,7 +1363,7 @@
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
     drawCollisionDebug();
 
-    // طبقة الصناديق أثناء السقوط، تبقى فوق واجهة العربة إلى لحظة الدخول للحوض.
+    // طبقة الصناديق أثناء السقوط تبقى خارج trainScene حتى لا تتحرك مع القطار أثناء السقوط.
     fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
   }
 
