@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 55</title>
+  <title>قطار الإجابات - إصدار 56</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 55:
+    // إصدار 56:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -317,6 +317,14 @@
   let wagonForegroundCoverLayer = null;
   let collisionDebugLayer = null;
   const collisionMap = [];
+
+  const BALLOONS_PER_ROUND = 5;
+  const MEDIUM_BALLOON_SCALE = .80;
+  const MAX_ACTIVE_FALLING_BOXES = 2;
+  const MAX_SETTLED_BOXES = 5;
+
+  let activeFallingBoxes = 0;
+  const settledBoxes = [];
 
   function balloonBurst(parent, x, y, scale = 1){
     const burst = el("g", {
@@ -823,6 +831,12 @@
     const box = answerBox(layer, textLines);
     const car = well.car;
 
+    settledBoxes.push(box);
+    while(settledBoxes.length > MAX_SETTLED_BOXES){
+      const oldBox = settledBoxes.shift();
+      if(oldBox && oldBox.parentNode) oldBox.remove();
+    }
+
     // يظهر الصندوق كأنه داخل الحوض: جزء ظاهر وجزء مخفي خلف واجهة العربة.
     const targetX = clamp(startState.x + startState.vx * .018, well.left + 34, well.right - 34);
     const targetY = car.y + 7 + (Math.random() * 5 - 2.5);
@@ -860,8 +874,21 @@
   }
 
   function spawnFallingAnswerBox(startX, startY, textLines){
+    if(activeFallingBoxes >= MAX_ACTIVE_FALLING_BOXES){
+      return false;
+    }
+
+    activeFallingBoxes += 1;
+
     const layer = fallingObjectsLayer || svg;
     const box = answerBox(layer, textLines);
+    let cleanedUp = false;
+
+    function cleanupFallingBox(){
+      if(cleanedUp) return;
+      cleanedUp = true;
+      activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
+    }
 
     const state = {
       mode:"falling",
@@ -904,6 +931,7 @@
       const wellHit = getWellHit(state);
       if(wellHit){
         box.remove();
+        cleanupFallingBox();
         settleBoxIntoWagon(state, wellHit, textLines);
         return "settled";
       }
@@ -916,6 +944,7 @@
 
       if(getBreakHit(state) || state.x < -180){
         breakFallingBox(box, state);
+        cleanupFallingBox();
         return "done";
       }
 
@@ -945,6 +974,7 @@
       const wellHit = getWellHit(state);
       if(wellHit){
         box.remove();
+        cleanupFallingBox();
         settleBoxIntoWagon(state, wellHit, textLines);
         return "settled";
       }
@@ -985,6 +1015,7 @@
         requestAnimationFrame(frame);
       }else{
         box.remove();
+        cleanupFallingBox();
       }
     }
 
@@ -1051,7 +1082,7 @@
   function createBalloonMotionState(config, index = 0){
     const now = performance.now();
     return {
-      x:(config.startX ?? 1355) + index * 148 + Math.random() * 34,
+      x:(config.startX ?? 1355) + index * 168 + Math.random() * 34,
       y:(config.baseY ?? 178) + (Math.random() * 34 - 17),
       lastTime:now,
       phaseA:Math.random() * Math.PI * 2,
@@ -1073,8 +1104,8 @@
     setBalloonLines(item.node, item.config.lines);
 
     item.state.x = forceFarRight
-      ? BALLOON_FLIGHT.startX + item.index * 148 + Math.random() * 38
-      : Math.max(BALLOON_FLIGHT.startX + Math.random() * 90, rightMost + 132 + Math.random() * 58);
+      ? BALLOON_FLIGHT.startX + item.index * 168 + Math.random() * 38
+      : Math.max(BALLOON_FLIGHT.startX + Math.random() * 90, rightMost + 156 + Math.random() * 52);
 
     item.state.y = item.config.baseY + (Math.random() * 40 - 20);
     item.state.phaseA = Math.random() * Math.PI * 2;
@@ -1166,19 +1197,18 @@
   function balloonsLayer(){
     const balloons = el("g", {id:"balloonsLayer"});
 
-    // الأداء: لا نرسم 40 بالونًا فعليًا.
-    // نعرض 8 بالونات نشطة فقط، ونُعيد تدويرها لتمثل عددًا كبيرًا من البالونات/المستويات.
-    const ACTIVE_BALLOONS = 8;
-    const yPattern = [174, 132, 226, 188, 112, 258, 150, 214];
-    const scalePattern = [.90, .76, .82, .70, .86, .72, .78, .66];
-    const speedPattern = [1.08, 1.18, 1.02, 1.24, .96, 1.14, 1.04, 1.20];
+    // نظام جولات خفيف: 5 بالونات نشطة فقط، وتُعاد تدويرها حتى نهاية الجولة.
+    const ACTIVE_BALLOONS = BALLOONS_PER_ROUND;
+    const yPattern = [158, 126, 196, 232, 174];
+    const scalePattern = [MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE];
+    const speedPattern = [1.08, 1.16, 1.02, 1.12, 1.06];
 
     for(let index = 0; index < ACTIVE_BALLOONS; index++){
       const lines = nextBalloonLines();
       const config = {
         ...BALLOON_FLIGHT,
         lines,
-        scale:scalePattern[index],
+        scale:MEDIUM_BALLOON_SCALE,
         baseY:yPattern[index],
         minY:88,
         maxY:312,
@@ -1188,7 +1218,7 @@
 
       const balloon = answerBalloon(balloons, {
         id:`answerBalloonDemo-${index}`,
-        x:BALLOON_FLIGHT.startX + index * 148,
+        x:BALLOON_FLIGHT.startX + index * 168,
         y:config.baseY,
         scale:config.scale,
         lines:config.lines,
@@ -1257,17 +1287,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=55",
+      href:"train-track.webp?v=56",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=55");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=56");
   }
 
-  function addWheel(layer, cx, cy, size, version = 55){
+  function addWheel(layer, cx, cy, size, version = 56){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1356,7 +1386,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=55",
+      href:"train-wagon.webp?v=56",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1364,7 +1394,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=55");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=56");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1397,7 +1427,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=55",
+        href:"train-wagon.webp?v=56",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1405,7 +1435,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=55");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=56");
 
       el("text", {
         x:car.centerX,
@@ -1430,7 +1460,7 @@
   }
 
   function locomotive(train){
-    // إصدار 55:
+    // إصدار 56:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1440,7 +1470,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=55",
+      href:"train-engine-transparent.png?v=56",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1448,7 +1478,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=55");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=56");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
