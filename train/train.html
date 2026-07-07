@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 64</title>
+  <title>قطار الإجابات - إصدار 65</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 64:
+    // إصدار 65:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -581,11 +581,11 @@
     slideAngularDamping:.26,
     slideContactHold:220,
 
-    // أعلى مقطورة السائق: قفزة/شقلبة بدل انزلاق.
-    roofBounceVX:-1.05,
-    roofBounceVY:-4.05,
-    roofBounceSpin:.18,
-    roofBounceCooldown:360
+    // أعلى مقطورة السائق: لمسة ارتداد خفيفة جدًا ناتجة من الاصطدام، وليست قفزة مرسومة.
+    roofBounceVX:-0.28,
+    roofBounceVY:-1.28,
+    roofBounceSpin:.045,
+    roofBounceCooldown:420
   };
 
   let matterEngine = null;
@@ -827,9 +827,9 @@
     addMatterRect(850, 432, 160, 18, {
       label:"driver-roof",
       sgType:"driver-roof",
-      friction:.18,
-      frictionStatic:.26,
-      restitution:.12
+      friction:.38,
+      frictionStatic:.46,
+      restitution:.035
     });
 
     // بقية القاطرة: مناطق قتل. أي صندوق يصطدم بها ينفجر.
@@ -973,22 +973,31 @@
     item.lastSurfaceContactAt = now;
     item.lastSurfaceType = "driver-roof";
 
-    // ضربة أعلى مقطورة السائق: قفزة قصيرة + شقلبة، وليست انزلاقًا.
+    // لمسة اصطدام خفيفة:
+    // لا نرسم قفزة ثابتة، بل نقلل طاقة الاصطدام ونترك Matter.js يكمل السقوط.
+    const currentVx = body.velocity.x;
+    const currentVy = body.velocity.y;
+
+    const softUp =
+      currentVy > 0
+        ? -Math.min(1.18, currentVy * .22)
+        : Math.max(currentVy, PHYSICS.roofBounceVY);
+
     Matter.Body.setVelocity(body, {
-      x:body.velocity.x * .45 + PHYSICS.roofBounceVX,
-      y:Math.min(body.velocity.y * -.18, PHYSICS.roofBounceVY)
+      x:currentVx * .72 + PHYSICS.roofBounceVX,
+      y:softUp
     });
 
-    const spinDirection = body.velocity.x <= 0 ? -1 : 1;
+    const spinDirection = currentVx <= 0 ? -1 : 1;
     Matter.Body.setAngularVelocity(
       body,
-      body.angularVelocity * .35 + spinDirection * PHYSICS.roofBounceSpin
+      body.angularVelocity * .62 + spinDirection * PHYSICS.roofBounceSpin
     );
 
-    // رفع بسيط حتى لا يظل ملتصقًا بالسقف ويكرر الاصطدام.
+    // رفع صغير جدًا فقط لمنع الالتصاق، وليس لإظهار قفزة واضحة.
     Matter.Body.setPosition(body, {
       x:body.position.x,
-      y:body.position.y - 5
+      y:body.position.y - 1.6
     });
   }
 
@@ -1521,17 +1530,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=64",
+      href:"train-track.webp?v=65",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=64");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=65");
   }
 
-  function addWheel(layer, cx, cy, size, version = 64){
+  function addWheel(layer, cx, cy, size, version = 65){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1620,7 +1629,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=64",
+      href:"train-wagon.webp?v=65",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1628,7 +1637,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=64");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=65");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1661,7 +1670,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=64",
+        href:"train-wagon.webp?v=65",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1669,7 +1678,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=64");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=65");
 
       el("text", {
         x:car.centerX,
@@ -1694,7 +1703,7 @@
   }
 
   function locomotive(train){
-    // إصدار 64:
+    // إصدار 65:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1704,7 +1713,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=64",
+      href:"train-engine-transparent.png?v=65",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1712,7 +1721,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=64");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=65");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
