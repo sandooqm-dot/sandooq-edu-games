@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>قطار الإجابات - إصدار 53</title>
+  <style>
+    :root{
+      --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px);
+      --sky-top:#bfcae6;
+      --sky-mid:#dce3f2;
+      --sand:#d7a464;
+      --sand2:#bd7f42;
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:100%;
+      background:#d9ecff;
+      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{
+      min-height:calc(100dvh + 120px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:120px;
+      pointer-events:none;
+    }
+
+    .train-page{
+      position:sticky;
+      top:0;
+      width:100%;
+      height:100dvh;
+      min-height:100dvh;
+      overflow:hidden;
+      direction:ltr;
+      user-select:none;
+      touch-action:none;
+      background:
+        linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 45%,#ead5ac 46%,var(--sand) 72%,var(--sand2) 100%);
+    }
+
+    .stage{
+      position:absolute;
+      inset:0;
+      z-index:10;
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:hidden;
+      pointer-events:auto;
+    }
+
+    .train-wheel{
+      transform-box:fill-box;
+      transform-origin:center;
+      animation:wheelSpin .55s linear infinite;
+    }
+
+    .train-idle-motion{
+      transform-box:fill-box;
+      transform-origin:center;
+      animation:trainIdleMotion 3.2s ease-in-out infinite;
+      will-change:transform;
+    }
+
+    @keyframes trainIdleMotion{
+      0%,100%{transform:translateX(0)}
+      45%{transform:translateX(4px)}
+      68%{transform:translateX(2px)}
+    }
+
+    @keyframes wheelSpin{
+      from{transform:rotate(0deg)}
+      to{transform:rotate(360deg)}
+    }
+  </style>
+</head>
+<body>
+  <main class="train-page" id="page">
+    <svg class="stage" id="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="خلفية وسكة قطار الإجابات"></svg>
+  </main>
+
+<script>
+(() => {
+  "use strict";
+
+  const svg = document.getElementById("stage");
+  const NS = "http://www.w3.org/2000/svg";
+
+  function el(name, attrs = {}, parent = svg){
+    const node = document.createElementNS(NS, name);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+    parent.appendChild(node);
+    return node;
+  }
+
+  function clear(){
+    svg.innerHTML = "";
+  }
+
+  function defs(){
+    const d = el("defs");
+
+    const scene = el("linearGradient", {id:"sceneGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#bfcae6"}, scene);
+    el("stop", {offset:"45%", "stop-color":"#dce3f2"}, scene);
+    el("stop", {offset:"46%", "stop-color":"#ead5ac"}, scene);
+    el("stop", {offset:"72%", "stop-color":"#d7a464"}, scene);
+    el("stop", {offset:"100%", "stop-color":"#bd7f42"}, scene);
+
+    const sand = el("linearGradient", {id:"sandGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#e7c188"}, sand);
+    el("stop", {offset:"100%", "stop-color":"#b47538"}, sand);
+
+    const softShadow = el("filter", {id:"softShadow", x:"-20%", y:"-20%", width:"140%", height:"140%"}, d);
+    el("feDropShadow", {dx:"0", dy:"5", stdDeviation:"4", "flood-color":"#000", "flood-opacity":".16"}, softShadow);
+
+    const balloonBody = el("radialGradient", {
+      id:"balloonBodyGrad",
+      cx:"34%",
+      cy:"30%",
+      r:"72%",
+      fx:"28%",
+      fy:"22%"
+    }, d);
+    el("stop", {offset:"0%", "stop-color":"#f5f8ff"}, balloonBody);
+    el("stop", {offset:"23%", "stop-color":"#cfdaf0"}, balloonBody);
+    el("stop", {offset:"52%", "stop-color":"#8fa0c1"}, balloonBody);
+    el("stop", {offset:"78%", "stop-color":"#5f6170"}, balloonBody);
+    el("stop", {offset:"100%", "stop-color":"#3f3d47"}, balloonBody);
+
+    const balloonHighlight = el("linearGradient", {id:"balloonHighlightGrad", x1:"0", y1:"0", x2:"1", y2:"0"}, d);
+    el("stop", {offset:"0%", "stop-color":"#ffffff", "stop-opacity":".08"}, balloonHighlight);
+    el("stop", {offset:"38%", "stop-color":"#ffffff", "stop-opacity":".58"}, balloonHighlight);
+    el("stop", {offset:"70%", "stop-color":"#ffffff", "stop-opacity":".12"}, balloonHighlight);
+    el("stop", {offset:"100%", "stop-color":"#ffffff", "stop-opacity":"0"}, balloonHighlight);
+
+    const balloonFin = el("linearGradient", {id:"balloonFinGrad", x1:"0", y1:"0", x2:"1", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#aab6d0"}, balloonFin);
+    el("stop", {offset:"100%", "stop-color":"#68718d"}, balloonFin);
+
+    const balloonShadow = el("filter", {id:"balloonShadow", x:"-20%", y:"-25%", width:"140%", height:"150%"}, d);
+    el("feDropShadow", {dx:"0", dy:"8", stdDeviation:"6", "flood-color":"#1e2332", "flood-opacity":".22"}, balloonShadow);
+
+    const boxBody = el("linearGradient", {id:"answerBoxGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#b07445"}, boxBody);
+    el("stop", {offset:"48%", "stop-color":"#8e552f"}, boxBody);
+    el("stop", {offset:"100%", "stop-color":"#62351d"}, boxBody);
+
+    const boxTop = el("linearGradient", {id:"answerBoxTopGrad", x1:"0", y1:"0", x2:"1", y2:"0"}, d);
+    el("stop", {offset:"0%", "stop-color":"#c78a56"}, boxTop);
+    el("stop", {offset:"100%", "stop-color":"#8a4d2b"}, boxTop);
+
+    const boxShadow = el("filter", {id:"answerBoxShadow", x:"-35%", y:"-35%", width:"170%", height:"180%"}, d);
+    el("feDropShadow", {dx:"0", dy:"7", stdDeviation:"5", "flood-color":"#2b170c", "flood-opacity":".24"}, boxShadow);
+  }
+
+  function makeCloud(parent, x, y, scale){
+    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, opacity:".78"}, parent);
+    [[0,0,20],[22,-6,30],[52,-2,24],[76,6,18],[24,16,25],[58,15,22]].forEach(([cx, cy, r]) => {
+      el("circle", {
+        cx,
+        cy,
+        r,
+        fill:"#eef3fa",
+        stroke:"#b2bdcd",
+        "stroke-width":2,
+        opacity:".85"
+      }, g);
+    });
+  }
+
+  function makeCactus(parent, x, y, scale){
+    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, filter:"url(#softShadow)"}, parent);
+    el("rect", {x:-10, y:-70, width:20, height:80, rx:10, fill:"#4c8b53", stroke:"#39703f", "stroke-width":3}, g);
+    el("path", {d:"M-9 -44 C-45 -52 -43 -6 -20 -7", fill:"none", stroke:"#4c8b53", "stroke-width":16, "stroke-linecap":"round"}, g);
+    el("path", {d:"M8 -54 C45 -64 47 -20 20 -19", fill:"none", stroke:"#4c8b53", "stroke-width":15, "stroke-linecap":"round"}, g);
+    el("ellipse", {cx:0, cy:12, rx:30, ry:6, fill:"rgba(66,39,16,.22)"}, g);
+  }
+
+  function makeBush(parent, x, y, scale){
+    const g = el("g", {transform:`translate(${x} ${y}) scale(${scale})`, filter:"url(#softShadow)"}, parent);
+    [[-22,0,20],[0,-8,28],[26,0,19],[10,9,16]].forEach(([cx,cy,r]) => {
+      el("circle", {cx, cy, r, fill:"#8faa52", opacity:".88"}, g);
+    });
+  }
+
+  function answerBalloon(parent, options = {}){
+    // إصدار 53:
+    // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
+    // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
+    const x = options.x ?? 760;
+    const y = options.y ?? 165;
+    const scale = options.scale ?? 1;
+    const lines = options.lines || ["ما أجمل", "الزهور!"];
+
+    const g = el("g", {
+      id:options.id || "answerBalloonDemo",
+      transform:`translate(${x} ${y}) scale(${scale})`,
+      filter:"url(#balloonShadow)"
+    }, parent);
+
+    // زعانف خلفية يمين مثل المرجع.
+    el("path", {
+      d:"M116 -23 L153 -43 L153 -5 L118 3 Z",
+      fill:"url(#balloonFinGrad)",
+      stroke:"#6e7895",
+      "stroke-width":2.2,
+      opacity:".92"
+    }, g);
+    el("path", {
+      d:"M118 12 L153 4 L153 42 L113 25 Z",
+      fill:"url(#balloonFinGrad)",
+      stroke:"#6e7895",
+      "stroke-width":2.2,
+      opacity:".9"
+    }, g);
+    el("path", {
+      d:"M122 -7 L162 -18 L162 20 L122 9 Z",
+      fill:"#75809d",
+      stroke:"#646f8a",
+      "stroke-width":2,
+      opacity:".7"
+    }, g);
+
+    // جسم البالون.
+    el("ellipse", {
+      cx:0,
+      cy:0,
+      rx:138,
+      ry:64,
+      fill:"url(#balloonBodyGrad)",
+      stroke:"#68738f",
+      "stroke-width":3.2
+    }, g);
+
+    // خطوط جسم البالون لإحساس الشكل المعدني/المنفوخ.
+    [-42,-18,8,34].forEach((yy, idx) => {
+      el("path", {
+        d:`M-120 ${yy} C-58 ${yy - 16 + idx * 4} 52 ${yy - 14 + idx * 3} 120 ${yy - 2}`,
+        fill:"none",
+        stroke:idx < 2 ? "#eef4ff" : "#4e566c",
+        "stroke-width":idx < 2 ? 2.2 : 1.6,
+        opacity:idx < 2 ? ".55" : ".35"
+      }, g);
+    });
+
+    // لمعة علوية خفيفة.
+    el("ellipse", {
+      cx:-30,
+      cy:-27,
+      rx:86,
+      ry:21,
+      fill:"url(#balloonHighlightGrad)",
+      opacity:".72"
+    }, g);
+
+    // سلة/محرك صغير أسفل البالون.
+    const gondola = el("g", {transform:"translate(-8 68)"}, g);
+    el("path", {
+      d:"M-34 -8 L35 -8 L27 18 L-25 18 Z",
+      fill:"#6f7080",
+      stroke:"#56596a",
+      "stroke-width":2,
+      opacity:".86"
+    }, gondola);
+    [-18,0,18].forEach(cx => {
+      el("circle", {cx, cy:7, r:5, fill:"#858899", stroke:"#55586a", "stroke-width":1.5}, gondola);
+    });
+
+    // النص من الكود، وليس جزءًا من صورة.
+    const text = el("text", {
+      x:0,
+      y:-10,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#050505",
+      stroke:"#ffffff",
+      "stroke-width":2.7,
+      "paint-order":"stroke fill",
+      "font-size":37,
+      "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl",
+      style:"direction:rtl;unicode-bidi:plaintext"
+    }, g);
+
+    lines.forEach((line, index) => {
+      el("tspan", {
+        x:0,
+        dy:index === 0 ? 0 : 40
+      }, text).textContent = line;
+    });
+
+    return g;
+  }
+
+  const DEBUG_COLLISION = false;
+
+  let fallingObjectsLayer = null;
+  let settledObjectsLayer = null;
+  let wagonForegroundCoverLayer = null;
+  let collisionDebugLayer = null;
+  const collisionMap = [];
+
+  function balloonBurst(parent, x, y, scale = 1){
+    const burst = el("g", {
+      transform:`translate(${x} ${y}) scale(${scale})`,
+      opacity:"1"
+    }, parent);
+
+    const boom = el("text", {
+      x:0,
+      y:-86,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#e92323",
+      stroke:"#fff1a8",
+      "stroke-width":5.2,
+      "paint-order":"stroke fill",
+      "font-size":46,
+      "font-weight":1000,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      transform:"scale(.72)",
+      opacity:"0"
+    }, burst);
+    boom.textContent = "بووم!";
+
+    const boomIn = el("animate", {
+      attributeName:"opacity",
+      values:"0;1;1;0",
+      keyTimes:"0;.18;.68;1",
+      dur:".62s",
+      fill:"freeze"
+    }, boom);
+    const boomScale = el("animateTransform", {
+      attributeName:"transform",
+      type:"scale",
+      values:".72;1.18;1.02;.9",
+      keyTimes:"0;.2;.62;1",
+      dur:".62s",
+      fill:"freeze"
+    }, boom);
+    boomIn.beginElement();
+    boomScale.beginElement();
+
+    const pieces = [
+      [-36,-16,-74,-42],[-12,-28,-28,-72],[20,-24,44,-68],
+      [46,-4,90,-22],[-44,18,-86,38],[-8,30,-24,76],
+      [26,24,58,66],[58,20,106,46],[-78,0,-126,-10],[78,-8,132,-18]
+    ];
+
+    pieces.forEach(([x1,y1,x2,y2], index) => {
+      const shard = el("path", {
+        d:`M${x1} ${y1} L${x1 + 12} ${y1 + 8} L${x2} ${y2} Z`,
+        fill:index % 2 ? "#cbd7ef" : "#828da9",
+        stroke:"#66718f",
+        "stroke-width":1.3,
+        opacity:".96"
+      }, burst);
+      const animate = el("animate", {
+        attributeName:"opacity",
+        values:".96;.62;0",
+        dur:".58s",
+        fill:"freeze"
+      }, shard);
+      animate.beginElement();
+    });
+
+    const ring = el("ellipse", {
+      cx:0,
+      cy:0,
+      rx:46,
+      ry:22,
+      fill:"none",
+      stroke:"#ff3b30",
+      "stroke-width":5,
+      opacity:".7"
+    }, burst);
+
+    const ringGrow = el("animate", {
+      attributeName:"rx",
+      values:"34;84;114",
+      dur:".52s",
+      fill:"freeze"
+    }, ring);
+    const ringFade = el("animate", {
+      attributeName:"opacity",
+      values:".7;.35;0",
+      dur:".52s",
+      fill:"freeze"
+    }, ring);
+    ringGrow.beginElement();
+    ringFade.beginElement();
+
+    setTimeout(() => burst.remove(), 760);
+  }
+
+  function answerBox(parent, textLines = ["ما أجمل", "الزهور!"]){
+    const g = el("g", {
+      filter:"url(#answerBoxShadow)"
+    }, parent);
+
+    // صندوق بسيط مؤقت لاختبار فيزياء السقوط فقط.
+    el("path", {
+      d:"M-46 -32 L46 -32 L58 -18 L-34 -18 Z",
+      fill:"url(#answerBoxTopGrad)",
+      stroke:"#4e2b18",
+      "stroke-width":2
+    }, g);
+
+    el("rect", {
+      x:-46,
+      y:-18,
+      width:92,
+      height:60,
+      rx:7,
+      fill:"url(#answerBoxGrad)",
+      stroke:"#4e2b18",
+      "stroke-width":2.5
+    }, g);
+
+    el("path", {
+      d:"M-46 2 L46 2 M-18 -18 L-18 42 M18 -18 L18 42",
+      fill:"none",
+      stroke:"#d3a06a",
+      "stroke-width":3,
+      opacity:".72"
+    }, g);
+
+    const text = el("text", {
+      x:0,
+      y:5,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#fff0b8",
+      stroke:"#442313",
+      "stroke-width":1.9,
+      "paint-order":"stroke fill",
+      "font-size":17,
+      "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl",
+      style:"direction:rtl;unicode-bidi:plaintext"
+    }, g);
+
+    textLines.forEach((line, index) => {
+      el("tspan", {
+        x:0,
+        dy:index === 0 ? 0 : 20
+      }, text).textContent = line;
+    });
+
+    return g;
+  }
+
+  function trackImpactBurst(parent, x, y){
+    const burst = el("g", {
+      transform:`translate(${x} ${y})`,
+      opacity:"1"
+    }, parent);
+
+    for(let i = 0; i < 12; i++){
+      const angle = Math.PI + Math.random() * Math.PI;
+      const dist = 20 + Math.random() * 48;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist * .42;
+      const dot = el("circle", {
+        cx:0,
+        cy:0,
+        r:3 + Math.random() * 4,
+        fill:i % 2 ? "#8a5a34" : "#d2a36a",
+        opacity:".75"
+      }, burst);
+      const move = el("animateTransform", {
+        attributeName:"transform",
+        type:"translate",
+        from:"0 0",
+        to:`${dx.toFixed(1)} ${dy.toFixed(1)}`,
+        dur:".38s",
+        fill:"freeze"
+      }, dot);
+      const fade = el("animate", {
+        attributeName:"opacity",
+        values:".75;.35;0",
+        dur:".42s",
+        fill:"freeze"
+      }, dot);
+      move.beginElement();
+      fade.beginElement();
+    }
+
+    setTimeout(() => burst.remove(), 520);
+  }
+
+  const BOX = {
+    left:46,
+    right:58,
+    top:32,
+    bottom:42
+  };
+
+  function getBoxCollisionInfo(state){
+    const boxTop = state.y - BOX.top;
+    const boxBottom = state.y + BOX.bottom;
+    const boxLeft = state.x - BOX.left;
+    const boxRight = state.x + BOX.right;
+    const boxCenterX = state.x;
+
+    return {
+      boxTop,
+      boxBottom,
+      boxLeft,
+      boxRight,
+      boxCenterX,
+      bottomPoint:{x:boxCenterX, y:boxBottom},
+      leftBottom:{x:boxLeft + 13, y:boxBottom},
+      rightBottom:{x:boxRight - 13, y:boxBottom}
+    };
+  }
+
+  function rectContainsPoint(rect, point){
+    return point.x >= rect.left &&
+      point.x <= rect.right &&
+      point.y >= rect.top &&
+      point.y <= rect.bottom;
+  }
+
+  function rectsOverlap(a, b){
+    return a.right > b.left &&
+      a.left < b.right &&
+      a.bottom > b.top &&
+      a.top < b.bottom;
+  }
+
+  function clamp(value, min, max){
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function makeZone(type, rect, meta = {}){
+    return {type, ...rect, ...meta};
+  }
+
+  function makeWell(rect, meta = {}){
+    return makeZone("well", rect, meta);
+  }
+
+  function makeSlide(rect, meta = {}){
+    return makeZone("short-slide", rect, meta);
+  }
+
+  function makeBreak(rect, meta = {}){
+    return makeZone("break", rect, meta);
+  }
+
+  function makeBreakSurface(rect, meta = {}){
+    return makeZone("break-surface", rect, meta);
+  }
+
+  function buildCollisionMap(){
+    collisionMap.length = 0;
+
+    // السكة والأرض: أي سقوط عليها يعني تكسر الصندوق واختفاؤه.
+    collisionMap.push(makeBreakSurface({
+      left:-90,
+      right:1380,
+      y:604,
+      thickness:44
+    }, {
+      name:"track"
+    }));
+
+    trainCarRegistry.forEach((car, index) => {
+      if(!car || car.type !== "answer") return;
+
+      const well = {
+        left:car.x + 58,
+        right:car.x + car.width - 58,
+        top:car.y + 18,
+        bottom:car.y + car.height - 20
+      };
+
+      // الحوض فقط هو منطقة الثبات. لا يوجد جذب لمركز العربة.
+      collisionMap.push(makeWell(well, {
+        car,
+        index,
+        floorY:car.y + 30,
+        name:`wagon-well-${index}`
+      }));
+
+      // حافتان قصيرتان فقط؛ تعطيان انزلاقًا قصيرًا ثم إما يدخل الحوض أو يسقط.
+      collisionMap.push(makeSlide({
+        left:car.x + 8,
+        right:well.left + 10,
+        y:car.y + 7,
+        thickness:24
+      }, {
+        kind:"wagon-rim",
+        side:"left-rim",
+        car,
+        index,
+        slideX:46,
+        slideDuration:.22,
+        friction:.82,
+        name:`wagon-left-rim-${index}`
+      }));
+
+      collisionMap.push(makeSlide({
+        left:well.right - 10,
+        right:car.x + car.width - 8,
+        y:car.y + 7,
+        thickness:24
+      }, {
+        kind:"wagon-rim",
+        side:"right-rim",
+        car,
+        index,
+        slideX:-58,
+        slideDuration:.22,
+        friction:.82,
+        name:`wagon-right-rim-${index}`
+      }));
+
+      // بقية أجزاء العربة الخارجية صلبة: الصندوق يتكسر عليها بدل الانزلاق اللامنتهي.
+      collisionMap.push(makeBreak({
+        left:car.x,
+        right:car.x + 44,
+        top:car.y + 24,
+        bottom:car.y + car.height + 8
+      }, {name:`wagon-left-solid-${index}`}));
+
+      collisionMap.push(makeBreak({
+        left:car.x + car.width - 44,
+        right:car.x + car.width,
+        top:car.y + 24,
+        bottom:car.y + car.height + 8
+      }, {name:`wagon-right-solid-${index}`}));
+
+      collisionMap.push(makeBreak({
+        left:car.x + 26,
+        right:car.x + car.width - 26,
+        top:car.y + car.height - 18,
+        bottom:car.y + car.height + 8
+      }, {name:`wagon-base-solid-${index}`}));
+    });
+
+    // الدحرجة مسموحة فقط على السطح العلوي الصغير لمقصورة السائق.
+    // بقية مقطورة السائق صلبة وتتسبب في تكسر الصندوق.
+    collisionMap.push(makeSlide({
+      // أعلى مقطورة السائق فقط: المنطقة المسموح فيها بالتدحرج.
+      // بقية القاطرة صلبة وتكسر الصندوق.
+      left:770,
+      right:930,
+      y:424,
+      thickness:28
+    }, {
+      kind:"driver-roof",
+      slideX:-156,
+      slideDuration:.78,
+      friction:.965,
+      name:"driver-roof-controlled-roll"
+    }));
+
+    // أجزاء القاطرة الصلبة: اصطدام مباشر = تكسر واختفاء.
+    [
+      {name:"driver-cabin-body", left:770, right:914, top:454, bottom:604},
+      {name:"engine-boiler", left:890, right:1088, top:446, bottom:592},
+      {name:"engine-front", left:1060, right:1164, top:438, bottom:610},
+      {name:"engine-nose", left:1114, right:1208, top:498, bottom:620},
+      {name:"engine-plow", left:1084, right:1210, top:548, bottom:632},
+      {name:"engine-base", left:770, right:1150, top:558, bottom:622},
+      {name:"engine-wheels-solid", left:780, right:1088, top:552, bottom:622},
+      {name:"chimney-solid", left:892, right:926, top:382, bottom:418}
+    ].forEach(zone => {
+      collisionMap.push(makeBreak({
+        left:zone.left,
+        right:zone.right,
+        top:zone.top,
+        bottom:zone.bottom
+      }, {name:zone.name}));
+    });
+  }
+
+  function drawCollisionDebug(){
+    if(!DEBUG_COLLISION || !collisionDebugLayer) return;
+    collisionDebugLayer.innerHTML = "";
+
+    const colors = {
+      "well":"#00c853",
+      "short-slide":"#00b0ff",
+      "break":"#ff1744",
+      "break-surface":"#ff7a00"
+    };
+
+    collisionMap.forEach(zone => {
+      if(zone.type === "short-slide" || zone.type === "break-surface"){
+        el("rect", {
+          x:zone.left,
+          y:zone.y,
+          width:zone.right - zone.left,
+          height:zone.thickness || 22,
+          fill:colors[zone.type],
+          opacity:".16",
+          stroke:colors[zone.type],
+          "stroke-width":2
+        }, collisionDebugLayer);
+      }else{
+        el("rect", {
+          x:zone.left,
+          y:zone.top,
+          width:zone.right - zone.left,
+          height:zone.bottom - zone.top,
+          fill:colors[zone.type] || "#fff",
+          opacity:".16",
+          stroke:colors[zone.type] || "#fff",
+          "stroke-width":2
+        }, collisionDebugLayer);
+      }
+    });
+  }
+
+  function getWellHit(state){
+    const info = getBoxCollisionInfo(state);
+
+    for(const zone of collisionMap){
+      if(zone.type !== "well") continue;
+
+      const bottomInside =
+        rectContainsPoint(zone, info.bottomPoint) ||
+        rectContainsPoint(zone, info.leftBottom) ||
+        rectContainsPoint(zone, info.rightBottom);
+
+      const centerInside = info.boxCenterX >= zone.left + 12 && info.boxCenterX <= zone.right - 12;
+      const deepEnough = info.boxBottom >= zone.top + 14;
+
+      if(bottomInside && centerInside && deepEnough && state.vy >= 0){
+        return zone;
+      }
+    }
+
+    return null;
+  }
+
+  function getSlideHit(state){
+    const info = getBoxCollisionInfo(state);
+    const prevBottom = state.prevY + BOX.bottom;
+
+    for(const zone of collisionMap){
+      if(zone.type !== "short-slide") continue;
+
+      const overlapsX = info.boxRight > zone.left && info.boxLeft < zone.right;
+      const crossed = prevBottom <= zone.y + 8 && info.boxBottom >= zone.y;
+      const shallow = info.boxBottom >= zone.y && info.boxBottom <= zone.y + zone.thickness;
+
+      if(overlapsX && (crossed || shallow) && state.vy > 0){
+        return zone;
+      }
+    }
+
+    return null;
+  }
+
+  function getBreakHit(state){
+    const info = getBoxCollisionInfo(state);
+    const boxRect = {
+      left:info.boxLeft,
+      right:info.boxRight,
+      top:info.boxTop,
+      bottom:info.boxBottom
+    };
+
+    for(const zone of collisionMap){
+      if(zone.type !== "break") continue;
+      if(rectsOverlap(boxRect, zone)){
+        return zone;
+      }
+    }
+
+    for(const zone of collisionMap){
+      if(zone.type !== "break-surface") continue;
+      if(info.boxBottom >= zone.y && state.vy >= 0){
+        return zone;
+      }
+    }
+
+    return null;
+  }
+
+  function breakFallingBox(box, state){
+    box.remove();
+    trackImpactBurst(fallingObjectsLayer || svg, state.x, Math.min(state.y + BOX.bottom, 610));
+  }
+
+  function startShortSlide(state, zone){
+    state.mode = "shortSlide";
+    state.slideZone = zone;
+    state.slideTime = zone.slideDuration || .24;
+    state.y = zone.y - BOX.bottom;
+    state.vy = 0;
+
+    // الانزلاق قصير ومحدود، وليس سطحًا مفتوحًا للدحرجة.
+    state.vx = state.vx * .38 + (zone.slideX || 0);
+    state.vr = clamp(state.vr * .48 + state.vx * .32, -118, 94);
+  }
+
+  function settleBoxIntoWagon(startState, well, textLines){
+    const layer = settledObjectsLayer || fallingObjectsLayer || svg;
+    const box = answerBox(layer, textLines);
+    const car = well.car;
+
+    // يظهر الصندوق كأنه داخل الحوض: جزء ظاهر وجزء مخفي خلف واجهة العربة.
+    const targetX = clamp(startState.x + startState.vx * .018, well.left + 34, well.right - 34);
+    const targetY = car.y + 7 + (Math.random() * 5 - 2.5);
+    const targetRotation = clamp(startState.rotation * .34, -18, 18);
+
+    const startX = startState.x;
+    const startY = startState.y;
+    const startRotation = startState.rotation;
+    const startedAt = performance.now();
+    const duration = 300;
+
+    function easeOutCubic(t){
+      return 1 - Math.pow(1 - t, 3);
+    }
+
+    function frame(now){
+      const t = Math.min(1, (now - startedAt) / duration);
+      const e = easeOutCubic(t);
+
+      const x = startX + (targetX - startX) * e;
+      const y = startY + (targetY - startY) * e;
+      const r = startRotation + (targetRotation - startRotation) * e;
+
+      box.setAttribute(
+        "transform",
+        `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
+      );
+
+      if(t < 1){
+        requestAnimationFrame(frame);
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function spawnFallingAnswerBox(startX, startY, textLines){
+    const layer = fallingObjectsLayer || svg;
+    const box = answerBox(layer, textLines);
+
+    const state = {
+      mode:"falling",
+      x:startX,
+      y:startY + 54,
+      prevX:startX,
+      prevY:startY + 54,
+      vx:-104,
+      vy:18,
+      gravity:770,
+      wind:-8,
+      airDrag:.993,
+      rotation:-8,
+      vr:-42,
+      slideZone:null,
+      slideTime:0,
+      lastTime:performance.now()
+    };
+
+    function draw(){
+      box.setAttribute(
+        "transform",
+        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) rotate(${state.rotation.toFixed(2)})`
+      );
+    }
+
+    function stepFalling(dt){
+      state.prevX = state.x;
+      state.prevY = state.y;
+
+      state.vx += state.wind * dt;
+      state.vy += state.gravity * dt;
+      state.vx *= Math.pow(state.airDrag, dt * 60);
+      state.vr *= Math.pow(.990, dt * 60);
+
+      state.x += state.vx * dt;
+      state.y += state.vy * dt;
+      state.rotation += state.vr * dt;
+
+      const wellHit = getWellHit(state);
+      if(wellHit){
+        box.remove();
+        settleBoxIntoWagon(state, wellHit, textLines);
+        return "settled";
+      }
+
+      const slideHit = getSlideHit(state);
+      if(slideHit){
+        startShortSlide(state, slideHit);
+        return "continue";
+      }
+
+      if(getBreakHit(state) || state.x < -180){
+        breakFallingBox(box, state);
+        return "done";
+      }
+
+      return "continue";
+    }
+
+    function stepSlide(dt){
+      const zone = state.slideZone;
+      state.prevX = state.x;
+      state.prevY = state.y;
+
+      state.slideTime -= dt;
+
+      state.vx *= Math.pow(zone.friction || .84, dt * 60);
+      state.vx += (zone.kind === "driver-roof" ? -34 : 0) * dt;
+      state.vr *= Math.pow(.972, dt * 60);
+
+      // دوران الصندوق ناتج من الحركة الأفقية على السطح، وليس حركة مرسومة إلى هدف.
+      if(zone.kind === "driver-roof"){
+        state.vr = clamp(state.vr + state.vx * .018, -155, 115);
+      }
+
+      state.x += state.vx * dt;
+      state.y = zone.y - BOX.bottom;
+      state.rotation += state.vr * dt;
+
+      const wellHit = getWellHit(state);
+      if(wellHit){
+        box.remove();
+        settleBoxIntoWagon(state, wellHit, textLines);
+        return "settled";
+      }
+
+      const stillOnSurface =
+        state.x + BOX.right > zone.left &&
+        state.x - BOX.left < zone.right &&
+        state.slideTime > 0;
+
+      if(!stillOnSurface){
+        state.mode = "falling";
+        state.slideZone = null;
+        state.vy = 42;
+        return "continue";
+      }
+
+      return "continue";
+    }
+
+    function frame(now){
+      let remaining = Math.min(0.045, (now - state.lastTime) / 1000);
+      state.lastTime = now;
+
+      while(remaining > 0){
+        const dt = Math.min(0.008, remaining);
+        remaining -= dt;
+
+        const result = state.mode === "shortSlide" ? stepSlide(dt) : stepFalling(dt);
+
+        if(result === "settled" || result === "done"){
+          return;
+        }
+      }
+
+      draw();
+
+      if(state.y < 700 && state.x > -190){
+        requestAnimationFrame(frame);
+      }else{
+        box.remove();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  const BALLOON_SPEED_LEVEL = 5; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
+
+  const BALLOON_FLIGHT = {
+    startX:1355,
+    endX:-230,
+    minY:112,
+    maxY:292,
+    baseY:178,
+    scale:.92,
+    speedLevel:BALLOON_SPEED_LEVEL
+  };
+
+  function clamp(value, min, max){
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function speedFromLevel(level){
+    const safeLevel = clamp(Number(level) || 1, 1, 10);
+    // سرعة بطيئة الآن، وقابلة للتوسيع لاحقًا من شريط السرعة.
+    return 24 + safeLevel * 9;
+  }
+
+  function createBalloonMotionState(config, index = 0){
+    const now = performance.now();
+    return {
+      x:(config.startX ?? 1355) + index * 420 + Math.random() * 160,
+      y:(config.baseY ?? 178) + (Math.random() * 36 - 18),
+      startedAt:now,
+      lastTime:now,
+      phaseA:Math.random() * Math.PI * 2,
+      phaseB:Math.random() * Math.PI * 2,
+      phaseC:Math.random() * Math.PI * 2,
+      drift:0,
+      driftTarget:0,
+      nextDriftAt:now + 650 + Math.random() * 1200
+    };
+  }
+
+  function resetBalloonMotion(state, config, now, index = 0){
+    state.x = (config.startX ?? 1355) + index * 330 + Math.random() * 220;
+    state.y = (config.baseY ?? 178) + (Math.random() * 42 - 21);
+    state.startedAt = now;
+    state.lastTime = now;
+    state.phaseA = Math.random() * Math.PI * 2;
+    state.phaseB = Math.random() * Math.PI * 2;
+    state.phaseC = Math.random() * Math.PI * 2;
+    state.drift = 0;
+    state.driftTarget = Math.random() * 36 - 18;
+    state.nextDriftAt = now + 850 + Math.random() * 1800;
+  }
+
+  function startBalloonFlight(balloon, config = BALLOON_FLIGHT, index = 0){
+    const state = createBalloonMotionState(config, index);
+    const speed = speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1);
+    let popped = false;
+    let resetAt = 0;
+
+    function popBalloon(now){
+      if(popped) return;
+      popped = true;
+      resetAt = now + 1900;
+
+      const currentScale = config.scale;
+      balloon.setAttribute("opacity", "0");
+      balloon.style.pointerEvents = "none";
+      balloonBurst(fallingObjectsLayer || svg, state.x, state.y, currentScale);
+      spawnFallingAnswerBox(state.x, state.y, config.lines || ["ما أجمل", "الزهور!"]);
+    }
+
+    // اللاعب فقط هو الذي يفرقع البالون بالضغط عليه.
+    balloon.style.pointerEvents = "auto";
+    balloon.style.cursor = "pointer";
+    balloon.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      popBalloon(performance.now());
+    });
+
+    function frame(now){
+      const dt = Math.min(40, now - state.lastTime);
+      state.lastTime = now;
+
+      if(popped){
+        if(now >= resetAt){
+          resetBalloonMotion(state, config, now, index);
+          balloon.setAttribute("opacity", "1");
+          balloon.style.pointerEvents = "auto";
+          popped = false;
+        }
+        requestAnimationFrame(frame);
+        return;
+      }
+
+      const speedPulse =
+        0.95 +
+        Math.sin(now * 0.0011 + state.phaseB) * 0.05 +
+        Math.sin(now * 0.0021 + state.phaseC) * 0.028;
+
+      state.x -= speed * speedPulse * (dt / 1000);
+
+      if(now >= state.nextDriftAt){
+        state.driftTarget = Math.random() * 54 - 27;
+        state.nextDriftAt = now + 900 + Math.random() * 2200;
+      }
+      state.drift += (state.driftTarget - state.drift) * 0.018;
+
+      const wave =
+        Math.sin(now * 0.00125 + state.phaseA) * 31 +
+        Math.sin(now * 0.00235 + state.phaseB) * 12 +
+        Math.sin(now * 0.00058 + state.phaseC) * 16;
+
+      state.y = clamp(config.baseY + wave + state.drift, config.minY, config.maxY);
+
+      balloon.setAttribute(
+        "transform",
+        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) scale(${config.scale})`
+      );
+
+      if(state.x < config.endX){
+        resetBalloonMotion(state, config, now, index);
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function balloonsLayer(){
+    const balloons = el("g", {id:"balloonsLayer"});
+
+    const balloonData = [
+      {lines:["ما أجمل", "الزهور!"], scale:.92, baseY:174, speedMultiplier:1},
+      {lines:["أين", "القلم؟"], scale:.78, baseY:132, speedMultiplier:1.08},
+      {lines:["هذا", "طالب"], scale:.84, baseY:226, speedMultiplier:.95},
+      {lines:["يا", "محمد!"], scale:.72, baseY:188, speedMultiplier:1.18}
+    ];
+
+    balloonData.forEach((data, index) => {
+      const config = {
+        ...BALLOON_FLIGHT,
+        ...data,
+        startX:BALLOON_FLIGHT.startX + index * 390,
+        minY:96,
+        maxY:306,
+        speedLevel:BALLOON_SPEED_LEVEL
+      };
+
+      const balloon = answerBalloon(balloons, {
+        id:`answerBalloonDemo-${index}`,
+        x:config.startX,
+        y:config.baseY,
+        scale:config.scale,
+        lines:config.lines
+      });
+
+      startBalloonFlight(balloon, config, index);
+    });
+  }
+
+  function background(){
+    const bg = el("g", {id:"background"});
+
+    el("rect", {x:0, y:0, width:1280, height:720, fill:"url(#sceneGrad)"}, bg);
+
+    el("path", {
+      d:"M-120 314 C-55 240 40 306 116 198 C185 101 246 210 318 116 C392 230 448 146 517 270 C582 150 642 212 716 100 C785 230 840 166 916 304 C990 190 1047 260 1120 150 C1190 250 1295 210 1400 270 L1400 426 L-120 426 Z",
+      fill:"#7d86aa",
+      opacity:".31"
+    }, bg);
+
+    el("path", {
+      d:"M-120 360 C0 302 110 343 230 238 C352 150 403 302 492 228 C590 310 674 252 752 330 C834 242 926 304 1005 216 C1085 346 1185 260 1400 332 L1400 426 L-120 426 Z",
+      fill:"#afa0ad",
+      opacity:".44"
+    }, bg);
+
+    makeCloud(bg, 105, 126, .72);
+    makeCloud(bg, 390, 95, .62);
+    makeCloud(bg, 780, 112, .68);
+    makeCloud(bg, 1075, 142, .58);
+    makeCloud(bg, 1240, 96, .5);
+
+    el("rect", {
+      x:-20,
+      y:402,
+      width:1320,
+      height:245,
+      fill:"url(#sandGrad)",
+      opacity:".58"
+    }, bg);
+
+    makeCactus(bg, 250, 444, .95);
+    makeCactus(bg, 890, 436, 1.05);
+    makeBush(bg, 760, 504, 1);
+
+    const track = el("g", {id:"track"}, bg);
+    const trackImage = el("image", {
+      href:"train-track.webp?v=53",
+      x:-55,
+      y:604,
+      width:1390,
+      height:27,
+      preserveAspectRatio:"none"
+    }, track);
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=53");
+  }
+
+  function addWheel(layer, cx, cy, size, version = 53){
+    const wheel = el("image", {
+      href:`train-wheel.webp?v=${version}`,
+      x:cx - size / 2,
+      y:cy - size / 2,
+      width:size,
+      height:size,
+      preserveAspectRatio:"xMidYMid meet",
+      class:"train-wheel"
+    }, layer);
+    wheel.setAttributeNS("http://www.w3.org/1999/xlink", "href", `train-wheel.webp?v=${version}`);
+    return wheel;
+  }
+
+  // بيانات مؤقتة للتجربة فقط.
+  // لاحقًا ستأتي هذه القائمة من إعدادات المعلم في صفحة الإنشاء.
+  // عدد العناصر هنا هو الذي يحدد عدد عربات الإجابة تلقائيًا:
+  // عنصران = عربتان، ثلاثة = ثلاث عربات، أربعة = أربع عربات.
+  const TRAIN_ANSWER_TEXTS = ["استفهام", "تعجب", "نقطة"];
+
+  function buildAnswerCars(answerTexts){
+    return answerTexts
+      .map(text => String(text || "").trim())
+      .filter(Boolean)
+      .slice(0, 4)
+      .map(text => ({type:"answer", text}));
+  }
+
+  const TRAIN_CARS = buildAnswerCars(TRAIN_ANSWER_TEXTS);
+
+  const TRAIN_LAYOUT = {
+    nearestWagonX:490,
+    wagonY:486,
+    wagonW:300,
+    wagonH:111,
+    wagonStep:288
+  };
+
+  const trainCarRegistry = [];
+
+  function answerWagon(train, car, index){
+    // قالب عربة الإجابة:
+    // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
+    const wagonX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const wagonY = TRAIN_LAYOUT.wagonY;
+    const wagonW = TRAIN_LAYOUT.wagonW;
+    const wagonH = TRAIN_LAYOUT.wagonH;
+
+    const targetArea = {
+      // منطقة الاستهداف الداخلية للعربة.
+      // هذه البيانات لا تظهر بصريًا، وستستخدم لاحقًا لمعرفة سقوط الصندوق/البالون داخل العربة.
+      left:wagonX + 14,
+      right:wagonX + wagonW - 14,
+      top:wagonY + 16,
+      bottom:wagonY + wagonH - 16,
+      centerX:wagonX + wagonW / 2,
+      centerY:wagonY + wagonH / 2
+    };
+
+    trainCarRegistry[index] = {
+      type:car.type,
+      text:car.text,
+      x:wagonX,
+      y:wagonY,
+      width:wagonW,
+      height:wagonH,
+      left:wagonX,
+      right:wagonX + wagonW,
+      top:wagonY,
+      bottom:wagonY + wagonH,
+      centerX:wagonX + wagonW / 2,
+      centerY:wagonY + wagonH / 2,
+      targetArea
+    };
+
+    const wheelLayer = el("g", {id:`wagonWheelLayer-${index}`}, train);
+    // عجلات عربات الإجابة بنفس حجم وارتفاع العجلات الثلاث الصغيرة في القاطرة.
+    // جسم العربة يُرسم بعدها، لذلك يبقى الجزء العلوي من العجلة مخفيًا خلف العربة.
+    const wheelSize = 47.4;
+    const wheelY = 585.3;
+    const firstWheelX = wagonX + 49;
+    const gap = 66;
+    addWheel(wheelLayer, firstWheelX, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX + gap, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX + gap * 2, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX + gap * 3, wheelY, wheelSize);
+
+    const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
+    const wagonBody = el("image", {
+      href:"train-wagon.webp?v=53",
+      x:wagonX,
+      y:wagonY,
+      width:wagonW,
+      height:wagonH,
+      preserveAspectRatio:"xMidYMid meet",
+      id:`wagonBody-${index}`
+    }, bodyLayer);
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=53");
+
+    el("text", {
+      x:wagonX + wagonW / 2,
+      y:wagonY + wagonH * .56,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#ffe28a",
+      stroke:"#5b2618",
+      "stroke-width":2.6,
+      "paint-order":"stroke fill",
+      "font-size":30,
+      "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl"
+    }, bodyLayer).textContent = car.text;
+  }
+
+  function wagons(train){
+    // نرسم العربات من الخلف إلى الأمام حتى تكون العربة الأقرب للقاطرة فوق الوصلات بصريًا.
+    for(let i = TRAIN_CARS.length - 1; i >= 0; i--){
+      const car = TRAIN_CARS[i];
+      if(car.type === "answer") answerWagon(train, car, i);
+    }
+  }
+
+  function renderWagonForegroundCovers(){
+    if(!wagonForegroundCoverLayer) return;
+
+    trainCarRegistry.forEach((car, index) => {
+      if(!car || car.type !== "answer") return;
+
+      const wagonBody = el("image", {
+        href:"train-wagon.webp?v=53",
+        x:car.x,
+        y:car.y,
+        width:car.width,
+        height:car.height,
+        preserveAspectRatio:"xMidYMid meet",
+        id:`wagonCoverBody-${index}`
+      }, wagonForegroundCoverLayer);
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=53");
+
+      el("text", {
+        x:car.centerX,
+        y:car.y + car.height * .56,
+        "text-anchor":"middle",
+        "dominant-baseline":"middle",
+        fill:"#ffe28a",
+        stroke:"#5b2618",
+        "stroke-width":2.6,
+        "paint-order":"stroke fill",
+        "font-size":30,
+        "font-weight":900,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"rtl"
+      }, wagonForegroundCoverLayer).textContent = car.text;
+    });
+  }
+
+  function getAnswerTargetArea(index){
+    const car = trainCarRegistry[index];
+    return car ? car.targetArea : null;
+  }
+
+  function locomotive(train){
+    // إصدار 53:
+    // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
+    // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
+    const locoX = 782;
+    const locoY = 430;
+    const locoW = 320;
+    const locoH = 179;
+
+    const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
+    const locomotiveBody = el("image", {
+      href:"train-engine-transparent.png?v=53",
+      x:locoX,
+      y:locoY,
+      width:locoW,
+      height:locoH,
+      preserveAspectRatio:"xMidYMid meet",
+      id:"locomotiveBody"
+    }, bodyLayer);
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=53");
+
+    const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
+
+    // العجلة الكبيرة: تقديم للأمام بحوالي 3% ورفع للأعلى بحوالي 2%.
+    const largeWheelSize = 90.2;
+    const largeWheelCx = locoX + 64;
+    const largeWheelCy = 565;
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 39);
+
+    // العجلات الثلاث الصغيرة: إرجاع للخلف داخل القاطرة وتكبير 10% تقريبًا.
+    const smallWheelSize = 47.4;
+    const smallWheelCy = 585.3;
+    const smallStartX = locoX + 148;
+    const smallGap = 50;
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 39);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 39);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 39);
+  }
+
+  function build(){
+    clear();
+    defs();
+    background();
+    balloonsLayer();
+
+    // المجموعة الخارجية مخصصة لاحقًا لحركة تقدم القطار بين العربات.
+    const trainPositionGroup = el("g", {id:"trainPositionGroup"});
+
+    // المجموعة الداخلية مخصصة للحركة الخفيفة المستمرة فقط.
+    const train = el("g", {id:"trainScene", class:"train-idle-motion"}, trainPositionGroup);
+
+    wagons(train);
+    locomotive(train);
+
+    // طبقة الصناديق التي استقرت داخل أحواض العربات.
+    // توضع داخل trainScene حتى تتحرك مع الحركة الخفيفة للقطار.
+    settledObjectsLayer = el("g", {id:"settledObjectsLayer"}, train);
+    wagonForegroundCoverLayer = el("g", {id:"wagonForegroundCoverLayer"}, train);
+    renderWagonForegroundCovers();
+
+    // خريطة تصادم غير مرئية للقطار: أحواض، حواف، جسم القاطرة، السكة.
+    buildCollisionMap();
+    collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
+    drawCollisionDebug();
+
+    // طبقة الصناديق أثناء السقوط تبقى خارج trainScene حتى لا تتحرك مع القطار أثناء السقوط.
+    fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
+  }
+
+  build();
+})();
+</script>
+</body>
+</html>
