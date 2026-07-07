@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 62</title>
+  <title>قطار الإجابات - إصدار 63</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -95,7 +95,6 @@
     <svg class="stage" id="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="خلفية وسكة قطار الإجابات"></svg>
   </main>
 
-<script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 <script>
 (() => {
   "use strict";
@@ -202,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 62:
+    // إصدار 63:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -532,7 +531,7 @@
     // تخفيف مقاومة الهواء قليلًا حتى لا يهرب الصندوق كثيرًا لليسار أثناء السقوط.
     airTargetVX:-3.05,
     airPull:.00030,
-    maxActiveMatterBoxes:2,
+    maxActiveMatterBoxes:5,
 
     // بعد ملامسة العربة لا يستمر الصندوق بنفس سرعة السقوط.
     // هذه القيم أقوى لإيقاف دحرجة الصندوق من عربة إلى عربة.
@@ -560,6 +559,49 @@
 
   function isMatterReady(){
     return !!(window.Matter && Matter.Engine && Matter.World && Matter.Bodies && Matter.Body);
+  }
+
+  let matterLibraryLoading = false;
+
+  function loadMatterLibrary(){
+    if(isMatterReady()){
+      buildCollisionMap();
+      startMatterLoop();
+      return;
+    }
+
+    if(matterLibraryLoading) return;
+    matterLibraryLoading = true;
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js";
+    script.async = true;
+
+    script.onload = () => {
+      matterLibraryLoading = false;
+      buildCollisionMap();
+      startMatterLoop();
+    };
+
+    script.onerror = () => {
+      matterLibraryLoading = false;
+    };
+
+    document.head.appendChild(script);
+  }
+
+  function releaseOldestMatterBoxIfNeeded(){
+    const liveBoxes = matterBoxes.filter(item => item && !item.done);
+    activeFallingBoxes = Math.min(activeFallingBoxes, liveBoxes.length);
+
+    if(activeFallingBoxes < PHYSICS.maxActiveMatterBoxes) return;
+
+    const oldest = liveBoxes[0];
+    if(oldest){
+      cleanupMatterBox(oldest, true);
+    }else{
+      activeFallingBoxes = 0;
+    }
   }
 
   function makeZone(type, rect, meta = {}){
@@ -966,6 +1008,17 @@
 
     const body = item.body;
 
+    // حماية من الصناديق العالقة: لا نترك صندوقًا نشطًا يمنع ظهور صناديق جديدة.
+    if(item.spawnedAt && now - item.spawnedAt > 6500){
+      const well = getWellByMatterBody(body);
+      if(well){
+        settleMatterBox(item, well);
+      }else{
+        breakMatterBox(item);
+      }
+      return;
+    }
+
     // مقاومة الهواء: قوة تتجه بالصندوق تدريجيًا لليسار، مع بقاء الجاذبية والدوران من Matter.js.
     const velocityError = PHYSICS.airTargetVX - body.velocity.x;
     Matter.Body.applyForce(body, body.position, {
@@ -1031,10 +1084,18 @@
     let x = startX;
     let y = startY + 54;
     let vy = 20;
-    let vx = -90;
+    let vx = -72;
     let rotation = -8;
-    let vr = -90;
+    let vr = -84;
     let lastTime = performance.now();
+    const startedAt = lastTime;
+    let cleaned = false;
+
+    function cleanup(){
+      if(cleaned) return;
+      cleaned = true;
+      activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
+    }
 
     function frame(now){
       const dt = Math.min(.04, (now - lastTime) / 1000);
@@ -1045,10 +1106,10 @@
       rotation += vr * dt;
       box.setAttribute("transform", `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${rotation.toFixed(2)})`);
 
-      if(y > 610){
+      if(y > 610 || now - startedAt > 5000){
         box.remove();
-        activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
-        trackImpactBurst(fallingObjectsLayer || svg, x, 610);
+        cleanup();
+        trackImpactBurst(fallingObjectsLayer || svg, x, Math.min(y, 610));
       }else{
         requestAnimationFrame(frame);
       }
@@ -1058,9 +1119,9 @@
   }
 
   function spawnFallingAnswerBox(startX, startY, textLines){
-    if(activeFallingBoxes >= PHYSICS.maxActiveMatterBoxes){
-      return false;
-    }
+    // لا نخلي فرقعة البالون تصير بدون صندوق.
+    // إذا امتلأ الحد، ننظف أقدم صندوق نشط ثم نسمح بالصندوق الجديد.
+    releaseOldestMatterBoxIfNeeded();
 
     activeFallingBoxes += 1;
 
@@ -1094,6 +1155,7 @@
       body,
       textLines,
       done:false,
+      spawnedAt:performance.now(),
       lastWagonContactAt:0,
       lastWellIndex:null
     };
@@ -1373,17 +1435,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=62",
+      href:"train-track.webp?v=63",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=62");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=63");
   }
 
-  function addWheel(layer, cx, cy, size, version = 62){
+  function addWheel(layer, cx, cy, size, version = 63){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1472,7 +1534,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=62",
+      href:"train-wagon.webp?v=63",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1480,7 +1542,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=62");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=63");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1513,7 +1575,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=62",
+        href:"train-wagon.webp?v=63",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1521,7 +1583,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=62");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=63");
 
       el("text", {
         x:car.centerX,
@@ -1546,7 +1608,7 @@
   }
 
   function locomotive(train){
-    // إصدار 62:
+    // إصدار 63:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1556,7 +1618,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=62",
+      href:"train-engine-transparent.png?v=63",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1564,7 +1626,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=62");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=63");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1615,6 +1677,7 @@
   }
 
   build();
+  requestAnimationFrame(loadMatterLibrary);
 })();
 </script>
 </body>
