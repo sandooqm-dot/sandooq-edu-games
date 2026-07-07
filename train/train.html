@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 35</title>
+  <title>قطار الإجابات - إصدار 36</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -186,17 +186,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=35",
+      href:"train-track.webp?v=36",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=35");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=36");
   }
 
-  function addWheel(layer, cx, cy, size, version = 35){
+  function addWheel(layer, cx, cy, size, version = 36){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -228,7 +228,7 @@
 
     const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=35",
+      href:"train-wagon.webp?v=36",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -236,7 +236,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"wagonBody"
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=35");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=36");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -255,7 +255,7 @@
   }
 
   function locomotive(train){
-    // إصدار 35:
+    // إصدار 36:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -265,7 +265,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=35",
+      href:"train-engine-transparent.png?v=36",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -273,24 +273,24 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=35");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=36");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
     // العجلة الكبيرة: تقديم للأمام بحوالي 3% ورفع للأعلى بحوالي 2%.
-    const largeWheelSize = 84;
+    const largeWheelSize = 94;
     const largeWheelCx = locoX + 64;
-    const largeWheelCy = 568;
-    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 35);
+    const largeWheelCy = 563;
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 36);
 
     // العجلات الثلاث الصغيرة: إرجاع للخلف داخل القاطرة وتكبير 10% تقريبًا.
-    const smallWheelSize = 41;
-    const smallWheelCy = 589;
+    const smallWheelSize = 46;
+    const smallWheelCy = 586;
     const smallStartX = locoX + 148;
     const smallGap = 50;
-    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 35);
-    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 35);
-    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 35);
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 36);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 36);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 36);
   }
 
   function build(){
