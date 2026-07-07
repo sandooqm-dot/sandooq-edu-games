@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 43</title>
+  <title>قطار الإجابات - إصدار 44</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -189,7 +189,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 43:
+    // إصدار 44:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -298,14 +298,112 @@
     return g;
   }
 
+  const BALLOON_SPEED_LEVEL = 2; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
+
+  const BALLOON_FLIGHT = {
+    startX:1355,
+    endX:-230,
+    minY:112,
+    maxY:292,
+    baseY:178,
+    scale:.92,
+    speedLevel:BALLOON_SPEED_LEVEL
+  };
+
+  function clamp(value, min, max){
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function speedFromLevel(level){
+    const safeLevel = clamp(Number(level) || 1, 1, 10);
+    // سرعة بطيئة الآن، وقابلة للتوسيع لاحقًا من شريط السرعة.
+    return 16 + safeLevel * 6;
+  }
+
+  function createBalloonMotionState(config){
+    const now = performance.now();
+    return {
+      x:config.startX,
+      y:config.baseY,
+      startedAt:now,
+      lastTime:now,
+      phaseA:Math.random() * Math.PI * 2,
+      phaseB:Math.random() * Math.PI * 2,
+      phaseC:Math.random() * Math.PI * 2,
+      drift:0,
+      driftTarget:0,
+      nextDriftAt:now + 900 + Math.random() * 1700
+    };
+  }
+
+  function resetBalloonMotion(state, config, now){
+    state.x = config.startX + Math.random() * 90;
+    state.y = config.baseY + (Math.random() * 36 - 18);
+    state.startedAt = now;
+    state.lastTime = now;
+    state.phaseA = Math.random() * Math.PI * 2;
+    state.phaseB = Math.random() * Math.PI * 2;
+    state.phaseC = Math.random() * Math.PI * 2;
+    state.drift = 0;
+    state.driftTarget = Math.random() * 32 - 16;
+    state.nextDriftAt = now + 1200 + Math.random() * 2300;
+  }
+
+  function startBalloonFlight(balloon, config = BALLOON_FLIGHT){
+    const state = createBalloonMotionState(config);
+    const speed = speedFromLevel(config.speedLevel);
+
+    function frame(now){
+      const dt = Math.min(40, now - state.lastTime);
+      state.lastTime = now;
+
+      // تسارع وتهدئة خفيفان جدًا حتى لا تكون الحركة ميكانيكية.
+      const speedPulse =
+        0.94 +
+        Math.sin(now * 0.0009 + state.phaseB) * 0.045 +
+        Math.sin(now * 0.0017 + state.phaseC) * 0.025;
+
+      state.x -= speed * speedPulse * (dt / 1000);
+
+      // تغيّر عشوائي ناعم كل فترة، بدون قفزات مزعجة.
+      if(now >= state.nextDriftAt){
+        state.driftTarget = Math.random() * 52 - 26;
+        state.nextDriftAt = now + 1200 + Math.random() * 2600;
+      }
+      state.drift += (state.driftTarget - state.drift) * 0.018;
+
+      const wave =
+        Math.sin(now * 0.00125 + state.phaseA) * 34 +
+        Math.sin(now * 0.00235 + state.phaseB) * 13 +
+        Math.sin(now * 0.00058 + state.phaseC) * 18;
+
+      state.y = clamp(config.baseY + wave + state.drift, config.minY, config.maxY);
+
+      balloon.setAttribute(
+        "transform",
+        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) scale(${config.scale})`
+      );
+
+      if(state.x < config.endX){
+        resetBalloonMotion(state, config, now);
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   function balloonsLayer(){
     const balloons = el("g", {id:"balloonsLayer"});
-    answerBalloon(balloons, {
-      x:780,
-      y:178,
-      scale:.92,
+    const balloon = answerBalloon(balloons, {
+      x:BALLOON_FLIGHT.startX,
+      y:BALLOON_FLIGHT.baseY,
+      scale:BALLOON_FLIGHT.scale,
       lines:["ما أجمل", "الزهور!"]
     });
+
+    startBalloonFlight(balloon, BALLOON_FLIGHT);
   }
 
   function background(){
@@ -346,17 +444,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=43",
+      href:"train-track.webp?v=44",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=43");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=44");
   }
 
-  function addWheel(layer, cx, cy, size, version = 43){
+  function addWheel(layer, cx, cy, size, version = 44){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -445,7 +543,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=43",
+      href:"train-wagon.webp?v=44",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -453,7 +551,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=43");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=44");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -485,7 +583,7 @@
   }
 
   function locomotive(train){
-    // إصدار 43:
+    // إصدار 44:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -495,7 +593,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=43",
+      href:"train-engine-transparent.png?v=44",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -503,7 +601,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=43");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=44");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
