@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 32</title>
+  <title>قطار الإجابات - إصدار 33</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -186,17 +186,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=32",
+      href:"train-track.webp?v=33",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=32");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=33");
   }
 
-  function addWheel(layer, cx, cy, size, version = 32){
+  function addWheel(layer, cx, cy, size, version = 33){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -212,7 +212,7 @@
 
   function wagon(train){
     const wagonX = 490;
-    const wagonY = 492;
+    const wagonY = 486;
     const wagonW = 300;
     const wagonH = 111;
 
@@ -228,7 +228,7 @@
 
     const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=32",
+      href:"train-wagon.webp?v=33",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -236,7 +236,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"wagonBody"
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=32");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=33");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -255,17 +255,16 @@
   }
 
   function locomotive(train){
-    // إصدار 32:
-    // استخدام صورة القاطرة الشفافة باسم جديد لمنع الكاش وظهور الخلفية البيضاء، ثم إعادة موازنة مواضع العجلات
-    // لتطابق المرجع قدر الإمكان: عجلة كبيرة خلفية وثلاث عجلات صغيرة أمامية.
-    const locoX = 742;
-    const locoY = 406;
-    const locoW = 450;
-    const locoH = 252;
+    // إصدار 33:
+    // تصغير القاطرة ورفعها وموازنة مواقع العجلات لتطابق الصورة المرجعية بشكل أقرب.
+    const locoX = 744;
+    const locoY = 430;
+    const locoW = 320;
+    const locoH = 179;
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=32",
+      href:"train-engine-transparent.png?v=33",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -273,23 +272,23 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=32");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=33");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
-    // مواقع العجلات محسوبة على أساس الصورة المرجعية المرفقة من المستخدم.
-    const largeWheelSize = 86;
-    const largeWheelCx = locoX + 66;
-    const largeWheelCy = 569;
-    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 32);
+    // عجلة كبيرة خلفية وثلاث عجلات أمامية بأحجام ومسافات أقرب للمرجع.
+    const largeWheelSize = 72;
+    const largeWheelCx = locoX + 54;
+    const largeWheelCy = 574;
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 33);
 
-    const smallWheelSize = 46;
-    const smallWheelCy = 588;
-    const smallStartX = locoX + 238;
-    const smallGap = 58;
-    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 32);
-    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 32);
-    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 32);
+    const smallWheelSize = 36;
+    const smallWheelCy = 589;
+    const smallStartX = locoX + 171;
+    const smallGap = 43;
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 33);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 33);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 33);
   }
 
   function build(){
