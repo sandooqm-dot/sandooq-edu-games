@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 28</title>
+  <title>قطار الإجابات - إصدار 29</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -186,14 +186,14 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=28",
+      href:"train-track.webp?v=29",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=28");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=29");
   }
 
   function addWheel(layer, cx, cy, size, version = 28){
@@ -228,7 +228,7 @@
 
     const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=28",
+      href:"train-wagon.webp?v=29",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -236,7 +236,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"wagonBody"
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=28");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=29");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -255,33 +255,16 @@
   }
 
   function locomotive(train){
-    // إصدار 28: إضافة مقطورة/قاطرة السائق باستخدام الصورة المعتمدة من المستخدم
-    // مع تركيب العجلات بالكود فقط حسب الصورة المرجعية.
+    // إصدار 29: تثبيت مقطورة/قاطرة السائق بالصورة الشفافة المصححة،
+    // ثم رسم العجلات فوق الجزء السفلي الذهبي حتى تظهر مثل الصورة المرجعية.
     const locoX = 735;
-    const locoY = 418;
-    const locoW = 455;
-    const locoH = 228;
-
-    const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
-
-    // مواضع وأحجام العجلات موازنة بحسب المرجع:
-    // عجلة كبيرة خلفية + ثلاث عجلات صغيرة أمامية، وكلها تدور.
-    const largeWheelSize = 72;
-    const largeWheelCx = locoX + 78;
-    const largeWheelCy = 585;
-    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize);
-
-    const smallWheelSize = 39;
-    const smallWheelCy = 592;
-    const smallStartX = locoX + 206;
-    const smallGap = 56;
-    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize);
-    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize);
-    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize);
+    const locoY = 403;
+    const locoW = 430;
+    const locoH = 244;
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine.webp?v=28",
+      href:"train-engine.webp?v=29",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -289,7 +272,24 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine.webp?v=28");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine.webp?v=29");
+
+    const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
+
+    // عجلة كبيرة خلفية وثلاث عجلات أمامية.
+    // العجلات فوق جسم القاطرة لأن الصورة المعتمدة تحتوي الجزء السفلي الحامل خلفها.
+    const largeWheelSize = 68;
+    const largeWheelCx = locoX + 79;
+    const largeWheelCy = 588;
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize);
+
+    const smallWheelSize = 37;
+    const smallWheelCy = 594;
+    const smallStartX = locoX + 197;
+    const smallGap = 54;
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize);
   }
 
   function build(){
