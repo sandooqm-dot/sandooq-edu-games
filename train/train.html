@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 39</title>
+  <title>قطار الإجابات - إصدار 40</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -199,17 +199,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=39",
+      href:"train-track.webp?v=40",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=39");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=40");
   }
 
-  function addWheel(layer, cx, cy, size, version = 39){
+  function addWheel(layer, cx, cy, size, version = 40){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -223,11 +223,21 @@
     return wheel;
   }
 
-  const TRAIN_CARS = [
-    {type:"answer", text:"استفهام"},
-    {type:"answer", text:"تعجب"},
-    {type:"answer", text:"نقطة"}
-  ];
+  // بيانات مؤقتة للتجربة فقط.
+  // لاحقًا ستأتي هذه القائمة من إعدادات المعلم في صفحة الإنشاء.
+  // عدد العناصر هنا هو الذي يحدد عدد عربات الإجابة تلقائيًا:
+  // عنصران = عربتان، ثلاثة = ثلاث عربات، أربعة = أربع عربات.
+  const TRAIN_ANSWER_TEXTS = ["استفهام", "تعجب", "نقطة"];
+
+  function buildAnswerCars(answerTexts){
+    return answerTexts
+      .map(text => String(text || "").trim())
+      .filter(Boolean)
+      .slice(0, 4)
+      .map(text => ({type:"answer", text}));
+  }
+
+  const TRAIN_CARS = buildAnswerCars(TRAIN_ANSWER_TEXTS);
 
   const TRAIN_LAYOUT = {
     nearestWagonX:490,
@@ -237,6 +247,8 @@
     wagonStep:288
   };
 
+  const trainCarRegistry = [];
+
   function answerWagon(train, car, index){
     // قالب عربة الإجابة:
     // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
@@ -244,6 +256,16 @@
     const wagonY = TRAIN_LAYOUT.wagonY;
     const wagonW = TRAIN_LAYOUT.wagonW;
     const wagonH = TRAIN_LAYOUT.wagonH;
+
+    trainCarRegistry[index] = {
+      type:car.type,
+      text:car.text,
+      x:wagonX,
+      y:wagonY,
+      width:wagonW,
+      height:wagonH,
+      centerX:wagonX + wagonW / 2
+    };
 
     const wheelLayer = el("g", {id:`wagonWheelLayer-${index}`}, train);
     const wheelSize = 29;
@@ -257,7 +279,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=39",
+      href:"train-wagon.webp?v=40",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -265,7 +287,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=39");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=40");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -292,7 +314,7 @@
   }
 
   function locomotive(train){
-    // إصدار 39:
+    // إصدار 40:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -302,7 +324,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=39",
+      href:"train-engine-transparent.png?v=40",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -310,7 +332,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=39");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=40");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
