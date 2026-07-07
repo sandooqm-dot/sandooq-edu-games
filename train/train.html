@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 27</title>
+  <title>قطار الإجابات - إصدار 28</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -65,19 +65,16 @@
       pointer-events:none;
     }
 
-
     .train-wheel{
       transform-box:fill-box;
       transform-origin:center;
       animation:wheelSpin .55s linear infinite;
     }
 
-
     @keyframes wheelSpin{
       from{transform:rotate(0deg)}
       to{transform:rotate(360deg)}
     }
-
   </style>
 </head>
 <body>
@@ -187,62 +184,51 @@
     makeCactus(bg, 890, 436, 1.05);
     makeBush(bg, 760, 504, 1);
 
-    // إصدار 27: تصغير السكة بوضوح لتكون أخف وتترك مساحة أكبر للقطار والبالونات.
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=27",
+      href:"train-track.webp?v=28",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    // دعم إضافي لبعض نسخ Safari عند قراءة صور SVG image + كسر الكاش بعد تعديل المقاسات.
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=27");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=28");
   }
 
+  function addWheel(layer, cx, cy, size, version = 28){
+    const wheel = el("image", {
+      href:`train-wheel.webp?v=${version}`,
+      x:cx - size / 2,
+      y:cy - size / 2,
+      width:size,
+      height:size,
+      preserveAspectRatio:"xMidYMid meet",
+      class:"train-wheel"
+    }, layer);
+    wheel.setAttributeNS("http://www.w3.org/1999/xlink", "href", `train-wheel.webp?v=${version}`);
+    return wheel;
+  }
 
-  function wagon(){
-    const train = el("g", {id:"singleWagonScene"});
-
-    // إصدار 27:
-    // تصغير واضح للعربة والسكة لأن العربة طويلة مقارنة بحجم الصفحة،
-    // مع الحفاظ على نفس علاقة العجلات بجسم العربة والسكة.
+  function wagon(train){
     const wagonX = 490;
     const wagonY = 492;
     const wagonW = 300;
     const wagonH = 111;
 
     const wheelLayer = el("g", {id:"wagonWheelLayer"}, train);
-
-    function addWheel(cx, cy, size){
-      const wheel = el("image", {
-        href:"train-wheel.webp?v=27",
-        x:cx - size / 2,
-        y:cy - size / 2,
-        width:size,
-        height:size,
-        preserveAspectRatio:"xMidYMid meet",
-        class:"train-wheel wagon-wheel"
-      }, wheelLayer);
-      wheel.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wheel.webp?v=27");
-      return wheel;
-    }
-
-    // أربع عجلات صغيرة مثل المرجع. مراكز العجلات داخل أسفل العربة،
-    // وجسم العربة يُرسم بعدها ليغطي الجزء العلوي من العجلات.
     const wheelSize = 29;
     const wheelY = wagonY + wagonH - 8;
     const firstWheelX = wagonX + 49;
     const gap = 66;
-    addWheel(firstWheelX, wheelY, wheelSize);
-    addWheel(firstWheelX + gap, wheelY, wheelSize);
-    addWheel(firstWheelX + gap * 2, wheelY, wheelSize);
-    addWheel(firstWheelX + gap * 3, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX + gap, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX + gap * 2, wheelY, wheelSize);
+    addWheel(wheelLayer, firstWheelX + gap * 3, wheelY, wheelSize);
 
     const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=27",
+      href:"train-wagon.webp?v=28",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -250,9 +236,8 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"wagonBody"
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=27");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=28");
 
-    // نص تجريبي داخل العربة، سيُستبدل لاحقًا بنص الإجابة/السؤال من بيانات اللعبة.
     el("text", {
       x:wagonX + wagonW / 2,
       y:wagonY + wagonH * .56,
@@ -269,11 +254,51 @@
     }, bodyLayer).textContent = "استفهام";
   }
 
+  function locomotive(train){
+    // إصدار 28: إضافة مقطورة/قاطرة السائق باستخدام الصورة المعتمدة من المستخدم
+    // مع تركيب العجلات بالكود فقط حسب الصورة المرجعية.
+    const locoX = 735;
+    const locoY = 418;
+    const locoW = 455;
+    const locoH = 228;
+
+    const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
+
+    // مواضع وأحجام العجلات موازنة بحسب المرجع:
+    // عجلة كبيرة خلفية + ثلاث عجلات صغيرة أمامية، وكلها تدور.
+    const largeWheelSize = 72;
+    const largeWheelCx = locoX + 78;
+    const largeWheelCy = 585;
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize);
+
+    const smallWheelSize = 39;
+    const smallWheelCy = 592;
+    const smallStartX = locoX + 206;
+    const smallGap = 56;
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize);
+
+    const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
+    const locomotiveBody = el("image", {
+      href:"train-engine.webp?v=28",
+      x:locoX,
+      y:locoY,
+      width:locoW,
+      height:locoH,
+      preserveAspectRatio:"xMidYMid meet",
+      id:"locomotiveBody"
+    }, bodyLayer);
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine.webp?v=28");
+  }
+
   function build(){
     clear();
     defs();
     background();
-    wagon();
+    const train = el("g", {id:"trainScene"});
+    wagon(train);
+    locomotive(train);
   }
 
   build();
