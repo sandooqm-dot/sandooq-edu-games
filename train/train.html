@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 37</title>
+  <title>قطار الإجابات - إصدار 38</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -69,6 +69,19 @@
       transform-box:fill-box;
       transform-origin:center;
       animation:wheelSpin .55s linear infinite;
+    }
+
+    .train-idle-motion{
+      transform-box:fill-box;
+      transform-origin:center;
+      animation:trainIdleMotion 3.2s ease-in-out infinite;
+      will-change:transform;
+    }
+
+    @keyframes trainIdleMotion{
+      0%,100%{transform:translateX(0)}
+      45%{transform:translateX(4px)}
+      68%{transform:translateX(2px)}
     }
 
     @keyframes wheelSpin{
@@ -186,17 +199,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=37",
+      href:"train-track.webp?v=38",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=37");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=38");
   }
 
-  function addWheel(layer, cx, cy, size, version = 37){
+  function addWheel(layer, cx, cy, size, version = 38){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -228,7 +241,7 @@
 
     const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=37",
+      href:"train-wagon.webp?v=38",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -236,7 +249,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"wagonBody"
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=37");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=38");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -255,7 +268,7 @@
   }
 
   function locomotive(train){
-    // إصدار 37:
+    // إصدار 38:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -265,7 +278,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=37",
+      href:"train-engine-transparent.png?v=38",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -273,7 +286,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=37");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=38");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -281,23 +294,23 @@
     const largeWheelSize = 90.2;
     const largeWheelCx = locoX + 64;
     const largeWheelCy = 565;
-    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 36);
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 38);
 
     // العجلات الثلاث الصغيرة: إرجاع للخلف داخل القاطرة وتكبير 10% تقريبًا.
     const smallWheelSize = 47.4;
     const smallWheelCy = 585.3;
     const smallStartX = locoX + 148;
     const smallGap = 50;
-    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 36);
-    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 36);
-    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 36);
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 38);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 38);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 38);
   }
 
   function build(){
     clear();
     defs();
     background();
-    const train = el("g", {id:"trainScene"});
+    const train = el("g", {id:"trainScene", class:"train-idle-motion"});
     wagon(train);
     locomotive(train);
   }
