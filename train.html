@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 53</title>
+  <title>قطار الإجابات - إصدار 59</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 53:
+    // إصدار 59:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -212,7 +212,7 @@
     const g = el("g", {
       id:options.id || "answerBalloonDemo",
       transform:`translate(${x} ${y}) scale(${scale})`,
-      filter:"url(#balloonShadow)"
+      filter:options.shadow === false ? "none" : "url(#balloonShadow)"
     }, parent);
 
     // زعانف خلفية يمين مثل المرجع.
@@ -317,6 +317,14 @@
   let wagonForegroundCoverLayer = null;
   let collisionDebugLayer = null;
   const collisionMap = [];
+
+  const BALLOONS_PER_ROUND = 5;
+  const MEDIUM_BALLOON_SCALE = .80;
+  const MAX_ACTIVE_FALLING_BOXES = 2;
+  const MAX_SETTLED_BOXES = 5;
+
+  let activeFallingBoxes = 0;
+  const settledBoxes = [];
 
   function balloonBurst(parent, x, y, scale = 1){
     const burst = el("g", {
@@ -515,6 +523,19 @@
     bottom:42
   };
 
+  const PHYSICS = {
+    gravity:820,
+
+    // مقاومة الهواء كفيزياء: الصندوق يقترب تدريجيًا من تيار الهواء/حركة المشهد، وليس دفعًا مباشرًا.
+    airFlowX:-220,
+    airResistance:1.18,
+    linearDrag:.995,
+    angularDrag:.992,
+
+    floorRestitution:.03,
+    trainSurfaceVelocityX:-72
+  };
+
   function getBoxCollisionInfo(state){
     const boxTop = state.y - BOX.top;
     const boxBottom = state.y + BOX.bottom;
@@ -560,8 +581,8 @@
     return makeZone("well", rect, meta);
   }
 
-  function makeSlide(rect, meta = {}){
-    return makeZone("short-slide", rect, meta);
+  function makeSurface(rect, meta = {}){
+    return makeZone("surface", rect, meta);
   }
 
   function makeBreak(rect, meta = {}){
@@ -575,7 +596,7 @@
   function buildCollisionMap(){
     collisionMap.length = 0;
 
-    // السكة والأرض: أي سقوط عليها يعني تكسر الصندوق واختفاؤه.
+    // السكة والأرض فقط: هنا يتكسر الصندوق.
     collisionMap.push(makeBreakSurface({
       left:-90,
       right:1380,
@@ -589,103 +610,77 @@
       if(!car || car.type !== "answer") return;
 
       const well = {
-        left:car.x + 58,
-        right:car.x + car.width - 58,
-        top:car.y + 18,
-        bottom:car.y + car.height - 20
+        // حدود العربة أصبحت واسعة من طرف العربة إلى طرفها تقريبًا.
+        // أي صندوق يدخل هذا العمود يسقط داخل العربة ولا يتدحرج فوق حوافها.
+        left:car.x + 4,
+        right:car.x + car.width - 4,
+        top:car.y + 8,
+        bottom:car.y + car.height - 12
       };
 
-      // الحوض فقط هو منطقة الثبات. لا يوجد جذب لمركز العربة.
+      // الحوض واسع مثل الفيديو: الصندوق إذا دخل فعليًا يثبت على وضعه، بدون سحب.
       collisionMap.push(makeWell(well, {
         car,
         index,
-        floorY:car.y + 30,
+        floorY:car.y + 50,
         name:`wagon-well-${index}`
       }));
 
-      // حافتان قصيرتان فقط؛ تعطيان انزلاقًا قصيرًا ثم إما يدخل الحوض أو يسقط.
-      collisionMap.push(makeSlide({
-        left:car.x + 8,
-        right:well.left + 10,
-        y:car.y + 7,
-        thickness:24
+      // منطقة الوصلات بين العربات: ليست قاتلة؛ تعطي انزلاقًا قصيرًا بدل الانفجار.
+      collisionMap.push(makeSurface({
+        left:car.x - 22,
+        right:car.x + 34,
+        y:car.y + 42,
+        thickness:22
       }, {
-        kind:"wagon-rim",
-        side:"left-rim",
-        car,
-        index,
-        slideX:46,
-        slideDuration:.22,
-        friction:.82,
-        name:`wagon-left-rim-${index}`
+        kind:"wagon-connector",
+        name:`wagon-left-connector-${index}`,
+        friction:.12,
+        rollingFriction:.986,
+        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+        restitution:.018
       }));
 
-      collisionMap.push(makeSlide({
-        left:well.right - 10,
-        right:car.x + car.width - 8,
-        y:car.y + 7,
-        thickness:24
+      collisionMap.push(makeSurface({
+        left:car.x + car.width - 34,
+        right:car.x + car.width + 22,
+        y:car.y + 42,
+        thickness:22
       }, {
-        kind:"wagon-rim",
-        side:"right-rim",
-        car,
-        index,
-        slideX:-58,
-        slideDuration:.22,
-        friction:.82,
-        name:`wagon-right-rim-${index}`
+        kind:"wagon-connector",
+        name:`wagon-right-connector-${index}`,
+        friction:.12,
+        rollingFriction:.986,
+        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+        restitution:.018
       }));
-
-      // بقية أجزاء العربة الخارجية صلبة: الصندوق يتكسر عليها بدل الانزلاق اللامنتهي.
-      collisionMap.push(makeBreak({
-        left:car.x,
-        right:car.x + 44,
-        top:car.y + 24,
-        bottom:car.y + car.height + 8
-      }, {name:`wagon-left-solid-${index}`}));
-
-      collisionMap.push(makeBreak({
-        left:car.x + car.width - 44,
-        right:car.x + car.width,
-        top:car.y + 24,
-        bottom:car.y + car.height + 8
-      }, {name:`wagon-right-solid-${index}`}));
-
-      collisionMap.push(makeBreak({
-        left:car.x + 26,
-        right:car.x + car.width - 26,
-        top:car.y + car.height - 18,
-        bottom:car.y + car.height + 8
-      }, {name:`wagon-base-solid-${index}`}));
     });
 
-    // الدحرجة مسموحة فقط على السطح العلوي الصغير لمقصورة السائق.
-    // بقية مقطورة السائق صلبة وتتسبب في تكسر الصندوق.
-    collisionMap.push(makeSlide({
-      // أعلى مقطورة السائق فقط: المنطقة المسموح فيها بالتدحرج.
-      // بقية القاطرة صلبة وتكسر الصندوق.
+    // القمة العلوية فقط لمقطورة السائق: سطح تدحرج دقيق.
+    // وسّعناه للمنطقة الخضراء حتى لا ينفجر أولها أو آخرها.
+    collisionMap.push(makeSurface({
       left:770,
       right:930,
       y:424,
-      thickness:28
+      thickness:32
     }, {
       kind:"driver-roof",
-      slideX:-156,
-      slideDuration:.78,
-      friction:.965,
-      name:"driver-roof-controlled-roll"
+      name:"driver-roof-real-roll",
+      friction:.16,
+      rollingFriction:.990,
+      surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+      restitution:.022
     }));
 
-    // أجزاء القاطرة الصلبة: اصطدام مباشر = تكسر واختفاء.
+    // الأجزاء الصلبة القاتلة في القاطرة فقط، وليست كل القطار.
     [
-      {name:"driver-cabin-body", left:770, right:914, top:454, bottom:604},
-      {name:"engine-boiler", left:890, right:1088, top:446, bottom:592},
-      {name:"engine-front", left:1060, right:1164, top:438, bottom:610},
-      {name:"engine-nose", left:1114, right:1208, top:498, bottom:620},
-      {name:"engine-plow", left:1084, right:1210, top:548, bottom:632},
-      {name:"engine-base", left:770, right:1150, top:558, bottom:622},
-      {name:"engine-wheels-solid", left:780, right:1088, top:552, bottom:622},
-      {name:"chimney-solid", left:892, right:926, top:382, bottom:418}
+      {name:"driver-cabin-body", left:768, right:932, top:456, bottom:604},
+      {name:"engine-boiler", left:898, right:1088, top:448, bottom:592},
+      {name:"engine-front", left:1064, right:1164, top:438, bottom:610},
+      {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
+      {name:"engine-plow", left:1088, right:1210, top:550, bottom:632},
+      {name:"engine-base", left:770, right:1150, top:562, bottom:622},
+      {name:"engine-wheels-solid", left:780, right:1088, top:556, bottom:622}
     ].forEach(zone => {
       collisionMap.push(makeBreak({
         left:zone.left,
@@ -702,13 +697,13 @@
 
     const colors = {
       "well":"#00c853",
-      "short-slide":"#00b0ff",
+      "surface":"#00b0ff",
       "break":"#ff1744",
       "break-surface":"#ff7a00"
     };
 
     collisionMap.forEach(zone => {
-      if(zone.type === "short-slide" || zone.type === "break-surface"){
+      if(zone.type === "surface" || zone.type === "break-surface"){
         el("rect", {
           x:zone.left,
           y:zone.y,
@@ -734,21 +729,18 @@
     });
   }
 
-  function getWellHit(state){
+  function getWellFloorHit(state){
     const info = getBoxCollisionInfo(state);
+    const prevBottom = state.prevY + BOX.bottom;
 
     for(const zone of collisionMap){
       if(zone.type !== "well") continue;
 
-      const bottomInside =
-        rectContainsPoint(zone, info.bottomPoint) ||
-        rectContainsPoint(zone, info.leftBottom) ||
-        rectContainsPoint(zone, info.rightBottom);
+      // من طرف العربة إلى طرفها: إذا كان مركز الصندوق داخل حدود العربة، يسقط داخلها مباشرة.
+      const centerInside = info.boxCenterX >= zone.left && info.boxCenterX <= zone.right;
+      const crossedFloor = prevBottom <= zone.floorY + 10 && info.boxBottom >= zone.floorY;
 
-      const centerInside = info.boxCenterX >= zone.left + 12 && info.boxCenterX <= zone.right - 12;
-      const deepEnough = info.boxBottom >= zone.top + 14;
-
-      if(bottomInside && centerInside && deepEnough && state.vy >= 0){
+      if(centerInside && crossedFloor && state.vy >= 0){
         return zone;
       }
     }
@@ -756,18 +748,18 @@
     return null;
   }
 
-  function getSlideHit(state){
+  function getSurfaceHit(state){
     const info = getBoxCollisionInfo(state);
     const prevBottom = state.prevY + BOX.bottom;
 
     for(const zone of collisionMap){
-      if(zone.type !== "short-slide") continue;
+      if(zone.type !== "surface") continue;
 
       const overlapsX = info.boxRight > zone.left && info.boxLeft < zone.right;
-      const crossed = prevBottom <= zone.y + 8 && info.boxBottom >= zone.y;
+      const crossed = prevBottom <= zone.y + 6 && info.boxBottom >= zone.y;
       const shallow = info.boxBottom >= zone.y && info.boxBottom <= zone.y + zone.thickness;
 
-      if(overlapsX && (crossed || shallow) && state.vy > 0){
+      if(overlapsX && (crossed || shallow) && state.vy >= 0){
         return zone;
       }
     }
@@ -806,78 +798,84 @@
     trackImpactBurst(fallingObjectsLayer || svg, state.x, Math.min(state.y + BOX.bottom, 610));
   }
 
-  function startShortSlide(state, zone){
-    state.mode = "shortSlide";
-    state.slideZone = zone;
-    state.slideTime = zone.slideDuration || .24;
-    state.y = zone.y - BOX.bottom;
-    state.vy = 0;
+  function applyAirResistance(state, dt){
+    // مقاومة الهواء لا تدفع الصندوق كأمر مباشر؛ هي تقرّب سرعته من تيار الهواء تدريجيًا.
+    const relativeAirX = PHYSICS.airFlowX - state.vx;
+    state.vx += relativeAirX * PHYSICS.airResistance * dt;
+    state.vx *= Math.pow(PHYSICS.linearDrag, dt * 60);
+    state.vr *= Math.pow(PHYSICS.angularDrag, dt * 60);
+  }
 
-    // الانزلاق قصير ومحدود، وليس سطحًا مفتوحًا للدحرجة.
-    state.vx = state.vx * .38 + (zone.slideX || 0);
-    state.vr = clamp(state.vr * .48 + state.vx * .32, -118, 94);
+  function applySurfaceContact(state, zone){
+    const incomingVy = state.vy;
+    const surfaceVelocity = zone.surfaceVelocityX || 0;
+    const relVx = state.vx - surfaceVelocity;
+
+    state.y = zone.y - BOX.bottom;
+
+    if(incomingVy > 245){
+      state.vy = -Math.min(28, incomingVy * (zone.restitution ?? PHYSICS.floorRestitution));
+    }else{
+      state.vy = 0;
+    }
+
+    // السطح يغيّر السرعة بالاحتكاك فقط، لذلك يظهر الانزلاق/التدحرج طبيعيًا.
+    state.vx -= relVx * (zone.friction || .12);
+    state.vx *= Math.pow(zone.rollingFriction || .988, 1);
+
+    const surfaceCenter = (zone.left + zone.right) / 2;
+    const offset = clamp((state.x - surfaceCenter) / 80, -1, 1);
+    state.vr += state.vx * .045 + incomingVy * offset * .017;
+    state.vr *= .94;
   }
 
   function settleBoxIntoWagon(startState, well, textLines){
     const layer = settledObjectsLayer || fallingObjectsLayer || svg;
     const box = answerBox(layer, textLines);
-    const car = well.car;
 
-    // يظهر الصندوق كأنه داخل الحوض: جزء ظاهر وجزء مخفي خلف واجهة العربة.
-    const targetX = clamp(startState.x + startState.vx * .018, well.left + 34, well.right - 34);
-    const targetY = car.y + 7 + (Math.random() * 5 - 2.5);
-    const targetRotation = clamp(startState.rotation * .34, -18, 18);
-
-    const startX = startState.x;
-    const startY = startState.y;
-    const startRotation = startState.rotation;
-    const startedAt = performance.now();
-    const duration = 300;
-
-    function easeOutCubic(t){
-      return 1 - Math.pow(1 - t, 3);
+    settledBoxes.push(box);
+    while(settledBoxes.length > MAX_SETTLED_BOXES){
+      const oldBox = settledBoxes.shift();
+      if(oldBox && oldBox.parentNode) oldBox.remove();
     }
 
-    function frame(now){
-      const t = Math.min(1, (now - startedAt) / duration);
-      const e = easeOutCubic(t);
+    // يثبت في نفس مكان وزاوية السقوط، فقط مع حد أمان بسيط حتى لا يخرج من الحوض بصريًا.
+    const finalX = clamp(startState.x, well.left + 12, well.right - 12);
+    const finalY = clamp(startState.y, well.floorY - BOX.bottom - 5, well.floorY - BOX.bottom + 9);
+    const finalRotation = clamp(startState.rotation, -38, 38);
 
-      const x = startX + (targetX - startX) * e;
-      const y = startY + (targetY - startY) * e;
-      const r = startRotation + (targetRotation - startRotation) * e;
-
-      box.setAttribute(
-        "transform",
-        `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
-      );
-
-      if(t < 1){
-        requestAnimationFrame(frame);
-      }
-    }
-
-    requestAnimationFrame(frame);
+    box.setAttribute(
+      "transform",
+      `translate(${finalX.toFixed(2)} ${finalY.toFixed(2)}) rotate(${finalRotation.toFixed(2)})`
+    );
   }
 
   function spawnFallingAnswerBox(startX, startY, textLines){
+    if(activeFallingBoxes >= MAX_ACTIVE_FALLING_BOXES){
+      return false;
+    }
+
+    activeFallingBoxes += 1;
+
     const layer = fallingObjectsLayer || svg;
     const box = answerBox(layer, textLines);
+    let cleanedUp = false;
+
+    function cleanupFallingBox(){
+      if(cleanedUp) return;
+      cleanedUp = true;
+      activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
+    }
 
     const state = {
-      mode:"falling",
       x:startX,
       y:startY + 54,
       prevX:startX,
       prevY:startY + 54,
-      vx:-104,
+      vx:-10 + Math.random() * 18,
       vy:18,
-      gravity:770,
-      wind:-8,
-      airDrag:.993,
-      rotation:-8,
-      vr:-42,
-      slideZone:null,
-      slideTime:0,
+      rotation:-12 + Math.random() * 24,
+      vr:-96 + Math.random() * 192,
       lastTime:performance.now()
     };
 
@@ -888,77 +886,35 @@
       );
     }
 
-    function stepFalling(dt){
+    function step(dt){
       state.prevX = state.x;
       state.prevY = state.y;
 
-      state.vx += state.wind * dt;
-      state.vy += state.gravity * dt;
-      state.vx *= Math.pow(state.airDrag, dt * 60);
-      state.vr *= Math.pow(.990, dt * 60);
+      state.vy += PHYSICS.gravity * dt;
+      applyAirResistance(state, dt);
 
       state.x += state.vx * dt;
       state.y += state.vy * dt;
       state.rotation += state.vr * dt;
 
-      const wellHit = getWellHit(state);
+      const wellHit = getWellFloorHit(state);
       if(wellHit){
         box.remove();
+        cleanupFallingBox();
         settleBoxIntoWagon(state, wellHit, textLines);
         return "settled";
       }
 
-      const slideHit = getSlideHit(state);
-      if(slideHit){
-        startShortSlide(state, slideHit);
+      const surfaceHit = getSurfaceHit(state);
+      if(surfaceHit){
+        applySurfaceContact(state, surfaceHit);
         return "continue";
       }
 
       if(getBreakHit(state) || state.x < -180){
         breakFallingBox(box, state);
+        cleanupFallingBox();
         return "done";
-      }
-
-      return "continue";
-    }
-
-    function stepSlide(dt){
-      const zone = state.slideZone;
-      state.prevX = state.x;
-      state.prevY = state.y;
-
-      state.slideTime -= dt;
-
-      state.vx *= Math.pow(zone.friction || .84, dt * 60);
-      state.vx += (zone.kind === "driver-roof" ? -34 : 0) * dt;
-      state.vr *= Math.pow(.972, dt * 60);
-
-      // دوران الصندوق ناتج من الحركة الأفقية على السطح، وليس حركة مرسومة إلى هدف.
-      if(zone.kind === "driver-roof"){
-        state.vr = clamp(state.vr + state.vx * .018, -155, 115);
-      }
-
-      state.x += state.vx * dt;
-      state.y = zone.y - BOX.bottom;
-      state.rotation += state.vr * dt;
-
-      const wellHit = getWellHit(state);
-      if(wellHit){
-        box.remove();
-        settleBoxIntoWagon(state, wellHit, textLines);
-        return "settled";
-      }
-
-      const stillOnSurface =
-        state.x + BOX.right > zone.left &&
-        state.x - BOX.left < zone.right &&
-        state.slideTime > 0;
-
-      if(!stillOnSurface){
-        state.mode = "falling";
-        state.slideZone = null;
-        state.vy = 42;
-        return "continue";
       }
 
       return "continue";
@@ -969,11 +925,10 @@
       state.lastTime = now;
 
       while(remaining > 0){
-        const dt = Math.min(0.008, remaining);
+        const dt = Math.min(0.007, remaining);
         remaining -= dt;
 
-        const result = state.mode === "shortSlide" ? stepSlide(dt) : stepFalling(dt);
-
+        const result = step(dt);
         if(result === "settled" || result === "done"){
           return;
         }
@@ -985,13 +940,15 @@
         requestAnimationFrame(frame);
       }else{
         box.remove();
+        cleanupFallingBox();
       }
     }
 
     requestAnimationFrame(frame);
+    return true;
   }
 
-  const BALLOON_SPEED_LEVEL = 5; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
+  const BALLOON_SPEED_LEVEL = 6; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
 
   const BALLOON_FLIGHT = {
     startX:1355,
@@ -1013,12 +970,46 @@
     return 24 + safeLevel * 9;
   }
 
+  const BALLOON_TEXT_BANK = [
+    ["ما أجمل", "الزهور!"],
+    ["أين", "القلم؟"],
+    ["هذا", "طالب"],
+    ["يا", "محمد!"],
+    ["هل", "تسمع؟"],
+    ["كم", "كتاب؟"],
+    ["أحب", "القراءة"],
+    ["لن", "نتأخر"],
+    ["في", "الفصل"],
+    ["هذا", "قلم"],
+    ["من", "القارئ؟"],
+    ["هذا", "كتاب"],
+    ["لا", "تتأخر"],
+    ["يا", "سالم!"],
+    ["أين", "الحقيبة؟"]
+  ];
+
+  const activeBalloons = [];
+  let balloonTextCursor = 0;
+  let balloonLoopStarted = false;
+  let balloonLoopLastTime = 0;
+
+  function nextBalloonLines(){
+    const lines = BALLOON_TEXT_BANK[balloonTextCursor % BALLOON_TEXT_BANK.length];
+    balloonTextCursor += 1;
+    return lines;
+  }
+
+  function setBalloonLines(balloon, lines){
+    const tspans = balloon.querySelectorAll("text tspan");
+    if(tspans[0]) tspans[0].textContent = lines[0] || "";
+    if(tspans[1]) tspans[1].textContent = lines[1] || "";
+  }
+
   function createBalloonMotionState(config, index = 0){
     const now = performance.now();
     return {
-      x:(config.startX ?? 1355) + index * 420 + Math.random() * 160,
-      y:(config.baseY ?? 178) + (Math.random() * 36 - 18),
-      startedAt:now,
+      x:(config.startX ?? 1355) + index * 168 + Math.random() * 34,
+      y:(config.baseY ?? 178) + (Math.random() * 34 - 17),
       lastTime:now,
       phaseA:Math.random() * Math.PI * 2,
       phaseB:Math.random() * Math.PI * 2,
@@ -1029,87 +1020,98 @@
     };
   }
 
-  function resetBalloonMotion(state, config, now, index = 0){
-    state.x = (config.startX ?? 1355) + index * 330 + Math.random() * 220;
-    state.y = (config.baseY ?? 178) + (Math.random() * 42 - 21);
-    state.startedAt = now;
-    state.lastTime = now;
-    state.phaseA = Math.random() * Math.PI * 2;
-    state.phaseB = Math.random() * Math.PI * 2;
-    state.phaseC = Math.random() * Math.PI * 2;
-    state.drift = 0;
-    state.driftTarget = Math.random() * 36 - 18;
-    state.nextDriftAt = now + 850 + Math.random() * 1800;
+  function recycleBalloon(item, now, forceFarRight = false){
+    const rightMost = activeBalloons.reduce((max, other) => {
+      if(other === item || other.popped) return max;
+      return Math.max(max, other.state.x);
+    }, BALLOON_FLIGHT.startX);
+
+    item.config.lines = nextBalloonLines();
+    setBalloonLines(item.node, item.config.lines);
+
+    item.state.x = forceFarRight
+      ? BALLOON_FLIGHT.startX + item.index * 168 + Math.random() * 38
+      : Math.max(BALLOON_FLIGHT.startX + Math.random() * 90, rightMost + 156 + Math.random() * 52);
+
+    item.state.y = item.config.baseY + (Math.random() * 40 - 20);
+    item.state.phaseA = Math.random() * Math.PI * 2;
+    item.state.phaseB = Math.random() * Math.PI * 2;
+    item.state.phaseC = Math.random() * Math.PI * 2;
+    item.state.drift = 0;
+    item.state.driftTarget = Math.random() * 44 - 22;
+    item.state.nextDriftAt = now + 750 + Math.random() * 1700;
+
+    item.node.setAttribute("opacity", "1");
+    item.node.style.pointerEvents = "auto";
+    item.popped = false;
+    item.resetAt = 0;
   }
 
-  function startBalloonFlight(balloon, config = BALLOON_FLIGHT, index = 0){
-    const state = createBalloonMotionState(config, index);
-    const speed = speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1);
-    let popped = false;
-    let resetAt = 0;
+  function popPooledBalloon(item, now){
+    if(item.popped) return;
 
-    function popBalloon(now){
-      if(popped) return;
-      popped = true;
-      resetAt = now + 1900;
+    item.popped = true;
+    item.resetAt = now + 950;
 
-      const currentScale = config.scale;
-      balloon.setAttribute("opacity", "0");
-      balloon.style.pointerEvents = "none";
-      balloonBurst(fallingObjectsLayer || svg, state.x, state.y, currentScale);
-      spawnFallingAnswerBox(state.x, state.y, config.lines || ["ما أجمل", "الزهور!"]);
+    item.node.setAttribute("opacity", "0");
+    item.node.style.pointerEvents = "none";
+
+    balloonBurst(fallingObjectsLayer || svg, item.state.x, item.state.y, item.config.scale);
+    spawnFallingAnswerBox(item.state.x, item.state.y, item.config.lines || ["ما أجمل", "الزهور!"]);
+  }
+
+  function updateBalloonItem(item, now, dtMs){
+    if(item.popped){
+      if(now >= item.resetAt){
+        recycleBalloon(item, now, false);
+      }
+      return;
     }
 
-    // اللاعب فقط هو الذي يفرقع البالون بالضغط عليه.
-    balloon.style.pointerEvents = "auto";
-    balloon.style.cursor = "pointer";
-    balloon.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      popBalloon(performance.now());
-    });
+    const dt = dtMs / 1000;
+    const speed = item.speed;
+
+    const speedPulse =
+      0.96 +
+      Math.sin(now * 0.0011 + item.state.phaseB) * 0.045 +
+      Math.sin(now * 0.0021 + item.state.phaseC) * 0.024;
+
+    item.state.x -= speed * speedPulse * dt;
+
+    if(now >= item.state.nextDriftAt){
+      item.state.driftTarget = Math.random() * 48 - 24;
+      item.state.nextDriftAt = now + 900 + Math.random() * 2100;
+    }
+
+    item.state.drift += (item.state.driftTarget - item.state.drift) * 0.018;
+
+    const wave =
+      Math.sin(now * 0.00125 + item.state.phaseA) * 29 +
+      Math.sin(now * 0.00235 + item.state.phaseB) * 10 +
+      Math.sin(now * 0.00058 + item.state.phaseC) * 14;
+
+    item.state.y = clamp(item.config.baseY + wave + item.state.drift, item.config.minY, item.config.maxY);
+
+    item.node.setAttribute(
+      "transform",
+      `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
+    );
+
+    if(item.state.x < item.config.endX){
+      recycleBalloon(item, now, false);
+    }
+  }
+
+  function startBalloonPoolLoop(){
+    if(balloonLoopStarted) return;
+    balloonLoopStarted = true;
 
     function frame(now){
-      const dt = Math.min(40, now - state.lastTime);
-      state.lastTime = now;
+      const dtMs = balloonLoopLastTime ? Math.min(40, now - balloonLoopLastTime) : 16;
+      balloonLoopLastTime = now;
 
-      if(popped){
-        if(now >= resetAt){
-          resetBalloonMotion(state, config, now, index);
-          balloon.setAttribute("opacity", "1");
-          balloon.style.pointerEvents = "auto";
-          popped = false;
-        }
-        requestAnimationFrame(frame);
-        return;
-      }
-
-      const speedPulse =
-        0.95 +
-        Math.sin(now * 0.0011 + state.phaseB) * 0.05 +
-        Math.sin(now * 0.0021 + state.phaseC) * 0.028;
-
-      state.x -= speed * speedPulse * (dt / 1000);
-
-      if(now >= state.nextDriftAt){
-        state.driftTarget = Math.random() * 54 - 27;
-        state.nextDriftAt = now + 900 + Math.random() * 2200;
-      }
-      state.drift += (state.driftTarget - state.drift) * 0.018;
-
-      const wave =
-        Math.sin(now * 0.00125 + state.phaseA) * 31 +
-        Math.sin(now * 0.00235 + state.phaseB) * 12 +
-        Math.sin(now * 0.00058 + state.phaseC) * 16;
-
-      state.y = clamp(config.baseY + wave + state.drift, config.minY, config.maxY);
-
-      balloon.setAttribute(
-        "transform",
-        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) scale(${config.scale})`
-      );
-
-      if(state.x < config.endX){
-        resetBalloonMotion(state, config, now, index);
+      for(const item of activeBalloons){
+        updateBalloonItem(item, now, dtMs);
       }
 
       requestAnimationFrame(frame);
@@ -1121,33 +1123,56 @@
   function balloonsLayer(){
     const balloons = el("g", {id:"balloonsLayer"});
 
-    const balloonData = [
-      {lines:["ما أجمل", "الزهور!"], scale:.92, baseY:174, speedMultiplier:1},
-      {lines:["أين", "القلم؟"], scale:.78, baseY:132, speedMultiplier:1.08},
-      {lines:["هذا", "طالب"], scale:.84, baseY:226, speedMultiplier:.95},
-      {lines:["يا", "محمد!"], scale:.72, baseY:188, speedMultiplier:1.18}
-    ];
+    // نظام جولات خفيف: 5 بالونات نشطة فقط، وتُعاد تدويرها حتى نهاية الجولة.
+    const ACTIVE_BALLOONS = BALLOONS_PER_ROUND;
+    const yPattern = [158, 126, 196, 232, 174];
+    const scalePattern = [MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE];
+    const speedPattern = [1.08, 1.16, 1.02, 1.12, 1.06];
 
-    balloonData.forEach((data, index) => {
+    for(let index = 0; index < ACTIVE_BALLOONS; index++){
+      const lines = nextBalloonLines();
       const config = {
         ...BALLOON_FLIGHT,
-        ...data,
-        startX:BALLOON_FLIGHT.startX + index * 390,
-        minY:96,
-        maxY:306,
-        speedLevel:BALLOON_SPEED_LEVEL
+        lines,
+        scale:MEDIUM_BALLOON_SCALE,
+        baseY:yPattern[index],
+        minY:88,
+        maxY:312,
+        speedLevel:BALLOON_SPEED_LEVEL,
+        speedMultiplier:speedPattern[index]
       };
 
       const balloon = answerBalloon(balloons, {
         id:`answerBalloonDemo-${index}`,
-        x:config.startX,
+        x:BALLOON_FLIGHT.startX + index * 168,
         y:config.baseY,
         scale:config.scale,
-        lines:config.lines
+        lines:config.lines,
+        shadow:false
       });
 
-      startBalloonFlight(balloon, config, index);
-    });
+      balloon.style.pointerEvents = "auto";
+      balloon.style.cursor = "pointer";
+
+      const item = {
+        node:balloon,
+        index,
+        config,
+        state:createBalloonMotionState(config, index),
+        speed:speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1),
+        popped:false,
+        resetAt:0
+      };
+
+      balloon.addEventListener("pointerdown", event => {
+        event.preventDefault();
+        popPooledBalloon(item, performance.now());
+      });
+
+      activeBalloons.push(item);
+    }
+
+    startBalloonPoolLoop();
   }
 
   function background(){
@@ -1188,17 +1213,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=53",
+      href:"train-track.webp?v=59",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=53");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=59");
   }
 
-  function addWheel(layer, cx, cy, size, version = 53){
+  function addWheel(layer, cx, cy, size, version = 59){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1287,7 +1312,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=53",
+      href:"train-wagon.webp?v=59",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1295,7 +1320,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=53");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=59");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1328,7 +1353,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=53",
+        href:"train-wagon.webp?v=59",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1336,7 +1361,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=53");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=59");
 
       el("text", {
         x:car.centerX,
@@ -1361,7 +1386,7 @@
   }
 
   function locomotive(train){
-    // إصدار 53:
+    // إصدار 59:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1371,7 +1396,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=53",
+      href:"train-engine-transparent.png?v=59",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1379,7 +1404,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=53");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=59");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
