@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 41</title>
+  <title>قطار الإجابات - إصدار 42</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -199,17 +199,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=41",
+      href:"train-track.webp?v=42",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=41");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=42");
   }
 
-  function addWheel(layer, cx, cy, size, version = 41){
+  function addWheel(layer, cx, cy, size, version = 42){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -257,6 +257,17 @@
     const wagonW = TRAIN_LAYOUT.wagonW;
     const wagonH = TRAIN_LAYOUT.wagonH;
 
+    const targetArea = {
+      // منطقة الاستهداف الداخلية للعربة.
+      // هذه البيانات لا تظهر بصريًا، وستستخدم لاحقًا لمعرفة سقوط الصندوق/البالون داخل العربة.
+      left:wagonX + 14,
+      right:wagonX + wagonW - 14,
+      top:wagonY + 16,
+      bottom:wagonY + wagonH - 16,
+      centerX:wagonX + wagonW / 2,
+      centerY:wagonY + wagonH / 2
+    };
+
     trainCarRegistry[index] = {
       type:car.type,
       text:car.text,
@@ -264,7 +275,13 @@
       y:wagonY,
       width:wagonW,
       height:wagonH,
-      centerX:wagonX + wagonW / 2
+      left:wagonX,
+      right:wagonX + wagonW,
+      top:wagonY,
+      bottom:wagonY + wagonH,
+      centerX:wagonX + wagonW / 2,
+      centerY:wagonY + wagonH / 2,
+      targetArea
     };
 
     const wheelLayer = el("g", {id:`wagonWheelLayer-${index}`}, train);
@@ -281,7 +298,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=41",
+      href:"train-wagon.webp?v=42",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -289,7 +306,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=41");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=42");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -315,8 +332,13 @@
     }
   }
 
+  function getAnswerTargetArea(index){
+    const car = trainCarRegistry[index];
+    return car ? car.targetArea : null;
+  }
+
   function locomotive(train){
-    // إصدار 41:
+    // إصدار 42:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -326,7 +348,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=41",
+      href:"train-engine-transparent.png?v=42",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -334,7 +356,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=41");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=42");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
