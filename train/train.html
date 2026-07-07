@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 44</title>
+  <title>قطار الإجابات - إصدار 45</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -62,7 +62,7 @@
       height:100%;
       display:block;
       overflow:hidden;
-      pointer-events:none;
+      pointer-events:auto;
     }
 
     .train-wheel{
@@ -156,6 +156,18 @@
 
     const balloonShadow = el("filter", {id:"balloonShadow", x:"-20%", y:"-25%", width:"140%", height:"150%"}, d);
     el("feDropShadow", {dx:"0", dy:"8", stdDeviation:"6", "flood-color":"#1e2332", "flood-opacity":".22"}, balloonShadow);
+
+    const boxBody = el("linearGradient", {id:"answerBoxGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#b07445"}, boxBody);
+    el("stop", {offset:"48%", "stop-color":"#8e552f"}, boxBody);
+    el("stop", {offset:"100%", "stop-color":"#62351d"}, boxBody);
+
+    const boxTop = el("linearGradient", {id:"answerBoxTopGrad", x1:"0", y1:"0", x2:"1", y2:"0"}, d);
+    el("stop", {offset:"0%", "stop-color":"#c78a56"}, boxTop);
+    el("stop", {offset:"100%", "stop-color":"#8a4d2b"}, boxTop);
+
+    const boxShadow = el("filter", {id:"answerBoxShadow", x:"-35%", y:"-35%", width:"170%", height:"180%"}, d);
+    el("feDropShadow", {dx:"0", dy:"7", stdDeviation:"5", "flood-color":"#2b170c", "flood-opacity":".24"}, boxShadow);
   }
 
   function makeCloud(parent, x, y, scale){
@@ -189,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 44:
+    // إصدار 45:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -298,6 +310,159 @@
     return g;
   }
 
+  let fallingObjectsLayer = null;
+
+  function balloonBurst(parent, x, y, scale = 1){
+    const burst = el("g", {
+      transform:`translate(${x} ${y}) scale(${scale})`,
+      opacity:"1"
+    }, parent);
+
+    const pieces = [
+      [-36,-16,-74,-42],[-12,-28,-28,-72],[20,-24,44,-68],
+      [46,-4,90,-22],[-44,18,-86,38],[-8,30,-24,76],
+      [26,24,58,66],[58,20,106,46]
+    ];
+
+    pieces.forEach(([x1,y1,x2,y2], index) => {
+      const shard = el("path", {
+        d:`M${x1} ${y1} L${x1 + 12} ${y1 + 8} L${x2} ${y2} Z`,
+        fill:index % 2 ? "#cbd7ef" : "#828da9",
+        stroke:"#66718f",
+        "stroke-width":1.3,
+        opacity:".92"
+      }, burst);
+      const animate = el("animate", {
+        attributeName:"opacity",
+        values:".95;.55;0",
+        dur:".55s",
+        fill:"freeze"
+      }, shard);
+      animate.beginElement();
+    });
+
+    const ring = el("ellipse", {
+      cx:0,
+      cy:0,
+      rx:48,
+      ry:23,
+      fill:"none",
+      stroke:"#ffffff",
+      "stroke-width":4,
+      opacity:".55"
+    }, burst);
+
+    const ringFade = el("animate", {
+      attributeName:"opacity",
+      values:".55;.2;0",
+      dur:".45s",
+      fill:"freeze"
+    }, ring);
+    ringFade.beginElement();
+
+    setTimeout(() => burst.remove(), 650);
+  }
+
+  function answerBox(parent, textLines = ["ما أجمل", "الزهور!"]){
+    const g = el("g", {
+      filter:"url(#answerBoxShadow)"
+    }, parent);
+
+    // صندوق بسيط مؤقت لاختبار فيزياء السقوط فقط.
+    el("path", {
+      d:"M-46 -32 L46 -32 L58 -18 L-34 -18 Z",
+      fill:"url(#answerBoxTopGrad)",
+      stroke:"#4e2b18",
+      "stroke-width":2
+    }, g);
+
+    el("rect", {
+      x:-46,
+      y:-18,
+      width:92,
+      height:60,
+      rx:7,
+      fill:"url(#answerBoxGrad)",
+      stroke:"#4e2b18",
+      "stroke-width":2.5
+    }, g);
+
+    el("path", {
+      d:"M-46 2 L46 2 M-18 -18 L-18 42 M18 -18 L18 42",
+      fill:"none",
+      stroke:"#d3a06a",
+      "stroke-width":3,
+      opacity:".72"
+    }, g);
+
+    const text = el("text", {
+      x:0,
+      y:5,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#fff0b8",
+      stroke:"#442313",
+      "stroke-width":1.9,
+      "paint-order":"stroke fill",
+      "font-size":17,
+      "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl",
+      style:"direction:rtl;unicode-bidi:plaintext"
+    }, g);
+
+    textLines.forEach((line, index) => {
+      el("tspan", {
+        x:0,
+        dy:index === 0 ? 0 : 20
+      }, text).textContent = line;
+    });
+
+    return g;
+  }
+
+  function spawnFallingAnswerBox(startX, startY, textLines){
+    const layer = fallingObjectsLayer || svg;
+    const box = answerBox(layer, textLines);
+
+    const state = {
+      x:startX,
+      y:startY + 54,
+      vx:-105,       // ميل لليسار بسبب حركة البالون/الرياح
+      vy:28,         // يبدأ نزوله خفيفًا ثم تتسارع الجاذبية
+      gravity:620,
+      wind:-22,
+      rotation:-8,
+      vr:-62,
+      lastTime:performance.now()
+    };
+
+    function frame(now){
+      const dt = Math.min(0.045, (now - state.lastTime) / 1000);
+      state.lastTime = now;
+
+      state.vx += state.wind * dt;
+      state.vy += state.gravity * dt;
+      state.x += state.vx * dt;
+      state.y += state.vy * dt;
+      state.rotation += state.vr * dt;
+
+      box.setAttribute(
+        "transform",
+        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) rotate(${state.rotation.toFixed(2)})`
+      );
+
+      // في هذه المرحلة لا يوجد تصادم، فقط اختبار سقوط مائل.
+      if(state.y < 690 && state.x > -180){
+        requestAnimationFrame(frame);
+      }else{
+        setTimeout(() => box.remove(), 220);
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
   const BALLOON_SPEED_LEVEL = 2; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
 
   const BALLOON_FLIGHT = {
@@ -352,10 +517,43 @@
   function startBalloonFlight(balloon, config = BALLOON_FLIGHT){
     const state = createBalloonMotionState(config);
     const speed = speedFromLevel(config.speedLevel);
+    let popped = false;
+    let resetAt = 0;
+    let canAutoPop = true;
+
+    function popBalloon(now){
+      if(popped) return;
+      popped = true;
+      resetAt = now + 1700;
+
+      const currentScale = config.scale;
+      balloon.setAttribute("opacity", "0");
+      balloonBurst(fallingObjectsLayer || svg, state.x, state.y, currentScale);
+      spawnFallingAnswerBox(state.x, state.y, ["ما أجمل", "الزهور!"]);
+    }
+
+    // للاختبار: يمكن فرقعة البالون بالضغط عليه.
+    balloon.style.pointerEvents = "auto";
+    balloon.style.cursor = "pointer";
+    balloon.addEventListener("pointerdown", event => {
+      event.preventDefault();
+      popBalloon(performance.now());
+    });
 
     function frame(now){
       const dt = Math.min(40, now - state.lastTime);
       state.lastTime = now;
+
+      if(popped){
+        if(now >= resetAt){
+          resetBalloonMotion(state, config, now);
+          balloon.setAttribute("opacity", "1");
+          popped = false;
+          canAutoPop = true;
+        }
+        requestAnimationFrame(frame);
+        return;
+      }
 
       // تسارع وتهدئة خفيفان جدًا حتى لا تكون الحركة ميكانيكية.
       const speedPulse =
@@ -384,8 +582,16 @@
         `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) scale(${config.scale})`
       );
 
+      // فرقعة تلقائية تجريبية عندما يدخل البالون منطقة اللعب بوضوح.
+      // لاحقًا سيتم استبدال هذا بمنطق اللاعب/التوقيت.
+      if(canAutoPop && state.x < 1040 && state.x > 720){
+        canAutoPop = false;
+        popBalloon(now);
+      }
+
       if(state.x < config.endX){
         resetBalloonMotion(state, config, now);
+        canAutoPop = true;
       }
 
       requestAnimationFrame(frame);
@@ -444,17 +650,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=44",
+      href:"train-track.webp?v=45",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=44");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=45");
   }
 
-  function addWheel(layer, cx, cy, size, version = 44){
+  function addWheel(layer, cx, cy, size, version = 45){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -543,7 +749,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=44",
+      href:"train-wagon.webp?v=45",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -551,7 +757,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=44");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=45");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -583,7 +789,7 @@
   }
 
   function locomotive(train){
-    // إصدار 44:
+    // إصدار 45:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -593,7 +799,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=44",
+      href:"train-engine-transparent.png?v=45",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -601,7 +807,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=44");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=45");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -635,6 +841,9 @@
 
     wagons(train);
     locomotive(train);
+
+    // طبقة مؤقتة للصناديق الساقطة، فوق القطار.
+    fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
   }
 
   build();
