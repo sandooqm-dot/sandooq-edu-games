@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 54</title>
+  <title>قطار الإجابات - إصدار 55</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 54:
+    // إصدار 55:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -212,7 +212,7 @@
     const g = el("g", {
       id:options.id || "answerBalloonDemo",
       transform:`translate(${x} ${y}) scale(${scale})`,
-      filter:"url(#balloonShadow)"
+      filter:options.shadow === false ? "none" : "url(#balloonShadow)"
     }, parent);
 
     // زعانف خلفية يمين مثل المرجع.
@@ -1013,13 +1013,46 @@
     return 24 + safeLevel * 9;
   }
 
+  const BALLOON_TEXT_BANK = [
+    ["ما أجمل", "الزهور!"],
+    ["أين", "القلم؟"],
+    ["هذا", "طالب"],
+    ["يا", "محمد!"],
+    ["هل", "تسمع؟"],
+    ["كم", "كتاب؟"],
+    ["أحب", "القراءة"],
+    ["لن", "نتأخر"],
+    ["في", "الفصل"],
+    ["هذا", "قلم"],
+    ["من", "القارئ؟"],
+    ["هذا", "كتاب"],
+    ["لا", "تتأخر"],
+    ["يا", "سالم!"],
+    ["أين", "الحقيبة؟"]
+  ];
+
+  const activeBalloons = [];
+  let balloonTextCursor = 0;
+  let balloonLoopStarted = false;
+  let balloonLoopLastTime = 0;
+
+  function nextBalloonLines(){
+    const lines = BALLOON_TEXT_BANK[balloonTextCursor % BALLOON_TEXT_BANK.length];
+    balloonTextCursor += 1;
+    return lines;
+  }
+
+  function setBalloonLines(balloon, lines){
+    const tspans = balloon.querySelectorAll("text tspan");
+    if(tspans[0]) tspans[0].textContent = lines[0] || "";
+    if(tspans[1]) tspans[1].textContent = lines[1] || "";
+  }
+
   function createBalloonMotionState(config, index = 0){
     const now = performance.now();
-    const offset = config.spawnOffset ?? index * 160;
     return {
-      x:(config.startX ?? 1355) + offset + Math.random() * 44,
-      y:(config.baseY ?? 178) + (Math.random() * 36 - 18),
-      startedAt:now,
+      x:(config.startX ?? 1355) + index * 148 + Math.random() * 34,
+      y:(config.baseY ?? 178) + (Math.random() * 34 - 17),
       lastTime:now,
       phaseA:Math.random() * Math.PI * 2,
       phaseB:Math.random() * Math.PI * 2,
@@ -1030,88 +1063,98 @@
     };
   }
 
-  function resetBalloonMotion(state, config, now, index = 0){
-    const offset = config.spawnOffset ?? index * 160;
-    state.x = (config.startX ?? 1355) + offset + Math.random() * 90;
-    state.y = (config.baseY ?? 178) + (Math.random() * 42 - 21);
-    state.startedAt = now;
-    state.lastTime = now;
-    state.phaseA = Math.random() * Math.PI * 2;
-    state.phaseB = Math.random() * Math.PI * 2;
-    state.phaseC = Math.random() * Math.PI * 2;
-    state.drift = 0;
-    state.driftTarget = Math.random() * 36 - 18;
-    state.nextDriftAt = now + 850 + Math.random() * 1800;
+  function recycleBalloon(item, now, forceFarRight = false){
+    const rightMost = activeBalloons.reduce((max, other) => {
+      if(other === item || other.popped) return max;
+      return Math.max(max, other.state.x);
+    }, BALLOON_FLIGHT.startX);
+
+    item.config.lines = nextBalloonLines();
+    setBalloonLines(item.node, item.config.lines);
+
+    item.state.x = forceFarRight
+      ? BALLOON_FLIGHT.startX + item.index * 148 + Math.random() * 38
+      : Math.max(BALLOON_FLIGHT.startX + Math.random() * 90, rightMost + 132 + Math.random() * 58);
+
+    item.state.y = item.config.baseY + (Math.random() * 40 - 20);
+    item.state.phaseA = Math.random() * Math.PI * 2;
+    item.state.phaseB = Math.random() * Math.PI * 2;
+    item.state.phaseC = Math.random() * Math.PI * 2;
+    item.state.drift = 0;
+    item.state.driftTarget = Math.random() * 44 - 22;
+    item.state.nextDriftAt = now + 750 + Math.random() * 1700;
+
+    item.node.setAttribute("opacity", "1");
+    item.node.style.pointerEvents = "auto";
+    item.popped = false;
+    item.resetAt = 0;
   }
 
-  function startBalloonFlight(balloon, config = BALLOON_FLIGHT, index = 0){
-    const state = createBalloonMotionState(config, index);
-    const speed = speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1);
-    let popped = false;
-    let resetAt = 0;
+  function popPooledBalloon(item, now){
+    if(item.popped) return;
 
-    function popBalloon(now){
-      if(popped) return;
-      popped = true;
-      resetAt = now + 1900;
+    item.popped = true;
+    item.resetAt = now + 950;
 
-      const currentScale = config.scale;
-      balloon.setAttribute("opacity", "0");
-      balloon.style.pointerEvents = "none";
-      balloonBurst(fallingObjectsLayer || svg, state.x, state.y, currentScale);
-      spawnFallingAnswerBox(state.x, state.y, config.lines || ["ما أجمل", "الزهور!"]);
+    item.node.setAttribute("opacity", "0");
+    item.node.style.pointerEvents = "none";
+
+    balloonBurst(fallingObjectsLayer || svg, item.state.x, item.state.y, item.config.scale);
+    spawnFallingAnswerBox(item.state.x, item.state.y, item.config.lines || ["ما أجمل", "الزهور!"]);
+  }
+
+  function updateBalloonItem(item, now, dtMs){
+    if(item.popped){
+      if(now >= item.resetAt){
+        recycleBalloon(item, now, false);
+      }
+      return;
     }
 
-    // اللاعب فقط هو الذي يفرقع البالون بالضغط عليه.
-    balloon.style.pointerEvents = "auto";
-    balloon.style.cursor = "pointer";
-    balloon.addEventListener("pointerdown", event => {
-      event.preventDefault();
-      popBalloon(performance.now());
-    });
+    const dt = dtMs / 1000;
+    const speed = item.speed;
+
+    const speedPulse =
+      0.96 +
+      Math.sin(now * 0.0011 + item.state.phaseB) * 0.045 +
+      Math.sin(now * 0.0021 + item.state.phaseC) * 0.024;
+
+    item.state.x -= speed * speedPulse * dt;
+
+    if(now >= item.state.nextDriftAt){
+      item.state.driftTarget = Math.random() * 48 - 24;
+      item.state.nextDriftAt = now + 900 + Math.random() * 2100;
+    }
+
+    item.state.drift += (item.state.driftTarget - item.state.drift) * 0.018;
+
+    const wave =
+      Math.sin(now * 0.00125 + item.state.phaseA) * 29 +
+      Math.sin(now * 0.00235 + item.state.phaseB) * 10 +
+      Math.sin(now * 0.00058 + item.state.phaseC) * 14;
+
+    item.state.y = clamp(item.config.baseY + wave + item.state.drift, item.config.minY, item.config.maxY);
+
+    item.node.setAttribute(
+      "transform",
+      `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
+    );
+
+    if(item.state.x < item.config.endX){
+      recycleBalloon(item, now, false);
+    }
+  }
+
+  function startBalloonPoolLoop(){
+    if(balloonLoopStarted) return;
+    balloonLoopStarted = true;
 
     function frame(now){
-      const dt = Math.min(40, now - state.lastTime);
-      state.lastTime = now;
+      const dtMs = balloonLoopLastTime ? Math.min(40, now - balloonLoopLastTime) : 16;
+      balloonLoopLastTime = now;
 
-      if(popped){
-        if(now >= resetAt){
-          resetBalloonMotion(state, config, now, index);
-          balloon.setAttribute("opacity", "1");
-          balloon.style.pointerEvents = "auto";
-          popped = false;
-        }
-        requestAnimationFrame(frame);
-        return;
-      }
-
-      const speedPulse =
-        0.95 +
-        Math.sin(now * 0.0011 + state.phaseB) * 0.05 +
-        Math.sin(now * 0.0021 + state.phaseC) * 0.028;
-
-      state.x -= speed * speedPulse * (dt / 1000);
-
-      if(now >= state.nextDriftAt){
-        state.driftTarget = Math.random() * 54 - 27;
-        state.nextDriftAt = now + 900 + Math.random() * 2200;
-      }
-      state.drift += (state.driftTarget - state.drift) * 0.018;
-
-      const wave =
-        Math.sin(now * 0.00125 + state.phaseA) * 31 +
-        Math.sin(now * 0.00235 + state.phaseB) * 12 +
-        Math.sin(now * 0.00058 + state.phaseC) * 16;
-
-      state.y = clamp(config.baseY + wave + state.drift, config.minY, config.maxY);
-
-      balloon.setAttribute(
-        "transform",
-        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) scale(${config.scale})`
-      );
-
-      if(state.x < config.endX){
-        resetBalloonMotion(state, config, now, index);
+      for(const item of activeBalloons){
+        updateBalloonItem(item, now, dtMs);
       }
 
       requestAnimationFrame(frame);
@@ -1123,64 +1166,57 @@
   function balloonsLayer(){
     const balloons = el("g", {id:"balloonsLayer"});
 
-    const BALLOON_TOTAL = 40;
-    const BALLOON_CLUSTER_SIZE = 8;
-    const BALLOON_SPACING = 145;
-    const BALLOON_CLUSTER_GAP = 760;
-
-    const textBank = [
-      ["ما أجمل", "الزهور!"],
-      ["أين", "القلم؟"],
-      ["هذا", "طالب"],
-      ["يا", "محمد!"],
-      ["هل", "تسمع؟"],
-      ["كم", "كتاب؟"],
-      ["أحب", "القراءة"],
-      ["لن", "نتأخر"],
-      ["في", "الفصل"],
-      ["هذا", "قلم"]
-    ];
-
+    // الأداء: لا نرسم 40 بالونًا فعليًا.
+    // نعرض 8 بالونات نشطة فقط، ونُعيد تدويرها لتمثل عددًا كبيرًا من البالونات/المستويات.
+    const ACTIVE_BALLOONS = 8;
     const yPattern = [174, 132, 226, 188, 112, 258, 150, 214];
-    const scalePattern = [.92, .78, .84, .72, .88, .74, .80, .68];
+    const scalePattern = [.90, .76, .82, .70, .86, .72, .78, .66];
     const speedPattern = [1.08, 1.18, 1.02, 1.24, .96, 1.14, 1.04, 1.20];
 
-    for(let index = 0; index < BALLOON_TOTAL; index++){
-      const clusterIndex = Math.floor(index / BALLOON_CLUSTER_SIZE);
-      const positionInCluster = index % BALLOON_CLUSTER_SIZE;
-
-      // ٨ بالونات ورا بعض مباشرة، ثم فراغ بسيط ثم موجة ثانية.
-      const clusterOffset =
-        clusterIndex * (BALLOON_CLUSTER_SIZE * BALLOON_SPACING + BALLOON_CLUSTER_GAP);
-
-      const staggerOffset =
-        positionInCluster * BALLOON_SPACING +
-        (clusterIndex % 2) * 64 +
-        Math.random() * 34;
-
+    for(let index = 0; index < ACTIVE_BALLOONS; index++){
+      const lines = nextBalloonLines();
       const config = {
         ...BALLOON_FLIGHT,
-        startX:BALLOON_FLIGHT.startX,
-        spawnOffset:clusterOffset + staggerOffset,
-        lines:textBank[index % textBank.length],
-        scale:scalePattern[positionInCluster],
-        baseY:yPattern[positionInCluster] + (clusterIndex % 3) * 10,
+        lines,
+        scale:scalePattern[index],
+        baseY:yPattern[index],
         minY:88,
         maxY:312,
         speedLevel:BALLOON_SPEED_LEVEL,
-        speedMultiplier:speedPattern[positionInCluster] + (clusterIndex % 2) * .035
+        speedMultiplier:speedPattern[index]
       };
 
       const balloon = answerBalloon(balloons, {
         id:`answerBalloonDemo-${index}`,
-        x:config.startX + config.spawnOffset,
+        x:BALLOON_FLIGHT.startX + index * 148,
         y:config.baseY,
         scale:config.scale,
-        lines:config.lines
+        lines:config.lines,
+        shadow:false
       });
 
-      startBalloonFlight(balloon, config, index);
+      balloon.style.pointerEvents = "auto";
+      balloon.style.cursor = "pointer";
+
+      const item = {
+        node:balloon,
+        index,
+        config,
+        state:createBalloonMotionState(config, index),
+        speed:speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1),
+        popped:false,
+        resetAt:0
+      };
+
+      balloon.addEventListener("pointerdown", event => {
+        event.preventDefault();
+        popPooledBalloon(item, performance.now());
+      });
+
+      activeBalloons.push(item);
     }
+
+    startBalloonPoolLoop();
   }
 
   function background(){
@@ -1221,17 +1257,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=54",
+      href:"train-track.webp?v=55",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=54");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=55");
   }
 
-  function addWheel(layer, cx, cy, size, version = 54){
+  function addWheel(layer, cx, cy, size, version = 55){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1320,7 +1356,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=54",
+      href:"train-wagon.webp?v=55",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1328,7 +1364,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=54");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=55");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1361,7 +1397,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=54",
+        href:"train-wagon.webp?v=55",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1369,7 +1405,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=54");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=55");
 
       el("text", {
         x:car.centerX,
@@ -1394,7 +1430,7 @@
   }
 
   function locomotive(train){
-    // إصدار 54:
+    // إصدار 55:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1404,7 +1440,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=54",
+      href:"train-engine-transparent.png?v=55",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1412,7 +1448,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=54");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=55");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
