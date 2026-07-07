@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 57</title>
+  <title>قطار الإجابات - إصدار 58</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 57:
+    // إصدار 58:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -525,10 +525,15 @@
 
   const PHYSICS = {
     gravity:820,
-    airDrag:.997,
+
+    // مقاومة الهواء كفيزياء: الصندوق يقترب تدريجيًا من تيار الهواء/حركة المشهد، وليس دفعًا مباشرًا.
+    airFlowX:-118,
+    airResistance:.78,
+    linearDrag:.995,
     angularDrag:.992,
-    floorRestitution:.035,
-    surfaceVelocityX:-54
+
+    floorRestitution:.03,
+    trainSurfaceVelocityX:-72
   };
 
   function getBoxCollisionInfo(state){
@@ -591,7 +596,7 @@
   function buildCollisionMap(){
     collisionMap.length = 0;
 
-    // السكة والأرض: اصطدام مباشر = تكسر واختفاء.
+    // السكة والأرض فقط: هنا يتكسر الصندوق.
     collisionMap.push(makeBreakSurface({
       left:-90,
       right:1380,
@@ -605,69 +610,104 @@
       if(!car || car.type !== "answer") return;
 
       const well = {
-        left:car.x + 44,
-        right:car.x + car.width - 44,
-        top:car.y + 14,
-        bottom:car.y + car.height - 16
+        left:car.x + 34,
+        right:car.x + car.width - 34,
+        top:car.y + 10,
+        bottom:car.y + car.height - 14
       };
 
-      // الحوض: الصندوق لا يُسحب إليه. يثبت فقط عندما يصل قاعه فعليًا إلى أرضية الحوض.
+      // الحوض واسع مثل الفيديو: الصندوق إذا دخل فعليًا يثبت على وضعه، بدون سحب.
       collisionMap.push(makeWell(well, {
         car,
         index,
-        floorY:car.y + 52,
+        floorY:car.y + 50,
         name:`wagon-well-${index}`
       }));
 
-      // جوانب وقاعدة العربة من الخارج صلبة. إذا لم يدخل الصندوق من فتحة الحوض يتكسر.
-      collisionMap.push(makeBreak({
-        left:car.x,
-        right:car.x + 42,
-        top:car.y + 20,
-        bottom:car.y + car.height + 8
-      }, {name:`wagon-left-solid-${index}`}));
+      // حواف العربة ليست قاتلة. الصندوق ينزلق/يتشقلب فوقها ثم يقع في الحوض أو يكمل سقوطه.
+      collisionMap.push(makeSurface({
+        left:car.x + 4,
+        right:well.left + 10,
+        y:car.y + 8,
+        thickness:26
+      }, {
+        kind:"wagon-lip",
+        name:`wagon-left-lip-${index}`,
+        friction:.18,
+        rollingFriction:.988,
+        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+        restitution:.025
+      }));
 
-      collisionMap.push(makeBreak({
-        left:car.x + car.width - 42,
-        right:car.x + car.width,
-        top:car.y + 20,
-        bottom:car.y + car.height + 8
-      }, {name:`wagon-right-solid-${index}`}));
+      collisionMap.push(makeSurface({
+        left:well.right - 10,
+        right:car.x + car.width - 4,
+        y:car.y + 8,
+        thickness:26
+      }, {
+        kind:"wagon-lip",
+        name:`wagon-right-lip-${index}`,
+        friction:.18,
+        rollingFriction:.988,
+        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+        restitution:.025
+      }));
 
-      collisionMap.push(makeBreak({
-        left:car.x + 22,
-        right:car.x + car.width - 22,
-        top:car.y + car.height - 12,
-        bottom:car.y + car.height + 8
-      }, {name:`wagon-base-solid-${index}`}));
+      // منطقة الوصلات بين العربات: ليست قاتلة؛ تعطي انزلاقًا قصيرًا بدل الانفجار.
+      collisionMap.push(makeSurface({
+        left:car.x - 22,
+        right:car.x + 34,
+        y:car.y + 42,
+        thickness:22
+      }, {
+        kind:"wagon-connector",
+        name:`wagon-left-connector-${index}`,
+        friction:.12,
+        rollingFriction:.986,
+        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+        restitution:.018
+      }));
+
+      collisionMap.push(makeSurface({
+        left:car.x + car.width - 34,
+        right:car.x + car.width + 22,
+        y:car.y + 42,
+        thickness:22
+      }, {
+        kind:"wagon-connector",
+        name:`wagon-right-connector-${index}`,
+        friction:.12,
+        rollingFriction:.986,
+        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+        restitution:.018
+      }));
     });
 
-    // فقط القمة العلوية لمقصورة السائق هي سطح قابل للتدحرج.
-    // لا يوجد سحب ولا أمر مباشر لليسار؛ الحركة تنتج من سرعة الصندوق واحتكاك سطح القطار.
+    // القمة العلوية فقط لمقطورة السائق: سطح تدحرج دقيق.
+    // وسّعناه للمنطقة الخضراء حتى لا ينفجر أولها أو آخرها.
     collisionMap.push(makeSurface({
-      left:792,
-      right:895,
+      left:770,
+      right:930,
       y:424,
-      thickness:18
+      thickness:32
     }, {
       kind:"driver-roof",
       name:"driver-roof-real-roll",
-      friction:.20,
-      rollingFriction:.986,
-      surfaceVelocityX:PHYSICS.surfaceVelocityX,
-      restitution:.025
+      friction:.16,
+      rollingFriction:.990,
+      surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
+      restitution:.022
     }));
 
-    // بقية القاطرة صلبة. اصطدام مباشر = تكسر.
+    // الأجزاء الصلبة القاتلة في القاطرة فقط، وليست كل القطار.
     [
-      {name:"driver-cabin-body", left:770, right:914, top:454, bottom:604},
-      {name:"engine-boiler", left:890, right:1088, top:446, bottom:592},
-      {name:"engine-front", left:1060, right:1164, top:438, bottom:610},
-      {name:"engine-nose", left:1114, right:1208, top:498, bottom:620},
-      {name:"engine-plow", left:1084, right:1210, top:548, bottom:632},
-      {name:"engine-base", left:770, right:1150, top:558, bottom:622},
-      {name:"engine-wheels-solid", left:780, right:1088, top:552, bottom:622},
-      {name:"chimney-solid", left:892, right:926, top:382, bottom:418}
+      {name:"driver-cabin-body", left:768, right:932, top:456, bottom:604},
+      {name:"engine-boiler", left:898, right:1088, top:448, bottom:592},
+      {name:"engine-front", left:1064, right:1164, top:438, bottom:610},
+      {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
+      {name:"engine-plow", left:1088, right:1210, top:550, bottom:632},
+      {name:"engine-base", left:770, right:1150, top:562, bottom:622},
+      {name:"engine-wheels-solid", left:780, right:1088, top:556, bottom:622}
     ].forEach(zone => {
       collisionMap.push(makeBreak({
         left:zone.left,
@@ -723,9 +763,10 @@
     for(const zone of collisionMap){
       if(zone.type !== "well") continue;
 
-      const centerInside = info.boxCenterX >= zone.left + 18 && info.boxCenterX <= zone.right - 18;
-      const crossedFloor = prevBottom <= zone.floorY + 8 && info.boxBottom >= zone.floorY;
+      const centerInside = info.boxCenterX >= zone.left + 12 && info.boxCenterX <= zone.right - 12;
+      const crossedFloor = prevBottom <= zone.floorY + 10 && info.boxBottom >= zone.floorY;
 
+      // لا نثبته إلا إذا دخل أرضية العربة فعليًا.
       if(centerInside && crossedFloor && state.vy >= 0){
         return zone;
       }
@@ -742,7 +783,7 @@
       if(zone.type !== "surface") continue;
 
       const overlapsX = info.boxRight > zone.left && info.boxLeft < zone.right;
-      const crossed = prevBottom <= zone.y + 5 && info.boxBottom >= zone.y;
+      const crossed = prevBottom <= zone.y + 6 && info.boxBottom >= zone.y;
       const shallow = info.boxBottom >= zone.y && info.boxBottom <= zone.y + zone.thickness;
 
       if(overlapsX && (crossed || shallow) && state.vy >= 0){
@@ -784,6 +825,14 @@
     trackImpactBurst(fallingObjectsLayer || svg, state.x, Math.min(state.y + BOX.bottom, 610));
   }
 
+  function applyAirResistance(state, dt){
+    // مقاومة الهواء لا تدفع الصندوق كأمر مباشر؛ هي تقرّب سرعته من تيار الهواء تدريجيًا.
+    const relativeAirX = PHYSICS.airFlowX - state.vx;
+    state.vx += relativeAirX * PHYSICS.airResistance * dt;
+    state.vx *= Math.pow(PHYSICS.linearDrag, dt * 60);
+    state.vr *= Math.pow(PHYSICS.angularDrag, dt * 60);
+  }
+
   function applySurfaceContact(state, zone){
     const incomingVy = state.vy;
     const surfaceVelocity = zone.surfaceVelocityX || 0;
@@ -791,21 +840,19 @@
 
     state.y = zone.y - BOX.bottom;
 
-    // ارتداد خفيف جدًا فقط عند الضربة القوية. غير ذلك يلتصق بالسطح ويتدحرج.
-    if(incomingVy > 240){
-      state.vy = -Math.min(34, incomingVy * (zone.restitution ?? PHYSICS.floorRestitution));
+    if(incomingVy > 245){
+      state.vy = -Math.min(28, incomingVy * (zone.restitution ?? PHYSICS.floorRestitution));
     }else{
       state.vy = 0;
     }
 
-    // احتكاك فيزيائي: لا ندفعه إلى هدف. نقرّب سرعته من سرعة السطح تدريجيًا.
+    // السطح يغيّر السرعة بالاحتكاك فقط، لذلك يظهر الانزلاق/التدحرج طبيعيًا.
     state.vx -= relVx * (zone.friction || .12);
     state.vx *= Math.pow(zone.rollingFriction || .988, 1);
 
-    // دوران ناتج من السرعة الأفقية ومكان التصادم.
     const surfaceCenter = (zone.left + zone.right) / 2;
     const offset = clamp((state.x - surfaceCenter) / 80, -1, 1);
-    state.vr += state.vx * .045 + incomingVy * offset * .018;
+    state.vr += state.vx * .045 + incomingVy * offset * .017;
     state.vr *= .94;
   }
 
@@ -819,11 +866,10 @@
       if(oldBox && oldBox.parentNode) oldBox.remove();
     }
 
-    // لا يوجد سحب ولا تحريك إلى مكان محدد.
-    // الصندوق يثبت بنفس مكانه وزاويته لحظة وصوله إلى أرضية العربة.
-    const finalX = clamp(startState.x, well.left + 24, well.right - 24);
-    const finalY = clamp(startState.y, well.floorY - BOX.bottom - 4, well.floorY - BOX.bottom + 8);
-    const finalRotation = clamp(startState.rotation, -34, 34);
+    // يثبت في نفس مكان وزاوية السقوط، فقط مع حد أمان بسيط حتى لا يخرج من الحوض بصريًا.
+    const finalX = clamp(startState.x, well.left + 18, well.right - 18);
+    const finalY = clamp(startState.y, well.floorY - BOX.bottom - 5, well.floorY - BOX.bottom + 9);
+    const finalRotation = clamp(startState.rotation, -38, 38);
 
     box.setAttribute(
       "transform",
@@ -853,10 +899,10 @@
       y:startY + 54,
       prevX:startX,
       prevY:startY + 54,
-      vx:-32 + Math.random() * 20,
+      vx:4 + Math.random() * 18,
       vy:18,
-      rotation:-10 + Math.random() * 20,
-      vr:-86 + Math.random() * 172,
+      rotation:-12 + Math.random() * 24,
+      vr:-96 + Math.random() * 192,
       lastTime:performance.now()
     };
 
@@ -872,8 +918,7 @@
       state.prevY = state.y;
 
       state.vy += PHYSICS.gravity * dt;
-      state.vx *= Math.pow(PHYSICS.airDrag, dt * 60);
-      state.vr *= Math.pow(PHYSICS.angularDrag, dt * 60);
+      applyAirResistance(state, dt);
 
       state.x += state.vx * dt;
       state.y += state.vy * dt;
@@ -1195,17 +1240,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=57",
+      href:"train-track.webp?v=58",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=57");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=58");
   }
 
-  function addWheel(layer, cx, cy, size, version = 57){
+  function addWheel(layer, cx, cy, size, version = 58){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1294,7 +1339,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=57",
+      href:"train-wagon.webp?v=58",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1302,7 +1347,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=57");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=58");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1335,7 +1380,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=57",
+        href:"train-wagon.webp?v=58",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1343,7 +1388,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=57");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=58");
 
       el("text", {
         x:car.centerX,
@@ -1368,7 +1413,7 @@
   }
 
   function locomotive(train){
-    // إصدار 57:
+    // إصدار 58:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1378,7 +1423,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=57",
+      href:"train-engine-transparent.png?v=58",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1386,7 +1431,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=57");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=58");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
