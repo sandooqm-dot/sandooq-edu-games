@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 38</title>
+  <title>قطار الإجابات - إصدار 39</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -199,17 +199,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=38",
+      href:"train-track.webp?v=39",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=38");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=39");
   }
 
-  function addWheel(layer, cx, cy, size, version = 38){
+  function addWheel(layer, cx, cy, size, version = 39){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -223,13 +223,29 @@
     return wheel;
   }
 
-  function wagon(train){
-    const wagonX = 490;
-    const wagonY = 486;
-    const wagonW = 300;
-    const wagonH = 111;
+  const TRAIN_CARS = [
+    {type:"answer", text:"استفهام"},
+    {type:"answer", text:"تعجب"},
+    {type:"answer", text:"نقطة"}
+  ];
 
-    const wheelLayer = el("g", {id:"wagonWheelLayer"}, train);
+  const TRAIN_LAYOUT = {
+    nearestWagonX:490,
+    wagonY:486,
+    wagonW:300,
+    wagonH:111,
+    wagonStep:288
+  };
+
+  function answerWagon(train, car, index){
+    // قالب عربة الإجابة:
+    // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
+    const wagonX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const wagonY = TRAIN_LAYOUT.wagonY;
+    const wagonW = TRAIN_LAYOUT.wagonW;
+    const wagonH = TRAIN_LAYOUT.wagonH;
+
+    const wheelLayer = el("g", {id:`wagonWheelLayer-${index}`}, train);
     const wheelSize = 29;
     const wheelY = wagonY + wagonH - 8;
     const firstWheelX = wagonX + 49;
@@ -239,17 +255,17 @@
     addWheel(wheelLayer, firstWheelX + gap * 2, wheelY, wheelSize);
     addWheel(wheelLayer, firstWheelX + gap * 3, wheelY, wheelSize);
 
-    const bodyLayer = el("g", {id:"wagonBodyLayer"}, train);
+    const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=38",
+      href:"train-wagon.webp?v=39",
       x:wagonX,
       y:wagonY,
       width:wagonW,
       height:wagonH,
       preserveAspectRatio:"xMidYMid meet",
-      id:"wagonBody"
+      id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=38");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=39");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -264,11 +280,19 @@
       "font-weight":900,
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl"
-    }, bodyLayer).textContent = "استفهام";
+    }, bodyLayer).textContent = car.text;
+  }
+
+  function wagons(train){
+    // نرسم العربات من الخلف إلى الأمام حتى تكون العربة الأقرب للقاطرة فوق الوصلات بصريًا.
+    for(let i = TRAIN_CARS.length - 1; i >= 0; i--){
+      const car = TRAIN_CARS[i];
+      if(car.type === "answer") answerWagon(train, car, i);
+    }
   }
 
   function locomotive(train){
-    // إصدار 38:
+    // إصدار 39:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -278,7 +302,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=38",
+      href:"train-engine-transparent.png?v=39",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -286,7 +310,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=38");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=39");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -294,24 +318,30 @@
     const largeWheelSize = 90.2;
     const largeWheelCx = locoX + 64;
     const largeWheelCy = 565;
-    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 38);
+    addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 39);
 
     // العجلات الثلاث الصغيرة: إرجاع للخلف داخل القاطرة وتكبير 10% تقريبًا.
     const smallWheelSize = 47.4;
     const smallWheelCy = 585.3;
     const smallStartX = locoX + 148;
     const smallGap = 50;
-    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 38);
-    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 38);
-    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 38);
+    addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 39);
+    addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 39);
+    addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 39);
   }
 
   function build(){
     clear();
     defs();
     background();
-    const train = el("g", {id:"trainScene", class:"train-idle-motion"});
-    wagon(train);
+
+    // المجموعة الخارجية مخصصة لاحقًا لحركة تقدم القطار بين العربات.
+    const trainPositionGroup = el("g", {id:"trainPositionGroup"});
+
+    // المجموعة الداخلية مخصصة للحركة الخفيفة المستمرة فقط.
+    const train = el("g", {id:"trainScene", class:"train-idle-motion"}, trainPositionGroup);
+
+    wagons(train);
     locomotive(train);
   }
 
