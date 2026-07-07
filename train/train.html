@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 61</title>
+  <title>قطار الإجابات - إصدار 62</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -202,7 +202,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 61:
+    // إصدار 62:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -528,20 +528,24 @@
 
   const PHYSICS = {
     gravityScale:1.18,
-    airTargetVX:-4.25,
-    airPull:.00042,
+
+    // تخفيف مقاومة الهواء قليلًا حتى لا يهرب الصندوق كثيرًا لليسار أثناء السقوط.
+    airTargetVX:-3.05,
+    airPull:.00030,
     maxActiveMatterBoxes:2,
 
     // بعد ملامسة العربة لا يستمر الصندوق بنفس سرعة السقوط.
-    wagonDampingX:.58,
-    wagonDampingY:.82,
-    wagonAngularDamping:.70,
-    wagonInnerGravity:.00034,
+    // هذه القيم أقوى لإيقاف دحرجة الصندوق من عربة إلى عربة.
+    wagonDampingX:.30,
+    wagonDampingY:.58,
+    wagonAngularDamping:.42,
+    wagonInnerGravity:.00044,
 
-    // أسطح الانزلاق الخارجية تُبطئ الصندوق بدل أن تتركه يخترق العربات.
-    slideDampingX:.76,
-    slideDampingY:.52,
-    slideAngularDamping:.82
+    // أسطح الانزلاق الخارجية تُبطئ الصندوق بقوة بدل أن تتركه يتدحرج بين العربات.
+    slideDampingX:.32,
+    slideDampingY:.30,
+    slideAngularDamping:.34,
+    slideContactHold:420
   };
 
   let matterEngine = null;
@@ -592,6 +596,13 @@
       matterEngine.gravity.y = PHYSICS.gravityScale;
 
       Matter.Events.on(matterEngine, "collisionStart", event => {
+        for(const pair of event.pairs){
+          handleMatterCollision(pair.bodyA, pair.bodyB);
+          handleMatterCollision(pair.bodyB, pair.bodyA);
+        }
+      });
+
+      Matter.Events.on(matterEngine, "collisionActive", event => {
         for(const pair of event.pairs){
           handleMatterCollision(pair.bodyA, pair.bodyB);
           handleMatterCollision(pair.bodyB, pair.bodyA);
@@ -672,22 +683,22 @@
       });
 
       // جداران داخليان منخفضان يمنعان خروج الصندوق بعد دخوله، دون أن يعملا كجدار قاتل.
-      addMatterRect(car.x + 8, car.y + 78, 14, 84, {
+      addMatterRect(car.x + 10, car.y + 72, 28, 128, {
         label:`wagon-left-wall-${index}`,
         sgType:"wagon-wall",
         sgWellIndex:index,
-        friction:.88,
-        frictionStatic:.92,
-        restitution:.01
+        friction:.96,
+        frictionStatic:.99,
+        restitution:0
       });
 
-      addMatterRect(car.x + car.width - 8, car.y + 78, 14, 84, {
+      addMatterRect(car.x + car.width - 10, car.y + 72, 28, 128, {
         label:`wagon-right-wall-${index}`,
         sgType:"wagon-wall",
         sgWellIndex:index,
-        friction:.88,
-        frictionStatic:.92,
-        restitution:.01
+        friction:.96,
+        frictionStatic:.99,
+        restitution:0
       });
 
       // الوصلات بين العربات سطح انزلاق خفيف، وليست منطقة انفجار.
@@ -701,9 +712,9 @@
       addMatterRect(car.x + 6, car.y + 54, 58, 12, {
         label:`wagon-connector-left-${index}`,
         sgType:"connector",
-        friction:.48,
-        frictionStatic:.55,
-        restitution:.02
+        friction:.96,
+        frictionStatic:.99,
+        restitution:0
       });
 
       collisionMap.push(makeSurface({
@@ -716,9 +727,9 @@
       addMatterRect(car.x + car.width - 6, car.y + 54, 58, 12, {
         label:`wagon-connector-right-${index}`,
         sgType:"connector",
-        friction:.48,
-        frictionStatic:.55,
-        restitution:.02
+        friction:.96,
+        frictionStatic:.99,
+        restitution:0
       });
     });
 
@@ -856,13 +867,18 @@
   function dampBodyOnSlideSurface(body, surfaceType){
     if(!body || !Matter || !Matter.Body) return;
 
-    const targetX = surfaceType === "driver-roof" ? -2.65 : -1.65;
+    // السقف يسمح بانزلاق خفيف، أما الوصلات بين العربات فتبطيء الصندوق بقوة.
+    const targetX = surfaceType === "driver-roof" ? -1.35 : -0.25;
+    const xDamp = surfaceType === "driver-roof" ? .46 : .18;
+    const yDamp = surfaceType === "driver-roof" ? .40 : .20;
+    const angularDamp = surfaceType === "driver-roof" ? .48 : .22;
+
     Matter.Body.setVelocity(body, {
-      x:body.velocity.x * PHYSICS.slideDampingX + targetX * (1 - PHYSICS.slideDampingX),
-      y:body.velocity.y * PHYSICS.slideDampingY
+      x:body.velocity.x * xDamp + targetX * (1 - xDamp),
+      y:body.velocity.y * yDamp
     });
 
-    Matter.Body.setAngularVelocity(body, body.angularVelocity * PHYSICS.slideAngularDamping);
+    Matter.Body.setAngularVelocity(body, body.angularVelocity * angularDamp);
   }
 
   function cleanupMatterBox(item, removeVisual = true){
@@ -939,6 +955,8 @@
     }
 
     if(bodyB && (bodyB.sgType === "driver-roof" || bodyB.sgType === "connector")){
+      item.lastSurfaceType = bodyB.sgType;
+      item.lastSurfaceContactAt = performance.now();
       dampBodyOnSlideSurface(bodyA, bodyB.sgType);
     }
   }
@@ -962,19 +980,24 @@
 
     const well = getWellByMatterBody(body);
     if(well){
-      if(item.insideWagon || item.lastWellIndex === well.index){
-        moveMatterBoxBehindWagonCover(item);
-        dampBodyInsideWagon(body);
-      }
+      item.insideWagon = true;
+      if(item.lastWellIndex === null) item.lastWellIndex = well.index;
 
-      const slowEnough = body.speed < 1.55 && Math.abs(body.angularVelocity) < .075;
-      const contactedWagon = item.lastWellIndex === well.index && now - item.lastWagonContactAt > 95;
-      const deepEnough = body.position.y >= well.floorY - BOX.bottom - 28;
+      moveMatterBoxBehindWagonCover(item);
+      dampBodyInsideWagon(body);
+
+      const slowEnough = body.speed < 2.05 && Math.abs(body.angularVelocity) < .12;
+      const contactedWagon = item.lastWellIndex === well.index && now - item.lastWagonContactAt > 55;
+      const deepEnough = body.position.y >= well.floorY - BOX.bottom - 34;
 
       if((slowEnough && deepEnough) || (contactedWagon && deepEnough)){
         settleMatterBox(item, well);
         return;
       }
+    }
+
+    if(item.lastSurfaceContactAt && now - item.lastSurfaceContactAt < PHYSICS.slideContactHold){
+      dampBodyOnSlideSurface(body, item.lastSurfaceType);
     }
 
     syncMatterBox(item);
@@ -1060,11 +1083,11 @@
     });
 
     Matter.Body.setVelocity(body, {
-      x:-1.15 + Math.random() * .55,
-      y:.12
+      x:-0.85 + Math.random() * .42,
+      y:.10
     });
 
-    Matter.Body.setAngularVelocity(body, (-0.09 + Math.random() * .18));
+    Matter.Body.setAngularVelocity(body, (-0.075 + Math.random() * .15));
 
     const item = {
       node,
@@ -1350,17 +1373,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=61",
+      href:"train-track.webp?v=62",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=61");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=62");
   }
 
-  function addWheel(layer, cx, cy, size, version = 61){
+  function addWheel(layer, cx, cy, size, version = 62){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1449,7 +1472,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=61",
+      href:"train-wagon.webp?v=62",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1457,7 +1480,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=61");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=62");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1490,7 +1513,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=61",
+        href:"train-wagon.webp?v=62",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1498,7 +1521,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=61");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=62");
 
       el("text", {
         x:car.centerX,
@@ -1523,7 +1546,7 @@
   }
 
   function locomotive(train){
-    // إصدار 61:
+    // إصدار 62:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1533,7 +1556,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=61",
+      href:"train-engine-transparent.png?v=62",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1541,7 +1564,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=61");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=62");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
