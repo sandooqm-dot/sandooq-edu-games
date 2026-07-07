@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 52</title>
+  <title>قطار الإجابات - إصدار 54</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 52:
+    // إصدار 54:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -210,7 +210,7 @@
     const lines = options.lines || ["ما أجمل", "الزهور!"];
 
     const g = el("g", {
-      id:"answerBalloonDemo",
+      id:options.id || "answerBalloonDemo",
       transform:`translate(${x} ${y}) scale(${scale})`,
       filter:"url(#balloonShadow)"
     }, parent);
@@ -324,10 +324,45 @@
       opacity:"1"
     }, parent);
 
+    const boom = el("text", {
+      x:0,
+      y:-86,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#e92323",
+      stroke:"#fff1a8",
+      "stroke-width":5.2,
+      "paint-order":"stroke fill",
+      "font-size":46,
+      "font-weight":1000,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      transform:"scale(.72)",
+      opacity:"0"
+    }, burst);
+    boom.textContent = "بووم!";
+
+    const boomIn = el("animate", {
+      attributeName:"opacity",
+      values:"0;1;1;0",
+      keyTimes:"0;.18;.68;1",
+      dur:".62s",
+      fill:"freeze"
+    }, boom);
+    const boomScale = el("animateTransform", {
+      attributeName:"transform",
+      type:"scale",
+      values:".72;1.18;1.02;.9",
+      keyTimes:"0;.2;.62;1",
+      dur:".62s",
+      fill:"freeze"
+    }, boom);
+    boomIn.beginElement();
+    boomScale.beginElement();
+
     const pieces = [
       [-36,-16,-74,-42],[-12,-28,-28,-72],[20,-24,44,-68],
       [46,-4,90,-22],[-44,18,-86,38],[-8,30,-24,76],
-      [26,24,58,66],[58,20,106,46]
+      [26,24,58,66],[58,20,106,46],[-78,0,-126,-10],[78,-8,132,-18]
     ];
 
     pieces.forEach(([x1,y1,x2,y2], index) => {
@@ -336,12 +371,12 @@
         fill:index % 2 ? "#cbd7ef" : "#828da9",
         stroke:"#66718f",
         "stroke-width":1.3,
-        opacity:".92"
+        opacity:".96"
       }, burst);
       const animate = el("animate", {
         attributeName:"opacity",
-        values:".95;.55;0",
-        dur:".55s",
+        values:".96;.62;0",
+        dur:".58s",
         fill:"freeze"
       }, shard);
       animate.beginElement();
@@ -350,23 +385,30 @@
     const ring = el("ellipse", {
       cx:0,
       cy:0,
-      rx:48,
-      ry:23,
+      rx:46,
+      ry:22,
       fill:"none",
-      stroke:"#ffffff",
-      "stroke-width":4,
-      opacity:".55"
+      stroke:"#ff3b30",
+      "stroke-width":5,
+      opacity:".7"
     }, burst);
 
-    const ringFade = el("animate", {
-      attributeName:"opacity",
-      values:".55;.2;0",
-      dur:".45s",
+    const ringGrow = el("animate", {
+      attributeName:"rx",
+      values:"34;84;114",
+      dur:".52s",
       fill:"freeze"
     }, ring);
+    const ringFade = el("animate", {
+      attributeName:"opacity",
+      values:".7;.35;0",
+      dur:".52s",
+      fill:"freeze"
+    }, ring);
+    ringGrow.beginElement();
     ringFade.beginElement();
 
-    setTimeout(() => burst.remove(), 650);
+    setTimeout(() => burst.remove(), 760);
   }
 
   function answerBox(parent, textLines = ["ما أجمل", "الزهور!"]){
@@ -949,7 +991,7 @@
     requestAnimationFrame(frame);
   }
 
-  const BALLOON_SPEED_LEVEL = 2; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
+  const BALLOON_SPEED_LEVEL = 6; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
 
   const BALLOON_FLIGHT = {
     startX:1355,
@@ -968,14 +1010,15 @@
   function speedFromLevel(level){
     const safeLevel = clamp(Number(level) || 1, 1, 10);
     // سرعة بطيئة الآن، وقابلة للتوسيع لاحقًا من شريط السرعة.
-    return 16 + safeLevel * 6;
+    return 24 + safeLevel * 9;
   }
 
-  function createBalloonMotionState(config){
+  function createBalloonMotionState(config, index = 0){
     const now = performance.now();
+    const offset = config.spawnOffset ?? index * 160;
     return {
-      x:config.startX,
-      y:config.baseY,
+      x:(config.startX ?? 1355) + offset + Math.random() * 44,
+      y:(config.baseY ?? 178) + (Math.random() * 36 - 18),
       startedAt:now,
       lastTime:now,
       phaseA:Math.random() * Math.PI * 2,
@@ -983,41 +1026,43 @@
       phaseC:Math.random() * Math.PI * 2,
       drift:0,
       driftTarget:0,
-      nextDriftAt:now + 900 + Math.random() * 1700
+      nextDriftAt:now + 650 + Math.random() * 1200
     };
   }
 
-  function resetBalloonMotion(state, config, now){
-    state.x = config.startX + Math.random() * 90;
-    state.y = config.baseY + (Math.random() * 36 - 18);
+  function resetBalloonMotion(state, config, now, index = 0){
+    const offset = config.spawnOffset ?? index * 160;
+    state.x = (config.startX ?? 1355) + offset + Math.random() * 90;
+    state.y = (config.baseY ?? 178) + (Math.random() * 42 - 21);
     state.startedAt = now;
     state.lastTime = now;
     state.phaseA = Math.random() * Math.PI * 2;
     state.phaseB = Math.random() * Math.PI * 2;
     state.phaseC = Math.random() * Math.PI * 2;
     state.drift = 0;
-    state.driftTarget = Math.random() * 32 - 16;
-    state.nextDriftAt = now + 1200 + Math.random() * 2300;
+    state.driftTarget = Math.random() * 36 - 18;
+    state.nextDriftAt = now + 850 + Math.random() * 1800;
   }
 
-  function startBalloonFlight(balloon, config = BALLOON_FLIGHT){
-    const state = createBalloonMotionState(config);
-    const speed = speedFromLevel(config.speedLevel);
+  function startBalloonFlight(balloon, config = BALLOON_FLIGHT, index = 0){
+    const state = createBalloonMotionState(config, index);
+    const speed = speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1);
     let popped = false;
     let resetAt = 0;
 
     function popBalloon(now){
       if(popped) return;
       popped = true;
-      resetAt = now + 1700;
+      resetAt = now + 1900;
 
       const currentScale = config.scale;
       balloon.setAttribute("opacity", "0");
+      balloon.style.pointerEvents = "none";
       balloonBurst(fallingObjectsLayer || svg, state.x, state.y, currentScale);
-      spawnFallingAnswerBox(state.x, state.y, ["ما أجمل", "الزهور!"]);
+      spawnFallingAnswerBox(state.x, state.y, config.lines || ["ما أجمل", "الزهور!"]);
     }
 
-    // البالون لا يفرقع تلقائيًا؛ اللاعب فقط هو الذي يفرقه بالضغط عليه.
+    // اللاعب فقط هو الذي يفرقع البالون بالضغط عليه.
     balloon.style.pointerEvents = "auto";
     balloon.style.cursor = "pointer";
     balloon.addEventListener("pointerdown", event => {
@@ -1031,33 +1076,32 @@
 
       if(popped){
         if(now >= resetAt){
-          resetBalloonMotion(state, config, now);
+          resetBalloonMotion(state, config, now, index);
           balloon.setAttribute("opacity", "1");
+          balloon.style.pointerEvents = "auto";
           popped = false;
         }
         requestAnimationFrame(frame);
         return;
       }
 
-      // تسارع وتهدئة خفيفان جدًا حتى لا تكون الحركة ميكانيكية.
       const speedPulse =
-        0.94 +
-        Math.sin(now * 0.0009 + state.phaseB) * 0.045 +
-        Math.sin(now * 0.0017 + state.phaseC) * 0.025;
+        0.95 +
+        Math.sin(now * 0.0011 + state.phaseB) * 0.05 +
+        Math.sin(now * 0.0021 + state.phaseC) * 0.028;
 
       state.x -= speed * speedPulse * (dt / 1000);
 
-      // تغيّر عشوائي ناعم كل فترة، بدون قفزات مزعجة.
       if(now >= state.nextDriftAt){
-        state.driftTarget = Math.random() * 52 - 26;
-        state.nextDriftAt = now + 1200 + Math.random() * 2600;
+        state.driftTarget = Math.random() * 54 - 27;
+        state.nextDriftAt = now + 900 + Math.random() * 2200;
       }
       state.drift += (state.driftTarget - state.drift) * 0.018;
 
       const wave =
-        Math.sin(now * 0.00125 + state.phaseA) * 34 +
-        Math.sin(now * 0.00235 + state.phaseB) * 13 +
-        Math.sin(now * 0.00058 + state.phaseC) * 18;
+        Math.sin(now * 0.00125 + state.phaseA) * 31 +
+        Math.sin(now * 0.00235 + state.phaseB) * 12 +
+        Math.sin(now * 0.00058 + state.phaseC) * 16;
 
       state.y = clamp(config.baseY + wave + state.drift, config.minY, config.maxY);
 
@@ -1067,7 +1111,7 @@
       );
 
       if(state.x < config.endX){
-        resetBalloonMotion(state, config, now);
+        resetBalloonMotion(state, config, now, index);
       }
 
       requestAnimationFrame(frame);
@@ -1078,14 +1122,65 @@
 
   function balloonsLayer(){
     const balloons = el("g", {id:"balloonsLayer"});
-    const balloon = answerBalloon(balloons, {
-      x:BALLOON_FLIGHT.startX,
-      y:BALLOON_FLIGHT.baseY,
-      scale:BALLOON_FLIGHT.scale,
-      lines:["ما أجمل", "الزهور!"]
-    });
 
-    startBalloonFlight(balloon, BALLOON_FLIGHT);
+    const BALLOON_TOTAL = 40;
+    const BALLOON_CLUSTER_SIZE = 8;
+    const BALLOON_SPACING = 145;
+    const BALLOON_CLUSTER_GAP = 760;
+
+    const textBank = [
+      ["ما أجمل", "الزهور!"],
+      ["أين", "القلم؟"],
+      ["هذا", "طالب"],
+      ["يا", "محمد!"],
+      ["هل", "تسمع؟"],
+      ["كم", "كتاب؟"],
+      ["أحب", "القراءة"],
+      ["لن", "نتأخر"],
+      ["في", "الفصل"],
+      ["هذا", "قلم"]
+    ];
+
+    const yPattern = [174, 132, 226, 188, 112, 258, 150, 214];
+    const scalePattern = [.92, .78, .84, .72, .88, .74, .80, .68];
+    const speedPattern = [1.08, 1.18, 1.02, 1.24, .96, 1.14, 1.04, 1.20];
+
+    for(let index = 0; index < BALLOON_TOTAL; index++){
+      const clusterIndex = Math.floor(index / BALLOON_CLUSTER_SIZE);
+      const positionInCluster = index % BALLOON_CLUSTER_SIZE;
+
+      // ٨ بالونات ورا بعض مباشرة، ثم فراغ بسيط ثم موجة ثانية.
+      const clusterOffset =
+        clusterIndex * (BALLOON_CLUSTER_SIZE * BALLOON_SPACING + BALLOON_CLUSTER_GAP);
+
+      const staggerOffset =
+        positionInCluster * BALLOON_SPACING +
+        (clusterIndex % 2) * 64 +
+        Math.random() * 34;
+
+      const config = {
+        ...BALLOON_FLIGHT,
+        startX:BALLOON_FLIGHT.startX,
+        spawnOffset:clusterOffset + staggerOffset,
+        lines:textBank[index % textBank.length],
+        scale:scalePattern[positionInCluster],
+        baseY:yPattern[positionInCluster] + (clusterIndex % 3) * 10,
+        minY:88,
+        maxY:312,
+        speedLevel:BALLOON_SPEED_LEVEL,
+        speedMultiplier:speedPattern[positionInCluster] + (clusterIndex % 2) * .035
+      };
+
+      const balloon = answerBalloon(balloons, {
+        id:`answerBalloonDemo-${index}`,
+        x:config.startX + config.spawnOffset,
+        y:config.baseY,
+        scale:config.scale,
+        lines:config.lines
+      });
+
+      startBalloonFlight(balloon, config, index);
+    }
   }
 
   function background(){
@@ -1126,17 +1221,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=52",
+      href:"train-track.webp?v=54",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=52");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=54");
   }
 
-  function addWheel(layer, cx, cy, size, version = 52){
+  function addWheel(layer, cx, cy, size, version = 54){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1225,7 +1320,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=52",
+      href:"train-wagon.webp?v=54",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1233,7 +1328,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=52");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=54");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1266,7 +1361,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=52",
+        href:"train-wagon.webp?v=54",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1274,7 +1369,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=52");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=54");
 
       el("text", {
         x:car.centerX,
@@ -1299,7 +1394,7 @@
   }
 
   function locomotive(train){
-    // إصدار 52:
+    // إصدار 54:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1309,7 +1404,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=52",
+      href:"train-engine-transparent.png?v=54",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1317,7 +1412,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=52");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=54");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
