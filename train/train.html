@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 68</title>
+  <title>قطار الإجابات - إصدار 69</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 68:
+    // إصدار 69:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -564,16 +564,16 @@
     airPull:.00020,
     maxActiveMatterBoxes:4,
 
-    // بعد دخول العربة: تخفيف سريع للطاقة حتى لا يتدحرج من عربة إلى عربة.
-    wagonDampingX:.16,
-    wagonDampingY:.36,
-    wagonAngularDamping:.26,
-    wagonInnerGravity:.00054,
+    // داخل العربة: تخفيف ناعم يسمح بانزلاق بسيط قبل الاستقرار.
+    wagonDampingX:.78,
+    wagonDampingY:.70,
+    wagonAngularDamping:.72,
+    wagonInnerGravity:.00042,
 
-    // التثبيت الذكي داخل العربة بعد لمسة قصيرة، وليس بعد دحرجة طويلة.
-    captureDelayMin:105,
-    captureDelayMax:175,
-    captureSpeedLimit:3.2,
+    // التثبيت بعد حركة قصيرة داخل العربة، وليس فور اللمس.
+    captureDelayMin:420,
+    captureDelayMax:760,
+    captureSpeedLimit:1.25,
 
     // الفاصل بين العربات لا يستقبل الصندوق؛ يتم توجيهه للعربة الأقرب.
     gapRouteCooldown:300,
@@ -1062,6 +1062,27 @@
     });
   }
 
+  function nudgeBodyTowardWell(body, well){
+    if(!body || !well || !Matter || !Matter.Body) return;
+
+    const safeLeft = well.left + 32;
+    const safeRight = well.right - 32;
+    const targetX = clamp(body.position.x, safeLeft, safeRight);
+    const dx = targetX - body.position.x;
+
+    if(Math.abs(dx) < 3) return;
+
+    const direction = dx > 0 ? 1 : -1;
+    const gentleSpeed = Math.min(.62, Math.max(.20, Math.abs(dx) / 120));
+
+    Matter.Body.setVelocity(body, {
+      x:body.velocity.x * .82 + direction * gentleSpeed,
+      y:body.velocity.y * .94
+    });
+
+    Matter.Body.setAngularVelocity(body, body.angularVelocity * .90);
+  }
+
   function applyDriverRoofBounce(item, body){
     if(!item || !body || !Matter || !Matter.Body) return;
 
@@ -1116,11 +1137,16 @@
     item.lastGapRouteAt = now;
     item.insideWagon = true;
     item.lastWellIndex = targetWell.index;
-    item.enteredWellAt = now;
-    item.captureAfter = 0;
 
-    // الفاصل ليس سطحًا: نوقف Matter فورًا، ونحرك نفس الصندوق بانزلاق داخل العربة.
-    settleMatterBox(item, targetWell);
+    if(!item.enteredWellAt){
+      item.enteredWellAt = now;
+      item.captureAfter = PHYSICS.captureDelayMin +
+        Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
+    }
+
+    // الفاصل لا يثبت الصندوق، بل يدفعه بخفة إلى أقرب عربة ويتركه يستقر طبيعيًا.
+    moveMatterBoxBehindWagonCover(item);
+    nudgeBodyTowardWell(body, targetWell);
   }
 
   function cleanupMatterBox(item, removeVisual = true){
@@ -1152,31 +1178,27 @@
   }
 
   function getWagonSlotTarget(well, startX, startRotation){
-    const key = String(well.index);
-    const count = (settledBoxesByWagon[key] || []).length;
-    const slotIndex = count % MAX_SETTLED_BOXES_PER_WAGON;
-    const offsets = [-78, 78];
-    const rotations = [-8, 7];
+    // لا نستخدم خانات ثابتة؛ الصندوق يستقر قريبًا من آخر مكان وصل له طبيعيًا.
+    const safeLeft = well.left + 28;
+    const safeRight = well.right - 28;
 
-    const targetX = clamp(
-      well.car.centerX + offsets[slotIndex] + (Math.random() * 10 - 5),
-      well.left + 22,
-      well.right - 22
-    );
+    let targetX = clamp(startX, safeLeft, safeRight);
 
-    const targetY = well.floorY - BOX.bottom - 34 + (Math.random() * 4 - 2);
-    const targetRotation = clamp(
-      startRotation * .55 + rotations[slotIndex] + (Math.random() * 5 - 2.5),
-      -36,
-      36
-    );
+    // تصحيح خفيف فقط إذا كان قريبًا جدًا من الحافة حتى لا يظهر معلقًا.
+    if(targetX < safeLeft + 16) targetX = safeLeft + 16;
+    if(targetX > safeRight - 16) targetX = safeRight - 16;
+
+    targetX += Math.random() * 6 - 3;
+
+    const targetY = well.floorY - BOX.bottom - 31 + (Math.random() * 4 - 2);
+    const targetRotation = clamp(startRotation * .88, -34, 34);
 
     return {targetX, targetY, targetRotation};
   }
 
   function animateBoxToSlot(node, startX, startY, startRotation, targetX, targetY, targetRotation){
     const start = performance.now();
-    const duration = 380;
+    const duration = 190;
 
     function easeOutCubic(t){
       return 1 - Math.pow(1 - t, 3);
@@ -1185,7 +1207,7 @@
     function frame(now){
       const t = Math.min(1, (now - start) / duration);
       const e = easeOutCubic(t);
-      const arc = Math.sin(Math.PI * t) * -3;
+      const arc = Math.sin(Math.PI * t) * -1.5;
 
       const x = startX + (targetX - startX) * e;
       const y = startY + (targetY - startY) * e + arc;
@@ -1286,7 +1308,7 @@
 
     // حماية من الصناديق العالقة: لا نترك صندوقًا نشطًا يمنع ظهور صناديق جديدة.
     if(item.spawnedAt && now - item.spawnedAt > 5200){
-      const well = getWellByMatterBody(body) || getLandingWellForBody(body);
+      const well = getWellByMatterBody(body) || getLandingWellForBody(body) || getBestWellForBody(body);
       if(well){
         settleMatterBox(item, well);
       }else{
@@ -1300,8 +1322,35 @@
 
     if(landingWell){
       item.insideWagon = true;
-      item.lastWellIndex = landingWell.index;
-      settleMatterBox(item, landingWell);
+      if(item.lastWellIndex === null) item.lastWellIndex = landingWell.index;
+
+      if(!item.enteredWellAt){
+        item.enteredWellAt = now;
+        item.captureAfter = PHYSICS.captureDelayMin +
+          Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
+      }
+
+      moveMatterBoxBehindWagonCover(item);
+
+      if(!well){
+        // إذا كان في الفاصل، نوجهه بخفة فقط، وليس سحبًا قويًا ولا تثبيتًا فوريًا.
+        nudgeBodyTowardWell(body, landingWell);
+      }
+
+      dampBodyInsideWagon(body);
+
+      const timeInside = now - item.enteredWellAt;
+      const captureReady = timeInside >= item.captureAfter;
+      const slowEnough = body.speed < PHYSICS.captureSpeedLimit && Math.abs(body.angularVelocity) < .20;
+      const deepEnough = body.position.y >= landingWell.floorY - BOX.bottom - 50;
+      const waitedLongEnough = timeInside > 980;
+
+      if(deepEnough && ((captureReady && slowEnough) || waitedLongEnough)){
+        settleMatterBox(item, landingWell);
+        return;
+      }
+
+      syncMatterBox(item);
       return;
     }
 
@@ -1310,7 +1359,7 @@
       item.lastSurfaceContactAt &&
       now - item.lastSurfaceContactAt < 260;
 
-    if(!well && !item.insideWagon && !recentlyHitRoof){
+    if(!item.insideWagon && !recentlyHitRoof){
       const velocityError = PHYSICS.airTargetVX - body.velocity.x;
       Matter.Body.applyForce(body, body.position, {
         x:velocityError * body.mass * PHYSICS.airPull,
@@ -1321,30 +1370,6 @@
     if(body.position.y > 670 || body.position.x < -200){
       breakMatterBox(item);
       return;
-    }
-
-    if(well){
-      item.insideWagon = true;
-      if(item.lastWellIndex === null) item.lastWellIndex = well.index;
-
-      if(!item.enteredWellAt){
-        item.enteredWellAt = now;
-        item.captureAfter = PHYSICS.captureDelayMin +
-          Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
-      }
-
-      moveMatterBoxBehindWagonCover(item);
-      dampBodyInsideWagon(body);
-
-      const captureReady = now - item.enteredWellAt >= Math.min(item.captureAfter, 115);
-      const slowEnough = body.speed < PHYSICS.captureSpeedLimit && Math.abs(body.angularVelocity) < .24;
-      const contactedWagon = item.lastWellIndex === well.index && now - item.lastWagonContactAt > 35;
-      const deepEnough = body.position.y >= well.floorY - BOX.bottom - 48;
-
-      if(deepEnough && (captureReady || slowEnough || contactedWagon)){
-        settleMatterBox(item, well);
-        return;
-      }
     }
 
     syncMatterBox(item);
@@ -1729,17 +1754,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=68",
+      href:"train-track.webp?v=69",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=68");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=69");
   }
 
-  function addWheel(layer, cx, cy, size, version = 68){
+  function addWheel(layer, cx, cy, size, version = 69){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1828,7 +1853,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=68",
+      href:"train-wagon.webp?v=69",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1836,7 +1861,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=68");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=69");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1869,7 +1894,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=68",
+        href:"train-wagon.webp?v=69",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1877,7 +1902,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=68");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=69");
 
       el("text", {
         x:car.centerX,
@@ -1902,7 +1927,7 @@
   }
 
   function locomotive(train){
-    // إصدار 68:
+    // إصدار 69:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1912,7 +1937,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=68",
+      href:"train-engine-transparent.png?v=69",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1920,7 +1945,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=68");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=69");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
