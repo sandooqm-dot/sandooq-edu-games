@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 4</title>
+  <title>مختبر فيزياء القطار - إصدار 5</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -148,7 +148,7 @@
     <div class="note">
       مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
       <div class="small">
-        المحسوب فقط: حواف العربات، الفواصل، وسطح مقطورة السائق القافز باتجاه العربة. الباقي على الفيزياء.
+        المحسوب فقط: حواف العربات، نطاطات الأطراف، الفواصل، وسطح مقطورة السائق القافز. الباقي على الفيزياء.
       </div>
     </div>
 
@@ -246,6 +246,16 @@
     liftOut:14
   };
 
+  const EDGE_BUMPER = {
+    // نطاطات أطراف العربات: أخف من مقطورة السائق.
+    // وظيفتها تصحيح السقوط عند الحافة ودفع الصندوق للداخل فقط.
+    cooldown:260,
+    inwardVelocity:.72,
+    upVelocity:.72,
+    spinKick:.018,
+    liftOut:4
+  };
+
   const staticBoxBodies = [];
 
   function el(name, attrs = {}, parent = stage){
@@ -284,7 +294,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics4", {
+    makeImage("train-track.webp?v=physics5", {
       x:-55,
       y:604,
       width:1390,
@@ -304,7 +314,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics4", {
+        makeImage("train-wheel.webp?v=physics5", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -313,7 +323,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics4", {
+      makeImage("train-wagon.webp?v=physics5", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -322,7 +332,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics4", {
+      makeImage("train-wagon.webp?v=physics5", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -346,7 +356,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics4", {
+    makeImage("train-engine-transparent.png?v=physics5", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -476,6 +486,30 @@
         frictionStatic:1,
         restitution:.18
       });
+
+      // نطاط داخلي على حافة العربة اليسرى: يدفع الصندوق للداخل باتجاه اليمين.
+      makeStaticRect(wagon.x + 24, wagon.y + 55, 34, 92, {
+        label:`${wagon.id}-left-edge-bumper`,
+        sgType:"wagon-edge-bumper",
+        sgWagonId:wagon.id,
+        sgPushX:1,
+        isSensor:true,
+        friction:.18,
+        frictionStatic:.22,
+        restitution:.38
+      });
+
+      // نطاط داخلي على حافة العربة اليمنى: يدفع الصندوق للداخل باتجاه اليسار.
+      makeStaticRect(wagon.x + wagon.w - 24, wagon.y + 55, 34, 92, {
+        label:`${wagon.id}-right-edge-bumper`,
+        sgType:"wagon-edge-bumper",
+        sgWagonId:wagon.id,
+        sgPushX:-1,
+        isSensor:true,
+        friction:.18,
+        frictionStatic:.22,
+        restitution:.38
+      });
     });
 
     // الفاصل بين العربتين: سطحان مائلان يقرران العربة الأقرب بالتصادم، وليس بالسحب.
@@ -527,6 +561,40 @@
       if(!item.inWagon){
         breakBox(item);
       }
+      return;
+    }
+
+    if(otherBody.sgType === "wagon-edge-bumper"){
+      const now = performance.now();
+      if(item.lastEdgeBumperAt && now - item.lastEdgeBumperAt < EDGE_BUMPER.cooldown){
+        return;
+      }
+
+      item.lastEdgeBumperAt = now;
+      item.wagonId = otherBody.sgWagonId || item.wagonId;
+
+      // نطاط الحافة يدفع للداخل فقط، بقوة أخف من قفزة مقطورة السائق.
+      // لا يحدد مكان النهاية ولا يسحب الصندوق؛ مجرد دفعة قصيرة مثل حافة مطاطية.
+      const direction = otherBody.sgPushX || 0;
+      const targetX = direction > 0
+        ? Math.max(boxBody.velocity.x, EDGE_BUMPER.inwardVelocity)
+        : Math.min(boxBody.velocity.x, -EDGE_BUMPER.inwardVelocity);
+
+      Matter.Body.setVelocity(boxBody, {
+        x:targetX,
+        y:Math.min(boxBody.velocity.y * .28, -EDGE_BUMPER.upVelocity)
+      });
+
+      Matter.Body.setAngularVelocity(
+        boxBody,
+        boxBody.angularVelocity * .72 + (direction > 0 ? EDGE_BUMPER.spinKick : -EDGE_BUMPER.spinKick)
+      );
+
+      Matter.Body.setPosition(boxBody, {
+        x:boxBody.position.x + direction * EDGE_BUMPER.liftOut,
+        y:boxBody.position.y - EDGE_BUMPER.liftOut
+      });
+
       return;
     }
 
@@ -612,6 +680,7 @@
       inWagon:false,
       wagonId:null,
       lastWagonContactAt:0,
+      lastEdgeBumperAt:0,
       stableFrames:0,
       removed:false
     };
@@ -752,6 +821,7 @@
       const type = body.sgType || body.label || "";
       const color =
         type.includes("roof") ? "#2196f3" :
+        type.includes("edge") ? "#00e5ff" :
         type.includes("gap") ? "#ff9800" :
         type.includes("floor") ? "#00c853" :
         type.includes("wall") ? "#8e24aa" :
