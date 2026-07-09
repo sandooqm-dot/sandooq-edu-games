@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 90</title>
+  <title>قطار الإجابات - إصدار 91</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -2121,12 +2121,12 @@
   function passengerWagon(train, car, index){
     // عربة الركاب بصرية فقط:
     // لا تدخل في trainCarRegistry ولا في فيزياء الصناديق.
-    // العجلات بنفس حجم وموقع وطريقة عجلات عربات السؤال.
+    // حجمها أصبح مطابقًا تقريبًا لمقطورة السائق، مع إبقاء العجلات بنفس طريقة عربات السؤال.
     const rawSlotX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
-    const rawPassengerW = 260;
-    const rawPassengerH = 104;
+    const rawPassengerW = 320;
+    const rawPassengerH = 179;
     const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2;
-    const rawPassengerY = TRAIN_LAYOUT.wagonY + 6;
+    const rawPassengerY = 430;
 
     const passengerX = trainX(rawPassengerX);
     const passengerY = trainY(rawPassengerY);
@@ -2136,8 +2136,8 @@
     const wheelLayer = el("g", {id:`passengerWheelLayer-${index}`}, train);
     const wheelSize = 47.4;
     const wheelY = 585.3;
-    const firstWheelX = rawPassengerX + 43;
-    const gap = 56;
+    const firstWheelX = rawPassengerX + 49;
+    const gap = 66;
 
     addWheel(wheelLayer, firstWheelX, wheelY, wheelSize);
     addWheel(wheelLayer, firstWheelX + gap, wheelY, wheelSize);
@@ -2328,7 +2328,7 @@
   }
 
   build();
-  /* إصدار 90: إضافة عربة ركاب بصرية بين عربتي سؤال، بدون تغيير فيزياء السقوط أو البالونات. */
+  /* إصدار 91: تكبير عربة الركاب لتكون بنفس حجم مقطورة السائق تقريبًا مع إبقائها بصرية فقط. */
 })();
 </script>
 </body>
