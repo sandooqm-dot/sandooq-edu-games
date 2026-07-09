@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 83</title>
+  <title>قطار الإجابات - إصدار 84</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -613,7 +613,7 @@
       floor:{
         inset:14,
         h:18,
-        yOffsetFromTop:43,
+        yOffsetFromTop:46,
         friction:1.05,
         frictionStatic:1.35,
         restitution:.12
@@ -1193,38 +1193,12 @@
       body.position.y <= well.bottom + 30;
   }
 
-  function getWagonEntryWellByMatterBody(body){
-    // دخول بصري مبكر:
-    // إذا دخل أسفل الصندوق حدود العربة العلوية، ننقله خلف واجهة العربة فورًا
-    // حتى لا يظهر الجزء السفلي للحظة ثم يختفي.
-    const halfBoxH = BOX.height / 2;
-    const halfBoxW = BOX.width / 2;
-
+  function getWellByMatterBody(body){
     for(const zone of collisionMap){
       if(zone.type !== "well") continue;
-
-      const bottomEntered = body.position.y + halfBoxH >= zone.top + trainLen(1);
-      const topNotTooLow = body.position.y - halfBoxH <= zone.bottom;
-      const xOverlaps =
-        body.position.x + halfBoxW * .42 >= zone.left &&
-        body.position.x - halfBoxW * .42 <= zone.right;
-
-      if(bottomEntered && topNotTooLow && xOverlaps){
-        return zone;
-      }
+      if(isBodyInsideWell(body, zone)) return zone;
     }
-
     return null;
-  }
-
-  function markBoxInsideWagonEarly(item, well){
-    if(!item || !well || item.done) return;
-
-    item.insideWagon = true;
-    item.lastWellIndex = well.index;
-    item.enteredWellAt = item.enteredWellAt || performance.now();
-
-    moveMatterBoxBehindWagonCover(item);
   }
 
   function syncMatterBox(item){
@@ -1523,15 +1497,6 @@
 
     const body = item.body;
     applyFreeFallAirDrift(item);
-
-    const entryWell = item.insideWagon
-      ? null
-      : getWagonEntryWellByMatterBody(body);
-
-    if(entryWell){
-      markBoxInsideWagonEarly(item, entryWell);
-    }
-
     syncMatterBox(item);
 
     const activeWell = item.insideWagon
@@ -1908,14 +1873,14 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=83",
+      href:"train-track.webp?v=84",
       x:trainX(-55),
       y:trainY(604),
       width:trainLen(1390),
       height:trainLen(27),
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=83");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
   }
 
   function addWheel(layer, cx, cy, size, version = 72){
@@ -2016,7 +1981,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=83",
+      href:"train-wagon.webp?v=84",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -2024,7 +1989,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=83");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -2057,7 +2022,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=83",
+        href:"train-wagon.webp?v=84",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -2065,7 +2030,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=83");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
       el("text", {
         x:car.centerX,
@@ -2104,7 +2069,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=83",
+      href:"train-engine-transparent.png?v=84",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -2112,7 +2077,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=83");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=84");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -2130,6 +2095,43 @@
     addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 39);
     addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 39);
     addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 39);
+  }
+
+  function renderWagonDropCovers(){
+    const coverLayer = el("g", {
+      id:"wagonDropCoverLayer",
+      class:"train-idle-motion",
+      "pointer-events":"none"
+    });
+
+    trainCarRegistry.forEach((car, index) => {
+      if(!car || car.type !== "answer") return;
+
+      const clipId = `wagonDropCoverClip-${index}`;
+      const defsNode = svg.querySelector("defs");
+      const clip = el("clipPath", {id:clipId}, defsNode);
+
+      // نغطي الثلث السفلي فقط حتى لا نحجب نص العربة،
+      // وفي نفس الوقت نمنع ظهور أسفل الصندوق فوق واجهة العربة.
+      el("rect", {
+        x:car.x,
+        y:car.y + car.height * .62,
+        width:car.width,
+        height:car.height * .38
+      }, clip);
+
+      const cover = el("image", {
+        href:"train-wagon.webp?v=84",
+        x:car.x,
+        y:car.y,
+        width:car.width,
+        height:car.height,
+        preserveAspectRatio:"xMidYMid meet",
+        "clip-path":`url(#${clipId})`,
+        "pointer-events":"none"
+      }, coverLayer);
+      cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
+    });
   }
 
   function build(){
@@ -2156,13 +2158,16 @@
     // طبقة الصناديق أثناء السقوط تبقى خارج trainScene حتى لا تتحرك مع القطار أثناء السقوط.
     fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
 
+    // غطاء بصري سفلي فوق الصناديق الساقطة فقط، بدون نقل الصندوق أو تغيير الفيزياء.
+    renderWagonDropCovers();
+
     // خريطة تصادم غير مرئية للقطار: أحواض، حواف، نطاطات، فواصل ذكية، قاطرة، وسكة.
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
     loadMatterLibrary();
   }
 
   build();
-  /* إصدار 83: إخفاء الجزء السفلي مبكرًا عند دخول العربة ورفع أرضية العربة قليلًا لإظهار العبارة. */
+  /* إصدار 84: مبني من 82؛ رفع بسيط لأرضية العربة وغطاء بصري سفلي بدون تغيير مسار الفيزياء. */
 })();
 </script>
 </body>
