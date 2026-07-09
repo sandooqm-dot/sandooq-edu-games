@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 1</title>
+  <title>مختبر فيزياء القطار - إصدار 2</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -272,7 +272,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics1", {
+    makeImage("train-track.webp?v=physics2", {
       x:-55,
       y:604,
       width:1390,
@@ -292,7 +292,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics1", {
+        makeImage("train-wheel.webp?v=physics2", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -301,7 +301,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics1", {
+      makeImage("train-wagon.webp?v=physics2", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -310,7 +310,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics1", {
+      makeImage("train-wagon.webp?v=physics2", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -334,7 +334,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics1", {
+    makeImage("train-engine-transparent.png?v=physics2", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -483,9 +483,9 @@
     makeStaticRect((ROOF.x1 + ROOF.x2) / 2, ROOF.y + 8, ROOF.x2 - ROOF.x1, 18, {
       label:"driver-roof-bounce",
       sgType:"driver-roof",
-      friction:.12,
-      frictionStatic:.16,
-      restitution:.78
+      friction:.18,
+      frictionStatic:.22,
+      restitution:.62
     });
 
     Matter.Events.on(engine, "collisionStart", event => {
@@ -526,13 +526,13 @@
     if(otherBody.sgType === "driver-roof"){
       item.lastRoofHitAt = performance.now();
       // لا نحدد مسارًا. فقط نعطي لفّة خفيفة لحظة الاصطدام مثل علبة تضرب حافة.
-      Matter.Body.setAngularVelocity(boxBody, boxBody.angularVelocity - .055);
+      Matter.Body.setAngularVelocity(boxBody, boxBody.angularVelocity - .024);
       return;
     }
 
     if(otherBody.sgType === "gap-ramp"){
       item.lastGapHitAt = performance.now();
-      Matter.Body.setAngularVelocity(boxBody, boxBody.angularVelocity - .035);
+      Matter.Body.setAngularVelocity(boxBody, boxBody.angularVelocity - .018);
     }
   }
 
@@ -547,7 +547,8 @@
       chamfer:{radius:4},
       friction:.78,
       frictionStatic:.88,
-      frictionAir:.006,
+      // مقاومة الهواء كانت عالية وتخلي الصندوق ينجرف للخلف أكثر من المطلوب.
+      frictionAir:.0012,
       restitution:.22,
       density:.0032,
       sleepThreshold:60
@@ -576,22 +577,22 @@
 
   function dropNormal(){
     // السقوط المعتمد: من اليمين، مائل لليسار، والباقي فيزياء.
-    createFallingBox(748, 126, -1.22, .12, -.018);
+    createFallingBox(748, 126, -.56, .12, -.010);
   }
 
   function dropGapRight(){
     // يبدأ من اليمين، لكن موقعه فوق النصف الأيمن للفاصل؛ السطح المائل يقرر الارتداد.
-    createFallingBox(612, 128, -1.08, .10, -.018);
+    createFallingBox(612, 128, -.50, .10, -.010);
   }
 
   function dropGapLeft(){
     // يبدأ من اليمين أيضًا، لكن فوق النصف الأيسر للفاصل.
-    createFallingBox(565, 128, -1.03, .10, -.018);
+    createFallingBox(565, 128, -.48, .10, -.010);
   }
 
   function dropRoof(){
     // يسقط على مقطورة السائق من اليمين، والسقف النطاط يعطي القفزة.
-    createFallingBox(850, 110, -.52, .05, -.012);
+    createFallingBox(850, 110, -.24, .05, -.007);
   }
 
   function dropThree(){
@@ -599,12 +600,6 @@
     dropNormal();
     dropTimer = setTimeout(dropNormal, 1500);
     setTimeout(dropNormal, 3000);
-  }
-
-  function breakBox(item){
-    if(!item || item.removed) return;
-
-    item.removed = true;
   }
 
   function breakBox(item){
