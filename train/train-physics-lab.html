@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 8</title>
+  <title>مختبر فيزياء القطار - إصدار 9</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -148,7 +148,7 @@
     <div class="note">
       مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
       <div class="small">
-        المحسوب فقط: فيزياء موحدة لكل عربة + فاصل ذكي بين العربات يقرأ مركز ثقل الصندوق ويدفعه للأقرب. الباقي على الفيزياء.
+        المحسوب فقط: فيزياء موحدة لكل عربة + فاصل ذكي صغير بين العربات يقرأ مركز ثقل الصندوق ويدفعه للأقرب. الباقي على الفيزياء.
       </div>
     </div>
 
@@ -283,18 +283,17 @@
   };
 
   const GAP_PHYSICS_PROFILE = {
-    // فاصل ذكي بين كل عربتين.
-    // يقسم الفاصل إلى نصفين، ثم يعتمد على مركز ثقل الصندوق:
-    // إذا كان الحمل يميل لليسار يدفعه لليسار، وإذا يميل لليمين يدفعه لليمين.
-    yOffset:-38,
-    width:132,
-    height:118,
-    cooldown:95,
-    inwardVelocity:1.42,
-    upVelocity:1.08,
-    spinKick:.032,
-    liftOut:9,
-    centerDeadZone:5
+    // فاصل ذكي صغير بين العربات، بحجم قريب من نطاط رأس الحافة.
+    // لا يمتد للأعلى ولا يأخذ مساحة من العربة؛ يلتقط فقط الصندوق الواقف فوق الفاصل.
+    yOffset:-7,
+    width:54,
+    height:22,
+    cooldown:85,
+    inwardVelocity:1.32,
+    upVelocity:.92,
+    spinKick:.026,
+    liftOut:6,
+    centerDeadZone:4
   };
 
   const staticBoxBodies = [];
@@ -335,7 +334,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics8", {
+    makeImage("train-track.webp?v=physics9", {
       x:-55,
       y:604,
       width:1390,
@@ -355,7 +354,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics8", {
+        makeImage("train-wheel.webp?v=physics9", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -364,7 +363,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics8", {
+      makeImage("train-wagon.webp?v=physics9", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -373,7 +372,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics8", {
+      makeImage("train-wagon.webp?v=physics9", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -397,7 +396,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics8", {
+    makeImage("train-engine-transparent.png?v=physics9", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -536,7 +535,7 @@
     const y = Math.min(leftWagon.y, rightWagon.y) + profile.yOffset;
     const halfW = profile.width / 2;
 
-    // نصف الفاصل ناحية العربة اليسرى.
+    // نصف الفاصل ناحية العربة اليسرى. صغير جدًا مثل نطاط رأس الحافة.
     makeStaticRect(center - halfW / 2, y, halfW, profile.height, {
       label:`gap-${leftWagon.id}-${rightWagon.id}-left-smart-bouncer`,
       sgType:"gap-smart-bouncer",
@@ -547,10 +546,10 @@
       isSensor:true,
       friction:.05,
       frictionStatic:.08,
-      restitution:.42
+      restitution:.38
     });
 
-    // نصف الفاصل ناحية العربة اليمنى.
+    // نصف الفاصل ناحية العربة اليمنى. صغير جدًا مثل نطاط رأس الحافة.
     makeStaticRect(center + halfW / 2, y, halfW, profile.height, {
       label:`gap-${leftWagon.id}-${rightWagon.id}-right-smart-bouncer`,
       sgType:"gap-smart-bouncer",
@@ -561,7 +560,7 @@
       isSensor:true,
       friction:.05,
       frictionStatic:.08,
-      restitution:.42
+      restitution:.38
     });
   }
 
