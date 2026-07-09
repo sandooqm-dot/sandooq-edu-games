@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 78</title>
+  <title>قطار الإجابات - إصدار 80</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -663,12 +663,21 @@
     },
 
     freeFallAirDrift:{
-      // انجراف هوائي خفيف لليسار أثناء السقوط الحر فقط.
+      // انجراف هوائي واضح لليسار أثناء السقوط الحر فقط، مع سقوط أسرع.
       // يتوقف نهائيًا عند أول ملامسة لأي سطح/نطاط/فاصل/قاطرة.
       enabled:true,
-      targetVX:-1.04,
-      maxLeftVX:-1.18,
-      force:.000018
+
+      // الميل لليسار — أقوى من الإصدار السابق حتى لا يظهر السقوط عموديًا.
+      targetVX:-4.25,
+      maxLeftVX:-4.75,
+      velocityStepX:.24,
+      forceX:.00014,
+
+      // سرعة النزول أثناء السقوط الحر فقط.
+      targetVY:6.35,
+      maxDownVY:6.9,
+      velocityStepY:.32,
+      forceY:.00012
     }
   };
 
@@ -1288,21 +1297,35 @@
 
     const body = item.body;
 
-    // لا نؤثر على الصندوق بعد أن وصل لسرعة الميل المطلوبة؛ هذا يمنع المبالغة.
-    if(body.velocity.x > profile.targetVX){
+    // أثناء السقوط الحر فقط:
+    // نثبت المسار كهبوط مائل بفعل الهواء، لا كهروب عمودي.
+    let nextVX = body.velocity.x;
+    let nextVY = body.velocity.y;
+
+    if(nextVX > profile.targetVX){
+      nextVX = Math.max(profile.targetVX, nextVX - profile.velocityStepX);
       Matter.Body.applyForce(body, body.position, {
-        x:-body.mass * profile.force,
+        x:-body.mass * profile.forceX,
         y:0
       });
+    }else if(nextVX < profile.maxLeftVX){
+      nextVX = profile.maxLeftVX;
     }
 
-    // سقف أمان: الميل يبقى خفيفًا ولا يتحول إلى سحب قوي.
-    if(body.velocity.x < profile.maxLeftVX){
-      Matter.Body.setVelocity(body, {
-        x:profile.maxLeftVX,
-        y:body.velocity.y
+    if(nextVY < profile.targetVY){
+      nextVY = Math.min(profile.targetVY, nextVY + profile.velocityStepY);
+      Matter.Body.applyForce(body, body.position, {
+        x:0,
+        y:body.mass * profile.forceY
       });
+    }else if(nextVY > profile.maxDownVY){
+      nextVY = profile.maxDownVY;
     }
+
+    Matter.Body.setVelocity(body, {
+      x:nextVX,
+      y:nextVY
+    });
   }
 
   function handleGapActiveCollision(bodyA, bodyB){
@@ -1503,7 +1526,7 @@
       ...TRAIN_PHYSICS_PROFILES.box.body
     });
 
-    Matter.Body.setVelocity(body, {x:-.56, y:.12});
+    Matter.Body.setVelocity(body, {x:-3.05, y:1.9});
     Matter.Body.setAngularVelocity(body, 0);
 
     const item = {
@@ -1898,7 +1921,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=78",
+      href:"train-wagon.webp?v=80",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1906,7 +1929,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=78");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=80");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1939,7 +1962,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=78",
+        href:"train-wagon.webp?v=80",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1947,7 +1970,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=78");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=80");
 
       el("text", {
         x:car.centerX,
@@ -1982,7 +2005,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=78",
+      href:"train-engine-transparent.png?v=80",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1990,7 +2013,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=78");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=80");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -2040,7 +2063,7 @@
   }
 
   build();
-  /* إصدار 78: انجراف هوائي خفيف لليسار أثناء السقوط الحر فقط، ويتوقف عند أول ملامسة. */
+  /* إصدار 80: سقوط حر مائل بوضوح لليسار وسرعة سقوط أعلى مباشرة بعد فرقعة البالون. */
 })();
 </script>
 </body>
