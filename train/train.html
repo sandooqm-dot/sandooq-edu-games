@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 75</title>
+  <title>قطار الإجابات - إصدار 76</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -89,6 +89,7 @@
       to{transform:rotate(360deg)}
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 </head>
 <body>
   <main class="train-page" id="page">
@@ -320,7 +321,7 @@
 
   const BALLOONS_PER_ROUND = 5;
   const MEDIUM_BALLOON_SCALE = .80;
-  const MAX_ACTIVE_FALLING_BOXES = 2;
+  const MAX_ACTIVE_FALLING_BOXES = 4;
   const MAX_SETTLED_BOXES = 6;
   const MAX_SETTLED_BOXES_PER_WAGON = 2;
 
@@ -670,6 +671,7 @@
   const matterBoxes = [];
   const matterStaticBodies = [];
   const settledVisualMatterBoxes = [];
+  const pendingMatterSpawns = [];
 
   function clamp(value, min, max){
     return Math.max(min, Math.min(max, value));
@@ -703,6 +705,7 @@
     if(isMatterReady()){
       buildCollisionMap();
       startMatterLoop();
+      flushPendingMatterSpawns();
       return;
     }
 
@@ -717,6 +720,7 @@
       matterLibraryLoading = false;
       buildCollisionMap();
       startMatterLoop();
+      flushPendingMatterSpawns();
     };
 
     script.onerror = () => {
@@ -724,6 +728,15 @@
     };
 
     document.head.appendChild(script);
+  }
+
+  function flushPendingMatterSpawns(){
+    if(!isMatterReady() || !matterEngine || !pendingMatterSpawns.length) return;
+
+    const pending = pendingMatterSpawns.splice(0, pendingMatterSpawns.length);
+    pending.forEach(job => {
+      spawnMatterAnswerBox(job.startX, job.startY, job.textLines, true);
+    });
   }
 
   function resetMatterWorld(){
@@ -1398,7 +1411,7 @@
     const liveBoxes = matterBoxes.filter(item => item && !item.done);
     activeFallingBoxes = Math.min(activeFallingBoxes, liveBoxes.length);
 
-    if(activeFallingBoxes < 4) return;
+    if(activeFallingBoxes < MAX_ACTIVE_FALLING_BOXES) return;
 
     const oldest = liveBoxes[0];
     if(oldest){
@@ -1408,8 +1421,11 @@
     }
   }
 
-  function spawnMatterAnswerBox(startX, startY, textLines){
+  function spawnMatterAnswerBox(startX, startY, textLines, fromQueue = false){
     if(!isMatterReady() || !matterEngine){
+      if(!fromQueue){
+        pendingMatterSpawns.push({startX, startY, textLines});
+      }
       loadMatterLibrary();
       return false;
     }
@@ -1468,10 +1484,6 @@
     scale:.92,
     speedLevel:BALLOON_SPEED_LEVEL
   };
-
-  function clamp(value, min, max){
-    return Math.max(min, Math.min(max, value));
-  }
 
   function speedFromLevel(level){
     const safeLevel = clamp(Number(level) || 1, 1, 10);
@@ -1821,7 +1833,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=75",
+      href:"train-wagon.webp?v=76",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1829,7 +1841,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=75");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=76");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1862,7 +1874,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=75",
+        href:"train-wagon.webp?v=76",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1870,7 +1882,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=75");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=76");
 
       el("text", {
         x:car.centerX,
@@ -1905,7 +1917,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=75",
+      href:"train-engine-transparent.png?v=76",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1913,7 +1925,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=75");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=76");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1963,7 +1975,7 @@
   }
 
   build();
-  /* إصدار 75: ضبط مساحة نطاط مقطورة السائق فقط، بدون تغيير قوة النط. */
+  /* إصدار 76: إكمال النقل كاملًا؛ Matter.js هو مسار السقوط الوحيد مع طابور جاهزية وبدون بقايا مسار قديم. */
 })();
 </script>
 </body>
