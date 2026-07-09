@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 92</title>
+  <title>قطار الإجابات - إصدار 93</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -329,12 +329,15 @@
 
     // أبطأ بنسبة 40% من إصدار 88.
     enterDuration:7280,
+    betweenDuration:5200,
     exitDuration:8680
   };
 
   let trainVisualOffsetX = TRAIN_MOTION.enterOffset;
+  let trainPhysicsOffsetX = 0;
   let trainMotionState = "entering";
   let trainAnimationFrame = 0;
+  let activeQuestionPointer = 0;
   let stageCompleteTriggered = false;
 
   const BALLOONS_PER_ROUND = 5;
@@ -604,6 +607,27 @@
     };
   }
 
+  function trainWorldX(x){
+    return x + trainPhysicsOffsetX;
+  }
+
+  function trainWorldRect(rect){
+    return {
+      left:rect.left + trainPhysicsOffsetX,
+      right:rect.right + trainPhysicsOffsetX,
+      top:rect.top,
+      bottom:rect.bottom
+    };
+  }
+
+  function trainOffsetForWagonIndex(index){
+    return trainLen((Number(index) || 0) * TRAIN_LAYOUT.wagonStep);
+  }
+
+  function currentQuestionWagonIndex(){
+    return QUESTION_WAGON_INDICES[activeQuestionPointer] ?? QUESTION_WAGON_INDICES[0] ?? 0;
+  }
+
   /*
     نظام فيزياء القطار المنقول من المختبر:
     - لا يوجد manual fallback.
@@ -765,7 +789,7 @@
       : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
-  function animateTrainTo(targetX, duration, nextState){
+  function animateTrainTo(targetX, duration, nextState, onComplete){
     if(trainAnimationFrame){
       cancelAnimationFrame(trainAnimationFrame);
       trainAnimationFrame = 0;
@@ -792,6 +816,10 @@
       if(nextState){
         trainMotionState = nextState;
       }
+
+      if(typeof onComplete === "function"){
+        onComplete();
+      }
     }
 
     trainAnimationFrame = requestAnimationFrame(frame);
@@ -806,11 +834,54 @@
     });
   }
 
+  function clearActiveFallingMatterBoxes(){
+    pendingMatterSpawns.length = 0;
+    matterBoxes.slice().forEach(item => cleanupMatterBox(item, true));
+    activeFallingBoxes = 0;
+  }
+
+  function rebuildTrainPhysicsAtCurrentOffset(){
+    trainPhysicsOffsetX = trainVisualOffsetX;
+    buildCollisionMap();
+  }
+
+  function advanceTrainToQuestionWagon(wagonIndex){
+    trainMotionState = "advancing";
+    clearActiveFallingMatterBoxes();
+
+    const targetOffset = trainOffsetForWagonIndex(wagonIndex);
+
+    animateTrainTo(targetOffset, TRAIN_MOTION.betweenDuration, "playing", () => {
+      rebuildTrainPhysicsAtCurrentOffset();
+    });
+  }
+
+  function handleQuestionWagonSettled(well){
+    if(!well) return;
+
+    const activeWagonIndex = currentQuestionWagonIndex();
+
+    if(well.index !== activeWagonIndex){
+      return;
+    }
+
+    const nextPointer = activeQuestionPointer + 1;
+
+    if(nextPointer < QUESTION_WAGON_INDICES.length){
+      activeQuestionPointer = nextPointer;
+      advanceTrainToQuestionWagon(currentQuestionWagonIndex());
+      return;
+    }
+
+    requestTrainExit();
+  }
+
   function requestTrainExit(){
     if(stageCompleteTriggered || trainMotionState !== "playing") return;
 
     stageCompleteTriggered = true;
     trainMotionState = "exiting";
+    clearActiveFallingMatterBoxes();
     animateTrainTo(TRAIN_MOTION.exitOffset, TRAIN_MOTION.exitDuration, "done");
   }
 
@@ -951,7 +1022,7 @@
         id:`wagon-${index}`,
         index,
         car,
-        x:car.x,
+        x:trainWorldX(car.x),
         y:car.y,
         w:car.width,
         h:car.height,
@@ -962,13 +1033,13 @@
     parts.push({
       type:"engine",
       id:"engine",
-      x:trainX(782),
+      x:trainWorldX(trainX(782)),
       y:trainY(430),
       w:trainLen(320),
       h:trainLen(179),
       roof:{
-        x1:trainX(TRAIN_PHYSICS_PROFILES.engine.roof.x1),
-        x2:trainX(TRAIN_PHYSICS_PROFILES.engine.roof.x2),
+        x1:trainWorldX(trainX(TRAIN_PHYSICS_PROFILES.engine.roof.x1)),
+        x2:trainWorldX(trainX(TRAIN_PHYSICS_PROFILES.engine.roof.x2)),
         y:trainY(TRAIN_PHYSICS_PROFILES.engine.roof.y),
         h:trainLen(TRAIN_PHYSICS_PROFILES.engine.roof.h)
       }
@@ -1000,10 +1071,10 @@
     const topH = trainLen(profile.topBumper.h);
 
     const well = {
-      left:car.x + trainLen(2),
-      right:car.x + car.width - trainLen(2),
-      top:car.y + trainLen(4),
-      bottom:car.y + car.height - trainLen(10)
+      left:part.x + trainLen(2),
+      right:part.x + part.w - trainLen(2),
+      top:part.y + trainLen(4),
+      bottom:part.y + part.h - trainLen(10)
     };
 
     collisionMap.push(makeWell(well, {
@@ -1209,7 +1280,7 @@
       {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
       {name:"engine-plow", left:1088, right:1210, top:550, bottom:632}
     ].forEach(zone => {
-      const scaledZone = trainRect(zone);
+      const scaledZone = trainWorldRect(trainRect(zone));
 
       collisionMap.push(makeBreak({
         left:scaledZone.left,
@@ -1298,16 +1369,21 @@
     if(!item || !item.body || !item.node) return;
 
     const body = item.body;
+    const localX = item.insideWagonLayer
+      ? body.position.x - trainVisualOffsetX
+      : body.position.x;
+
     item.node.setAttribute(
       "transform",
-      `translate(${body.position.x.toFixed(2)} ${body.position.y.toFixed(2)}) rotate(${(body.angle * 180 / Math.PI).toFixed(2)})`
+      `translate(${localX.toFixed(2)} ${body.position.y.toFixed(2)}) rotate(${(body.angle * 180 / Math.PI).toFixed(2)})`
     );
   }
 
   function moveMatterBoxBehindWagonCover(item){
     if(!item || item.insideWagonLayer || !settledObjectsLayer || !item.node) return;
-    settledObjectsLayer.appendChild(item.node);
     item.insideWagonLayer = true;
+    settledObjectsLayer.appendChild(item.node);
+    syncMatterBox(item);
   }
 
   function applySmartGapBounceToMatter(item, body, gapBody, activeMode = false){
@@ -1566,9 +1642,11 @@
     const y = body.position.y;
     const r = body.angle * 180 / Math.PI;
 
+    const localX = x - trainVisualOffsetX;
+
     node.setAttribute(
       "transform",
-      `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
+      `translate(${localX.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
     );
 
     // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
@@ -1584,8 +1662,9 @@
     settledVisualMatterBoxes.push(item);
     rememberSettledBox(node, well && well.index);
 
-    // المرحلة الأولى: عند استقرار أي صندوق داخل عربة السؤال، يخرج القطار من الشاشة.
-    requestTrainExit();
+    // إذا كان الصندوق في عربة السؤال النشطة:
+    // ننتقل إلى عربة السؤال التالية، أو نخرج إذا كانت آخر عربة سؤال.
+    handleQuestionWagonSettled(well);
   }
 
   function updateMatterBoxState(item){
@@ -2028,6 +2107,10 @@
     {type:"answer", text:"رخويات"}
   ];
 
+  const QUESTION_WAGON_INDICES = TRAIN_CARS
+    .map((car, index) => car && car.type === "answer" ? index : null)
+    .filter(index => index !== null);
+
   const TRAIN_LAYOUT = {
     nearestWagonX:490,
     wagonY:486,
@@ -2328,7 +2411,7 @@
   }
 
   build();
-  /* إصدار 92: رفع عربة الركاب لتتساوى من الأسفل مع عربة السؤال، بدون تغيير حجمها أو الفيزياء. */
+  /* إصدار 93: تقدم القطار من عربة السؤال الأولى إلى الثانية ثم الخروج بعد نجاح العربة الثانية، مع مزامنة الفيزياء مع توقف القطار. */
 })();
 </script>
 </body>
