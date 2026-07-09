@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 86</title>
+  <title>قطار الإجابات - إصدار 87</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -316,8 +316,24 @@
   let fallingObjectsLayer = null;
   let settledObjectsLayer = null;
   let wagonForegroundCoverLayer = null;
+  let wagonDropCoverPositionGroup = null;
+  let wagonDropCoverLayer = null;
+  let trainPositionGroup = null;
   let collisionDebugLayer = null;
   const collisionMap = [];
+
+  const TRAIN_MOTION = {
+    enterOffset:-1350,
+    centerOffset:0,
+    exitOffset:1450,
+    enterDuration:1700,
+    exitDuration:2200
+  };
+
+  let trainVisualOffsetX = TRAIN_MOTION.enterOffset;
+  let trainMotionState = "entering";
+  let trainAnimationFrame = 0;
+  let stageCompleteTriggered = false;
 
   const BALLOONS_PER_ROUND = 5;
   const MEDIUM_BALLOON_SCALE = .80;
@@ -725,6 +741,75 @@
 
   function clamp(value, min, max){
     return Math.max(min, Math.min(max, value));
+  }
+
+  function setTrainVisualOffset(x){
+    trainVisualOffsetX = x;
+
+    const transform = `translate(${x.toFixed(2)} 0)`;
+
+    if(trainPositionGroup){
+      trainPositionGroup.setAttribute("transform", transform);
+    }
+
+    if(wagonDropCoverPositionGroup){
+      wagonDropCoverPositionGroup.setAttribute("transform", transform);
+    }
+  }
+
+  function trainEaseInOut(t){
+    return t < .5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  }
+
+  function animateTrainTo(targetX, duration, nextState){
+    if(trainAnimationFrame){
+      cancelAnimationFrame(trainAnimationFrame);
+      trainAnimationFrame = 0;
+    }
+
+    const startX = trainVisualOffsetX;
+    const startTime = performance.now();
+
+    function frame(now){
+      const t = clamp((now - startTime) / duration, 0, 1);
+      const eased = trainEaseInOut(t);
+      const x = startX + (targetX - startX) * eased;
+
+      setTrainVisualOffset(x);
+
+      if(t < 1){
+        trainAnimationFrame = requestAnimationFrame(frame);
+        return;
+      }
+
+      setTrainVisualOffset(targetX);
+      trainAnimationFrame = 0;
+
+      if(nextState){
+        trainMotionState = nextState;
+      }
+    }
+
+    trainAnimationFrame = requestAnimationFrame(frame);
+  }
+
+  function startTrainEntry(){
+    trainMotionState = "entering";
+    setTrainVisualOffset(TRAIN_MOTION.enterOffset);
+
+    requestAnimationFrame(() => {
+      animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing");
+    });
+  }
+
+  function requestTrainExit(){
+    if(stageCompleteTriggered || trainMotionState !== "playing") return;
+
+    stageCompleteTriggered = true;
+    trainMotionState = "exiting";
+    animateTrainTo(TRAIN_MOTION.exitOffset, TRAIN_MOTION.exitDuration, "done");
   }
 
   function isMatterReady(){
@@ -1490,6 +1575,9 @@
 
     settledVisualMatterBoxes.push(item);
     rememberSettledBox(node, well && well.index);
+
+    // المرحلة الأولى: عند استقرار أي صندوق داخل عربة السؤال، يخرج القطار من الشاشة.
+    requestTrainExit();
   }
 
   function updateMatterBoxState(item){
@@ -1717,6 +1805,7 @@
 
   function popPooledBalloon(item, now){
     if(item.popped) return;
+    if(trainMotionState !== "playing") return;
 
     item.popped = true;
     item.resetAt = now + 950;
@@ -1914,7 +2003,7 @@
   // لاحقًا ستأتي هذه القائمة من إعدادات المعلم في صفحة الإنشاء.
   // عدد العناصر هنا هو الذي يحدد عدد عربات الإجابة تلقائيًا:
   // عنصران = عربتان، ثلاثة = ثلاث عربات، أربعة = أربع عربات.
-  const TRAIN_ANSWER_TEXTS = ["استفهام", "تعجب", "نقطة"];
+  const TRAIN_ANSWER_TEXTS = ["ثديّات"];
 
   function buildAnswerCars(answerTexts){
     return answerTexts
@@ -2107,11 +2196,16 @@
   }
 
   function renderWagonDropCovers(){
-    const coverLayer = el("g", {
+    wagonDropCoverPositionGroup = el("g", {
+      id:"wagonDropCoverPositionGroup",
+      "pointer-events":"none"
+    });
+
+    wagonDropCoverLayer = el("g", {
       id:"wagonDropCoverLayer",
       class:"train-idle-motion",
       "pointer-events":"none"
-    });
+    }, wagonDropCoverPositionGroup);
 
     trainCarRegistry.forEach((car, index) => {
       if(!car || car.type !== "answer") return;
@@ -2138,7 +2232,7 @@
         preserveAspectRatio:"xMidYMid meet",
         "clip-path":`url(#${clipId})`,
         "pointer-events":"none"
-      }, coverLayer);
+      }, wagonDropCoverLayer);
       cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
     });
   }
@@ -2149,8 +2243,9 @@
     background();
     balloonsLayer();
 
-    // المجموعة الخارجية مخصصة لاحقًا لحركة تقدم القطار بين العربات.
-    const trainPositionGroup = el("g", {id:"trainPositionGroup"});
+    // المجموعة الخارجية لحركة دخول وخروج القطار.
+    trainPositionGroup = el("g", {id:"trainPositionGroup"});
+    setTrainVisualOffset(TRAIN_MOTION.enterOffset);
 
     // المجموعة الداخلية مخصصة للحركة الخفيفة المستمرة فقط.
     const train = el("g", {id:"trainScene", class:"train-idle-motion"}, trainPositionGroup);
@@ -2173,10 +2268,13 @@
     // خريطة تصادم غير مرئية للقطار: أحواض، حواف، نطاطات، فواصل ذكية، قاطرة، وسكة.
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
     loadMatterLibrary();
+
+    // المرحلة الأولى: يبدأ القطار خارج الشاشة من اليسار ثم يدخل حتى تستقر العربة في المنتصف.
+    startTrainEntry();
   }
 
   build();
-  /* إصدار 86: مبني من 84؛ إصلاح لمحة البالون بعد الفرقعة فقط بدون تغيير القطار أو الفيزياء أو الصور. */
+  /* إصدار 87: مرحلة أولى لحركة القطار؛ يدخل من اليسار ويتوقف عند عربة واحدة، ثم يخرج يمينًا عند استقرار أول صندوق داخل العربة. */
 })();
 </script>
 </body>
