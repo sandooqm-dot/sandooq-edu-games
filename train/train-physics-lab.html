@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 7</title>
+  <title>مختبر فيزياء القطار - إصدار 8</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -148,7 +148,7 @@
     <div class="note">
       مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
       <div class="small">
-        المحسوب فقط: فيزياء موحدة لكل عربة: أرضية، جدران، ونطاطات رأس صغيرة عند الأطراف. الباقي على الفيزياء.
+        المحسوب فقط: فيزياء موحدة لكل عربة + فاصل ذكي بين العربات يقرأ مركز ثقل الصندوق ويدفعه للأقرب. الباقي على الفيزياء.
       </div>
     </div>
 
@@ -282,6 +282,21 @@
     }
   };
 
+  const GAP_PHYSICS_PROFILE = {
+    // فاصل ذكي بين كل عربتين.
+    // يقسم الفاصل إلى نصفين، ثم يعتمد على مركز ثقل الصندوق:
+    // إذا كان الحمل يميل لليسار يدفعه لليسار، وإذا يميل لليمين يدفعه لليمين.
+    yOffset:-38,
+    width:132,
+    height:118,
+    cooldown:95,
+    inwardVelocity:1.42,
+    upVelocity:1.08,
+    spinKick:.032,
+    liftOut:9,
+    centerDeadZone:5
+  };
+
   const staticBoxBodies = [];
 
   function el(name, attrs = {}, parent = stage){
@@ -320,7 +335,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics7", {
+    makeImage("train-track.webp?v=physics8", {
       x:-55,
       y:604,
       width:1390,
@@ -340,7 +355,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics7", {
+        makeImage("train-wheel.webp?v=physics8", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -349,7 +364,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics7", {
+      makeImage("train-wagon.webp?v=physics8", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -358,7 +373,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics7", {
+      makeImage("train-wagon.webp?v=physics8", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -382,7 +397,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics7", {
+    makeImage("train-engine-transparent.png?v=physics8", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -514,6 +529,49 @@
     });
   }
 
+  function addGapPhysics(leftWagon, rightWagon, profile = GAP_PHYSICS_PROFILE){
+    const leftEdge = leftWagon.x + leftWagon.w;
+    const rightEdge = rightWagon.x;
+    const center = (leftEdge + rightEdge) / 2;
+    const y = Math.min(leftWagon.y, rightWagon.y) + profile.yOffset;
+    const halfW = profile.width / 2;
+
+    // نصف الفاصل ناحية العربة اليسرى.
+    makeStaticRect(center - halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftWagon.id}-${rightWagon.id}-left-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWagonId:leftWagon.id,
+      sgRightWagonId:rightWagon.id,
+      sgDefaultPushX:-1,
+      isSensor:true,
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.42
+    });
+
+    // نصف الفاصل ناحية العربة اليمنى.
+    makeStaticRect(center + halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftWagon.id}-${rightWagon.id}-right-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWagonId:leftWagon.id,
+      sgRightWagonId:rightWagon.id,
+      sgDefaultPushX:1,
+      isSensor:true,
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.42
+    });
+  }
+
+  function addAllGapPhysics(){
+    const sorted = [...WAGONS].sort((a, b) => a.x - b.x);
+    for(let i = 0; i < sorted.length - 1; i++){
+      addGapPhysics(sorted[i], sorted[i + 1]);
+    }
+  }
+
   function buildWorld(){
     if(!window.Matter){
       status.textContent = "Matter.js لم يحمّل";
@@ -542,25 +600,8 @@
     // لاحقًا عند إضافة أي عربة جديدة، يكفي إدخال مقاساتها في WAGONS فقط.
     WAGONS.forEach(wagon => addWagonPhysics(wagon));
 
-    // الفاصل بين العربتين: سطحان مائلان يقرران العربة الأقرب بالتصادم، وليس بالسحب.
-    // إذا وقع على النصف الأيمن يرتد للعربة اليمنى، وإذا وقع على النصف الأيسر يرتد للعربة اليسرى.
-    makeStaticRect(502, 509, 76, 14, {
-      label:"gap-left-ramp",
-      sgType:"gap-ramp",
-      angle:-0.42,
-      friction:.25,
-      frictionStatic:.35,
-      restitution:.62
-    });
-
-    makeStaticRect(548, 509, 76, 14, {
-      label:"gap-right-ramp",
-      sgType:"gap-ramp",
-      angle:.42,
-      friction:.25,
-      frictionStatic:.35,
-      restitution:.62
-    });
+    // الفواصل الذكية بين العربات: كل فاصل ينقسم إلى نصفين ويعتمد على مركز ثقل الصندوق.
+    addAllGapPhysics();
 
     // سقف مقطورة السائق: نطاط، احتكاكه قليل، يعطي دوران طبيعي من الاصطدام.
     makeStaticRect((ROOF.x1 + ROOF.x2) / 2, ROOF.y + 8, ROOF.x2 - ROOF.x1, 18, {
@@ -578,8 +619,69 @@
       });
     });
 
+    Matter.Events.on(engine, "collisionActive", event => {
+      event.pairs.forEach(pair => {
+        handleGapActiveCollision(pair.bodyA, pair.bodyB);
+        handleGapActiveCollision(pair.bodyB, pair.bodyA);
+      });
+    });
+
     status.textContent = "Matter.js: جاهز — فيزياء حقيقية";
     return true;
+  }
+
+  function applySmartGapBounce(boxBody, gapBody, activeMode = false){
+    const item = boxBody.sgBox;
+    if(!item || !gapBody) return;
+
+    const now = performance.now();
+    const cooldown = activeMode ? GAP_PHYSICS_PROFILE.cooldown : Math.max(40, GAP_PHYSICS_PROFILE.cooldown - 35);
+
+    if(item.lastGapSmartAt && now - item.lastGapSmartAt < cooldown){
+      return;
+    }
+
+    item.lastGapSmartAt = now;
+
+    const center = gapBody.sgGapCenter;
+    const dx = boxBody.position.x - center;
+    let direction = 0;
+
+    if(Math.abs(dx) > GAP_PHYSICS_PROFILE.centerDeadZone){
+      direction = dx < 0 ? -1 : 1;
+    }else if(Math.abs(boxBody.velocity.x) > .08){
+      direction = boxBody.velocity.x < 0 ? -1 : 1;
+    }else{
+      direction = gapBody.sgDefaultPushX || 1;
+    }
+
+    item.wagonId = direction < 0 ? gapBody.sgLeftWagonId : gapBody.sgRightWagonId;
+
+    const inwardX = direction < 0
+      ? Math.min(boxBody.velocity.x, -GAP_PHYSICS_PROFILE.inwardVelocity)
+      : Math.max(boxBody.velocity.x, GAP_PHYSICS_PROFILE.inwardVelocity);
+
+    Matter.Body.setVelocity(boxBody, {
+      x:inwardX,
+      y:Math.min(boxBody.velocity.y * .12, -GAP_PHYSICS_PROFILE.upVelocity)
+    });
+
+    Matter.Body.setAngularVelocity(
+      boxBody,
+      boxBody.angularVelocity * .58 + (direction < 0 ? -GAP_PHYSICS_PROFILE.spinKick : GAP_PHYSICS_PROFILE.spinKick)
+    );
+
+    Matter.Body.setPosition(boxBody, {
+      x:boxBody.position.x + direction * GAP_PHYSICS_PROFILE.liftOut,
+      y:boxBody.position.y - GAP_PHYSICS_PROFILE.liftOut
+    });
+  }
+
+  function handleGapActiveCollision(boxBody, otherBody){
+    if(!boxBody || !boxBody.sgBox || !otherBody) return;
+    if(otherBody.sgType === "gap-smart-bouncer"){
+      applySmartGapBounce(boxBody, otherBody, true);
+    }
   }
 
   function handleCollision(boxBody, otherBody){
@@ -591,6 +693,11 @@
       if(!item.inWagon){
         breakBox(item);
       }
+      return;
+    }
+
+    if(otherBody.sgType === "gap-smart-bouncer"){
+      applySmartGapBounce(boxBody, otherBody, false);
       return;
     }
 
@@ -676,10 +783,7 @@
       return;
     }
 
-    if(otherBody.sgType === "gap-ramp"){
-      item.lastGapHitAt = performance.now();
-      Matter.Body.setAngularVelocity(boxBody, boxBody.angularVelocity - .018);
-    }
+
   }
 
   function createFallingBox(x, y, vx, vy, angular = 0){
@@ -711,6 +815,7 @@
       wagonId:null,
       lastWagonContactAt:0,
       lastTopEdgeBumperAt:0,
+      lastGapSmartAt:0,
       stableFrames:0,
       removed:false
     };
@@ -851,6 +956,7 @@
       const type = body.sgType || body.label || "";
       const color =
         type.includes("roof") ? "#2196f3" :
+        type.includes("gap-smart") ? "#ff7a00" :
         type.includes("top-edge") ? "#00e5ff" :
         type.includes("gap") ? "#ff9800" :
         type.includes("floor") ? "#00c853" :
