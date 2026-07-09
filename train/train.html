@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 72</title>
+  <title>قطار الإجابات - إصدار 73</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -851,113 +851,15 @@
       thickness:54
     }, {name:"track"}));
 
-    addMatterRect(640, 632, 1480, 70, {
+    addMatterRect(640, TRAIN_PHYSICS_PROFILES.track.y, TRAIN_PHYSICS_PROFILES.track.w, TRAIN_PHYSICS_PROFILES.track.h, {
       label:"kill-track",
       isSensor:true
     });
 
-    trainCarRegistry.forEach((car, index) => {
-      if(!car || car.type !== "answer") return;
+    // المرحلة الأولى: بناء فيزياء القطار من مكوّنات جاهزة، لا من أرقام مبعثرة.
+    addAllTrainPartPhysics();
 
-      const well = {
-        left:car.x + 2,
-        right:car.x + car.width - 2,
-        top:car.y + 4,
-        bottom:car.y + car.height - 10
-      };
-
-      collisionMap.push(makeWell(well, {
-        car,
-        index,
-        floorY:car.y + 49,
-        name:`wagon-well-${index}`
-      }));
-
-      // Matter.js: أرضية العربة تمتد من طرف العربة إلى طرفها.
-      // رفعنا الأرضية قليلًا حتى يظهر جزء من الصندوق فوق العربة بعد الثبات.
-      addMatterRect(car.x + car.width / 2, car.y + 51, car.width - 8, 20, {
-        label:`wagon-floor-${index}`,
-        sgType:"wagon-floor",
-        sgWellIndex:index,
-        friction:.68,
-        frictionStatic:.76,
-        restitution:.015
-      });
-
-      // جداران داخليان منخفضان يمنعان خروج الصندوق بعد دخوله، دون أن يعملا كجدار قاتل.
-      addMatterRect(car.x + 10, car.y + 72, 28, 128, {
-        label:`wagon-left-wall-${index}`,
-        sgType:"wagon-wall",
-        sgWellIndex:index,
-        friction:.74,
-        frictionStatic:.82,
-        restitution:.01
-      });
-
-      addMatterRect(car.x + car.width - 10, car.y + 72, 28, 128, {
-        label:`wagon-right-wall-${index}`,
-        sgType:"wagon-wall",
-        sgWellIndex:index,
-        friction:.74,
-        frictionStatic:.82,
-        restitution:.01
-      });
-
-      // الوصلات بين العربات سطح انزلاق خفيف، وليست منطقة انفجار.
-      collisionMap.push(makeSurface({
-        left:car.x - 22,
-        right:car.x + 34,
-        y:car.y + 42,
-        thickness:22
-      }, {name:`wagon-left-connector-${index}`}));
-
-      addMatterRect(car.x + 6, car.y + 54, 62, 18, {
-        label:`wagon-gap-router-left-${index}`,
-        sgType:"gap-router",
-        sgWellIndex:index,
-        isSensor:true
-      });
-
-      collisionMap.push(makeSurface({
-        left:car.x + car.width - 34,
-        right:car.x + car.width + 22,
-        y:car.y + 42,
-        thickness:22
-      }, {name:`wagon-right-connector-${index}`}));
-
-      addMatterRect(car.x + car.width - 6, car.y + 54, 62, 18, {
-        label:`wagon-gap-router-right-${index}`,
-        sgType:"gap-router",
-        sgWellIndex:index,
-        isSensor:true
-      });
-    });
-
-    // المنطقة الزرقاء فقط: أعلى مقطورة السائق قابل للتدحرج.
-    collisionMap.push(makeSurface({
-      left:PHYSICS.roofSafeLeft,
-      right:PHYSICS.roofSafeRight,
-      y:PHYSICS.roofY,
-      thickness:18
-    }, {name:"driver-roof-bumper"}));
-
-    // المنطقة الزرقاء جسم صلب حقيقي حتى يعطي قفزة Matter.js فعلية، وليس sensor.
-    addMatterRect(
-      (PHYSICS.roofSafeLeft + PHYSICS.roofSafeRight) / 2,
-      PHYSICS.roofY + 8,
-      PHYSICS.roofSafeRight - PHYSICS.roofSafeLeft,
-      18,
-      {
-        label:"driver-roof-bumper",
-        sgType:"driver-roof",
-        friction:.20,
-        frictionStatic:.26,
-        restitution:.055
-      }
-    );
-
-    // في هذه الخطوة نترك المنطقة الخلفية بين مقطورة السائق والعربة آمنة.
-    // التفجير يبقى فقط للأجزاء الأمامية الواضحة من القاطرة والسكة.
+    // مناطق القاطرة القاتلة تبقى كما هي، لأنها خارج نظام استقبال الصناديق.
     [
       {name:"engine-front", left:1058, right:1164, top:438, bottom:610},
       {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
@@ -1242,13 +1144,20 @@
     if(!item || item.done) return;
 
     const body = item.body;
-    const startX = body.position.x;
-    const startY = body.position.y;
-    const startRotation = body.angle * 180 / Math.PI;
-    const slot = getWagonSlotTarget(well, startX, startRotation);
     const node = item.node;
 
-    // نفس الصندوق يبقى بصريًا؛ نزيل جسم Matter.js فقط ونحرّكه بخفة داخل العربة.
+    if(body && node){
+      const x = body.position.x;
+      const y = body.position.y;
+      const r = body.angle * 180 / Math.PI;
+
+      node.setAttribute(
+        "transform",
+        `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
+      );
+    }
+
+    // المرحلة الأولى: الصندوق المستقر يبقى بصريًا فقط ولا يؤثر على أي صندوق جديد.
     cleanupMatterBox(item, false);
 
     const layer = settledObjectsLayer || fallingObjectsLayer || svg;
@@ -1256,17 +1165,7 @@
       layer.appendChild(node);
     }
 
-    animateBoxToSlot(
-      node,
-      startX,
-      startY,
-      startRotation,
-      slot.targetX,
-      slot.targetY,
-      slot.targetRotation
-    );
-
-    rememberSettledBox(node, well.index);
+    rememberSettledBox(node, well && well.index);
   }
 
   function handleMatterCollision(bodyA, bodyB){
@@ -1289,6 +1188,16 @@
 
     if(bodyB && (bodyB.sgType === "kill" || String(bodyB.label || "").startsWith("kill-"))){
       breakMatterBox(item);
+      return;
+    }
+
+    if(bodyB && bodyB.sgType === "gap-smart-bouncer"){
+      applySmartGapBounceToMatter(item, bodyA, bodyB);
+      return;
+    }
+
+    if(bodyB && bodyB.sgType === "wagon-top-edge-bumper"){
+      applyWagonTopBumperBounceToMatter(item, bodyA, bodyB);
       return;
     }
 
@@ -2088,6 +1997,313 @@
 
   const trainCarRegistry = [];
 
+  /*
+    المرحلة الأولى من النقل:
+    تجهيز نظام فيزياء موحّد على شكل مكوّنات.
+    - كل عربة تُبنى فيزيائيًا من TRAIN_PHYSICS_PROFILES.wagon.
+    - القاطرة لها نطاط السقف من TRAIN_PHYSICS_PROFILES.engine.
+    - الفواصل الذكية تتولد تلقائيًا بين العربات المتجاورة.
+    هذه المرحلة لا تربط سقوط البالونات بالنظام الجديد بعد؛ الربط في المرحلة الثانية.
+  */
+  const TRAIN_PHYSICS_PROFILES = {
+    box:{
+      w:96,
+      h:72
+    },
+
+    wagon:{
+      floor:{
+        inset:14,
+        h:18,
+        yOffsetFromTop:49,
+        friction:1.05,
+        frictionStatic:1.35,
+        restitution:.12
+      },
+      wall:{
+        xInset:16,
+        yOffset:70,
+        w:26,
+        h:126,
+        friction:.82,
+        frictionStatic:1,
+        restitution:.18
+      },
+      topBumper:{
+        xInset:18,
+        yOffset:-7,
+        w:34,
+        h:18,
+        angle:.08,
+        cooldown:240,
+        inwardVelocity:.98,
+        upVelocity:.86,
+        spinKick:.022,
+        liftOut:5,
+        friction:.08,
+        frictionStatic:.10,
+        restitution:.46
+      }
+    },
+
+    gap:{
+      yOffset:-7,
+      width:54,
+      height:22,
+      cooldown:85,
+      inwardVelocity:1.32,
+      upVelocity:.92,
+      spinKick:.026,
+      liftOut:6,
+      centerDeadZone:4,
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.38
+    },
+
+    engine:{
+      roof:{
+        x1:784,
+        x2:904,
+        y:424,
+        h:18
+      },
+      roofBounce:{
+        cooldown:620,
+        minUpVelocity:3.05,
+        maxUpVelocity:4.35,
+        backwardVelocity:-1.42,
+        maxBackwardVelocity:-1.72,
+        spinKick:-.065,
+        liftOut:14,
+        friction:.05,
+        frictionStatic:.08,
+        restitution:.94
+      }
+    },
+
+    track:{
+      y:632,
+      w:1480,
+      h:70
+    }
+  };
+
+  function buildTrainPhysicsParts(){
+    const parts = [];
+
+    trainCarRegistry.forEach((car, index) => {
+      if(!car || car.type !== "answer") return;
+
+      parts.push({
+        type:"wagon",
+        id:`wagon-${index}`,
+        index,
+        car,
+        x:car.x,
+        y:car.y,
+        w:car.width,
+        h:car.height,
+        floorY:car.y + TRAIN_PHYSICS_PROFILES.wagon.floor.yOffsetFromTop
+      });
+    });
+
+    parts.push({
+      type:"engine",
+      id:"engine",
+      x:782,
+      y:430,
+      w:320,
+      h:179,
+      roof:{...TRAIN_PHYSICS_PROFILES.engine.roof}
+    });
+
+    return parts;
+  }
+
+  function getAdjacentWagonParts(parts){
+    return parts
+      .filter(part => part && part.type === "wagon")
+      .sort((a, b) => a.x - b.x);
+  }
+
+  function addWagonPhysicsPart(part){
+    const profile = TRAIN_PHYSICS_PROFILES.wagon;
+    const car = part.car;
+    const index = part.index;
+
+    const well = {
+      left:car.x + 2,
+      right:car.x + car.width - 2,
+      top:car.y + 4,
+      bottom:car.y + car.height - 10
+    };
+
+    collisionMap.push(makeWell(well, {
+      car,
+      index,
+      partId:part.id,
+      floorY:part.floorY,
+      name:`wagon-well-${index}`
+    }));
+
+    addMatterRect(part.x + part.w / 2, part.floorY, part.w - profile.floor.inset * 2, profile.floor.h, {
+      label:`${part.id}-floor`,
+      sgType:"wagon-floor",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      friction:profile.floor.friction,
+      frictionStatic:profile.floor.frictionStatic,
+      restitution:profile.floor.restitution
+    });
+
+    addMatterRect(part.x + profile.wall.xInset, part.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${part.id}-left-wall`,
+      sgType:"wagon-wall",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    addMatterRect(part.x + part.w - profile.wall.xInset, part.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${part.id}-right-wall`,
+      sgType:"wagon-wall",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    addMatterRect(part.x + profile.topBumper.xInset, part.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${part.id}-left-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      sgPushX:1,
+      isSensor:true,
+      angle:-profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+
+    addMatterRect(part.x + part.w - profile.topBumper.xInset, part.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${part.id}-right-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      sgPushX:-1,
+      isSensor:true,
+      angle:profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+
+    // مناطق debug فقط، حتى نعرف أن كل عربة أخذت مكوّناتها.
+    collisionMap.push(makeSurface({
+      left:part.x + profile.topBumper.xInset - profile.topBumper.w / 2,
+      right:part.x + profile.topBumper.xInset + profile.topBumper.w / 2,
+      y:part.y + profile.topBumper.yOffset,
+      thickness:profile.topBumper.h
+    }, {name:`${part.id}-left-top-bumper-debug`}));
+
+    collisionMap.push(makeSurface({
+      left:part.x + part.w - profile.topBumper.xInset - profile.topBumper.w / 2,
+      right:part.x + part.w - profile.topBumper.xInset + profile.topBumper.w / 2,
+      y:part.y + profile.topBumper.yOffset,
+      thickness:profile.topBumper.h
+    }, {name:`${part.id}-right-top-bumper-debug`}));
+  }
+
+  function addGapPhysicsBetweenParts(leftPart, rightPart){
+    const profile = TRAIN_PHYSICS_PROFILES.gap;
+    const leftEdge = leftPart.x + leftPart.w;
+    const rightEdge = rightPart.x;
+    const center = (leftEdge + rightEdge) / 2;
+    const y = Math.min(leftPart.y, rightPart.y) + profile.yOffset;
+    const halfW = profile.width / 2;
+
+    collisionMap.push(makeSurface({
+      left:center - profile.width / 2,
+      right:center + profile.width / 2,
+      y,
+      thickness:profile.height
+    }, {
+      name:`gap-smart-${leftPart.id}-${rightPart.id}`
+    }));
+
+    addMatterRect(center - halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftPart.id}-${rightPart.id}-left-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWellIndex:leftPart.index,
+      sgRightWellIndex:rightPart.index,
+      sgDefaultPushX:-1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+
+    addMatterRect(center + halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftPart.id}-${rightPart.id}-right-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWellIndex:leftPart.index,
+      sgRightWellIndex:rightPart.index,
+      sgDefaultPushX:1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+  }
+
+  function addAllSmartGaps(parts){
+    const wagons = getAdjacentWagonParts(parts);
+    for(let i = 0; i < wagons.length - 1; i++){
+      addGapPhysicsBetweenParts(wagons[i], wagons[i + 1]);
+    }
+  }
+
+  function addEnginePhysicsPart(part){
+    const profile = TRAIN_PHYSICS_PROFILES.engine;
+    const roof = part.roof || profile.roof;
+
+    collisionMap.push(makeSurface({
+      left:roof.x1,
+      right:roof.x2,
+      y:roof.y,
+      thickness:roof.h
+    }, {
+      name:"driver-roof-bumper"
+    }));
+
+    addMatterRect((roof.x1 + roof.x2) / 2, roof.y + 8, roof.x2 - roof.x1, roof.h, {
+      label:`${part.id}-roof-bounce`,
+      sgType:"driver-roof",
+      sgPartId:part.id,
+      friction:profile.roofBounce.friction,
+      frictionStatic:profile.roofBounce.frictionStatic,
+      restitution:profile.roofBounce.restitution
+    });
+  }
+
+  function addAllTrainPartPhysics(){
+    const parts = buildTrainPhysicsParts();
+
+    parts.forEach(part => {
+      if(part.type === "wagon") addWagonPhysicsPart(part);
+      if(part.type === "engine") addEnginePhysicsPart(part);
+    });
+
+    addAllSmartGaps(parts);
+  }
+
   function answerWagon(train, car, index){
     // قالب عربة الإجابة:
     // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
@@ -2137,7 +2353,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=72",
+      href:"train-wagon.webp?v=73",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -2145,7 +2361,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=72");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=73");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -2178,7 +2394,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=72",
+        href:"train-wagon.webp?v=73",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -2186,7 +2402,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=72");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=73");
 
       el("text", {
         x:car.centerX,
@@ -2221,7 +2437,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=72",
+      href:"train-engine-transparent.png?v=73",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -2229,7 +2445,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=72");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=73");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -2280,7 +2496,7 @@
   }
 
   build();
-  /* Matter.js disabled for falling boxes: single manual physics path. */
+  /* المرحلة الأولى: نظام الفيزياء الموحد جاهز. ربط سقوط البالونات به سيكون في المرحلة الثانية. */
 })();
 </script>
 </body>
