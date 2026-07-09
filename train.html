@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 59</title>
+  <title>قطار الإجابات - إصدار 79</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -89,6 +89,7 @@
       to{transform:rotate(360deg)}
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 </head>
 <body>
   <main class="train-page" id="page">
@@ -201,7 +202,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 59:
+    // إصدار 72:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -320,11 +321,41 @@
 
   const BALLOONS_PER_ROUND = 5;
   const MEDIUM_BALLOON_SCALE = .80;
-  const MAX_ACTIVE_FALLING_BOXES = 2;
-  const MAX_SETTLED_BOXES = 5;
+  const MAX_ACTIVE_FALLING_BOXES = 4;
+  const MAX_SETTLED_BOXES = 6;
+  const MAX_SETTLED_BOXES_PER_WAGON = 2;
 
   let activeFallingBoxes = 0;
   const settledBoxes = [];
+  const settledBoxesByWagon = Object.create(null);
+
+  function removeSettledBoxRecord(record){
+    if(!record) return;
+    const node = record.node || record;
+    if(node && node.parentNode) node.remove();
+  }
+
+  function rememberSettledBox(node, wagonIndex){
+    const record = {node, wagonIndex};
+    settledBoxes.push(record);
+
+    if(wagonIndex !== null && wagonIndex !== undefined){
+      const key = String(wagonIndex);
+      const list = settledBoxesByWagon[key] || (settledBoxesByWagon[key] = []);
+      list.push(record);
+
+      while(list.length > MAX_SETTLED_BOXES_PER_WAGON){
+        const oldRecord = list.shift();
+        removeSettledBoxRecord(oldRecord);
+        const globalIndex = settledBoxes.indexOf(oldRecord);
+        if(globalIndex >= 0) settledBoxes.splice(globalIndex, 1);
+      }
+    }
+
+    while(settledBoxes.length > MAX_SETTLED_BOXES){
+      removeSettledBoxRecord(settledBoxes.shift());
+    }
+  }
 
   function balloonBurst(parent, x, y, scale = 1){
     const burst = el("g", {
@@ -424,27 +455,32 @@
       filter:"url(#answerBoxShadow)"
     }, parent);
 
-    // صندوق بسيط مؤقت لاختبار فيزياء السقوط فقط.
-    el("path", {
-      d:"M-46 -32 L46 -32 L58 -18 L-34 -18 Z",
-      fill:"url(#answerBoxTopGrad)",
-      stroke:"#4e2b18",
-      "stroke-width":2
-    }, g);
-
+    // صندوق مستقيم مثل المختبر: لا منظور مائل، الفيزياء وحدها تديره.
     el("rect", {
-      x:-46,
-      y:-18,
-      width:92,
-      height:60,
+      x:-48,
+      y:-36,
+      width:96,
+      height:72,
       rx:7,
       fill:"url(#answerBoxGrad)",
       stroke:"#4e2b18",
-      "stroke-width":2.5
+      "stroke-width":2.8
+    }, g);
+
+    el("rect", {
+      x:-42,
+      y:-30,
+      width:84,
+      height:14,
+      rx:4,
+      fill:"url(#answerBoxTopGrad)",
+      opacity:".86",
+      stroke:"#6b3b21",
+      "stroke-width":1.8
     }, g);
 
     el("path", {
-      d:"M-46 2 L46 2 M-18 -18 L-18 42 M18 -18 L18 42",
+      d:"M-48 -10 L48 -10 M-18 -36 L-18 36 M18 -36 L18 36",
       fill:"none",
       stroke:"#d3a06a",
       "stroke-width":3,
@@ -453,14 +489,14 @@
 
     const text = el("text", {
       x:0,
-      y:5,
+      y:7,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
       fill:"#fff0b8",
       stroke:"#442313",
       "stroke-width":1.9,
       "paint-order":"stroke fill",
-      "font-size":17,
+      "font-size":16,
       "font-weight":900,
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl",
@@ -517,60 +553,157 @@
   }
 
   const BOX = {
-    left:46,
-    right:58,
-    top:32,
-    bottom:42
+    left:48,
+    right:48,
+    top:36,
+    bottom:36,
+    width:96,
+    height:72
   };
 
-  const PHYSICS = {
-    gravity:820,
+  /*
+    نظام فيزياء القطار المنقول من المختبر:
+    - لا يوجد manual fallback.
+    - لا يوجد سحب للصندوق أو nudge أو target slot.
+    - الصندوق يسقط بـ Matter.js والجاذبية.
+    - الفاصل الذكي والنطاطات تعمل بنفس منطق المختبر.
+    - الصندوق المستقر يتحول إلى عنصر بصري فقط.
+  */
+  const TRAIN_PHYSICS_PROFILES = {
+    box:{
+      w:96,
+      h:72,
+      body:{
+        chamfer:{radius:4},
+        friction:.78,
+        frictionStatic:.88,
+        frictionAir:.0012,
+        restitution:.22,
+        density:.0032,
+        sleepThreshold:60
+      }
+    },
 
-    // مقاومة الهواء كفيزياء: الصندوق يقترب تدريجيًا من تيار الهواء/حركة المشهد، وليس دفعًا مباشرًا.
-    airFlowX:-220,
-    airResistance:1.18,
-    linearDrag:.995,
-    angularDrag:.992,
+    wagon:{
+      floor:{
+        inset:14,
+        h:18,
+        yOffsetFromTop:49,
+        friction:1.05,
+        frictionStatic:1.35,
+        restitution:.12
+      },
+      wall:{
+        xInset:16,
+        yOffset:70,
+        w:26,
+        h:126,
+        friction:.82,
+        frictionStatic:1,
+        restitution:.18
+      },
+      topBumper:{
+        xInset:18,
+        yOffset:-7,
+        w:34,
+        h:18,
+        angle:.08,
+        cooldown:240,
+        inwardVelocity:.98,
+        upVelocity:.86,
+        spinKick:.022,
+        liftOut:5,
+        friction:.08,
+        frictionStatic:.10,
+        restitution:.46
+      }
+    },
 
-    floorRestitution:.03,
-    trainSurfaceVelocityX:-72
+    gap:{
+      yOffset:-7,
+      width:54,
+      height:22,
+      cooldown:85,
+      inwardVelocity:1.32,
+      upVelocity:.92,
+      spinKick:.026,
+      liftOut:6,
+      centerDeadZone:4,
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.38
+    },
+
+    engine:{
+      roof:{
+        // نطاط مقطورة السائق: شريط صغير فقط على السطح المحدد، بدون تمديد يمين/يسار أو للأعلى.
+        x1:786,
+        x2:874,
+        y:424,
+        h:14
+      },
+      roofBounce:{
+        cooldown:620,
+        minUpVelocity:3.05,
+        maxUpVelocity:4.35,
+        backwardVelocity:-1.42,
+        maxBackwardVelocity:-1.72,
+        spinKick:-.065,
+        liftOut:14,
+        friction:.05,
+        frictionStatic:.08,
+        restitution:.94
+      }
+    },
+
+    track:{
+      y:636,
+      w:1500,
+      h:44
+    },
+
+    freeFallAirDrift:{
+      // انجراف هوائي أوضح لليسار أثناء السقوط الحر فقط، مع تسريع النزول مثل الفيديو.
+      // يتوقف نهائيًا عند أول ملامسة لأي سطح/نطاط/فاصل/قاطرة.
+      enabled:true,
+
+      // الميل لليسار
+      targetVX:-2.55,
+      maxLeftVX:-2.95,
+      velocityStepX:.075,
+      forceX:.000065,
+
+      // سرعة النزول أثناء السقوط الحر فقط
+      targetVY:4.85,
+      maxDownVY:5.35,
+      velocityStepY:.13,
+      forceY:.000055
+    }
   };
 
-  function getBoxCollisionInfo(state){
-    const boxTop = state.y - BOX.top;
-    const boxBottom = state.y + BOX.bottom;
-    const boxLeft = state.x - BOX.left;
-    const boxRight = state.x + BOX.right;
-    const boxCenterX = state.x;
+  let matterEngine = null;
+  let matterRunnerStarted = false;
+  let matterLastTime = 0;
+  let matterLibraryLoading = false;
 
-    return {
-      boxTop,
-      boxBottom,
-      boxLeft,
-      boxRight,
-      boxCenterX,
-      bottomPoint:{x:boxCenterX, y:boxBottom},
-      leftBottom:{x:boxLeft + 13, y:boxBottom},
-      rightBottom:{x:boxRight - 13, y:boxBottom}
-    };
-  }
+  const matterBoxes = [];
+  const matterStaticBodies = [];
+  const settledVisualMatterBoxes = [];
+  const pendingMatterSpawns = [];
 
-  function rectContainsPoint(rect, point){
-    return point.x >= rect.left &&
-      point.x <= rect.right &&
-      point.y >= rect.top &&
-      point.y <= rect.bottom;
-  }
-
-  function rectsOverlap(a, b){
-    return a.right > b.left &&
-      a.left < b.right &&
-      a.bottom > b.top &&
-      a.top < b.bottom;
-  }
+  const MATTER_COLLISION = {
+    // الصناديق لا تتصادم مع بعضها أبدًا.
+    // الصندوق يتصادم فقط مع القطار/العربة/النطاطات/الفواصل/مناطق الانفجار.
+    train:0x0001,
+    box:0x0002
+  };
 
   function clamp(value, min, max){
     return Math.max(min, Math.min(max, value));
+  }
+
+  function isMatterReady(){
+    return !!(window.Matter && Matter.Engine && Matter.World && Matter.Bodies && Matter.Body);
   }
 
   function makeZone(type, rect, meta = {}){
@@ -593,94 +726,346 @@
     return makeZone("break-surface", rect, meta);
   }
 
-  function buildCollisionMap(){
-    collisionMap.length = 0;
+  function loadMatterLibrary(){
+    if(isMatterReady()){
+      buildCollisionMap();
+      startMatterLoop();
+      flushPendingMatterSpawns();
+      return;
+    }
 
-    // السكة والأرض فقط: هنا يتكسر الصندوق.
-    collisionMap.push(makeBreakSurface({
-      left:-90,
-      right:1380,
-      y:604,
-      thickness:44
-    }, {
-      name:"track"
-    }));
+    if(matterLibraryLoading) return;
+    matterLibraryLoading = true;
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js";
+    script.async = true;
+
+    script.onload = () => {
+      matterLibraryLoading = false;
+      buildCollisionMap();
+      startMatterLoop();
+      flushPendingMatterSpawns();
+    };
+
+    script.onerror = () => {
+      matterLibraryLoading = false;
+    };
+
+    document.head.appendChild(script);
+  }
+
+  function flushPendingMatterSpawns(){
+    if(!isMatterReady() || !matterEngine || !pendingMatterSpawns.length) return;
+
+    const pending = pendingMatterSpawns.splice(0, pendingMatterSpawns.length);
+    pending.forEach(job => {
+      spawnMatterAnswerBox(job.startX, job.startY, job.textLines, true);
+    });
+  }
+
+  function resetMatterWorld(){
+    if(!isMatterReady()) return;
+
+    if(!matterEngine){
+      matterEngine = Matter.Engine.create({
+        enableSleeping:true,
+        positionIterations:10,
+        velocityIterations:10,
+        constraintIterations:2
+      });
+
+      matterEngine.gravity.x = 0;
+      matterEngine.gravity.y = .82;
+
+      Matter.Events.on(matterEngine, "collisionStart", event => {
+        event.pairs.forEach(pair => {
+          handleMatterCollision(pair.bodyA, pair.bodyB);
+          handleMatterCollision(pair.bodyB, pair.bodyA);
+        });
+      });
+
+      Matter.Events.on(matterEngine, "collisionActive", event => {
+        event.pairs.forEach(pair => {
+          handleGapActiveCollision(pair.bodyA, pair.bodyB);
+          handleGapActiveCollision(pair.bodyB, pair.bodyA);
+        });
+      });
+    }else{
+      Matter.World.clear(matterEngine.world, false);
+      matterEngine.gravity.x = 0;
+      matterEngine.gravity.y = .82;
+    }
+
+    matterStaticBodies.length = 0;
+    matterBoxes.length = 0;
+    settledVisualMatterBoxes.length = 0;
+    activeFallingBoxes = 0;
+  }
+
+  function addMatterBody(body){
+    if(!isMatterReady() || !matterEngine) return null;
+    matterStaticBodies.push(body);
+    Matter.World.add(matterEngine.world, body);
+    return body;
+  }
+
+  function addMatterRect(x, y, w, h, options = {}){
+    if(!isMatterReady() || !matterEngine) return null;
+
+    const body = Matter.Bodies.rectangle(x, y, w, h, {
+      isStatic:true,
+      friction:.9,
+      frictionStatic:1.1,
+      restitution:.08,
+      collisionFilter:{
+        category:MATTER_COLLISION.train,
+        mask:MATTER_COLLISION.box
+      },
+      ...options
+    });
+
+    return addMatterBody(body);
+  }
+
+  function buildTrainPhysicsParts(){
+    const parts = [];
 
     trainCarRegistry.forEach((car, index) => {
       if(!car || car.type !== "answer") return;
 
-      const well = {
-        // حدود العربة أصبحت واسعة من طرف العربة إلى طرفها تقريبًا.
-        // أي صندوق يدخل هذا العمود يسقط داخل العربة ولا يتدحرج فوق حوافها.
-        left:car.x + 4,
-        right:car.x + car.width - 4,
-        top:car.y + 8,
-        bottom:car.y + car.height - 12
-      };
-
-      // الحوض واسع مثل الفيديو: الصندوق إذا دخل فعليًا يثبت على وضعه، بدون سحب.
-      collisionMap.push(makeWell(well, {
-        car,
+      parts.push({
+        type:"wagon",
+        id:`wagon-${index}`,
         index,
-        floorY:car.y + 50,
-        name:`wagon-well-${index}`
-      }));
-
-      // منطقة الوصلات بين العربات: ليست قاتلة؛ تعطي انزلاقًا قصيرًا بدل الانفجار.
-      collisionMap.push(makeSurface({
-        left:car.x - 22,
-        right:car.x + 34,
-        y:car.y + 42,
-        thickness:22
-      }, {
-        kind:"wagon-connector",
-        name:`wagon-left-connector-${index}`,
-        friction:.12,
-        rollingFriction:.986,
-        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
-        restitution:.018
-      }));
-
-      collisionMap.push(makeSurface({
-        left:car.x + car.width - 34,
-        right:car.x + car.width + 22,
-        y:car.y + 42,
-        thickness:22
-      }, {
-        kind:"wagon-connector",
-        name:`wagon-right-connector-${index}`,
-        friction:.12,
-        rollingFriction:.986,
-        surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
-        restitution:.018
-      }));
+        car,
+        x:car.x,
+        y:car.y,
+        w:car.width,
+        h:car.height,
+        floorY:car.y + TRAIN_PHYSICS_PROFILES.wagon.floor.yOffsetFromTop
+      });
     });
 
-    // القمة العلوية فقط لمقطورة السائق: سطح تدحرج دقيق.
-    // وسّعناه للمنطقة الخضراء حتى لا ينفجر أولها أو آخرها.
-    collisionMap.push(makeSurface({
-      left:770,
-      right:930,
-      y:424,
-      thickness:32
-    }, {
-      kind:"driver-roof",
-      name:"driver-roof-real-roll",
-      friction:.16,
-      rollingFriction:.990,
-      surfaceVelocityX:PHYSICS.trainSurfaceVelocityX,
-      restitution:.022
+    parts.push({
+      type:"engine",
+      id:"engine",
+      x:782,
+      y:430,
+      w:320,
+      h:179,
+      roof:{...TRAIN_PHYSICS_PROFILES.engine.roof}
+    });
+
+    return parts;
+  }
+
+  function getAdjacentWagonParts(parts){
+    return parts
+      .filter(part => part && part.type === "wagon")
+      .sort((a, b) => a.x - b.x);
+  }
+
+  function addWagonPhysicsPart(part){
+    const profile = TRAIN_PHYSICS_PROFILES.wagon;
+    const car = part.car;
+    const index = part.index;
+
+    const well = {
+      left:car.x + 2,
+      right:car.x + car.width - 2,
+      top:car.y + 4,
+      bottom:car.y + car.height - 10
+    };
+
+    collisionMap.push(makeWell(well, {
+      car,
+      index,
+      partId:part.id,
+      floorY:part.floorY,
+      name:`wagon-well-${index}`
     }));
 
-    // الأجزاء الصلبة القاتلة في القاطرة فقط، وليست كل القطار.
+    addMatterRect(part.x + part.w / 2, part.floorY, part.w - profile.floor.inset * 2, profile.floor.h, {
+      label:`${part.id}-floor`,
+      sgType:"wagon-floor",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      friction:profile.floor.friction,
+      frictionStatic:profile.floor.frictionStatic,
+      restitution:profile.floor.restitution
+    });
+
+    addMatterRect(part.x + profile.wall.xInset, part.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${part.id}-left-wall`,
+      sgType:"wagon-wall",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    addMatterRect(part.x + part.w - profile.wall.xInset, part.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${part.id}-right-wall`,
+      sgType:"wagon-wall",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    addMatterRect(part.x + profile.topBumper.xInset, part.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${part.id}-left-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      sgPushX:1,
+      isSensor:true,
+      angle:-profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+
+    addMatterRect(part.x + part.w - profile.topBumper.xInset, part.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${part.id}-right-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgPartId:part.id,
+      sgWellIndex:index,
+      sgPushX:-1,
+      isSensor:true,
+      angle:profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+
+    collisionMap.push(makeSurface({
+      left:part.x + profile.topBumper.xInset - profile.topBumper.w / 2,
+      right:part.x + profile.topBumper.xInset + profile.topBumper.w / 2,
+      y:part.y + profile.topBumper.yOffset,
+      thickness:profile.topBumper.h
+    }, {name:`${part.id}-left-top-edge-bumper`}));
+
+    collisionMap.push(makeSurface({
+      left:part.x + part.w - profile.topBumper.xInset - profile.topBumper.w / 2,
+      right:part.x + part.w - profile.topBumper.xInset + profile.topBumper.w / 2,
+      y:part.y + profile.topBumper.yOffset,
+      thickness:profile.topBumper.h
+    }, {name:`${part.id}-right-top-edge-bumper`}));
+  }
+
+  function addEnginePhysicsPart(part){
+    const profile = TRAIN_PHYSICS_PROFILES.engine;
+    const roof = part.roof || profile.roof;
+
+    collisionMap.push(makeSurface({
+      left:roof.x1,
+      right:roof.x2,
+      y:roof.y,
+      thickness:roof.h
+    }, {name:"driver-roof-bumper"}));
+
+    addMatterRect((roof.x1 + roof.x2) / 2, roof.y + roof.h / 2, roof.x2 - roof.x1, roof.h, {
+      label:`${part.id}-roof-bounce`,
+      sgType:"driver-roof",
+      sgPartId:part.id,
+      sgRoofY:roof.y,
+      friction:profile.roofBounce.friction,
+      frictionStatic:profile.roofBounce.frictionStatic,
+      restitution:profile.roofBounce.restitution
+    });
+  }
+
+  function addGapPhysicsBetweenParts(leftPart, rightPart){
+    const profile = TRAIN_PHYSICS_PROFILES.gap;
+    const leftEdge = leftPart.x + leftPart.w;
+    const rightEdge = rightPart.x;
+    const center = (leftEdge + rightEdge) / 2;
+    const y = Math.min(leftPart.y, rightPart.y) + profile.yOffset;
+    const halfW = profile.width / 2;
+
+    collisionMap.push(makeSurface({
+      left:center - profile.width / 2,
+      right:center + profile.width / 2,
+      y,
+      thickness:profile.height
+    }, {name:`gap-smart-${leftPart.id}-${rightPart.id}`}));
+
+    addMatterRect(center - halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftPart.id}-${rightPart.id}-left-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWellIndex:leftPart.index,
+      sgRightWellIndex:rightPart.index,
+      sgDefaultPushX:-1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+
+    addMatterRect(center + halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftPart.id}-${rightPart.id}-right-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWellIndex:leftPart.index,
+      sgRightWellIndex:rightPart.index,
+      sgDefaultPushX:1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+  }
+
+  function addAllSmartGaps(parts){
+    const wagons = getAdjacentWagonParts(parts);
+    for(let i = 0; i < wagons.length - 1; i++){
+      addGapPhysicsBetweenParts(wagons[i], wagons[i + 1]);
+    }
+  }
+
+  function addAllTrainPartPhysics(){
+    const parts = buildTrainPhysicsParts();
+
+    parts.forEach(part => {
+      if(part.type === "wagon") addWagonPhysicsPart(part);
+      if(part.type === "engine") addEnginePhysicsPart(part);
+    });
+
+    addAllSmartGaps(parts);
+  }
+
+  function buildCollisionMap(){
+    collisionMap.length = 0;
+    resetMatterWorld();
+
+    collisionMap.push(makeBreakSurface({
+      left:-90,
+      right:1380,
+      y:604,
+      thickness:54
+    }, {name:"track"}));
+
+    addMatterRect(640, TRAIN_PHYSICS_PROFILES.track.y, TRAIN_PHYSICS_PROFILES.track.w, TRAIN_PHYSICS_PROFILES.track.h, {
+      label:"kill-track",
+      isSensor:true
+    });
+
+    addAllTrainPartPhysics();
+
     [
-      {name:"driver-cabin-body", left:768, right:932, top:456, bottom:604},
-      {name:"engine-boiler", left:898, right:1088, top:448, bottom:592},
-      {name:"engine-front", left:1064, right:1164, top:438, bottom:610},
+      // الخلف جهة العربة غير قاتل. النطاط فقط هو الشريط الصغير فوق مقطورة السائق.
+      // ما عدا ذلك من جسم القاطرة يعتبر اصطدام/انفجار.
+      {name:"driver-cabin-front", left:890, right:960, top:424, bottom:514},
+      {name:"engine-top-mid", left:920, right:1088, top:430, bottom:505},
+      {name:"engine-body-mid", left:930, right:1085, top:488, bottom:590},
+      {name:"engine-front", left:1058, right:1164, top:438, bottom:610},
       {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
-      {name:"engine-plow", left:1088, right:1210, top:550, bottom:632},
-      {name:"engine-base", left:770, right:1150, top:562, bottom:622},
-      {name:"engine-wheels-solid", left:780, right:1088, top:556, bottom:622}
+      {name:"engine-plow", left:1088, right:1210, top:550, bottom:632}
     ].forEach(zone => {
       collisionMap.push(makeBreak({
         left:zone.left,
@@ -688,7 +1073,21 @@
         top:zone.top,
         bottom:zone.bottom
       }, {name:zone.name}));
+
+      addMatterRect(
+        (zone.left + zone.right) / 2,
+        (zone.top + zone.bottom) / 2,
+        zone.right - zone.left,
+        zone.bottom - zone.top,
+        {
+          label:`kill-${zone.name}`,
+          sgType:"kill",
+          isSensor:true
+        }
+      );
     });
+
+    drawCollisionDebug();
   }
 
   function drawCollisionDebug(){
@@ -729,223 +1128,441 @@
     });
   }
 
-  function getWellFloorHit(state){
-    const info = getBoxCollisionInfo(state);
-    const prevBottom = state.prevY + BOX.bottom;
+  function getWellByIndex(index){
+    for(const zone of collisionMap){
+      if(zone.type === "well" && zone.index === index) return zone;
+    }
+    return null;
+  }
 
+  function isBodyInsideWell(body, well){
+    return body.position.x >= well.left + 2 &&
+      body.position.x <= well.right - 2 &&
+      body.position.y >= well.top &&
+      body.position.y <= well.bottom + 30;
+  }
+
+  function getWellByMatterBody(body){
     for(const zone of collisionMap){
       if(zone.type !== "well") continue;
-
-      // من طرف العربة إلى طرفها: إذا كان مركز الصندوق داخل حدود العربة، يسقط داخلها مباشرة.
-      const centerInside = info.boxCenterX >= zone.left && info.boxCenterX <= zone.right;
-      const crossedFloor = prevBottom <= zone.floorY + 10 && info.boxBottom >= zone.floorY;
-
-      if(centerInside && crossedFloor && state.vy >= 0){
-        return zone;
-      }
+      if(isBodyInsideWell(body, zone)) return zone;
     }
-
     return null;
   }
 
-  function getSurfaceHit(state){
-    const info = getBoxCollisionInfo(state);
-    const prevBottom = state.prevY + BOX.bottom;
+  function syncMatterBox(item){
+    if(!item || !item.body || !item.node) return;
 
-    for(const zone of collisionMap){
-      if(zone.type !== "surface") continue;
-
-      const overlapsX = info.boxRight > zone.left && info.boxLeft < zone.right;
-      const crossed = prevBottom <= zone.y + 6 && info.boxBottom >= zone.y;
-      const shallow = info.boxBottom >= zone.y && info.boxBottom <= zone.y + zone.thickness;
-
-      if(overlapsX && (crossed || shallow) && state.vy >= 0){
-        return zone;
-      }
-    }
-
-    return null;
-  }
-
-  function getBreakHit(state){
-    const info = getBoxCollisionInfo(state);
-    const boxRect = {
-      left:info.boxLeft,
-      right:info.boxRight,
-      top:info.boxTop,
-      bottom:info.boxBottom
-    };
-
-    for(const zone of collisionMap){
-      if(zone.type !== "break") continue;
-      if(rectsOverlap(boxRect, zone)){
-        return zone;
-      }
-    }
-
-    for(const zone of collisionMap){
-      if(zone.type !== "break-surface") continue;
-      if(info.boxBottom >= zone.y && state.vy >= 0){
-        return zone;
-      }
-    }
-
-    return null;
-  }
-
-  function breakFallingBox(box, state){
-    box.remove();
-    trackImpactBurst(fallingObjectsLayer || svg, state.x, Math.min(state.y + BOX.bottom, 610));
-  }
-
-  function applyAirResistance(state, dt){
-    // مقاومة الهواء لا تدفع الصندوق كأمر مباشر؛ هي تقرّب سرعته من تيار الهواء تدريجيًا.
-    const relativeAirX = PHYSICS.airFlowX - state.vx;
-    state.vx += relativeAirX * PHYSICS.airResistance * dt;
-    state.vx *= Math.pow(PHYSICS.linearDrag, dt * 60);
-    state.vr *= Math.pow(PHYSICS.angularDrag, dt * 60);
-  }
-
-  function applySurfaceContact(state, zone){
-    const incomingVy = state.vy;
-    const surfaceVelocity = zone.surfaceVelocityX || 0;
-    const relVx = state.vx - surfaceVelocity;
-
-    state.y = zone.y - BOX.bottom;
-
-    if(incomingVy > 245){
-      state.vy = -Math.min(28, incomingVy * (zone.restitution ?? PHYSICS.floorRestitution));
-    }else{
-      state.vy = 0;
-    }
-
-    // السطح يغيّر السرعة بالاحتكاك فقط، لذلك يظهر الانزلاق/التدحرج طبيعيًا.
-    state.vx -= relVx * (zone.friction || .12);
-    state.vx *= Math.pow(zone.rollingFriction || .988, 1);
-
-    const surfaceCenter = (zone.left + zone.right) / 2;
-    const offset = clamp((state.x - surfaceCenter) / 80, -1, 1);
-    state.vr += state.vx * .045 + incomingVy * offset * .017;
-    state.vr *= .94;
-  }
-
-  function settleBoxIntoWagon(startState, well, textLines){
-    const layer = settledObjectsLayer || fallingObjectsLayer || svg;
-    const box = answerBox(layer, textLines);
-
-    settledBoxes.push(box);
-    while(settledBoxes.length > MAX_SETTLED_BOXES){
-      const oldBox = settledBoxes.shift();
-      if(oldBox && oldBox.parentNode) oldBox.remove();
-    }
-
-    // يثبت في نفس مكان وزاوية السقوط، فقط مع حد أمان بسيط حتى لا يخرج من الحوض بصريًا.
-    const finalX = clamp(startState.x, well.left + 12, well.right - 12);
-    const finalY = clamp(startState.y, well.floorY - BOX.bottom - 5, well.floorY - BOX.bottom + 9);
-    const finalRotation = clamp(startState.rotation, -38, 38);
-
-    box.setAttribute(
+    const body = item.body;
+    item.node.setAttribute(
       "transform",
-      `translate(${finalX.toFixed(2)} ${finalY.toFixed(2)}) rotate(${finalRotation.toFixed(2)})`
+      `translate(${body.position.x.toFixed(2)} ${body.position.y.toFixed(2)}) rotate(${(body.angle * 180 / Math.PI).toFixed(2)})`
     );
   }
 
-  function spawnFallingAnswerBox(startX, startY, textLines){
-    if(activeFallingBoxes >= MAX_ACTIVE_FALLING_BOXES){
-      return false;
+  function moveMatterBoxBehindWagonCover(item){
+    if(!item || item.insideWagonLayer || !settledObjectsLayer || !item.node) return;
+    settledObjectsLayer.appendChild(item.node);
+    item.insideWagonLayer = true;
+  }
+
+  function applySmartGapBounceToMatter(item, body, gapBody, activeMode = false){
+    if(!item || !body || !gapBody || !Matter || !Matter.Body) return;
+
+    const profile = TRAIN_PHYSICS_PROFILES.gap;
+    const now = performance.now();
+    const cooldown = activeMode ? profile.cooldown : Math.max(40, profile.cooldown - 35);
+
+    if(item.lastGapSmartAt && now - item.lastGapSmartAt < cooldown){
+      return;
     }
 
-    activeFallingBoxes += 1;
+    item.lastGapSmartAt = now;
 
-    const layer = fallingObjectsLayer || svg;
-    const box = answerBox(layer, textLines);
-    let cleanedUp = false;
+    const dx = body.position.x - gapBody.sgGapCenter;
+    let direction = 0;
 
-    function cleanupFallingBox(){
-      if(cleanedUp) return;
-      cleanedUp = true;
-      activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
+    if(Math.abs(dx) > profile.centerDeadZone){
+      direction = dx < 0 ? -1 : 1;
+    }else if(Math.abs(body.velocity.x) > .08){
+      direction = body.velocity.x < 0 ? -1 : 1;
+    }else{
+      direction = gapBody.sgDefaultPushX || 1;
     }
 
-    const state = {
-      x:startX,
-      y:startY + 54,
-      prevX:startX,
-      prevY:startY + 54,
-      vx:-10 + Math.random() * 18,
-      vy:18,
-      rotation:-12 + Math.random() * 24,
-      vr:-96 + Math.random() * 192,
-      lastTime:performance.now()
-    };
+    item.lastWellIndex = direction < 0 ? gapBody.sgLeftWellIndex : gapBody.sgRightWellIndex;
 
-    function draw(){
-      box.setAttribute(
-        "transform",
-        `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) rotate(${state.rotation.toFixed(2)})`
-      );
+    const inwardX = direction < 0
+      ? Math.min(body.velocity.x, -profile.inwardVelocity)
+      : Math.max(body.velocity.x, profile.inwardVelocity);
+
+    Matter.Body.setVelocity(body, {
+      x:inwardX,
+      y:Math.min(body.velocity.y * .12, -profile.upVelocity)
+    });
+
+    Matter.Body.setAngularVelocity(
+      body,
+      body.angularVelocity * .58 + (direction < 0 ? -profile.spinKick : profile.spinKick)
+    );
+
+    Matter.Body.setPosition(body, {
+      x:body.position.x + direction * profile.liftOut,
+      y:body.position.y - profile.liftOut
+    });
+  }
+
+  function applyWagonTopBumperBounceToMatter(item, body, bumperBody){
+    if(!item || !body || !bumperBody || !Matter || !Matter.Body) return;
+
+    const profile = TRAIN_PHYSICS_PROFILES.wagon.topBumper;
+    const now = performance.now();
+
+    if(item.lastTopEdgeBumperAt && now - item.lastTopEdgeBumperAt < profile.cooldown){
+      return;
     }
 
-    function step(dt){
-      state.prevX = state.x;
-      state.prevY = state.y;
+    item.lastTopEdgeBumperAt = now;
+    item.lastWellIndex = bumperBody.sgWellIndex ?? item.lastWellIndex;
 
-      state.vy += PHYSICS.gravity * dt;
-      applyAirResistance(state, dt);
+    const direction = bumperBody.sgPushX || 0;
+    const inwardX = direction > 0
+      ? Math.max(body.velocity.x, profile.inwardVelocity)
+      : Math.min(body.velocity.x, -profile.inwardVelocity);
 
-      state.x += state.vx * dt;
-      state.y += state.vy * dt;
-      state.rotation += state.vr * dt;
+    Matter.Body.setVelocity(body, {
+      x:inwardX,
+      y:Math.min(body.velocity.y * .18, -profile.upVelocity)
+    });
 
-      const wellHit = getWellFloorHit(state);
-      if(wellHit){
-        box.remove();
-        cleanupFallingBox();
-        settleBoxIntoWagon(state, wellHit, textLines);
-        return "settled";
-      }
+    Matter.Body.setAngularVelocity(
+      body,
+      body.angularVelocity * .64 + (direction > 0 ? profile.spinKick : -profile.spinKick)
+    );
 
-      const surfaceHit = getSurfaceHit(state);
-      if(surfaceHit){
-        applySurfaceContact(state, surfaceHit);
-        return "continue";
-      }
+    Matter.Body.setPosition(body, {
+      x:body.position.x + direction * profile.liftOut,
+      y:body.position.y - profile.liftOut
+    });
+  }
 
-      if(getBreakHit(state) || state.x < -180){
-        breakFallingBox(box, state);
-        cleanupFallingBox();
-        return "done";
-      }
+  function applyDriverRoofBounce(item, body, roofBody){
+    if(!item || !body || !Matter || !Matter.Body) return;
 
-      return "continue";
+    const profile = TRAIN_PHYSICS_PROFILES.engine.roofBounce;
+    const roofY = (roofBody && roofBody.sgRoofY) || TRAIN_PHYSICS_PROFILES.engine.roof.y;
+    const now = performance.now();
+
+    if(item.lastRoofBounceAt && now - item.lastRoofBounceAt < profile.cooldown){
+      return;
     }
 
-    function frame(now){
-      let remaining = Math.min(0.045, (now - state.lastTime) / 1000);
-      state.lastTime = now;
+    item.lastRoofBounceAt = now;
 
-      while(remaining > 0){
-        const dt = Math.min(0.007, remaining);
-        remaining -= dt;
+    const incomingY = Math.abs(body.velocity.y);
+    const upVelocity = -clamp(incomingY * .92, profile.minUpVelocity, profile.maxUpVelocity);
+    const backVelocity = Math.max(
+      profile.maxBackwardVelocity,
+      Math.min(profile.backwardVelocity, body.velocity.x - .82)
+    );
 
-        const result = step(dt);
-        if(result === "settled" || result === "done"){
-          return;
-        }
+    Matter.Body.setVelocity(body, {
+      x:backVelocity,
+      y:upVelocity
+    });
+
+    Matter.Body.setAngularVelocity(
+      body,
+      body.angularVelocity * .48 + profile.spinKick
+    );
+
+    Matter.Body.setPosition(body, {
+      x:body.position.x - 3,
+      y:Math.min(body.position.y - profile.liftOut, roofY - BOX.height / 2 - 8)
+    });
+  }
+
+  function stopFreeFallAirDrift(item){
+    if(!item || !item.airDriftActive) return;
+    item.airDriftActive = false;
+    item.firstSurfaceContactAt = item.firstSurfaceContactAt || performance.now();
+  }
+
+  function applyFreeFallAirDrift(item){
+    if(!item || item.done || !item.airDriftActive || item.firstSurfaceContactAt || item.insideWagon) return;
+    if(!item.body || !Matter || !Matter.Body) return;
+
+    const profile = TRAIN_PHYSICS_PROFILES.freeFallAirDrift;
+    if(!profile || !profile.enabled) return;
+
+    const body = item.body;
+
+    // أثناء السقوط الحر فقط:
+    // نرفع الميل لليسار تدريجيًا، ونزيد سرعة النزول حتى تصبح قريبة من الفيديو المرجعي.
+    let nextVX = body.velocity.x;
+    let nextVY = body.velocity.y;
+
+    if(nextVX > profile.targetVX){
+      nextVX = Math.max(profile.targetVX, nextVX - profile.velocityStepX);
+      Matter.Body.applyForce(body, body.position, {
+        x:-body.mass * profile.forceX,
+        y:0
+      });
+    }
+
+    if(nextVX < profile.maxLeftVX){
+      nextVX = profile.maxLeftVX;
+    }
+
+    if(nextVY < profile.targetVY){
+      nextVY = Math.min(profile.targetVY, nextVY + profile.velocityStepY);
+      Matter.Body.applyForce(body, body.position, {
+        x:0,
+        y:body.mass * profile.forceY
+      });
+    }
+
+    if(nextVY > profile.maxDownVY){
+      nextVY = profile.maxDownVY;
+    }
+
+    Matter.Body.setVelocity(body, {
+      x:nextVX,
+      y:nextVY
+    });
+  }
+
+  function handleGapActiveCollision(bodyA, bodyB){
+    const item = bodyA && bodyA.sgItem;
+    if(!item || item.done || !bodyB) return;
+
+    if(bodyB.sgType === "gap-smart-bouncer"){
+      stopFreeFallAirDrift(item);
+      applySmartGapBounceToMatter(item, bodyA, bodyB, true);
+    }
+  }
+
+  function handleMatterCollision(bodyA, bodyB){
+    const item = bodyA && bodyA.sgItem;
+    if(!item || item.done || !bodyB) return;
+
+    stopFreeFallAirDrift(item);
+
+    if(bodyB.label === "kill-track"){
+      if(!item.insideWagon){
+        breakMatterBox(item);
+      }
+      return;
+    }
+
+    if(bodyB.sgType === "kill" || String(bodyB.label || "").startsWith("kill-")){
+      breakMatterBox(item);
+      return;
+    }
+
+    if(bodyB.sgType === "gap-smart-bouncer"){
+      applySmartGapBounceToMatter(item, bodyA, bodyB, false);
+      return;
+    }
+
+    if(bodyB.sgType === "wagon-top-edge-bumper"){
+      applyWagonTopBumperBounceToMatter(item, bodyA, bodyB);
+      return;
+    }
+
+    if(bodyB.sgType === "wagon-floor" || bodyB.sgType === "wagon-wall"){
+      item.insideWagon = true;
+      item.lastWagonContactAt = performance.now();
+      item.lastWellIndex = bodyB.sgWellIndex;
+
+      if(!item.enteredWellAt){
+        item.enteredWellAt = performance.now();
       }
 
-      draw();
+      moveMatterBoxBehindWagonCover(item);
+      return;
+    }
 
-      if(state.y < 700 && state.x > -190){
-        requestAnimationFrame(frame);
+    if(bodyB.sgType === "driver-roof"){
+      applyDriverRoofBounce(item, bodyA, bodyB);
+      return;
+    }
+  }
+
+  function cleanupMatterBox(item, removeVisual = true){
+    if(!item || item.done) return;
+    item.done = true;
+
+    if(item.body && matterEngine && matterEngine.world){
+      Matter.World.remove(matterEngine.world, item.body);
+    }
+
+    if(removeVisual && item.node && item.node.parentNode){
+      item.node.remove();
+    }
+
+    const index = matterBoxes.indexOf(item);
+    if(index >= 0) matterBoxes.splice(index, 1);
+
+    activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
+  }
+
+  function breakMatterBox(item){
+    if(!item || item.done) return;
+
+    const x = item.body ? item.body.position.x : 0;
+    const y = item.body ? item.body.position.y : 610;
+
+    cleanupMatterBox(item, true);
+    trackImpactBurst(fallingObjectsLayer || svg, x, Math.min(y + BOX.bottom, 610));
+  }
+
+  function settleMatterBoxAsVisualOnly(item, well){
+    if(!item || item.done || !item.body || !item.node) return;
+
+    const body = item.body;
+    const node = item.node;
+    const x = body.position.x;
+    const y = body.position.y;
+    const r = body.angle * 180 / Math.PI;
+
+    node.setAttribute(
+      "transform",
+      `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
+    );
+
+    // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
+    node.removeAttribute("filter");
+
+    cleanupMatterBox(item, false);
+
+    const layer = settledObjectsLayer || fallingObjectsLayer || svg;
+    if(node && node.parentNode !== layer){
+      layer.appendChild(node);
+    }
+
+    settledVisualMatterBoxes.push(item);
+    rememberSettledBox(node, well && well.index);
+  }
+
+  function updateMatterBoxState(item){
+    if(!item || item.done || !item.body || !item.node) return;
+
+    const body = item.body;
+    applyFreeFallAirDrift(item);
+    syncMatterBox(item);
+
+    const activeWell = item.insideWagon
+      ? (getWellByIndex(item.lastWellIndex) || getWellByMatterBody(body))
+      : getWellByMatterBody(body);
+
+    if(item.insideWagon && activeWell){
+      const speed = body.speed;
+      const angular = Math.abs(body.angularVelocity);
+
+      if(speed < .18 && angular < .018){
+        item.stableFrames += 1;
       }else{
-        box.remove();
-        cleanupFallingBox();
+        item.stableFrames = 0;
       }
+
+      if(item.stableFrames > 40){
+        settleMatterBoxAsVisualOnly(item, activeWell);
+        return;
+      }
+    }
+
+    if(body.position.y > 700 || body.position.x < -240 || body.position.x > 1450){
+      breakMatterBox(item);
+    }
+  }
+
+  function startMatterLoop(){
+    if(matterRunnerStarted || !isMatterReady() || !matterEngine) return;
+    matterRunnerStarted = true;
+
+    function frame(){
+      if(matterEngine){
+        Matter.Engine.update(matterEngine, 1000 / 60);
+        matterBoxes.slice().forEach(updateMatterBoxState);
+      }
+
+      requestAnimationFrame(frame);
     }
 
     requestAnimationFrame(frame);
+  }
+
+  function releaseOldestMatterBoxIfNeeded(){
+    const liveBoxes = matterBoxes.filter(item => item && !item.done);
+    activeFallingBoxes = Math.min(activeFallingBoxes, liveBoxes.length);
+
+    if(activeFallingBoxes < MAX_ACTIVE_FALLING_BOXES) return;
+
+    const oldest = liveBoxes[0];
+    if(oldest){
+      cleanupMatterBox(oldest, true);
+    }else{
+      activeFallingBoxes = 0;
+    }
+  }
+
+  function spawnMatterAnswerBox(startX, startY, textLines, fromQueue = false){
+    if(!isMatterReady() || !matterEngine){
+      if(!fromQueue){
+        pendingMatterSpawns.push({startX, startY, textLines});
+      }
+      loadMatterLibrary();
+      return false;
+    }
+
+    releaseOldestMatterBoxIfNeeded();
+
+    const layer = fallingObjectsLayer || svg;
+    const node = answerBox(layer, textLines);
+
+    const body = Matter.Bodies.rectangle(startX, startY + 54, BOX.width, BOX.height, {
+      label:"answer-box",
+      collisionFilter:{
+        category:MATTER_COLLISION.box,
+        mask:MATTER_COLLISION.train
+      },
+      ...TRAIN_PHYSICS_PROFILES.box.body
+    });
+
+    Matter.Body.setVelocity(body, {x:-.72, y:.28});
+    Matter.Body.setAngularVelocity(body, 0);
+
+    const item = {
+      node,
+      body,
+      textLines,
+      spawnedAt:performance.now(),
+      insideWagon:false,
+      insideWagonLayer:false,
+      enteredWellAt:0,
+      lastWellIndex:null,
+      lastTopEdgeBumperAt:0,
+      lastGapSmartAt:0,
+      lastRoofBounceAt:0,
+      firstSurfaceContactAt:0,
+      airDriftActive:true,
+      stableFrames:0,
+      done:false
+    };
+
+    body.sgItem = item;
+    matterBoxes.push(item);
+    activeFallingBoxes += 1;
+    Matter.World.add(matterEngine.world, body);
+    syncMatterBox(item);
+
     return true;
+  }
+
+  function spawnFallingAnswerBox(startX, startY, textLines){
+    // مسار واحد فقط: نفس نظام المختبر Matter.js.
+    return spawnMatterAnswerBox(startX, startY, textLines);
   }
 
   const BALLOON_SPEED_LEVEL = 6; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
@@ -959,10 +1576,6 @@
     scale:.92,
     speedLevel:BALLOON_SPEED_LEVEL
   };
-
-  function clamp(value, min, max){
-    return Math.max(min, Math.min(max, value));
-  }
 
   function speedFromLevel(level){
     const safeLevel = clamp(Number(level) || 1, 1, 10);
@@ -1213,17 +1826,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=59",
+      href:"train-track.webp?v=72",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=59");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=72");
   }
 
-  function addWheel(layer, cx, cy, size, version = 59){
+  function addWheel(layer, cx, cy, size, version = 72){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1312,7 +1925,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=59",
+      href:"train-wagon.webp?v=79",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1320,7 +1933,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=59");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=79");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1353,7 +1966,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=59",
+        href:"train-wagon.webp?v=79",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1361,7 +1974,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=59");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=79");
 
       el("text", {
         x:car.centerX,
@@ -1386,7 +1999,7 @@
   }
 
   function locomotive(train){
-    // إصدار 59:
+    // إصدار 72:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1396,7 +2009,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=59",
+      href:"train-engine-transparent.png?v=79",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1404,7 +2017,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=59");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=79");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1445,16 +2058,16 @@
     wagonForegroundCoverLayer = el("g", {id:"wagonForegroundCoverLayer"}, train);
     renderWagonForegroundCovers();
 
-    // خريطة تصادم غير مرئية للقطار: أحواض، حواف، جسم القاطرة، السكة.
-    buildCollisionMap();
-    collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
-    drawCollisionDebug();
-
     // طبقة الصناديق أثناء السقوط تبقى خارج trainScene حتى لا تتحرك مع القطار أثناء السقوط.
     fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
+
+    // خريطة تصادم غير مرئية للقطار: أحواض، حواف، نطاطات، فواصل ذكية، قاطرة، وسكة.
+    collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
+    loadMatterLibrary();
   }
 
   build();
+  /* إصدار 79: زيادة ميل السقوط لليسار وتسريع السقوط الحر فقط ليطابق الفيديو المرجعي. */
 })();
 </script>
 </body>
