@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر سقوط الصندوق - إصدار 1</title>
+  <title>مختبر سقوط الصندوق - إصدار 2</title>
   <style>
     :root{
       --bg:#d9ecff;
@@ -132,8 +132,8 @@
 <body>
   <main class="page">
     <div class="note">
-      مختبر مستقل لحركة السقوط فقط — بدون Matter.js وبدون ملف القطار الأساسي.
-      <div class="small">الهدف: نضبط الإحساس أولًا. سقوط، ارتطام، انزلاق، ثبات. بعدها ننقل النظام للعبة.</div>
+      مختبر مستقل لحركة السقوط فقط — السقوط المعتمد الآن من اليمين فقط.
+      <div class="small">الهدف: ضبط الحركة قبل نقلها للعبة القطار الأساسية. بدون Matter.js وبدون تعديل ملف القطار.</div>
     </div>
 
     <svg id="stage" class="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="مختبر سقوط الصندوق داخل العربة">
@@ -177,13 +177,11 @@
 
     <div class="panel">
       <div class="panel-title">اختبر الحركة:</div>
-      <button data-clip="right">سقوط من اليمين</button>
-      <button data-clip="center">سقوط من الوسط</button>
-      <button data-clip="left">سقوط من اليسار</button>
-      <button data-clip="gap">قريب من الفاصل</button>
+      <button data-clip="right">السقوط المعتمد من اليمين</button>
+      <button data-clip="gap">قفزة الفاصل</button>
       <button data-clip="roof">اصطدام مقطورة السائق</button>
       <button data-clip="track">سقوط على السكة</button>
-      <button data-clip="random">عشوائي</button>
+      <button data-clip="random">عشوائي من اليمين</button>
     </div>
   </main>
 
@@ -200,20 +198,21 @@
   const fxLayer = document.getElementById("fxLayer");
 
   const WAGON = {
-    x:430,
-    y:493,
-    w:410,
-    h:126,
-    floorY:566,
-    frontTop:522,
-    leftSafe:468,
-    rightSafe:802
+    // نفس مقاسات العربة الفعلية تقريبًا داخل صفحة القطار.
+    x:490,
+    y:486,
+    w:300,
+    h:111,
+    floorY:535,
+    frontTop:520,
+    leftSafe:520,
+    rightSafe:760
   };
 
   const ROOF = {
-    x:760,
-    y:418,
-    w:142,
+    x:784,
+    y:424,
+    w:120,
     h:18
   };
 
@@ -288,9 +287,9 @@
 
     // العجلات خلف الجسم.
     [0,1,2,3].forEach(i => {
-      const cx = WAGON.x + 74 + i * 88;
-      el("circle", {cx, cy:612, r:28, fill:"#30251f", stroke:"#17110e", "stroke-width":5}, wagonBack);
-      el("circle", {cx, cy:612, r:12, fill:"#b68b5e", stroke:"#4a3022", "stroke-width":4}, wagonBack);
+      const cx = WAGON.x + 49 + i * 66;
+      el("circle", {cx, cy:585, r:23.7, fill:"#30251f", stroke:"#17110e", "stroke-width":4.2}, wagonBack);
+      el("circle", {cx, cy:585, r:10, fill:"#b68b5e", stroke:"#4a3022", "stroke-width":3.4}, wagonBack);
     });
 
     // سقف/منطقة مقطورة السائق للتجربة.
@@ -484,82 +483,61 @@
 
   const clips = {
     right:{
-      label:"سقوط من اليمين",
+      label:"السقوط المعتمد من اليمين",
       frames:[
-        {t:0, x:740, y:150, r:-9},
-        {t:290, x:716, y:280, r:-22, ease:"inCubic"},
-        {t:560, x:684, y:480, r:-42, ease:"inCubic"},
-        {t:690, x:660, y:523, r:-31, inside:true, ease:"outSine"},
-        {t:830, x:637, y:506, r:-18, inside:true, ease:"outSine"},
-        {t:1110, x:606, y:518, r:-10, inside:true, ease:"outCubic"},
-        {t:1450, x:586, y:520, r:-7, inside:true, ease:"outCubic"},
-        {t:1840, x:576, y:521, r:-6, inside:true, ease:"outCubic"}
-      ]
-    },
-    center:{
-      label:"سقوط من الوسط",
-      frames:[
-        {t:0, x:640, y:142, r:7},
-        {t:300, x:632, y:290, r:22, ease:"inCubic"},
-        {t:560, x:624, y:478, r:34, ease:"inCubic"},
-        {t:690, x:618, y:523, r:24, inside:true, ease:"outSine"},
-        {t:825, x:609, y:509, r:13, inside:true, ease:"outSine"},
-        {t:1130, x:596, y:519, r:7, inside:true, ease:"outCubic"},
-        {t:1650, x:592, y:521, r:5, inside:true, ease:"outCubic"}
-      ]
-    },
-    left:{
-      label:"سقوط من اليسار",
-      frames:[
-        {t:0, x:520, y:145, r:12},
-        {t:300, x:527, y:286, r:31, ease:"inCubic"},
-        {t:565, x:542, y:476, r:48, ease:"inCubic"},
-        {t:700, x:552, y:523, r:37, inside:true, ease:"outSine"},
-        {t:845, x:566, y:508, r:21, inside:true, ease:"outSine"},
-        {t:1180, x:590, y:519, r:10, inside:true, ease:"outCubic"},
-        {t:1720, x:602, y:521, r:7, inside:true, ease:"outCubic"}
+        {t:0, x:740, y:132, r:-8},
+        {t:270, x:724, y:252, r:-18, ease:"inCubic"},
+        {t:520, x:696, y:430, r:-36, ease:"inCubic"},
+        {t:650, x:672, y:491, r:-30, inside:true, ease:"linear"},
+        {t:780, x:648, y:472, r:-21, inside:true, ease:"linear"},
+        {t:1040, x:622, y:484, r:-13, inside:true, ease:"linear"},
+        {t:1420, x:603, y:486, r:-8, inside:true, ease:"outCubic"},
+        {t:1760, x:594, y:486, r:-7, inside:true, ease:"outCubic"}
       ]
     },
     gap:{
-      label:"قريب من الفاصل",
+      label:"قفزة الفاصل",
       frames:[
-        {t:0, x:414, y:154, r:-8},
-        {t:310, x:424, y:304, r:-21, ease:"inCubic"},
-        {t:570, x:446, y:481, r:-38, ease:"inCubic"},
-        {t:700, x:469, y:523, r:-28, inside:true, ease:"outSine"},
-        {t:880, x:494, y:510, r:-16, inside:true, ease:"outSine"},
-        {t:1260, x:526, y:519, r:-8, inside:true, ease:"outCubic"},
-        {t:1800, x:540, y:521, r:-6, inside:true, ease:"outCubic"}
+        {t:0, x:454, y:138, r:-6},
+        {t:285, x:466, y:268, r:-18, ease:"inCubic"},
+        {t:535, x:486, y:442, r:-34, ease:"inCubic"},
+        {t:650, x:506, y:490, r:-26, ease:"linear"},
+        {t:800, x:548, y:382, r:-54, ease:"outSine"},
+        {t:1040, x:606, y:435, r:-69, ease:"linear"},
+        {t:1240, x:650, y:491, r:-43, inside:true, ease:"linear"},
+        {t:1400, x:636, y:472, r:-28, inside:true, ease:"linear"},
+        {t:1740, x:612, y:484, r:-15, inside:true, ease:"linear"},
+        {t:2200, x:600, y:486, r:-9, inside:true, ease:"outCubic"}
       ]
     },
     roof:{
       label:"اصطدام مقطورة السائق",
       frames:[
-        {t:0, x:830, y:112, r:-4},
-        {t:320, x:826, y:282, r:-20, ease:"inCubic"},
-        {t:520, x:821, y:382, r:-30, ease:"inCubic"},
-        {t:610, x:810, y:386, r:-38, ease:"outSine"},
-        {t:790, x:768, y:342, r:-66, ease:"outSine"},
-        {t:1060, x:724, y:426, r:-92, ease:"inCubic"},
-        {t:1270, x:678, y:523, r:-54, inside:true, ease:"outSine"},
-        {t:1430, x:650, y:506, r:-34, inside:true, ease:"outSine"},
-        {t:1780, x:612, y:518, r:-16, inside:true, ease:"outCubic"},
-        {t:2260, x:594, y:521, r:-10, inside:true, ease:"outCubic"}
+        {t:0, x:840, y:108, r:-4},
+        {t:300, x:834, y:260, r:-20, ease:"inCubic"},
+        {t:500, x:824, y:382, r:-34, ease:"inCubic"},
+        {t:610, x:812, y:388, r:-40, ease:"linear"},
+        {t:805, x:768, y:292, r:-78, ease:"outSine"},
+        {t:1080, x:720, y:380, r:-104, ease:"linear"},
+        {t:1280, x:680, y:491, r:-61, inside:true, ease:"linear"},
+        {t:1440, x:656, y:472, r:-38, inside:true, ease:"linear"},
+        {t:1800, x:624, y:484, r:-19, inside:true, ease:"linear"},
+        {t:2280, x:604, y:486, r:-11, inside:true, ease:"outCubic"}
       ]
     },
     track:{
       label:"سقوط على السكة",
       frames:[
-        {t:0, x:1000, y:140, r:5},
-        {t:320, x:980, y:294, r:24, ease:"inCubic"},
-        {t:610, x:948, y:514, r:52, ease:"inCubic"},
-        {t:750, x:932, y:602, r:68, ease:"inCubic"}
+        {t:0, x:1000, y:130, r:5},
+        {t:300, x:980, y:286, r:24, ease:"inCubic"},
+        {t:590, x:948, y:514, r:52, ease:"inCubic"},
+        {t:720, x:932, y:602, r:68, ease:"linear"}
       ],
       breakAtEnd:true
     }
   };
 
-  const randomOrder = ["right", "center", "left", "gap", "roof"];
+  const randomOrder = ["right", "right", "right", "gap", "roof"];
 
   function playClip(name){
     if(name === "random"){
@@ -607,7 +585,7 @@
     button.addEventListener("click", () => playClip(button.dataset.clip));
   });
 
-  setTimeout(() => playClip("center"), 450);
+  setTimeout(() => playClip("right"), 450);
 })();
 </script>
 </body>
