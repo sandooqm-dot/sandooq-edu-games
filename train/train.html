@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 95</title>
+  <title>قطار الإجابات - إصدار 96</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -696,14 +696,15 @@
         sideYOffset:16,
         sideW:20,
         sideH:118,
-        cooldown:280,
-        leftVelocity:1.08,
-        upVelocity:.82,
-        spinKick:.018,
-        liftOut:5,
-        friction:.05,
-        frictionStatic:.08,
-        restitution:.42,
+        // قفز أسرع ومرن مثل السبرنق، مع منع دحرجة الصندوق.
+        cooldown:135,
+        leftVelocity:1.12,
+        upVelocity:1.55,
+        spinKick:0,
+        liftOut:7,
+        friction:.035,
+        frictionStatic:.05,
+        restitution:.62,
 
         // جسم صلب يمنع الصندوق من اختراق عربة الركاب.
         // النطاطات تعطي دفعة، وهذه الأجسام تمنع الدخول داخل الصورة.
@@ -745,16 +746,17 @@
         h:14
       },
       roofBounce:{
-        cooldown:620,
-        minUpVelocity:3.05,
-        maxUpVelocity:4.35,
+        // قفز مرن وسريع مثل السبرنق، بدون دحرجة الصندوق.
+        cooldown:430,
+        minUpVelocity:3.35,
+        maxUpVelocity:4.75,
         backwardVelocity:-1.42,
         maxBackwardVelocity:-1.72,
-        spinKick:-.065,
+        spinKick:0,
         liftOut:14,
-        friction:.05,
-        frictionStatic:.08,
-        restitution:.94
+        friction:.035,
+        frictionStatic:.05,
+        restitution:.96
       }
     },
 
@@ -1661,10 +1663,8 @@
       y:Math.min(body.velocity.y * .22, -profile.upVelocity)
     });
 
-    Matter.Body.setAngularVelocity(
-      body,
-      body.angularVelocity * .62 - profile.spinKick
-    );
+    // لا نضيف أي دوران: الصندوق يقفز بنفس حالته بدل الدحرجة.
+    Matter.Body.setAngularVelocity(body, 0);
 
     Matter.Body.setPosition(body, {
       x:body.position.x - profile.liftOut,
@@ -1697,10 +1697,8 @@
       y:upVelocity
     });
 
-    Matter.Body.setAngularVelocity(
-      body,
-      body.angularVelocity * .48 + profile.spinKick
-    );
+    // لا نضيف أي دوران: القفز يكون عمودي/مرن أكثر وليس دحرجة.
+    Matter.Body.setAngularVelocity(body, 0);
 
     Matter.Body.setPosition(body, {
       x:body.position.x - 3,
@@ -2645,7 +2643,7 @@
   }
 
   build();
-  /* إصدار 95: جعل عربة الركاب جزءًا صلبًا يمنع اختراق الصندوق، مع إبقاء النطاطات الخارجية الخفيفة باتجاه اليسار. */
+  /* إصدار 96: تعديل النطاطات لتقفز الصندوق كالسبرنق بدون دحرجة؛ عربة الركاب أقوى قليلًا ومقطورة السائق بدون تدوير. */
 })();
 </script>
 </body>
