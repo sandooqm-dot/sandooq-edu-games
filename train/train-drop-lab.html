@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر سقوط الصندوق - إصدار 2</title>
+  <title>مختبر سقوط الصندوق - إصدار 3</title>
   <style>
     :root{
       --bg:#d9ecff;
@@ -132,7 +132,7 @@
 <body>
   <main class="page">
     <div class="note">
-      مختبر مستقل لحركة السقوط فقط — السقوط المعتمد الآن من اليمين فقط.
+      مختبر مستقل لحركة السقوط فقط — كل الحالات الآن تبدأ من اليمين فقط.
       <div class="small">الهدف: ضبط الحركة قبل نقلها للعبة القطار الأساسية. بدون Matter.js وبدون تعديل ملف القطار.</div>
     </div>
 
@@ -178,7 +178,7 @@
     <div class="panel">
       <div class="panel-title">اختبر الحركة:</div>
       <button data-clip="right">السقوط المعتمد من اليمين</button>
-      <button data-clip="gap">قفزة الفاصل</button>
+      <button data-clip="gap">قفزة الفاصل من اليمين</button>
       <button data-clip="roof">اصطدام مقطورة السائق</button>
       <button data-clip="track">سقوط على السكة</button>
       <button data-clip="random">عشوائي من اليمين</button>
@@ -455,6 +455,30 @@
     setTimeout(() => clearNode(fxLayer), 620);
   }
 
+  function catmull(p0, p1, p2, p3, t){
+    const t2 = t * t;
+    const t3 = t2 * t;
+    return .5 * (
+      (2 * p1) +
+      (-p0 + p2) * t +
+      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 +
+      (-p0 + 3 * p1 - 3 * p2 + p3) * t3
+    );
+  }
+
+  function sampleProp(frames, index, prop, t){
+    const p0 = frames[Math.max(0, index - 1)][prop];
+    const p1 = frames[index][prop];
+    const p2 = frames[Math.min(frames.length - 1, index + 1)][prop];
+    const p3 = frames[Math.min(frames.length - 1, index + 2)][prop];
+
+    if(prop === "r"){
+      return catmull(p0, p1, p2, p3, t);
+    }
+
+    return catmull(p0, p1, p2, p3, t);
+  }
+
   function interpolateFrames(frames, elapsed){
     if(elapsed <= frames[0].t) return {...frames[0]};
 
@@ -464,16 +488,16 @@
 
       if(elapsed >= a.t && elapsed <= b.t){
         const span = b.t - a.t || 1;
-        const raw = (elapsed - a.t) / span;
-        const ease = eases[b.ease || "linear"] || eases.linear;
-        const p = ease(raw);
+        const raw = clamp((elapsed - a.t) / span, 0, 1);
 
+        // لا نستخدم ease داخل كل قطعة؛ لأن الـease كان يسبب إحساس "توقف ثم يكمل".
+        // Catmull-Rom يعطي مسارًا ناعمًا بين النقاط بدون وقفات مصطنعة.
         return {
-          x:a.x + (b.x - a.x) * p,
-          y:a.y + (b.y - a.y) * p,
-          r:a.r + (b.r - a.r) * p,
-          s:(a.s ?? 1) + ((b.s ?? 1) - (a.s ?? 1)) * p,
-          inside:b.inside || a.inside
+          x:sampleProp(frames, i, "x", raw),
+          y:sampleProp(frames, i, "y", raw),
+          r:sampleProp(frames, i, "r", raw),
+          s:(a.s ?? 1) + ((b.s ?? 1) - (a.s ?? 1)) * raw,
+          inside:!!(a.inside || b.inside)
         };
       }
     }
@@ -485,53 +509,66 @@
     right:{
       label:"السقوط المعتمد من اليمين",
       frames:[
-        {t:0, x:740, y:132, r:-8},
-        {t:270, x:724, y:252, r:-18, ease:"inCubic"},
-        {t:520, x:696, y:430, r:-36, ease:"inCubic"},
-        {t:650, x:672, y:491, r:-30, inside:true, ease:"linear"},
-        {t:780, x:648, y:472, r:-21, inside:true, ease:"linear"},
-        {t:1040, x:622, y:484, r:-13, inside:true, ease:"linear"},
-        {t:1420, x:603, y:486, r:-8, inside:true, ease:"outCubic"},
-        {t:1760, x:594, y:486, r:-7, inside:true, ease:"outCubic"}
+        // مسار مستخرج بصريًا من الفيديو المرجعي: سقوط قطري من اليمين، ارتطام، نطة خفيفة، انزلاق، ثبات.
+        {t:0, x:748, y:122, r:-7},
+        {t:140, x:742, y:160, r:-10},
+        {t:300, x:728, y:235, r:-17},
+        {t:470, x:704, y:346, r:-28},
+        {t:610, x:678, y:455, r:-39},
+        {t:700, x:657, y:493, r:-34, inside:true},
+        {t:805, x:642, y:476, r:-27, inside:true},
+        {t:980, x:623, y:481, r:-19, inside:true},
+        {t:1210, x:606, y:485, r:-12, inside:true},
+        {t:1510, x:596, y:486, r:-8, inside:true},
+        {t:1780, x:592, y:486, r:-7, inside:true}
       ]
     },
     gap:{
-      label:"قفزة الفاصل",
+      label:"قفزة الفاصل من اليمين",
       frames:[
-        {t:0, x:454, y:138, r:-6},
-        {t:285, x:466, y:268, r:-18, ease:"inCubic"},
-        {t:535, x:486, y:442, r:-34, ease:"inCubic"},
-        {t:650, x:506, y:490, r:-26, ease:"linear"},
-        {t:800, x:548, y:382, r:-54, ease:"outSine"},
-        {t:1040, x:606, y:435, r:-69, ease:"linear"},
-        {t:1240, x:650, y:491, r:-43, inside:true, ease:"linear"},
-        {t:1400, x:636, y:472, r:-28, inside:true, ease:"linear"},
-        {t:1740, x:612, y:484, r:-15, inside:true, ease:"linear"},
-        {t:2200, x:600, y:486, r:-9, inside:true, ease:"outCubic"}
+        // يبدأ من اليمين مثل السقوط المعتمد، ثم يضرب فاصل/حافة العربة من اليمين ويقفز للداخل.
+        {t:0, x:760, y:124, r:-6},
+        {t:150, x:754, y:166, r:-10},
+        {t:320, x:744, y:245, r:-18},
+        {t:500, x:729, y:365, r:-30},
+        {t:640, x:711, y:470, r:-43},
+        {t:720, x:694, y:494, r:-39},
+        {t:850, x:672, y:405, r:-58},
+        {t:1040, x:646, y:378, r:-71},
+        {t:1240, x:622, y:443, r:-58},
+        {t:1390, x:604, y:493, r:-38, inside:true},
+        {t:1540, x:595, y:476, r:-25, inside:true},
+        {t:1820, x:590, y:484, r:-14, inside:true},
+        {t:2220, x:588, y:486, r:-9, inside:true}
       ]
     },
     roof:{
       label:"اصطدام مقطورة السائق",
       frames:[
-        {t:0, x:840, y:108, r:-4},
-        {t:300, x:834, y:260, r:-20, ease:"inCubic"},
-        {t:500, x:824, y:382, r:-34, ease:"inCubic"},
-        {t:610, x:812, y:388, r:-40, ease:"linear"},
-        {t:805, x:768, y:292, r:-78, ease:"outSine"},
-        {t:1080, x:720, y:380, r:-104, ease:"linear"},
-        {t:1280, x:680, y:491, r:-61, inside:true, ease:"linear"},
-        {t:1440, x:656, y:472, r:-38, inside:true, ease:"linear"},
-        {t:1800, x:624, y:484, r:-19, inside:true, ease:"linear"},
-        {t:2280, x:604, y:486, r:-11, inside:true, ease:"outCubic"}
+        // قفزة أعلى قليلًا من النسخة السابقة، مع استمرار الحركة بدون توقف.
+        {t:0, x:854, y:108, r:-4},
+        {t:150, x:850, y:156, r:-9},
+        {t:320, x:840, y:250, r:-20},
+        {t:500, x:826, y:374, r:-34},
+        {t:600, x:814, y:390, r:-42},
+        {t:780, x:770, y:260, r:-80},
+        {t:1010, x:728, y:300, r:-106},
+        {t:1200, x:695, y:420, r:-88},
+        {t:1340, x:669, y:493, r:-58, inside:true},
+        {t:1500, x:642, y:474, r:-38, inside:true},
+        {t:1800, x:615, y:483, r:-21, inside:true},
+        {t:2220, x:600, y:486, r:-11, inside:true}
       ]
     },
     track:{
       label:"سقوط على السكة",
       frames:[
-        {t:0, x:1000, y:130, r:5},
-        {t:300, x:980, y:286, r:24, ease:"inCubic"},
-        {t:590, x:948, y:514, r:52, ease:"inCubic"},
-        {t:720, x:932, y:602, r:68, ease:"linear"}
+        // يبدأ من اليمين أيضًا، لكنه لا يدخل العربة ويكسر عند السكة.
+        {t:0, x:930, y:128, r:4},
+        {t:160, x:922, y:180, r:12},
+        {t:340, x:906, y:282, r:25},
+        {t:540, x:884, y:440, r:43},
+        {t:710, x:864, y:602, r:66}
       ],
       breakAtEnd:true
     }
