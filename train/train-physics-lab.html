@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 9</title>
+  <title>مختبر فيزياء القطار - إصدار 10</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -148,7 +148,7 @@
     <div class="note">
       مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
       <div class="small">
-        المحسوب فقط: فيزياء موحدة لكل عربة + فاصل ذكي صغير بين العربات يقرأ مركز ثقل الصندوق ويدفعه للأقرب. الباقي على الفيزياء.
+        المحسوب فقط: فيزياء موحدة لكل عربة + فاصل ذكي صغير + الصندوق المستقر يصبح بصريًا فقط حتى يظهر الجديد أمامه.
       </div>
     </div>
 
@@ -297,6 +297,7 @@
   };
 
   const staticBoxBodies = [];
+  const settledVisualBoxes = [];
 
   function el(name, attrs = {}, parent = stage){
     const node = document.createElementNS(NS, name);
@@ -334,7 +335,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics9", {
+    makeImage("train-track.webp?v=physics10", {
       x:-55,
       y:604,
       width:1390,
@@ -354,7 +355,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics9", {
+        makeImage("train-wheel.webp?v=physics10", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -363,7 +364,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics9", {
+      makeImage("train-wagon.webp?v=physics10", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -372,7 +373,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics9", {
+      makeImage("train-wagon.webp?v=physics10", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -396,7 +397,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics9", {
+    makeImage("train-engine-transparent.png?v=physics10", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -862,7 +863,9 @@
       item.node.remove();
     }
 
-    Matter.World.remove(world, item.body);
+    if(item.body){
+      Matter.World.remove(world, item.body);
+    }
     const index = liveBoxes.indexOf(item);
     if(index >= 0) liveBoxes.splice(index, 1);
 
@@ -906,6 +909,37 @@
     setTimeout(() => clearNode(fxLayer), 620);
   }
 
+  function settleBoxAsVisualOnly(item){
+    if(!item || item.removed || !item.body || !item.node) return;
+
+    const body = item.body;
+    const pos = body.position;
+    const angle = body.angle * 180 / Math.PI;
+
+    // تثبيت آخر موضع طبيعي وصل له الصندوق، بدون سحب أو إعادة ترتيب.
+    item.node.setAttribute(
+      "transform",
+      `translate(${pos.x.toFixed(2)} ${pos.y.toFixed(2)}) rotate(${angle.toFixed(2)})`
+    );
+
+    // بعد الاستقرار نزيل الجسم من عالم Matter:
+    // يبقى الصندوق ظاهرًا فقط، ولا يؤثر على الصناديق الجديدة.
+    Matter.World.remove(world, body);
+
+    const index = liveBoxes.indexOf(item);
+    if(index >= 0) liveBoxes.splice(index, 1);
+
+    item.body = null;
+    item.visualOnly = true;
+    settledVisualBoxes.push(item);
+
+    // إعادة إلحاقه تحافظ على مكانه ضمن طبقة الصناديق،
+    // والصندوق الجديد الذي يُنشأ بعده سيظهر أمامه تلقائيًا.
+    if(item.node.parentNode === boxLayer){
+      boxLayer.appendChild(item.node);
+    }
+  }
+
   function updateBox(item){
     if(!item || item.removed || !item.body || !item.node) return;
 
@@ -930,9 +964,8 @@
       }
 
       if(item.stableFrames > 40){
-        Matter.Sleeping.set(body, true);
-        Matter.Body.setStatic(body, true);
-        staticBoxBodies.push(body);
+        settleBoxAsVisualOnly(item);
+        return;
       }
     }
 
@@ -1011,6 +1044,7 @@
 
     liveBoxes.length = 0;
     staticBoxBodies.length = 0;
+    settledVisualBoxes.length = 0;
     clearNode(boxLayer);
     clearNode(fxLayer);
     nextBoxNumber = 1;
