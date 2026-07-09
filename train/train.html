@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 77</title>
+  <title>قطار الإجابات - إصدار 78</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -660,6 +660,15 @@
       y:636,
       w:1500,
       h:44
+    },
+
+    freeFallAirDrift:{
+      // انجراف هوائي خفيف لليسار أثناء السقوط الحر فقط.
+      // يتوقف نهائيًا عند أول ملامسة لأي سطح/نطاط/فاصل/قاطرة.
+      enabled:true,
+      targetVX:-1.04,
+      maxLeftVX:-1.18,
+      force:.000018
     }
   };
 
@@ -1264,11 +1273,44 @@
     });
   }
 
+  function stopFreeFallAirDrift(item){
+    if(!item || !item.airDriftActive) return;
+    item.airDriftActive = false;
+    item.firstSurfaceContactAt = item.firstSurfaceContactAt || performance.now();
+  }
+
+  function applyFreeFallAirDrift(item){
+    if(!item || item.done || !item.airDriftActive || item.firstSurfaceContactAt || item.insideWagon) return;
+    if(!item.body || !Matter || !Matter.Body) return;
+
+    const profile = TRAIN_PHYSICS_PROFILES.freeFallAirDrift;
+    if(!profile || !profile.enabled) return;
+
+    const body = item.body;
+
+    // لا نؤثر على الصندوق بعد أن وصل لسرعة الميل المطلوبة؛ هذا يمنع المبالغة.
+    if(body.velocity.x > profile.targetVX){
+      Matter.Body.applyForce(body, body.position, {
+        x:-body.mass * profile.force,
+        y:0
+      });
+    }
+
+    // سقف أمان: الميل يبقى خفيفًا ولا يتحول إلى سحب قوي.
+    if(body.velocity.x < profile.maxLeftVX){
+      Matter.Body.setVelocity(body, {
+        x:profile.maxLeftVX,
+        y:body.velocity.y
+      });
+    }
+  }
+
   function handleGapActiveCollision(bodyA, bodyB){
     const item = bodyA && bodyA.sgItem;
     if(!item || item.done || !bodyB) return;
 
     if(bodyB.sgType === "gap-smart-bouncer"){
+      stopFreeFallAirDrift(item);
       applySmartGapBounceToMatter(item, bodyA, bodyB, true);
     }
   }
@@ -1276,6 +1318,8 @@
   function handleMatterCollision(bodyA, bodyB){
     const item = bodyA && bodyA.sgItem;
     if(!item || item.done || !bodyB) return;
+
+    stopFreeFallAirDrift(item);
 
     if(bodyB.label === "kill-track"){
       if(!item.insideWagon){
@@ -1378,6 +1422,7 @@
     if(!item || item.done || !item.body || !item.node) return;
 
     const body = item.body;
+    applyFreeFallAirDrift(item);
     syncMatterBox(item);
 
     const activeWell = item.insideWagon
@@ -1473,6 +1518,8 @@
       lastTopEdgeBumperAt:0,
       lastGapSmartAt:0,
       lastRoofBounceAt:0,
+      firstSurfaceContactAt:0,
+      airDriftActive:true,
       stableFrames:0,
       done:false
     };
@@ -1851,7 +1898,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=77",
+      href:"train-wagon.webp?v=78",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1859,7 +1906,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=77");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=78");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1892,7 +1939,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=77",
+        href:"train-wagon.webp?v=78",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1900,7 +1947,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=77");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=78");
 
       el("text", {
         x:car.centerX,
@@ -1935,7 +1982,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=77",
+      href:"train-engine-transparent.png?v=78",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1943,7 +1990,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=77");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=78");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1993,7 +2040,7 @@
   }
 
   build();
-  /* إصدار 77: الصناديق لا تتصادم مع بعضها؛ تتصادم فقط مع القطار لتحسين الأداء ومنع دفع الصناديق. */
+  /* إصدار 78: انجراف هوائي خفيف لليسار أثناء السقوط الحر فقط، ويتوقف عند أول ملامسة. */
 })();
 </script>
 </body>
