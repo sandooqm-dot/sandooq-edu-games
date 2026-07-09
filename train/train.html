@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 74</title>
+  <title>قطار الإجابات - إصدار 75</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -635,10 +635,11 @@
 
     engine:{
       roof:{
-        x1:784,
-        x2:904,
+        // نطاط مقطورة السائق: شريط صغير فقط على السطح المحدد، بدون تمديد يمين/يسار أو للأعلى.
+        x1:786,
+        x2:874,
         y:424,
-        h:18
+        h:14
       },
       roofBounce:{
         cooldown:620,
@@ -925,7 +926,7 @@
       thickness:roof.h
     }, {name:"driver-roof-bumper"}));
 
-    addMatterRect((roof.x1 + roof.x2) / 2, roof.y + 8, roof.x2 - roof.x1, roof.h, {
+    addMatterRect((roof.x1 + roof.x2) / 2, roof.y + roof.h / 2, roof.x2 - roof.x1, roof.h, {
       label:`${part.id}-roof-bounce`,
       sgType:"driver-roof",
       sgPartId:part.id,
@@ -1015,6 +1016,11 @@
     addAllTrainPartPhysics();
 
     [
+      // الخلف جهة العربة غير قاتل. النطاط فقط هو الشريط الصغير فوق مقطورة السائق.
+      // ما عدا ذلك من جسم القاطرة يعتبر اصطدام/انفجار.
+      {name:"driver-cabin-front", left:890, right:960, top:424, bottom:514},
+      {name:"engine-top-mid", left:920, right:1088, top:430, bottom:505},
+      {name:"engine-body-mid", left:930, right:1085, top:488, bottom:590},
       {name:"engine-front", left:1058, right:1164, top:438, bottom:610},
       {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
       {name:"engine-plow", left:1088, right:1210, top:550, bottom:632}
@@ -1815,7 +1821,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=74",
+      href:"train-wagon.webp?v=75",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1823,7 +1829,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=74");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=75");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1856,7 +1862,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=74",
+        href:"train-wagon.webp?v=75",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1864,7 +1870,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=74");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=75");
 
       el("text", {
         x:car.centerX,
@@ -1899,7 +1905,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=74",
+      href:"train-engine-transparent.png?v=75",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1907,7 +1913,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=74");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=75");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1957,7 +1963,7 @@
   }
 
   build();
-  /* إصدار 74: نقل نظام المختبر فعليًا وإلغاء مسار السقوط القديم. */
+  /* إصدار 75: ضبط مساحة نطاط مقطورة السائق فقط، بدون تغيير قوة النط. */
 })();
 </script>
 </body>
