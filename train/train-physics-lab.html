@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 3</title>
+  <title>مختبر فيزياء القطار - إصدار 4</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -148,7 +148,7 @@
     <div class="note">
       مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
       <div class="small">
-        المحسوب فقط: حواف العربات، الفواصل، سطح مقطورة السائق النطاط، والسكة. الباقي على الفيزياء.
+        المحسوب فقط: حواف العربات، الفواصل، وسطح مقطورة السائق القافز باتجاه العربة. الباقي على الفيزياء.
       </div>
     </div>
 
@@ -214,7 +214,7 @@
   const debugLayer = document.getElementById("debugLayer");
   const fxLayer = document.getElementById("fxLayer");
 
-  const BOX = {w:104, h:74};
+  const BOX = {w:96, h:72};
 
   // نفس مقاسات صفحة القطار تقريبًا.
   const WAGONS = [
@@ -235,13 +235,15 @@
   const physicsBodies = [];
   const liveBoxes = [];
   const ROOF_BOUNCE = {
-    cooldown:520,
-    minUpVelocity:1.62,
-    maxUpVelocity:2.05,
-    horizontalCarry:-.18,
-    maxLeftVelocity:-.52,
-    spinKick:-.042,
-    liftOut:6
+    // سطح مقطورة السائق ليس مجرد ارتداد عادي.
+    // هو "سطح قافز": أي جسم يلمسه يأخذ دفعة للأعلى والخلف باتجاه العربة الأولى.
+    cooldown:620,
+    minUpVelocity:3.05,
+    maxUpVelocity:4.35,
+    backwardVelocity:-1.42,
+    maxBackwardVelocity:-1.72,
+    spinKick:-.065,
+    liftOut:14
   };
 
   const staticBoxBodies = [];
@@ -282,7 +284,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics3", {
+    makeImage("train-track.webp?v=physics4", {
       x:-55,
       y:604,
       width:1390,
@@ -302,7 +304,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics3", {
+        makeImage("train-wheel.webp?v=physics4", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -311,7 +313,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics3", {
+      makeImage("train-wagon.webp?v=physics4", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -320,7 +322,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics3", {
+      makeImage("train-wagon.webp?v=physics4", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -344,7 +346,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics3", {
+    makeImage("train-engine-transparent.png?v=physics4", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -356,26 +358,33 @@
   function createBoxSvg(label){
     const g = el("g", {filter:"url(#softShadow)"}, boxLayer);
 
-    el("path", {
-      d:"M-46 -32 L46 -32 L58 -18 L-34 -18 Z",
-      fill:"url(#boxTop)",
-      stroke:"#4e2b18",
-      "stroke-width":2
-    }, g);
-
+    // صندوق مستقيم: الأعلى/الأسفل/اليمين/اليسار واضحين.
+    // لا يوجد منظور مائل في الرسم نفسه؛ الفيزياء وحدها هي التي تديره بعد الاصطدام.
     el("rect", {
-      x:-46,
-      y:-18,
-      width:92,
-      height:60,
+      x:-48,
+      y:-36,
+      width:96,
+      height:72,
       rx:7,
       fill:"url(#boxBody)",
       stroke:"#4e2b18",
-      "stroke-width":2.5
+      "stroke-width":2.8
+    }, g);
+
+    el("rect", {
+      x:-42,
+      y:-30,
+      width:84,
+      height:14,
+      rx:4,
+      fill:"url(#boxTop)",
+      opacity:".86",
+      stroke:"#6b3b21",
+      "stroke-width":1.8
     }, g);
 
     el("path", {
-      d:"M-46 2 L46 2 M-18 -18 L-18 42 M18 -18 L18 42",
+      d:"M-48 -10 L48 -10 M-18 -36 L-18 36 M18 -36 L18 36",
       fill:"none",
       stroke:"#d3a06a",
       "stroke-width":3,
@@ -384,7 +393,7 @@
 
     el("text", {
       x:0,
-      y:5,
+      y:7,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
       fill:"#fff0b8",
@@ -493,9 +502,9 @@
     makeStaticRect((ROOF.x1 + ROOF.x2) / 2, ROOF.y + 8, ROOF.x2 - ROOF.x1, 18, {
       label:"driver-roof-bounce",
       sgType:"driver-roof",
-      friction:.10,
-      frictionStatic:.14,
-      restitution:.74
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.94
     });
 
     Matter.Events.on(engine, "collisionStart", event => {
@@ -541,25 +550,29 @@
 
       item.lastRoofHitAt = now;
 
-      // قفزة فيزيائية لحظية: السطح يعمل كمنطقة نطاطية.
-      // لا يوجد مسار محسوب، فقط تعديل سرعة الاصطدام مثل ارتداد علبة على حافة.
+      // السطح نفسه يعطي القفزة: دفعة للأعلى + دفعة للخلف باتجاه العربة الأولى.
+      // لا نحدد نهاية الصندوق ولا نسحبه للعربة؛ بعد الدفعة الجاذبية والتصادم تكمل الباقي.
       const incomingY = Math.abs(boxBody.velocity.y);
-      const upVelocity = -clamp(incomingY * .58, ROOF_BOUNCE.minUpVelocity, ROOF_BOUNCE.maxUpVelocity);
+      const upVelocity = -clamp(incomingY * .92, ROOF_BOUNCE.minUpVelocity, ROOF_BOUNCE.maxUpVelocity);
+      const backVelocity = Math.max(
+        ROOF_BOUNCE.maxBackwardVelocity,
+        Math.min(ROOF_BOUNCE.backwardVelocity, boxBody.velocity.x - .82)
+      );
 
       Matter.Body.setVelocity(boxBody, {
-        x:Math.max(ROOF_BOUNCE.maxLeftVelocity, boxBody.velocity.x * .45 + ROOF_BOUNCE.horizontalCarry),
+        x:backVelocity,
         y:upVelocity
       });
 
       Matter.Body.setAngularVelocity(
         boxBody,
-        boxBody.angularVelocity * .65 + ROOF_BOUNCE.spinKick
+        boxBody.angularVelocity * .48 + ROOF_BOUNCE.spinKick
       );
 
-      // رفع بسيط يخرجه من تداخل السطح، حتى لا يتحول السقف إلى دحرجة طويلة.
+      // إخراج بسيط من السطح حتى تظهر القفزة مباشرة بدل دحرجة على السقف.
       Matter.Body.setPosition(boxBody, {
-        x:boxBody.position.x,
-        y:Math.min(boxBody.position.y - ROOF_BOUNCE.liftOut, ROOF.y - BOX.h / 2 - 4)
+        x:boxBody.position.x - 3,
+        y:Math.min(boxBody.position.y - ROOF_BOUNCE.liftOut, ROOF.y - BOX.h / 2 - 8)
       });
 
       return;
@@ -612,22 +625,22 @@
 
   function dropNormal(){
     // السقوط المعتمد: من اليمين، مائل لليسار، والباقي فيزياء.
-    createFallingBox(748, 126, -.56, .12, -.010);
+    createFallingBox(748, 126, -.56, .12, 0);
   }
 
   function dropGapRight(){
     // يبدأ من اليمين، لكن موقعه فوق النصف الأيمن للفاصل؛ السطح المائل يقرر الارتداد.
-    createFallingBox(612, 128, -.50, .10, -.010);
+    createFallingBox(612, 128, -.50, .10, 0);
   }
 
   function dropGapLeft(){
     // يبدأ من اليمين أيضًا، لكن فوق النصف الأيسر للفاصل.
-    createFallingBox(565, 128, -.48, .10, -.010);
+    createFallingBox(565, 128, -.48, .10, 0);
   }
 
   function dropRoof(){
     // يسقط على مقطورة السائق من اليمين، والسقف النطاط يعطي القفزة.
-    createFallingBox(850, 110, -.18, .05, -.006);
+    createFallingBox(850, 110, -.10, .05, 0);
   }
 
   function dropThree(){
