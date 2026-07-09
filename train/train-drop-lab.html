@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر سقوط الصندوق - إصدار 3</title>
+  <title>مختبر سقوط الصندوق - إصدار 4</title>
   <style>
     :root{
-      --bg:#d9ecff;
+      --safe-bottom:env(safe-area-inset-bottom,0px);
       --panel:#10233f;
       --yellow:#ffd24a;
       --cyan:#28d7ff;
@@ -19,15 +19,12 @@
       margin:0;
       width:100%;
       min-height:100%;
-      background:var(--bg);
+      background:#d9ecff;
       font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
       -webkit-text-size-adjust:100%;
     }
 
-    body{
-      min-height:100dvh;
-      overflow:hidden;
-    }
+    body{min-height:100dvh;overflow:hidden}
 
     .page{
       position:relative;
@@ -35,9 +32,9 @@
       height:100dvh;
       overflow:hidden;
       direction:ltr;
+      user-select:none;
       background:
         linear-gradient(180deg,#bfcbe8 0%,#dce3f2 45%,#ead5ac 46%,#d7a464 72%,#bd7f42 100%);
-      user-select:none;
     }
 
     .stage{
@@ -52,17 +49,18 @@
 
     .panel{
       position:absolute;
-      inset-inline:18px;
-      bottom:18px;
+      left:14px;
+      right:14px;
+      bottom:calc(14px + var(--safe-bottom));
       z-index:5;
       display:flex;
-      gap:10px;
+      gap:9px;
       flex-wrap:wrap;
       align-items:center;
       justify-content:center;
       direction:rtl;
-      padding:12px;
-      background:rgba(13,30,58,.82);
+      padding:11px;
+      background:rgba(13,30,58,.84);
       border:1px solid rgba(255,255,255,.18);
       border-radius:18px;
       box-shadow:0 12px 30px rgba(0,0,0,.18);
@@ -72,17 +70,17 @@
     .panel-title{
       color:#fff;
       font-weight:900;
-      font-size:15px;
-      margin-inline:6px 10px;
+      font-size:14px;
+      margin-inline:6px 8px;
       white-space:nowrap;
     }
 
     button{
       border:0;
       border-radius:999px;
-      padding:11px 15px;
+      padding:10px 13px;
       font-weight:900;
-      font-size:14px;
+      font-size:13px;
       cursor:pointer;
       color:#10233f;
       background:var(--yellow);
@@ -100,31 +98,27 @@
 
     .note{
       position:absolute;
-      top:16px;
-      right:16px;
+      top:13px;
+      right:13px;
       z-index:5;
       direction:rtl;
-      max-width:min(560px,calc(100vw - 32px));
-      padding:12px 15px;
-      border-radius:16px;
+      max-width:min(600px,calc(100vw - 26px));
+      padding:10px 13px;
+      border-radius:15px;
       background:rgba(255,255,255,.78);
       border:1px solid rgba(255,255,255,.55);
       color:#17345d;
-      font-weight:800;
+      font-weight:900;
       line-height:1.55;
       box-shadow:0 10px 28px rgba(0,0,0,.12);
     }
 
-    .small{
-      font-size:13px;
-      font-weight:700;
-      color:#365477;
-    }
+    .small{font-size:12px;font-weight:750;color:#365477}
 
     @media (max-width:700px){
       .note{font-size:12px}
-      .panel{bottom:10px;inset-inline:10px}
-      button{font-size:12px;padding:10px 12px}
+      .panel{bottom:calc(8px + var(--safe-bottom));left:8px;right:8px}
+      button{font-size:11px;padding:9px 10px}
       .panel-title{width:100%;text-align:center}
     }
   </style>
@@ -132,12 +126,19 @@
 <body>
   <main class="page">
     <div class="note">
-      مختبر مستقل لحركة السقوط فقط — كل الحالات الآن تبدأ من اليمين فقط.
-      <div class="small">الهدف: ضبط الحركة قبل نقلها للعبة القطار الأساسية. بدون Matter.js وبدون تعديل ملف القطار.</div>
+      مختبر حركة السقوط والاصطفاف — كل السقوط يبدأ من اليمين.
+      <div class="small">فيه الآن أكثر من صندوق، ترتيب داخل العربة، قفزة فاصل حسب أقرب عربة، واصطدام مقطورة السائق مع دوران ثم ثبات.</div>
     </div>
 
-    <svg id="stage" class="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="مختبر سقوط الصندوق داخل العربة">
+    <svg id="stage" class="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="مختبر سقوط صناديق داخل عربات القطار">
       <defs>
+        <linearGradient id="sceneGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#bfcae6"/>
+          <stop offset="45%" stop-color="#dce3f2"/>
+          <stop offset="46%" stop-color="#ead5ac"/>
+          <stop offset="72%" stop-color="#d7a464"/>
+          <stop offset="100%" stop-color="#bd7f42"/>
+        </linearGradient>
         <linearGradient id="boxBody" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#b87948"/>
           <stop offset="48%" stop-color="#8d552f"/>
@@ -147,41 +148,27 @@
           <stop offset="0%" stop-color="#cc8d58"/>
           <stop offset="100%" stop-color="#87502d"/>
         </linearGradient>
-        <linearGradient id="wagonBody" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#d84a33"/>
-          <stop offset="55%" stop-color="#9d2b22"/>
-          <stop offset="100%" stop-color="#642016"/>
-        </linearGradient>
-        <linearGradient id="wagonLip" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="#ffad58"/>
-          <stop offset="100%" stop-color="#d77231"/>
-        </linearGradient>
-        <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
-          <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#2b170c" flood-opacity=".25"/>
+        <filter id="softShadow" x="-35%" y="-35%" width="170%" height="180%">
+          <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#2b170c" flood-opacity=".25"/>
         </filter>
       </defs>
 
-      <g id="scene">
-        <rect x="0" y="0" width="1280" height="720" fill="transparent"/>
-        <path d="M-90 610 C180 585 310 635 530 604 C760 574 930 636 1370 595 L1370 760 L-90 760 Z" fill="#a76634" opacity=".28"/>
-        <rect x="0" y="610" width="1280" height="18" fill="#3c2c28" opacity=".35"/>
-        <rect x="-50" y="628" width="1380" height="8" fill="#2d241f" opacity=".58"/>
-      </g>
-
-      <g id="wagonBack"></g>
-      <g id="roofLayer"></g>
-      <g id="boxLayer"></g>
-      <g id="wagonFront"></g>
+      <g id="backgroundLayer"></g>
+      <g id="trainBackLayer"></g>
+      <g id="settledBoxLayer"></g>
+      <g id="activeBoxLayer"></g>
+      <g id="trainFrontLayer"></g>
       <g id="fxLayer"></g>
     </svg>
 
     <div class="panel">
-      <div class="panel-title">اختبر الحركة:</div>
-      <button data-clip="right">السقوط المعتمد من اليمين</button>
-      <button data-clip="gap">قفزة الفاصل من اليمين</button>
-      <button data-clip="roof">اصطدام مقطورة السائق</button>
-      <button data-clip="track">سقوط على السكة</button>
-      <button data-clip="random">عشوائي من اليمين</button>
+      <div class="panel-title">اختبار الحركة:</div>
+      <button data-action="drop-right">إسقاط صندوق</button>
+      <button data-action="drop-three">إسقاط ٣ صناديق</button>
+      <button data-action="gap-right">فاصل → العربة اليمنى</button>
+      <button data-action="gap-left">فاصل → العربة اليسرى</button>
+      <button data-action="roof">اصطدام مقطورة السائق</button>
+      <button data-action="clear">مسح الصناديق</button>
     </div>
   </main>
 
@@ -191,34 +178,28 @@
 
   const NS = "http://www.w3.org/2000/svg";
   const stage = document.getElementById("stage");
-  const wagonBack = document.getElementById("wagonBack");
-  const wagonFront = document.getElementById("wagonFront");
-  const roofLayer = document.getElementById("roofLayer");
-  const boxLayer = document.getElementById("boxLayer");
+  const backgroundLayer = document.getElementById("backgroundLayer");
+  const trainBackLayer = document.getElementById("trainBackLayer");
+  const trainFrontLayer = document.getElementById("trainFrontLayer");
+  const activeBoxLayer = document.getElementById("activeBoxLayer");
+  const settledBoxLayer = document.getElementById("settledBoxLayer");
   const fxLayer = document.getElementById("fxLayer");
 
-  const WAGON = {
-    // نفس مقاسات العربة الفعلية تقريبًا داخل صفحة القطار.
-    x:490,
-    y:486,
-    w:300,
-    h:111,
-    floorY:535,
-    frontTop:520,
-    leftSafe:520,
-    rightSafe:760
-  };
+  const BOX = {left:46, right:58, top:32, bottom:42, width:104, height:74};
 
-  const ROOF = {
-    x:784,
-    y:424,
-    w:120,
-    h:18
-  };
+  const WAGONS = [
+    {id:"left", label:"العربة اليسرى", x:202, y:486, w:300, h:111, floorY:535},
+    {id:"right", label:"العربة اليمنى", x:490, y:486, w:300, h:111, floorY:535}
+  ];
 
-  let currentBox = null;
-  let currentAnim = null;
-  let clipCounter = 0;
+  const ENGINE = {x:782, y:430, w:320, h:179};
+  const ROOF = {x1:784, x2:904, y:424};
+
+  const settledByWagon = {left:[], right:[]};
+  let activeBox = null;
+  let activeAnim = null;
+  let runId = 0;
+  let sequenceTimer = null;
 
   function el(name, attrs = {}, parent = stage){
     const node = document.createElementNS(NS, name);
@@ -227,232 +208,181 @@
     return node;
   }
 
-  function clamp(value, min, max){
-    return Math.max(min, Math.min(max, value));
-  }
-
-  function easeOutCubic(t){
-    return 1 - Math.pow(1 - t, 3);
-  }
-
-  function easeInCubic(t){
-    return t * t * t;
-  }
-
-  function easeInOutSine(t){
-    return -(Math.cos(Math.PI * t) - 1) / 2;
-  }
-
-  function easeOutSine(t){
-    return Math.sin((t * Math.PI) / 2);
-  }
-
-  const eases = {
-    linear:t => t,
-    outCubic:easeOutCubic,
-    inCubic:easeInCubic,
-    inOutSine:easeInOutSine,
-    outSine:easeOutSine
-  };
-
   function clearNode(node){
     while(node.firstChild) node.removeChild(node.firstChild);
   }
 
-  function drawWagon(){
-    clearNode(wagonBack);
-    clearNode(wagonFront);
-    clearNode(roofLayer);
-
-    // خلفية حوض العربة.
-    el("path", {
-      d:`M${WAGON.x + 24} ${WAGON.y + 28}
-         C${WAGON.x + 70} ${WAGON.y + 12} ${WAGON.x + WAGON.w - 72} ${WAGON.y + 12} ${WAGON.x + WAGON.w - 24} ${WAGON.y + 28}
-         L${WAGON.x + WAGON.w - 40} ${WAGON.y + 86}
-         C${WAGON.x + WAGON.w - 82} ${WAGON.y + 112} ${WAGON.x + 82} ${WAGON.y + 112} ${WAGON.x + 40} ${WAGON.y + 86}
-         Z`,
-      fill:"#5f241b",
-      opacity:".86"
-    }, wagonBack);
-
-    // أرضية داخلية ظاهرة خفيفة.
-    el("ellipse", {
-      cx:WAGON.x + WAGON.w / 2,
-      cy:WAGON.floorY - 18,
-      rx:WAGON.w * .39,
-      ry:24,
-      fill:"#3f1712",
-      opacity:".55"
-    }, wagonBack);
-
-    // العجلات خلف الجسم.
-    [0,1,2,3].forEach(i => {
-      const cx = WAGON.x + 49 + i * 66;
-      el("circle", {cx, cy:585, r:23.7, fill:"#30251f", stroke:"#17110e", "stroke-width":4.2}, wagonBack);
-      el("circle", {cx, cy:585, r:10, fill:"#b68b5e", stroke:"#4a3022", "stroke-width":3.4}, wagonBack);
-    });
-
-    // سقف/منطقة مقطورة السائق للتجربة.
-    el("rect", {
-      x:ROOF.x,
-      y:ROOF.y,
-      width:ROOF.w,
-      height:ROOF.h,
-      rx:8,
-      fill:"#2c9cff",
-      opacity:".68",
-      stroke:"#0067c7",
-      "stroke-width":3
-    }, roofLayer);
-    el("text", {
-      x:ROOF.x + ROOF.w / 2,
-      y:ROOF.y - 12,
-      "text-anchor":"middle",
-      fill:"#08345f",
-      "font-size":18,
-      "font-weight":900,
-      direction:"rtl"
-    }, roofLayer).textContent = "منطقة القفزة";
-
-    // واجهة العربة فوق الصندوق.
-    el("path", {
-      d:`M${WAGON.x + 18} ${WAGON.y + 38}
-         C${WAGON.x + 78} ${WAGON.y + 60} ${WAGON.x + WAGON.w - 78} ${WAGON.y + 60} ${WAGON.x + WAGON.w - 18} ${WAGON.y + 38}
-         L${WAGON.x + WAGON.w - 45} ${WAGON.y + WAGON.h - 4}
-         C${WAGON.x + WAGON.w - 96} ${WAGON.y + WAGON.h + 18} ${WAGON.x + 96} ${WAGON.y + WAGON.h + 18} ${WAGON.x + 45} ${WAGON.y + WAGON.h - 4}
-         Z`,
-      fill:"url(#wagonBody)",
-      stroke:"#531d15",
-      "stroke-width":5,
-      filter:"url(#softShadow)"
-    }, wagonFront);
-
-    el("path", {
-      d:`M${WAGON.x + 30} ${WAGON.y + 38}
-         C${WAGON.x + 88} ${WAGON.y + 25} ${WAGON.x + WAGON.w - 88} ${WAGON.y + 25} ${WAGON.x + WAGON.w - 30} ${WAGON.y + 38}`,
-      fill:"none",
-      stroke:"url(#wagonLip)",
-      "stroke-width":13,
-      "stroke-linecap":"round"
-    }, wagonFront);
-
-    el("text", {
-      x:WAGON.x + WAGON.w / 2,
-      y:WAGON.y + 82,
-      "text-anchor":"middle",
-      "dominant-baseline":"middle",
-      fill:"#ffe28a",
-      stroke:"#5b2618",
-      "stroke-width":3,
-      "paint-order":"stroke fill",
-      "font-size":34,
-      "font-weight":1000,
-      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
-      direction:"rtl"
-    }, wagonFront).textContent = "العربة";
+  function clamp(v, min, max){
+    return Math.max(min, Math.min(max, v));
   }
 
-  function createBox(){
-    clearNode(boxLayer);
-    clearNode(fxLayer);
+  function wagonCenter(wagon){
+    return wagon.x + wagon.w / 2;
+  }
 
-    const g = el("g", {filter:"url(#softShadow)"}, boxLayer);
+  function makeImage(href, attrs, parent){
+    const image = el("image", {href, ...attrs}, parent);
+    image.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);
+    return image;
+  }
+
+  function drawBackground(){
+    clearNode(backgroundLayer);
+
+    el("rect", {x:0, y:0, width:1280, height:720, fill:"url(#sceneGrad)"}, backgroundLayer);
+    el("path", {
+      d:"M-120 314 C-55 240 40 306 116 198 C185 101 246 210 318 116 C392 230 448 146 517 270 C582 150 642 212 716 100 C785 230 840 166 916 304 C990 190 1047 260 1120 150 C1190 250 1295 210 1400 270 L1400 426 L-120 426 Z",
+      fill:"#7d86aa",
+      opacity:".31"
+    }, backgroundLayer);
+    el("path", {
+      d:"M-120 360 C0 302 110 343 230 238 C352 150 403 302 492 228 C590 310 674 252 752 330 C834 242 926 304 1005 216 C1085 346 1185 260 1400 332 L1400 426 L-120 426 Z",
+      fill:"#afa0ad",
+      opacity:".44"
+    }, backgroundLayer);
+
+    makeImage("train-track.webp?v=lab4", {
+      x:-55,
+      y:604,
+      width:1390,
+      height:27,
+      preserveAspectRatio:"none"
+    }, backgroundLayer);
+  }
+
+  function drawTrain(){
+    clearNode(trainBackLayer);
+    clearNode(trainFrontLayer);
+
+    WAGONS.forEach((wagon, index) => {
+      // عجلات مثل صفحة القطار تقريبًا.
+      const wheelY = 585.3;
+      const size = 47.4;
+      const firstX = wagon.x + 49;
+      const gap = 66;
+
+      for(let i = 0; i < 4; i++){
+        makeImage("train-wheel.webp?v=lab4", {
+          x:firstX + i * gap - size / 2,
+          y:wheelY - size / 2,
+          width:size,
+          height:size,
+          preserveAspectRatio:"xMidYMid meet"
+        }, trainBackLayer);
+      }
+
+      makeImage("train-wagon.webp?v=lab4", {
+        x:wagon.x,
+        y:wagon.y,
+        width:wagon.w,
+        height:wagon.h,
+        preserveAspectRatio:"xMidYMid meet"
+      }, trainBackLayer);
+
+      // نسخة أمامية تغطي جزءًا من الصناديق حتى يظهر الاصطفاف داخل الحوض.
+      makeImage("train-wagon.webp?v=lab4", {
+        x:wagon.x,
+        y:wagon.y,
+        width:wagon.w,
+        height:wagon.h,
+        preserveAspectRatio:"xMidYMid meet"
+      }, trainFrontLayer);
+
+      el("text", {
+        x:wagonCenter(wagon),
+        y:wagon.y + wagon.h * .56,
+        "text-anchor":"middle",
+        "dominant-baseline":"middle",
+        fill:"#ffe28a",
+        stroke:"#5b2618",
+        "stroke-width":2.6,
+        "paint-order":"stroke fill",
+        "font-size":26,
+        "font-weight":900,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"rtl"
+      }, trainFrontLayer).textContent = index === 0 ? "يسار" : "يمين";
+    });
+
+    makeImage("train-engine-transparent.png?v=lab4", {
+      x:ENGINE.x,
+      y:ENGINE.y,
+      width:ENGINE.w,
+      height:ENGINE.h,
+      preserveAspectRatio:"xMidYMid meet"
+    }, trainBackLayer);
+
+    // تحديد بصري خفيف لمنطقة اصطدام مقطورة السائق في المختبر فقط.
+    el("rect", {
+      x:ROOF.x1,
+      y:ROOF.y - 4,
+      width:ROOF.x2 - ROOF.x1,
+      height:20,
+      rx:7,
+      fill:"#32a8ff",
+      opacity:".18",
+      stroke:"#1383d5",
+      "stroke-width":2
+    }, trainBackLayer);
+  }
+
+  function createBox(label = "إجابة"){
+    const g = el("g", {filter:"url(#softShadow)"}, activeBoxLayer);
 
     el("path", {
-      d:"M-48 -34 L48 -34 L60 -19 L-36 -19 Z",
+      d:"M-46 -32 L46 -32 L58 -18 L-34 -18 Z",
       fill:"url(#boxTop)",
       stroke:"#4e2b18",
-      "stroke-width":2.3
+      "stroke-width":2
     }, g);
 
     el("rect", {
-      x:-48,
-      y:-19,
-      width:96,
-      height:62,
-      rx:8,
+      x:-46,
+      y:-18,
+      width:92,
+      height:60,
+      rx:7,
       fill:"url(#boxBody)",
       stroke:"#4e2b18",
-      "stroke-width":3
+      "stroke-width":2.5
     }, g);
 
     el("path", {
-      d:"M-48 3 L48 3 M-18 -19 L-18 43 M18 -19 L18 43",
+      d:"M-46 2 L46 2 M-18 -18 L-18 42 M18 -18 L18 42",
       fill:"none",
       stroke:"#d3a06a",
-      "stroke-width":3.2,
+      "stroke-width":3,
       opacity:".72"
     }, g);
 
     el("text", {
       x:0,
-      y:7,
+      y:5,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
       fill:"#fff0b8",
       stroke:"#442313",
-      "stroke-width":2,
+      "stroke-width":1.9,
       "paint-order":"stroke fill",
-      "font-size":18,
+      "font-size":16,
       "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl",
       style:"direction:rtl;unicode-bidi:plaintext"
-    }, g).textContent = "إجابة";
+    }, g).textContent = label;
 
-    currentBox = g;
     return g;
   }
 
-  function setBoxState(state){
-    if(!currentBox) return;
-
-    currentBox.setAttribute(
+  function setBoxState(node, state){
+    node.setAttribute(
       "transform",
       `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) rotate(${state.r.toFixed(2)}) scale(${(state.s ?? 1).toFixed(3)})`
     );
 
-    // الصندوق يبدأ فوق العربة، ثم يدخل خلف واجهتها بعد نقطة الاصطدام.
-    if(state.inside){
-      if(currentBox.parentNode !== boxLayer){
-        boxLayer.appendChild(currentBox);
-      }
+    if(state.inside && node.parentNode !== settledBoxLayer){
+      settledBoxLayer.appendChild(node);
     }
-  }
-
-  function burst(x, y){
-    clearNode(fxLayer);
-    const g = el("g", {transform:`translate(${x} ${y})`}, fxLayer);
-
-    for(let i = 0; i < 16; i++){
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 22 + Math.random() * 60;
-      const dot = el("circle", {
-        cx:0,
-        cy:0,
-        r:3 + Math.random() * 4,
-        fill:i % 2 ? "#8a5a34" : "#e0ae71",
-        opacity:".86"
-      }, g);
-
-      const move = el("animateTransform", {
-        attributeName:"transform",
-        type:"translate",
-        from:"0 0",
-        to:`${Math.cos(angle) * dist} ${Math.sin(angle) * dist * .55}`,
-        dur:".45s",
-        fill:"freeze"
-      }, dot);
-      const fade = el("animate", {
-        attributeName:"opacity",
-        values:".86;.35;0",
-        dur:".45s",
-        fill:"freeze"
-      }, dot);
-      move.beginElement();
-      fade.beginElement();
-    }
-
-    setTimeout(() => clearNode(fxLayer), 620);
   }
 
   function catmull(p0, p1, p2, p3, t){
@@ -466,20 +396,15 @@
     );
   }
 
-  function sampleProp(frames, index, prop, t){
+  function sample(frames, index, prop, t){
     const p0 = frames[Math.max(0, index - 1)][prop];
     const p1 = frames[index][prop];
     const p2 = frames[Math.min(frames.length - 1, index + 1)][prop];
     const p3 = frames[Math.min(frames.length - 1, index + 2)][prop];
-
-    if(prop === "r"){
-      return catmull(p0, p1, p2, p3, t);
-    }
-
     return catmull(p0, p1, p2, p3, t);
   }
 
-  function interpolateFrames(frames, elapsed){
+  function interpolate(frames, elapsed){
     if(elapsed <= frames[0].t) return {...frames[0]};
 
     for(let i = 0; i < frames.length - 1; i++){
@@ -487,16 +412,12 @@
       const b = frames[i + 1];
 
       if(elapsed >= a.t && elapsed <= b.t){
-        const span = b.t - a.t || 1;
-        const raw = clamp((elapsed - a.t) / span, 0, 1);
-
-        // لا نستخدم ease داخل كل قطعة؛ لأن الـease كان يسبب إحساس "توقف ثم يكمل".
-        // Catmull-Rom يعطي مسارًا ناعمًا بين النقاط بدون وقفات مصطنعة.
+        const t = clamp((elapsed - a.t) / (b.t - a.t || 1), 0, 1);
         return {
-          x:sampleProp(frames, i, "x", raw),
-          y:sampleProp(frames, i, "y", raw),
-          r:sampleProp(frames, i, "r", raw),
-          s:(a.s ?? 1) + ((b.s ?? 1) - (a.s ?? 1)) * raw,
+          x:sample(frames, i, "x", t),
+          y:sample(frames, i, "y", t),
+          r:sample(frames, i, "r", t),
+          s:(a.s ?? 1) + ((b.s ?? 1) - (a.s ?? 1)) * t,
           inside:!!(a.inside || b.inside)
         };
       }
@@ -505,124 +426,203 @@
     return {...frames[frames.length - 1]};
   }
 
-  const clips = {
-    right:{
-      label:"السقوط المعتمد من اليمين",
-      frames:[
-        // مسار مستخرج بصريًا من الفيديو المرجعي: سقوط قطري من اليمين، ارتطام، نطة خفيفة، انزلاق، ثبات.
-        {t:0, x:748, y:122, r:-7},
-        {t:140, x:742, y:160, r:-10},
-        {t:300, x:728, y:235, r:-17},
-        {t:470, x:704, y:346, r:-28},
-        {t:610, x:678, y:455, r:-39},
-        {t:700, x:657, y:493, r:-34, inside:true},
-        {t:805, x:642, y:476, r:-27, inside:true},
-        {t:980, x:623, y:481, r:-19, inside:true},
-        {t:1210, x:606, y:485, r:-12, inside:true},
-        {t:1510, x:596, y:486, r:-8, inside:true},
-        {t:1780, x:592, y:486, r:-7, inside:true}
-      ]
-    },
-    gap:{
-      label:"قفزة الفاصل من اليمين",
-      frames:[
-        // يبدأ من اليمين مثل السقوط المعتمد، ثم يضرب فاصل/حافة العربة من اليمين ويقفز للداخل.
-        {t:0, x:760, y:124, r:-6},
-        {t:150, x:754, y:166, r:-10},
-        {t:320, x:744, y:245, r:-18},
-        {t:500, x:729, y:365, r:-30},
-        {t:640, x:711, y:470, r:-43},
-        {t:720, x:694, y:494, r:-39},
-        {t:850, x:672, y:405, r:-58},
-        {t:1040, x:646, y:378, r:-71},
-        {t:1240, x:622, y:443, r:-58},
-        {t:1390, x:604, y:493, r:-38, inside:true},
-        {t:1540, x:595, y:476, r:-25, inside:true},
-        {t:1820, x:590, y:484, r:-14, inside:true},
-        {t:2220, x:588, y:486, r:-9, inside:true}
-      ]
-    },
-    roof:{
-      label:"اصطدام مقطورة السائق",
-      frames:[
-        // قفزة أعلى قليلًا من النسخة السابقة، مع استمرار الحركة بدون توقف.
-        {t:0, x:854, y:108, r:-4},
-        {t:150, x:850, y:156, r:-9},
-        {t:320, x:840, y:250, r:-20},
-        {t:500, x:826, y:374, r:-34},
-        {t:600, x:814, y:390, r:-42},
-        {t:780, x:770, y:260, r:-80},
-        {t:1010, x:728, y:300, r:-106},
-        {t:1200, x:695, y:420, r:-88},
-        {t:1340, x:669, y:493, r:-58, inside:true},
-        {t:1500, x:642, y:474, r:-38, inside:true},
-        {t:1800, x:615, y:483, r:-21, inside:true},
-        {t:2220, x:600, y:486, r:-11, inside:true}
-      ]
-    },
-    track:{
-      label:"سقوط على السكة",
-      frames:[
-        // يبدأ من اليمين أيضًا، لكنه لا يدخل العربة ويكسر عند السكة.
-        {t:0, x:930, y:128, r:4},
-        {t:160, x:922, y:180, r:12},
-        {t:340, x:906, y:282, r:25},
-        {t:540, x:884, y:440, r:43},
-        {t:710, x:864, y:602, r:66}
-      ],
-      breakAtEnd:true
-    }
-  };
+  function getSlot(wagonId){
+    const wagon = WAGONS.find(w => w.id === wagonId) || WAGONS[1];
+    const count = settledByWagon[wagonId].length;
+    const c = wagonCenter(wagon);
 
-  const randomOrder = ["right", "right", "right", "gap", "roof"];
+    // الأول للخلف، الثاني بارز للأمام، الثالث وسط/خلف.
+    const slots = [
+      {x:c - 18, y:489, r:-7, s:.94},
+      {x:c + 18, y:493, r:-9, s:1.03},
+      {x:c + 42, y:487, r:-4, s:.98}
+    ];
 
-  function playClip(name){
-    if(name === "random"){
-      name = randomOrder[Math.floor(Math.random() * randomOrder.length)];
+    return {wagon, ...slots[Math.min(count, slots.length - 1)]};
+  }
+
+  function rememberSettled(node, wagonId){
+    const list = settledByWagon[wagonId];
+
+    if(list.length >= 3){
+      const old = list.shift();
+      if(old && old.parentNode) old.remove();
     }
 
-    const clip = clips[name] || clips.center;
-    clipCounter += 1;
-    const runId = clipCounter;
+    list.push(node);
 
-    if(currentAnim) cancelAnimationFrame(currentAnim);
-    createBox();
+    // إعادة ترتيب الرسم: الأقدم خلف، الأحدث أمام داخل نفس طبقة الصناديق.
+    [...settledByWagon.left, ...settledByWagon.right].forEach(box => {
+      if(box && box.parentNode === settledBoxLayer){
+        settledBoxLayer.appendChild(box);
+      }
+    });
+  }
+
+  function buildDirectDropFrames(slot){
+    const c = wagonCenter(slot.wagon);
+    const impactX = c + 34;
+    return [
+      {t:0, x:748, y:122, r:-7},
+      {t:140, x:742, y:160, r:-10},
+      {t:300, x:728, y:235, r:-17},
+      {t:470, x:704, y:346, r:-28},
+      {t:610, x:impactX + 6, y:455, r:-39},
+      {t:700, x:impactX, y:493, r:-34, inside:true},
+      // السقوط المباشر: نطة بسيطة بدون دوران كبير.
+      {t:805, x:impactX - 16, y:476, r:-27, inside:true},
+      {t:980, x:slot.x + 24, y:slot.y - 7, r:slot.r - 9, inside:true},
+      {t:1210, x:slot.x + 9, y:slot.y - 2, r:slot.r - 3, inside:true, s:slot.s},
+      {t:1510, x:slot.x, y:slot.y, r:slot.r, inside:true, s:slot.s},
+      {t:1780, x:slot.x, y:slot.y, r:slot.r, inside:true, s:slot.s}
+    ];
+  }
+
+  function buildGapFrames(slot, side){
+    const c = wagonCenter(slot.wagon);
+    const hitX = side === "left" ? 500 : 530;
+
+    return [
+      {t:0, x:760, y:124, r:-6},
+      {t:150, x:754, y:166, r:-10},
+      {t:320, x:744, y:245, r:-18},
+      {t:500, x:729, y:365, r:-30},
+      {t:640, x:hitX + 18, y:470, r:-43},
+      {t:720, x:hitX, y:494, r:-39},
+      // الفاصل يقفز باتجاه العربة الأقرب.
+      {t:850, x:hitX + (side === "left" ? -34 : 34), y:398, r:-62},
+      {t:1040, x:c + (side === "left" ? 12 : -4), y:382, r:-76},
+      {t:1240, x:c + (side === "left" ? 26 : 34), y:443, r:-58},
+      {t:1390, x:c + 24, y:493, r:-38, inside:true},
+      {t:1540, x:c + 7, y:476, r:-25, inside:true},
+      {t:1820, x:slot.x + 10, y:slot.y - 3, r:slot.r - 7, inside:true, s:slot.s},
+      {t:2220, x:slot.x, y:slot.y, r:slot.r, inside:true, s:slot.s}
+    ];
+  }
+
+  function buildRoofFrames(slot){
+    const c = wagonCenter(slot.wagon);
+    return [
+      {t:0, x:854, y:108, r:-4},
+      {t:150, x:850, y:156, r:-9},
+      {t:320, x:840, y:250, r:-20},
+      {t:500, x:826, y:374, r:-34},
+      {t:600, x:814, y:390, r:-42},
+      // قفزة أعلى مع دوران واضح مثل الفيديو.
+      {t:780, x:770, y:258, r:-88},
+      {t:1010, x:728, y:304, r:-124},
+      {t:1200, x:696, y:420, r:-101},
+      // اصطدام العربة بعد القفزة، ثم نطة صغيرة وانزلاق.
+      {t:1340, x:c + 42, y:493, r:-64, inside:true},
+      {t:1500, x:c + 16, y:474, r:-43, inside:true},
+      {t:1800, x:slot.x + 18, y:slot.y - 4, r:slot.r - 12, inside:true, s:slot.s},
+      {t:2220, x:slot.x, y:slot.y, r:slot.r, inside:true, s:slot.s}
+    ];
+  }
+
+  function playFrames(frames, options = {}){
+    runId += 1;
+    const localRun = runId;
+
+    if(activeAnim) cancelAnimationFrame(activeAnim);
+    activeBox = createBox(options.label || "إجابة");
 
     const start = performance.now();
-    const frames = clip.frames;
 
     function frame(now){
-      if(runId !== clipCounter) return;
+      if(localRun !== runId) return;
 
       const elapsed = now - start;
-      const state = interpolateFrames(frames, elapsed);
-      setBoxState(state);
+      const state = interpolate(frames, elapsed);
+      setBoxState(activeBox, state);
 
-      const endTime = frames[frames.length - 1].t;
-      if(elapsed < endTime){
-        currentAnim = requestAnimationFrame(frame);
+      const end = frames[frames.length - 1].t;
+      if(elapsed < end){
+        activeAnim = requestAnimationFrame(frame);
       }else{
-        setBoxState(frames[frames.length - 1]);
-        currentAnim = null;
+        const finalState = frames[frames.length - 1];
+        setBoxState(activeBox, finalState);
 
-        if(clip.breakAtEnd){
-          burst(frames[frames.length - 1].x, frames[frames.length - 1].y);
-          if(currentBox) currentBox.remove();
-          currentBox = null;
+        if(options.settleWagonId){
+          rememberSettled(activeBox, options.settleWagonId);
         }
+
+        activeBox = null;
+        activeAnim = null;
       }
     }
 
     requestAnimationFrame(frame);
   }
 
-  drawWagon();
+  function dropDirect(wagonId = "right"){
+    const slot = getSlot(wagonId);
+    playFrames(buildDirectDropFrames(slot), {
+      settleWagonId:wagonId,
+      label:String(settledByWagon[wagonId].length + 1)
+    });
+  }
 
-  document.querySelectorAll("button[data-clip]").forEach(button => {
-    button.addEventListener("click", () => playClip(button.dataset.clip));
+  function dropGap(side){
+    const wagonId = side === "left" ? "left" : "right";
+    const slot = getSlot(wagonId);
+    playFrames(buildGapFrames(slot, side), {
+      settleWagonId:wagonId,
+      label:String(settledByWagon[wagonId].length + 1)
+    });
+  }
+
+  function dropRoof(){
+    const wagonId = "right";
+    const slot = getSlot(wagonId);
+    playFrames(buildRoofFrames(slot), {
+      settleWagonId:wagonId,
+      label:String(settledByWagon[wagonId].length + 1)
+    });
+  }
+
+  function dropThree(){
+    clearAll(false);
+    dropDirect("right");
+    sequenceTimer = setTimeout(() => dropDirect("right"), 2100);
+    setTimeout(() => dropDirect("right"), 4200);
+  }
+
+  function clearAll(redraw = true){
+    runId += 1;
+    if(activeAnim) cancelAnimationFrame(activeAnim);
+    if(sequenceTimer) clearTimeout(sequenceTimer);
+    activeAnim = null;
+    sequenceTimer = null;
+    activeBox = null;
+
+    clearNode(activeBoxLayer);
+    clearNode(settledBoxLayer);
+    clearNode(fxLayer);
+    settledByWagon.left.length = 0;
+    settledByWagon.right.length = 0;
+
+    if(redraw){
+      drawBackground();
+      drawTrain();
+    }
+  }
+
+  document.querySelectorAll("button[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      const action = button.dataset.action;
+      if(action === "drop-right") dropDirect("right");
+      if(action === "drop-three") dropThree();
+      if(action === "gap-right") dropGap("right");
+      if(action === "gap-left") dropGap("left");
+      if(action === "roof") dropRoof();
+      if(action === "clear") clearAll();
+    });
   });
 
-  setTimeout(() => playClip("right"), 450);
+  drawBackground();
+  drawTrain();
+  setTimeout(() => dropDirect("right"), 420);
 })();
 </script>
 </body>
