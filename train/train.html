@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 94</title>
+  <title>قطار الإجابات - إصدار 95</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -703,7 +703,21 @@
         liftOut:5,
         friction:.05,
         frictionStatic:.08,
-        restitution:.42
+        restitution:.42,
+
+        // جسم صلب يمنع الصندوق من اختراق عربة الركاب.
+        // النطاطات تعطي دفعة، وهذه الأجسام تمنع الدخول داخل الصورة.
+        solidTopYOffset:34,
+        solidTopH:26,
+        solidBodyYOffset:88,
+        solidBodyH:112,
+        solidSideInset:10,
+        solidSideYOffset:38,
+        solidSideW:24,
+        solidSideH:136,
+        solidFriction:.82,
+        solidFrictionStatic:1,
+        solidRestitution:.12
       }
     },
 
@@ -1227,6 +1241,61 @@
     const sideH = trainLen(profile.sideH);
     const sideCenterY = part.y + trainLen(profile.sideYOffset) + sideH / 2;
 
+    const solidTopY = part.y + trainLen(profile.solidTopYOffset);
+    const solidTopH = trainLen(profile.solidTopH);
+    const solidBodyY = part.y + trainLen(profile.solidBodyYOffset);
+    const solidBodyH = trainLen(profile.solidBodyH);
+    const solidSideInset = trainLen(profile.solidSideInset);
+    const solidSideW = trainLen(profile.solidSideW);
+    const solidSideH = trainLen(profile.solidSideH);
+    const solidSideCenterY = part.y + trainLen(profile.solidSideYOffset) + solidSideH / 2;
+
+    // أجسام صلبة لعربة الركاب:
+    // تمنع الصندوق من اختراق العربة، لكنها لا تجعلها عربة سؤال ولا تحسب نجاحًا.
+    addMatterRect(part.x + part.w / 2, solidTopY, part.w - inset * 2, solidTopH, {
+      label:`${part.id}-top-passenger-solid`,
+      sgType:"passenger-solid",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      friction:profile.solidFriction,
+      frictionStatic:profile.solidFrictionStatic,
+      restitution:profile.solidRestitution
+    });
+
+    addMatterRect(part.x + part.w / 2, solidBodyY, part.w - trainLen(24), solidBodyH, {
+      label:`${part.id}-body-passenger-solid`,
+      sgType:"passenger-solid",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      friction:profile.solidFriction,
+      frictionStatic:profile.solidFrictionStatic,
+      restitution:profile.solidRestitution
+    });
+
+    addMatterRect(part.x + solidSideInset, solidSideCenterY, solidSideW, solidSideH, {
+      label:`${part.id}-left-passenger-solid`,
+      sgType:"passenger-solid",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      friction:profile.solidFriction,
+      frictionStatic:profile.solidFrictionStatic,
+      restitution:profile.solidRestitution
+    });
+
+    addMatterRect(part.x + part.w - solidSideInset, solidSideCenterY, solidSideW, solidSideH, {
+      label:`${part.id}-right-passenger-solid`,
+      sgType:"passenger-solid",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      friction:profile.solidFriction,
+      frictionStatic:profile.solidFrictionStatic,
+      restitution:profile.solidRestitution
+    });
+
     addMatterRect(part.x + part.w / 2, topY, part.w - inset * 2, topH, {
       label:`${part.id}-top-passenger-bouncer`,
       sgType:"passenger-bouncer",
@@ -1692,6 +1761,13 @@
     if(bodyB.sgType === "gap-smart-bouncer"){
       stopFreeFallAirDrift(item);
       applySmartGapBounceToMatter(item, bodyA, bodyB, true);
+      return;
+    }
+
+    if(bodyB.sgType === "passenger-bouncer" || bodyB.sgType === "passenger-solid"){
+      stopFreeFallAirDrift(item);
+      applyPassengerBouncerBounce(item, bodyA, bodyB);
+      return;
     }
   }
 
@@ -1718,7 +1794,7 @@
       return;
     }
 
-    if(bodyB.sgType === "passenger-bouncer"){
+    if(bodyB.sgType === "passenger-bouncer" || bodyB.sgType === "passenger-solid"){
       applyPassengerBouncerBounce(item, bodyA, bodyB);
       return;
     }
@@ -2569,7 +2645,7 @@
   }
 
   build();
-  /* إصدار 94: إضافة نطاطات خفيفة أعلى وجانبي أي عربة ركاب، تدفع الصندوق لليسار باتجاه العربة الأخيرة. */
+  /* إصدار 95: جعل عربة الركاب جزءًا صلبًا يمنع اختراق الصندوق، مع إبقاء النطاطات الخارجية الخفيفة باتجاه اليسار. */
 })();
 </script>
 </body>
