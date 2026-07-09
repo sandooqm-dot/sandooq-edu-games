@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 71</title>
+  <title>قطار الإجابات - إصدار 72</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 71:
+    // إصدار 72:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -1416,6 +1416,317 @@
     requestAnimationFrame(frame);
   }
 
+
+  const manualBoxes = [];
+  let manualLoopStarted = false;
+  let manualLastTime = 0;
+
+  function manualBoxBounds(item){
+    return {
+      left:item.x - BOX.left,
+      right:item.x + BOX.right,
+      top:item.y - BOX.top,
+      bottom:item.y + BOX.bottom
+    };
+  }
+
+  function getManualWellForBox(item){
+    const bounds = manualBoxBounds(item);
+    let bestWell = null;
+    let bestOverlap = 0;
+
+    for(const zone of collisionMap){
+      if(zone.type !== "well") continue;
+      const overlap = horizontalOverlap(bounds.left, bounds.right, zone.left, zone.right);
+      if(overlap > bestOverlap){
+        bestOverlap = overlap;
+        bestWell = zone;
+      }
+    }
+
+    return bestOverlap >= BOX.width * .16 ? bestWell : null;
+  }
+
+  function getNearestManualWell(item){
+    let nearestWell = null;
+    let nearestDistance = Infinity;
+
+    for(const zone of collisionMap){
+      if(zone.type !== "well") continue;
+
+      const distance = item.x < zone.left
+        ? zone.left - item.x
+        : item.x > zone.right
+          ? item.x - zone.right
+          : 0;
+
+      if(distance < nearestDistance){
+        nearestDistance = distance;
+        nearestWell = zone;
+      }
+    }
+
+    return nearestDistance <= 54 ? nearestWell : null;
+  }
+
+  function syncManualBox(item){
+    if(!item || !item.node) return;
+    item.node.setAttribute(
+      "transform",
+      `translate(${item.x.toFixed(2)} ${item.y.toFixed(2)}) rotate(${item.rotation.toFixed(2)})`
+    );
+  }
+
+  function moveManualBoxBehindWagon(item){
+    if(!item || item.insideWagonLayer || !settledObjectsLayer || !item.node) return;
+    settledObjectsLayer.appendChild(item.node);
+    item.insideWagonLayer = true;
+  }
+
+  function cleanupManualBox(item, removeVisual = true){
+    if(!item || item.done) return;
+    item.done = true;
+
+    const index = manualBoxes.indexOf(item);
+    if(index >= 0) manualBoxes.splice(index, 1);
+
+    activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
+
+    if(removeVisual && item.node && item.node.parentNode){
+      item.node.remove();
+    }
+  }
+
+  function breakManualBox(item){
+    if(!item || item.done) return;
+    const x = item.x;
+    const y = item.y;
+    cleanupManualBox(item, true);
+    trackImpactBurst(fallingObjectsLayer || svg, x, Math.min(y + BOX.bottom, 610));
+  }
+
+  function settleManualBox(item, well){
+    if(!item || item.done || !well) return;
+
+    const minX = well.left + BOX.left + 8;
+    const maxX = well.right - BOX.right - 8;
+    const floorCenterY = well.floorY - BOX.bottom - 8;
+
+    item.x = clamp(item.x, minX, maxX);
+    item.y = clamp(item.y, floorCenterY - 8, floorCenterY + 6);
+    item.rotation = clamp(item.rotation, -48, 48);
+
+    cleanupManualBox(item, false);
+
+    const layer = settledObjectsLayer || fallingObjectsLayer || svg;
+    if(item.node && item.node.parentNode !== layer){
+      layer.appendChild(item.node);
+    }
+
+    syncManualBox(item);
+    rememberSettledBox(item.node, well.index);
+  }
+
+  function updateManualBox(item, dt, now){
+    if(item.done) return;
+
+    const beforeBottom = item.y + BOX.bottom;
+
+    // سقوط حر واضح. لا يوجد أي التقاط من الهواء.
+    item.vy += 1280 * dt;
+
+    if(!item.insideWagon){
+      // ميل خفيف لليسار أثناء السقوط فقط.
+      item.vx += (-88 - item.vx) * .16 * dt;
+    }
+
+    item.x += item.vx * dt;
+    item.y += item.vy * dt;
+    item.rotation += item.vr * dt;
+
+    const afterBottom = item.y + BOX.bottom;
+
+    // قفزة سقف مقطورة السائق كتصادم لحظي، بدون سطح دحرجة.
+    if(!item.roofBounced &&
+      item.vy > 0 &&
+      item.x >= PHYSICS.roofSafeLeft &&
+      item.x <= PHYSICS.roofSafeRight &&
+      beforeBottom <= PHYSICS.roofY + 8 &&
+      afterBottom >= PHYSICS.roofY){
+
+      item.roofBounced = true;
+      item.y = PHYSICS.roofY - BOX.bottom - 2;
+      item.vy = -365;
+      item.vx = Math.min(item.vx, -86);
+      item.vr += item.vx < 0 ? -35 : 35;
+    }
+
+    const well = getManualWellForBox(item);
+
+    // إذا وقع بين العربات وعلى مستوى الفاصل، نزحة خفيفة فقط. لا تثبيت ولا نقل.
+    if(!well && afterBottom >= TRAIN_LAYOUT.wagonY + 42){
+      const nearest = getNearestManualWell(item);
+      if(nearest){
+        const targetX = clamp(item.x, nearest.left + BOX.left + 14, nearest.right - BOX.right - 14);
+        const dx = targetX - item.x;
+        item.vx += clamp(dx * 1.35, -34, 34) * dt;
+        item.vr *= Math.pow(.988, dt * 60);
+      }
+    }
+
+    if(well){
+      const floorBottom = well.floorY - 8;
+      const hitFloor = item.vy >= 0 && beforeBottom <= floorBottom + 18 && afterBottom >= floorBottom;
+
+      if(hitFloor){
+        if(!item.insideWagon){
+          item.insideWagon = true;
+          item.enteredWellAt = now;
+          item.captureAfter = PHYSICS.captureDelayMin +
+            Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
+          item.lastWellIndex = well.index;
+        }
+
+        item.y = well.floorY - BOX.bottom - 8;
+
+        // كتلة ثقيلة: ارتداد بسيط جدًا، ثم انزلاق واحتكاك.
+        if(Math.abs(item.vy) > 230){
+          item.vy = -Math.abs(item.vy) * .13;
+          item.vr += item.vx < 0 ? -20 : 20;
+        }else{
+          item.vy = 0;
+        }
+
+        item.vx *= .80;
+        item.vr *= .82;
+
+        moveManualBoxBehindWagon(item);
+      }
+
+      if(item.insideWagon){
+        const minX = well.left + BOX.left + 8;
+        const maxX = well.right - BOX.right - 8;
+
+        if(item.x < minX){
+          item.x = minX;
+          item.vx = Math.abs(item.vx) * .22;
+          item.vr *= .75;
+        }
+
+        if(item.x > maxX){
+          item.x = maxX;
+          item.vx = -Math.abs(item.vx) * .22;
+          item.vr *= .75;
+        }
+
+        // احتكاك أرضي بطيء، لا يوقف الصندوق فجأة.
+        const nearFloor = Math.abs((item.y + BOX.bottom) - well.floorY) < 18;
+        if(nearFloor && Math.abs(item.vy) < 12){
+          item.vx *= Math.pow(.965, dt * 60);
+          item.vr *= Math.pow(.955, dt * 60);
+        }
+
+        const timeInside = now - item.enteredWellAt;
+        const speed = Math.hypot(item.vx, item.vy);
+        const stableEnough =
+          timeInside >= item.captureAfter &&
+          speed < 18 &&
+          Math.abs(item.vr) < 18 &&
+          nearFloor;
+
+        const waitedEnough =
+          timeInside > 2600 &&
+          speed < 36 &&
+          nearFloor;
+
+        if(stableEnough || waitedEnough){
+          settleManualBox(item, well);
+          return;
+        }
+      }
+    }
+
+    // إذا فات العربات وضرب الأرض/السكة، ينكسر.
+    if(afterBottom >= 610 && !well && !item.insideWagon){
+      breakManualBox(item);
+      return;
+    }
+
+    if(item.y > 690 || item.x < -240){
+      breakManualBox(item);
+      return;
+    }
+
+    syncManualBox(item);
+  }
+
+  function startManualLoop(){
+    if(manualLoopStarted) return;
+    manualLoopStarted = true;
+
+    function frame(now){
+      const dt = manualLastTime ? Math.min(.034, (now - manualLastTime) / 1000) : .016;
+      manualLastTime = now;
+
+      for(const item of [...manualBoxes]){
+        updateManualBox(item, dt, now);
+      }
+
+      requestAnimationFrame(frame);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function releaseOldestManualBoxIfNeeded(){
+    const liveBoxes = manualBoxes.filter(item => item && !item.done);
+    if(liveBoxes.length < PHYSICS.maxActiveMatterBoxes) return;
+
+    const oldest = liveBoxes[0];
+    if(!oldest) return;
+
+    if(oldest.insideWagon && oldest.lastWellIndex !== null){
+      const well = getWellByIndex(oldest.lastWellIndex);
+      if(well){
+        settleManualBox(oldest, well);
+        return;
+      }
+    }
+
+    breakManualBox(oldest);
+  }
+
+  function spawnManualAnswerBox(startX, startY, textLines){
+    releaseOldestManualBoxIfNeeded();
+
+    const layer = fallingObjectsLayer || svg;
+    const node = answerBox(layer, textLines);
+
+    const item = {
+      node,
+      textLines,
+      x:startX,
+      y:startY + 54,
+      vx:-72 + Math.random() * 18,
+      vy:24 + Math.random() * 16,
+      rotation:-8 + Math.random() * 16,
+      vr:-64 + Math.random() * 128,
+      done:false,
+      insideWagon:false,
+      insideWagonLayer:false,
+      enteredWellAt:0,
+      captureAfter:0,
+      lastWellIndex:null,
+      roofBounced:false
+    };
+
+    manualBoxes.push(item);
+    activeFallingBoxes += 1;
+    syncManualBox(item);
+    startManualLoop();
+    return true;
+  }
+
   function spawnFallbackAnswerBox(startX, startY, textLines){
     const layer = fallingObjectsLayer || svg;
     const box = answerBox(layer, textLines);
@@ -1457,55 +1768,9 @@
   }
 
   function spawnFallingAnswerBox(startX, startY, textLines){
-    // لا نخلي فرقعة البالون تصير بدون صندوق.
-    // إذا امتلأ الحد، ننظف أقدم صندوق نشط ثم نسمح بالصندوق الجديد.
-    releaseOldestMatterBoxIfNeeded();
-
-    activeFallingBoxes += 1;
-
-    if(!isMatterReady() || !matterEngine){
-      spawnFallbackAnswerBox(startX, startY, textLines);
-      return true;
-    }
-
-    const layer = fallingObjectsLayer || svg;
-    const node = answerBox(layer, textLines);
-
-    const body = Matter.Bodies.rectangle(startX, startY + 54, BOX.width, BOX.height, {
-      label:"answer-box",
-      friction:.72,
-      frictionStatic:.78,
-      frictionAir:.010,
-      restitution:.08,
-      density:.0026,
-      chamfer:{radius:4}
-    });
-
-    Matter.Body.setVelocity(body, {
-      x:-0.58 + Math.random() * .32,
-      y:.34
-    });
-
-    Matter.Body.setAngularVelocity(body, (-0.065 + Math.random() * .13));
-
-    const item = {
-      node,
-      body,
-      textLines,
-      done:false,
-      spawnedAt:performance.now(),
-      lastWagonContactAt:0,
-      lastWellIndex:null
-    };
-
-    body.sgItem = item;
-    matterBoxes.push(item);
-    Matter.World.add(matterEngine.world, body);
-
-    syncMatterBox(item);
-    startMatterLoop();
-
-    return true;
+    // مسار واحد فقط لسقوط الصناديق.
+    // لا Matter.js ولا fallback للصناديق حتى لا ينفصل العنصر المرئي عن الحركة.
+    return spawnManualAnswerBox(startX, startY, textLines);
   }
 
   const BALLOON_SPEED_LEVEL = 6; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
@@ -1773,17 +2038,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=71",
+      href:"train-track.webp?v=72",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=71");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=72");
   }
 
-  function addWheel(layer, cx, cy, size, version = 71){
+  function addWheel(layer, cx, cy, size, version = 72){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1872,7 +2137,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=71",
+      href:"train-wagon.webp?v=72",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1880,7 +2145,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=71");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=72");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1913,7 +2178,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=71",
+        href:"train-wagon.webp?v=72",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1921,7 +2186,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=71");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=72");
 
       el("text", {
         x:car.centerX,
@@ -1946,7 +2211,7 @@
   }
 
   function locomotive(train){
-    // إصدار 71:
+    // إصدار 72:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1956,7 +2221,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=71",
+      href:"train-engine-transparent.png?v=72",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1964,7 +2229,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=71");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=72");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -2015,7 +2280,7 @@
   }
 
   build();
-  requestAnimationFrame(loadMatterLibrary);
+  /* Matter.js disabled for falling boxes: single manual physics path. */
 })();
 </script>
 </body>
