@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 80</title>
+  <title>قطار الإجابات - إصدار 81</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -667,11 +667,11 @@
       // يتوقف نهائيًا عند أول ملامسة لأي سطح/نطاط/فاصل/قاطرة.
       enabled:true,
 
-      // الميل لليسار — أقوى من الإصدار السابق حتى لا يظهر السقوط عموديًا.
-      targetVX:-4.25,
-      maxLeftVX:-4.75,
-      velocityStepX:.24,
-      forceX:.00014,
+      // الميل لليسار — متوسط، ليس عموديًا وليس حادًا.
+      targetVX:-3.18,
+      maxLeftVX:-3.55,
+      velocityStepX:.15,
+      forceX:.000095,
 
       // سرعة النزول أثناء السقوط الحر فقط.
       targetVY:6.35,
@@ -1526,7 +1526,7 @@
       ...TRAIN_PHYSICS_PROFILES.box.body
     });
 
-    Matter.Body.setVelocity(body, {x:-3.05, y:1.9});
+    Matter.Body.setVelocity(body, {x:-1.95, y:1.9});
     Matter.Body.setAngularVelocity(body, 0);
 
     const item = {
@@ -1921,7 +1921,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=80",
+      href:"train-wagon.webp?v=81",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1929,7 +1929,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=80");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=81");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1962,7 +1962,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=80",
+        href:"train-wagon.webp?v=81",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1970,7 +1970,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=80");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=81");
 
       el("text", {
         x:car.centerX,
@@ -2005,7 +2005,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=80",
+      href:"train-engine-transparent.png?v=81",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -2013,7 +2013,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=80");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=81");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -2063,7 +2063,7 @@
   }
 
   build();
-  /* إصدار 80: سقوط حر مائل بوضوح لليسار وسرعة سقوط أعلى مباشرة بعد فرقعة البالون. */
+  /* إصدار 81: تخفيف ميلان السقوط لليسار مع إبقاء سرعة النزول السريعة. */
 })();
 </script>
 </body>
