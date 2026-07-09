@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>مختبر فيزياء القطار - إصدار 8</title>
+  <style>
+    :root{
+      --safe-bottom:env(safe-area-inset-bottom,0px);
+      --panel:#10233f;
+      --yellow:#ffd24a;
+      --cyan:#28d7ff;
+      --pink:#ff4f9a;
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:100%;
+      background:#d9ecff;
+      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{min-height:100dvh;overflow:hidden}
+
+    .page{
+      position:relative;
+      width:100vw;
+      height:100dvh;
+      overflow:hidden;
+      direction:ltr;
+      user-select:none;
+      touch-action:none;
+      background:
+        linear-gradient(180deg,#bfcbe8 0%,#dce3f2 45%,#ead5ac 46%,#d7a464 72%,#bd7f42 100%);
+    }
+
+    .stage{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:hidden;
+      z-index:1;
+    }
+
+    .note{
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:5;
+      direction:rtl;
+      max-width:min(640px,calc(100vw - 24px));
+      padding:10px 13px;
+      border-radius:15px;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(255,255,255,.55);
+      color:#17345d;
+      font-weight:900;
+      line-height:1.55;
+      box-shadow:0 10px 28px rgba(0,0,0,.12);
+    }
+
+    .small{font-size:12px;font-weight:750;color:#365477}
+
+    .panel{
+      position:absolute;
+      left:12px;
+      right:12px;
+      bottom:calc(12px + var(--safe-bottom));
+      z-index:5;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      direction:rtl;
+      padding:10px;
+      background:rgba(13,30,58,.84);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:18px;
+      box-shadow:0 12px 30px rgba(0,0,0,.18);
+      backdrop-filter:blur(8px);
+    }
+
+    .panel-title{
+      color:#fff;
+      font-weight:900;
+      font-size:14px;
+      margin-inline:6px 8px;
+      white-space:nowrap;
+    }
+
+    button{
+      border:0;
+      border-radius:999px;
+      padding:10px 12px;
+      font-weight:900;
+      font-size:12px;
+      cursor:pointer;
+      color:#10233f;
+      background:var(--yellow);
+      box-shadow:0 5px 0 rgba(0,0,0,.18);
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+
+    button:nth-of-type(2n){background:var(--cyan)}
+    button:nth-of-type(3n){background:var(--pink);color:#fff}
+
+    button:active{
+      transform:translateY(3px);
+      box-shadow:0 2px 0 rgba(0,0,0,.22);
+    }
+
+    .status{
+      position:absolute;
+      left:12px;
+      top:12px;
+      z-index:5;
+      direction:rtl;
+      padding:8px 10px;
+      border-radius:12px;
+      color:#0d2a4a;
+      background:rgba(255,255,255,.72);
+      border:1px solid rgba(255,255,255,.5);
+      font-weight:900;
+      font-size:12px;
+      box-shadow:0 8px 20px rgba(0,0,0,.11);
+    }
+
+    @media (max-width:700px){
+      .note{font-size:12px}
+      .panel{left:8px;right:8px;bottom:calc(8px + var(--safe-bottom))}
+      .panel-title{width:100%;text-align:center}
+      button{font-size:11px;padding:9px 9px}
+      .status{display:none}
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+</head>
+<body>
+  <main class="page">
+    <div class="note">
+      مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
+      <div class="small">
+        المحسوب فقط: فيزياء موحدة لكل عربة + فاصل ذكي بين العربات يقرأ مركز ثقل الصندوق ويدفعه للأقرب. الباقي على الفيزياء.
+      </div>
+    </div>
+
+    <div class="status" id="status">Matter.js: جاري التحميل</div>
+
+    <svg id="stage" class="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="مختبر فيزياء سقوط الصناديق داخل عربات القطار">
+      <defs>
+        <linearGradient id="sceneGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#bfcae6"/>
+          <stop offset="45%" stop-color="#dce3f2"/>
+          <stop offset="46%" stop-color="#ead5ac"/>
+          <stop offset="72%" stop-color="#d7a464"/>
+          <stop offset="100%" stop-color="#bd7f42"/>
+        </linearGradient>
+
+        <linearGradient id="boxBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#b87948"/>
+          <stop offset="48%" stop-color="#8d552f"/>
+          <stop offset="100%" stop-color="#5f351e"/>
+        </linearGradient>
+
+        <linearGradient id="boxTop" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#cc8d58"/>
+          <stop offset="100%" stop-color="#87502d"/>
+        </linearGradient>
+
+        <filter id="softShadow" x="-35%" y="-35%" width="170%" height="180%">
+          <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#2b170c" flood-opacity=".25"/>
+        </filter>
+      </defs>
+
+      <g id="backgroundLayer"></g>
+      <g id="trainBackLayer"></g>
+      <g id="boxLayer"></g>
+      <g id="trainFrontLayer"></g>
+      <g id="debugLayer"></g>
+      <g id="fxLayer"></g>
+    </svg>
+
+    <div class="panel">
+      <div class="panel-title">اختبار الفيزياء:</div>
+      <button data-action="drop">إسقاط صندوق</button>
+      <button data-action="drop3">إسقاط ٣ صناديق</button>
+      <button data-action="gapRight">إسقاط على فاصل يمين</button>
+      <button data-action="gapLeft">إسقاط على فاصل يسار</button>
+      <button data-action="roof">اصطدام مقطورة السائق</button>
+      <button data-action="debug">إظهار/إخفاء التصادم</button>
+      <button data-action="clear">مسح</button>
+    </div>
+  </main>
+
+<script>
+(() => {
+  "use strict";
+
+  const NS = "http://www.w3.org/2000/svg";
+  const status = document.getElementById("status");
+  const stage = document.getElementById("stage");
+  const backgroundLayer = document.getElementById("backgroundLayer");
+  const trainBackLayer = document.getElementById("trainBackLayer");
+  const trainFrontLayer = document.getElementById("trainFrontLayer");
+  const boxLayer = document.getElementById("boxLayer");
+  const debugLayer = document.getElementById("debugLayer");
+  const fxLayer = document.getElementById("fxLayer");
+
+  const BOX = {w:96, h:72};
+
+  // نفس مقاسات صفحة القطار تقريبًا.
+  const WAGONS = [
+    {id:"left", label:"يسار", x:202, y:486, w:300, h:111, floorY:535},
+    {id:"right", label:"يمين", x:490, y:486, w:300, h:111, floorY:535}
+  ];
+
+  const ENGINE = {x:782, y:430, w:320, h:179};
+  const ROOF = {x1:784, x2:904, y:424};
+
+  let engine = null;
+  let world = null;
+  let renderStarted = false;
+  let debugVisible = false;
+  let nextBoxNumber = 1;
+  let dropTimer = null;
+
+  const physicsBodies = [];
+  const liveBoxes = [];
+  const ROOF_BOUNCE = {
+    // سطح مقطورة السائق ليس مجرد ارتداد عادي.
+    // هو "سطح قافز": أي جسم يلمسه يأخذ دفعة للأعلى والخلف باتجاه العربة الأولى.
+    cooldown:620,
+    minUpVelocity:3.05,
+    maxUpVelocity:4.35,
+    backwardVelocity:-1.42,
+    maxBackwardVelocity:-1.72,
+    spinKick:-.065,
+    liftOut:14
+  };
+
+  const WAGON_PHYSICS_PROFILE = {
+    floor:{
+      inset:14,
+      h:18,
+      friction:1.05,
+      frictionStatic:1.35,
+      restitution:.12
+    },
+    wall:{
+      xInset:16,
+      yOffset:70,
+      w:26,
+      h:126,
+      friction:.82,
+      frictionStatic:1,
+      restitution:.18
+    },
+    topBumper:{
+      // نطاط رأس صغير فقط عند طرف العربة، لا يمتد داخل العربة.
+      // يستخدم نفس المقاسات لكل عربة لاحقًا.
+      xInset:18,
+      yOffset:-7,
+      w:34,
+      h:18,
+      angle:.08,
+      cooldown:240,
+      inwardVelocity:.98,
+      upVelocity:.86,
+      spinKick:.022,
+      liftOut:5,
+      friction:.08,
+      frictionStatic:.10,
+      restitution:.46
+    }
+  };
+
+  const GAP_PHYSICS_PROFILE = {
+    // فاصل ذكي بين كل عربتين.
+    // يقسم الفاصل إلى نصفين، ثم يعتمد على مركز ثقل الصندوق:
+    // إذا كان الحمل يميل لليسار يدفعه لليسار، وإذا يميل لليمين يدفعه لليمين.
+    yOffset:-38,
+    width:132,
+    height:118,
+    cooldown:95,
+    inwardVelocity:1.42,
+    upVelocity:1.08,
+    spinKick:.032,
+    liftOut:9,
+    centerDeadZone:5
+  };
+
+  const staticBoxBodies = [];
+
+  function el(name, attrs = {}, parent = stage){
+    const node = document.createElementNS(NS, name);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+    parent.appendChild(node);
+    return node;
+  }
+
+  function makeImage(href, attrs, parent){
+    const image = el("image", {href, ...attrs}, parent);
+    image.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);
+    return image;
+  }
+
+  function clearNode(node){
+    while(node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function clamp(v, min, max){
+    return Math.max(min, Math.min(max, v));
+  }
+
+  function drawBackground(){
+    clearNode(backgroundLayer);
+
+    el("rect", {x:0, y:0, width:1280, height:720, fill:"url(#sceneGrad)"}, backgroundLayer);
+    el("path", {
+      d:"M-120 314 C-55 240 40 306 116 198 C185 101 246 210 318 116 C392 230 448 146 517 270 C582 150 642 212 716 100 C785 230 840 166 916 304 C990 190 1047 260 1120 150 C1190 250 1295 210 1400 270 L1400 426 L-120 426 Z",
+      fill:"#7d86aa",
+      opacity:".31"
+    }, backgroundLayer);
+    el("path", {
+      d:"M-120 360 C0 302 110 343 230 238 C352 150 403 302 492 228 C590 310 674 252 752 330 C834 242 926 304 1005 216 C1085 346 1185 260 1400 332 L1400 426 L-120 426 Z",
+      fill:"#afa0ad",
+      opacity:".44"
+    }, backgroundLayer);
+
+    makeImage("train-track.webp?v=physics8", {
+      x:-55,
+      y:604,
+      width:1390,
+      height:27,
+      preserveAspectRatio:"none"
+    }, backgroundLayer);
+  }
+
+  function drawTrain(){
+    clearNode(trainBackLayer);
+    clearNode(trainFrontLayer);
+
+    WAGONS.forEach((wagon, index) => {
+      const wheelY = 585.3;
+      const size = 47.4;
+      const firstX = wagon.x + 49;
+      const gap = 66;
+
+      for(let i = 0; i < 4; i++){
+        makeImage("train-wheel.webp?v=physics8", {
+          x:firstX + i * gap - size / 2,
+          y:wheelY - size / 2,
+          width:size,
+          height:size,
+          preserveAspectRatio:"xMidYMid meet"
+        }, trainBackLayer);
+      }
+
+      makeImage("train-wagon.webp?v=physics8", {
+        x:wagon.x,
+        y:wagon.y,
+        width:wagon.w,
+        height:wagon.h,
+        preserveAspectRatio:"xMidYMid meet"
+      }, trainBackLayer);
+
+      // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
+      makeImage("train-wagon.webp?v=physics8", {
+        x:wagon.x,
+        y:wagon.y,
+        width:wagon.w,
+        height:wagon.h,
+        preserveAspectRatio:"xMidYMid meet"
+      }, trainFrontLayer);
+
+      el("text", {
+        x:wagon.x + wagon.w / 2,
+        y:wagon.y + wagon.h * .56,
+        "text-anchor":"middle",
+        "dominant-baseline":"middle",
+        fill:"#ffe28a",
+        stroke:"#5b2618",
+        "stroke-width":2.6,
+        "paint-order":"stroke fill",
+        "font-size":26,
+        "font-weight":900,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"rtl"
+      }, trainFrontLayer).textContent = wagon.label;
+    });
+
+    makeImage("train-engine-transparent.png?v=physics8", {
+      x:ENGINE.x,
+      y:ENGINE.y,
+      width:ENGINE.w,
+      height:ENGINE.h,
+      preserveAspectRatio:"xMidYMid meet"
+    }, trainBackLayer);
+  }
+
+  function createBoxSvg(label){
+    const g = el("g", {filter:"url(#softShadow)"}, boxLayer);
+
+    // صندوق مستقيم: الأعلى/الأسفل/اليمين/اليسار واضحين.
+    // لا يوجد منظور مائل في الرسم نفسه؛ الفيزياء وحدها هي التي تديره بعد الاصطدام.
+    el("rect", {
+      x:-48,
+      y:-36,
+      width:96,
+      height:72,
+      rx:7,
+      fill:"url(#boxBody)",
+      stroke:"#4e2b18",
+      "stroke-width":2.8
+    }, g);
+
+    el("rect", {
+      x:-42,
+      y:-30,
+      width:84,
+      height:14,
+      rx:4,
+      fill:"url(#boxTop)",
+      opacity:".86",
+      stroke:"#6b3b21",
+      "stroke-width":1.8
+    }, g);
+
+    el("path", {
+      d:"M-48 -10 L48 -10 M-18 -36 L-18 36 M18 -36 L18 36",
+      fill:"none",
+      stroke:"#d3a06a",
+      "stroke-width":3,
+      opacity:".72"
+    }, g);
+
+    el("text", {
+      x:0,
+      y:7,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#fff0b8",
+      stroke:"#442313",
+      "stroke-width":1.9,
+      "paint-order":"stroke fill",
+      "font-size":16,
+      "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl",
+      style:"direction:rtl;unicode-bidi:plaintext"
+    }, g).textContent = label;
+
+    return g;
+  }
+
+  function makeStaticRect(x, y, w, h, options = {}){
+    const body = Matter.Bodies.rectangle(x, y, w, h, {
+      isStatic:true,
+      friction:.9,
+      frictionStatic:1.1,
+      restitution:.08,
+      ...options
+    });
+
+    physicsBodies.push(body);
+    Matter.World.add(world, body);
+    return body;
+  }
+
+  function addWagonPhysics(wagon, profile = WAGON_PHYSICS_PROFILE){
+    makeStaticRect(wagon.x + wagon.w / 2, wagon.floorY, wagon.w - profile.floor.inset * 2, profile.floor.h, {
+      label:`${wagon.id}-floor`,
+      sgType:"wagon-floor",
+      sgWagonId:wagon.id,
+      friction:profile.floor.friction,
+      frictionStatic:profile.floor.frictionStatic,
+      restitution:profile.floor.restitution
+    });
+
+    makeStaticRect(wagon.x + profile.wall.xInset, wagon.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${wagon.id}-left-wall`,
+      sgType:"wagon-wall",
+      sgWagonId:wagon.id,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    makeStaticRect(wagon.x + wagon.w - profile.wall.xInset, wagon.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${wagon.id}-right-wall`,
+      sgType:"wagon-wall",
+      sgWagonId:wagon.id,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    // نطاط رأس الحافة فقط: صغير ومحدد عند الطرف، ولا يأخذ من مساحة العربة الداخلية.
+    makeStaticRect(wagon.x + profile.topBumper.xInset, wagon.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${wagon.id}-left-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgWagonId:wagon.id,
+      sgPushX:1,
+      isSensor:true,
+      angle:-profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+
+    makeStaticRect(wagon.x + wagon.w - profile.topBumper.xInset, wagon.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${wagon.id}-right-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgWagonId:wagon.id,
+      sgPushX:-1,
+      isSensor:true,
+      angle:profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+  }
+
+  function addGapPhysics(leftWagon, rightWagon, profile = GAP_PHYSICS_PROFILE){
+    const leftEdge = leftWagon.x + leftWagon.w;
+    const rightEdge = rightWagon.x;
+    const center = (leftEdge + rightEdge) / 2;
+    const y = Math.min(leftWagon.y, rightWagon.y) + profile.yOffset;
+    const halfW = profile.width / 2;
+
+    // نصف الفاصل ناحية العربة اليسرى.
+    makeStaticRect(center - halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftWagon.id}-${rightWagon.id}-left-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWagonId:leftWagon.id,
+      sgRightWagonId:rightWagon.id,
+      sgDefaultPushX:-1,
+      isSensor:true,
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.42
+    });
+
+    // نصف الفاصل ناحية العربة اليمنى.
+    makeStaticRect(center + halfW / 2, y, halfW, profile.height, {
+      label:`gap-${leftWagon.id}-${rightWagon.id}-right-smart-bouncer`,
+      sgType:"gap-smart-bouncer",
+      sgGapCenter:center,
+      sgLeftWagonId:leftWagon.id,
+      sgRightWagonId:rightWagon.id,
+      sgDefaultPushX:1,
+      isSensor:true,
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.42
+    });
+  }
+
+  function addAllGapPhysics(){
+    const sorted = [...WAGONS].sort((a, b) => a.x - b.x);
+    for(let i = 0; i < sorted.length - 1; i++){
+      addGapPhysics(sorted[i], sorted[i + 1]);
+    }
+  }
+
+  function buildWorld(){
+    if(!window.Matter){
+      status.textContent = "Matter.js لم يحمّل";
+      return false;
+    }
+
+    const MatterAlias = Matter;
+    engine = MatterAlias.Engine.create({
+      enableSleeping:true,
+      positionIterations:10,
+      velocityIterations:10,
+      constraintIterations:2
+    });
+
+    world = engine.world;
+    world.gravity.x = 0;
+    world.gravity.y = .82;
+
+    // أرض/سكة: إذا وصلها الصندوق بدون عربة، ينكسر.
+    makeStaticRect(640, 636, 1500, 44, {
+      label:"track-kill",
+      isSensor:true
+    });
+
+    // العربات: كل عربة تُبنى من بروفايل فيزيائي موحد.
+    // لاحقًا عند إضافة أي عربة جديدة، يكفي إدخال مقاساتها في WAGONS فقط.
+    WAGONS.forEach(wagon => addWagonPhysics(wagon));
+
+    // الفواصل الذكية بين العربات: كل فاصل ينقسم إلى نصفين ويعتمد على مركز ثقل الصندوق.
+    addAllGapPhysics();
+
+    // سقف مقطورة السائق: نطاط، احتكاكه قليل، يعطي دوران طبيعي من الاصطدام.
+    makeStaticRect((ROOF.x1 + ROOF.x2) / 2, ROOF.y + 8, ROOF.x2 - ROOF.x1, 18, {
+      label:"driver-roof-bounce",
+      sgType:"driver-roof",
+      friction:.05,
+      frictionStatic:.08,
+      restitution:.94
+    });
+
+    Matter.Events.on(engine, "collisionStart", event => {
+      event.pairs.forEach(pair => {
+        handleCollision(pair.bodyA, pair.bodyB);
+        handleCollision(pair.bodyB, pair.bodyA);
+      });
+    });
+
+    Matter.Events.on(engine, "collisionActive", event => {
+      event.pairs.forEach(pair => {
+        handleGapActiveCollision(pair.bodyA, pair.bodyB);
+        handleGapActiveCollision(pair.bodyB, pair.bodyA);
+      });
+    });
+
+    status.textContent = "Matter.js: جاهز — فيزياء حقيقية";
+    return true;
+  }
+
+  function applySmartGapBounce(boxBody, gapBody, activeMode = false){
+    const item = boxBody.sgBox;
+    if(!item || !gapBody) return;
+
+    const now = performance.now();
+    const cooldown = activeMode ? GAP_PHYSICS_PROFILE.cooldown : Math.max(40, GAP_PHYSICS_PROFILE.cooldown - 35);
+
+    if(item.lastGapSmartAt && now - item.lastGapSmartAt < cooldown){
+      return;
+    }
+
+    item.lastGapSmartAt = now;
+
+    const center = gapBody.sgGapCenter;
+    const dx = boxBody.position.x - center;
+    let direction = 0;
+
+    if(Math.abs(dx) > GAP_PHYSICS_PROFILE.centerDeadZone){
+      direction = dx < 0 ? -1 : 1;
+    }else if(Math.abs(boxBody.velocity.x) > .08){
+      direction = boxBody.velocity.x < 0 ? -1 : 1;
+    }else{
+      direction = gapBody.sgDefaultPushX || 1;
+    }
+
+    item.wagonId = direction < 0 ? gapBody.sgLeftWagonId : gapBody.sgRightWagonId;
+
+    const inwardX = direction < 0
+      ? Math.min(boxBody.velocity.x, -GAP_PHYSICS_PROFILE.inwardVelocity)
+      : Math.max(boxBody.velocity.x, GAP_PHYSICS_PROFILE.inwardVelocity);
+
+    Matter.Body.setVelocity(boxBody, {
+      x:inwardX,
+      y:Math.min(boxBody.velocity.y * .12, -GAP_PHYSICS_PROFILE.upVelocity)
+    });
+
+    Matter.Body.setAngularVelocity(
+      boxBody,
+      boxBody.angularVelocity * .58 + (direction < 0 ? -GAP_PHYSICS_PROFILE.spinKick : GAP_PHYSICS_PROFILE.spinKick)
+    );
+
+    Matter.Body.setPosition(boxBody, {
+      x:boxBody.position.x + direction * GAP_PHYSICS_PROFILE.liftOut,
+      y:boxBody.position.y - GAP_PHYSICS_PROFILE.liftOut
+    });
+  }
+
+  function handleGapActiveCollision(boxBody, otherBody){
+    if(!boxBody || !boxBody.sgBox || !otherBody) return;
+    if(otherBody.sgType === "gap-smart-bouncer"){
+      applySmartGapBounce(boxBody, otherBody, true);
+    }
+  }
+
+  function handleCollision(boxBody, otherBody){
+    if(!boxBody || !boxBody.sgBox || !otherBody) return;
+
+    const item = boxBody.sgBox;
+
+    if(otherBody.label === "track-kill"){
+      if(!item.inWagon){
+        breakBox(item);
+      }
+      return;
+    }
+
+    if(otherBody.sgType === "gap-smart-bouncer"){
+      applySmartGapBounce(boxBody, otherBody, false);
+      return;
+    }
+
+    if(otherBody.sgType === "wagon-top-edge-bumper"){
+      const now = performance.now();
+      if(item.lastTopEdgeBumperAt && now - item.lastTopEdgeBumperAt < WAGON_PHYSICS_PROFILE.topBumper.cooldown){
+        return;
+      }
+
+      item.lastTopEdgeBumperAt = now;
+      item.wagonId = otherBody.sgWagonId || item.wagonId;
+
+      // نطاط رأس الحافة: هذه المنطقة التي كان الصندوق يوقف فوقها.
+      // الدفعة للداخل فقط، بدون تحديد مكان النهاية.
+      const direction = otherBody.sgPushX || 0;
+      const inwardX = direction > 0
+        ? Math.max(boxBody.velocity.x, WAGON_PHYSICS_PROFILE.topBumper.inwardVelocity)
+        : Math.min(boxBody.velocity.x, -WAGON_PHYSICS_PROFILE.topBumper.inwardVelocity);
+
+      Matter.Body.setVelocity(boxBody, {
+        x:inwardX,
+        y:Math.min(boxBody.velocity.y * .18, -WAGON_PHYSICS_PROFILE.topBumper.upVelocity)
+      });
+
+      Matter.Body.setAngularVelocity(
+        boxBody,
+        boxBody.angularVelocity * .64 + (direction > 0 ? WAGON_PHYSICS_PROFILE.topBumper.spinKick : -WAGON_PHYSICS_PROFILE.topBumper.spinKick)
+      );
+
+      Matter.Body.setPosition(boxBody, {
+        x:boxBody.position.x + direction * WAGON_PHYSICS_PROFILE.topBumper.liftOut,
+        y:boxBody.position.y - WAGON_PHYSICS_PROFILE.topBumper.liftOut
+      });
+
+      return;
+    }
+
+    if(otherBody.sgType === "wagon-floor" || otherBody.sgType === "wagon-wall"){
+      item.inWagon = true;
+      item.lastWagonContactAt = performance.now();
+      item.wagonId = otherBody.sgWagonId || item.wagonId;
+
+      // بعد دخول العربة، نقل بصري تحت واجهة العربة فقط. لا يوجد سحب.
+      if(item.node && item.node.parentNode !== boxLayer){
+        boxLayer.appendChild(item.node);
+      }
+      return;
+    }
+
+    if(otherBody.sgType === "driver-roof"){
+      const now = performance.now();
+      if(item.lastRoofHitAt && now - item.lastRoofHitAt < ROOF_BOUNCE.cooldown){
+        return;
+      }
+
+      item.lastRoofHitAt = now;
+
+      // السطح نفسه يعطي القفزة: دفعة للأعلى + دفعة للخلف باتجاه العربة الأولى.
+      // لا نحدد نهاية الصندوق ولا نسحبه للعربة؛ بعد الدفعة الجاذبية والتصادم تكمل الباقي.
+      const incomingY = Math.abs(boxBody.velocity.y);
+      const upVelocity = -clamp(incomingY * .92, ROOF_BOUNCE.minUpVelocity, ROOF_BOUNCE.maxUpVelocity);
+      const backVelocity = Math.max(
+        ROOF_BOUNCE.maxBackwardVelocity,
+        Math.min(ROOF_BOUNCE.backwardVelocity, boxBody.velocity.x - .82)
+      );
+
+      Matter.Body.setVelocity(boxBody, {
+        x:backVelocity,
+        y:upVelocity
+      });
+
+      Matter.Body.setAngularVelocity(
+        boxBody,
+        boxBody.angularVelocity * .48 + ROOF_BOUNCE.spinKick
+      );
+
+      // إخراج بسيط من السطح حتى تظهر القفزة مباشرة بدل دحرجة على السقف.
+      Matter.Body.setPosition(boxBody, {
+        x:boxBody.position.x - 3,
+        y:Math.min(boxBody.position.y - ROOF_BOUNCE.liftOut, ROOF.y - BOX.h / 2 - 8)
+      });
+
+      return;
+    }
+
+
+  }
+
+  function createFallingBox(x, y, vx, vy, angular = 0){
+    if(!world) return;
+
+    const label = String(nextBoxNumber++);
+    const node = createBoxSvg(label);
+
+    const body = Matter.Bodies.rectangle(x, y, BOX.w, BOX.h, {
+      label:`answer-box-${label}`,
+      chamfer:{radius:4},
+      friction:.78,
+      frictionStatic:.88,
+      // مقاومة الهواء كانت عالية وتخلي الصندوق ينجرف للخلف أكثر من المطلوب.
+      frictionAir:.0012,
+      restitution:.22,
+      density:.0032,
+      sleepThreshold:60
+    });
+
+    Matter.Body.setVelocity(body, {x:vx, y:vy});
+    Matter.Body.setAngularVelocity(body, angular);
+
+    const item = {
+      node,
+      body,
+      createdAt:performance.now(),
+      inWagon:false,
+      wagonId:null,
+      lastWagonContactAt:0,
+      lastTopEdgeBumperAt:0,
+      lastGapSmartAt:0,
+      stableFrames:0,
+      removed:false
+    };
+
+    body.sgBox = item;
+    liveBoxes.push(item);
+    Matter.World.add(world, body);
+
+    return item;
+  }
+
+  function dropNormal(){
+    // السقوط المعتمد: من اليمين، مائل لليسار، والباقي فيزياء.
+    createFallingBox(748, 126, -.56, .12, 0);
+  }
+
+  function dropGapRight(){
+    // يبدأ من اليمين، لكن موقعه فوق النصف الأيمن للفاصل؛ السطح المائل يقرر الارتداد.
+    createFallingBox(612, 128, -.50, .10, 0);
+  }
+
+  function dropGapLeft(){
+    // يبدأ من اليمين أيضًا، لكن فوق النصف الأيسر للفاصل.
+    createFallingBox(565, 128, -.48, .10, 0);
+  }
+
+  function dropRoof(){
+    // يسقط على مقطورة السائق من اليمين، والسقف النطاط يعطي القفزة.
+    createFallingBox(850, 110, -.10, .05, 0);
+  }
+
+  function dropThree(){
+    clearBoxesOnly();
+    dropNormal();
+    dropTimer = setTimeout(dropNormal, 1500);
+    setTimeout(dropNormal, 3000);
+  }
+
+  function breakBox(item){
+    if(!item || item.removed) return;
+    item.removed = true;
+
+    const pos = item.body.position;
+    if(item.node && item.node.parentNode){
+      item.node.remove();
+    }
+
+    Matter.World.remove(world, item.body);
+    const index = liveBoxes.indexOf(item);
+    if(index >= 0) liveBoxes.splice(index, 1);
+
+    dust(pos.x, Math.min(pos.y + 36, 610));
+  }
+
+  function dust(x, y){
+    clearNode(fxLayer);
+    const g = el("g", {transform:`translate(${x} ${y})`}, fxLayer);
+
+    for(let i = 0; i < 12; i++){
+      const angle = Math.PI + Math.random() * Math.PI;
+      const dist = 18 + Math.random() * 54;
+      const dot = el("circle", {
+        cx:0,
+        cy:0,
+        r:3 + Math.random() * 4,
+        fill:i % 2 ? "#8a5a34" : "#d2a36a",
+        opacity:".78"
+      }, g);
+
+      const move = el("animateTransform", {
+        attributeName:"transform",
+        type:"translate",
+        from:"0 0",
+        to:`${Math.cos(angle) * dist} ${Math.sin(angle) * dist * .42}`,
+        dur:".4s",
+        fill:"freeze"
+      }, dot);
+      const fade = el("animate", {
+        attributeName:"opacity",
+        values:".78;.35;0",
+        dur:".44s",
+        fill:"freeze"
+      }, dot);
+
+      move.beginElement();
+      fade.beginElement();
+    }
+
+    setTimeout(() => clearNode(fxLayer), 620);
+  }
+
+  function updateBox(item){
+    if(!item || item.removed || !item.body || !item.node) return;
+
+    const body = item.body;
+    const pos = body.position;
+    const angle = body.angle * 180 / Math.PI;
+
+    item.node.setAttribute(
+      "transform",
+      `translate(${pos.x.toFixed(2)} ${pos.y.toFixed(2)}) rotate(${angle.toFixed(2)})`
+    );
+
+    // إذا استقر داخل العربة، نجمده في مكانه الطبيعي فقط، لا نسحبه ولا ننقله لخانة.
+    if(item.inWagon && !body.isStatic){
+      const speed = body.speed;
+      const angular = Math.abs(body.angularVelocity);
+
+      if(speed < .18 && angular < .018){
+        item.stableFrames += 1;
+      }else{
+        item.stableFrames = 0;
+      }
+
+      if(item.stableFrames > 40){
+        Matter.Sleeping.set(body, true);
+        Matter.Body.setStatic(body, true);
+        staticBoxBodies.push(body);
+      }
+    }
+
+    if(pos.y > 700 || pos.x < -240 || pos.x > 1450){
+      breakBox(item);
+    }
+  }
+
+  function updateDebug(){
+    if(!debugVisible){
+      clearNode(debugLayer);
+      return;
+    }
+
+    clearNode(debugLayer);
+
+    physicsBodies.forEach(body => {
+      const vertices = body.vertices;
+      const points = vertices.map(v => `${v.x.toFixed(1)},${v.y.toFixed(1)}`).join(" ");
+      const type = body.sgType || body.label || "";
+      const color =
+        type.includes("roof") ? "#2196f3" :
+        type.includes("gap-smart") ? "#ff7a00" :
+        type.includes("top-edge") ? "#00e5ff" :
+        type.includes("gap") ? "#ff9800" :
+        type.includes("floor") ? "#00c853" :
+        type.includes("wall") ? "#8e24aa" :
+        type.includes("kill") ? "#ff1744" : "#fff";
+
+      el("polygon", {
+        points,
+        fill:color,
+        opacity:".18",
+        stroke:color,
+        "stroke-width":2
+      }, debugLayer);
+    });
+
+    liveBoxes.forEach(item => {
+      if(!item.body || item.removed) return;
+      const vertices = item.body.vertices;
+      const points = vertices.map(v => `${v.x.toFixed(1)},${v.y.toFixed(1)}`).join(" ");
+      el("polygon", {
+        points,
+        fill:"#fff",
+        opacity:".08",
+        stroke:"#111",
+        "stroke-width":1
+      }, debugLayer);
+    });
+  }
+
+  function loop(now){
+    if(engine){
+      Matter.Engine.update(engine, 1000 / 60);
+
+      liveBoxes.slice().forEach(updateBox);
+      updateDebug();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  function clearBoxesOnly(){
+    if(dropTimer) clearTimeout(dropTimer);
+    dropTimer = null;
+
+    liveBoxes.slice().forEach(item => {
+      if(item.node && item.node.parentNode) item.node.remove();
+      if(item.body && world) Matter.World.remove(world, item.body);
+    });
+
+    staticBoxBodies.slice().forEach(body => {
+      if(body && world) Matter.World.remove(world, body);
+    });
+
+    liveBoxes.length = 0;
+    staticBoxBodies.length = 0;
+    clearNode(boxLayer);
+    clearNode(fxLayer);
+    nextBoxNumber = 1;
+  }
+
+  function init(){
+    drawBackground();
+    drawTrain();
+
+    if(!window.Matter){
+      status.textContent = "Matter.js لم يحمّل — تأكد من الاتصال";
+      return;
+    }
+
+    if(buildWorld() && !renderStarted){
+      renderStarted = true;
+      requestAnimationFrame(loop);
+      setTimeout(dropNormal, 450);
+    }
+  }
+
+  document.querySelectorAll("button[data-action]").forEach(button => {
+    button.addEventListener("click", () => {
+      const action = button.dataset.action;
+
+      if(action === "drop") dropNormal();
+      if(action === "drop3") dropThree();
+      if(action === "gapRight") dropGapRight();
+      if(action === "gapLeft") dropGapLeft();
+      if(action === "roof") dropRoof();
+
+      if(action === "debug"){
+        debugVisible = !debugVisible;
+        updateDebug();
+      }
+
+      if(action === "clear"){
+        clearBoxesOnly();
+      }
+    });
+  });
+
+  init();
+})();
+</script>
+</body>
+</html>
