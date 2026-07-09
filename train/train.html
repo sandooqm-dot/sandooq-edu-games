@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 70</title>
+  <title>قطار الإجابات - إصدار 71</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 70:
+    // إصدار 71:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -564,16 +564,16 @@
     airPull:.00020,
     maxActiveMatterBoxes:4,
 
-    // داخل العربة: كتلة ثقيلة تنزلق ببطء، بدون كبح مائي أو توقف مفاجئ.
-    wagonDampingX:.94,
-    wagonDampingY:.96,
-    wagonAngularDamping:.94,
-    wagonInnerGravity:.00028,
+    // داخل العربة: كبح خفيف بعد الاصطدام الحقيقي فقط، بدون تعليق في الهواء.
+    wagonDampingX:.90,
+    wagonDampingY:.94,
+    wagonAngularDamping:.90,
+    wagonInnerGravity:.00034,
 
-    // التثبيت بعد أن تهدأ الحركة فعلًا، وليس بحركة مبرمجة واضحة.
-    captureDelayMin:980,
-    captureDelayMax:1500,
-    captureSpeedLimit:.58,
+    // التثبيت بعد أن تهدأ الحركة فعلًا.
+    captureDelayMin:650,
+    captureDelayMax:1150,
+    captureSpeedLimit:.72,
 
     // الفاصل بين العربات لا يستقبل الصندوق؛ يتم توجيهه للعربة الأقرب.
     gapRouteCooldown:300,
@@ -769,13 +769,21 @@
     return null;
   }
 
+  function getWellByIndex(index){
+    for(const zone of collisionMap){
+      if(zone.type === "well" && zone.index === index) return zone;
+    }
+    return null;
+  }
+
   function getLandingWellForBody(body){
     const bounds = bodyBoxBounds(body);
 
-    // لا نتدخل إلا عندما يكون الصندوق وصل فعليًا لمستوى أعلى العربة/الفاصل.
-    const touchedWagonLevel = bounds.bottom >= TRAIN_LAYOUT.wagonY - 8;
-    const stillNearWagons = bounds.top <= TRAIN_LAYOUT.wagonY + TRAIN_LAYOUT.wagonH + 42;
-    if(!touchedWagonLevel || !stillNearWagons) return null;
+    // مهم: هذه الدالة لا تلتقط الصندوق من الهواء.
+    // تستخدم فقط عندما وصل الصندوق فعليًا إلى مستوى الفاصل بين العربات.
+    const reachedGapLevel = bounds.bottom >= TRAIN_LAYOUT.wagonY + 44;
+    const stillNearWagons = bounds.top <= TRAIN_LAYOUT.wagonY + TRAIN_LAYOUT.wagonH + 26;
+    if(!reachedGapLevel || !stillNearWagons) return null;
 
     let bestWell = null;
     let bestOverlap = 0;
@@ -803,13 +811,11 @@
       }
     }
 
-    // إذا أغلب أو جزء واضح من الصندوق فوق عربة، يذهب لها فورًا.
     if(bestWell && bestOverlap >= BOX.width * .18){
       return bestWell;
     }
 
-    // إذا كان في الفاصل، نختار أقرب عربة ولا نتركه يثبت في المنتصف.
-    if(nearestWell && nearestDistance <= 42){
+    if(nearestWell && nearestDistance <= 34){
       return nearestWell;
     }
 
@@ -1121,7 +1127,7 @@
     });
   }
 
-  function routeGapBoxToNearestWagon(item, body){
+  function routeGapBoxToNearestWagon(item, body, preferredWellIndex = null){
     if(!item || !body || item.done) return;
 
     const now = performance.now();
@@ -1129,23 +1135,16 @@
       return;
     }
 
-    const targetWell = getLandingWellForBody(body) || getBestWellForBody(body);
+    const targetWell = getWellByIndex(preferredWellIndex) || getLandingWellForBody(body);
     if(!targetWell){
       return;
     }
 
     item.lastGapRouteAt = now;
-    item.insideWagon = true;
     item.lastWellIndex = targetWell.index;
 
-    if(!item.enteredWellAt){
-      item.enteredWellAt = now;
-      item.captureAfter = PHYSICS.captureDelayMin +
-        Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
-    }
-
-    // الفاصل لا يثبت الصندوق، بل يدفعه بخفة إلى أقرب عربة ويتركه يستقر طبيعيًا.
-    moveMatterBoxBehindWagonCover(item);
+    // الفاصل لا يلتقط الصندوق ولا يثبته ولا ينقله خلف العربة.
+    // فقط يزحزحه بخفة وهو في مستوى الفاصل، ثم Matter يكمل السقوط/الانزلاق.
     nudgeBodyTowardWell(body, targetWell);
   }
 
@@ -1187,7 +1186,7 @@
     if(targetX < safeLeft) targetX = startX + Math.min(12, safeLeft - startX);
     if(targetX > safeRight) targetX = startX - Math.min(12, startX - safeRight);
 
-    const naturalY = well.floorY - BOX.bottom - 4;
+    const naturalY = well.floorY - BOX.bottom - 8;
     let targetY = startY;
     if(targetY < naturalY - 16) targetY = startY + Math.min(10, (naturalY - 16) - startY);
     if(targetY > naturalY + 10) targetY = startY - Math.min(10, startY - (naturalY + 10));
@@ -1212,7 +1211,7 @@
     }
 
     const start = performance.now();
-    const duration = 620;
+    const duration = 180;
 
     function easeOutSine(t){
       return Math.sin((t * Math.PI) / 2);
@@ -1298,7 +1297,17 @@
       item.lastWellIndex = bodyB.sgWellIndex;
       item.insideWagon = true;
 
-      moveMatterBoxBehindWagonCover(item);
+      if(!item.enteredWellAt){
+        item.enteredWellAt = performance.now();
+        item.captureAfter = PHYSICS.captureDelayMin +
+          Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
+      }
+
+      const hitWell = getWellByIndex(bodyB.sgWellIndex);
+      if(hitWell && bodyA.position.y >= hitWell.floorY - BOX.bottom - 18){
+        moveMatterBoxBehindWagonCover(item);
+      }
+
       dampBodyInsideWagon(bodyA);
       return;
     }
@@ -1309,7 +1318,7 @@
     }
 
     if(bodyB && bodyB.sgType === "gap-router"){
-      routeGapBoxToNearestWagon(item, bodyA);
+      routeGapBoxToNearestWagon(item, bodyA, bodyB.sgWellIndex);
       return;
     }
   }
@@ -1319,51 +1328,44 @@
 
     const body = item.body;
 
-    // حماية من الصناديق العالقة: لا نترك صندوقًا نشطًا يمنع ظهور صناديق جديدة.
+    const well = getWellByMatterBody(body);
+    const activeWell = well || (item.insideWagon ? getWellByIndex(item.lastWellIndex) : null);
+
+    // حماية من الصناديق العالقة: لا نكسر صندوقًا دخل العربة فعلًا.
     if(item.spawnedAt && now - item.spawnedAt > 5200){
-      const well = getWellByMatterBody(body) || getLandingWellForBody(body) || getBestWellForBody(body);
-      if(well){
-        settleMatterBox(item, well);
+      const timeoutWell = activeWell || getWellByMatterBody(body);
+      if(timeoutWell && item.insideWagon){
+        settleMatterBox(item, timeoutWell);
       }else{
         breakMatterBox(item);
       }
       return;
     }
 
-    const well = getWellByMatterBody(body);
-    const landingWell = well || getLandingWellForBody(body);
-
-    if(landingWell){
-      item.insideWagon = true;
-      if(item.lastWellIndex === null) item.lastWellIndex = landingWell.index;
-
+    if(activeWell && item.insideWagon){
       if(!item.enteredWellAt){
         item.enteredWellAt = now;
         item.captureAfter = PHYSICS.captureDelayMin +
           Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
       }
 
-      const closeToWagonBody = body.position.y >= landingWell.floorY - BOX.bottom - 42;
-      if(closeToWagonBody){
+      const closeToFloor = body.position.y >= activeWell.floorY - BOX.bottom - 16;
+      if(closeToFloor){
         moveMatterBoxBehindWagonCover(item);
       }
 
-      if(!well){
-        // إذا كان في الفاصل، نوجهه بخفة فقط، وليس سحبًا قويًا ولا تثبيتًا فوريًا.
-        nudgeBodyTowardWell(body, landingWell);
-      }
-
+      // لا كبح ولا تثبيت إلا بعد الاصطدام الحقيقي داخل العربة.
       dampBodyInsideWagon(body);
 
       const timeInside = now - item.enteredWellAt;
       const captureReady = timeInside >= item.captureAfter;
-      const slowEnough = body.speed < PHYSICS.captureSpeedLimit && Math.abs(body.angularVelocity) < .075;
-      const deepEnough = body.position.y >= landingWell.floorY - BOX.bottom - 28;
-      const waitedLongEnough = timeInside > 1900;
-      const almostStopped = body.speed < .86 && Math.abs(body.angularVelocity) < .11;
+      const slowEnough = body.speed < PHYSICS.captureSpeedLimit && Math.abs(body.angularVelocity) < .095;
+      const deepEnough = body.position.y >= activeWell.floorY - BOX.bottom - 18;
+      const waitedLongEnough = timeInside > 1700;
+      const almostStopped = body.speed < .92 && Math.abs(body.angularVelocity) < .13;
 
       if(deepEnough && ((captureReady && slowEnough) || (waitedLongEnough && almostStopped))){
-        settleMatterBox(item, landingWell);
+        settleMatterBox(item, activeWell);
         return;
       }
 
@@ -1371,12 +1373,12 @@
       return;
     }
 
-    // مقاومة الهواء تعمل أثناء السقوط فقط، وتتوقف بعد دخول العربة أو بعد الاصطدام بالسقف.
+    // سقوط حر كامل. لا نعامل الصندوق كأنه داخل عربة قبل التصادم الحقيقي.
     const recentlyHitRoof = item.lastSurfaceType === "driver-roof" &&
       item.lastSurfaceContactAt &&
       now - item.lastSurfaceContactAt < 260;
 
-    if(!item.insideWagon && !recentlyHitRoof){
+    if(!recentlyHitRoof){
       const velocityError = PHYSICS.airTargetVX - body.velocity.x;
       Matter.Body.applyForce(body, body.position, {
         x:velocityError * body.mass * PHYSICS.airPull,
@@ -1771,17 +1773,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=70",
+      href:"train-track.webp?v=71",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=70");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=71");
   }
 
-  function addWheel(layer, cx, cy, size, version = 70){
+  function addWheel(layer, cx, cy, size, version = 71){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1870,7 +1872,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=70",
+      href:"train-wagon.webp?v=71",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1878,7 +1880,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=70");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=71");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1911,7 +1913,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=70",
+        href:"train-wagon.webp?v=71",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1919,7 +1921,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=70");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=71");
 
       el("text", {
         x:car.centerX,
@@ -1944,7 +1946,7 @@
   }
 
   function locomotive(train){
-    // إصدار 70:
+    // إصدار 71:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1954,7 +1956,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=70",
+      href:"train-engine-transparent.png?v=71",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1962,7 +1964,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=70");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=71");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
