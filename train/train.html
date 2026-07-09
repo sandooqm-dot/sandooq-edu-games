@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 69</title>
+  <title>قطار الإجابات - إصدار 70</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -201,7 +201,7 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 69:
+    // إصدار 70:
     // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
     // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
     const x = options.x ?? 760;
@@ -564,16 +564,16 @@
     airPull:.00020,
     maxActiveMatterBoxes:4,
 
-    // داخل العربة: تخفيف ناعم يسمح بانزلاق بسيط قبل الاستقرار.
-    wagonDampingX:.78,
-    wagonDampingY:.70,
-    wagonAngularDamping:.72,
-    wagonInnerGravity:.00042,
+    // داخل العربة: كتلة ثقيلة تنزلق ببطء، بدون كبح مائي أو توقف مفاجئ.
+    wagonDampingX:.94,
+    wagonDampingY:.96,
+    wagonAngularDamping:.94,
+    wagonInnerGravity:.00028,
 
-    // التثبيت بعد حركة قصيرة داخل العربة، وليس فور اللمس.
-    captureDelayMin:420,
-    captureDelayMax:760,
-    captureSpeedLimit:1.25,
+    // التثبيت بعد أن تهدأ الحركة فعلًا، وليس بحركة مبرمجة واضحة.
+    captureDelayMin:980,
+    captureDelayMax:1500,
+    captureSpeedLimit:.58,
 
     // الفاصل بين العربات لا يستقبل الصندوق؛ يتم توجيهه للعربة الأقرب.
     gapRouteCooldown:300,
@@ -873,9 +873,9 @@
         label:`wagon-floor-${index}`,
         sgType:"wagon-floor",
         sgWellIndex:index,
-        friction:.98,
-        frictionStatic:1,
-        restitution:0
+        friction:.68,
+        frictionStatic:.76,
+        restitution:.015
       });
 
       // جداران داخليان منخفضان يمنعان خروج الصندوق بعد دخوله، دون أن يعملا كجدار قاتل.
@@ -883,18 +883,18 @@
         label:`wagon-left-wall-${index}`,
         sgType:"wagon-wall",
         sgWellIndex:index,
-        friction:.96,
-        frictionStatic:.99,
-        restitution:0
+        friction:.74,
+        frictionStatic:.82,
+        restitution:.01
       });
 
       addMatterRect(car.x + car.width - 10, car.y + 72, 28, 128, {
         label:`wagon-right-wall-${index}`,
         sgType:"wagon-wall",
         sgWellIndex:index,
-        friction:.96,
-        frictionStatic:.99,
-        restitution:0
+        friction:.74,
+        frictionStatic:.82,
+        restitution:.01
       });
 
       // الوصلات بين العربات سطح انزلاق خفيف، وليست منطقة انفجار.
@@ -1070,17 +1070,17 @@
     const targetX = clamp(body.position.x, safeLeft, safeRight);
     const dx = targetX - body.position.x;
 
-    if(Math.abs(dx) < 3) return;
+    if(Math.abs(dx) < 4) return;
 
     const direction = dx > 0 ? 1 : -1;
-    const gentleSpeed = Math.min(.62, Math.max(.20, Math.abs(dx) / 120));
+    const gentleSpeed = Math.min(.28, Math.max(.08, Math.abs(dx) / 260));
 
     Matter.Body.setVelocity(body, {
-      x:body.velocity.x * .82 + direction * gentleSpeed,
-      y:body.velocity.y * .94
+      x:body.velocity.x * .94 + direction * gentleSpeed,
+      y:body.velocity.y * .985
     });
 
-    Matter.Body.setAngularVelocity(body, body.angularVelocity * .90);
+    Matter.Body.setAngularVelocity(body, body.angularVelocity * .97);
   }
 
   function applyDriverRoofBounce(item, body){
@@ -1178,39 +1178,52 @@
   }
 
   function getWagonSlotTarget(well, startX, startRotation){
-    // لا نستخدم خانات ثابتة؛ الصندوق يستقر قريبًا من آخر مكان وصل له طبيعيًا.
-    const safeLeft = well.left + 28;
-    const safeRight = well.right - 28;
+    // لا توجد خانات ثابتة ولا تعديل سريع للزاوية.
+    // نجمّد الصندوق قريبًا جدًا من آخر موضع وصل له، مع تصحيح خفيف فقط للحواف والارتفاع.
+    const safeLeft = well.left + 30;
+    const safeRight = well.right - 30;
 
-    let targetX = clamp(startX, safeLeft, safeRight);
+    let targetX = startX;
+    if(targetX < safeLeft) targetX = startX + Math.min(12, safeLeft - startX);
+    if(targetX > safeRight) targetX = startX - Math.min(12, startX - safeRight);
 
-    // تصحيح خفيف فقط إذا كان قريبًا جدًا من الحافة حتى لا يظهر معلقًا.
-    if(targetX < safeLeft + 16) targetX = safeLeft + 16;
-    if(targetX > safeRight - 16) targetX = safeRight - 16;
+    const naturalY = well.floorY - BOX.bottom - 4;
+    let targetY = startY;
+    if(targetY < naturalY - 16) targetY = startY + Math.min(10, (naturalY - 16) - startY);
+    if(targetY > naturalY + 10) targetY = startY - Math.min(10, startY - (naturalY + 10));
 
-    targetX += Math.random() * 6 - 3;
-
-    const targetY = well.floorY - BOX.bottom - 31 + (Math.random() * 4 - 2);
-    const targetRotation = clamp(startRotation * .88, -34, 34);
+    const targetRotation = clamp(startRotation, -52, 52);
 
     return {targetX, targetY, targetRotation};
   }
 
   function animateBoxToSlot(node, startX, startY, startRotation, targetX, targetY, targetRotation){
-    const start = performance.now();
-    const duration = 190;
+    const dx = Math.abs(targetX - startX);
+    const dy = Math.abs(targetY - startY);
+    const dr = Math.abs(targetRotation - startRotation);
 
-    function easeOutCubic(t){
-      return 1 - Math.pow(1 - t, 3);
+    // إذا كان التصحيح صغيرًا، نثبته مباشرة حتى لا تظهر حركة مبرمجة.
+    if(dx < 2.5 && dy < 2.5 && dr < 1.5){
+      node.setAttribute(
+        "transform",
+        `translate(${targetX.toFixed(2)} ${targetY.toFixed(2)}) rotate(${targetRotation.toFixed(2)})`
+      );
+      return;
+    }
+
+    const start = performance.now();
+    const duration = 620;
+
+    function easeOutSine(t){
+      return Math.sin((t * Math.PI) / 2);
     }
 
     function frame(now){
       const t = Math.min(1, (now - start) / duration);
-      const e = easeOutCubic(t);
-      const arc = Math.sin(Math.PI * t) * -1.5;
+      const e = easeOutSine(t);
 
       const x = startX + (targetX - startX) * e;
-      const y = startY + (targetY - startY) * e + arc;
+      const y = startY + (targetY - startY) * e;
       const r = startRotation + (targetRotation - startRotation) * e;
 
       node.setAttribute(
@@ -1330,7 +1343,10 @@
           Math.random() * (PHYSICS.captureDelayMax - PHYSICS.captureDelayMin);
       }
 
-      moveMatterBoxBehindWagonCover(item);
+      const closeToWagonBody = body.position.y >= landingWell.floorY - BOX.bottom - 42;
+      if(closeToWagonBody){
+        moveMatterBoxBehindWagonCover(item);
+      }
 
       if(!well){
         // إذا كان في الفاصل، نوجهه بخفة فقط، وليس سحبًا قويًا ولا تثبيتًا فوريًا.
@@ -1341,11 +1357,12 @@
 
       const timeInside = now - item.enteredWellAt;
       const captureReady = timeInside >= item.captureAfter;
-      const slowEnough = body.speed < PHYSICS.captureSpeedLimit && Math.abs(body.angularVelocity) < .20;
-      const deepEnough = body.position.y >= landingWell.floorY - BOX.bottom - 50;
-      const waitedLongEnough = timeInside > 980;
+      const slowEnough = body.speed < PHYSICS.captureSpeedLimit && Math.abs(body.angularVelocity) < .075;
+      const deepEnough = body.position.y >= landingWell.floorY - BOX.bottom - 28;
+      const waitedLongEnough = timeInside > 1900;
+      const almostStopped = body.speed < .86 && Math.abs(body.angularVelocity) < .11;
 
-      if(deepEnough && ((captureReady && slowEnough) || waitedLongEnough)){
+      if(deepEnough && ((captureReady && slowEnough) || (waitedLongEnough && almostStopped))){
         settleMatterBox(item, landingWell);
         return;
       }
@@ -1754,17 +1771,17 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=69",
+      href:"train-track.webp?v=70",
       x:-55,
       y:604,
       width:1390,
       height:27,
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=69");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=70");
   }
 
-  function addWheel(layer, cx, cy, size, version = 69){
+  function addWheel(layer, cx, cy, size, version = 70){
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
       x:cx - size / 2,
@@ -1853,7 +1870,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=69",
+      href:"train-wagon.webp?v=70",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1861,7 +1878,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=69");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=70");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1894,7 +1911,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=69",
+        href:"train-wagon.webp?v=70",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1902,7 +1919,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=69");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=70");
 
       el("text", {
         x:car.centerX,
@@ -1927,7 +1944,7 @@
   }
 
   function locomotive(train){
-    // إصدار 69:
+    // إصدار 70:
     // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
     // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
     const locoX = 782;
@@ -1937,7 +1954,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=69",
+      href:"train-engine-transparent.png?v=70",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1945,7 +1962,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=69");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=70");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
