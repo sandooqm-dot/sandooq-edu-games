@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 98</title>
+  <title>قطار الإجابات - إصدار 99</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -696,15 +696,15 @@
         sideYOffset:16,
         sideW:20,
         sideH:118,
-        // نطات سريعة وقوية للخلف/اليسار من عربة الركاب، تسمح بعدة نطات بدون دحرجة.
-        cooldown:72,
-        leftVelocity:1.72,
-        upVelocity:2.28,
+        // نطات أعلى وأقوى للخلف/اليسار من عربة الركاب، تسمح بعدة نطات متتابعة بدون دحرجة.
+        cooldown:46,
+        leftVelocity:2.95,
+        upVelocity:3.25,
         spinKick:0,
-        liftOut:9,
-        friction:.025,
-        frictionStatic:.04,
-        restitution:.78,
+        liftOut:13,
+        friction:.02,
+        frictionStatic:.035,
+        restitution:.86,
 
         // جسم صلب يمنع الصندوق من اختراق عربة الركاب.
         // النطاطات تعطي دفعة، وهذه الأجسام تمنع الدخول داخل الصورة.
@@ -746,17 +746,17 @@
         h:14
       },
       roofBounce:{
-        // نطة واحدة قوية للخلف/اليسار من أعلى مقطورة السائق، بدون تكرار في نفس الموضع وبدون دحرجة.
-        cooldown:1650,
-        minUpVelocity:3.95,
-        maxUpVelocity:5.15,
-        backwardVelocity:-3.15,
-        maxBackwardVelocity:-3.85,
+        // نطة واحدة قوية جدًا على شكل قوس للخلف/اليسار من أعلى مقطورة السائق، بدون تكرار وبدون دحرجة.
+        cooldown:2600,
+        minUpVelocity:4.65,
+        maxUpVelocity:5.75,
+        backwardVelocity:-6.25,
+        maxBackwardVelocity:-7.25,
         spinKick:0,
-        liftOut:16,
-        friction:.06,
-        frictionStatic:.08,
-        restitution:.34
+        liftOut:28,
+        friction:.035,
+        frictionStatic:.05,
+        restitution:.22
       }
     },
 
@@ -1658,9 +1658,9 @@
     item.lastPassengerBounceAt = now;
 
     Matter.Body.setVelocity(body, {
-      // نطات متكررة وسريعة باتجاه الخلف/اليسار، بدون تدوير الصندوق.
-      x:Math.min(body.velocity.x - .42, -profile.leftVelocity),
-      y:Math.min(body.velocity.y * .16, -profile.upVelocity)
+      // نطات عالية وواضحة باتجاه الخلف/اليسار، وليست عمودية فوق نفس المكان.
+      x:Math.min(body.velocity.x - 1.35, -profile.leftVelocity),
+      y:Math.min(body.velocity.y * .10, -profile.upVelocity)
     });
 
     // لا نضيف أي دوران: الصندوق يقفز بنفس حالته بدل الدحرجة.
@@ -1686,11 +1686,11 @@
     item.lastRoofBounceAt = now;
 
     const incomingY = Math.abs(body.velocity.y);
-    const upVelocity = -clamp(incomingY * 1.02, profile.minUpVelocity, profile.maxUpVelocity);
+    const upVelocity = -clamp(incomingY * 1.08, profile.minUpVelocity, profile.maxUpVelocity);
 
-    // نطة واحدة قوية باتجاه الخلف/اليسار، لا نسمح لها أن تكون ضعيفة إذا كان الصندوق شبه ثابت.
+    // نطة قوسية قوية للخلف/اليسار: الدفع الأفقي هنا أقوى من السابق حتى لا تصبح النطة عمودية.
     const backVelocity = clamp(
-      Math.min(body.velocity.x - 1.35, profile.backwardVelocity),
+      Math.min(body.velocity.x - 3.4, profile.backwardVelocity),
       profile.maxBackwardVelocity,
       profile.backwardVelocity
     );
@@ -1704,7 +1704,8 @@
     Matter.Body.setAngularVelocity(body, 0);
 
     Matter.Body.setPosition(body, {
-      x:body.position.x - 3,
+      // إزاحة واضحة لليسار بعد النطة الواحدة حتى لا يبقى فوق نفس النطاط.
+      x:body.position.x - profile.liftOut,
       y:Math.min(body.position.y - profile.liftOut, roofY - BOX.height / 2 - 8)
     });
   }
@@ -2646,7 +2647,7 @@
   }
 
   build();
-  /* إصدار 98: نطاط السائق نطة واحدة قوية للخلف، ونطاط الركاب نطات أسرع وأقوى للخلف بدون دحرجة. */
+  /* إصدار 99: تحويل النطات إلى أقواس أقوى للخلف/اليسار؛ نطة السائق واحدة قوية، ونطات الركاب أعلى وأسرع بدون دحرجة. */
 })();
 </script>
 </body>
