@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>مختبر سقوط الصندوق - إصدار 1</title>
+  <style>
+    :root{
+      --bg:#d9ecff;
+      --panel:#10233f;
+      --yellow:#ffd24a;
+      --cyan:#28d7ff;
+      --pink:#ff4f9a;
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+    html,body{
+      margin:0;
+      width:100%;
+      min-height:100%;
+      background:var(--bg);
+      font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;
+      -webkit-text-size-adjust:100%;
+    }
+
+    body{
+      min-height:100dvh;
+      overflow:hidden;
+    }
+
+    .page{
+      position:relative;
+      width:100vw;
+      height:100dvh;
+      overflow:hidden;
+      direction:ltr;
+      background:
+        linear-gradient(180deg,#bfcbe8 0%,#dce3f2 45%,#ead5ac 46%,#d7a464 72%,#bd7f42 100%);
+      user-select:none;
+    }
+
+    .stage{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      display:block;
+      overflow:hidden;
+      z-index:1;
+    }
+
+    .panel{
+      position:absolute;
+      inset-inline:18px;
+      bottom:18px;
+      z-index:5;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      direction:rtl;
+      padding:12px;
+      background:rgba(13,30,58,.82);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius:18px;
+      box-shadow:0 12px 30px rgba(0,0,0,.18);
+      backdrop-filter:blur(8px);
+    }
+
+    .panel-title{
+      color:#fff;
+      font-weight:900;
+      font-size:15px;
+      margin-inline:6px 10px;
+      white-space:nowrap;
+    }
+
+    button{
+      border:0;
+      border-radius:999px;
+      padding:11px 15px;
+      font-weight:900;
+      font-size:14px;
+      cursor:pointer;
+      color:#10233f;
+      background:var(--yellow);
+      box-shadow:0 5px 0 rgba(0,0,0,.18);
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+
+    button:nth-of-type(2n){background:var(--cyan)}
+    button:nth-of-type(3n){background:var(--pink);color:#fff}
+
+    button:active{
+      transform:translateY(3px);
+      box-shadow:0 2px 0 rgba(0,0,0,.22);
+    }
+
+    .note{
+      position:absolute;
+      top:16px;
+      right:16px;
+      z-index:5;
+      direction:rtl;
+      max-width:min(560px,calc(100vw - 32px));
+      padding:12px 15px;
+      border-radius:16px;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(255,255,255,.55);
+      color:#17345d;
+      font-weight:800;
+      line-height:1.55;
+      box-shadow:0 10px 28px rgba(0,0,0,.12);
+    }
+
+    .small{
+      font-size:13px;
+      font-weight:700;
+      color:#365477;
+    }
+
+    @media (max-width:700px){
+      .note{font-size:12px}
+      .panel{bottom:10px;inset-inline:10px}
+      button{font-size:12px;padding:10px 12px}
+      .panel-title{width:100%;text-align:center}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="note">
+      مختبر مستقل لحركة السقوط فقط — بدون Matter.js وبدون ملف القطار الأساسي.
+      <div class="small">الهدف: نضبط الإحساس أولًا. سقوط، ارتطام، انزلاق، ثبات. بعدها ننقل النظام للعبة.</div>
+    </div>
+
+    <svg id="stage" class="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="مختبر سقوط الصندوق داخل العربة">
+      <defs>
+        <linearGradient id="boxBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#b87948"/>
+          <stop offset="48%" stop-color="#8d552f"/>
+          <stop offset="100%" stop-color="#5f351e"/>
+        </linearGradient>
+        <linearGradient id="boxTop" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#cc8d58"/>
+          <stop offset="100%" stop-color="#87502d"/>
+        </linearGradient>
+        <linearGradient id="wagonBody" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d84a33"/>
+          <stop offset="55%" stop-color="#9d2b22"/>
+          <stop offset="100%" stop-color="#642016"/>
+        </linearGradient>
+        <linearGradient id="wagonLip" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#ffad58"/>
+          <stop offset="100%" stop-color="#d77231"/>
+        </linearGradient>
+        <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+          <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#2b170c" flood-opacity=".25"/>
+        </filter>
+      </defs>
+
+      <g id="scene">
+        <rect x="0" y="0" width="1280" height="720" fill="transparent"/>
+        <path d="M-90 610 C180 585 310 635 530 604 C760 574 930 636 1370 595 L1370 760 L-90 760 Z" fill="#a76634" opacity=".28"/>
+        <rect x="0" y="610" width="1280" height="18" fill="#3c2c28" opacity=".35"/>
+        <rect x="-50" y="628" width="1380" height="8" fill="#2d241f" opacity=".58"/>
+      </g>
+
+      <g id="wagonBack"></g>
+      <g id="roofLayer"></g>
+      <g id="boxLayer"></g>
+      <g id="wagonFront"></g>
+      <g id="fxLayer"></g>
+    </svg>
+
+    <div class="panel">
+      <div class="panel-title">اختبر الحركة:</div>
+      <button data-clip="right">سقوط من اليمين</button>
+      <button data-clip="center">سقوط من الوسط</button>
+      <button data-clip="left">سقوط من اليسار</button>
+      <button data-clip="gap">قريب من الفاصل</button>
+      <button data-clip="roof">اصطدام مقطورة السائق</button>
+      <button data-clip="track">سقوط على السكة</button>
+      <button data-clip="random">عشوائي</button>
+    </div>
+  </main>
+
+<script>
+(() => {
+  "use strict";
+
+  const NS = "http://www.w3.org/2000/svg";
+  const stage = document.getElementById("stage");
+  const wagonBack = document.getElementById("wagonBack");
+  const wagonFront = document.getElementById("wagonFront");
+  const roofLayer = document.getElementById("roofLayer");
+  const boxLayer = document.getElementById("boxLayer");
+  const fxLayer = document.getElementById("fxLayer");
+
+  const WAGON = {
+    x:430,
+    y:493,
+    w:410,
+    h:126,
+    floorY:566,
+    frontTop:522,
+    leftSafe:468,
+    rightSafe:802
+  };
+
+  const ROOF = {
+    x:760,
+    y:418,
+    w:142,
+    h:18
+  };
+
+  let currentBox = null;
+  let currentAnim = null;
+  let clipCounter = 0;
+
+  function el(name, attrs = {}, parent = stage){
+    const node = document.createElementNS(NS, name);
+    Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+    parent.appendChild(node);
+    return node;
+  }
+
+  function clamp(value, min, max){
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function easeOutCubic(t){
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function easeInCubic(t){
+    return t * t * t;
+  }
+
+  function easeInOutSine(t){
+    return -(Math.cos(Math.PI * t) - 1) / 2;
+  }
+
+  function easeOutSine(t){
+    return Math.sin((t * Math.PI) / 2);
+  }
+
+  const eases = {
+    linear:t => t,
+    outCubic:easeOutCubic,
+    inCubic:easeInCubic,
+    inOutSine:easeInOutSine,
+    outSine:easeOutSine
+  };
+
+  function clearNode(node){
+    while(node.firstChild) node.removeChild(node.firstChild);
+  }
+
+  function drawWagon(){
+    clearNode(wagonBack);
+    clearNode(wagonFront);
+    clearNode(roofLayer);
+
+    // خلفية حوض العربة.
+    el("path", {
+      d:`M${WAGON.x + 24} ${WAGON.y + 28}
+         C${WAGON.x + 70} ${WAGON.y + 12} ${WAGON.x + WAGON.w - 72} ${WAGON.y + 12} ${WAGON.x + WAGON.w - 24} ${WAGON.y + 28}
+         L${WAGON.x + WAGON.w - 40} ${WAGON.y + 86}
+         C${WAGON.x + WAGON.w - 82} ${WAGON.y + 112} ${WAGON.x + 82} ${WAGON.y + 112} ${WAGON.x + 40} ${WAGON.y + 86}
+         Z`,
+      fill:"#5f241b",
+      opacity:".86"
+    }, wagonBack);
+
+    // أرضية داخلية ظاهرة خفيفة.
+    el("ellipse", {
+      cx:WAGON.x + WAGON.w / 2,
+      cy:WAGON.floorY - 18,
+      rx:WAGON.w * .39,
+      ry:24,
+      fill:"#3f1712",
+      opacity:".55"
+    }, wagonBack);
+
+    // العجلات خلف الجسم.
+    [0,1,2,3].forEach(i => {
+      const cx = WAGON.x + 74 + i * 88;
+      el("circle", {cx, cy:612, r:28, fill:"#30251f", stroke:"#17110e", "stroke-width":5}, wagonBack);
+      el("circle", {cx, cy:612, r:12, fill:"#b68b5e", stroke:"#4a3022", "stroke-width":4}, wagonBack);
+    });
+
+    // سقف/منطقة مقطورة السائق للتجربة.
+    el("rect", {
+      x:ROOF.x,
+      y:ROOF.y,
+      width:ROOF.w,
+      height:ROOF.h,
+      rx:8,
+      fill:"#2c9cff",
+      opacity:".68",
+      stroke:"#0067c7",
+      "stroke-width":3
+    }, roofLayer);
+    el("text", {
+      x:ROOF.x + ROOF.w / 2,
+      y:ROOF.y - 12,
+      "text-anchor":"middle",
+      fill:"#08345f",
+      "font-size":18,
+      "font-weight":900,
+      direction:"rtl"
+    }, roofLayer).textContent = "منطقة القفزة";
+
+    // واجهة العربة فوق الصندوق.
+    el("path", {
+      d:`M${WAGON.x + 18} ${WAGON.y + 38}
+         C${WAGON.x + 78} ${WAGON.y + 60} ${WAGON.x + WAGON.w - 78} ${WAGON.y + 60} ${WAGON.x + WAGON.w - 18} ${WAGON.y + 38}
+         L${WAGON.x + WAGON.w - 45} ${WAGON.y + WAGON.h - 4}
+         C${WAGON.x + WAGON.w - 96} ${WAGON.y + WAGON.h + 18} ${WAGON.x + 96} ${WAGON.y + WAGON.h + 18} ${WAGON.x + 45} ${WAGON.y + WAGON.h - 4}
+         Z`,
+      fill:"url(#wagonBody)",
+      stroke:"#531d15",
+      "stroke-width":5,
+      filter:"url(#softShadow)"
+    }, wagonFront);
+
+    el("path", {
+      d:`M${WAGON.x + 30} ${WAGON.y + 38}
+         C${WAGON.x + 88} ${WAGON.y + 25} ${WAGON.x + WAGON.w - 88} ${WAGON.y + 25} ${WAGON.x + WAGON.w - 30} ${WAGON.y + 38}`,
+      fill:"none",
+      stroke:"url(#wagonLip)",
+      "stroke-width":13,
+      "stroke-linecap":"round"
+    }, wagonFront);
+
+    el("text", {
+      x:WAGON.x + WAGON.w / 2,
+      y:WAGON.y + 82,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#ffe28a",
+      stroke:"#5b2618",
+      "stroke-width":3,
+      "paint-order":"stroke fill",
+      "font-size":34,
+      "font-weight":1000,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl"
+    }, wagonFront).textContent = "العربة";
+  }
+
+  function createBox(){
+    clearNode(boxLayer);
+    clearNode(fxLayer);
+
+    const g = el("g", {filter:"url(#softShadow)"}, boxLayer);
+
+    el("path", {
+      d:"M-48 -34 L48 -34 L60 -19 L-36 -19 Z",
+      fill:"url(#boxTop)",
+      stroke:"#4e2b18",
+      "stroke-width":2.3
+    }, g);
+
+    el("rect", {
+      x:-48,
+      y:-19,
+      width:96,
+      height:62,
+      rx:8,
+      fill:"url(#boxBody)",
+      stroke:"#4e2b18",
+      "stroke-width":3
+    }, g);
+
+    el("path", {
+      d:"M-48 3 L48 3 M-18 -19 L-18 43 M18 -19 L18 43",
+      fill:"none",
+      stroke:"#d3a06a",
+      "stroke-width":3.2,
+      opacity:".72"
+    }, g);
+
+    el("text", {
+      x:0,
+      y:7,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#fff0b8",
+      stroke:"#442313",
+      "stroke-width":2,
+      "paint-order":"stroke fill",
+      "font-size":18,
+      "font-weight":900,
+      direction:"rtl",
+      style:"direction:rtl;unicode-bidi:plaintext"
+    }, g).textContent = "إجابة";
+
+    currentBox = g;
+    return g;
+  }
+
+  function setBoxState(state){
+    if(!currentBox) return;
+
+    currentBox.setAttribute(
+      "transform",
+      `translate(${state.x.toFixed(2)} ${state.y.toFixed(2)}) rotate(${state.r.toFixed(2)}) scale(${(state.s ?? 1).toFixed(3)})`
+    );
+
+    // الصندوق يبدأ فوق العربة، ثم يدخل خلف واجهتها بعد نقطة الاصطدام.
+    if(state.inside){
+      if(currentBox.parentNode !== boxLayer){
+        boxLayer.appendChild(currentBox);
+      }
+    }
+  }
+
+  function burst(x, y){
+    clearNode(fxLayer);
+    const g = el("g", {transform:`translate(${x} ${y})`}, fxLayer);
+
+    for(let i = 0; i < 16; i++){
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 22 + Math.random() * 60;
+      const dot = el("circle", {
+        cx:0,
+        cy:0,
+        r:3 + Math.random() * 4,
+        fill:i % 2 ? "#8a5a34" : "#e0ae71",
+        opacity:".86"
+      }, g);
+
+      const move = el("animateTransform", {
+        attributeName:"transform",
+        type:"translate",
+        from:"0 0",
+        to:`${Math.cos(angle) * dist} ${Math.sin(angle) * dist * .55}`,
+        dur:".45s",
+        fill:"freeze"
+      }, dot);
+      const fade = el("animate", {
+        attributeName:"opacity",
+        values:".86;.35;0",
+        dur:".45s",
+        fill:"freeze"
+      }, dot);
+      move.beginElement();
+      fade.beginElement();
+    }
+
+    setTimeout(() => clearNode(fxLayer), 620);
+  }
+
+  function interpolateFrames(frames, elapsed){
+    if(elapsed <= frames[0].t) return {...frames[0]};
+
+    for(let i = 0; i < frames.length - 1; i++){
+      const a = frames[i];
+      const b = frames[i + 1];
+
+      if(elapsed >= a.t && elapsed <= b.t){
+        const span = b.t - a.t || 1;
+        const raw = (elapsed - a.t) / span;
+        const ease = eases[b.ease || "linear"] || eases.linear;
+        const p = ease(raw);
+
+        return {
+          x:a.x + (b.x - a.x) * p,
+          y:a.y + (b.y - a.y) * p,
+          r:a.r + (b.r - a.r) * p,
+          s:(a.s ?? 1) + ((b.s ?? 1) - (a.s ?? 1)) * p,
+          inside:b.inside || a.inside
+        };
+      }
+    }
+
+    return {...frames[frames.length - 1]};
+  }
+
+  const clips = {
+    right:{
+      label:"سقوط من اليمين",
+      frames:[
+        {t:0, x:740, y:150, r:-9},
+        {t:290, x:716, y:280, r:-22, ease:"inCubic"},
+        {t:560, x:684, y:480, r:-42, ease:"inCubic"},
+        {t:690, x:660, y:523, r:-31, inside:true, ease:"outSine"},
+        {t:830, x:637, y:506, r:-18, inside:true, ease:"outSine"},
+        {t:1110, x:606, y:518, r:-10, inside:true, ease:"outCubic"},
+        {t:1450, x:586, y:520, r:-7, inside:true, ease:"outCubic"},
+        {t:1840, x:576, y:521, r:-6, inside:true, ease:"outCubic"}
+      ]
+    },
+    center:{
+      label:"سقوط من الوسط",
+      frames:[
+        {t:0, x:640, y:142, r:7},
+        {t:300, x:632, y:290, r:22, ease:"inCubic"},
+        {t:560, x:624, y:478, r:34, ease:"inCubic"},
+        {t:690, x:618, y:523, r:24, inside:true, ease:"outSine"},
+        {t:825, x:609, y:509, r:13, inside:true, ease:"outSine"},
+        {t:1130, x:596, y:519, r:7, inside:true, ease:"outCubic"},
+        {t:1650, x:592, y:521, r:5, inside:true, ease:"outCubic"}
+      ]
+    },
+    left:{
+      label:"سقوط من اليسار",
+      frames:[
+        {t:0, x:520, y:145, r:12},
+        {t:300, x:527, y:286, r:31, ease:"inCubic"},
+        {t:565, x:542, y:476, r:48, ease:"inCubic"},
+        {t:700, x:552, y:523, r:37, inside:true, ease:"outSine"},
+        {t:845, x:566, y:508, r:21, inside:true, ease:"outSine"},
+        {t:1180, x:590, y:519, r:10, inside:true, ease:"outCubic"},
+        {t:1720, x:602, y:521, r:7, inside:true, ease:"outCubic"}
+      ]
+    },
+    gap:{
+      label:"قريب من الفاصل",
+      frames:[
+        {t:0, x:414, y:154, r:-8},
+        {t:310, x:424, y:304, r:-21, ease:"inCubic"},
+        {t:570, x:446, y:481, r:-38, ease:"inCubic"},
+        {t:700, x:469, y:523, r:-28, inside:true, ease:"outSine"},
+        {t:880, x:494, y:510, r:-16, inside:true, ease:"outSine"},
+        {t:1260, x:526, y:519, r:-8, inside:true, ease:"outCubic"},
+        {t:1800, x:540, y:521, r:-6, inside:true, ease:"outCubic"}
+      ]
+    },
+    roof:{
+      label:"اصطدام مقطورة السائق",
+      frames:[
+        {t:0, x:830, y:112, r:-4},
+        {t:320, x:826, y:282, r:-20, ease:"inCubic"},
+        {t:520, x:821, y:382, r:-30, ease:"inCubic"},
+        {t:610, x:810, y:386, r:-38, ease:"outSine"},
+        {t:790, x:768, y:342, r:-66, ease:"outSine"},
+        {t:1060, x:724, y:426, r:-92, ease:"inCubic"},
+        {t:1270, x:678, y:523, r:-54, inside:true, ease:"outSine"},
+        {t:1430, x:650, y:506, r:-34, inside:true, ease:"outSine"},
+        {t:1780, x:612, y:518, r:-16, inside:true, ease:"outCubic"},
+        {t:2260, x:594, y:521, r:-10, inside:true, ease:"outCubic"}
+      ]
+    },
+    track:{
+      label:"سقوط على السكة",
+      frames:[
+        {t:0, x:1000, y:140, r:5},
+        {t:320, x:980, y:294, r:24, ease:"inCubic"},
+        {t:610, x:948, y:514, r:52, ease:"inCubic"},
+        {t:750, x:932, y:602, r:68, ease:"inCubic"}
+      ],
+      breakAtEnd:true
+    }
+  };
+
+  const randomOrder = ["right", "center", "left", "gap", "roof"];
+
+  function playClip(name){
+    if(name === "random"){
+      name = randomOrder[Math.floor(Math.random() * randomOrder.length)];
+    }
+
+    const clip = clips[name] || clips.center;
+    clipCounter += 1;
+    const runId = clipCounter;
+
+    if(currentAnim) cancelAnimationFrame(currentAnim);
+    createBox();
+
+    const start = performance.now();
+    const frames = clip.frames;
+
+    function frame(now){
+      if(runId !== clipCounter) return;
+
+      const elapsed = now - start;
+      const state = interpolateFrames(frames, elapsed);
+      setBoxState(state);
+
+      const endTime = frames[frames.length - 1].t;
+      if(elapsed < endTime){
+        currentAnim = requestAnimationFrame(frame);
+      }else{
+        setBoxState(frames[frames.length - 1]);
+        currentAnim = null;
+
+        if(clip.breakAtEnd){
+          burst(frames[frames.length - 1].x, frames[frames.length - 1].y);
+          if(currentBox) currentBox.remove();
+          currentBox = null;
+        }
+      }
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  drawWagon();
+
+  document.querySelectorAll("button[data-clip]").forEach(button => {
+    button.addEventListener("click", () => playClip(button.dataset.clip));
+  });
+
+  setTimeout(() => playClip("center"), 450);
+})();
+</script>
+</body>
+</html>
