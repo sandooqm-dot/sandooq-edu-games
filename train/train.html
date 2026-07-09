@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 93</title>
+  <title>قطار الإجابات - إصدار 94</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -686,6 +686,27 @@
       }
     },
 
+    passenger:{
+      bouncer:{
+        // نطاطات خفيفة أعلى وجانبي عربة الركاب، تدفع الصندوق لليسار باتجاه العربة الأخيرة.
+        inset:14,
+        topYOffset:14,
+        topH:20,
+        sideInset:8,
+        sideYOffset:16,
+        sideW:20,
+        sideH:118,
+        cooldown:280,
+        leftVelocity:1.08,
+        upVelocity:.82,
+        spinKick:.018,
+        liftOut:5,
+        friction:.05,
+        frictionStatic:.08,
+        restitution:.42
+      }
+    },
+
     gap:{
       yOffset:-7,
       width:54,
@@ -1030,6 +1051,23 @@
       });
     });
 
+    TRAIN_CARS.forEach((car, index) => {
+      if(!car || car.type !== "passenger") return;
+
+      const layout = passengerLayoutForIndex(index);
+
+      parts.push({
+        type:"passenger",
+        id:`passenger-${index}`,
+        index,
+        car,
+        x:trainWorldX(layout.x),
+        y:layout.y,
+        w:layout.width,
+        h:layout.height
+      });
+    });
+
     parts.push({
       type:"engine",
       id:"engine",
@@ -1178,6 +1216,75 @@
     });
   }
 
+  function addPassengerPhysicsPart(part){
+    const profile = TRAIN_PHYSICS_PROFILES.passenger.bouncer;
+
+    const inset = trainLen(profile.inset);
+    const topY = part.y + trainLen(profile.topYOffset);
+    const topH = trainLen(profile.topH);
+    const sideInset = trainLen(profile.sideInset);
+    const sideW = trainLen(profile.sideW);
+    const sideH = trainLen(profile.sideH);
+    const sideCenterY = part.y + trainLen(profile.sideYOffset) + sideH / 2;
+
+    addMatterRect(part.x + part.w / 2, topY, part.w - inset * 2, topH, {
+      label:`${part.id}-top-passenger-bouncer`,
+      sgType:"passenger-bouncer",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+
+    addMatterRect(part.x + sideInset, sideCenterY, sideW, sideH, {
+      label:`${part.id}-left-passenger-bouncer`,
+      sgType:"passenger-bouncer",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+
+    addMatterRect(part.x + part.w - sideInset, sideCenterY, sideW, sideH, {
+      label:`${part.id}-right-passenger-bouncer`,
+      sgType:"passenger-bouncer",
+      sgPartId:part.id,
+      sgPassengerIndex:part.index,
+      sgPushX:-1,
+      isSensor:true,
+      friction:profile.friction,
+      frictionStatic:profile.frictionStatic,
+      restitution:profile.restitution
+    });
+
+    collisionMap.push(makeSurface({
+      left:part.x + inset,
+      right:part.x + part.w - inset,
+      y:topY - topH / 2,
+      thickness:topH
+    }, {name:`${part.id}-top-passenger-bouncer`}));
+
+    collisionMap.push(makeSurface({
+      left:part.x,
+      right:part.x + sideW + sideInset,
+      y:sideCenterY - sideH / 2,
+      thickness:sideH
+    }, {name:`${part.id}-left-passenger-bouncer`}));
+
+    collisionMap.push(makeSurface({
+      left:part.x + part.w - sideW - sideInset,
+      right:part.x + part.w,
+      y:sideCenterY - sideH / 2,
+      thickness:sideH
+    }, {name:`${part.id}-right-passenger-bouncer`}));
+  }
+
   function addGapPhysicsBetweenParts(leftPart, rightPart){
     const profile = TRAIN_PHYSICS_PROFILES.gap;
     const leftEdge = leftPart.x + leftPart.w;
@@ -1240,6 +1347,7 @@
 
     parts.forEach(part => {
       if(part.type === "wagon") addWagonPhysicsPart(part);
+      if(part.type === "passenger") addPassengerPhysicsPart(part);
       if(part.type === "engine") addEnginePhysicsPart(part);
     });
 
@@ -1466,6 +1574,35 @@
     });
   }
 
+  function applyPassengerBouncerBounce(item, body, bouncerBody){
+    if(!item || !body || !bouncerBody || !Matter || !Matter.Body) return;
+
+    const profile = TRAIN_PHYSICS_PROFILES.passenger.bouncer;
+    const now = performance.now();
+
+    if(item.lastPassengerBounceAt && now - item.lastPassengerBounceAt < profile.cooldown){
+      return;
+    }
+
+    item.lastPassengerBounceAt = now;
+
+    Matter.Body.setVelocity(body, {
+      // دفع ثابت لليسار باتجاه العربة الأخيرة، مع قفزة خفيفة فقط.
+      x:Math.min(body.velocity.x, -profile.leftVelocity),
+      y:Math.min(body.velocity.y * .22, -profile.upVelocity)
+    });
+
+    Matter.Body.setAngularVelocity(
+      body,
+      body.angularVelocity * .62 - profile.spinKick
+    );
+
+    Matter.Body.setPosition(body, {
+      x:body.position.x - profile.liftOut,
+      y:body.position.y - profile.liftOut
+    });
+  }
+
   function applyDriverRoofBounce(item, body, roofBody){
     if(!item || !body || !Matter || !Matter.Body) return;
 
@@ -1578,6 +1715,11 @@
 
     if(bodyB.sgType === "gap-smart-bouncer"){
       applySmartGapBounceToMatter(item, bodyA, bodyB, false);
+      return;
+    }
+
+    if(bodyB.sgType === "passenger-bouncer"){
+      applyPassengerBouncerBounce(item, bodyA, bodyB);
       return;
     }
 
@@ -1766,6 +1908,7 @@
       lastWellIndex:null,
       lastTopEdgeBumperAt:0,
       lastGapSmartAt:0,
+      lastPassengerBounceAt:0,
       lastRoofBounceAt:0,
       firstSurfaceContactAt:0,
       airDriftActive:true,
@@ -2119,6 +2262,25 @@
     wagonStep:288
   };
 
+  function passengerLayoutForIndex(index){
+    const rawSlotX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const rawPassengerW = 320;
+    const rawPassengerH = 179;
+    const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2;
+    const rawPassengerY = 418;
+
+    return {
+      rawX:rawPassengerX,
+      rawY:rawPassengerY,
+      rawW:rawPassengerW,
+      rawH:rawPassengerH,
+      x:trainX(rawPassengerX),
+      y:trainY(rawPassengerY),
+      width:trainLen(rawPassengerW),
+      height:trainLen(rawPassengerH)
+    };
+  }
+
   const trainCarRegistry = [];
 
   function answerWagon(train, car, index){
@@ -2203,18 +2365,14 @@
 
   function passengerWagon(train, car, index){
     // عربة الركاب بصرية فقط:
-    // لا تدخل في trainCarRegistry ولا في فيزياء الصناديق.
-    // حجمها أصبح مطابقًا تقريبًا لمقطورة السائق، مع إبقاء العجلات بنفس طريقة عربات السؤال.
-    const rawSlotX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
-    const rawPassengerW = 320;
-    const rawPassengerH = 179;
-    const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2;
-    const rawPassengerY = 418;
-
-    const passengerX = trainX(rawPassengerX);
-    const passengerY = trainY(rawPassengerY);
-    const passengerW = trainLen(rawPassengerW);
-    const passengerH = trainLen(rawPassengerH);
+    // لا تدخل في trainCarRegistry ولا تُحسب كعربة سؤال.
+    // نطاطاتها الفيزيائية تعتمد على نفس passengerLayoutForIndex المستخدم للرسم.
+    const layout = passengerLayoutForIndex(index);
+    const rawPassengerX = layout.rawX;
+    const passengerX = layout.x;
+    const passengerY = layout.y;
+    const passengerW = layout.width;
+    const passengerH = layout.height;
 
     const wheelLayer = el("g", {id:`passengerWheelLayer-${index}`}, train);
     const wheelSize = 47.4;
@@ -2411,7 +2569,7 @@
   }
 
   build();
-  /* إصدار 93: تقدم القطار من عربة السؤال الأولى إلى الثانية ثم الخروج بعد نجاح العربة الثانية، مع مزامنة الفيزياء مع توقف القطار. */
+  /* إصدار 94: إضافة نطاطات خفيفة أعلى وجانبي أي عربة ركاب، تدفع الصندوق لليسار باتجاه العربة الأخيرة. */
 })();
 </script>
 </body>
