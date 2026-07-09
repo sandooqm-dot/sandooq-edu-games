@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 76</title>
+  <title>قطار الإجابات - إصدار 77</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -673,6 +673,13 @@
   const settledVisualMatterBoxes = [];
   const pendingMatterSpawns = [];
 
+  const MATTER_COLLISION = {
+    // الصناديق لا تتصادم مع بعضها أبدًا.
+    // الصندوق يتصادم فقط مع القطار/العربة/النطاطات/الفواصل/مناطق الانفجار.
+    train:0x0001,
+    box:0x0002
+  };
+
   function clamp(value, min, max){
     return Math.max(min, Math.min(max, value));
   }
@@ -793,6 +800,10 @@
       friction:.9,
       frictionStatic:1.1,
       restitution:.08,
+      collisionFilter:{
+        category:MATTER_COLLISION.train,
+        mask:MATTER_COLLISION.box
+      },
       ...options
     });
 
@@ -1349,6 +1360,9 @@
       `translate(${x.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
     );
 
+    // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
+    node.removeAttribute("filter");
+
     cleanupMatterBox(item, false);
 
     const layer = settledObjectsLayer || fallingObjectsLayer || svg;
@@ -1437,6 +1451,10 @@
 
     const body = Matter.Bodies.rectangle(startX, startY + 54, BOX.width, BOX.height, {
       label:"answer-box",
+      collisionFilter:{
+        category:MATTER_COLLISION.box,
+        mask:MATTER_COLLISION.train
+      },
       ...TRAIN_PHYSICS_PROFILES.box.body
     });
 
@@ -1833,7 +1851,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=76",
+      href:"train-wagon.webp?v=77",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1841,7 +1859,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=76");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=77");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1874,7 +1892,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=76",
+        href:"train-wagon.webp?v=77",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1882,7 +1900,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=76");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=77");
 
       el("text", {
         x:car.centerX,
@@ -1917,7 +1935,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=76",
+      href:"train-engine-transparent.png?v=77",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -1925,7 +1943,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=76");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=77");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -1975,7 +1993,7 @@
   }
 
   build();
-  /* إصدار 76: إكمال النقل كاملًا؛ Matter.js هو مسار السقوط الوحيد مع طابور جاهزية وبدون بقايا مسار قديم. */
+  /* إصدار 77: الصناديق لا تتصادم مع بعضها؛ تتصادم فقط مع القطار لتحسين الأداء ومنع دفع الصناديق. */
 })();
 </script>
 </body>
