@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 85</title>
+  <title>قطار الإجابات - إصدار 86</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -1665,12 +1665,6 @@
     if(tspans[1]) tspans[1].textContent = lines[1] || "";
   }
 
-  function applyBalloonTransform(item){
-    if(!item || !item.node || !item.state || !item.config) return;
-
-    applyBalloonTransform(item);
-  }
-
   function createBalloonMotionState(config, index = 0){
     const now = performance.now();
     return {
@@ -1707,11 +1701,14 @@
     item.state.driftTarget = Math.random() * 44 - 22;
     item.state.nextDriftAt = now + 750 + Math.random() * 1700;
 
-    // مهم: حدث مكان البالون الجديد وهو مخفي قبل إظهاره.
-    // هذا يمنع لمحة ظهور البالون القديم في مكان الفرقعة قبل اختفائه.
-    applyBalloonTransform(item);
+    // تحديث المكان الجديد وهو مخفي أولًا، ثم إظهاره.
+    // هذا يمنع لمحة ظهور البالون القديم بعد الفرقعة بدون لمس القطار أو الفيزياء.
+    item.node.setAttribute(
+      "transform",
+      `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
+    );
 
-    item.node.setAttribute("visibility", "visible");
+    item.node.style.display = "";
     item.node.setAttribute("opacity", "1");
     item.node.style.pointerEvents = "auto";
     item.popped = false;
@@ -1725,7 +1722,7 @@
     item.resetAt = now + 950;
 
     item.node.setAttribute("opacity", "0");
-    item.node.setAttribute("visibility", "hidden");
+    item.node.style.display = "none";
     item.node.style.pointerEvents = "none";
 
     balloonBurst(fallingObjectsLayer || svg, item.state.x, item.state.y, item.config.scale);
@@ -1764,7 +1761,10 @@
 
     item.state.y = clamp(item.config.baseY + wave + item.state.drift, item.config.minY, item.config.maxY);
 
-    applyBalloonTransform(item);
+    item.node.setAttribute(
+      "transform",
+      `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
+    );
 
     if(item.state.x < item.config.endX){
       recycleBalloon(item, now, false);
@@ -1833,8 +1833,6 @@
         resetAt:0
       };
 
-      applyBalloonTransform(item);
-
       balloon.addEventListener("pointerdown", event => {
         event.preventDefault();
         popPooledBalloon(item, performance.now());
@@ -1884,14 +1882,14 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=85",
+      href:"train-track.webp?v=84",
       x:trainX(-55),
       y:trainY(604),
       width:trainLen(1390),
       height:trainLen(27),
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=85");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
   }
 
   function addWheel(layer, cx, cy, size, version = 72){
@@ -1992,7 +1990,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=85",
+      href:"train-wagon.webp?v=84",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -2000,7 +1998,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=85");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -2033,7 +2031,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=85",
+        href:"train-wagon.webp?v=84",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -2041,7 +2039,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=85");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
       el("text", {
         x:car.centerX,
@@ -2080,7 +2078,7 @@
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=85",
+      href:"train-engine-transparent.png?v=84",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -2088,7 +2086,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=85");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=84");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
@@ -2132,7 +2130,7 @@
       }, clip);
 
       const cover = el("image", {
-        href:"train-wagon.webp?v=85",
+        href:"train-wagon.webp?v=84",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -2141,7 +2139,7 @@
         "clip-path":`url(#${clipId})`,
         "pointer-events":"none"
       }, coverLayer);
-      cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=85");
+      cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
     });
   }
 
@@ -2178,7 +2176,7 @@
   }
 
   build();
-  /* إصدار 85: منع لمحة ظهور البالون بعد الفرقعة بتحديث موضعه وهو مخفي قبل إعادة إظهاره. */
+  /* إصدار 86: مبني من 84؛ إصلاح لمحة البالون بعد الفرقعة فقط بدون تغيير القطار أو الفيزياء أو الصور. */
 })();
 </script>
 </body>
