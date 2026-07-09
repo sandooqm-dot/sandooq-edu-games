@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 81</title>
+  <title>قطار الإجابات - إصدار 82</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -561,6 +561,31 @@
     height:72
   };
 
+  // تصغير القطار والسكة فقط. البالونات والصناديق تبقى بنفس الحجم.
+  const TRAIN_SCALE = .92;
+  const TRAIN_SCALE_PIVOT = {x:640, y:604};
+
+  function trainX(x){
+    return TRAIN_SCALE_PIVOT.x + (x - TRAIN_SCALE_PIVOT.x) * TRAIN_SCALE;
+  }
+
+  function trainY(y){
+    return TRAIN_SCALE_PIVOT.y + (y - TRAIN_SCALE_PIVOT.y) * TRAIN_SCALE;
+  }
+
+  function trainLen(value){
+    return value * TRAIN_SCALE;
+  }
+
+  function trainRect(rect){
+    return {
+      left:trainX(rect.left),
+      right:trainX(rect.right),
+      top:trainY(rect.top),
+      bottom:trainY(rect.bottom)
+    };
+  }
+
   /*
     نظام فيزياء القطار المنقول من المختبر:
     - لا يوجد manual fallback.
@@ -843,18 +868,23 @@
         y:car.y,
         w:car.width,
         h:car.height,
-        floorY:car.y + TRAIN_PHYSICS_PROFILES.wagon.floor.yOffsetFromTop
+        floorY:car.y + trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.yOffsetFromTop)
       });
     });
 
     parts.push({
       type:"engine",
       id:"engine",
-      x:782,
-      y:430,
-      w:320,
-      h:179,
-      roof:{...TRAIN_PHYSICS_PROFILES.engine.roof}
+      x:trainX(782),
+      y:trainY(430),
+      w:trainLen(320),
+      h:trainLen(179),
+      roof:{
+        x1:trainX(TRAIN_PHYSICS_PROFILES.engine.roof.x1),
+        x2:trainX(TRAIN_PHYSICS_PROFILES.engine.roof.x2),
+        y:trainY(TRAIN_PHYSICS_PROFILES.engine.roof.y),
+        h:trainLen(TRAIN_PHYSICS_PROFILES.engine.roof.h)
+      }
     });
 
     return parts;
@@ -871,11 +901,22 @@
     const car = part.car;
     const index = part.index;
 
+    const floorInset = trainLen(profile.floor.inset);
+    const floorH = trainLen(profile.floor.h);
+    const wallXInset = trainLen(profile.wall.xInset);
+    const wallYOffset = trainLen(profile.wall.yOffset);
+    const wallW = trainLen(profile.wall.w);
+    const wallH = trainLen(profile.wall.h);
+    const topXInset = trainLen(profile.topBumper.xInset);
+    const topYOffset = trainLen(profile.topBumper.yOffset);
+    const topW = trainLen(profile.topBumper.w);
+    const topH = trainLen(profile.topBumper.h);
+
     const well = {
-      left:car.x + 2,
-      right:car.x + car.width - 2,
-      top:car.y + 4,
-      bottom:car.y + car.height - 10
+      left:car.x + trainLen(2),
+      right:car.x + car.width - trainLen(2),
+      top:car.y + trainLen(4),
+      bottom:car.y + car.height - trainLen(10)
     };
 
     collisionMap.push(makeWell(well, {
@@ -886,7 +927,7 @@
       name:`wagon-well-${index}`
     }));
 
-    addMatterRect(part.x + part.w / 2, part.floorY, part.w - profile.floor.inset * 2, profile.floor.h, {
+    addMatterRect(part.x + part.w / 2, part.floorY, part.w - floorInset * 2, floorH, {
       label:`${part.id}-floor`,
       sgType:"wagon-floor",
       sgPartId:part.id,
@@ -896,7 +937,7 @@
       restitution:profile.floor.restitution
     });
 
-    addMatterRect(part.x + profile.wall.xInset, part.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+    addMatterRect(part.x + wallXInset, part.y + wallYOffset, wallW, wallH, {
       label:`${part.id}-left-wall`,
       sgType:"wagon-wall",
       sgPartId:part.id,
@@ -906,7 +947,7 @@
       restitution:profile.wall.restitution
     });
 
-    addMatterRect(part.x + part.w - profile.wall.xInset, part.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+    addMatterRect(part.x + part.w - wallXInset, part.y + wallYOffset, wallW, wallH, {
       label:`${part.id}-right-wall`,
       sgType:"wagon-wall",
       sgPartId:part.id,
@@ -916,7 +957,7 @@
       restitution:profile.wall.restitution
     });
 
-    addMatterRect(part.x + profile.topBumper.xInset, part.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+    addMatterRect(part.x + topXInset, part.y + topYOffset, topW, topH, {
       label:`${part.id}-left-top-edge-bumper`,
       sgType:"wagon-top-edge-bumper",
       sgPartId:part.id,
@@ -929,7 +970,7 @@
       restitution:profile.topBumper.restitution
     });
 
-    addMatterRect(part.x + part.w - profile.topBumper.xInset, part.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+    addMatterRect(part.x + part.w - topXInset, part.y + topYOffset, topW, topH, {
       label:`${part.id}-right-top-edge-bumper`,
       sgType:"wagon-top-edge-bumper",
       sgPartId:part.id,
@@ -943,17 +984,17 @@
     });
 
     collisionMap.push(makeSurface({
-      left:part.x + profile.topBumper.xInset - profile.topBumper.w / 2,
-      right:part.x + profile.topBumper.xInset + profile.topBumper.w / 2,
-      y:part.y + profile.topBumper.yOffset,
-      thickness:profile.topBumper.h
+      left:part.x + topXInset - profile.topBumper.w / 2,
+      right:part.x + topXInset + profile.topBumper.w / 2,
+      y:part.y + topYOffset,
+      thickness:topH
     }, {name:`${part.id}-left-top-edge-bumper`}));
 
     collisionMap.push(makeSurface({
-      left:part.x + part.w - profile.topBumper.xInset - profile.topBumper.w / 2,
-      right:part.x + part.w - profile.topBumper.xInset + profile.topBumper.w / 2,
-      y:part.y + profile.topBumper.yOffset,
-      thickness:profile.topBumper.h
+      left:part.x + part.w - topXInset - profile.topBumper.w / 2,
+      right:part.x + part.w - topXInset + profile.topBumper.w / 2,
+      y:part.y + topYOffset,
+      thickness:topH
     }, {name:`${part.id}-right-top-edge-bumper`}));
   }
 
@@ -984,17 +1025,19 @@
     const leftEdge = leftPart.x + leftPart.w;
     const rightEdge = rightPart.x;
     const center = (leftEdge + rightEdge) / 2;
-    const y = Math.min(leftPart.y, rightPart.y) + profile.yOffset;
-    const halfW = profile.width / 2;
+    const y = Math.min(leftPart.y, rightPart.y) + trainLen(profile.yOffset);
+    const gapW = trainLen(profile.width);
+    const gapH = trainLen(profile.height);
+    const halfW = gapW / 2;
 
     collisionMap.push(makeSurface({
-      left:center - profile.width / 2,
-      right:center + profile.width / 2,
+      left:center - gapW / 2,
+      right:center + gapW / 2,
       y,
-      thickness:profile.height
+      thickness:gapH
     }, {name:`gap-smart-${leftPart.id}-${rightPart.id}`}));
 
-    addMatterRect(center - halfW / 2, y, halfW, profile.height, {
+    addMatterRect(center - halfW / 2, y, halfW, gapH, {
       label:`gap-${leftPart.id}-${rightPart.id}-left-smart-bouncer`,
       sgType:"gap-smart-bouncer",
       sgGapCenter:center,
@@ -1007,7 +1050,7 @@
       restitution:profile.restitution
     });
 
-    addMatterRect(center + halfW / 2, y, halfW, profile.height, {
+    addMatterRect(center + halfW / 2, y, halfW, gapH, {
       label:`gap-${leftPart.id}-${rightPart.id}-right-smart-bouncer`,
       sgType:"gap-smart-bouncer",
       sgGapCenter:center,
@@ -1044,16 +1087,22 @@
     resetMatterWorld();
 
     collisionMap.push(makeBreakSurface({
-      left:-90,
-      right:1380,
-      y:604,
-      thickness:54
+      left:trainX(-90),
+      right:trainX(1380),
+      y:trainY(604),
+      thickness:trainLen(54)
     }, {name:"track"}));
 
-    addMatterRect(640, TRAIN_PHYSICS_PROFILES.track.y, TRAIN_PHYSICS_PROFILES.track.w, TRAIN_PHYSICS_PROFILES.track.h, {
-      label:"kill-track",
-      isSensor:true
-    });
+    addMatterRect(
+      trainX(640),
+      trainY(TRAIN_PHYSICS_PROFILES.track.y),
+      trainLen(TRAIN_PHYSICS_PROFILES.track.w),
+      trainLen(TRAIN_PHYSICS_PROFILES.track.h),
+      {
+        label:"kill-track",
+        isSensor:true
+      }
+    );
 
     addAllTrainPartPhysics();
 
@@ -1067,18 +1116,20 @@
       {name:"engine-nose", left:1116, right:1208, top:498, bottom:620},
       {name:"engine-plow", left:1088, right:1210, top:550, bottom:632}
     ].forEach(zone => {
+      const scaledZone = trainRect(zone);
+
       collisionMap.push(makeBreak({
-        left:zone.left,
-        right:zone.right,
-        top:zone.top,
-        bottom:zone.bottom
+        left:scaledZone.left,
+        right:scaledZone.right,
+        top:scaledZone.top,
+        bottom:scaledZone.bottom
       }, {name:zone.name}));
 
       addMatterRect(
-        (zone.left + zone.right) / 2,
-        (zone.top + zone.bottom) / 2,
-        zone.right - zone.left,
-        zone.bottom - zone.top,
+        (scaledZone.left + scaledZone.right) / 2,
+        (scaledZone.top + scaledZone.bottom) / 2,
+        scaledZone.right - scaledZone.left,
+        scaledZone.bottom - scaledZone.top,
         {
           label:`kill-${zone.name}`,
           sgType:"kill",
@@ -1822,23 +1873,27 @@
 
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
-      href:"train-track.webp?v=72",
-      x:-55,
-      y:604,
-      width:1390,
-      height:27,
+      href:"train-track.webp?v=82",
+      x:trainX(-55),
+      y:trainY(604),
+      width:trainLen(1390),
+      height:trainLen(27),
       preserveAspectRatio:"none"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=72");
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=82");
   }
 
   function addWheel(layer, cx, cy, size, version = 72){
+    const scaledCx = trainX(cx);
+    const scaledCy = trainY(cy);
+    const scaledSize = trainLen(size);
+
     const wheel = el("image", {
       href:`train-wheel.webp?v=${version}`,
-      x:cx - size / 2,
-      y:cy - size / 2,
-      width:size,
-      height:size,
+      x:scaledCx - scaledSize / 2,
+      y:scaledCy - scaledSize / 2,
+      width:scaledSize,
+      height:scaledSize,
       preserveAspectRatio:"xMidYMid meet",
       class:"train-wheel"
     }, layer);
@@ -1875,18 +1930,23 @@
   function answerWagon(train, car, index){
     // قالب عربة الإجابة:
     // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
-    const wagonX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
-    const wagonY = TRAIN_LAYOUT.wagonY;
-    const wagonW = TRAIN_LAYOUT.wagonW;
-    const wagonH = TRAIN_LAYOUT.wagonH;
+    // يتم تصغير القطار هنا فقط؛ الصندوق والبالونات تبقى بالحجم الأصلي.
+    const rawWagonX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const rawWagonY = TRAIN_LAYOUT.wagonY;
+    const rawWagonW = TRAIN_LAYOUT.wagonW;
+    const rawWagonH = TRAIN_LAYOUT.wagonH;
+
+    const wagonX = trainX(rawWagonX);
+    const wagonY = trainY(rawWagonY);
+    const wagonW = trainLen(rawWagonW);
+    const wagonH = trainLen(rawWagonH);
 
     const targetArea = {
-      // منطقة الاستهداف الداخلية للعربة.
-      // هذه البيانات لا تظهر بصريًا، وستستخدم لاحقًا لمعرفة سقوط الصندوق/البالون داخل العربة.
-      left:wagonX + 14,
-      right:wagonX + wagonW - 14,
-      top:wagonY + 16,
-      bottom:wagonY + wagonH - 16,
+      // منطقة الاستهداف الداخلية للعربة، مصغرة بنفس حجم العربة المرئية.
+      left:wagonX + trainLen(14),
+      right:wagonX + wagonW - trainLen(14),
+      top:wagonY + trainLen(16),
+      bottom:wagonY + wagonH - trainLen(16),
       centerX:wagonX + wagonW / 2,
       centerY:wagonY + wagonH / 2
     };
@@ -1912,7 +1972,7 @@
     // جسم العربة يُرسم بعدها، لذلك يبقى الجزء العلوي من العجلة مخفيًا خلف العربة.
     const wheelSize = 47.4;
     const wheelY = 585.3;
-    const firstWheelX = wagonX + 49;
+    const firstWheelX = rawWagonX + 49;
     const gap = 66;
     addWheel(wheelLayer, firstWheelX, wheelY, wheelSize);
     addWheel(wheelLayer, firstWheelX + gap, wheelY, wheelSize);
@@ -1921,7 +1981,7 @@
 
     const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
     const wagonBody = el("image", {
-      href:"train-wagon.webp?v=81",
+      href:"train-wagon.webp?v=82",
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -1929,7 +1989,7 @@
       preserveAspectRatio:"xMidYMid meet",
       id:`wagonBody-${index}`
     }, bodyLayer);
-    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=81");
+    wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=82");
 
     el("text", {
       x:wagonX + wagonW / 2,
@@ -1938,9 +1998,9 @@
       "dominant-baseline":"middle",
       fill:"#ffe28a",
       stroke:"#5b2618",
-      "stroke-width":2.6,
+      "stroke-width":trainLen(2.6),
       "paint-order":"stroke fill",
-      "font-size":30,
+      "font-size":trainLen(30),
       "font-weight":900,
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl"
@@ -1962,7 +2022,7 @@
       if(!car || car.type !== "answer") return;
 
       const wagonBody = el("image", {
-        href:"train-wagon.webp?v=81",
+        href:"train-wagon.webp?v=82",
         x:car.x,
         y:car.y,
         width:car.width,
@@ -1970,7 +2030,7 @@
         preserveAspectRatio:"xMidYMid meet",
         id:`wagonCoverBody-${index}`
       }, wagonForegroundCoverLayer);
-      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=81");
+      wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=82");
 
       el("text", {
         x:car.centerX,
@@ -1995,17 +2055,21 @@
   }
 
   function locomotive(train){
-    // إصدار 72:
-    // زيادة المسافة بين العربة والقاطرة، إرجاع العجلات الثلاث للخلف،
-    // تكبيرها 10%، وتقديم العجلة الكبيرة للأمام مع رفعها قليلًا.
-    const locoX = 782;
-    const locoY = 430;
-    const locoW = 320;
-    const locoH = 179;
+    // إصدار 82:
+    // القاطرة مصغرة بنفس مقياس القطار، بينما البالونات والصناديق لا تتغير.
+    const rawLocoX = 782;
+    const rawLocoY = 430;
+    const rawLocoW = 320;
+    const rawLocoH = 179;
+
+    const locoX = trainX(rawLocoX);
+    const locoY = trainY(rawLocoY);
+    const locoW = trainLen(rawLocoW);
+    const locoH = trainLen(rawLocoH);
 
     const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
     const locomotiveBody = el("image", {
-      href:"train-engine-transparent.png?v=81",
+      href:"train-engine-transparent.png?v=82",
       x:locoX,
       y:locoY,
       width:locoW,
@@ -2013,20 +2077,20 @@
       preserveAspectRatio:"xMidYMid meet",
       id:"locomotiveBody"
     }, bodyLayer);
-    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=81");
+    locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=82");
 
     const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
 
     // العجلة الكبيرة: تقديم للأمام بحوالي 3% ورفع للأعلى بحوالي 2%.
     const largeWheelSize = 90.2;
-    const largeWheelCx = locoX + 64;
+    const largeWheelCx = rawLocoX + 64;
     const largeWheelCy = 565;
     addWheel(wheelLayer, largeWheelCx, largeWheelCy, largeWheelSize, 39);
 
     // العجلات الثلاث الصغيرة: إرجاع للخلف داخل القاطرة وتكبير 10% تقريبًا.
     const smallWheelSize = 47.4;
     const smallWheelCy = 585.3;
-    const smallStartX = locoX + 148;
+    const smallStartX = rawLocoX + 148;
     const smallGap = 50;
     addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 39);
     addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 39);
@@ -2063,7 +2127,7 @@
   }
 
   build();
-  /* إصدار 81: تخفيف ميلان السقوط لليسار مع إبقاء سرعة النزول السريعة. */
+  /* إصدار 82: تصغير القطار والسكة والفيزياء التابعة لهما فقط، مع إبقاء البالونات والصناديق بحجمها. */
 })();
 </script>
 </body>
