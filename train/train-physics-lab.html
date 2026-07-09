@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>مختبر فيزياء القطار - إصدار 6</title>
+  <title>مختبر فيزياء القطار - إصدار 7</title>
   <style>
     :root{
       --safe-bottom:env(safe-area-inset-bottom,0px);
@@ -148,7 +148,7 @@
     <div class="note">
       مختبر فيزياء حقيقي — الصندوق يسقط بالجاذبية، وليس بمسار محسوب.
       <div class="small">
-        المحسوب فقط: حواف العربات، نطاطات رأس الأطراف، الفواصل، وسطح مقطورة السائق القافز. الباقي على الفيزياء.
+        المحسوب فقط: فيزياء موحدة لكل عربة: أرضية، جدران، ونطاطات رأس صغيرة عند الأطراف. الباقي على الفيزياء.
       </div>
     </div>
 
@@ -246,24 +246,40 @@
     liftOut:14
   };
 
-  const EDGE_BUMPER = {
-    // نطاطات أطراف العربات: أخف من مقطورة السائق.
-    // وظيفتها تصحيح السقوط عند الحافة ودفع الصندوق للداخل فقط.
-    cooldown:260,
-    inwardVelocity:.72,
-    upVelocity:.72,
-    spinKick:.018,
-    liftOut:4
-  };
-
-  const TOP_EDGE_BUMPER = {
-    // نطاط رأس الحافة: هذا هو المهم عند سقوط الصندوق فوق حافة العربة أو بين العربات.
-    // أقوى من النطاط الداخلي قليلًا، وأخف من مقطورة السائق.
-    cooldown:260,
-    inwardVelocity:1.05,
-    upVelocity:1.02,
-    spinKick:.026,
-    liftOut:7
+  const WAGON_PHYSICS_PROFILE = {
+    floor:{
+      inset:14,
+      h:18,
+      friction:1.05,
+      frictionStatic:1.35,
+      restitution:.12
+    },
+    wall:{
+      xInset:16,
+      yOffset:70,
+      w:26,
+      h:126,
+      friction:.82,
+      frictionStatic:1,
+      restitution:.18
+    },
+    topBumper:{
+      // نطاط رأس صغير فقط عند طرف العربة، لا يمتد داخل العربة.
+      // يستخدم نفس المقاسات لكل عربة لاحقًا.
+      xInset:18,
+      yOffset:-7,
+      w:34,
+      h:18,
+      angle:.08,
+      cooldown:240,
+      inwardVelocity:.98,
+      upVelocity:.86,
+      spinKick:.022,
+      liftOut:5,
+      friction:.08,
+      frictionStatic:.10,
+      restitution:.46
+    }
   };
 
   const staticBoxBodies = [];
@@ -304,7 +320,7 @@
       opacity:".44"
     }, backgroundLayer);
 
-    makeImage("train-track.webp?v=physics6", {
+    makeImage("train-track.webp?v=physics7", {
       x:-55,
       y:604,
       width:1390,
@@ -324,7 +340,7 @@
       const gap = 66;
 
       for(let i = 0; i < 4; i++){
-        makeImage("train-wheel.webp?v=physics6", {
+        makeImage("train-wheel.webp?v=physics7", {
           x:firstX + i * gap - size / 2,
           y:wheelY - size / 2,
           width:size,
@@ -333,7 +349,7 @@
         }, trainBackLayer);
       }
 
-      makeImage("train-wagon.webp?v=physics6", {
+      makeImage("train-wagon.webp?v=physics7", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -342,7 +358,7 @@
       }, trainBackLayer);
 
       // واجهة فوق الصناديق حتى يظهر أنها داخل الحوض.
-      makeImage("train-wagon.webp?v=physics6", {
+      makeImage("train-wagon.webp?v=physics7", {
         x:wagon.x,
         y:wagon.y,
         width:wagon.w,
@@ -366,7 +382,7 @@
       }, trainFrontLayer).textContent = wagon.label;
     });
 
-    makeImage("train-engine-transparent.png?v=physics6", {
+    makeImage("train-engine-transparent.png?v=physics7", {
       x:ENGINE.x,
       y:ENGINE.y,
       width:ENGINE.w,
@@ -444,6 +460,60 @@
     return body;
   }
 
+  function addWagonPhysics(wagon, profile = WAGON_PHYSICS_PROFILE){
+    makeStaticRect(wagon.x + wagon.w / 2, wagon.floorY, wagon.w - profile.floor.inset * 2, profile.floor.h, {
+      label:`${wagon.id}-floor`,
+      sgType:"wagon-floor",
+      sgWagonId:wagon.id,
+      friction:profile.floor.friction,
+      frictionStatic:profile.floor.frictionStatic,
+      restitution:profile.floor.restitution
+    });
+
+    makeStaticRect(wagon.x + profile.wall.xInset, wagon.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${wagon.id}-left-wall`,
+      sgType:"wagon-wall",
+      sgWagonId:wagon.id,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    makeStaticRect(wagon.x + wagon.w - profile.wall.xInset, wagon.y + profile.wall.yOffset, profile.wall.w, profile.wall.h, {
+      label:`${wagon.id}-right-wall`,
+      sgType:"wagon-wall",
+      sgWagonId:wagon.id,
+      friction:profile.wall.friction,
+      frictionStatic:profile.wall.frictionStatic,
+      restitution:profile.wall.restitution
+    });
+
+    // نطاط رأس الحافة فقط: صغير ومحدد عند الطرف، ولا يأخذ من مساحة العربة الداخلية.
+    makeStaticRect(wagon.x + profile.topBumper.xInset, wagon.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${wagon.id}-left-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgWagonId:wagon.id,
+      sgPushX:1,
+      isSensor:true,
+      angle:-profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+
+    makeStaticRect(wagon.x + wagon.w - profile.topBumper.xInset, wagon.y + profile.topBumper.yOffset, profile.topBumper.w, profile.topBumper.h, {
+      label:`${wagon.id}-right-top-edge-bumper`,
+      sgType:"wagon-top-edge-bumper",
+      sgWagonId:wagon.id,
+      sgPushX:-1,
+      isSensor:true,
+      angle:profile.topBumper.angle,
+      friction:profile.topBumper.friction,
+      frictionStatic:profile.topBumper.frictionStatic,
+      restitution:profile.topBumper.restitution
+    });
+  }
+
   function buildWorld(){
     if(!window.Matter){
       status.textContent = "Matter.js لم يحمّل";
@@ -468,84 +538,9 @@
       isSensor:true
     });
 
-    // العربات: أرضية، جدران، وحواف داخلية.
-    WAGONS.forEach(wagon => {
-      makeStaticRect(wagon.x + wagon.w / 2, wagon.floorY, wagon.w - 28, 18, {
-        label:`${wagon.id}-floor`,
-        sgType:"wagon-floor",
-        sgWagonId:wagon.id,
-        friction:1.05,
-        frictionStatic:1.35,
-        restitution:.12
-      });
-
-      makeStaticRect(wagon.x + 16, wagon.y + 70, 26, 126, {
-        label:`${wagon.id}-left-wall`,
-        sgType:"wagon-wall",
-        sgWagonId:wagon.id,
-        friction:.82,
-        frictionStatic:1,
-        restitution:.18
-      });
-
-      makeStaticRect(wagon.x + wagon.w - 16, wagon.y + 70, 26, 126, {
-        label:`${wagon.id}-right-wall`,
-        sgType:"wagon-wall",
-        sgWagonId:wagon.id,
-        friction:.82,
-        frictionStatic:1,
-        restitution:.18
-      });
-
-      // نطاط داخلي على حافة العربة اليسرى: يدفع الصندوق للداخل باتجاه اليمين.
-      makeStaticRect(wagon.x + 24, wagon.y + 55, 34, 92, {
-        label:`${wagon.id}-left-edge-bumper`,
-        sgType:"wagon-edge-bumper",
-        sgWagonId:wagon.id,
-        sgPushX:1,
-        isSensor:true,
-        friction:.18,
-        frictionStatic:.22,
-        restitution:.38
-      });
-
-      // نطاط داخلي على حافة العربة اليمنى: يدفع الصندوق للداخل باتجاه اليسار.
-      makeStaticRect(wagon.x + wagon.w - 24, wagon.y + 55, 34, 92, {
-        label:`${wagon.id}-right-edge-bumper`,
-        sgType:"wagon-edge-bumper",
-        sgWagonId:wagon.id,
-        sgPushX:-1,
-        isSensor:true,
-        friction:.18,
-        frictionStatic:.22,
-        restitution:.38
-      });
-
-      // نطاط على رأس الحافة اليسرى: يشتغل عندما يقع الصندوق فوق رأس العربة.
-      // غير sensor حتى يكون سطحًا حقيقيًا، ومعه دفعة داخلية خفيفة.
-      makeStaticRect(wagon.x + 25, wagon.y - 8, 86, 24, {
-        label:`${wagon.id}-left-top-edge-bumper`,
-        sgType:"wagon-top-edge-bumper",
-        sgWagonId:wagon.id,
-        sgPushX:1,
-        angle:-0.10,
-        friction:.10,
-        frictionStatic:.14,
-        restitution:.58
-      });
-
-      // نطاط على رأس الحافة اليمنى: يدفع للداخل باتجاه اليسار.
-      makeStaticRect(wagon.x + wagon.w - 25, wagon.y - 8, 86, 24, {
-        label:`${wagon.id}-right-top-edge-bumper`,
-        sgType:"wagon-top-edge-bumper",
-        sgWagonId:wagon.id,
-        sgPushX:-1,
-        angle:0.10,
-        friction:.10,
-        frictionStatic:.14,
-        restitution:.58
-      });
-    });
+    // العربات: كل عربة تُبنى من بروفايل فيزيائي موحد.
+    // لاحقًا عند إضافة أي عربة جديدة، يكفي إدخال مقاساتها في WAGONS فقط.
+    WAGONS.forEach(wagon => addWagonPhysics(wagon));
 
     // الفاصل بين العربتين: سطحان مائلان يقرران العربة الأقرب بالتصادم، وليس بالسحب.
     // إذا وقع على النصف الأيمن يرتد للعربة اليمنى، وإذا وقع على النصف الأيسر يرتد للعربة اليسرى.
@@ -601,7 +596,7 @@
 
     if(otherBody.sgType === "wagon-top-edge-bumper"){
       const now = performance.now();
-      if(item.lastTopEdgeBumperAt && now - item.lastTopEdgeBumperAt < TOP_EDGE_BUMPER.cooldown){
+      if(item.lastTopEdgeBumperAt && now - item.lastTopEdgeBumperAt < WAGON_PHYSICS_PROFILE.topBumper.cooldown){
         return;
       }
 
@@ -612,56 +607,22 @@
       // الدفعة للداخل فقط، بدون تحديد مكان النهاية.
       const direction = otherBody.sgPushX || 0;
       const inwardX = direction > 0
-        ? Math.max(boxBody.velocity.x, TOP_EDGE_BUMPER.inwardVelocity)
-        : Math.min(boxBody.velocity.x, -TOP_EDGE_BUMPER.inwardVelocity);
+        ? Math.max(boxBody.velocity.x, WAGON_PHYSICS_PROFILE.topBumper.inwardVelocity)
+        : Math.min(boxBody.velocity.x, -WAGON_PHYSICS_PROFILE.topBumper.inwardVelocity);
 
       Matter.Body.setVelocity(boxBody, {
         x:inwardX,
-        y:Math.min(boxBody.velocity.y * .18, -TOP_EDGE_BUMPER.upVelocity)
+        y:Math.min(boxBody.velocity.y * .18, -WAGON_PHYSICS_PROFILE.topBumper.upVelocity)
       });
 
       Matter.Body.setAngularVelocity(
         boxBody,
-        boxBody.angularVelocity * .64 + (direction > 0 ? TOP_EDGE_BUMPER.spinKick : -TOP_EDGE_BUMPER.spinKick)
+        boxBody.angularVelocity * .64 + (direction > 0 ? WAGON_PHYSICS_PROFILE.topBumper.spinKick : -WAGON_PHYSICS_PROFILE.topBumper.spinKick)
       );
 
       Matter.Body.setPosition(boxBody, {
-        x:boxBody.position.x + direction * TOP_EDGE_BUMPER.liftOut,
-        y:boxBody.position.y - TOP_EDGE_BUMPER.liftOut
-      });
-
-      return;
-    }
-
-    if(otherBody.sgType === "wagon-edge-bumper"){
-      const now = performance.now();
-      if(item.lastEdgeBumperAt && now - item.lastEdgeBumperAt < EDGE_BUMPER.cooldown){
-        return;
-      }
-
-      item.lastEdgeBumperAt = now;
-      item.wagonId = otherBody.sgWagonId || item.wagonId;
-
-      // نطاط الحافة الداخلي يدفع للداخل فقط، بقوة أخف من قفزة مقطورة السائق.
-      // لا يحدد مكان النهاية ولا يسحب الصندوق؛ مجرد دفعة قصيرة مثل حافة مطاطية.
-      const direction = otherBody.sgPushX || 0;
-      const targetX = direction > 0
-        ? Math.max(boxBody.velocity.x, EDGE_BUMPER.inwardVelocity)
-        : Math.min(boxBody.velocity.x, -EDGE_BUMPER.inwardVelocity);
-
-      Matter.Body.setVelocity(boxBody, {
-        x:targetX,
-        y:Math.min(boxBody.velocity.y * .28, -EDGE_BUMPER.upVelocity)
-      });
-
-      Matter.Body.setAngularVelocity(
-        boxBody,
-        boxBody.angularVelocity * .72 + (direction > 0 ? EDGE_BUMPER.spinKick : -EDGE_BUMPER.spinKick)
-      );
-
-      Matter.Body.setPosition(boxBody, {
-        x:boxBody.position.x + direction * EDGE_BUMPER.liftOut,
-        y:boxBody.position.y - EDGE_BUMPER.liftOut
+        x:boxBody.position.x + direction * WAGON_PHYSICS_PROFILE.topBumper.liftOut,
+        y:boxBody.position.y - WAGON_PHYSICS_PROFILE.topBumper.liftOut
       });
 
       return;
@@ -749,7 +710,6 @@
       inWagon:false,
       wagonId:null,
       lastWagonContactAt:0,
-      lastEdgeBumperAt:0,
       lastTopEdgeBumperAt:0,
       stableFrames:0,
       removed:false
@@ -891,7 +851,7 @@
       const type = body.sgType || body.label || "";
       const color =
         type.includes("roof") ? "#2196f3" :
-        type.includes("edge") ? "#00e5ff" :
+        type.includes("top-edge") ? "#00e5ff" :
         type.includes("gap") ? "#ff9800" :
         type.includes("floor") ? "#00c853" :
         type.includes("wall") ? "#8e24aa" :
