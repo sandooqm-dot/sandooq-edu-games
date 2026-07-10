@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 106</title>
+  <title>قطار الإجابات - إصدار 107</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -325,7 +325,7 @@
   const TRAIN_MOTION = {
     enterOffset:-1350,
 
-    // تقديم القطار للأمام قليلًا مع مزامنة الفيزياء بعد الدخول.
+    // تقديم القطار للأمام قليلًا حتى تظهر العربات الخلفية بشكل أوضح.
     centerOffset:90,
     exitOffset:1450,
 
@@ -640,8 +640,7 @@
       if(!car) return;
 
       if(car.type === "answer"){
-        const rawX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
-        leftEdges.push(trainX(rawX));
+        leftEdges.push(trainX(trainSlotRawX(index)));
         return;
       }
 
@@ -910,7 +909,7 @@
 
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
-        // مهم: أي تقديم للقطار يجب أن يغيّر الفيزياء معه، لا الشكل فقط.
+        // مهم: تقديم القطار لا يكون بصريًا فقط؛ الفيزياء تُعاد بناؤها في نفس المكان.
         rebuildTrainPhysicsAtCurrentOffset();
       });
     });
@@ -2647,18 +2646,29 @@
     wagonY:486,
     wagonW:300,
     wagonH:111,
-    wagonStep:288
+    wagonStep:288,
+
+    // مسافة بسيطة فقط بين مقطورة السائق وعربة الركاب إذا كانت خلفه مباشرة.
+    // تطبق على مجموعة العربات كلها حتى تبقى المسافات الخلفية متناسقة.
+    driverPassengerGap:16
   };
 
+  function hasPassengerBehindDriver(){
+    return !!(TRAIN_CARS && TRAIN_CARS[0] && TRAIN_CARS[0].type === "passenger");
+  }
+
+  function trainSlotRawX(index){
+    const baseX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    return hasPassengerBehindDriver()
+      ? baseX - TRAIN_LAYOUT.driverPassengerGap
+      : baseX;
+  }
+
   function passengerLayoutForIndex(index){
-    const rawSlotX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const rawSlotX = trainSlotRawX(index);
     const rawPassengerW = 320;
     const rawPassengerH = 179;
-
-    // إذا كانت عربة الركاب خلف مقطورة السائق مباشرة، نرجعها للخلف قليلًا
-    // مع بقاء الرسم والفيزياء والعجلات على نفس الإحداثيات.
-    const driverPassengerGap = index === 0 ? 42 : 0;
-    const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2 - driverPassengerGap;
+    const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2;
     const rawPassengerY = 418;
 
     return {
@@ -2674,7 +2684,7 @@
   }
 
   function coalLayoutForIndex(index){
-    const rawSlotX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const rawSlotX = trainSlotRawX(index);
     const rawCoalW = 320;
     const rawCoalH = 150;
     const rawCoalX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawCoalW) / 2;
@@ -2698,7 +2708,7 @@
     // قالب عربة الإجابة:
     // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
     // يتم تصغير القطار هنا فقط؛ الصندوق والبالونات تبقى بالحجم الأصلي.
-    const rawWagonX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    const rawWagonX = trainSlotRawX(index);
     const rawWagonY = TRAIN_LAYOUT.wagonY;
     const rawWagonW = TRAIN_LAYOUT.wagonW;
     const rawWagonH = TRAIN_LAYOUT.wagonH;
@@ -3021,7 +3031,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 106: مبني من 104؛ تقديم القطار مع مزامنة الفيزياء، وزيادة مسافة الركاب خلف السائق دون كسر السقوط. */
+  /* إصدار 107: إعادة تطبيق تقديم القطار باحترافية مع مزامنة الفيزياء، ومسافة بسيطة متناسقة بين السائق والركاب دون تداخل العربات. */
 })();
 </script>
 </body>
