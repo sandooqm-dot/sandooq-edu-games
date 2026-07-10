@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 107</title>
+  <title>قطار الإجابات - إصدار 108</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -1005,6 +1005,10 @@
 
     stageCompleteTriggered = true;
     trainMotionState = "exiting";
+
+    // البالونات المتبقية تطير للأعلى طبيعيًا وتصبح غير قابلة للفرقعة.
+    releaseStageBalloonsUpward();
+
     clearActiveFallingMatterBoxes();
 
     // خروج آمن: نحسب مسافة الخروج حسب طول القطار، مع الحفاظ على دخول القطار القديم كما هو.
@@ -1978,7 +1982,27 @@
       return;
     }
 
-    if(bodyB.sgType === "wagon-floor" || bodyB.sgType === "wagon-wall"){
+    if(bodyB.sgType === "wagon-floor"){
+      item.insideWagon = true;
+      item.lastWagonContactAt = performance.now();
+      item.lastWellIndex = bodyB.sgWellIndex;
+
+      if(!item.enteredWellAt){
+        item.enteredWellAt = performance.now();
+      }
+
+      moveMatterBoxBehindWagonCover(item);
+
+      // تجميد مباشر عند ملامسة قاع العربة لتقليل الحركة الداخلية والتعليق.
+      const settledWell = getWellByIndex(bodyB.sgWellIndex) || getWellByMatterBody(bodyA);
+      if(settledWell){
+        settleMatterBoxAsVisualOnly(item, settledWell);
+      }
+
+      return;
+    }
+
+    if(bodyB.sgType === "wagon-wall"){
       item.insideWagon = true;
       item.lastWagonContactAt = performance.now();
       item.lastWellIndex = bodyB.sgWellIndex;
@@ -2249,6 +2273,31 @@
     };
   }
 
+  function releaseStageBalloonsUpward(){
+    // عند اكتمال المستوى: البالونات المتبقية تصبح غير قابلة للفرقعة
+    // وتطير للأعلى بهدوء طبيعي حتى تخرج من الشاشة.
+    const now = performance.now();
+
+    activeBalloons.forEach(item => {
+      if(!item || !item.node || item.flyAway) return;
+
+      item.flyAway = true;
+      item.flyAwayStartedAt = now;
+      item.flyAwaySpeed = 72 + item.index * 7 + Math.random() * 10;
+      item.flyAwayDrift = (Math.random() * 20 - 10);
+
+      item.popped = false;
+      item.resetAt = 0;
+      item.node.style.pointerEvents = "none";
+      item.node.style.cursor = "default";
+
+      // لا نعيد إظهار البالون الذي كان مفرقعًا ومخفيًا أصلًا.
+      if(item.node.style.display !== "none"){
+        item.node.setAttribute("opacity", "1");
+      }
+    });
+  }
+
   function recycleBalloon(item, now, forceFarRight = false){
     const rightMost = activeBalloons.reduce((max, other) => {
       if(other === item || other.popped) return max;
@@ -2300,6 +2349,32 @@
   }
 
   function updateBalloonItem(item, now, dtMs){
+    const dt = dtMs / 1000;
+
+    if(item.flyAway){
+      // طيران هادئ للأعلى عند نهاية المستوى، بدون فرقعة وبدون إعادة تدوير.
+      item.state.y -= item.flyAwaySpeed * dt;
+      item.state.x += item.flyAwayDrift * dt;
+
+      const fade = clamp((item.state.y + 150) / 180, 0, 1);
+
+      item.node.setAttribute(
+        "transform",
+        `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
+      );
+
+      if(item.node.style.display !== "none"){
+        item.node.setAttribute("opacity", fade.toFixed(2));
+      }
+
+      if(item.state.y < -170){
+        item.node.setAttribute("opacity", "0");
+        item.node.style.display = "none";
+      }
+
+      return;
+    }
+
     if(item.popped){
       if(now >= item.resetAt){
         recycleBalloon(item, now, false);
@@ -2307,7 +2382,6 @@
       return;
     }
 
-    const dt = dtMs / 1000;
     const speed = item.speed;
 
     const speedPulse =
@@ -2400,7 +2474,11 @@
         state:createBalloonMotionState(config, index),
         speed:speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1),
         popped:false,
-        resetAt:0
+        resetAt:0,
+        flyAway:false,
+        flyAwayStartedAt:0,
+        flyAwaySpeed:0,
+        flyAwayDrift:0
       };
 
       balloon.addEventListener("pointerdown", event => {
@@ -3031,7 +3109,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 107: إعادة تطبيق تقديم القطار باحترافية مع مزامنة الفيزياء، ومسافة بسيطة متناسقة بين السائق والركاب دون تداخل العربات. */
+  /* إصدار 108: تجميد الصندوق فور ملامسة قاع العربة، وإطلاق البالونات للأعلى بهدوء عند نهاية المستوى. */
 })();
 </script>
 </body>
