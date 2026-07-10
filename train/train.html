@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 113</title>
+  <title>قطار الإجابات - إصدار 114</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -69,6 +69,10 @@
       transform-box:fill-box;
       transform-origin:center;
       animation:wheelSpin .55s linear infinite;
+    }
+
+    .train-wheel.is-offscreen{
+      animation-play-state:paused;
     }
 
     .train-idle-motion{
@@ -355,6 +359,49 @@
   let trainPositionGroup = null;
   let collisionDebugLayer = null;
   const collisionMap = [];
+
+  // لا نرسم أو نشغّل أجزاء القطار البعيدة خارج الشاشة.
+  // الهامش يجعل الجزء يبدأ العمل قبل ظهوره بقليل حتى لا يلاحظ اللاعب أي انتقال.
+  const TRAIN_VIEWPORT_MARGIN = 360;
+  const trainVisualParts = [];
+  const trainCoverVisualParts = [];
+
+  function registerTrainVisualPart(node, left, right, collection = trainVisualParts){
+    if(!node) return;
+    collection.push({node, left, right, visible:null});
+  }
+
+  function isTrainRangeNearViewport(left, right){
+    const worldLeft = left + trainVisualOffsetX;
+    const worldRight = right + trainVisualOffsetX;
+    return worldRight >= -TRAIN_VIEWPORT_MARGIN &&
+      worldLeft <= 1280 + TRAIN_VIEWPORT_MARGIN;
+  }
+
+  function updateTrainVisualCulling(){
+    const updatePart = part => {
+      if(!part || !part.node) return;
+      const visible = isTrainRangeNearViewport(part.left, part.right);
+      if(part.visible === visible) return;
+      part.visible = visible;
+      part.node.style.display = visible ? "" : "none";
+
+      // العجلات الظاهرة تستمر بالدوران دائمًا، والمتوقفة فقط هي عجلات الأجزاء البعيدة خارج الشاشة.
+      part.node.querySelectorAll?.(".train-wheel").forEach(wheel => {
+        wheel.classList.toggle("is-offscreen", !visible);
+      });
+    };
+
+    trainVisualParts.forEach(updatePart);
+    trainCoverVisualParts.forEach(updatePart);
+
+    settledBoxes.forEach(record => {
+      if(!record || !record.node || record.wagonIndex === null || record.wagonIndex === undefined) return;
+      const car = trainCarRegistry[record.wagonIndex];
+      if(!car) return;
+      record.node.style.display = isTrainRangeNearViewport(car.left, car.right) ? "" : "none";
+    });
+  }
 
   const TRAIN_MOTION = {
     enterOffset:-1350,
@@ -891,6 +938,10 @@
   let matterEngine = null;
   let matterRunnerStarted = false;
   let matterLastTime = 0;
+  let matterAccumulator = 0;
+  const MATTER_FIXED_STEP_MS = 1000 / 60;
+  const MATTER_MAX_FRAME_MS = 100;
+  const MATTER_MAX_SUBSTEPS = 5;
   let matterLibraryLoading = false;
 
   const matterBoxes = [];
@@ -921,6 +972,8 @@
     if(wagonDropCoverPositionGroup){
       wagonDropCoverPositionGroup.setAttribute("transform", transform);
     }
+
+    updateTrainVisualCulling();
   }
 
   function trainEaseInOut(t){
@@ -984,29 +1037,42 @@
     activeFallingBoxes = 0;
   }
 
+  function syncStaticMatterBodyToViewport(body){
+    if(!body || body.label === "kill-track" || !Matter || !Matter.Body) return;
+
+    const desiredX = body.sgBaseX + trainVisualOffsetX;
+    const halfWidth = body.sgHalfWidth || 0;
+    const nearViewport = desiredX + halfWidth >= -TRAIN_VIEWPORT_MARGIN &&
+      desiredX - halfWidth <= 1280 + TRAIN_VIEWPORT_MARGIN;
+
+    if(body.sgViewportActive !== nearViewport){
+      body.sgViewportActive = nearViewport;
+      body.collisionFilter.mask = nearViewport ? body.sgActiveMask : 0;
+    }
+
+    // الأجسام البعيدة لا تُنقل في كل إطار. عند اقترابها تُقفز مباشرة إلى موقعها الصحيح.
+    if(nearViewport && Math.abs(body.position.x - desiredX) >= .01){
+      Matter.Body.setPosition(body, {x:desiredX, y:body.position.y});
+    }
+  }
+
   function syncTrainPhysicsToVisualOffset(){
-    // أثناء تحرك القطار، لا نعيد بناء عالم الفيزياء حتى لا تختفي الصناديق.
-    // نحرّك أجسام القطار الثابتة وخريطة التصادم بنفس مقدار حركة القطار البصرية.
-    const delta = trainVisualOffsetX - trainPhysicsOffsetX;
-
-    if(Math.abs(delta) < .01) return;
-
     if(!isMatterReady() || !matterEngine || !Matter || !Matter.Body){
       trainPhysicsOffsetX = trainVisualOffsetX;
       return;
     }
 
-    matterStaticBodies.forEach(body => {
-      if(!body || body.label === "kill-track") return;
-      Matter.Body.translate(body, {x:delta, y:0});
-    });
+    matterStaticBodies.forEach(syncStaticMatterBodyToViewport);
 
     collisionMap.forEach(zone => {
-      // السكة ثابتة في مكانها، أما القطار وعرباته ومناطق القتل التابعة له فتتحرك.
       if(!zone || zone.name === "track") return;
 
-      if(typeof zone.left === "number") zone.left += delta;
-      if(typeof zone.right === "number") zone.right += delta;
+      if(typeof zone.sgBaseLeft === "number"){
+        zone.left = zone.sgBaseLeft + trainVisualOffsetX;
+      }
+      if(typeof zone.sgBaseRight === "number"){
+        zone.right = zone.sgBaseRight + trainVisualOffsetX;
+      }
     });
 
     trainPhysicsOffsetX = trainVisualOffsetX;
@@ -1104,6 +1170,7 @@
     // خروج آمن: نحسب مسافة الخروج حسب طول القطار، مع الحفاظ على دخول القطار القديم كما هو.
     // بعد الاختفاء الكامل ننتظر قليلًا ثم ندخل المرحلة التالية.
     animateTrainTo(getSafeTrainExitOffset(), TRAIN_MOTION.exitDuration, "done", () => {
+      disposeFinishedStageRuntime();
       scheduleNextTrainStage();
     });
   }
@@ -1113,7 +1180,14 @@
   }
 
   function makeZone(type, rect, meta = {}){
-    return {type, ...rect, ...meta};
+    const zone = {type, ...rect, ...meta};
+
+    if(meta.name !== "track"){
+      if(typeof zone.left === "number") zone.sgBaseLeft = zone.left - trainPhysicsOffsetX;
+      if(typeof zone.right === "number") zone.sgBaseRight = zone.right - trainPhysicsOffsetX;
+    }
+
+    return zone;
   }
 
   function makeWell(rect, meta = {}){
@@ -1231,7 +1305,14 @@
       ...options
     });
 
-    return addMatterBody(body);
+    body.sgBaseX = x - trainPhysicsOffsetX;
+    body.sgHalfWidth = Math.abs(w) / 2;
+    body.sgActiveMask = body.collisionFilter.mask;
+    body.sgViewportActive = true;
+
+    const added = addMatterBody(body);
+    if(body.label !== "kill-track") syncStaticMatterBodyToViewport(body);
+    return added;
   }
 
   function buildTrainPhysicsParts(){
@@ -2257,10 +2338,30 @@
     if(matterRunnerStarted || !isMatterReady() || !matterEngine) return;
     matterRunnerStarted = true;
 
-    function frame(){
-      if(matterEngine){
-        Matter.Engine.update(matterEngine, 1000 / 60);
+    function frame(now){
+      const elapsed = matterLastTime
+        ? clamp(now - matterLastTime, 0, MATTER_MAX_FRAME_MS)
+        : MATTER_FIXED_STEP_MS;
+      matterLastTime = now;
+
+      if(matterEngine && (matterStaticBodies.length || matterBoxes.length)){
+        matterAccumulator += elapsed;
+        let substeps = 0;
+
+        while(matterAccumulator >= MATTER_FIXED_STEP_MS && substeps < MATTER_MAX_SUBSTEPS){
+          Matter.Engine.update(matterEngine, MATTER_FIXED_STEP_MS);
+          matterAccumulator -= MATTER_FIXED_STEP_MS;
+          substeps += 1;
+        }
+
+        // منع تراكم زمن ضخم إذا تجمد المتصفح أو خرج المستخدم من الصفحة مؤقتًا.
+        if(substeps === MATTER_MAX_SUBSTEPS && matterAccumulator >= MATTER_FIXED_STEP_MS){
+          matterAccumulator %= MATTER_FIXED_STEP_MS;
+        }
+
         matterBoxes.slice().forEach(updateMatterBoxState);
+      }else{
+        matterAccumulator = 0;
       }
 
       requestAnimationFrame(frame);
@@ -2574,7 +2675,7 @@
     balloonLoopStarted = true;
 
     function frame(now){
-      const dtMs = balloonLoopLastTime ? Math.min(40, now - balloonLoopLastTime) : 16;
+      const dtMs = balloonLoopLastTime ? clamp(now - balloonLoopLastTime, 0, 100) : 16;
       balloonLoopLastTime = now;
 
       for(const item of activeBalloons){
@@ -2759,6 +2860,7 @@
   let currentStageIndex = 0;
   let currentTrainStage = null;
   let stageTransitionTimer = 0;
+  let stageGeneration = 0;
   let TRAIN_CARS = [];
   let QUESTION_WAGON_INDICES = [];
 
@@ -2813,6 +2915,45 @@
     return currentStageIndex < MAX_TRAIN_STAGE - 1;
   }
 
+  function disposeFinishedStageRuntime(){
+    pendingMatterSpawns.length = 0;
+    matterBoxes.slice().forEach(item => cleanupMatterBox(item, true));
+
+    if(isMatterReady() && matterEngine && matterEngine.world){
+      Matter.World.clear(matterEngine.world, false);
+    }
+
+    matterBoxes.length = 0;
+    matterStaticBodies.length = 0;
+    settledVisualMatterBoxes.length = 0;
+    collisionMap.length = 0;
+    activeFallingBoxes = 0;
+    matterAccumulator = 0;
+    matterLastTime = 0;
+
+    settledBoxes.splice(0, settledBoxes.length);
+    Object.keys(settledBoxesByWagon).forEach(key => delete settledBoxesByWagon[key]);
+    activeBalloons.splice(0, activeBalloons.length);
+
+    trainVisualParts.splice(0, trainVisualParts.length);
+    trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
+    trainCarRegistry.splice(0, trainCarRegistry.length);
+
+    trainPositionGroup?.remove();
+    wagonDropCoverPositionGroup?.remove();
+    fallingObjectsLayer?.remove();
+    collisionDebugLayer?.remove();
+    svg.querySelector("#balloonsLayer")?.remove();
+
+    trainPositionGroup = null;
+    wagonDropCoverPositionGroup = null;
+    wagonDropCoverLayer = null;
+    wagonForegroundCoverLayer = null;
+    fallingObjectsLayer = null;
+    settledObjectsLayer = null;
+    collisionDebugLayer = null;
+  }
+
   function scheduleNextTrainStage(){
     if(stageTransitionTimer){
       clearTimeout(stageTransitionTimer);
@@ -2824,8 +2965,10 @@
       return;
     }
 
+    const scheduledGeneration = stageGeneration;
     stageTransitionTimer = setTimeout(() => {
       stageTransitionTimer = 0;
+      if(scheduledGeneration !== stageGeneration) return;
       startTrainStage(currentStageIndex + 1);
     }, STAGE_CHANGE_DELAY);
   }
@@ -2864,11 +3007,16 @@
 
     activeBalloons.splice(0, activeBalloons.length);
     balloonLoopLastTime = 0;
+    matterLastTime = 0;
+    matterAccumulator = 0;
 
+    trainVisualParts.splice(0, trainVisualParts.length);
+    trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     trainCarRegistry.splice(0, trainCarRegistry.length);
   }
 
   function startTrainStage(stageIndex){
+    stageGeneration += 1;
     applyTrainStage(stageIndex);
     resetStageRuntime();
     build();
@@ -2981,7 +3129,8 @@
       targetArea
     };
 
-    const wheelLayer = el("g", {id:`wagonWheelLayer-${index}`}, train);
+    const carVisualGroup = el("g", {id:`answerCar-${index}`}, train);
+    const wheelLayer = el("g", {id:`wagonWheelLayer-${index}`}, carVisualGroup);
     // عجلات عربات الإجابة بنفس حجم وارتفاع العجلات الثلاث الصغيرة في القاطرة.
     // جسم العربة يُرسم بعدها، لذلك يبقى الجزء العلوي من العجلة مخفيًا خلف العربة.
     const wheelSize = 47.4;
@@ -2993,7 +3142,7 @@
     addWheel(wheelLayer, firstWheelX + gap * 2, wheelY, wheelSize);
     addWheel(wheelLayer, firstWheelX + gap * 3, wheelY, wheelSize);
 
-    const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, train);
+    const bodyLayer = el("g", {id:`wagonBodyLayer-${index}`}, carVisualGroup);
     const wagonBody = el("image", {
       href:"train-wagon.webp?v=84",
       x:wagonX,
@@ -3019,6 +3168,8 @@
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl"
     }, bodyLayer).textContent = car.text;
+
+    registerTrainVisualPart(carVisualGroup, wagonX, wagonX + wagonW);
   }
 
   function passengerWagon(train, car, index){
@@ -3032,7 +3183,8 @@
     const passengerW = layout.width;
     const passengerH = layout.height;
 
-    const wheelLayer = el("g", {id:`passengerWheelLayer-${index}`}, train);
+    const carVisualGroup = el("g", {id:`passengerCar-${index}`}, train);
+    const wheelLayer = el("g", {id:`passengerWheelLayer-${index}`}, carVisualGroup);
     const wheelSize = 47.4;
     const wheelY = 585.3;
     const firstWheelX = rawPassengerX + 49;
@@ -3043,7 +3195,7 @@
     addWheel(wheelLayer, firstWheelX + gap * 2, wheelY, wheelSize);
     addWheel(wheelLayer, firstWheelX + gap * 3, wheelY, wheelSize);
 
-    const bodyLayer = el("g", {id:`passengerBodyLayer-${index}`}, train);
+    const bodyLayer = el("g", {id:`passengerBodyLayer-${index}`}, carVisualGroup);
     const passengerBody = el("image", {
       href:PASSENGER_WAGON_IMAGE,
       x:passengerX,
@@ -3055,6 +3207,7 @@
     }, bodyLayer);
 
     passengerBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", PASSENGER_WAGON_IMAGE);
+    registerTrainVisualPart(carVisualGroup, passengerX, passengerX + passengerW);
   }
 
   function coalWagon(train, car, index){
@@ -3067,7 +3220,8 @@
     const coalW = layout.width;
     const coalH = layout.height;
 
-    const wheelLayer = el("g", {id:`coalWheelLayer-${index}`}, train);
+    const carVisualGroup = el("g", {id:`coalCar-${index}`}, train);
+    const wheelLayer = el("g", {id:`coalWheelLayer-${index}`}, carVisualGroup);
     const wheelSize = 47.4;
     const wheelY = 585.3;
     const firstWheelX = rawCoalX + 49;
@@ -3078,7 +3232,7 @@
     addWheel(wheelLayer, firstWheelX + gap * 2, wheelY, wheelSize);
     addWheel(wheelLayer, firstWheelX + gap * 3, wheelY, wheelSize);
 
-    const bodyLayer = el("g", {id:`coalBodyLayer-${index}`}, train);
+    const bodyLayer = el("g", {id:`coalBodyLayer-${index}`}, carVisualGroup);
     const coalBody = el("image", {
       href:COAL_WAGON_IMAGE,
       x:coalX,
@@ -3090,6 +3244,7 @@
     }, bodyLayer);
 
     coalBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", COAL_WAGON_IMAGE);
+    registerTrainVisualPart(carVisualGroup, coalX, coalX + coalW);
   }
 
   function wagons(train){
@@ -3154,7 +3309,8 @@
     const locoW = trainLen(rawLocoW);
     const locoH = trainLen(rawLocoH);
 
-    const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, train);
+    const locomotiveVisualGroup = el("g", {id:"locomotiveVisualGroup"}, train);
+    const bodyLayer = el("g", {id:"locomotiveBodyLayer"}, locomotiveVisualGroup);
     const locomotiveBody = el("image", {
       href:"train-engine-transparent.png?v=84",
       x:locoX,
@@ -3166,7 +3322,7 @@
     }, bodyLayer);
     locomotiveBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-engine-transparent.png?v=84");
 
-    const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, train);
+    const wheelLayer = el("g", {id:"locomotiveWheelLayer"}, locomotiveVisualGroup);
 
     // العجلة الكبيرة: تقديم للأمام بحوالي 3% ورفع للأعلى بحوالي 2%.
     const largeWheelSize = 90.2;
@@ -3182,6 +3338,7 @@
     addWheel(wheelLayer, smallStartX, smallWheelCy, smallWheelSize, 39);
     addWheel(wheelLayer, smallStartX + smallGap, smallWheelCy, smallWheelSize, 39);
     addWheel(wheelLayer, smallStartX + smallGap * 2, smallWheelCy, smallWheelSize, 39);
+    registerTrainVisualPart(locomotiveVisualGroup, locoX, locoX + locoW);
   }
 
   function renderWagonDropCovers(){
@@ -3196,11 +3353,33 @@
       "pointer-events":"none"
     }, wagonDropCoverPositionGroup);
 
+    const defsNode = svg.querySelector("defs");
+
     trainCarRegistry.forEach((car, index) => {
       if(!car || car.type !== "answer") return;
 
-      // نعيد واجهة العربة كاملة فوق الصندوق أثناء السقوط، ثم نعيد رسم النص فوقها.
-      // بهذا يبقى جانب العربة وواجهتها أمام الصندوق طوال دخوله، فلا يحدث تبدل طبقات مرئي.
+      // غطاء واحد خفيف فقط: الحافة العليا والجوانب والواجهة السفلية.
+      // لا نعيد رسم صورة العربة كاملة مرتين كما كان يحدث سابقًا.
+      const clipId = `wagonFrontClip-${index}`;
+      const clip = el("clipPath", {
+        id:clipId,
+        clipPathUnits:"userSpaceOnUse"
+      }, defsNode);
+
+      const sideW = Math.max(trainLen(16), car.width * .065);
+      const topH = Math.max(trainLen(13), car.height * .14);
+      const frontY = car.y + car.height * .42;
+
+      el("rect", {x:car.x, y:car.y, width:car.width, height:topH}, clip);
+      el("rect", {x:car.x, y:frontY, width:car.width, height:car.bottom - frontY}, clip);
+      el("rect", {x:car.x, y:car.y, width:sideW, height:car.height}, clip);
+      el("rect", {x:car.right - sideW, y:car.y, width:sideW, height:car.height}, clip);
+
+      const coverGroup = el("g", {
+        id:`wagonDropCover-${index}`,
+        "pointer-events":"none"
+      }, wagonDropCoverLayer);
+
       const cover = el("image", {
         href:"train-wagon.webp?v=84",
         x:car.x,
@@ -3208,8 +3387,9 @@
         width:car.width,
         height:car.height,
         preserveAspectRatio:"xMidYMid meet",
+        "clip-path":`url(#${clipId})`,
         "pointer-events":"none"
-      }, wagonDropCoverLayer);
+      }, coverGroup);
       cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
       el("text", {
@@ -3226,7 +3406,9 @@
         "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
         direction:"rtl",
         "pointer-events":"none"
-      }, wagonDropCoverLayer).textContent = car.text;
+      }, coverGroup).textContent = car.text;
+
+      registerTrainVisualPart(coverGroup, car.left, car.right, trainCoverVisualParts);
     });
   }
 
@@ -3235,6 +3417,8 @@
 
     // كل مرحلة تُبنى من الصفر بصريًا، لذلك نفرغ السجلات المرتبطة بالرسم الحالي.
     trainCarRegistry.splice(0, trainCarRegistry.length);
+    trainVisualParts.splice(0, trainVisualParts.length);
+    trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     activeBalloons.splice(0, activeBalloons.length);
 
     defs();
@@ -3254,8 +3438,7 @@
     // طبقة الصناديق التي استقرت داخل أحواض العربات.
     // توضع داخل trainScene حتى تتحرك مع الحركة الخفيفة للقطار.
     settledObjectsLayer = el("g", {id:"settledObjectsLayer"}, train);
-    wagonForegroundCoverLayer = el("g", {id:"wagonForegroundCoverLayer"}, train);
-    renderWagonForegroundCovers();
+    wagonForegroundCoverLayer = null;
 
     // طبقة الصناديق أثناء السقوط تبقى خارج trainScene حتى لا تتحرك مع القطار أثناء السقوط.
     fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
@@ -3267,12 +3450,14 @@
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
     loadMatterLibrary();
 
+    updateTrainVisualCulling();
+
     // المرحلة الأولى: يبدأ القطار خارج الشاشة من اليسار ثم يدخل حتى تستقر العربة في المنتصف.
     startTrainEntry();
   }
 
   startTrainStage(0);
-  /* إصدار 113: تثبيت الصندوق على العربة التي اختارها أولًا، توحيد طبقة واجهة العربة أثناء السقوط، وتخفيض سرعة حركة القطار قليلًا. */
+  /* إصدار 114: تنظيف كامل للمرحلة المنتهية، تشغيل ورسم الأجزاء القريبة من الشاشة فقط، غطاء عربة خفيف واحد، وتوقيت فيزياء مستقل عن معدل الإطارات. */
 })();
 </script>
 </body>
