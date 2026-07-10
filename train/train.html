@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 101</title>
+  <title>قطار الإجابات - إصدار 102</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -323,9 +323,11 @@
   const collisionMap = [];
 
   const TRAIN_MOTION = {
-    enterOffset:-1350,
     centerOffset:0,
-    exitOffset:1450,
+
+    // الدخول والخروج أصبحا ديناميكيين حسب طول القطار الحالي.
+    // هذا يضمن اختفاء القطار كاملًا حتى لو زاد عدد العربات في المراحل القادمة.
+    offscreenMargin:260,
 
     // أبطأ بنسبة 40% من إصدار 88.
     enterDuration:7280,
@@ -333,7 +335,7 @@
     exitDuration:8680
   };
 
-  let trainVisualOffsetX = TRAIN_MOTION.enterOffset;
+  let trainVisualOffsetX = 0;
   let trainPhysicsOffsetX = 0;
   let trainMotionState = "entering";
   let trainAnimationFrame = 0;
@@ -629,6 +631,64 @@
     return QUESTION_WAGON_INDICES[activeQuestionPointer] ?? QUESTION_WAGON_INDICES[0] ?? 0;
   }
 
+  function getBaseAnswerWagonBounds(index){
+    const rawX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+    return {
+      left:trainX(rawX),
+      right:trainX(rawX) + trainLen(TRAIN_LAYOUT.wagonW)
+    };
+  }
+
+  function getTrainVisualBounds(){
+    // نحسب حدود القطار كاملة بدون إزاحة الحركة.
+    // نعتمد على كل جزء بصري: القاطرة، عربات السؤال، الركاب، والفحم.
+    const bounds = [];
+
+    TRAIN_CARS.forEach((car, index) => {
+      if(!car) return;
+
+      if(car.type === "answer"){
+        bounds.push(getBaseAnswerWagonBounds(index));
+        return;
+      }
+
+      if(car.type === "passenger"){
+        const layout = passengerLayoutForIndex(index);
+        bounds.push({left:layout.x, right:layout.x + layout.width});
+        return;
+      }
+
+      if(car.type === "coal"){
+        const layout = coalLayoutForIndex(index);
+        bounds.push({left:layout.x, right:layout.x + layout.width});
+      }
+    });
+
+    bounds.push({
+      left:trainX(782),
+      right:trainX(782) + trainLen(320)
+    });
+
+    if(!bounds.length){
+      return {left:0, right:1280};
+    }
+
+    return {
+      left:Math.min(...bounds.map(item => item.left)),
+      right:Math.max(...bounds.map(item => item.right))
+    };
+  }
+
+  function getDynamicTrainEnterOffset(){
+    const bounds = getTrainVisualBounds();
+    return -bounds.right - TRAIN_MOTION.offscreenMargin;
+  }
+
+  function getDynamicTrainExitOffset(){
+    const bounds = getTrainVisualBounds();
+    return 1280 - bounds.left + TRAIN_MOTION.offscreenMargin;
+  }
+
   /*
     نظام فيزياء القطار المنقول من المختبر:
     - لا يوجد manual fallback.
@@ -865,7 +925,9 @@
 
   function startTrainEntry(){
     trainMotionState = "entering";
-    setTrainVisualOffset(TRAIN_MOTION.enterOffset);
+
+    // يبدأ القطار كاملًا خارج الشاشة من اليسار مهما كان طوله.
+    setTrainVisualOffset(getDynamicTrainEnterOffset());
 
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing");
@@ -960,7 +1022,9 @@
     stageCompleteTriggered = true;
     trainMotionState = "exiting";
     clearActiveFallingMatterBoxes();
-    animateTrainTo(TRAIN_MOTION.exitOffset, TRAIN_MOTION.exitDuration, "done");
+
+    // يخرج القطار كاملًا من الشاشة حسب طول القطار الحالي، وليس برقم ثابت.
+    animateTrainTo(getDynamicTrainExitOffset(), TRAIN_MOTION.exitDuration, "done");
   }
 
   function isMatterReady(){
@@ -2828,7 +2892,7 @@
   }
 
   build();
-  /* إصدار 101: منطق اكتمال عربات السؤال الظاهرة بدون تحريك بينها، وخروج القطار بعد اكتمالها كلها، مع جعل عربة الفحم عربة تحطيم. */
+  /* إصدار 102: جعل دخول وخروج القطار ديناميكيًا حسب طول القطار حتى يختفي كاملًا مهما زاد عدد العربات. */
 })();
 </script>
 </body>
