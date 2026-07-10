@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 108</title>
+  <title>قطار الإجابات - إصدار 109</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -213,8 +213,20 @@
     const g = el("g", {
       id:options.id || "answerBalloonDemo",
       transform:`translate(${x} ${y}) scale(${scale})`,
-      filter:options.shadow === false ? "none" : "url(#balloonShadow)"
+      filter:options.shadow === false ? "none" : "url(#balloonShadow)",
+      "pointer-events":"all"
     }, parent);
+
+    // مساحة ضغط شفافة تغطي البالون كاملًا حتى يمكن فرقعته من أي مكان ظاهر.
+    el("rect", {
+      x:-152,
+      y:-76,
+      width:328,
+      height:168,
+      rx:38,
+      fill:"transparent",
+      "pointer-events":"all"
+    }, g);
 
     // زعانف خلفية يمين مثل المرجع.
     el("path", {
@@ -346,8 +358,10 @@
   const BALLOONS_PER_ROUND = 5;
   const MEDIUM_BALLOON_SCALE = .80;
   const MAX_ACTIVE_FALLING_BOXES = 4;
-  const MAX_SETTLED_BOXES = 6;
-  const MAX_SETTLED_BOXES_PER_WAGON = 2;
+  // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
+  // تبقى كل الصناديق المستقرة في أماكنها.
+  const MAX_SETTLED_BOXES = Number.POSITIVE_INFINITY;
+  const MAX_SETTLED_BOXES_PER_WAGON = Number.POSITIVE_INFINITY;
 
   let activeFallingBoxes = 0;
   const settledBoxes = [];
@@ -2274,8 +2288,8 @@
   }
 
   function releaseStageBalloonsUpward(){
-    // عند اكتمال المستوى: البالونات المتبقية تصبح غير قابلة للفرقعة
-    // وتطير للأعلى بهدوء طبيعي حتى تخرج من الشاشة.
+    // عند اكتمال المستوى: ننتظر لحظة قصيرة ثم تطير البالونات المتبقية للأعلى/اليسار
+    // من مواقعها الحالية، بنفس إحساس حركتها أثناء اللعب، وتصبح غير قابلة للفرقعة.
     const now = performance.now();
 
     activeBalloons.forEach(item => {
@@ -2283,8 +2297,9 @@
 
       item.flyAway = true;
       item.flyAwayStartedAt = now;
-      item.flyAwaySpeed = 72 + item.index * 7 + Math.random() * 10;
-      item.flyAwayDrift = (Math.random() * 20 - 10);
+      item.flyAwayDelay = 650 + item.index * 90;
+      item.flyAwaySpeed = 118 + item.index * 8 + Math.random() * 16;
+      item.flyAwayDrift = -(44 + item.index * 4 + Math.random() * 18);
 
       item.popped = false;
       item.resetAt = 0;
@@ -2352,22 +2367,29 @@
     const dt = dtMs / 1000;
 
     if(item.flyAway){
-      // طيران هادئ للأعلى عند نهاية المستوى، بدون فرقعة وبدون إعادة تدوير.
-      item.state.y -= item.flyAwaySpeed * dt;
-      item.state.x += item.flyAwayDrift * dt;
+      // ننتظر أجزاء من الثانية بعد سقوط الصندوق الأخير، ثم يصعد البالون للأعلى/اليسار.
+      const elapsed = now - (item.flyAwayStartedAt || now);
+      if(elapsed < (item.flyAwayDelay || 0)){
+        return;
+      }
 
-      const fade = clamp((item.state.y + 150) / 180, 0, 1);
+      const flyDt = Math.min(dt, .05);
+      item.state.y -= item.flyAwaySpeed * flyDt;
+      item.state.x += item.flyAwayDrift * flyDt;
 
       item.node.setAttribute(
         "transform",
         `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
       );
 
+      // يبقى واضحًا أثناء الصعود، ثم يختفي قرب خروجه من أعلى الشاشة.
+      const fade = clamp((item.state.y + 120) / 120, 0, 1);
+
       if(item.node.style.display !== "none"){
         item.node.setAttribute("opacity", fade.toFixed(2));
       }
 
-      if(item.state.y < -170){
+      if(item.state.y < -135 || item.state.x < -230){
         item.node.setAttribute("opacity", "0");
         item.node.style.display = "none";
       }
@@ -2477,6 +2499,7 @@
         resetAt:0,
         flyAway:false,
         flyAwayStartedAt:0,
+        flyAwayDelay:0,
         flyAwaySpeed:0,
         flyAwayDrift:0
       };
@@ -3109,7 +3132,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 108: تجميد الصندوق فور ملامسة قاع العربة، وإطلاق البالونات للأعلى بهدوء عند نهاية المستوى. */
+  /* إصدار 109: تحسين طيران البالونات للأعلى/اليسار بعد تأخير قصير، إبقاء كل الصناديق المستقرة، وتوسيع مساحة فرقعة البالون. */
 })();
 </script>
 </body>
