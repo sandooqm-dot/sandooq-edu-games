@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 111</title>
+  <title>قطار الإجابات - إصدار 112</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -177,6 +177,20 @@
 
     const boxShadow = el("filter", {id:"answerBoxShadow", x:"-35%", y:"-35%", width:"170%", height:"180%"}, d);
     el("feDropShadow", {dx:"0", dy:"7", stdDeviation:"5", "flood-color":"#2b170c", "flood-opacity":".24"}, boxShadow);
+
+    const boxFace = el("linearGradient", {id:"answerBoxFaceNew", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#7a5a4e"}, boxFace);
+    el("stop", {offset:"46%", "stop-color":"#5f4034"}, boxFace);
+    el("stop", {offset:"100%", "stop-color":"#4a3027"}, boxFace);
+
+    const boxRail = el("linearGradient", {id:"answerBoxRailNew", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#9c7b70"}, boxRail);
+    el("stop", {offset:"55%", "stop-color":"#5a3b31"}, boxRail);
+    el("stop", {offset:"100%", "stop-color":"#322019"}, boxRail);
+
+    const boxTextFill = el("linearGradient", {id:"answerBoxTextCream", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#fff8ec"}, boxTextFill);
+    el("stop", {offset:"100%", "stop-color":"#ead8c8"}, boxTextFill);
   }
 
   function makeCloud(parent, x, y, scale){
@@ -501,58 +515,84 @@
       filter:"url(#answerBoxShadow)"
     }, parent);
 
-    // صندوق مستقيم مثل المختبر: لا منظور مائل، الفيزياء وحدها تديره.
+    // صندوق خشبي أعرض وأقرب للمرجع: بني داكن، ألواح خفيفة، ونص كريمي كبير.
     el("rect", {
-      x:-48,
-      y:-36,
-      width:96,
-      height:72,
+      x:-56,
+      y:-34,
+      width:112,
+      height:68,
       rx:7,
-      fill:"url(#answerBoxGrad)",
-      stroke:"#4e2b18",
-      "stroke-width":2.8
+      fill:"url(#answerBoxFaceNew)",
+      stroke:"#2f211c",
+      "stroke-width":3.2
+    }, g);
+
+    // ألواح علوية وسفلية مثل صورة المرجع.
+    el("rect", {
+      x:-56,
+      y:-34,
+      width:112,
+      height:14,
+      rx:6,
+      fill:"url(#answerBoxRailNew)",
+      opacity:".92"
     }, g);
 
     el("rect", {
-      x:-42,
-      y:-30,
-      width:84,
+      x:-56,
+      y:20,
+      width:112,
       height:14,
-      rx:4,
-      fill:"url(#answerBoxTopGrad)",
-      opacity:".86",
-      stroke:"#6b3b21",
-      "stroke-width":1.8
+      rx:5,
+      fill:"url(#answerBoxRailNew)",
+      opacity:".95"
+    }, g);
+
+    // خطوط خشب داخلية خفيفة وتفاصيل مائلة.
+    el("path", {
+      d:"M-48 -15 H48 M-48 18 H48 M-30 -30 V29 M0 -31 V31 M30 -30 V29",
+      fill:"none",
+      stroke:"#8c6d60",
+      "stroke-width":2.1,
+      opacity:".32"
     }, g);
 
     el("path", {
-      d:"M-48 -10 L48 -10 M-18 -36 L-18 36 M18 -36 L18 36",
+      d:"M-46 8 C-20 -10 -2 -18 28 -26 M-35 24 C-12 9 18 1 48 -15 M-52 -2 C-28 -18 8 -18 42 -28",
       fill:"none",
-      stroke:"#d3a06a",
-      "stroke-width":3,
-      opacity:".72"
+      stroke:"#2f211c",
+      "stroke-width":1.8,
+      opacity:".18"
+    }, g);
+
+    el("path", {
+      d:"M-53 -27 H53",
+      fill:"none",
+      stroke:"#b19a91",
+      "stroke-width":2.2,
+      opacity:".36"
     }, g);
 
     const text = el("text", {
       x:0,
-      y:7,
+      y:textLines.length > 1 ? -7 : 1,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
-      fill:"#fff0b8",
-      stroke:"#442313",
-      "stroke-width":1.9,
+      fill:"url(#answerBoxTextCream)",
+      stroke:"#1f1715",
+      "stroke-width":4.3,
       "paint-order":"stroke fill",
-      "font-size":16,
-      "font-weight":900,
+      "font-size":28,
+      "font-weight":1000,
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl",
       style:"direction:rtl;unicode-bidi:plaintext"
     }, g);
 
-    textLines.forEach((line, index) => {
+    textLines.slice(0, 2).forEach((line, index) => {
       el("tspan", {
         x:0,
-        dy:index === 0 ? 0 : 20
+        dy:index === 0 ? 0 : 32
       }, text).textContent = line;
     });
 
@@ -1645,16 +1685,16 @@
     resetMatterWorld();
 
     collisionMap.push(makeBreakSurface({
-      left:trainX(-90),
-      right:trainX(1380),
+      left:trainX(-300),
+      right:trainX(1560),
       y:trainY(604),
       thickness:trainLen(54)
     }, {name:"track"}));
 
     addMatterRect(
-      trainX(640),
+      trainX(630),
       trainY(TRAIN_PHYSICS_PROFILES.track.y),
-      trainLen(TRAIN_PHYSICS_PROFILES.track.w),
+      trainLen(1860),
       trainLen(TRAIN_PHYSICS_PROFILES.track.h),
       {
         label:"kill-track",
@@ -2606,9 +2646,10 @@
     const track = el("g", {id:"track"}, bg);
     const trackImage = el("image", {
       href:"train-track.webp?v=84",
-      x:trainX(-55),
+      // تمديد السكة يمينًا ويسارًا حتى لا تظهر مقطوعة عند أطراف الشاشة.
+      x:trainX(-260),
       y:trainY(604),
-      width:trainLen(1390),
+      width:trainLen(1800),
       height:trainLen(27),
       preserveAspectRatio:"none"
     }, track);
@@ -3187,7 +3228,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 111: حركة خفيفة بلا توقف، السماح بالفرقعة أثناء تقدم القطار مع مزامنة الفيزياء، وكسر أي صندوق خارج القطار عند السكة. */
+  /* إصدار 112: تحديث شكل الصندوق الخشبي ليصبح أقرب للمرجع، وتمديد السكة يمينًا ويسارًا مع تحديث منطقة الكسر. */
 })();
 </script>
 </body>
