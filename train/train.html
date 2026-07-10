@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 117</title>
+  <title>قطار الإجابات - إصدار 118</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -195,6 +195,19 @@
     const boxTextFill = el("linearGradient", {id:"answerBoxTextCream", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
     el("stop", {offset:"0%", "stop-color":"#fff8ec"}, boxTextFill);
     el("stop", {offset:"100%", "stop-color":"#ead8c8"}, boxTextFill);
+
+
+    // واجهة عربة مستقلة ومعتمة بالكامل.
+    // هذه الطبقة توضع فوق الصندوق، لذلك تخفي الجزء السفلي منه فعليًا.
+    const wagonFrontRed = el("linearGradient", {id:"wagonFrontRedGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#d51b2c"}, wagonFrontRed);
+    el("stop", {offset:"48%", "stop-color":"#b60f22"}, wagonFrontRed);
+    el("stop", {offset:"100%", "stop-color":"#85101d"}, wagonFrontRed);
+
+    const wagonFrontGold = el("linearGradient", {id:"wagonFrontGoldGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#fff0a0"}, wagonFrontGold);
+    el("stop", {offset:"38%", "stop-color":"#e8b53f"}, wagonFrontGold);
+    el("stop", {offset:"100%", "stop-color":"#9f5c0b"}, wagonFrontGold);
   }
 
   function makeCloud(parent, x, y, scale){
@@ -805,9 +818,9 @@
       floor:{
         inset:14,
         h:18,
-        // محاذاة أرضية Matter.js مع قاع الحوض المرئي للعربة.
-        // بهذا يستقر الصندوق فعليًا داخل العربة بدل الوقوف فوق حافتها.
-        yOffsetFromTop:78,
+        // موضع الفيزياء المستقر قبل محاولات إصلاح المظهر.
+        // إخفاء الجزء السفلي يتم الآن بواسطة واجهة أمامية حقيقية، لا بتحريك الأرضية.
+        yOffsetFromTop:46,
         friction:1.05,
         frictionStatic:1.35,
         restitution:.12
@@ -3344,60 +3357,113 @@
   }
 
   function renderWagonDropCovers(){
-    wagonDropCoverPositionGroup = el("g", {
-      id:"wagonDropCoverPositionGroup",
-      "pointer-events":"none"
-    });
-
-    wagonDropCoverLayer = el("g", {
-      id:"wagonDropCoverLayer",
-      class:"train-idle-motion",
-      "pointer-events":"none"
-    }, wagonDropCoverPositionGroup);
-
-    const defsNode = svg.querySelector("defs");
+    if(!wagonDropCoverLayer) return;
 
     trainCarRegistry.forEach((car, index) => {
       if(!car || car.type !== "answer") return;
 
-      // غطاء واحد خفيف فقط: الحافة العليا والجوانب والواجهة السفلية.
-      // لا نعيد رسم صورة العربة كاملة مرتين كما كان يحدث سابقًا.
-      const clipId = `wagonFrontClip-${index}`;
-      const clip = el("clipPath", {
-        id:clipId,
-        clipPathUnits:"userSpaceOnUse"
-      }, defsNode);
-
-      const sideW = Math.max(trainLen(16), car.width * .065);
-      const topH = Math.max(trainLen(13), car.height * .14);
-
-      // يبدأ حاجب الواجهة مباشرة بعد الحافة العلوية للعربة.
-      // بهذا يبقى الجزء العلوي من الصندوق ظاهرًا، بينما يختفي الجزء السفلي
-      // خلف جسم العربة كما يراه المشاهد طبيعيًا.
-      const frontY = car.y + topH;
-
-      el("rect", {x:car.x, y:car.y, width:car.width, height:topH}, clip);
-      el("rect", {x:car.x, y:frontY, width:car.width, height:car.bottom - frontY}, clip);
-      el("rect", {x:car.x, y:car.y, width:sideW, height:car.height}, clip);
-      el("rect", {x:car.right - sideW, y:car.y, width:sideW, height:car.height}, clip);
-
+      // بنية الطبقات الصحيحة:
+      // خلفية العربة الأصلية -> الصندوق داخل الحوض -> هذه الواجهة الأمامية المعتمة.
+      // لا توجد صورة مكررة ولا clipPath على صورة خارجية.
       const coverGroup = el("g", {
-        id:`wagonDropCover-${index}`,
-        "pointer-events":"none"
+        id:`wagonFrontFace-${index}`,
+        "pointer-events":"none",
+        "shape-rendering":"geometricPrecision"
       }, wagonDropCoverLayer);
 
-      const cover = el("image", {
-        href:"train-wagon.webp?v=84",
-        x:car.x,
-        y:car.y,
-        width:car.width,
-        height:car.height,
-        preserveAspectRatio:"xMidYMid meet",
-        "clip-path":`url(#${clipId})`,
-        "pointer-events":"none"
-      }, coverGroup);
-      cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
+      const sideInset = trainLen(7);
+      const topRailY = car.y + trainLen(1);
+      const topRailH = trainLen(12);
+      const faceX = car.x + sideInset;
+      const faceY = car.y + topRailH;
+      const faceW = car.width - sideInset * 2;
+      const faceH = car.height - topRailH - trainLen(10);
 
+      // جسم الواجهة الأحمر المعتم: هو الذي يحجب الجزء السفلي من الصندوق.
+      el("rect", {
+        x:faceX,
+        y:faceY,
+        width:faceW,
+        height:faceH,
+        rx:trainLen(2.5),
+        fill:"url(#wagonFrontRedGrad)",
+        stroke:"#5b1d16",
+        "stroke-width":trainLen(2.6)
+      }, coverGroup);
+
+      // الإطار الداخلي الذهبي.
+      el("rect", {
+        x:faceX + trainLen(10),
+        y:faceY + trainLen(10),
+        width:faceW - trainLen(20),
+        height:faceH - trainLen(20),
+        rx:trainLen(1.5),
+        fill:"none",
+        stroke:"url(#wagonFrontGoldGrad)",
+        "stroke-width":trainLen(2.2)
+      }, coverGroup);
+
+      // الحافة الذهبية العلوية فوق الصندوق.
+      el("rect", {
+        x:car.x + trainLen(1.5),
+        y:topRailY,
+        width:car.width - trainLen(3),
+        height:topRailH,
+        rx:trainLen(2.5),
+        fill:"url(#wagonFrontGoldGrad)",
+        stroke:"#633415",
+        "stroke-width":trainLen(2)
+      }, coverGroup);
+
+      // العمودان الأماميان.
+      [car.x + trainLen(4), car.right - trainLen(12)].forEach(x => {
+        el("rect", {
+          x,
+          y:car.y + trainLen(8),
+          width:trainLen(8),
+          height:car.height - trainLen(20),
+          rx:trainLen(2),
+          fill:"url(#wagonFrontGoldGrad)",
+          stroke:"#6c3714",
+          "stroke-width":trainLen(1.4)
+        }, coverGroup);
+      });
+
+      // الحافة السفلية.
+      el("rect", {
+        x:car.x + trainLen(5),
+        y:car.bottom - trainLen(16),
+        width:car.width - trainLen(10),
+        height:trainLen(8),
+        rx:trainLen(2),
+        fill:"url(#wagonFrontGoldGrad)",
+        stroke:"#6c3714",
+        "stroke-width":trainLen(1.4)
+      }, coverGroup);
+
+      // زخارف زوايا خفيفة داخل الواجهة.
+      const cornerY1 = faceY + trainLen(8);
+      const cornerY2 = car.bottom - trainLen(21);
+      const cornerX1 = faceX + trainLen(8);
+      const cornerX2 = car.right - sideInset - trainLen(8);
+
+      [
+        `M${cornerX1 + trainLen(8)} ${cornerY1} H${cornerX1} V${cornerY1 + trainLen(8)}`,
+        `M${cornerX2 - trainLen(8)} ${cornerY1} H${cornerX2} V${cornerY1 + trainLen(8)}`,
+        `M${cornerX1 + trainLen(8)} ${cornerY2} H${cornerX1} V${cornerY2 - trainLen(8)}`,
+        `M${cornerX2 - trainLen(8)} ${cornerY2} H${cornerX2} V${cornerY2 - trainLen(8)}`
+      ].forEach(d => {
+        el("path", {
+          d,
+          fill:"none",
+          stroke:"#f2c95c",
+          "stroke-width":trainLen(1.7),
+          "stroke-linecap":"round",
+          "stroke-linejoin":"round"
+        }, coverGroup);
+      });
+
+      // نص العربة فوق الواجهة الأمامية.
       el("text", {
         x:car.centerX,
         y:car.y + car.height * .56,
@@ -3405,9 +3471,9 @@
         "dominant-baseline":"middle",
         fill:"#ffe28a",
         stroke:"#5b2618",
-        "stroke-width":2.6,
+        "stroke-width":trainLen(2.6),
         "paint-order":"stroke fill",
-        "font-size":30,
+        "font-size":trainLen(30),
         "font-weight":900,
         "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
         direction:"rtl",
@@ -3441,16 +3507,25 @@
     wagons(train);
     locomotive(train);
 
-    // طبقة الصناديق التي استقرت داخل أحواض العربات.
-    // توضع داخل trainScene حتى تتحرك مع الحركة الخفيفة للقطار.
-    settledObjectsLayer = el("g", {id:"settledObjectsLayer"}, train);
-    wagonForegroundCoverLayer = null;
+    // الطبقة الوسطى: الصناديق التي دخلت أحواض العربات.
+    settledObjectsLayer = el("g", {
+      id:"settledObjectsLayer",
+      "pointer-events":"none"
+    }, train);
 
-    // طبقة الصناديق أثناء السقوط تبقى خارج trainScene حتى لا تتحرك مع القطار أثناء السقوط.
-    fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
-
-    // غطاء بصري سفلي فوق الصناديق الساقطة فقط، بدون نقل الصندوق أو تغيير الفيزياء.
+    // الطبقة الأمامية الحقيقية للعربة، داخل نفس trainScene وفوق الصناديق مباشرة.
+    // لذلك يتحرك الجميع بنفس دخول القطار وحركته الخفيفة دون أي اختلاف في التوقيت.
+    wagonDropCoverPositionGroup = null;
+    wagonDropCoverLayer = el("g", {
+      id:"wagonDropCoverLayer",
+      "pointer-events":"none"
+    }, train);
+    wagonForegroundCoverLayer = wagonDropCoverLayer;
     renderWagonDropCovers();
+
+    // الصندوق يبقى فوق القطار أثناء السقوط الحر.
+    // عند ملامسة جدار/قاع العربة يُنقل إلى settledObjectsLayer خلف الواجهة الأمامية.
+    fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
 
     // خريطة تصادم غير مرئية للقطار: أحواض، حواف، نطاطات، فواصل ذكية، قاطرة، وسكة.
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
@@ -3463,7 +3538,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 117: تصحيح طبقة الحجب الأمامية للعربة لتخفي الجزء السفلي من الصندوق وتُظهر الجزء العلوي فقط. */
+  /* إصدار 118: فصل العربة إلى خلفية وصندوق وواجهة SVG أمامية معتمة حقيقية، دون قص صورة أو تعديل الفيزياء. */
 })();
 </script>
 </body>
