@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 110</title>
+  <title>قطار الإجابات - إصدار 111</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -74,14 +74,22 @@
     .train-idle-motion{
       transform-box:fill-box;
       transform-origin:center;
-      animation:trainIdleMotion 3.2s ease-in-out infinite;
+      animation:trainIdleMotion 3.15s linear infinite;
       will-change:transform;
     }
 
     @keyframes trainIdleMotion{
-      0%,100%{transform:translateX(0)}
-      45%{transform:translateX(7px)}
-      68%{transform:translateX(4px)}
+      0%{transform:translateX(0)}
+      10%{transform:translateX(2px)}
+      20%{transform:translateX(4.4px)}
+      30%{transform:translateX(6.4px)}
+      40%{transform:translateX(7px)}
+      50%{transform:translateX(5.2px)}
+      60%{transform:translateX(2.4px)}
+      70%{transform:translateX(-1px)}
+      80%{transform:translateX(-3.8px)}
+      90%{transform:translateX(-2px)}
+      100%{transform:translateX(0)}
     }
 
     @keyframes wheelSpin{
@@ -896,6 +904,7 @@
       const x = startX + (targetX - startX) * eased;
 
       setTrainVisualOffset(x);
+      syncTrainPhysicsToVisualOffset();
 
       if(t < 1){
         trainAnimationFrame = requestAnimationFrame(frame);
@@ -920,15 +929,11 @@
   function startTrainEntry(){
     trainMotionState = "entering";
     setTrainVisualOffset(TRAIN_MOTION.enterOffset);
+    syncTrainPhysicsToVisualOffset();
 
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
-        // إذا تم فرقعة بالون قبل استقرار القطار، لا نعيد بناء الفيزياء حتى لا يختفي الصندوق.
-        if(matterBoxes.length === 0 && pendingMatterSpawns.length === 0){
-          rebuildTrainPhysicsAtCurrentOffset();
-        }else{
-          trainPhysicsOffsetX = TRAIN_MOTION.centerOffset;
-        }
+        syncTrainPhysicsToVisualOffset();
       });
     });
   }
@@ -939,6 +944,34 @@
     activeFallingBoxes = 0;
   }
 
+  function syncTrainPhysicsToVisualOffset(){
+    // أثناء تحرك القطار، لا نعيد بناء عالم الفيزياء حتى لا تختفي الصناديق.
+    // نحرّك أجسام القطار الثابتة وخريطة التصادم بنفس مقدار حركة القطار البصرية.
+    const delta = trainVisualOffsetX - trainPhysicsOffsetX;
+
+    if(Math.abs(delta) < .01) return;
+
+    if(!isMatterReady() || !matterEngine || !Matter || !Matter.Body){
+      trainPhysicsOffsetX = trainVisualOffsetX;
+      return;
+    }
+
+    matterStaticBodies.forEach(body => {
+      if(!body || body.label === "kill-track") return;
+      Matter.Body.translate(body, {x:delta, y:0});
+    });
+
+    collisionMap.forEach(zone => {
+      // السكة ثابتة في مكانها، أما القطار وعرباته ومناطق القتل التابعة له فتتحرك.
+      if(!zone || zone.name === "track") return;
+
+      if(typeof zone.left === "number") zone.left += delta;
+      if(typeof zone.right === "number") zone.right += delta;
+    });
+
+    trainPhysicsOffsetX = trainVisualOffsetX;
+  }
+
   function rebuildTrainPhysicsAtCurrentOffset(){
     trainPhysicsOffsetX = trainVisualOffsetX;
     buildCollisionMap();
@@ -946,12 +979,11 @@
 
   function advanceTrainToQuestionWagon(wagonIndex){
     trainMotionState = "advancing";
-    clearActiveFallingMatterBoxes();
 
     const targetOffset = trainOffsetForWagonIndex(wagonIndex);
 
     animateTrainTo(targetOffset, TRAIN_MOTION.betweenDuration, "playing", () => {
-      rebuildTrainPhysicsAtCurrentOffset();
+      syncTrainPhysicsToVisualOffset();
     });
   }
 
@@ -2129,6 +2161,14 @@
       }
     }
 
+    // إذا كان الصندوق خارج العربات ولم يدخل أي عربة، يترك حتى يصل السكة ثم ينكسر.
+    // هذا فحص احتياطي بجانب حساس السكة، لمنع أي صندوق من البقاء خارج إطار القطار.
+    const trackBreakY = trainY(TRAIN_PHYSICS_PROFILES.track.y) - BOX.bottom + 6;
+    if(!item.insideWagon && body.position.y >= trackBreakY){
+      breakMatterBox(item);
+      return;
+    }
+
     if(body.position.y > 700 || body.position.x < -240 || body.position.x > 1450){
       breakMatterBox(item);
     }
@@ -2353,9 +2393,11 @@
   }
 
   function canPopBalloonNow(){
-    // يسمح بالفرقعة أثناء دخول القطار وقبل استقراره، وكذلك أثناء اللعب.
+    // يسمح بالفرقعة أثناء دخول القطار، وأثناء اللعب، وأثناء تقدمه للنافذة التالية.
     // يمنع فقط أثناء خروج القطار أو نهاية المرحلة أو طيران البالونات للأعلى.
-    return trainMotionState === "entering" || trainMotionState === "playing";
+    return trainMotionState === "entering" ||
+      trainMotionState === "playing" ||
+      trainMotionState === "advancing";
   }
 
   function popPooledBalloon(item, now){
@@ -2722,9 +2764,9 @@
 
     trainVisualOffsetX = TRAIN_MOTION.enterOffset;
 
-    // الفيزياء تكون جاهزة على موضع استقرار القطار من البداية
-    // حتى يمكن فرقعة البالونات قبل اكتمال دخوله بدون اختفاء الصندوق عند نهاية الدخول.
-    trainPhysicsOffsetX = TRAIN_MOTION.centerOffset;
+    // الفيزياء تبدأ مع القطار خارج الشاشة، ثم تتابع حركته فريمًا بفريم.
+    // هذا يسمح باللعب أثناء الحركة بدون فصل بين الشكل والتصادم.
+    trainPhysicsOffsetX = TRAIN_MOTION.enterOffset;
     trainMotionState = "entering";
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
@@ -3145,7 +3187,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 110: السماح بفرقعة البالونات أثناء دخول القطار قبل الاستقرار، وزيادة مسافة الحركة الخفيفة للقطار قليلًا. */
+  /* إصدار 111: حركة خفيفة بلا توقف، السماح بالفرقعة أثناء تقدم القطار مع مزامنة الفيزياء، وكسر أي صندوق خارج القطار عند السكة. */
 })();
 </script>
 </body>
