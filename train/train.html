@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 100</title>
+  <title>قطار الإجابات - إصدار 101</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -338,6 +338,7 @@
   let trainMotionState = "entering";
   let trainAnimationFrame = 0;
   let activeQuestionPointer = 0;
+  const completedQuestionWagons = new Set();
   let stageCompleteTriggered = false;
 
   const BALLOONS_PER_ROUND = 5;
@@ -893,24 +894,64 @@
     });
   }
 
+  function isQuestionWagonIndex(index){
+    return QUESTION_WAGON_INDICES.includes(index);
+  }
+
+  function getQuestionWagonVisualRect(index){
+    const car = trainCarRegistry[index];
+    if(!car) return null;
+
+    return {
+      left:car.x + trainVisualOffsetX,
+      right:car.x + car.width + trainVisualOffsetX
+    };
+  }
+
+  function areAllQuestionWagonsPlayableNow(){
+    // إذا كل عربات السؤال ظاهرة وممكن إسقاط الصناديق فيها، لا نحرّك القطار بينها.
+    return QUESTION_WAGON_INDICES.every(index => {
+      const rect = getQuestionWagonVisualRect(index);
+      if(!rect) return false;
+
+      // هامش بسيط لأن جزءًا خفيفًا من العربة قد يكون قريبًا من حافة الشاشة.
+      return rect.left >= -40 && rect.right <= 1320;
+    });
+  }
+
+  function areAllQuestionWagonsCompleted(){
+    return QUESTION_WAGON_INDICES.length > 0 &&
+      QUESTION_WAGON_INDICES.every(index => completedQuestionWagons.has(index));
+  }
+
+  function nextUncompletedQuestionWagonIndex(){
+    return QUESTION_WAGON_INDICES.find(index => !completedQuestionWagons.has(index));
+  }
+
   function handleQuestionWagonSettled(well){
     if(!well) return;
+    if(!isQuestionWagonIndex(well.index)) return;
 
-    const activeWagonIndex = currentQuestionWagonIndex();
+    completedQuestionWagons.add(well.index);
 
-    if(well.index !== activeWagonIndex){
+    if(areAllQuestionWagonsCompleted()){
+      requestTrainExit();
       return;
     }
 
-    const nextPointer = activeQuestionPointer + 1;
-
-    if(nextPointer < QUESTION_WAGON_INDICES.length){
-      activeQuestionPointer = nextPointer;
-      advanceTrainToQuestionWagon(currentQuestionWagonIndex());
+    // المرحلة الحالية: إذا أصبحت عربات السؤال كلها واضحة على الشاشة،
+    // نبقى ثابتين ونسجل اكتمال كل عربة حتى تكتمل كلها ثم يخرج القطار.
+    if(areAllQuestionWagonsPlayableNow()){
       return;
     }
 
-    requestTrainExit();
+    // إذا بقيت عربة سؤال غير واضحة، نتقدم للنافذة التالية فقط.
+    const nextIndex = nextUncompletedQuestionWagonIndex();
+    if(nextIndex !== undefined){
+      const nextPointer = QUESTION_WAGON_INDICES.indexOf(nextIndex);
+      if(nextPointer >= 0) activeQuestionPointer = nextPointer;
+      advanceTrainToQuestionWagon(nextIndex);
+    }
   }
 
   function requestTrainExit(){
@@ -1840,6 +1881,12 @@
       applyPassengerBouncerBounce(item, bodyA, bodyB);
       return;
     }
+
+    if(bodyB.sgType === "coal-solid"){
+      stopFreeFallAirDrift(item);
+      breakMatterBox(item);
+      return;
+    }
   }
 
   function handleMatterCollision(bodyA, bodyB){
@@ -1856,6 +1903,11 @@
     }
 
     if(bodyB.sgType === "kill" || String(bodyB.label || "").startsWith("kill-")){
+      breakMatterBox(item);
+      return;
+    }
+
+    if(bodyB.sgType === "coal-solid"){
       breakMatterBox(item);
       return;
     }
@@ -1951,8 +2003,9 @@
     settledVisualMatterBoxes.push(item);
     rememberSettledBox(node, well && well.index);
 
-    // إذا كان الصندوق في عربة السؤال النشطة:
-    // ننتقل إلى عربة السؤال التالية، أو نخرج إذا كانت آخر عربة سؤال.
+    // نسجل اكتمال عربة السؤال.
+    // إذا كل عربات السؤال الظاهرة اكتملت، يخرج القطار.
+    // وإذا بقيت عربات خارج الشاشة فقط، يتقدم القطار للنافذة التالية.
     handleQuestionWagonSettled(well);
   }
 
@@ -2775,7 +2828,7 @@
   }
 
   build();
-  /* إصدار 100: المرحلة الثالثة؛ عربة ركاب ثم ثلاث عربات سؤال ثم عربة فحم صلبة في آخر القطار. */
+  /* إصدار 101: منطق اكتمال عربات السؤال الظاهرة بدون تحريك بينها، وخروج القطار بعد اكتمالها كلها، مع جعل عربة الفحم عربة تحطيم. */
 })();
 </script>
 </body>
