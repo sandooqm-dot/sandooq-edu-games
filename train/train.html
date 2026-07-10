@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 104</title>
+  <title>قطار الإجابات - إصدار 105</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -324,7 +324,9 @@
 
   const TRAIN_MOTION = {
     enterOffset:-1350,
-    centerOffset:0,
+
+    // تقديم القطار للأمام قليلًا حتى تظهر العربات الخلفية بشكل أوضح في المراحل الطويلة.
+    centerOffset:90,
     exitOffset:1450,
 
     // أبطأ بنسبة 40% من إصدار 88.
@@ -622,7 +624,7 @@
   }
 
   function trainOffsetForWagonIndex(index){
-    return trainLen((Number(index) || 0) * TRAIN_LAYOUT.wagonStep);
+    return TRAIN_MOTION.centerOffset + trainLen((Number(index) || 0) * TRAIN_LAYOUT.wagonStep);
   }
 
   function currentQuestionWagonIndex(){
@@ -2649,7 +2651,11 @@
     const rawSlotX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
     const rawPassengerW = 320;
     const rawPassengerH = 179;
-    const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2;
+
+    // إذا كانت عربة الركاب خلف مقطورة السائق مباشرة، نرجعها قليلًا للخلف
+    // حتى لا تكون ملاصقة للمقطورة.
+    const driverPassengerGap = index === 0 ? 42 : 0;
+    const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2 - driverPassengerGap;
     const rawPassengerY = 418;
 
     return {
@@ -3012,7 +3018,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 104: نظام 20 مرحلة احترافي؛ القطار يخرج يمينًا بعد اكتمال المرحلة، ينتظر 2.5 ثانية، ثم يدخل بمرحلة أصعب. */
+  /* إصدار 105: تقديم القطار للأمام قليلًا، وزيادة المسافة بين مقطورة السائق وعربة الركاب إذا كانت خلفها مباشرة. */
 })();
 </script>
 </body>
