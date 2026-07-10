@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 118</title>
+  <title>قطار الإجابات - إصدار 120</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -818,9 +818,8 @@
       floor:{
         inset:14,
         h:18,
-        // موضع الفيزياء المستقر قبل محاولات إصلاح المظهر.
-        // إخفاء الجزء السفلي يتم الآن بواسطة واجهة أمامية حقيقية، لا بتحريك الأرضية.
-        yOffsetFromTop:46,
+        // موضع القاع محسوب ليظهر قرابة 60%–70% من الصندوق فوق واجهة العربة.
+        yOffsetFromTop:45,
         friction:1.05,
         frictionStatic:1.35,
         restitution:.12
@@ -1916,6 +1915,30 @@
     syncMatterBox(item);
   }
 
+  function placeMatterBoxExactlyOnWagonFloor(body, floorBody){
+    if(!body || !floorBody || !Matter || !Matter.Body) return;
+
+    // نستخدم حدود الجسم الحالية حتى تبقى زاوية الصندوق كما هي.
+    const lowerExtent = Math.max(
+      BOX.bottom,
+      body.bounds && body.bounds.max
+        ? body.bounds.max.y - body.position.y
+        : BOX.bottom
+    );
+
+    const floorTop = floorBody.bounds && floorBody.bounds.min
+      ? floorBody.bounds.min.y
+      : floorBody.position.y - trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.h) / 2;
+
+    Matter.Body.setPosition(body, {
+      x:body.position.x,
+      y:floorTop - lowerExtent + .5
+    });
+
+    Matter.Body.setVelocity(body, {x:0, y:0});
+    Matter.Body.setAngularVelocity(body, 0);
+  }
+
   function applySmartGapBounceToMatter(item, body, gapBody, activeMode = false){
     if(!item || !body || !gapBody || !Matter || !Matter.Body) return;
 
@@ -2211,9 +2234,12 @@
         item.enteredWellAt = performance.now();
       }
 
+      // نضع الصندوق فوق السطح الحقيقي للقاع أولًا.
+      // التجميد قبل حل التداخل كان يجعل الصندوق يبدو غارقًا داخل العربة.
+      placeMatterBoxExactlyOnWagonFloor(bodyA, bodyB);
       moveMatterBoxBehindWagonCover(item);
 
-      // تجميد مباشر عند ملامسة قاع العربة لتقليل الحركة الداخلية والتعليق.
+      // بعد تصحيح موضع التلامس يتحول الصندوق إلى عنصر بصري ثابت.
       const settledWell = getWellByIndex(item.lockedWellIndex) || getWellByMatterBody(bodyA);
       if(settledWell){
         settleMatterBoxAsVisualOnly(item, settledWell);
@@ -3538,7 +3564,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 118: فصل العربة إلى خلفية وصندوق وواجهة SVG أمامية معتمة حقيقية، دون قص صورة أو تعديل الفيزياء. */
+  /* إصدار 120: تثبيت الصندوق فوق سطح قاع العربة الحقيقي قبل التجميد، وضبط ظهوره العلوي إلى قرابة 60%–70%. */
 })();
 </script>
 </body>
