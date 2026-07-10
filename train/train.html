@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 116</title>
+  <title>قطار الإجابات - إصدار 117</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -3370,7 +3370,11 @@
 
       const sideW = Math.max(trainLen(16), car.width * .065);
       const topH = Math.max(trainLen(13), car.height * .14);
-      const frontY = car.y + car.height * .42;
+
+      // يبدأ حاجب الواجهة مباشرة بعد الحافة العلوية للعربة.
+      // بهذا يبقى الجزء العلوي من الصندوق ظاهرًا، بينما يختفي الجزء السفلي
+      // خلف جسم العربة كما يراه المشاهد طبيعيًا.
+      const frontY = car.y + topH;
 
       el("rect", {x:car.x, y:car.y, width:car.width, height:topH}, clip);
       el("rect", {x:car.x, y:frontY, width:car.width, height:car.bottom - frontY}, clip);
@@ -3459,7 +3463,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 116: محاذاة أرضية الفيزياء مع قاع حوض العربة حتى يستقر الصندوق فعليًا داخلها. */
+  /* إصدار 117: تصحيح طبقة الحجب الأمامية للعربة لتخفي الجزء السفلي من الصندوق وتُظهر الجزء العلوي فقط. */
 })();
 </script>
 </body>
