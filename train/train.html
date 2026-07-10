@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 105</title>
+  <title>قطار الإجابات - إصدار 106</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -325,7 +325,7 @@
   const TRAIN_MOTION = {
     enterOffset:-1350,
 
-    // تقديم القطار للأمام قليلًا حتى تظهر العربات الخلفية بشكل أوضح في المراحل الطويلة.
+    // تقديم القطار للأمام قليلًا مع مزامنة الفيزياء بعد الدخول.
     centerOffset:90,
     exitOffset:1450,
 
@@ -909,7 +909,10 @@
     setTrainVisualOffset(TRAIN_MOTION.enterOffset);
 
     requestAnimationFrame(() => {
-      animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing");
+      animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
+        // مهم: أي تقديم للقطار يجب أن يغيّر الفيزياء معه، لا الشكل فقط.
+        rebuildTrainPhysicsAtCurrentOffset();
+      });
     });
   }
 
@@ -2652,8 +2655,8 @@
     const rawPassengerW = 320;
     const rawPassengerH = 179;
 
-    // إذا كانت عربة الركاب خلف مقطورة السائق مباشرة، نرجعها قليلًا للخلف
-    // حتى لا تكون ملاصقة للمقطورة.
+    // إذا كانت عربة الركاب خلف مقطورة السائق مباشرة، نرجعها للخلف قليلًا
+    // مع بقاء الرسم والفيزياء والعجلات على نفس الإحداثيات.
     const driverPassengerGap = index === 0 ? 42 : 0;
     const rawPassengerX = rawSlotX + (TRAIN_LAYOUT.wagonW - rawPassengerW) / 2 - driverPassengerGap;
     const rawPassengerY = 418;
@@ -3018,7 +3021,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 105: تقديم القطار للأمام قليلًا، وزيادة المسافة بين مقطورة السائق وعربة الركاب إذا كانت خلفها مباشرة. */
+  /* إصدار 106: مبني من 104؛ تقديم القطار مع مزامنة الفيزياء، وزيادة مسافة الركاب خلف السائق دون كسر السقوط. */
 })();
 </script>
 </body>
