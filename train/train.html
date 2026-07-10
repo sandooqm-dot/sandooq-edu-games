@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 114</title>
+  <title>قطار الإجابات - إصدار 113</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -363,9 +363,9 @@
     centerOffset:90,
     exitOffset:1450,
 
-    // أبطأ قليلًا حتى تكون حركة الدخول/الانتقال/الخروج أوضح وأكثر هدوءًا.
+    // تخفيض إضافي خفيف للسرعة مع إبقاء مزامنة الفيزياء كما هي.
     enterDuration:8400,
-    betweenDuration:6200,
+    betweenDuration:6000,
     exitDuration:10000
   };
 
@@ -379,8 +379,7 @@
 
   const BALLOONS_PER_ROUND = 5;
   const MEDIUM_BALLOON_SCALE = .80;
-  // لا نحذف أي صندوق عند كثرة الفرقعات؛ الصناديق تبقى حتى تستقر أو تنكسر.
-  const MAX_ACTIVE_FALLING_BOXES = Number.POSITIVE_INFINITY;
+  const MAX_ACTIVE_FALLING_BOXES = 4;
   // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
   // تبقى كل الصناديق المستقرة في أماكنها.
   const MAX_SETTLED_BOXES = Number.POSITIVE_INFINITY;
@@ -1792,36 +1791,12 @@
       body.position.y <= well.bottom + 30;
   }
 
-  function getStrongWellOverlapByMatterBody(body){
-    if(!body || !body.bounds) return null;
-
-    const boxArea = Math.max(1, (body.bounds.max.x - body.bounds.min.x) * (body.bounds.max.y - body.bounds.min.y));
-    let bestWell = null;
-    let bestScore = 0;
-
+  function getWellByMatterBody(body){
     for(const zone of collisionMap){
       if(zone.type !== "well") continue;
-
-      const overlapX = Math.max(
-        0,
-        Math.min(body.bounds.max.x, zone.right) - Math.max(body.bounds.min.x, zone.left)
-      );
-
-      const overlapY = Math.max(
-        0,
-        Math.min(body.bounds.max.y, zone.bottom + 34) - Math.max(body.bounds.min.y, zone.top)
-      );
-
-      const score = overlapX * overlapY;
-
-      if(score > bestScore){
-        bestScore = score;
-        bestWell = zone;
-      }
+      if(isBodyInsideWell(body, zone)) return zone;
     }
-
-    // عتبة واضحة: لا نتدخل إلا إذا كان الصندوق داخل عربة فعليًا بنسبة كافية.
-    return bestScore >= boxArea * .22 ? bestWell : null;
+    return null;
   }
 
   function syncMatterBox(item){
@@ -1861,32 +1836,27 @@
     const dx = body.position.x - gapBody.sgGapCenter;
     let direction = 0;
 
-    const strongWell = getStrongWellOverlapByMatterBody(body);
-    if(strongWell){
-      // إذا كان الصندوق فوق/داخل عربة بوضوح، لا ندعه يقفز للعربة المجاورة.
-      item.lastWellIndex = strongWell.index;
-
-      const wellCenter = (strongWell.left + strongWell.right) / 2;
-      const towardCenter = body.position.x < wellCenter ? 1 : -1;
-
-      Matter.Body.setVelocity(body, {
-        x:body.velocity.x * .42 + towardCenter * .34,
-        y:Math.min(body.velocity.y * .30, -.18)
-      });
-
-      Matter.Body.setAngularVelocity(body, body.angularVelocity * .45);
-      return;
-    }
-
-    if(Math.abs(dx) > profile.centerDeadZone){
-      direction = dx < 0 ? -1 : 1;
-    }else if(Math.abs(body.velocity.x) > .08){
-      direction = body.velocity.x < 0 ? -1 : 1;
+    // بعد اختيار العربة لأول مرة، يبقى الفاصل الذكي يعيد الصندوق إلى نفس العربة
+    // بدل تبديل الاتجاه في كل نطة وانتقاله إلى العربة المجاورة.
+    if(item.lockedWellIndex === gapBody.sgLeftWellIndex){
+      direction = -1;
+    }else if(item.lockedWellIndex === gapBody.sgRightWellIndex){
+      direction = 1;
     }else{
-      direction = gapBody.sgDefaultPushX || 1;
+      if(Math.abs(dx) > profile.centerDeadZone){
+        direction = dx < 0 ? -1 : 1;
+      }else if(Math.abs(body.velocity.x) > .08){
+        direction = body.velocity.x < 0 ? -1 : 1;
+      }else{
+        direction = gapBody.sgDefaultPushX || 1;
+      }
+
+      item.lockedWellIndex = direction < 0
+        ? gapBody.sgLeftWellIndex
+        : gapBody.sgRightWellIndex;
     }
 
-    item.lastWellIndex = direction < 0 ? gapBody.sgLeftWellIndex : gapBody.sgRightWellIndex;
+    item.lastWellIndex = item.lockedWellIndex;
 
     const inwardX = direction < 0
       ? Math.min(body.velocity.x, -profile.inwardVelocity)
@@ -1919,9 +1889,26 @@
     }
 
     item.lastTopEdgeBumperAt = now;
-    item.lastWellIndex = bumperBody.sgWellIndex ?? item.lastWellIndex;
 
-    const direction = bumperBody.sgPushX || 0;
+    if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
+      item.lockedWellIndex = bumperBody.sgWellIndex ?? null;
+    }
+
+    item.lastWellIndex = item.lockedWellIndex ?? bumperBody.sgWellIndex ?? item.lastWellIndex;
+
+    let direction = bumperBody.sgPushX || 0;
+
+    // إذا لامس الصندوق حافة العربة المجاورة بعد أن حُددت عربته،
+    // تكون النطة باتجاه عربته الأصلية لا باتجاه العربة الأخرى.
+    if(item.lockedWellIndex !== null &&
+      item.lockedWellIndex !== undefined &&
+      bumperBody.sgWellIndex !== item.lockedWellIndex){
+      const lockedWell = getWellByIndex(item.lockedWellIndex);
+      if(lockedWell){
+        const lockedCenterX = (lockedWell.left + lockedWell.right) / 2;
+        direction = lockedCenterX < body.position.x ? -1 : 1;
+      }
+    }
     const inwardX = direction > 0
       ? Math.max(body.velocity.x, profile.inwardVelocity)
       : Math.min(body.velocity.x, -profile.inwardVelocity);
@@ -2117,7 +2104,12 @@
     if(bodyB.sgType === "wagon-floor"){
       item.insideWagon = true;
       item.lastWagonContactAt = performance.now();
-      item.lastWellIndex = bodyB.sgWellIndex;
+
+      if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
+        item.lockedWellIndex = bodyB.sgWellIndex;
+      }
+
+      item.lastWellIndex = item.lockedWellIndex;
 
       if(!item.enteredWellAt){
         item.enteredWellAt = performance.now();
@@ -2126,11 +2118,7 @@
       moveMatterBoxBehindWagonCover(item);
 
       // تجميد مباشر عند ملامسة قاع العربة لتقليل الحركة الداخلية والتعليق.
-      const settledWell =
-        getStrongWellOverlapByMatterBody(bodyA) ||
-        getWellByIndex(bodyB.sgWellIndex) ||
-        getWellByMatterBody(bodyA);
-
+      const settledWell = getWellByIndex(item.lockedWellIndex) || getWellByMatterBody(bodyA);
       if(settledWell){
         settleMatterBoxAsVisualOnly(item, settledWell);
       }
@@ -2142,24 +2130,17 @@
       item.insideWagon = true;
       item.lastWagonContactAt = performance.now();
 
-      const wallWell = getWellByMatterBody(bodyA) || getStrongWellOverlapByMatterBody(bodyA);
-
-      if(wallWell){
-        item.lastWellIndex = wallWell.index;
-      }else{
-        item.lastWellIndex = bodyB.sgWellIndex;
+      if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
+        item.lockedWellIndex = bodyB.sgWellIndex;
       }
+
+      item.lastWellIndex = item.lockedWellIndex;
 
       if(!item.enteredWellAt){
         item.enteredWellAt = performance.now();
       }
 
-      // النقل خلف واجهة العربة يتم فقط إذا أصبح الصندوق داخل العربة بوضوح.
-      // هذا يمنع الوميض/الاختفاء اللحظي عند لمس الجدار من الخارج.
-      if(wallWell){
-        moveMatterBoxBehindWagonCover(item);
-      }
-
+      moveMatterBoxBehindWagonCover(item);
       return;
     }
 
@@ -2289,11 +2270,6 @@
   }
 
   function releaseOldestMatterBoxIfNeeded(){
-    if(!Number.isFinite(MAX_ACTIVE_FALLING_BOXES)){
-      activeFallingBoxes = matterBoxes.filter(item => item && !item.done).length;
-      return;
-    }
-
     const liveBoxes = matterBoxes.filter(item => item && !item.done);
     activeFallingBoxes = Math.min(activeFallingBoxes, liveBoxes.length);
 
@@ -2342,6 +2318,7 @@
       insideWagonLayer:false,
       enteredWellAt:0,
       lastWellIndex:null,
+      lockedWellIndex:null,
       lastTopEdgeBumperAt:0,
       lastGapSmartAt:0,
       lastPassengerBounceAt:0,
@@ -3222,19 +3199,8 @@
     trainCarRegistry.forEach((car, index) => {
       if(!car || car.type !== "answer") return;
 
-      const clipId = `wagonDropCoverClip-${index}`;
-      const defsNode = svg.querySelector("defs");
-      const clip = el("clipPath", {id:clipId}, defsNode);
-
-      // نغطي الثلث السفلي فقط حتى لا نحجب نص العربة،
-      // وفي نفس الوقت نمنع ظهور أسفل الصندوق فوق واجهة العربة.
-      el("rect", {
-        x:car.x,
-        y:car.y + car.height * .62,
-        width:car.width,
-        height:car.height * .38
-      }, clip);
-
+      // نعيد واجهة العربة كاملة فوق الصندوق أثناء السقوط، ثم نعيد رسم النص فوقها.
+      // بهذا يبقى جانب العربة وواجهتها أمام الصندوق طوال دخوله، فلا يحدث تبدل طبقات مرئي.
       const cover = el("image", {
         href:"train-wagon.webp?v=84",
         x:car.x,
@@ -3242,10 +3208,25 @@
         width:car.width,
         height:car.height,
         preserveAspectRatio:"xMidYMid meet",
-        "clip-path":`url(#${clipId})`,
         "pointer-events":"none"
       }, wagonDropCoverLayer);
       cover.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
+
+      el("text", {
+        x:car.centerX,
+        y:car.y + car.height * .56,
+        "text-anchor":"middle",
+        "dominant-baseline":"middle",
+        fill:"#ffe28a",
+        stroke:"#5b2618",
+        "stroke-width":2.6,
+        "paint-order":"stroke fill",
+        "font-size":30,
+        "font-weight":900,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"rtl",
+        "pointer-events":"none"
+      }, wagonDropCoverLayer).textContent = car.text;
     });
   }
 
@@ -3291,7 +3272,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 114: مبني من 112؛ منع حذف الصناديق بعد 4، ضبط الفاصل الذكي دون كسر الفيزياء، تقليل قلتش الجدار، وإبطاء القطار قليلًا. */
+  /* إصدار 113: تثبيت الصندوق على العربة التي اختارها أولًا، توحيد طبقة واجهة العربة أثناء السقوط، وتخفيض سرعة حركة القطار قليلًا. */
 })();
 </script>
 </body>
