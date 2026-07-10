@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 112</title>
+  <title>قطار الإجابات - إصدار 113</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -363,10 +363,10 @@
     centerOffset:90,
     exitOffset:1450,
 
-    // أبطأ بنسبة 40% من إصدار 88.
-    enterDuration:7280,
-    betweenDuration:5200,
-    exitDuration:8680
+    // أبطأ قليلًا حتى تكون حركة الدخول/الانتقال/الخروج أوضح وأكثر هدوءًا.
+    enterDuration:8600,
+    betweenDuration:6400,
+    exitDuration:10400
   };
 
   let trainVisualOffsetX = TRAIN_MOTION.enterOffset;
@@ -830,10 +830,10 @@
       width:54,
       height:22,
       cooldown:85,
-      inwardVelocity:1.32,
-      upVelocity:.92,
-      spinKick:.026,
-      liftOut:6,
+      inwardVelocity:1.05,
+      upVelocity:.76,
+      spinKick:.018,
+      liftOut:4,
       centerDeadZone:4,
       friction:.05,
       frictionStatic:.08,
@@ -1791,12 +1791,34 @@
       body.position.y <= well.bottom + 30;
   }
 
-  function getWellByMatterBody(body){
+  function getDominantWellByMatterBody(body){
+    if(!body || !body.bounds) return null;
+
+    let bestWell = null;
+    let bestScore = 0;
+
     for(const zone of collisionMap){
       if(zone.type !== "well") continue;
-      if(isBodyInsideWell(body, zone)) return zone;
+
+      const overlapX = Math.max(
+        0,
+        Math.min(body.bounds.max.x, zone.right) - Math.max(body.bounds.min.x, zone.left)
+      );
+
+      const overlapY = Math.max(
+        0,
+        Math.min(body.bounds.max.y, zone.bottom + 40) - Math.max(body.bounds.min.y, zone.top)
+      );
+
+      const score = overlapX * overlapY;
+
+      if(score > bestScore){
+        bestScore = score;
+        bestWell = zone;
+      }
     }
-    return null;
+
+    return bestScore > 80 ? bestWell : null;
   }
 
   function syncMatterBox(item){
@@ -1836,7 +1858,19 @@
     const dx = body.position.x - gapBody.sgGapCenter;
     let direction = 0;
 
-    if(Math.abs(dx) > profile.centerDeadZone){
+    // قبل قرار الدفع يمين/يسار، ننظر لأي عربة يغطيها الصندوق أكثر.
+    // هذا يمنع صندوقًا فوق عربة اليسار من القفز تدريجيًا إلى عربة اليمين.
+    const dominantWell = getDominantWellByMatterBody(body);
+
+    if(dominantWell && dominantWell.index === gapBody.sgLeftWellIndex){
+      direction = -1;
+    }else if(dominantWell && dominantWell.index === gapBody.sgRightWellIndex){
+      direction = 1;
+    }else if(body.bounds && body.bounds.min.x < gapBody.sgGapCenter && body.bounds.max.x > gapBody.sgGapCenter){
+      const leftShare = gapBody.sgGapCenter - body.bounds.min.x;
+      const rightShare = body.bounds.max.x - gapBody.sgGapCenter;
+      direction = leftShare >= rightShare ? -1 : 1;
+    }else if(Math.abs(dx) > profile.centerDeadZone){
       direction = dx < 0 ? -1 : 1;
     }else if(Math.abs(body.velocity.x) > .08){
       direction = body.velocity.x < 0 ? -1 : 1;
@@ -1861,8 +1895,8 @@
     );
 
     Matter.Body.setPosition(body, {
-      x:body.position.x + direction * profile.liftOut,
-      y:body.position.y - profile.liftOut
+      x:body.position.x + direction * Math.min(profile.liftOut, 3),
+      y:body.position.y - Math.min(profile.liftOut, 4)
     });
   }
 
@@ -2084,7 +2118,11 @@
       moveMatterBoxBehindWagonCover(item);
 
       // تجميد مباشر عند ملامسة قاع العربة لتقليل الحركة الداخلية والتعليق.
-      const settledWell = getWellByIndex(bodyB.sgWellIndex) || getWellByMatterBody(bodyA);
+      const settledWell =
+        getDominantWellByMatterBody(bodyA) ||
+        getWellByIndex(bodyB.sgWellIndex) ||
+        getWellByMatterBody(bodyA);
+
       if(settledWell){
         settleMatterBoxAsVisualOnly(item, settledWell);
       }
@@ -2101,7 +2139,8 @@
         item.enteredWellAt = performance.now();
       }
 
-      moveMatterBoxBehindWagonCover(item);
+      // لا ننقل الصندوق خلف غطاء العربة هنا؛ النقل المبكر عند الجدار يسبب قلتش بصري.
+      // النقل والتجميد يحصلان فقط عند ملامسة قاع العربة.
       return;
     }
 
@@ -3228,7 +3267,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 112: تحديث شكل الصندوق الخشبي ليصبح أقرب للمرجع، وتمديد السكة يمينًا ويسارًا مع تحديث منطقة الكسر. */
+  /* إصدار 113: ضبط الفواصل الذكية لمنع انتقال الصندوق للعربة الخطأ، إزالة قلتش طبقة العربة، وتخفيف سرعة القطار. */
 })();
 </script>
 </body>
