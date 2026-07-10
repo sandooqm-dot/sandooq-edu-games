@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 102</title>
+  <title>قطار الإجابات - إصدار 103</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -323,11 +323,9 @@
   const collisionMap = [];
 
   const TRAIN_MOTION = {
+    enterOffset:-1350,
     centerOffset:0,
-
-    // الدخول والخروج أصبحا ديناميكيين حسب طول القطار الحالي.
-    // هذا يضمن اختفاء القطار كاملًا حتى لو زاد عدد العربات في المراحل القادمة.
-    offscreenMargin:260,
+    exitOffset:1450,
 
     // أبطأ بنسبة 40% من إصدار 88.
     enterDuration:7280,
@@ -335,7 +333,7 @@
     exitDuration:8680
   };
 
-  let trainVisualOffsetX = 0;
+  let trainVisualOffsetX = TRAIN_MOTION.enterOffset;
   let trainPhysicsOffsetX = 0;
   let trainMotionState = "entering";
   let trainAnimationFrame = 0;
@@ -631,62 +629,43 @@
     return QUESTION_WAGON_INDICES[activeQuestionPointer] ?? QUESTION_WAGON_INDICES[0] ?? 0;
   }
 
-  function getBaseAnswerWagonBounds(index){
-    const rawX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
-    return {
-      left:trainX(rawX),
-      right:trainX(rawX) + trainLen(TRAIN_LAYOUT.wagonW)
-    };
-  }
-
-  function getTrainVisualBounds(){
-    // نحسب حدود القطار كاملة بدون إزاحة الحركة.
-    // نعتمد على كل جزء بصري: القاطرة، عربات السؤال، الركاب، والفحم.
-    const bounds = [];
+  function getBaseTrainLeftEdge(){
+    // نحسب أقصى يسار للقطار كاملًا بدون تغيير دخول القطار.
+    // هذا يستخدم فقط عند الخروج حتى يختفي آخر جزء من القطار بالكامل.
+    const leftEdges = [trainX(782)];
 
     TRAIN_CARS.forEach((car, index) => {
       if(!car) return;
 
       if(car.type === "answer"){
-        bounds.push(getBaseAnswerWagonBounds(index));
+        const rawX = TRAIN_LAYOUT.nearestWagonX - index * TRAIN_LAYOUT.wagonStep;
+        leftEdges.push(trainX(rawX));
         return;
       }
 
       if(car.type === "passenger"){
         const layout = passengerLayoutForIndex(index);
-        bounds.push({left:layout.x, right:layout.x + layout.width});
+        leftEdges.push(layout.x);
         return;
       }
 
       if(car.type === "coal"){
         const layout = coalLayoutForIndex(index);
-        bounds.push({left:layout.x, right:layout.x + layout.width});
+        leftEdges.push(layout.x);
       }
     });
 
-    bounds.push({
-      left:trainX(782),
-      right:trainX(782) + trainLen(320)
-    });
-
-    if(!bounds.length){
-      return {left:0, right:1280};
-    }
-
-    return {
-      left:Math.min(...bounds.map(item => item.left)),
-      right:Math.max(...bounds.map(item => item.right))
-    };
+    return Math.min(...leftEdges);
   }
 
-  function getDynamicTrainEnterOffset(){
-    const bounds = getTrainVisualBounds();
-    return -bounds.right - TRAIN_MOTION.offscreenMargin;
-  }
-
-  function getDynamicTrainExitOffset(){
-    const bounds = getTrainVisualBounds();
-    return 1280 - bounds.left + TRAIN_MOTION.offscreenMargin;
+  function getSafeTrainExitOffset(){
+    // يضمن خروج القطار كاملًا من يمين الشاشة مهما كان طوله.
+    // لا نستخدم هذا في الدخول حتى لا تتكرر مشكلة اختفاء القطار.
+    const safetyMargin = 320;
+    return Math.max(
+      TRAIN_MOTION.exitOffset,
+      1280 - getBaseTrainLeftEdge() + safetyMargin
+    );
   }
 
   /*
@@ -925,9 +904,7 @@
 
   function startTrainEntry(){
     trainMotionState = "entering";
-
-    // يبدأ القطار كاملًا خارج الشاشة من اليسار مهما كان طوله.
-    setTrainVisualOffset(getDynamicTrainEnterOffset());
+    setTrainVisualOffset(TRAIN_MOTION.enterOffset);
 
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing");
@@ -1023,8 +1000,8 @@
     trainMotionState = "exiting";
     clearActiveFallingMatterBoxes();
 
-    // يخرج القطار كاملًا من الشاشة حسب طول القطار الحالي، وليس برقم ثابت.
-    animateTrainTo(getDynamicTrainExitOffset(), TRAIN_MOTION.exitDuration, "done");
+    // خروج آمن: نحسب مسافة الخروج حسب طول القطار، مع الحفاظ على دخول القطار القديم كما هو.
+    animateTrainTo(getSafeTrainExitOffset(), TRAIN_MOTION.exitDuration, "done");
   }
 
   function isMatterReady(){
@@ -2892,7 +2869,7 @@
   }
 
   build();
-  /* إصدار 102: جعل دخول وخروج القطار ديناميكيًا حسب طول القطار حتى يختفي كاملًا مهما زاد عدد العربات. */
+  /* إصدار 103: مبني من 101؛ إصلاح خروج القطار فقط بحساب آمن لطوله، مع إبقاء دخول القطار كما كان لتجنب مشكلة 102. */
 })();
 </script>
 </body>
