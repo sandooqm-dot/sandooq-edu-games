@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 109</title>
+  <title>قطار الإجابات - إصدار 110</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -80,8 +80,8 @@
 
     @keyframes trainIdleMotion{
       0%,100%{transform:translateX(0)}
-      45%{transform:translateX(4px)}
-      68%{transform:translateX(2px)}
+      45%{transform:translateX(7px)}
+      68%{transform:translateX(4px)}
     }
 
     @keyframes wheelSpin{
@@ -923,8 +923,12 @@
 
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
-        // مهم: تقديم القطار لا يكون بصريًا فقط؛ الفيزياء تُعاد بناؤها في نفس المكان.
-        rebuildTrainPhysicsAtCurrentOffset();
+        // إذا تم فرقعة بالون قبل استقرار القطار، لا نعيد بناء الفيزياء حتى لا يختفي الصندوق.
+        if(matterBoxes.length === 0 && pendingMatterSpawns.length === 0){
+          rebuildTrainPhysicsAtCurrentOffset();
+        }else{
+          trainPhysicsOffsetX = TRAIN_MOTION.centerOffset;
+        }
       });
     });
   }
@@ -2348,9 +2352,15 @@
     item.resetAt = 0;
   }
 
+  function canPopBalloonNow(){
+    // يسمح بالفرقعة أثناء دخول القطار وقبل استقراره، وكذلك أثناء اللعب.
+    // يمنع فقط أثناء خروج القطار أو نهاية المرحلة أو طيران البالونات للأعلى.
+    return trainMotionState === "entering" || trainMotionState === "playing";
+  }
+
   function popPooledBalloon(item, now){
-    if(item.popped) return;
-    if(trainMotionState !== "playing") return;
+    if(item.popped || item.flyAway) return;
+    if(!canPopBalloonNow()) return;
 
     item.popped = true;
     item.resetAt = now + 950;
@@ -2711,7 +2721,10 @@
     completedQuestionWagons.clear();
 
     trainVisualOffsetX = TRAIN_MOTION.enterOffset;
-    trainPhysicsOffsetX = 0;
+
+    // الفيزياء تكون جاهزة على موضع استقرار القطار من البداية
+    // حتى يمكن فرقعة البالونات قبل اكتمال دخوله بدون اختفاء الصندوق عند نهاية الدخول.
+    trainPhysicsOffsetX = TRAIN_MOTION.centerOffset;
     trainMotionState = "entering";
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
@@ -3132,7 +3145,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 109: تحسين طيران البالونات للأعلى/اليسار بعد تأخير قصير، إبقاء كل الصناديق المستقرة، وتوسيع مساحة فرقعة البالون. */
+  /* إصدار 110: السماح بفرقعة البالونات أثناء دخول القطار قبل الاستقرار، وزيادة مسافة الحركة الخفيفة للقطار قليلًا. */
 })();
 </script>
 </body>
