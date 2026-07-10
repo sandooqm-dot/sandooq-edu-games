@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 114</title>
+  <title>قطار الإجابات - إصدار 115</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -693,6 +693,10 @@
     width:96,
     height:72
   };
+
+  // إزاحة بصرية فقط للصندوق بعد استقراره حتى يبدو داخل حوض العربة.
+  // لا تغيّر موضع جسم Matter.js ولا الجاذبية أو التصادمات.
+  const SETTLED_BOX_VISUAL_SINK_Y = 30;
 
   // تصغير القطار والسكة فقط. البالونات والصناديق تبقى بنفس الحجم.
   const TRAIN_SCALE = .92;
@@ -2269,10 +2273,11 @@
     const r = body.angle * 180 / Math.PI;
 
     const localX = x - trainVisualOffsetX;
+    const visualY = y + SETTLED_BOX_VISUAL_SINK_Y;
 
     node.setAttribute(
       "transform",
-      `translate(${localX.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
+      `translate(${localX.toFixed(2)} ${visualY.toFixed(2)}) rotate(${r.toFixed(2)})`
     );
 
     // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
@@ -3457,7 +3462,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 114: تنظيف كامل للمرحلة المنتهية، تشغيل ورسم الأجزاء القريبة من الشاشة فقط، غطاء عربة خفيف واحد، وتوقيت فيزياء مستقل عن معدل الإطارات. */
+  /* إصدار 115: تثبيت بصري للصندوق داخل حوض العربة بعد الاستقرار، دون أي تغيير في فيزياء Matter.js. */
 })();
 </script>
 </body>
