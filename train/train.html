@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 116</title>
+  <title>قطار الإجابات - إصدار 117</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -437,7 +437,7 @@
   const completedQuestionWagons = new Set();
   let stageCompleteTriggered = false;
 
-  const BALLOONS_PER_ROUND = 5;
+  const BALLOON_FLOW_SIZE = 3;
   const MEDIUM_BALLOON_SCALE = .80;
   const MAX_ACTIVE_FALLING_BOXES = 4;
   // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
@@ -2558,34 +2558,46 @@
 
   const BALLOON_MOTION_PROFILES = [
     {
-      id:"quick-bob",
-      baseY:154,
-      minY:106,
-      maxY:214
-    },
-    {
-      id:"wide-wave",
-      baseY:150,
-      minY:94,
-      maxY:236
-    },
-    {
-      id:"deep-dip",
-      baseY:158,
-      minY:132,
-      maxY:316
-    },
-    {
       id:"gentle-float",
-      baseY:206,
-      minY:174,
-      maxY:252
+      minY:166,
+      maxY:228,
+      cycle:8.6,
+      phaseOffset:.08
     },
     {
-      id:"compound-wave",
-      baseY:174,
-      minY:116,
-      maxY:272
+      id:"medium-wave",
+      minY:112,
+      maxY:270,
+      cycle:7.4,
+      phaseOffset:.36
+    },
+    {
+      id:"sky-to-train",
+      minY:62,
+      maxY:334,
+      cycle:10.6,
+      phaseOffset:.02
+    },
+    {
+      id:"high-arc",
+      minY:76,
+      maxY:252,
+      cycle:8.9,
+      phaseOffset:.58
+    },
+    {
+      id:"low-sweep",
+      minY:154,
+      maxY:332,
+      cycle:9.7,
+      phaseOffset:.24
+    },
+    {
+      id:"long-wave",
+      minY:92,
+      maxY:302,
+      cycle:11.2,
+      phaseOffset:.72
     }
   ];
 
@@ -2597,46 +2609,30 @@
     return Math.min(BALLOON_FLIGHT.maxY, trainTopY - balloonBottomExtent - clearance);
   }
 
+  function balloonYForProfile(profile, motionTime, scale){
+    const safeMin = Math.max(BALLOON_FLIGHT.minY, Number(profile.minY) || BALLOON_FLIGHT.minY);
+    const safeMax = Math.min(
+      Number(profile.maxY) || BALLOON_FLIGHT.maxY,
+      balloonSafeMaxY(scale)
+    );
+
+    const cycle = Math.max(4, Number(profile.cycle) || 8);
+    const phase = (
+      motionTime / cycle +
+      (Number(profile.phaseOffset) || 0)
+    ) % 1;
+
+    // منحنى جيبي طويل يبدأ وينتهي بسرعة رأسية صفرية.
+    const smoothTravel = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+
+    return safeMin + (safeMax - safeMin) * smoothTravel;
+  }
+
   function balloonProfileY(item){
-    const profile = item.config.motionProfile;
-    const t = item.state.motionTime;
-    let y = profile.baseY;
-
-    switch(profile.id){
-      case "quick-bob":
-        y += Math.sin(t * Math.PI * 2 / 1.48) * 21;
-        y += Math.sin(t * Math.PI * 2 / .74 + .65) * 4;
-        break;
-
-      case "wide-wave":
-        y += Math.sin(t * Math.PI * 2 / 4.65) * 38;
-        y += Math.sin(t * Math.PI * 2 / 2.35 + 1.2) * 7;
-        break;
-
-      case "deep-dip": {
-        const dip = (1 - Math.cos(t * Math.PI * 2 / 5.35)) / 2;
-        y += dip * 142;
-        y += Math.sin(t * Math.PI * 2 / 2.7 + .4) * 5;
-        break;
-      }
-
-      case "gentle-float":
-        y += Math.sin(t * Math.PI * 2 / 6.2) * 14;
-        y += Math.sin(t * Math.PI * 2 / 3.1 + 1.8) * 4;
-        break;
-
-      case "compound-wave":
-      default:
-        y += Math.sin(t * Math.PI * 2 / 3.45) * 27;
-        y += Math.sin(t * Math.PI * 2 / 1.72 + 2.1) * 9;
-        y += Math.sin(t * Math.PI * 2 / 7.4 + .9) * 6;
-        break;
-    }
-
-    return clamp(
-      y,
-      Math.max(BALLOON_FLIGHT.minY, profile.minY),
-      Math.min(profile.maxY, balloonSafeMaxY(item.config.scale))
+    return balloonYForProfile(
+      item.config.motionProfile,
+      item.state.motionTime,
+      item.config.scale
     );
   }
 
@@ -2662,6 +2658,7 @@
   let balloonTextCursor = 0;
   let balloonLoopStarted = false;
   let balloonLoopLastTime = 0;
+  let balloonMotionProfileCursor = 0;
 
   function nextBalloonLines(){
     const lines = BALLOON_TEXT_BANK[balloonTextCursor % BALLOON_TEXT_BANK.length];
@@ -2675,17 +2672,50 @@
     if(tspans[1]) tspans[1].textContent = lines[1] || "";
   }
 
+  function nextBalloonMotionProfile(previousId = ""){
+    const activeIds = new Set(
+      activeBalloons
+        .filter(item => item && !item.popped && !item.flyAway)
+        .map(item => item.config?.motionProfile?.id)
+        .filter(Boolean)
+    );
+
+    const total = BALLOON_MOTION_PROFILES.length;
+
+    for(let offset = 0; offset < total; offset++){
+      const index = (balloonMotionProfileCursor + offset) % total;
+      const profile = BALLOON_MOTION_PROFILES[index];
+
+      if(profile.id === previousId || activeIds.has(profile.id)) continue;
+
+      balloonMotionProfileCursor = (index + 1) % total;
+      return profile;
+    }
+
+    for(let offset = 0; offset < total; offset++){
+      const index = (balloonMotionProfileCursor + offset) % total;
+      const profile = BALLOON_MOTION_PROFILES[index];
+
+      if(profile.id === previousId) continue;
+
+      balloonMotionProfileCursor = (index + 1) % total;
+      return profile;
+    }
+
+    return BALLOON_MOTION_PROFILES[0];
+  }
+
   function createBalloonMotionState(config, index = 0){
+    const motionTime = index * 1.31;
+
     return {
-      x:(config.startX ?? 1355) + index * 174,
-      y:config.motionProfile.baseY,
-      motionTime:index * .83
+      x:(config.startX ?? 1355) + index * 225,
+      y:balloonYForProfile(config.motionProfile, motionTime, config.scale),
+      motionTime
     };
   }
 
   function releaseStageBalloonsUpward(){
-    // عند اكتمال المستوى: ننتظر لحظة قصيرة ثم تطير البالونات المتبقية للأعلى/اليسار
-    // من مواقعها الحالية، بنفس إحساس حركتها أثناء اللعب، وتصبح غير قابلة للفرقعة.
     const now = performance.now();
 
     activeBalloons.forEach(item => {
@@ -2702,31 +2732,62 @@
       item.node.style.pointerEvents = "none";
       item.node.style.cursor = "default";
 
-      // لا نعيد إظهار البالون الذي كان مفرقعًا ومخفيًا أصلًا.
       if(item.node.style.display !== "none"){
         item.node.setAttribute("opacity", "1");
       }
     });
   }
 
+  function nextContinuousSpawnX(item){
+    const startX = BALLOON_FLIGHT.startX;
+    const minimumSpacing = 188;
+
+    const nearbyRightBalloons = activeBalloons
+      .filter(other =>
+        other !== item &&
+        !other.popped &&
+        !other.flyAway &&
+        other.node?.style.display !== "none" &&
+        other.state.x > 1080
+      )
+      .map(other => other.state.x)
+      .sort((a, b) => a - b);
+
+    let spawnX = startX;
+
+    for(const x of nearbyRightBalloons){
+      if(Math.abs(x - spawnX) < minimumSpacing){
+        spawnX = x + minimumSpacing;
+      }
+    }
+
+    return clamp(spawnX, startX, startX + 245);
+  }
+
   function recycleBalloon(item, now, forceFarRight = false){
-    const rightMost = activeBalloons.reduce((max, other) => {
-      if(other === item || other.popped) return max;
-      return Math.max(max, other.state.x);
-    }, BALLOON_FLIGHT.startX);
+    const previousProfileId = item.config.motionProfile?.id || "";
+    const motionProfile = nextBalloonMotionProfile(previousProfileId);
 
     item.config.lines = nextBalloonLines();
+    item.config.motionProfile = motionProfile;
+    item.config.minY = motionProfile.minY;
+    item.config.maxY = motionProfile.maxY;
+    item.spawnSerial = (item.spawnSerial || 0) + 1;
+
     setBalloonLines(item.node, item.config.lines);
+    item.node.setAttribute("data-motion-profile", motionProfile.id);
 
     item.state.x = forceFarRight
-      ? BALLOON_FLIGHT.startX + item.index * 168 + Math.random() * 38
-      : Math.max(BALLOON_FLIGHT.startX + Math.random() * 90, rightMost + 156 + Math.random() * 52);
+      ? BALLOON_FLIGHT.startX + item.index * 225
+      : nextContinuousSpawnX(item);
 
-    // يحتفظ البالون بنمطه وإيقاعه عند إعادة التدوير.
+    item.state.motionTime =
+      (item.spawnSerial * 1.37 + item.index * .71) % motionProfile.cycle;
     item.state.y = balloonProfileY(item);
 
-    // تحديث المكان الجديد وهو مخفي أولًا، ثم إظهاره.
-    // هذا يمنع لمحة ظهور البالون القديم بعد الفرقعة بدون لمس القطار أو الفيزياء.
+    item.speed = speedFromLevel(item.config.speedLevel);
+    item.verticalTempo = 1;
+
     item.node.setAttribute(
       "transform",
       `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
@@ -2735,13 +2796,12 @@
     item.node.style.display = "";
     item.node.setAttribute("opacity", "1");
     item.node.style.pointerEvents = "auto";
+    item.node.style.cursor = "pointer";
     item.popped = false;
     item.resetAt = 0;
   }
 
   function canPopBalloonNow(){
-    // يسمح بالفرقعة أثناء دخول القطار، وأثناء اللعب، وأثناء تقدمه للنافذة التالية.
-    // يمنع فقط أثناء خروج القطار أو نهاية المرحلة أو طيران البالونات للأعلى.
     return trainMotionState === "entering" ||
       trainMotionState === "playing" ||
       trainMotionState === "advancing";
@@ -2752,7 +2812,7 @@
     if(!canPopBalloonNow()) return;
 
     item.popped = true;
-    item.resetAt = now + 950;
+    item.resetAt = now + 120;
 
     item.node.setAttribute("opacity", "0");
     item.node.style.display = "none";
@@ -2766,7 +2826,6 @@
     const dt = dtMs / 1000;
 
     if(item.flyAway){
-      // ننتظر أجزاء من الثانية بعد سقوط الصندوق الأخير، ثم يصعد البالون للأعلى/اليسار.
       const elapsed = now - (item.flyAwayStartedAt || now);
       if(elapsed < (item.flyAwayDelay || 0)){
         return;
@@ -2781,7 +2840,6 @@
         `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
       );
 
-      // يبقى واضحًا أثناء الصعود، ثم يختفي قرب خروجه من أعلى الشاشة.
       const fade = clamp((item.state.y + 120) / 120, 0, 1);
 
       if(item.node.style.display !== "none"){
@@ -2803,12 +2861,8 @@
       return;
     }
 
-    const speed = item.speed;
+    item.state.x -= item.speed * dt;
 
-    // حركة أفقية دقيقة وثابتة بالزمن الحقيقي، مستقلة عن معدل إطارات الجهاز.
-    item.state.x -= speed * dt;
-
-    // لكل بالون نمط رأسي مستقل؛ مستوى السرعة يؤثر على الإيقاع بنسبة محدودة فقط.
     item.state.motionTime += dt * item.verticalTempo;
     item.state.y = balloonProfileY(item);
 
@@ -2843,32 +2897,37 @@
   function balloonsLayer(){
     const balloons = el("g", {
       id:"balloonsLayer",
-      "data-speed-level":String(BALLOON_SPEED_LEVEL)
+      "data-speed-level":String(BALLOON_SPEED_LEVEL),
+      "data-flow-size":String(BALLOON_FLOW_SIZE)
     });
 
-    // خمسة بالونات بخمسة أنماط حركة مختلفة وثابتة.
-    const ACTIVE_BALLOONS = BALLOONS_PER_ROUND;
-    const speedPattern = [1.00, 1.04, .97, 1.02, .99];
+    const ACTIVE_BALLOONS = BALLOON_FLOW_SIZE;
 
     for(let index = 0; index < ACTIVE_BALLOONS; index++){
       const lines = nextBalloonLines();
-      const motionProfile = BALLOON_MOTION_PROFILES[index % BALLOON_MOTION_PROFILES.length];
+      const motionProfile = nextBalloonMotionProfile();
+      const initialMotionTime = index * 1.31;
+      const initialY = balloonYForProfile(
+        motionProfile,
+        initialMotionTime,
+        MEDIUM_BALLOON_SCALE
+      );
+
       const config = {
         ...BALLOON_FLIGHT,
         lines,
         scale:MEDIUM_BALLOON_SCALE,
-        baseY:motionProfile.baseY,
+        baseY:initialY,
         minY:motionProfile.minY,
         maxY:motionProfile.maxY,
         motionProfile,
-        speedLevel:BALLOON_SPEED_LEVEL,
-        speedMultiplier:speedPattern[index]
+        speedLevel:BALLOON_SPEED_LEVEL
       };
 
       const balloon = answerBalloon(balloons, {
         id:`answerBalloonDemo-${index}`,
-        x:BALLOON_FLIGHT.startX + index * 168,
-        y:config.baseY,
+        x:BALLOON_FLIGHT.startX + index * 225,
+        y:initialY,
         scale:config.scale,
         lines:config.lines,
         shadow:false
@@ -2876,14 +2935,16 @@
 
       balloon.style.pointerEvents = "auto";
       balloon.style.cursor = "pointer";
+      balloon.setAttribute("data-motion-profile", motionProfile.id);
 
       const item = {
         node:balloon,
         index,
         config,
         state:createBalloonMotionState(config, index),
-        speed:speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1),
-        verticalTempo:verticalTempoFromLevel(config.speedLevel),
+        speed:speedFromLevel(config.speedLevel),
+        verticalTempo:1,
+        spawnSerial:0,
         popped:false,
         resetAt:0,
         flyAway:false,
@@ -3679,7 +3740,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 116: ربط سرعة البالونات باختيار index من 1 إلى 10، وإضافة خمسة أنماط حركة مستقلة وسلسة مع حد أمان فوق القطار. */
+  /* إصدار 117: حركة رأسية طويلة وناعمة ومتنوعة، وتدفق مستمر يستبدل كل بالون فور فرقعته أو خروجه دون موجات أو فترات فراغ. */
 })();
 </script>
 </body>
