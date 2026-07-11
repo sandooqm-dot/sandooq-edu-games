@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 122</title>
+  <title>قطار الإجابات - إصدار 123</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -383,14 +383,14 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 122;
+  const PARALLAX_IMAGE_VERSION = 123;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 122: خفض سرعة الطبقة الوسطى 15% من 240 إلى 204px/s، مع إبقاء بقية الخلفية كما هي.
+  // إصدار 123: تصغير السكة المرئية إلى 70% وتكرارها أفقيًا لتغطية الشاشة دون فراغات، مع إبقاء موضعها والفيزياء كما هما.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -3396,16 +3396,29 @@
     createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.bottom);
 
     // السكة فوق الخلفية، والقطار فوقهما.
+    // نصغّر الرسم المرئي فقط مع إبقاء موضعه الرأسي نفسه،
+    // ثم نكرر القطعة أفقيًا بتداخل بسيط حتى لا يظهر أي فراغ بين النسخ.
     const track = el("g", {id:"track"}, parallaxBackGroup);
-    const trackImage = el("image", {
-      href:"train-track.webp?v=84",
-      x:trainX(-260),
-      y:trainY(604),
-      width:trainLen(1800),
-      height:trainLen(27),
-      preserveAspectRatio:"none"
-    }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
+    const TRACK_VISUAL_SCALE = .70;
+    const TRACK_TILE_OVERLAP = 3;
+    const trackSegmentWidth = trainLen(1800 * TRACK_VISUAL_SCALE);
+    const trackSegmentHeight = trainLen(27 * TRACK_VISUAL_SCALE);
+    const trackY = trainY(604);
+    const trackStep = trackSegmentWidth - TRACK_TILE_OVERLAP;
+    const trackStartX = -TRACK_TILE_OVERLAP;
+    const trackSegmentCount = Math.max(2, Math.ceil((1280 + TRACK_TILE_OVERLAP) / trackStep));
+
+    for(let i = 0; i < trackSegmentCount; i += 1){
+      const trackImage = el("image", {
+        href:"train-track.webp?v=84",
+        x:trackStartX + i * trackStep,
+        y:trackY,
+        width:trackSegmentWidth,
+        height:trackSegmentHeight,
+        preserveAspectRatio:"none"
+      }, track);
+      trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
+    }
   }
 
   function addWheel(layer, cx, cy, size, version = 72){
