@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 118</title>
+  <title>قطار الإجابات - إصدار 120</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -436,6 +436,14 @@
   let activeQuestionPointer = 0;
   const completedQuestionWagons = new Set();
   let stageCompleteTriggered = false;
+  let pendingTrainProgressReview = false;
+
+  // خط كشف منطقي شفاف داخل كل عربة.
+  // لا يُرسم ولا يضاف كجسم تصادم، لذلك لا يراه اللاعب ولا يؤثر على الفيزياء.
+  const WAGON_CAPTURE_CONFIRM_MS = 220;
+  const WAGON_CAPTURE_LINE_OFFSET = 12;
+  const WAGON_CAPTURE_MIN_OVERLAP = .32;
+  const WAGON_CAPTURE_MIN_DEPTH = 6;
 
   const BALLOON_FLOW_SIZE = 5;
   const MEDIUM_BALLOON_SCALE = .80;
@@ -1028,6 +1036,13 @@
       if(typeof onComplete === "function"){
         onComplete();
       }
+
+      // أي صندوق استقر أثناء حركة القطار يُحتسب فورًا،
+      // لكن قرار التوقف/التقدم/الخروج ينتظر انتهاء الحركة الحالية
+      // حتى لا تُلغى الحركة أو تبدأ من جديد فتبدو أبطأ.
+      if(nextState === "playing" && pendingTrainProgressReview){
+        reviewTrainProgressAfterMotion();
+      }
     }
 
     trainAnimationFrame = requestAnimationFrame(frame);
@@ -1098,6 +1113,14 @@
   }
 
   function advanceTrainToQuestionWagon(wagonIndex){
+    // لا نعيد تشغيل حركة قائمة؛ تسجيل الصناديق أثناء الحركة لا يغير سرعتها.
+    if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
+      pendingTrainProgressReview = true;
+      return;
+    }
+
+    if(trainMotionState === "exiting" || trainMotionState === "done") return;
+
     trainMotionState = "advancing";
 
     const targetOffset = trainOffsetForWagonIndex(wagonIndex);
@@ -1105,6 +1128,29 @@
     animateTrainTo(targetOffset, TRAIN_MOTION.betweenDuration, "playing", () => {
       syncTrainPhysicsToVisualOffset();
     });
+  }
+
+  function reviewTrainProgressAfterMotion(){
+    pendingTrainProgressReview = false;
+
+    if(stageCompleteTriggered || trainMotionState !== "playing") return;
+
+    if(areAllQuestionWagonsCompleted()){
+      requestTrainExit();
+      return;
+    }
+
+    // إذا بقيت عربة سؤال ظاهرة وغير مكتملة، يبقى القطار في موضعه الحالي.
+    if(hasPlayableUncompletedQuestionWagonNow()){
+      return;
+    }
+
+    const nextIndex = nextUncompletedQuestionWagonIndex();
+    if(nextIndex !== undefined){
+      const nextPointer = QUESTION_WAGON_INDICES.indexOf(nextIndex);
+      if(nextPointer >= 0) activeQuestionPointer = nextPointer;
+      advanceTrainToQuestionWagon(nextIndex);
+    }
   }
 
   function isQuestionWagonIndex(index){
@@ -1151,29 +1197,30 @@
 
     completedQuestionWagons.add(well.index);
 
-    if(areAllQuestionWagonsCompleted()){
-      requestTrainExit();
+    // أثناء دخول القطار أو تقدمه نحتسب العربة الآن،
+    // لكن لا نوقف الحركة ولا نعيد تشغيلها. القرار التالي يُراجع بعد انتهائها.
+    if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
+      pendingTrainProgressReview = true;
       return;
     }
 
-    // إذا بقيت أي عربة سؤال ظاهرة وغير مكتملة، نترك القطار ثابتًا.
-    if(hasPlayableUncompletedQuestionWagonNow()){
-      return;
-    }
-
-    // إذا لم يبق أي سؤال ظاهر، يتقدم القطار للنافذة التالية فقط.
-    const nextIndex = nextUncompletedQuestionWagonIndex();
-    if(nextIndex !== undefined){
-      const nextPointer = QUESTION_WAGON_INDICES.indexOf(nextIndex);
-      if(nextPointer >= 0) activeQuestionPointer = nextPointer;
-      advanceTrainToQuestionWagon(nextIndex);
-    }
+    reviewTrainProgressAfterMotion();
   }
 
   function requestTrainExit(){
-    if(stageCompleteTriggered || trainMotionState !== "playing") return;
+    if(stageCompleteTriggered) return;
+
+    // إذا اكتملت آخر عربة أثناء حركة قائمة، لا نقطع الحركة.
+    // نؤجل الخروج حتى تنتهي الحركة بنفس سرعتها الأصلية.
+    if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
+      pendingTrainProgressReview = true;
+      return;
+    }
+
+    if(trainMotionState !== "playing") return;
 
     stageCompleteTriggered = true;
+    pendingTrainProgressReview = false;
     trainMotionState = "exiting";
 
     // البالونات المتبقية تطير للأعلى طبيعيًا وتصبح غير قابلة للفرقعة.
@@ -1879,19 +1926,226 @@
     return null;
   }
 
+  function getWagonCaptureLineY(well){
+    if(!well) return Number.POSITIVE_INFINITY;
+
+    // الخط الشفاف يقع أسفل حافة فتحة العربة بقليل.
+    return well.top + trainLen(WAGON_CAPTURE_LINE_OFFSET);
+  }
+
+  function isMatterBodyPastWagonCaptureLine(body, well){
+    if(!body || !well) return false;
+
+    const overlapRatio = getBodyHorizontalOverlapRatio(body, well);
+    const centerInside = body.position.x >= well.left &&
+      body.position.x <= well.right;
+
+    if(!centerInside && overlapRatio < WAGON_CAPTURE_MIN_OVERLAP){
+      return false;
+    }
+
+    const captureLineY = getWagonCaptureLineY(well);
+    const bodyBottom = body.bounds?.max?.y ??
+      (body.position.y + BOX.bottom);
+    const bodyTop = body.bounds?.min?.y ??
+      (body.position.y - BOX.top);
+
+    // يكفي أن ينزل جزء واضح من الصندوق تحت الخط مع بقائه داخل ارتفاع العربة.
+    return bodyBottom >= captureLineY + trainLen(WAGON_CAPTURE_MIN_DEPTH) &&
+      bodyTop <= well.bottom + trainLen(12);
+  }
+
+  function getCaptureWellByMatterBody(body){
+    if(!body) return null;
+
+    let bestWell = null;
+    let bestScore = -Infinity;
+
+    for(const zone of collisionMap){
+      if(zone.type !== "well" ||
+         !isMatterBodyPastWagonCaptureLine(body, zone)){
+        continue;
+      }
+
+      const overlapRatio = getBodyHorizontalOverlapRatio(body, zone);
+      const centerX = (zone.left + zone.right) / 2;
+      const distancePenalty = Math.abs(body.position.x - centerX) /
+        Math.max(1, zone.right - zone.left);
+      const captureDepth = Math.max(
+        0,
+        (body.bounds?.max?.y ?? body.position.y + BOX.bottom) -
+          getWagonCaptureLineY(zone)
+      );
+
+      const score =
+        overlapRatio * 12 +
+        Math.min(captureDepth / 40, 1.5) -
+        distancePenalty;
+
+      if(score > bestScore){
+        bestScore = score;
+        bestWell = zone;
+      }
+    }
+
+    return bestWell;
+  }
+
+  function resetWagonCaptureCandidate(item){
+    if(!item) return;
+    item.captureCandidateWellIndex = null;
+    item.captureCandidateSince = 0;
+  }
+
+  function updateWagonCaptureConfirmation(item, now){
+    if(!item || item.done || item.settleCommitted || !item.body){
+      return false;
+    }
+
+    const captureWell = getCaptureWellByMatterBody(item.body);
+
+    if(!captureWell){
+      resetWagonCaptureCandidate(item);
+      return false;
+    }
+
+    if(item.captureCandidateWellIndex !== captureWell.index){
+      item.captureCandidateWellIndex = captureWell.index;
+      item.captureCandidateSince = now;
+      return false;
+    }
+
+    if(!item.captureCandidateSince){
+      item.captureCandidateSince = now;
+      return false;
+    }
+
+    if(now - item.captureCandidateSince < WAGON_CAPTURE_CONFIRM_MS){
+      return false;
+    }
+
+    // بقي الصندوق داخل العربة وتحت الخط الشفاف للمدة المطلوبة.
+    // هنا فقط نعتمد العربة، دون أي تغيير في السقوط أو النطات قبل ذلك.
+    return commitMatterBoxToWagon(item, captureWell);
+  }
+
+  function getBodyHorizontalOverlapRatio(body, well){
+    if(!body || !well) return 0;
+
+    const bodyLeft = body.bounds?.min?.x ?? (body.position.x - BOX.left);
+    const bodyRight = body.bounds?.max?.x ?? (body.position.x + BOX.right);
+    const bodyWidth = Math.max(1, bodyRight - bodyLeft);
+    const overlap = Math.max(
+      0,
+      Math.min(bodyRight, well.right) - Math.max(bodyLeft, well.left)
+    );
+
+    return overlap / bodyWidth;
+  }
+
   function isBodyInsideWell(body, well){
-    return body.position.x >= well.left + 2 &&
-      body.position.x <= well.right - 2 &&
-      body.position.y >= well.top &&
+    if(!body || !well) return false;
+
+    const overlapRatio = getBodyHorizontalOverlapRatio(body, well);
+    const centerInside = body.position.x >= well.left && body.position.x <= well.right;
+    const verticalInside = body.position.y >= well.top - 8 &&
       body.position.y <= well.bottom + 30;
+
+    return verticalInside && (centerInside || overlapRatio >= .45);
   }
 
   function getWellByMatterBody(body){
+    if(!body) return null;
+
+    let bestWell = null;
+    let bestScore = -Infinity;
+
     for(const zone of collisionMap){
-      if(zone.type !== "well") continue;
-      if(isBodyInsideWell(body, zone)) return zone;
+      if(zone.type !== "well" || !isBodyInsideWell(body, zone)) continue;
+
+      const overlapRatio = getBodyHorizontalOverlapRatio(body, zone);
+      const centerX = (zone.left + zone.right) / 2;
+      const distancePenalty = Math.abs(body.position.x - centerX) /
+        Math.max(1, zone.right - zone.left);
+      const score = overlapRatio * 10 - distancePenalty;
+
+      if(score > bestScore){
+        bestScore = score;
+        bestWell = zone;
+      }
     }
-    return null;
+
+    return bestWell;
+  }
+
+  function isMatterBodyAtWellFloor(body, well, tolerance = 10){
+    if(!body || !well) return false;
+
+    const overlapRatio = getBodyHorizontalOverlapRatio(body, well);
+    if(overlapRatio < .48) return false;
+
+    const floorHalfHeight = trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.h) / 2;
+    const floorTop = well.floorY - floorHalfHeight;
+    const bodyBottom = body.bounds?.max?.y ?? (body.position.y + BOX.bottom);
+    const bodyTop = body.bounds?.min?.y ?? (body.position.y - BOX.top);
+
+    return bodyBottom >= floorTop - Math.max(4, tolerance) &&
+      bodyBottom <= well.floorY + floorHalfHeight + 24 &&
+      bodyTop < floorTop &&
+      body.velocity.y >= -.75;
+  }
+
+  function placeMatterBoxExactlyOnWellFloor(body, well){
+    if(!body || !well || !Matter || !Matter.Body) return;
+
+    const lowerExtent = Math.max(
+      BOX.bottom,
+      body.bounds?.max?.y !== undefined
+        ? body.bounds.max.y - body.position.y
+        : BOX.bottom
+    );
+
+    const floorTop = well.floorY -
+      trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.h) / 2;
+
+    Matter.Body.setPosition(body, {
+      x:clamp(
+        body.position.x,
+        well.left + BOX.left * .55,
+        well.right - BOX.right * .55
+      ),
+      y:floorTop - lowerExtent + .5
+    });
+
+    Matter.Body.setVelocity(body, {x:0, y:0});
+    Matter.Body.setAngularVelocity(body, 0);
+  }
+
+  function commitMatterBoxToWagon(item, well, floorBody = null){
+    if(!item || item.done || item.settleCommitted || !item.body || !well) return false;
+
+    item.settleCommitted = true;
+    item.insideWagon = true;
+    item.currentWellIndex = well.index;
+    item.lastWellIndex = well.index;
+
+    // قفل النطاطات يتبع العربة الفعلية الحالية بدل أول عربة لمسها الصندوق.
+    item.lockedWellIndex = well.index;
+    item.lastWagonContactAt = performance.now();
+
+    if(!item.enteredWellAt){
+      item.enteredWellAt = item.lastWagonContactAt;
+    }
+
+    if(floorBody){
+      placeMatterBoxExactlyOnWagonFloor(item.body, floorBody);
+    }else{
+      placeMatterBoxExactlyOnWellFloor(item.body, well);
+    }
+
+    moveMatterBoxBehindWagonCover(item);
+    settleMatterBoxAsVisualOnly(item, well);
+    return true;
   }
 
   function syncMatterBox(item){
@@ -2184,12 +2438,16 @@
 
   function handleMatterCollision(bodyA, bodyB){
     const item = bodyA && bodyA.sgItem;
-    if(!item || item.done || !bodyB) return;
+    if(!item || item.done || item.settleCommitted || !bodyB) return;
 
     stopFreeFallAirDrift(item);
 
     if(bodyB.label === "kill-track"){
-      if(!item.insideWagon){
+      const actualWell = getWellByMatterBody(bodyA);
+
+      if(actualWell && isMatterBodyAtWellFloor(bodyA, actualWell)){
+        commitMatterBoxToWagon(item, actualWell);
+      }else if(!actualWell){
         breakMatterBox(item);
       }
       return;
@@ -2221,28 +2479,11 @@
     }
 
     if(bodyB.sgType === "wagon-floor"){
-      item.insideWagon = true;
-      item.lastWagonContactAt = performance.now();
+      // القاع الذي اصطدم به الصندوق هو مصدر الحقيقة، لا أول عربة لمسها سابقًا.
+      const actualWell = getWellByIndex(bodyB.sgWellIndex) || getWellByMatterBody(bodyA);
 
-      if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
-        item.lockedWellIndex = bodyB.sgWellIndex;
-      }
-
-      item.lastWellIndex = item.lockedWellIndex;
-
-      if(!item.enteredWellAt){
-        item.enteredWellAt = performance.now();
-      }
-
-      // نضع الصندوق فوق السطح الحقيقي للقاع أولًا.
-      // التجميد قبل حل التداخل كان يجعل الصندوق يبدو غارقًا داخل العربة.
-      placeMatterBoxExactlyOnWagonFloor(bodyA, bodyB);
-      moveMatterBoxBehindWagonCover(item);
-
-      // بعد تصحيح موضع التلامس يتحول الصندوق إلى عنصر بصري ثابت.
-      const settledWell = getWellByIndex(item.lockedWellIndex) || getWellByMatterBody(bodyA);
-      if(settledWell){
-        settleMatterBoxAsVisualOnly(item, settledWell);
+      if(actualWell){
+        commitMatterBoxToWagon(item, actualWell, bodyB);
       }
 
       return;
@@ -2252,14 +2493,13 @@
       item.insideWagon = true;
       item.lastWagonContactAt = performance.now();
 
-      if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
-        item.lockedWellIndex = bodyB.sgWellIndex;
-      }
-
-      item.lastWellIndex = item.lockedWellIndex;
+      // عند انتقال الصندوق بسبب نطة إلى عربة أخرى نحدّث العربة الحالية فورًا.
+      item.currentWellIndex = bodyB.sgWellIndex;
+      item.lastWellIndex = bodyB.sgWellIndex;
+      item.lockedWellIndex = bodyB.sgWellIndex;
 
       if(!item.enteredWellAt){
-        item.enteredWellAt = performance.now();
+        item.enteredWellAt = item.lastWagonContactAt;
       }
 
       moveMatterBoxBehindWagonCover(item);
@@ -2336,17 +2576,41 @@
   }
 
   function updateMatterBoxState(item){
-    if(!item || item.done || !item.body || !item.node) return;
+    if(!item || item.done || item.settleCommitted || !item.body || !item.node) return;
 
     const body = item.body;
     applyFreeFallAirDrift(item);
     syncMatterBox(item);
 
-    const activeWell = item.insideWagon
-      ? (getWellByIndex(item.lastWellIndex) || getWellByMatterBody(body))
-      : getWellByMatterBody(body);
+    // خط كشف شفاف + مهلة قصيرة:
+    // إذا بقي جزء واضح من الصندوق داخل العربة 220ms يُحتسب،
+    // حتى لو كان مائلًا أو لم يصل القاع بالشكل المثالي.
+    if(updateWagonCaptureConfirmation(item, performance.now())){
+      return;
+    }
 
-    if(item.insideWagon && activeWell){
+    // فحص هندسي احتياطي كل إطار: لا نعتمد فقط على collisionStart،
+    // لأن القطار نفسه قد يكون متحركًا أو قد يقفز الصندوق إلى عربة بعيدة.
+    const actualWell = getWellByMatterBody(body);
+
+    if(actualWell){
+      item.insideWagon = true;
+      item.currentWellIndex = actualWell.index;
+      item.lastWellIndex = actualWell.index;
+      item.lockedWellIndex = actualWell.index;
+      item.lastWagonContactAt = performance.now();
+
+      if(!item.enteredWellAt){
+        item.enteredWellAt = item.lastWagonContactAt;
+      }
+
+      moveMatterBoxBehindWagonCover(item);
+
+      if(isMatterBodyAtWellFloor(body, actualWell)){
+        commitMatterBoxToWagon(item, actualWell);
+        return;
+      }
+
       const speed = body.speed;
       const angular = Math.abs(body.angularVelocity);
 
@@ -2356,16 +2620,18 @@
         item.stableFrames = 0;
       }
 
-      if(item.stableFrames > 40){
-        settleMatterBoxAsVisualOnly(item, activeWell);
+      // احتياط إضافي للصندوق الهادئ قرب القاع، حتى لو فات حدث الاصطدام.
+      if(item.stableFrames > 18 && isMatterBodyAtWellFloor(body, actualWell, 22)){
+        commitMatterBoxToWagon(item, actualWell);
         return;
       }
+    }else{
+      item.stableFrames = 0;
     }
 
-    // إذا كان الصندوق خارج العربات ولم يدخل أي عربة، يترك حتى يصل السكة ثم ينكسر.
-    // هذا فحص احتياطي بجانب حساس السكة، لمنع أي صندوق من البقاء خارج إطار القطار.
+    // إذا كان الصندوق خارج كل العربات، يترك حتى يصل السكة ثم ينكسر.
     const trackBreakY = trainY(TRAIN_PHYSICS_PROFILES.track.y) - BOX.bottom + 6;
-    if(!item.insideWagon && body.position.y >= trackBreakY){
+    if(!actualWell && body.position.y >= trackBreakY){
       breakMatterBox(item);
       return;
     }
@@ -2460,7 +2726,9 @@
       insideWagonLayer:false,
       enteredWellAt:0,
       lastWellIndex:null,
+      currentWellIndex:null,
       lockedWellIndex:null,
+      settleCommitted:false,
       lastTopEdgeBumperAt:0,
       lastGapSmartAt:0,
       lastPassengerBounceAt:0,
@@ -2468,6 +2736,8 @@
       firstSurfaceContactAt:0,
       airDriftActive:true,
       stableFrames:0,
+      captureCandidateWellIndex:null,
+      captureCandidateSince:0,
       done:false
     };
 
@@ -3211,6 +3481,7 @@
     trainMotionState = "entering";
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
+    pendingTrainProgressReview = false;
 
     pendingMatterSpawns.length = 0;
     matterBoxes.slice().forEach(item => cleanupMatterBox(item, true));
@@ -3740,7 +4011,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 118: رفع عدد البالونات النشطة في التدفق المستمر من 3 إلى 5 مع الحفاظ على الحركة والسرعة ونظام الاستبدال كما هو. */
+  /* إصدار 120: إضافة خط كشف منطقي شفاف داخل كل عربة مع تأكيد زمني 220ms لاحتساب الصندوق المائل أو المستقر داخلها، دون تغيير السقوط أو النطات أو الفيزياء أو حركة القطار. */
 })();
 </script>
 </body>
