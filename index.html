@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-help-save-warning-v64 -->
+<!-- version: index-train-setup-v65 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10589,6 +10589,422 @@
       .save-success-icon{animation:none !important}
     }
 
+
+    /* صفحة إعداد قطار الإجابات */
+    .train-cover{
+      position:relative;
+      background:
+        linear-gradient(180deg,#c8d4ef 0 44%,#e8c388 45% 72%,#b9783c 73% 100%) !important;
+      overflow:hidden;
+    }
+
+    .train-cover::before{
+      content:"";
+      position:absolute;
+      left:8%;
+      right:4%;
+      bottom:17%;
+      height:58%;
+      background:url("train/train-engine-transparent.png") center bottom/contain no-repeat;
+      filter:drop-shadow(0 5px 4px rgba(0,0,0,.18));
+      z-index:2;
+    }
+
+    .train-cover::after{
+      content:"";
+      position:absolute;
+      left:-6%;
+      right:-6%;
+      bottom:13%;
+      height:7px;
+      border-top:4px solid #4d4b4a;
+      border-bottom:3px solid #6c482b;
+      background:#c69a66;
+      z-index:1;
+    }
+
+    .train-setup{
+      display:none;
+      width:min(1180px,92%);
+      margin:0 auto;
+      background:#fff;
+      border:3px solid var(--ink);
+      border-radius:26px;
+      padding:clamp(18px,2.4vw,28px);
+      position:relative;
+      z-index:5;
+    }
+
+    .train-setup.active{display:block}
+
+    .train-setup-body{
+      margin-top:clamp(16px,2vw,24px);
+      display:grid;
+      gap:clamp(14px,1.8vw,22px);
+    }
+
+    .train-theme-current{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto clamp(120px,18vw,210px);
+      align-items:center;
+      gap:14px;
+      min-height:94px;
+    }
+
+    .train-theme-copy{
+      display:grid;
+      justify-items:center;
+      gap:4px;
+      text-align:center;
+    }
+
+    .train-theme-note{
+      margin:0;
+      color:#666;
+      font-size:clamp(11px,1.1vw,14px);
+      font-weight:750;
+      line-height:1.4;
+    }
+
+    .train-theme-name{
+      min-width:92px;
+      min-height:42px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      background:var(--title-yellow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:8px 14px;
+      font-size:clamp(15px,1.5vw,20px);
+      font-weight:950;
+      white-space:nowrap;
+    }
+
+    .train-theme-preview{
+      width:100%;
+      aspect-ratio:16/9;
+      border:3px solid var(--ink);
+      border-radius:16px;
+      background:
+        linear-gradient(180deg,#c8d4ef 0 44%,#e8c388 45% 72%,#b9783c 73% 100%);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .train-theme-preview::before{
+      content:"";
+      position:absolute;
+      inset:8% 4% 13% 5%;
+      background:url("train/train-engine-transparent.png") center bottom/contain no-repeat;
+      filter:drop-shadow(0 4px 3px rgba(0,0,0,.18));
+      z-index:2;
+    }
+
+    .train-theme-preview::after{
+      content:"";
+      position:absolute;
+      left:-5%;
+      right:-5%;
+      bottom:12%;
+      height:6px;
+      border-top:3px solid #4d4b4a;
+      border-bottom:2px solid #6c482b;
+      background:#c69a66;
+    }
+
+    .train-settings-grid{
+      display:grid;
+      grid-template-columns:1.2fr repeat(2,minmax(190px,.9fr));
+      gap:clamp(10px,1.4vw,15px);
+    }
+
+    .train-content-mode-grid{
+      grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+
+    .train-range-wrap{
+      display:grid;
+      gap:9px;
+      align-content:center;
+    }
+
+    .train-range-value{
+      width:max-content;
+      min-width:72px;
+      min-height:34px;
+      margin:0 auto;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      background:var(--title-yellow);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:4px 12px;
+      font-size:clamp(14px,1.4vw,18px);
+      font-weight:950;
+      line-height:1;
+    }
+
+    .train-range{
+      width:100%;
+      height:28px;
+      margin:0;
+      accent-color:#4d7bd8;
+      cursor:pointer;
+    }
+
+    .train-range-labels{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color:#666;
+      font-size:12px;
+      font-weight:850;
+      direction:ltr;
+    }
+
+    .train-contents-editor{
+      display:grid;
+      gap:14px;
+    }
+
+    .train-content-card{
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#fff;
+      padding:clamp(13px,1.7vw,19px);
+      box-shadow:0 5px 0 rgba(0,0,0,.11);
+      display:grid;
+      gap:13px;
+    }
+
+    .train-content-card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .train-content-card-title{
+      margin:0;
+      font-size:clamp(17px,1.75vw,22px);
+      font-weight:950;
+      line-height:1.1;
+    }
+
+    .train-remove-content{
+      min-width:74px;
+      min-height:38px;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:#f05d5b;
+      color:#fff;
+      padding:5px 12px;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .train-content-fields{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .train-content-side{
+      min-width:0;
+      border:2px solid rgba(17,17,17,.2);
+      border-radius:17px;
+      background:#f8f8f8;
+      padding:11px;
+      display:grid;
+      gap:9px;
+    }
+
+    .train-content-side-title{
+      margin:0;
+      text-align:center;
+      font-size:clamp(15px,1.5vw,19px);
+      font-weight:950;
+      line-height:1.2;
+    }
+
+    .train-text-input{
+      width:100%;
+      min-height:48px;
+      border:2px solid var(--ink);
+      border-radius:14px;
+      background:#fff;
+      padding:9px 12px;
+      text-align:center;
+      font-size:clamp(14px,1.45vw,18px);
+      font-weight:800;
+      outline:none;
+    }
+
+    .train-image-control{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px;
+      align-items:stretch;
+    }
+
+    .train-image-preview{
+      min-width:0;
+      min-height:82px;
+      border:2px dashed rgba(17,17,17,.38);
+      border-radius:14px;
+      background:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      color:#777;
+      text-align:center;
+      padding:8px;
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .train-image-preview img{
+      width:100%;
+      height:100%;
+      max-height:128px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .train-image-actions{
+      display:grid;
+      align-content:center;
+      gap:7px;
+    }
+
+    .train-image-upload,
+    .train-image-clear{
+      min-width:82px;
+      min-height:36px;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      padding:5px 9px;
+      font-size:12px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .train-image-upload{
+      background:#5e88db;
+      color:#fff;
+    }
+
+    .train-image-clear{
+      background:#f05d5b;
+      color:#fff;
+    }
+
+    .train-add-content{
+      width:min(430px,100%);
+      min-height:54px;
+      margin:2px auto 0;
+      border:3px solid var(--ink);
+      border-radius:18px;
+      background:#5e88db;
+      color:#fff;
+      font-size:clamp(16px,1.7vw,22px);
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 5px 0 rgba(0,0,0,.16);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+    }
+
+    .train-add-content span:first-child{
+      font-size:24px;
+      line-height:1;
+    }
+
+    @media(max-width:900px){
+      .train-settings-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+    @media(max-width:760px){
+      .train-setup{
+        width:94%;
+        padding:16px 12px;
+        border-radius:22px;
+      }
+
+      .train-setup-body{
+        gap:12px;
+        margin-top:14px;
+      }
+
+      .train-theme-current{
+        grid-template-columns:minmax(0,1fr) 82px;
+        gap:9px;
+      }
+
+      .train-theme-name{
+        grid-column:1 / -1;
+        grid-row:2;
+        justify-self:center;
+        min-height:36px;
+      }
+
+      .train-theme-preview{
+        grid-column:2;
+        grid-row:1;
+      }
+
+      .train-content-mode-grid{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:6px;
+      }
+
+      .train-content-mode-grid .choices-mode-btn{
+        min-height:62px;
+        padding:7px 4px;
+      }
+
+      .train-content-mode-grid .choices-mode-btn strong{
+        font-size:clamp(13px,3.4vw,17px);
+        white-space:normal;
+        text-align:center;
+      }
+
+      .train-content-fields{
+        grid-template-columns:1fr;
+      }
+
+      .train-content-card{
+        border-radius:18px;
+        padding:12px;
+      }
+
+      .train-image-control{
+        grid-template-columns:1fr;
+      }
+
+      .train-image-actions{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+
+      .train-image-upload,
+      .train-image-clear{
+        min-width:0;
+      }
+
+      .train-add-content{
+        min-height:50px;
+        font-size:16px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -10678,6 +11094,13 @@
 <div class="template-content">
 <h3 class="template-title">الترتيب</h3>
 <p class="template-desc">رتّب الحروف أو الكلمات أو الصور.</p>
+</div>
+</button>
+<button class="template-card" data-template="train" type="button">
+<div aria-hidden="true" class="template-cover train-cover"></div>
+<div class="template-content">
+<h3 class="template-title">قطار الإجابات</h3>
+<p class="template-desc">أسقط محتوى البالون داخل عربة الإجابة الصحيحة.</p>
 </div>
 </button>
 </div>
@@ -11270,6 +11693,82 @@
   </div>
 </section>
 
+<section class="train-setup" id="trainSetupScreen">
+  <div class="game-name-panel">
+    <div class="game-name-head">
+      <span class="game-name-title">ادخل اسم اللعبة</span>
+      <span class="game-name-note">سيتم حفظ اللعبة في الألعاب المحفوظة بهذا الاسم</span>
+    </div>
+    <input class="game-name-input" id="trainGameNameInput" maxlength="60" placeholder="اكتب اسم اللعبة هنا.." type="text"/>
+  </div>
+
+  <div class="train-setup-body">
+    <section class="choices-section choices-theme-section">
+      <div class="train-theme-current">
+        <div class="train-theme-copy">
+          <h3 class="choices-section-title">ثيم اللعبة</h3>
+          <p class="train-theme-note">الثيم المتوفر حاليًا لقطار الإجابات</p>
+        </div>
+        <span class="train-theme-name">صحراء</span>
+        <span class="train-theme-preview" aria-label="ثيم الصحراء"></span>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">إعدادات اللعبة</h3>
+      </div>
+
+      <div class="train-settings-grid">
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">نوع المحتوى</h4>
+          <p class="choices-config-group-note">اختر شكل محتوى العربات والبالونات.</p>
+          <div class="choices-mode-grid train-content-mode-grid" aria-label="نوع محتوى قطار الإجابات">
+            <button class="choices-mode-btn active" data-train-content-type="text" type="button"><strong>نصوص</strong></button>
+            <button class="choices-mode-btn" data-train-content-type="images" type="button"><strong>صور</strong></button>
+            <button class="choices-mode-btn" data-train-content-type="mixed" type="button"><strong>نصوص وصور</strong></button>
+          </div>
+        </div>
+
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">عدد المراحل</h4>
+          <p class="choices-config-group-note">اختر عدد مراحل اللعبة من 3 إلى 20.</p>
+          <div class="train-range-wrap">
+            <output class="train-range-value" id="trainStagesValue" for="trainStagesRange">3 مراحل</output>
+            <input class="train-range" id="trainStagesRange" type="range" min="3" max="20" step="1" value="3" dir="ltr" aria-label="عدد مراحل قطار الإجابات"/>
+            <div class="train-range-labels"><span>3</span><span>20</span></div>
+          </div>
+        </div>
+
+        <div class="choices-config-group">
+          <h4 class="choices-config-group-title">سرعة البالونات</h4>
+          <p class="choices-config-group-note">اختر مستوى السرعة من 1 إلى 10.</p>
+          <div class="train-range-wrap">
+            <output class="train-range-value" id="trainSpeedValue" for="trainSpeedRange">3</output>
+            <input class="train-range" id="trainSpeedRange" type="range" min="1" max="10" step="1" value="3" dir="ltr" aria-label="سرعة بالونات قطار الإجابات"/>
+            <div class="train-range-labels"><span>1</span><span>10</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="choices-section">
+      <div class="choices-section-head">
+        <h3 class="choices-section-title">محتويات اللعبة</h3>
+        <p class="choices-section-note">أدخل محتوى العربة، ثم محتوى البالون المرتبط بها. يمكنك إضافة عدد كبير من المحتويات.</p>
+      </div>
+      <div class="train-contents-editor" id="trainContentsEditor"></div>
+      <button class="train-add-content" id="addTrainContentBtn" type="button"><span>＋</span><span>إضافة محتويات جديدة</span></button>
+    </section>
+
+    <div class="choices-actions">
+      <button class="choices-test-btn" id="testTrainBtn" type="button">اختبار اللعبة</button>
+      <button class="choices-save-btn" id="saveTrainBtn" type="button">حفظ اللعبة</button>
+    </div>
+  </div>
+</section>
+
+
 <div class="match-color-modal" id="matchColorModal" hidden aria-hidden="true">
   <div class="match-color-backdrop" data-match-color-close></div>
   <section class="match-color-dialog" role="dialog" aria-modal="true" aria-labelledby="matchColorModalTitle">
@@ -11466,7 +11965,8 @@
     "open-box":"افتح الصندوق",
     quiz:"الاختيارات",
     match:"المطابقة",
-    order:"الترتيب"
+    order:"الترتيب",
+    train:"قطار الإجابات"
   };
 
   const TYPE_CONFIG = {
@@ -11474,7 +11974,8 @@
     "open-box":{ page:"open-box.html", payloadKey:"sandooq_open_box_payload_v1", draftKey:"sandooq_wheel_draft_v1", extraDraftKey:"sandooq_open_box_draft_v1", hash:"#wheelSetup", dbPrefix:"open-box" },
     quiz:{ page:"choices.html", payloadKey:"sandooq_quiz_payload_v1", draftKey:"sandooq_quiz_draft_v2", hash:"#choicesSetup", dbPrefix:"quiz" },
     match:{ page:"match.html", payloadKey:"sandooq_match_payload_v1", draftKey:"sandooq_match_draft_v1", hash:"#matchSetup", dbPrefix:"match" },
-    order:{ page:"order.html", payloadKey:"sandooq_order_payload_v1", draftKey:"sandooq_order_draft_v1", hash:"#orderSetup", dbPrefix:"order" }
+    order:{ page:"order.html", payloadKey:"sandooq_order_payload_v1", draftKey:"sandooq_order_draft_v1", hash:"#orderSetup", dbPrefix:"order" },
+    train:{ page:"train/train.html", payloadKey:"sandooq_train_payload_v1", draftKey:"sandooq_train_draft_v1", hash:"#trainSetup", dbPrefix:"train" }
   };
 
   let saving = false;
@@ -11486,6 +11987,7 @@
     if (["matching","match-game"].includes(type)) return "match";
     if (["choices","choice","quiz-game"].includes(type)) return "quiz";
     if (["openbox","open_box","box"].includes(type)) return "open-box";
+    if (["answer-train","train-game","قطار"].includes(type)) return "train";
     return TYPE_CONFIG[type] ? type : "";
   }
 
@@ -11729,7 +12231,7 @@
       url.searchParams.set("theme",String(payload.theme || payload.selectedTheme || "classic"));
       if (gameType === "open-box") url.searchParams.set("intro","1");
       if (gameType === "quiz") url.searchParams.set("mode",String(payload.displayMode || "direct"));
-      if (["quiz","match","order"].includes(gameType)) url.searchParams.set("return","index.html");
+      if (["quiz","match","order","train"].includes(gameType)) url.searchParams.set("return","index.html");
       url.searchParams.set("v",String(Date.now()));
       window.location.href = `${url.pathname}${url.search}`;
     } catch (error) {
@@ -12224,8 +12726,8 @@
   const OPEN_BOX_PAGE_URL = "open-box.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
-  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
-  const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen"]);
+  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen"]);
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
   const wheelItemsEditor = document.getElementById("wheelItemsEditor");
@@ -12322,6 +12824,8 @@
     if (homeButton) homeButton.textContent = isGameSetup ? "العودة للالعاب" : "الرئيسية";
     try { window.scrollTo({ top:0, behavior:"auto" }); } catch (_) { window.scrollTo(0, 0); }
   }
+
+  window.openEduScreen = openScreen;
 
   function entryHint(){
     const target = currentGameTemplate === "open-box" ? "الصناديق" : "أقسام العجلة";
@@ -16813,6 +17317,554 @@
 </script>
 
 
+
+<script>
+(() => {
+  "use strict";
+
+  const TRAIN_PAYLOAD_KEY = "sandooq_train_payload_v1";
+  const TRAIN_DRAFT_KEY = "sandooq_train_draft_v1";
+  const TRAIN_PAGE_URL = "train/train.html";
+
+  const setup = document.getElementById("trainSetupScreen");
+  const gameNameInput = document.getElementById("trainGameNameInput");
+  const contentsEditor = document.getElementById("trainContentsEditor");
+  const addContentBtn = document.getElementById("addTrainContentBtn");
+  const stagesRange = document.getElementById("trainStagesRange");
+  const stagesValue = document.getElementById("trainStagesValue");
+  const speedRange = document.getElementById("trainSpeedRange");
+  const speedValue = document.getElementById("trainSpeedValue");
+
+  let contentType = "text";
+  let stageCount = 3;
+  let balloonSpeed = 3;
+  let contents = [];
+  let contentSequence = 0;
+
+  function clampNumber(value,min,max,fallback){
+    const number = Number(value);
+    return Number.isFinite(number)
+      ? Math.max(min,Math.min(max,Math.round(number)))
+      : fallback;
+  }
+
+  function blankMedia(){
+    return {text:"",imageName:"",imageData:""};
+  }
+
+  function createContent(){
+    contentSequence += 1;
+    return {
+      id:`train-content-${Date.now()}-${contentSequence}`,
+      wagon:blankMedia(),
+      balloon:blankMedia()
+    };
+  }
+
+  function normalizeMedia(raw){
+    return {
+      text:String(raw?.text || raw?.label || ""),
+      imageName:String(raw?.imageName || raw?.name || ""),
+      imageData:String(raw?.imageData || raw?.image || raw?.data || "")
+    };
+  }
+
+  function normalizeContent(raw,index){
+    return {
+      id:String(raw?.id || `train-content-${index + 1}`),
+      wagon:normalizeMedia(raw?.wagon || raw?.car || raw?.answer),
+      balloon:normalizeMedia(raw?.balloon || raw?.question || raw?.item)
+    };
+  }
+
+  function ensureInitialContents(){
+    if (contents.length) return;
+    contents = [createContent(),createContent(),createContent()];
+  }
+
+  function currentName(){
+    return String(gameNameInput?.value || "").trim();
+  }
+
+  function draftPayload(){
+    return {
+      gameType:"train",
+      gameTemplate:"train",
+      payloadVersion:1,
+      name:currentName(),
+      gameName:currentName(),
+      theme:"desert",
+      selectedTheme:"desert",
+      contentType,
+      type:contentType,
+      stageCount,
+      stages:stageCount,
+      balloonSpeed,
+      speedLevel:balloonSpeed,
+      contents:contents.map((entry)=>({
+        id:entry.id,
+        wagon:{...entry.wagon},
+        balloon:{...entry.balloon}
+      })),
+      entries:contents.map((entry)=>({
+        id:entry.id,
+        wagon:{...entry.wagon},
+        balloon:{...entry.balloon}
+      })),
+      updatedAt:Date.now()
+    };
+  }
+
+  function saveDraft(){
+    try {
+      sessionStorage.setItem(TRAIN_DRAFT_KEY,JSON.stringify(draftPayload()));
+    } catch (_) {}
+  }
+
+  function loadDraft(provided = null){
+    try {
+      let payload = provided;
+      if (!payload) {
+        const raw = sessionStorage.getItem(TRAIN_DRAFT_KEY);
+        if (!raw) return false;
+        payload = JSON.parse(raw);
+      }
+
+      contentType = ["text","images","mixed"].includes(payload?.contentType || payload?.type)
+        ? String(payload.contentType || payload.type)
+        : "text";
+      stageCount = clampNumber(payload?.stageCount ?? payload?.stages,3,20,3);
+      balloonSpeed = clampNumber(payload?.balloonSpeed ?? payload?.speedLevel,1,10,3);
+      const rawContents = Array.isArray(payload?.contents)
+        ? payload.contents
+        : (Array.isArray(payload?.entries) ? payload.entries : []);
+      contents = rawContents.map(normalizeContent);
+      if (gameNameInput) gameNameInput.value = String(payload?.name || payload?.gameName || "");
+      ensureInitialContents();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function updateControls(){
+    document.querySelectorAll("[data-train-content-type]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.trainContentType === contentType);
+    });
+
+    if (stagesRange) stagesRange.value = String(stageCount);
+    if (stagesValue) stagesValue.textContent = `${stageCount} ${stageCount === 3 ? "مراحل" : "مرحلة"}`;
+
+    if (speedRange) speedRange.value = String(balloonSpeed);
+    if (speedValue) speedValue.textContent = String(balloonSpeed);
+  }
+
+  function readImage(file){
+    return new Promise((resolve)=>{
+      if (!file || !String(file.type || "").startsWith("image/")) {
+        resolve({imageName:"",imageData:""});
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onerror = ()=>resolve({imageName:"",imageData:""});
+      reader.onload = ()=>{
+        const original = String(reader.result || "");
+        const image = new Image();
+
+        image.onerror = ()=>resolve({
+          imageName:String(file.name || "صورة"),
+          imageData:original
+        });
+
+        image.onload = ()=>{
+          try {
+            const maxSide = 1000;
+            const ratio = Math.min(
+              1,
+              maxSide / Math.max(image.naturalWidth || 1,image.naturalHeight || 1)
+            );
+            const width = Math.max(1,Math.round((image.naturalWidth || 1) * ratio));
+            const height = Math.max(1,Math.round((image.naturalHeight || 1) * ratio));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d");
+            context.drawImage(image,0,0,width,height);
+            resolve({
+              imageName:String(file.name || "صورة"),
+              imageData:canvas.toDataURL("image/jpeg",.86)
+            });
+          } catch (_) {
+            resolve({
+              imageName:String(file.name || "صورة"),
+              imageData:original
+            });
+          }
+        };
+
+        image.src = original;
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function createImageControl(media,onChange,label){
+    const wrap = document.createElement("div");
+    wrap.className = "train-image-control";
+
+    const preview = document.createElement("div");
+    preview.className = "train-image-preview";
+
+    const actions = document.createElement("div");
+    actions.className = "train-image-actions";
+
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = "image/*";
+    fileInput.hidden = true;
+
+    const upload = document.createElement("button");
+    upload.type = "button";
+    upload.className = "train-image-upload";
+    upload.textContent = media.imageData ? "تغيير" : "رفع صورة";
+    upload.setAttribute("aria-label",`رفع ${label}`);
+
+    const clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "train-image-clear";
+    clear.textContent = "حذف";
+    clear.hidden = !media.imageData;
+
+    function refresh(){
+      preview.textContent = "";
+      if (media.imageData) {
+        const image = document.createElement("img");
+        image.src = media.imageData;
+        image.alt = media.imageName || label;
+        preview.appendChild(image);
+      } else {
+        preview.textContent = "لا توجد صورة";
+      }
+      upload.textContent = media.imageData ? "تغيير" : "رفع صورة";
+      clear.hidden = !media.imageData;
+    }
+
+    upload.addEventListener("click",()=>fileInput.click());
+
+    clear.addEventListener("click",()=>{
+      media.imageName = "";
+      media.imageData = "";
+      refresh();
+      onChange();
+    });
+
+    fileInput.addEventListener("change",async()=>{
+      const file = fileInput.files?.[0];
+      const result = await readImage(file);
+      if (result.imageData) {
+        media.imageName = result.imageName;
+        media.imageData = result.imageData;
+        refresh();
+        onChange();
+      }
+      fileInput.value = "";
+    });
+
+    actions.append(upload,clear,fileInput);
+    wrap.append(preview,actions);
+    refresh();
+    return wrap;
+  }
+
+  function createSideEditor(entry,key,title){
+    const media = entry[key];
+    const side = document.createElement("section");
+    side.className = "train-content-side";
+
+    const heading = document.createElement("h4");
+    heading.className = "train-content-side-title";
+    heading.textContent = title;
+    side.appendChild(heading);
+
+    if (contentType === "text" || contentType === "mixed") {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "train-text-input";
+      input.maxLength = 90;
+      input.placeholder = key === "wagon"
+        ? "اكتب محتوى العربة..."
+        : "اكتب محتوى البالون...";
+      input.value = media.text;
+      input.addEventListener("input",()=>{
+        media.text = input.value;
+        saveDraft();
+      });
+      side.appendChild(input);
+    }
+
+    if (contentType === "images" || contentType === "mixed") {
+      side.appendChild(
+        createImageControl(
+          media,
+          saveDraft,
+          key === "wagon" ? "صورة العربة" : "صورة البالون"
+        )
+      );
+    }
+
+    return side;
+  }
+
+  function renderContents(){
+    if (!contentsEditor) return;
+    contentsEditor.textContent = "";
+
+    ensureInitialContents();
+
+    contents.forEach((entry,index)=>{
+      const card = document.createElement("article");
+      card.className = "train-content-card";
+
+      const head = document.createElement("div");
+      head.className = "train-content-card-head";
+
+      const title = document.createElement("h4");
+      title.className = "train-content-card-title";
+      title.textContent = `المحتوى ${index + 1}`;
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "train-remove-content";
+      remove.textContent = "حذف";
+      remove.disabled = contents.length <= 1;
+      remove.addEventListener("click",()=>{
+        if (contents.length <= 1) return;
+        contents.splice(index,1);
+        renderContents();
+        saveDraft();
+      });
+
+      head.append(title,remove);
+
+      const fields = document.createElement("div");
+      fields.className = "train-content-fields";
+      fields.append(
+        createSideEditor(entry,"wagon","محتوى العربة"),
+        createSideEditor(entry,"balloon","محتوى البالون")
+      );
+
+      card.append(head,fields);
+      contentsEditor.appendChild(card);
+    });
+  }
+
+  function sideComplete(media){
+    if (contentType === "text") return Boolean(String(media.text || "").trim());
+    if (contentType === "images") return Boolean(media.imageData);
+    return Boolean(String(media.text || "").trim() && media.imageData);
+  }
+
+  function completedContents(){
+    return contents.filter((entry)=>
+      sideComplete(entry.wagon) && sideComplete(entry.balloon)
+    );
+  }
+
+  function validate(){
+    if (!currentName()) {
+      alert("يرجى كتابة اسم اللعبة قبل المتابعة.");
+      gameNameInput?.focus();
+      return false;
+    }
+
+    if (!completedContents().length) {
+      alert("يرجى إدخال محتوى عربة ومحتوى بالون مكتملين على الأقل.");
+      return false;
+    }
+
+    return true;
+  }
+
+  function runtimePayload(payloadId){
+    const validContents = completedContents().map((entry)=>({
+      id:entry.id,
+      wagon:{...entry.wagon},
+      balloon:{...entry.balloon}
+    }));
+
+    return {
+      gameType:"train",
+      gameTemplate:"train",
+      payloadVersion:1,
+      name:currentName(),
+      gameName:currentName(),
+      theme:"desert",
+      selectedTheme:"desert",
+      contentType,
+      type:contentType,
+      stageCount,
+      stages:stageCount,
+      balloonSpeed,
+      speedLevel:balloonSpeed,
+      contents:validContents,
+      entries:validContents,
+      payloadId,
+      updatedAt:Date.now()
+    };
+  }
+
+  function writeRuntimePayloadToDb(key,payload){
+    if (!("indexedDB" in window)) return Promise.resolve(false);
+    return new Promise((resolve)=>{
+      const request = indexedDB.open("sandooq_edu_games_v1",1);
+      request.onerror = ()=>resolve(false);
+      request.onupgradeneeded = ()=>{
+        const db = request.result;
+        if (!db.objectStoreNames.contains("payloads")) {
+          db.createObjectStore("payloads",{keyPath:"key"});
+        }
+      };
+      request.onsuccess = ()=>{
+        const db = request.result;
+        try {
+          const tx = db.transaction("payloads","readwrite");
+          tx.objectStore("payloads").put({key,payload,updatedAt:Date.now()});
+          tx.oncomplete = ()=>{ db.close(); resolve(true); };
+          tx.onerror = ()=>{ db.close(); resolve(false); };
+          tx.onabort = ()=>{ db.close(); resolve(false); };
+        } catch (_) {
+          db.close();
+          resolve(false);
+        }
+      };
+    });
+  }
+
+  async function openTrainPage(){
+    if (!validate()) return;
+
+    const payloadId = `train_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const payload = runtimePayload(payloadId);
+
+    try {
+      Object.keys(sessionStorage).forEach((key)=>{
+        if (key.startsWith(`${TRAIN_PAYLOAD_KEY}_`)) sessionStorage.removeItem(key);
+      });
+      sessionStorage.removeItem(TRAIN_PAYLOAD_KEY);
+      sessionStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
+      sessionStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
+      sessionStorage.setItem(TRAIN_DRAFT_KEY,JSON.stringify(draftPayload()));
+    } catch (_) {}
+
+    await writeRuntimePayloadToDb(`train:${payloadId}`,payload);
+
+    const url = new URL(TRAIN_PAGE_URL,window.location.href);
+    url.searchParams.set("payloadId",payloadId);
+    url.searchParams.set("theme","desert");
+    url.searchParams.set("stages",String(stageCount));
+    url.searchParams.set("speed",String(balloonSpeed));
+    url.searchParams.set("return","index.html");
+    url.searchParams.set("v",String(Date.now()));
+    window.location.href = `${url.pathname}${url.search}`;
+  }
+
+  async function saveTrainGame(){
+    if (!validate()) return;
+
+    const payloadId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const payload = runtimePayload(payloadId);
+
+    saveDraft();
+
+    const task = ()=>window.SandooqSavedGames?.saveGame({
+      gameType:"train",
+      name:currentName(),
+      payload
+    });
+
+    if (window.SandooqSaveFlow?.run) {
+      await window.SandooqSaveFlow.run({
+        gameType:"train",
+        saveTask:task
+      });
+    } else {
+      await task();
+    }
+  }
+
+  function openSetup(){
+    ensureInitialContents();
+    updateControls();
+    renderContents();
+    window.openEduScreen?.("trainSetupScreen");
+  }
+
+  document.querySelectorAll("[data-template='train']").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      openSetup();
+      saveDraft();
+    });
+  });
+
+  document.querySelectorAll("[data-train-content-type]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      const next = button.dataset.trainContentType;
+      if (!["text","images","mixed"].includes(next)) return;
+      contentType = next;
+      updateControls();
+      renderContents();
+      saveDraft();
+    });
+  });
+
+  stagesRange?.addEventListener("input",()=>{
+    stageCount = clampNumber(stagesRange.value,3,20,3);
+    updateControls();
+    saveDraft();
+  });
+
+  speedRange?.addEventListener("input",()=>{
+    balloonSpeed = clampNumber(speedRange.value,1,10,3);
+    updateControls();
+    saveDraft();
+  });
+
+  addContentBtn?.addEventListener("click",()=>{
+    contents.push(createContent());
+    renderContents();
+    saveDraft();
+    window.setTimeout(()=>{
+      const cards = contentsEditor?.querySelectorAll(".train-content-card");
+      cards?.[cards.length - 1]?.scrollIntoView({behavior:"smooth",block:"center"});
+    },0);
+  });
+
+  gameNameInput?.addEventListener("input",saveDraft);
+  document.getElementById("testTrainBtn")?.addEventListener("click",openTrainPage);
+  document.getElementById("saveTrainBtn")?.addEventListener("click",saveTrainGame);
+
+  window.openTrainSetupScreen = openSetup;
+
+  loadDraft();
+  ensureInitialContents();
+  updateControls();
+  renderContents();
+
+  if (window.location.hash === "#trainSetup") {
+    openSetup();
+  }
+
+  (async()=>{
+    const pending = await window.SandooqSavedGames?.consumePendingEdit("train");
+    if (!pending?.payload) return;
+    loadDraft(pending.payload);
+    openSetup();
+  })();
+})();
+</script>
+
 <script>
 (() => {
   "use strict";
@@ -16829,7 +17881,8 @@
     "open-box":["sandooq_wheel_draft_v1","sandooq_open_box_draft_v1"],
     quiz:["sandooq_quiz_draft_v2"],
     match:["sandooq_match_draft_v1"],
-    order:["sandooq_order_draft_v1"]
+    order:["sandooq_order_draft_v1"],
+    train:["sandooq_train_draft_v1"]
   };
 
   const INDEXED_DRAFT_KEYS = {
