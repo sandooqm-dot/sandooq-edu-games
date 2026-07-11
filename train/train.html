@@ -379,51 +379,40 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 125;
+  const PARALLAX_IMAGE_VERSION = 126;
   const PARALLAX_ASSETS = {
-    sky:`desert-sky-125.webp?v=${PARALLAX_IMAGE_VERSION}`,
-    far:`desert-mountains-far-125.webp?v=${PARALLAX_IMAGE_VERSION}`,
-    mid:`desert-mountains-mid-125.webp?v=${PARALLAX_IMAGE_VERSION}`,
-    foreground:`desert-foreground-125.webp?v=${PARALLAX_IMAGE_VERSION}`
+    top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
   const PARALLAX_CONFIG = {
-    sky:{
-      key:"sky",
-      href:PARALLAX_ASSETS.sky,
+    top:{
+      key:"top",
+      href:PARALLAX_ASSETS.top,
       width:2560,
-      height:720,
+      height:320,
       y:0,
-      speed:0,
+      speed:4,
       opacity:1,
       preserveAspectRatio:"none"
     },
-    far:{
-      key:"far",
-      href:PARALLAX_ASSETS.far,
+    middle:{
+      key:"middle",
+      href:PARALLAX_ASSETS.middle,
       width:2560,
-      height:720,
-      y:0,
-      speed:6,
-      opacity:1,
-      preserveAspectRatio:"none"
-    },
-    mid:{
-      key:"mid",
-      href:PARALLAX_ASSETS.mid,
-      width:2560,
-      height:720,
-      y:0,
+      height:240,
+      y:300,
       speed:12,
       opacity:1,
       preserveAspectRatio:"none"
     },
-    foreground:{
-      key:"foreground",
-      href:PARALLAX_ASSETS.foreground,
+    bottom:{
+      key:"bottom",
+      href:PARALLAX_ASSETS.bottom,
       width:2560,
-      height:720,
-      y:0,
+      height:220,
+      y:500,
       speed:22,
       opacity:1,
       preserveAspectRatio:"none"
@@ -2952,9 +2941,8 @@
   }
 
   function renderParallaxForeground(){
-    // لم نعد نرسم العناصر الأمامية فوق القطار.
-    // طبقة foreground تُرسم الآن داخل background() خلف القطار والسكة
-    // حتى يبقى القطار واضحًا فوقها كما اتفقنا.
+    // لا نرسم طبقة أمامية فوق القطار.
+    // الشرائح الثلاث كلها تُرسم داخل background() خلف السكة والقطار.
     parallaxFrontGroup = null;
     return null;
   }
@@ -2963,13 +2951,14 @@
     parallaxLayerRecords.length = 0;
     parallaxBackGroup = el("g", {id:"background"});
 
-    // الطبقات الأربع الآن كلها صور كاملة 2560×720.
-    // الجبال/الكثبان والعناصر الأمامية موجودة داخل لوحات كاملة بخلفية شفافة،
-    // لذلك نرسمها كلها من (0,0) فوق بعضها حتى تعطي نفس المشهد المرجعي.
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.sky);
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.far);
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.mid);
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.foreground);
+    // الخلفية الآن مكوّنة من 3 شرائح كما اتفقنا:
+    // 1) الطبقة العلوية (بطيئة)
+    // 2) الطبقة الوسطى (متوسطة)
+    // 3) الطبقة السفلية (سريعة)
+    // مع تداخل رأسي بسيط لمنع ظهور أي فراغ أو خط فاصل.
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.top);
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.middle);
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.bottom);
 
     // السكة تبقى فوق الخلفية كلها، بينما القطار يرسم فوق السكة والخلفيات.
     const track = el("g", {id:"track"}, parallaxBackGroup);
