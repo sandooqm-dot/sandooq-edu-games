@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 126</title>
+  <title>قطار الإجابات - إصدار 127</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -398,14 +398,14 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 126;
+  const PARALLAX_IMAGE_VERSION = 127;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 126: عرض إجابات جميع محتويات النشاط كبالونات عشوائية مع ضمان وجود إجابة لكل عربة ظاهرة، وإبطاء الطبقة الوسطى 15% دون تغيير الفيزياء.
+  // إصدار 127: تدفق مستمر وكثيف للبالونات من جميع إجابات النشاط، مع تكرار الإجابة الصحيحة دوريًا وعدم ربط عدد البالونات بعدد العربات.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -512,9 +512,12 @@
   const WAGON_CAPTURE_MIN_OVERLAP = .32;
   const WAGON_CAPTURE_MIN_DEPTH = 6;
 
-  const BALLOON_FLOW_MIN = 7;
-  const BALLOON_FLOW_MAX = 10;
-  const MEDIUM_BALLOON_SCALE = .80;
+  // تدفق ثابت وكثيف مثل ألعاب فرقعة البالونات:
+  // العدد لا يعتمد على عدد العربات الحالية، والبالونات تُعاد تدويرها باستمرار.
+  const BALLOON_STREAM_SIZE = 15;
+  const CORRECT_BALLOON_CADENCE = 4;
+  const BALLOON_STREAM_SPACING = 118;
+  const MEDIUM_BALLOON_SCALE = .76;
   const MAX_ACTIVE_FALLING_BOXES = 4;
   // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
   // تبقى كل الصناديق المستقرة في أماكنها.
@@ -1290,6 +1293,7 @@
         const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
         accepted.add(balloonId);
         acceptedBalloonIdsByWagon.set(wagonId,accepted);
+        retireAcceptedBalloonCopies(balloonId);
       }
 
       const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
@@ -2231,6 +2235,14 @@
     const targetCar = trainCarRegistry[well.index];
     const landedWagonId = String(targetCar?.wagonId || "");
 
+    // قد توجد نسخ بصرية متكررة من الإجابة نفسها داخل التدفق.
+    // بعد احتساب إحداها لا نسمح لأي نسخة أخرى بالاستقرار أو الاحتساب مرة ثانية.
+    if(TRAIN_ANSWER_LOGIC_ENABLED && item.balloonId && acceptedBalloonIds.has(item.balloonId)){
+      item.settleCommitted = true;
+      breakMatterBox(item);
+      return true;
+    }
+
     if(TRAIN_ANSWER_LOGIC_ENABLED && item.targetWagonId && landedWagonId !== item.targetWagonId){
       item.settleCommitted = true;
       item.currentWellIndex = well.index;
@@ -2996,6 +3008,8 @@
   let currentStageActiveWagonIds = [];
   let stageBalloonDeck = [];
   let stageBalloonCursor = 0;
+  let stageBalloonSpawnCounter = 0;
+  let stageCorrectWagonCursor = 0;
 
   function shuffledTrainRelations(list){
     const copy = Array.isArray(list) ? list.slice() : [];
@@ -3007,13 +3021,8 @@
   }
 
   function currentBalloonFlowSize(){
-    if(!TRAIN_ANSWER_LOGIC_ENABLED) return BALLOON_FLOW_MIN;
-
-    // ثلاثة مشتتات إضافية على الأقل، مع مساحة تكفي لوجود إجابة
-    // لكل عربة ظاهرة في الوقت نفسه، وحتى عشرة بالونات متداولة.
-    const requiredWagonCount = currentStageActiveWagonIds.length;
-    const desired = Math.max(BALLOON_FLOW_MIN, requiredWagonCount + 3);
-    return clamp(desired, BALLOON_FLOW_MIN, BALLOON_FLOW_MAX);
+    // عدد ثابت وكبير لا يتغير حسب عدد العربات.
+    return BALLOON_STREAM_SIZE;
   }
 
   function setBalloonMedia(balloon, mediaInput){
@@ -3211,64 +3220,117 @@
   let balloonLoopLastTime = 0;
   let balloonMotionProfileCursor = 0;
 
-  function reservedBalloonRelations(exceptItem = null){
-    return activeBalloons
-      .filter(item => item && item !== exceptItem)
-      .map(item => {
-        const relation = item.pendingRetryContent || item.config?.content || null;
-        if(!relation) return null;
-
-        const reserved = Boolean(item.pendingRetryContent) || item.attemptPending || !item.popped;
-        if(!reserved || acceptedBalloonIds.has(relation.balloonId)) return null;
-        return relation;
-      })
-      .filter(Boolean);
+  function activeUncompletedWagonIds(){
+    return currentStageActiveWagonIds.filter(wagonId => {
+      const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
+      const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
+      return expected.size > accepted.size;
+    });
   }
 
-  function assignedStageBalloonIds(exceptItem = null){
-    return new Set(reservedBalloonRelations(exceptItem).map(relation => relation.balloonId));
+  function relationIsStillAvailable(relation){
+    return Boolean(
+      relation &&
+      relation.balloonId &&
+      !acceptedBalloonIds.has(relation.balloonId)
+    );
   }
 
-  function takeStageRelation(predicate, assignedIds){
-    if(!stageBalloonDeck.length) return null;
+  function nextCorrectStageRelation(){
+    const wagonIds = activeUncompletedWagonIds();
+    if(!wagonIds.length) return null;
 
-    for(let offset = 0; offset < stageBalloonDeck.length; offset++){
-      const index = (stageBalloonCursor + offset) % stageBalloonDeck.length;
-      const relation = stageBalloonDeck[index];
-      if(!relation || acceptedBalloonIds.has(relation.balloonId) || assignedIds.has(relation.balloonId)) continue;
-      if(typeof predicate === "function" && !predicate(relation)) continue;
+    for(let offset = 0; offset < wagonIds.length; offset++){
+      const wagonIndex = (stageCorrectWagonCursor + offset) % wagonIds.length;
+      const wagonId = wagonIds[wagonIndex];
+      const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
+      const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
 
-      stageBalloonCursor = (index + 1) % stageBalloonDeck.length;
-      return relation;
+      const candidates = shuffledTrainRelations(
+        currentStageRequiredRelations.filter(relation =>
+          relation.targetWagonId === wagonId &&
+          expected.has(relation.balloonId) &&
+          !accepted.has(relation.balloonId) &&
+          relationIsStillAvailable(relation)
+        )
+      );
+
+      if(candidates.length){
+        stageCorrectWagonCursor = (wagonIndex + 1) % wagonIds.length;
+        return candidates[stageBalloonCursor++ % candidates.length];
+      }
     }
 
     return null;
   }
 
-  function nextStageBalloonContent(exceptItem = null){
-    if(!TRAIN_ANSWER_LOGIC_ENABLED || !stageBalloonDeck.length) return null;
+  function nextDistractorStageRelation(){
+    const activeIds = new Set(activeUncompletedWagonIds());
 
-    const reservedRelations = reservedBalloonRelations(exceptItem);
-    const assignedIds = new Set(reservedRelations.map(relation => relation.balloonId));
-    const assignedTargetWagonIds = new Set(reservedRelations.map(relation => relation.targetWagonId));
+    let candidates = shuffledTrainRelations(
+      currentStageDistractorRelations.filter(relationIsStillAvailable)
+    );
 
-    // الأولوية الدائمة: كل عربة ظاهرة وغير مكتملة يجب أن يكون لها
-    // بالون صحيح واحد على الأقل ضمن البالونات المتداولة حاليًا.
-    for(const wagonId of currentStageActiveWagonIds){
-      const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
-      const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
-      if(!expected.size || accepted.size >= expected.size || assignedTargetWagonIds.has(wagonId)) continue;
-
-      const required = takeStageRelation(
-        relation => relation.targetWagonId === wagonId && expected.has(relation.balloonId),
-        assignedIds
+    if(!candidates.length){
+      candidates = shuffledTrainRelations(
+        TRAIN_RUNTIME_RELATIONS.filter(relation =>
+          relationIsStillAvailable(relation) &&
+          !activeIds.has(relation.targetWagonId)
+        )
       );
-      if(required) return required;
     }
 
-    // بعد ضمان الإجابات المطلوبة، نملأ بقية البالونات عشوائيًا
-    // من جميع إجابات النشاط، بما فيها إجابات العربات غير الظاهرة كمشتتات.
-    return takeStageRelation(null, assignedIds);
+    if(!candidates.length){
+      candidates = shuffledTrainRelations(
+        TRAIN_RUNTIME_RELATIONS.filter(relationIsStillAvailable)
+      );
+    }
+
+    if(!candidates.length) return null;
+    return candidates[stageBalloonCursor++ % candidates.length];
+  }
+
+  function nextStageBalloonContent(){
+    if(!TRAIN_ANSWER_LOGIC_ENABLED || !stageBalloonDeck.length) return null;
+
+    stageBalloonSpawnCounter += 1;
+
+    // كل عدة بالونات تظهر إجابة صحيحة مرة أخرى.
+    // يسمح ذلك للطالب بالحصول على فرصة جديدة سريعًا إذا فاتته الإجابة السابقة.
+    const correctDue =
+      stageBalloonSpawnCounter === 1 ||
+      stageBalloonSpawnCounter % CORRECT_BALLOON_CADENCE === 0;
+
+    let relation = correctDue
+      ? nextCorrectStageRelation()
+      : nextDistractorStageRelation();
+
+    if(!relation){
+      relation = nextCorrectStageRelation() || nextDistractorStageRelation();
+    }
+
+    // نسمح بتكرار المحتوى بصريًا داخل التدفق؛ المنطق يمنع احتسابه مرتين.
+    return relation || null;
+  }
+
+  function retireAcceptedBalloonCopies(balloonId){
+    if(!balloonId) return;
+    const now = performance.now();
+
+    activeBalloons.forEach(item => {
+      const relation = item?.pendingRetryContent || item?.config?.content || null;
+      if(!relation || String(relation.balloonId || "") !== String(balloonId)) return;
+
+      item.pendingRetryContent = null;
+      item.config.content = null;
+      item.attemptPending = false;
+      item.node.removeAttribute("data-balloon-id");
+      item.node.removeAttribute("data-target-wagon-id");
+      item.node.style.display = "none";
+      item.node.style.pointerEvents = "none";
+      item.popped = true;
+      item.resetAt = now + 180;
+    });
   }
 
   function nextBalloonLines(){
@@ -3319,9 +3381,9 @@
   }
 
   function initialBalloonX(index){
-    // نوزع البالونات منذ البداية على امتداد الشاشة بدل تكديسها كلها خارج اليمين.
-    // المسافة 190px تحافظ على وضوح كل بالون وتظهر عدة اختيارات للطالب فورًا.
-    return BALLOON_FLIGHT.startX - 30 - index * 190;
+    // صف متصل من البالونات يبدأ من خارج اليمين ويمتد عبر الشاشة.
+    // اختلاف الارتفاعات يمنع التداخل البصري رغم كثافة التدفق.
+    return BALLOON_FLIGHT.startX + 75 - index * BALLOON_STREAM_SPACING;
   }
 
   function createBalloonMotionState(config, index = 0){
@@ -3359,7 +3421,7 @@
 
   function nextContinuousSpawnX(item){
     const startX = BALLOON_FLIGHT.startX;
-    const minimumSpacing = 188;
+    const minimumSpacing = BALLOON_STREAM_SPACING;
 
     const nearbyRightBalloons = activeBalloons
       .filter(other =>
@@ -3380,7 +3442,7 @@
       }
     }
 
-    return clamp(spawnX, startX, startX + 245);
+    return clamp(spawnX, startX, startX + 420);
   }
 
   function recycleBalloon(item, now, forceFarRight = false){
@@ -3389,7 +3451,7 @@
 
     let content = null;
     if(TRAIN_ANSWER_LOGIC_ENABLED){
-      content = item.pendingRetryContent || nextStageBalloonContent(item);
+      content = item.pendingRetryContent || nextStageBalloonContent();
       if(content && acceptedBalloonIds.has(content.balloonId)) content = null;
 
       if(!content){
@@ -3939,6 +4001,8 @@
     acceptedBalloonIdsByWagon.clear();
     expectedBalloonIdsByWagon.clear();
     stageBalloonCursor = 0;
+    stageBalloonSpawnCounter = 0;
+    stageCorrectWagonCursor = 0;
 
     if(!TRAIN_ANSWER_LOGIC_ENABLED){
       currentStageRelations = [];
@@ -3963,8 +4027,8 @@
       expectedBalloonIdsByWagon.set(entry.targetWagonId,expected);
     });
 
-    // نبني رزمة عشوائية جديدة في كل مرحلة من جميع إجابات المعلم.
-    // البداية تضم إجابة مضمونة لكل عربة ظاهرة، ثم بقية الإجابات والمشتتات.
+    // نبني مصدرًا عشوائيًا من جميع إجابات المعلم.
+    // يمكن إعادة استخدام محتواه بصريًا داخل التدفق المستمر، بينما يمنع المنطق احتساب الإجابة مرتين.
     const guaranteed = [];
     const remainingRequired = [];
 
