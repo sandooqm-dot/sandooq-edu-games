@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 125</title>
+  <title>قطار الإجابات - إصدار 126</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -398,14 +398,14 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 125;
+  const PARALLAX_IMAGE_VERSION = 126;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 125: أساس الإصدار 124 نفسه بالكامل، مع ربط بيانات index ومنطق الإجابات الصحيحة والخاطئة دون تغيير الخلفية أو السكة أو الفيزياء.
+  // إصدار 126: عرض إجابات جميع محتويات النشاط كبالونات عشوائية مع ضمان وجود إجابة لكل عربة ظاهرة، وإبطاء الطبقة الوسطى 15% دون تغيير الفيزياء.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -424,7 +424,7 @@
       width:2560,
       height:240,
       y:300,
-      speed:204,
+      speed:173.4,
       opacity:1,
       preserveAspectRatio:"none"
     },
@@ -512,7 +512,8 @@
   const WAGON_CAPTURE_MIN_OVERLAP = .32;
   const WAGON_CAPTURE_MIN_DEPTH = 6;
 
-  const BALLOON_FLOW_SIZE = 5;
+  const BALLOON_FLOW_MIN = 7;
+  const BALLOON_FLOW_MAX = 10;
   const MEDIUM_BALLOON_SCALE = .80;
   const MAX_ACTIVE_FALLING_BOXES = 4;
   // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
@@ -2990,7 +2991,30 @@
   const expectedBalloonIdsByWagon = new Map();
   const acceptedBalloonIdsByWagon = new Map();
   let currentStageRelations = [];
+  let currentStageRequiredRelations = [];
+  let currentStageDistractorRelations = [];
+  let currentStageActiveWagonIds = [];
+  let stageBalloonDeck = [];
   let stageBalloonCursor = 0;
+
+  function shuffledTrainRelations(list){
+    const copy = Array.isArray(list) ? list.slice() : [];
+    for(let index = copy.length - 1; index > 0; index--){
+      const swapIndex = Math.floor(Math.random() * (index + 1));
+      [copy[index], copy[swapIndex]] = [copy[swapIndex], copy[index]];
+    }
+    return copy;
+  }
+
+  function currentBalloonFlowSize(){
+    if(!TRAIN_ANSWER_LOGIC_ENABLED) return BALLOON_FLOW_MIN;
+
+    // ثلاثة مشتتات إضافية على الأقل، مع مساحة تكفي لوجود إجابة
+    // لكل عربة ظاهرة في الوقت نفسه، وحتى عشرة بالونات متداولة.
+    const requiredWagonCount = currentStageActiveWagonIds.length;
+    const desired = Math.max(BALLOON_FLOW_MIN, requiredWagonCount + 3);
+    return clamp(desired, BALLOON_FLOW_MIN, BALLOON_FLOW_MAX);
+  }
 
   function setBalloonMedia(balloon, mediaInput){
     if(!balloon) return;
@@ -3187,26 +3211,64 @@
   let balloonLoopLastTime = 0;
   let balloonMotionProfileCursor = 0;
 
-  function assignedStageBalloonIds(exceptItem = null){
-    return new Set(activeBalloons
-      .filter(item => item && item !== exceptItem && item.config?.content && (item.attemptPending || !item.popped))
-      .map(item => item.config.content.balloonId));
+  function reservedBalloonRelations(exceptItem = null){
+    return activeBalloons
+      .filter(item => item && item !== exceptItem)
+      .map(item => {
+        const relation = item.pendingRetryContent || item.config?.content || null;
+        if(!relation) return null;
+
+        const reserved = Boolean(item.pendingRetryContent) || item.attemptPending || !item.popped;
+        if(!reserved || acceptedBalloonIds.has(relation.balloonId)) return null;
+        return relation;
+      })
+      .filter(Boolean);
   }
 
-  function nextStageBalloonContent(exceptItem = null){
-    if(!TRAIN_ANSWER_LOGIC_ENABLED) return null;
-    if(!currentStageRelations.length) return null;
+  function assignedStageBalloonIds(exceptItem = null){
+    return new Set(reservedBalloonRelations(exceptItem).map(relation => relation.balloonId));
+  }
 
-    const assigned = assignedStageBalloonIds(exceptItem);
-    for(let offset = 0; offset < currentStageRelations.length; offset++){
-      const index = (stageBalloonCursor + offset) % currentStageRelations.length;
-      const relation = currentStageRelations[index];
-      if(acceptedBalloonIds.has(relation.balloonId) || assigned.has(relation.balloonId)) continue;
-      stageBalloonCursor = (index + 1) % currentStageRelations.length;
+  function takeStageRelation(predicate, assignedIds){
+    if(!stageBalloonDeck.length) return null;
+
+    for(let offset = 0; offset < stageBalloonDeck.length; offset++){
+      const index = (stageBalloonCursor + offset) % stageBalloonDeck.length;
+      const relation = stageBalloonDeck[index];
+      if(!relation || acceptedBalloonIds.has(relation.balloonId) || assignedIds.has(relation.balloonId)) continue;
+      if(typeof predicate === "function" && !predicate(relation)) continue;
+
+      stageBalloonCursor = (index + 1) % stageBalloonDeck.length;
       return relation;
     }
 
     return null;
+  }
+
+  function nextStageBalloonContent(exceptItem = null){
+    if(!TRAIN_ANSWER_LOGIC_ENABLED || !stageBalloonDeck.length) return null;
+
+    const reservedRelations = reservedBalloonRelations(exceptItem);
+    const assignedIds = new Set(reservedRelations.map(relation => relation.balloonId));
+    const assignedTargetWagonIds = new Set(reservedRelations.map(relation => relation.targetWagonId));
+
+    // الأولوية الدائمة: كل عربة ظاهرة وغير مكتملة يجب أن يكون لها
+    // بالون صحيح واحد على الأقل ضمن البالونات المتداولة حاليًا.
+    for(const wagonId of currentStageActiveWagonIds){
+      const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
+      const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
+      if(!expected.size || accepted.size >= expected.size || assignedTargetWagonIds.has(wagonId)) continue;
+
+      const required = takeStageRelation(
+        relation => relation.targetWagonId === wagonId && expected.has(relation.balloonId),
+        assignedIds
+      );
+      if(required) return required;
+    }
+
+    // بعد ضمان الإجابات المطلوبة، نملأ بقية البالونات عشوائيًا
+    // من جميع إجابات النشاط، بما فيها إجابات العربات غير الظاهرة كمشتتات.
+    return takeStageRelation(null, assignedIds);
   }
 
   function nextBalloonLines(){
@@ -3256,11 +3318,17 @@
     return BALLOON_MOTION_PROFILES[0];
   }
 
+  function initialBalloonX(index){
+    // نوزع البالونات منذ البداية على امتداد الشاشة بدل تكديسها كلها خارج اليمين.
+    // المسافة 190px تحافظ على وضوح كل بالون وتظهر عدة اختيارات للطالب فورًا.
+    return BALLOON_FLIGHT.startX - 30 - index * 190;
+  }
+
   function createBalloonMotionState(config, index = 0){
     const motionTime = index * 1.31;
 
     return {
-      x:(config.startX ?? 1355) + index * 225,
+      x:initialBalloonX(index),
       y:balloonYForProfile(config.motionProfile, motionTime, config.scale),
       motionTime
     };
@@ -3328,6 +3396,8 @@
         item.pendingRetryContent = null;
         item.config.content = null;
         item.attemptPending = false;
+        item.node.removeAttribute("data-balloon-id");
+        item.node.removeAttribute("data-target-wagon-id");
         item.node.style.display = "none";
         item.node.style.pointerEvents = "none";
         item.popped = true;
@@ -3339,6 +3409,8 @@
       item.config.content = content;
       item.config.media = content.balloon;
       item.config.lines = mediaTextLines(content.balloon,["",""]);
+      item.node.setAttribute("data-balloon-id", String(content.balloonId || ""));
+      item.node.setAttribute("data-target-wagon-id", String(content.targetWagonId || content.wagonId || ""));
       setBalloonMedia(item.node,content.balloon);
     }else{
       item.config.lines = nextBalloonLines();
@@ -3485,13 +3557,14 @@
   }
 
   function balloonsLayer(){
+    const ACTIVE_BALLOONS = currentBalloonFlowSize();
     const balloons = el("g", {
       id:"balloonsLayer",
       "data-speed-level":String(BALLOON_SPEED_LEVEL),
-      "data-flow-size":String(BALLOON_FLOW_SIZE)
+      "data-flow-size":String(ACTIVE_BALLOONS),
+      "data-required-count":String(currentStageRequiredRelations.length),
+      "data-distractor-count":String(currentStageDistractorRelations.length)
     });
-
-    const ACTIVE_BALLOONS = BALLOON_FLOW_SIZE;
 
     for(let index = 0; index < ACTIVE_BALLOONS; index++){
       const content = TRAIN_ANSWER_LOGIC_ENABLED ? nextStageBalloonContent() : null;
@@ -3520,7 +3593,7 @@
 
       const balloon = answerBalloon(balloons, {
         id:`answerBalloonDemo-${index}`,
-        x:BALLOON_FLIGHT.startX + index * 225,
+        x:initialBalloonX(index),
         y:initialY,
         scale:config.scale,
         lines:config.lines,
@@ -3531,6 +3604,10 @@
       balloon.style.pointerEvents = "auto";
       balloon.style.cursor = "pointer";
       balloon.setAttribute("data-motion-profile", motionProfile.id);
+      if(content){
+        balloon.setAttribute("data-balloon-id", String(content.balloonId || ""));
+        balloon.setAttribute("data-target-wagon-id", String(content.targetWagonId || content.wagonId || ""));
+      }
 
       const item = {
         node:balloon,
@@ -3865,6 +3942,10 @@
 
     if(!TRAIN_ANSWER_LOGIC_ENABLED){
       currentStageRelations = [];
+      currentStageRequiredRelations = [];
+      currentStageDistractorRelations = [];
+      currentStageActiveWagonIds = [];
+      stageBalloonDeck = [];
       return;
     }
 
@@ -3872,12 +3953,37 @@
       .filter(car => car?.type === "answer" && car.wagonId)
       .map(car => car.wagonId));
 
-    currentStageRelations = TRAIN_RUNTIME_RELATIONS.filter(entry => activeWagonIds.has(entry.targetWagonId));
-    currentStageRelations.forEach(entry => {
+    currentStageActiveWagonIds = shuffledTrainRelations(Array.from(activeWagonIds));
+    currentStageRequiredRelations = TRAIN_RUNTIME_RELATIONS.filter(entry => activeWagonIds.has(entry.targetWagonId));
+    currentStageDistractorRelations = TRAIN_RUNTIME_RELATIONS.filter(entry => !activeWagonIds.has(entry.targetWagonId));
+
+    currentStageRequiredRelations.forEach(entry => {
       const expected = expectedBalloonIdsByWagon.get(entry.targetWagonId) || new Set();
       expected.add(entry.balloonId);
       expectedBalloonIdsByWagon.set(entry.targetWagonId,expected);
     });
+
+    // نبني رزمة عشوائية جديدة في كل مرحلة من جميع إجابات المعلم.
+    // البداية تضم إجابة مضمونة لكل عربة ظاهرة، ثم بقية الإجابات والمشتتات.
+    const guaranteed = [];
+    const remainingRequired = [];
+
+    currentStageActiveWagonIds.forEach(wagonId => {
+      const relations = shuffledTrainRelations(
+        currentStageRequiredRelations.filter(entry => entry.targetWagonId === wagonId)
+      );
+      if(relations.length) guaranteed.push(relations.shift());
+      remainingRequired.push(...relations);
+    });
+
+    stageBalloonDeck = [
+      ...shuffledTrainRelations(guaranteed),
+      ...shuffledTrainRelations([
+        ...remainingRequired,
+        ...currentStageDistractorRelations
+      ])
+    ];
+    currentStageRelations = stageBalloonDeck.slice();
   }
 
   function updateQuestionWagonIndices(){
@@ -4527,7 +4633,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 125: ربط محتويات index بالعربات والبالونات، واعتماد المطابقة بالمعرّفات، وانفجار الإجابة الخاطئة وإعادتها للمحاولة، فوق أساس 124 نفسه. */
+  /* إصدار 126: جميع إجابات النشاط تظهر كبالونات عشوائية، مع ضمان وجود الإجابة الصحيحة لكل عربة ظاهرة، وإبطاء الطبقة الوسطى. */
 })();
 </script>
 </body>
