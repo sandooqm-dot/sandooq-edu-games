@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-setup-v65 -->
+<!-- version: index-train-logic-v66 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11755,7 +11755,7 @@
     <section class="choices-section">
       <div class="choices-section-head">
         <h3 class="choices-section-title">محتويات اللعبة</h3>
-        <p class="choices-section-note">أدخل محتوى العربة، ثم محتوى البالون المرتبط بها. يمكنك إضافة عدد كبير من المحتويات.</p>
+        <p class="choices-section-note">أدخل محتوى العربة، ثم محتوى البالون المرتبط بها. لتخصيص أكثر من بالون للعربة نفسها، كرر محتوى العربة مع بالونات مختلفة.</p>
       </div>
       <div class="train-contents-editor" id="trainContentsEditor"></div>
       <button class="train-add-content" id="addTrainContentBtn" type="button"><span>＋</span><span>إضافة محتويات جديدة</span></button>
@@ -17371,10 +17371,58 @@
 
   function normalizeContent(raw,index){
     return {
-      id:String(raw?.id || `train-content-${index + 1}`),
+      id:String(raw?.id || raw?.relationId || `train-content-${index + 1}`),
+      wagonId:String(raw?.wagonId || raw?.targetWagonId || ""),
+      balloonId:String(raw?.balloonId || ""),
+      targetWagonId:String(raw?.targetWagonId || raw?.wagonId || ""),
       wagon:normalizeMedia(raw?.wagon || raw?.car || raw?.answer),
       balloon:normalizeMedia(raw?.balloon || raw?.question || raw?.item)
     };
+  }
+
+  function trainMediaIdentity(media){
+    const normalized = normalizeMedia(media);
+    const text = String(normalized.text || "")
+      .trim()
+      .replace(/\s+/g," ")
+      .toLocaleLowerCase("ar");
+    return `${text}|${normalized.imageData || ""}`;
+  }
+
+  function safeTrainLinkId(prefix,value,index){
+    const cleaned = String(value || "")
+      .trim()
+      .replace(/[^\w\u0600-\u06ff-]+/g,"-")
+      .replace(/^-+|-+$/g,"")
+      .slice(0,80);
+    return cleaned ? `${prefix}-${cleaned}` : `${prefix}-${index + 1}`;
+  }
+
+  function buildLinkedTrainContents(source){
+    const wagonIdByIdentity = new Map();
+
+    return source.map((entry,index)=>{
+      const relationId = String(entry?.id || `train-content-${index + 1}`);
+      const wagon = normalizeMedia(entry?.wagon);
+      const balloon = normalizeMedia(entry?.balloon);
+      const identity = trainMediaIdentity(wagon) || relationId;
+
+      let wagonId = String(entry?.targetWagonId || entry?.wagonId || "").trim();
+      if (!wagonId) {
+        wagonId = wagonIdByIdentity.get(identity) || safeTrainLinkId("wagon",relationId,index);
+      }
+      wagonIdByIdentity.set(identity,wagonId);
+
+      return {
+        id:relationId,
+        relationId,
+        wagonId,
+        targetWagonId:wagonId,
+        balloonId:String(entry?.balloonId || safeTrainLinkId("balloon",relationId,index)),
+        wagon,
+        balloon
+      };
+    });
   }
 
   function ensureInitialContents(){
@@ -17387,10 +17435,13 @@
   }
 
   function draftPayload(){
+    const linkedContents = buildLinkedTrainContents(contents);
     return {
       gameType:"train",
       gameTemplate:"train",
-      payloadVersion:1,
+      payloadVersion:2,
+      answerLogicVersion:1,
+      wrongAnswerBehavior:"explode-and-retry",
       name:currentName(),
       gameName:currentName(),
       theme:"desert",
@@ -17401,16 +17452,8 @@
       stages:stageCount,
       balloonSpeed,
       speedLevel:balloonSpeed,
-      contents:contents.map((entry)=>({
-        id:entry.id,
-        wagon:{...entry.wagon},
-        balloon:{...entry.balloon}
-      })),
-      entries:contents.map((entry)=>({
-        id:entry.id,
-        wagon:{...entry.wagon},
-        balloon:{...entry.balloon}
-      })),
+      contents:linkedContents,
+      entries:linkedContents,
       updatedAt:Date.now()
     };
   }
@@ -17688,16 +17731,14 @@
   }
 
   function runtimePayload(payloadId){
-    const validContents = completedContents().map((entry)=>({
-      id:entry.id,
-      wagon:{...entry.wagon},
-      balloon:{...entry.balloon}
-    }));
+    const validContents = buildLinkedTrainContents(completedContents());
 
     return {
       gameType:"train",
       gameTemplate:"train",
-      payloadVersion:1,
+      payloadVersion:2,
+      answerLogicVersion:1,
+      wrongAnswerBehavior:"explode-and-retry",
       name:currentName(),
       gameName:currentName(),
       theme:"desert",
@@ -17765,6 +17806,7 @@
     url.searchParams.set("theme","desert");
     url.searchParams.set("stages",String(stageCount));
     url.searchParams.set("speed",String(balloonSpeed));
+    url.searchParams.set("logic","answers-v1");
     url.searchParams.set("return","index.html");
     url.searchParams.set("v",String(Date.now()));
     window.location.href = `${url.pathname}${url.search}`;
