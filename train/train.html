@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 130</title>
+  <title>قطار الإجابات - إصدار 131</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -379,17 +379,19 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 130;
+  const PARALLAX_IMAGE_VERSION = 131;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 130:
-  // - ضبط سرعات البارالاكس إلى قيم مرئية فعليًا مع بقاء التدرج واضحًا:
-  //   العلوية بطيئة 16px/s، والوسطى متوسطة 34px/s، والسفلية سريعة 64px/s.
-  // - تمديد الطبقة العلوية إلى ارتفاع 560px لتبقى خلف الجبال وتسُد الفراغات الشفافة.
+  // إصدار 131:
+  // - اعتماد مقياس سرعة واضح من 0% إلى 100%.
+  // - السرعة القصوى المرجعية 120px/s.
+  // - العلوية 30% = 36px/s، والوسطى 55% = 66px/s، والسفلية 70% = 84px/s.
+  // - الطبقة العلوية تبقى ممتدة إلى ارتفاع 560px خلف الجبال.
+  const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
       key:"top",
@@ -397,7 +399,7 @@
       width:2560,
       height:560,
       y:0,
-      speed:16,
+      speed:PARALLAX_MAX_SPEED * .30,
       opacity:1,
       preserveAspectRatio:"none"
     },
@@ -407,7 +409,7 @@
       width:2560,
       height:240,
       y:300,
-      speed:34,
+      speed:PARALLAX_MAX_SPEED * .55,
       opacity:1,
       preserveAspectRatio:"none"
     },
@@ -417,7 +419,7 @@
       width:2560,
       height:220,
       y:500,
-      speed:64,
+      speed:PARALLAX_MAX_SPEED * .70,
       opacity:1,
       preserveAspectRatio:"none"
     }
