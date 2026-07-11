@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 125</title>
+  <title>قطار الإجابات - إصدار 127</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -379,21 +379,24 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 126;
+  const PARALLAX_IMAGE_VERSION = 127;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
+  // إصدار 127:
+  // - تمديد الطبقة العلوية إلى ارتفاع 560px لتبقى خلف الجبال وتسُد الفراغات الشفافة.
+  // - إبطاء العلوية 50%، والوسطى 50%، والسفلية 20%.
   const PARALLAX_CONFIG = {
     top:{
       key:"top",
       href:PARALLAX_ASSETS.top,
       width:2560,
-      height:320,
+      height:560,
       y:0,
-      speed:4,
+      speed:2,
       opacity:1,
       preserveAspectRatio:"none"
     },
@@ -403,7 +406,7 @@
       width:2560,
       height:240,
       y:300,
-      speed:12,
+      speed:6,
       opacity:1,
       preserveAspectRatio:"none"
     },
@@ -413,7 +416,7 @@
       width:2560,
       height:220,
       y:500,
-      speed:22,
+      speed:17.6,
       opacity:1,
       preserveAspectRatio:"none"
     }
