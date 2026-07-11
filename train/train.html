@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 127</title>
+  <title>قطار الإجابات - إصدار 128</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -379,7 +379,7 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 127;
+  const PARALLAX_IMAGE_VERSION = 128;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
@@ -2863,8 +2863,8 @@
   }
 
   function getParallaxSpeedMultiplier(){
-    if(trainMotionState === "done") return .45;
-    if(trainMotionState === "playing") return .7;
+    // حركة الخلفية مستقلة كليًا عن حالة القطار.
+    // لا تتباطأ ولا تتوقف عند انتهاء مرحلة أو أثناء بناء المرحلة التالية.
     return 1;
   }
 
@@ -3034,7 +3034,7 @@
   ];
 
   const MAX_TRAIN_STAGE = 20;
-  const STAGE_CHANGE_DELAY = 2500;
+  const STAGE_CHANGE_DELAY = 120;
 
   let currentStageIndex = 0;
   let currentTrainStage = null;
@@ -3118,10 +3118,8 @@
     trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     trainCarRegistry.splice(0, trainCarRegistry.length);
 
-    stopParallaxLoop();
-    parallaxBackGroup?.remove();
-    parallaxFrontGroup?.remove();
-
+    // الخلفية دائمة بين المراحل: لا نوقف حلقتها ولا نحذف صورها.
+    // نحذف فقط القطار والعناصر الخاصة بالمرحلة المنتهية.
     trainPositionGroup?.remove();
     wagonDropCoverPositionGroup?.remove();
     fallingObjectsLayer?.remove();
@@ -3135,9 +3133,7 @@
     fallingObjectsLayer = null;
     settledObjectsLayer = null;
     collisionDebugLayer = null;
-    parallaxBackGroup = null;
-    parallaxFrontGroup = null;
-    parallaxLayerRecords.length = 0;
+    // parallaxBackGroup وparallaxLayerRecords يبقيان كما هما حتى تستمر الحركة بلا انقطاع.
   }
 
   function scheduleNextTrainStage(){
@@ -3165,8 +3161,7 @@
       trainAnimationFrame = 0;
     }
 
-    stopParallaxLoop();
-
+    // لا نوقف خلفية البارالاكس عند بدء مرحلة جديدة.
     if(stageTransitionTimer){
       clearTimeout(stageTransitionTimer);
       stageTransitionTimer = 0;
@@ -3658,16 +3653,24 @@
   }
 
   function build(){
-    clear();
+    const persistentBackgroundReady = !!svg.querySelector("#background") &&
+      parallaxBackGroup &&
+      parallaxLayerRecords.length === 3;
 
-    // كل مرحلة تُبنى من الصفر بصريًا، لذلك نفرغ السجلات المرتبطة بالرسم الحالي.
+    // المرحلة الأولى فقط تبني الخلفية والـdefs والسكة.
+    // المراحل التالية تبني القطار والبالونات فقط فوق الخلفية الموجودة نفسها.
+    if(!persistentBackgroundReady){
+      clear();
+      defs();
+      background();
+      startParallaxLoop();
+    }
+
     trainCarRegistry.splice(0, trainCarRegistry.length);
     trainVisualParts.splice(0, trainVisualParts.length);
     trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     activeBalloons.splice(0, activeBalloons.length);
 
-    defs();
-    background();
     balloonsLayer();
 
     // المجموعة الخارجية لحركة دخول وخروج القطار.
@@ -3709,6 +3712,7 @@
 
     updateTrainVisualCulling();
 
+    // الحلقة قد تكون شغالة أصلًا من المرحلة السابقة؛ الدالة تمنع إنشاء حلقة ثانية.
     startParallaxLoop();
 
     // المرحلة الأولى: يبدأ القطار خارج الشاشة من اليسار ثم يدخل حتى تستقر العربة في المنتصف.
@@ -3716,7 +3720,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 125: استبدال طبقات الخلفية بالصور الأربع التي أرسلها المستخدم نفسها، بعد تحويل خلفية المربعات إلى شفافية حقيقية وترتيبها داخل لوحات 2560×720. */
+  /* إصدار 128: تثبيت سرعات الخلفية المطلوبة، وإبقاء البارالاكس والسكة مستمرين بين المراحل دون حذف SVG أو ظهور الخلفية الاحتياطية، مع بدء المرحلة التالية مباشرة بعد خروج القطار. */
 })();
 </script>
 </body>
