@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 128</title>
+  <title>قطار الإجابات - إصدار 129</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -379,16 +379,17 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 128;
+  const PARALLAX_IMAGE_VERSION = 129;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 127:
+  // إصدار 129:
+  // - السرعات أصبحت بكسل/ثانية فعليًا بدل ضربها خطأً في 60.
+  // - العلوية 2px/s، والوسطى 6px/s، والسفلية 17.6px/s.
   // - تمديد الطبقة العلوية إلى ارتفاع 560px لتبقى خلف الجبال وتسُد الفراغات الشفافة.
-  // - إبطاء العلوية 50%، والوسطى 50%، والسفلية 20%.
   const PARALLAX_CONFIG = {
     top:{
       key:"top",
@@ -2885,7 +2886,10 @@
     const dt = deltaMs / 1000;
 
     parallaxLayerRecords.forEach(record => {
-      record.offset += record.speed * motionMultiplier * dt * 60;
+      // السرعات في PARALLAX_CONFIG محسوبة بوحدة بكسل/ثانية.
+      // الإصدار السابق كان يضربها في 60 مرة إضافية، لذلك بقيت الخلفية سريعة
+      // حتى بعد خفض القيم. أزلنا معامل 60 ليصبح التخفيض فعليًا وواضحًا.
+      record.offset += record.speed * motionMultiplier * dt;
       applyParallaxLayerPosition(record);
     });
   }
