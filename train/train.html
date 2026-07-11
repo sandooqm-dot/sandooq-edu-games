@@ -126,77 +126,6 @@
     svg.innerHTML = "";
   }
 
-  const PARALLAX_TILE_WIDTH = 1280;
-  const PARALLAX_IMAGE_WIDTH = 2560;
-  const PARALLAX_IMAGE_HEIGHT = 720;
-  const parallaxLayers = [];
-  let parallaxLoopStarted = false;
-  let parallaxLastTime = 0;
-
-  function setSvgImageHref(node, href){
-    node.setAttribute("href", href);
-    node.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);
-  }
-
-  function addStaticBackgroundImage(parent, id, href){
-    const image = el("image", {
-      id,
-      x:0,
-      y:0,
-      width:PARALLAX_IMAGE_WIDTH,
-      height:PARALLAX_IMAGE_HEIGHT,
-      preserveAspectRatio:"none",
-      "pointer-events":"none"
-    }, parent);
-    setSvgImageHref(image, href);
-    return image;
-  }
-
-  function addMovingParallaxImage(parent, options){
-    const image = el("image", {
-      id:options.id,
-      x:0,
-      y:0,
-      width:PARALLAX_IMAGE_WIDTH,
-      height:PARALLAX_IMAGE_HEIGHT,
-      preserveAspectRatio:"none",
-      "pointer-events":"none"
-    }, parent);
-
-    setSvgImageHref(image, options.href);
-    parallaxLayers.push({node:image, speed:options.speed, offset:0});
-    return image;
-  }
-
-  function startParallaxLoop(){
-    if(parallaxLoopStarted) return;
-    parallaxLoopStarted = true;
-
-    function frame(now){
-      const dt = parallaxLastTime
-        ? clamp(now - parallaxLastTime, 0, 50) / 1000
-        : 0;
-
-      parallaxLastTime = now;
-
-      for(const layer of parallaxLayers){
-        if(!layer.node || !layer.node.isConnected) continue;
-
-        layer.offset =
-          (layer.offset + layer.speed * dt) % PARALLAX_TILE_WIDTH;
-
-        layer.node.setAttribute(
-          "transform",
-          `translate(${-layer.offset.toFixed(2)} 0)`
-        );
-      }
-
-      requestAnimationFrame(frame);
-    }
-
-    requestAnimationFrame(frame);
-  }
-
   function defs(){
     const d = el("defs");
 
@@ -443,6 +372,63 @@
   let trainPositionGroup = null;
   let collisionDebugLayer = null;
   const collisionMap = [];
+
+  let parallaxBackGroup = null;
+  let parallaxFrontGroup = null;
+  let parallaxAnimationFrame = 0;
+  let parallaxLastFrameTime = 0;
+  const parallaxLayerRecords = [];
+
+  const PARALLAX_IMAGE_VERSION = 123;
+  const PARALLAX_ASSETS = {
+    sky:`desert-sky-123.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    far:`desert-mountains-far-123.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    mid:`desert-mountains-mid-123.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    foreground:`desert-foreground-123.webp?v=${PARALLAX_IMAGE_VERSION}`
+  };
+
+  const PARALLAX_CONFIG = {
+    sky:{
+      key:"sky",
+      href:PARALLAX_ASSETS.sky,
+      width:1536,
+      height:720,
+      y:0,
+      speed:3.5,
+      opacity:1,
+      preserveAspectRatio:"none"
+    },
+    far:{
+      key:"far",
+      href:PARALLAX_ASSETS.far,
+      width:1536,
+      height:118,
+      y:228,
+      speed:7,
+      opacity:.96,
+      preserveAspectRatio:"none"
+    },
+    mid:{
+      key:"mid",
+      href:PARALLAX_ASSETS.mid,
+      width:1536,
+      height:159,
+      y:334,
+      speed:13,
+      opacity:1,
+      preserveAspectRatio:"none"
+    },
+    foreground:{
+      key:"foreground",
+      href:PARALLAX_ASSETS.foreground,
+      width:1536,
+      height:114,
+      y:556,
+      speed:22,
+      opacity:1,
+      preserveAspectRatio:"none"
+    }
+  };
 
   // لا نرسم أو نشغّل أجزاء القطار البعيدة خارج الشاشة.
   // الهامش يجعل الجزء يبدأ العمل قبل ظهوره بقليل حتى لا يلاحظ اللاعب أي انتقال.
@@ -1997,39 +1983,6 @@
     syncMatterBox(item);
   }
 
-  function placeMatterBoxAtWagonVisibleHeight(body, well){
-    if(!body || !well || !well.car || !Matter || !Matter.Body) return;
-
-    const angle = Number(body.angle) || 0;
-    const sin = Math.abs(Math.sin(angle));
-    const cos = Math.abs(Math.cos(angle));
-
-    // الامتداد الرأسي الحقيقي للصندوق المرسوم بعد الدوران.
-    const visualVerticalExtent =
-      ANSWER_BOX_VISUAL.halfWidth * sin +
-      ANSWER_BOX_VISUAL.halfHeight * cos;
-
-    // خط الحجب الفعلي هو بداية الحافة الذهبية العلوية للواجهة،
-    // وليس قاع العربة ولا بداية المستطيل الأحمر.
-    const occlusionY = well.car.y + trainLen(1);
-    const targetVisibleHeight =
-      ANSWER_BOX_VISUAL.height * WAGON_BOX_VISIBLE_RATIO;
-
-    // نثبت أعلى الصندوق على ارتفاع يجعل 66% منه ظاهرًا دائمًا،
-    // مهما كانت زاوية دورانه عند الاستقرار.
-    const targetCenterY =
-      occlusionY - targetVisibleHeight + visualVerticalExtent;
-
-    Matter.Body.setPosition(body, {
-      x:body.position.x,
-      y:targetCenterY
-    });
-
-    Matter.Body.setVelocity(body, {x:0, y:0});
-    Matter.Body.setAngularVelocity(body, 0);
-  }
-
-
   function applySmartGapBounceToMatter(item, body, gapBody, activeMode = false){
     if(!item || !body || !gapBody || !Matter || !Matter.Body) return;
 
@@ -2331,8 +2284,6 @@
         getWellByMatterBody(bodyA);
 
       if(settledWell){
-        // موضع نهائي محسوب من خط الحجب الحقيقي وأبعاد الصندوق المرسوم.
-        placeMatterBoxAtWagonVisibleHeight(bodyA, settledWell);
         moveMatterBoxBehindWagonCover(item);
         settleMatterBoxAsVisualOnly(item, settledWell);
       }
@@ -2393,22 +2344,50 @@
   }
 
   function settleMatterBoxAsVisualOnly(item, well){
-    if(!item || item.done || !item.body || !item.node) return;
+    if(!item || item.done || !item.body || !item.node || !well || !well.car) return;
 
     const body = item.body;
     const node = item.node;
-    const x = body.position.x;
-    const y = body.position.y;
-    const r = body.angle * 180 / Math.PI;
+    const car = well.car;
+    const angle = Number(body.angle) || 0;
+    const r = angle * 180 / Math.PI;
 
-    const localX = x - trainVisualOffsetX;
+    // مسار نهائي موحّد لكل حالات الاستقرار.
+    // سواء وصل الاستقرار من تصادم القاع أو من عداد الثبات،
+    // الموضع النهائي يُحسب هنا فقط من شكل العربة والصندوق.
+    const sin = Math.abs(Math.sin(angle));
+    const cos = Math.abs(Math.cos(angle));
+    const visualVerticalExtent =
+      ANSWER_BOX_VISUAL.halfWidth * sin +
+      ANSWER_BOX_VISUAL.halfHeight * cos;
+
+    const occlusionY = car.y + trainLen(1);
+    const targetVisibleHeight =
+      ANSWER_BOX_VISUAL.height * WAGON_BOX_VISIBLE_RATIO;
+
+    const finalY =
+      occlusionY - targetVisibleHeight + visualVerticalExtent;
+
+    const minLocalX = car.x + ANSWER_BOX_VISUAL.halfWidth;
+    const maxLocalX = car.right - ANSWER_BOX_VISUAL.halfWidth;
+    const localX = clamp(
+      body.position.x - trainVisualOffsetX,
+      minLocalX,
+      maxLocalX
+    );
+
+    Matter.Body.setPosition(body, {
+      x:localX + trainVisualOffsetX,
+      y:finalY
+    });
+    Matter.Body.setVelocity(body, {x:0, y:0});
+    Matter.Body.setAngularVelocity(body, 0);
 
     node.setAttribute(
       "transform",
-      `translate(${localX.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
+      `translate(${localX.toFixed(2)} ${finalY.toFixed(2)}) rotate(${r.toFixed(2)})`
     );
 
-    // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
     node.removeAttribute("filter");
 
     cleanupMatterBox(item, false);
@@ -2419,11 +2398,8 @@
     }
 
     settledVisualMatterBoxes.push(item);
-    rememberSettledBox(node, well && well.index);
+    rememberSettledBox(node, well.index);
 
-    // نسجل اكتمال عربة السؤال.
-    // إذا كل عربات السؤال الظاهرة اكتملت، يخرج القطار.
-    // وإذا بقيت عربات خارج الشاشة فقط، يتقدم القطار للنافذة التالية.
     handleQuestionWagonSettled(well);
   }
 
@@ -2881,44 +2857,137 @@
     startBalloonPoolLoop();
   }
 
+  function setSvgImageHref(node, href){
+    node.setAttribute("href", href);
+    node.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);
+  }
+
+  function stopParallaxLoop(){
+    if(parallaxAnimationFrame){
+      cancelAnimationFrame(parallaxAnimationFrame);
+      parallaxAnimationFrame = 0;
+    }
+    parallaxLastFrameTime = 0;
+  }
+
+  function getParallaxSpeedMultiplier(){
+    if(trainMotionState === "done") return .45;
+    if(trainMotionState === "playing") return .7;
+    return 1;
+  }
+
+  function applyParallaxLayerPosition(record){
+    if(!record || !record.images || !record.images.length) return;
+
+    const wrapWidth = record.width;
+    const normalized = ((record.offset % wrapWidth) + wrapWidth) % wrapWidth;
+    const firstX = -normalized;
+    const overlap = 1;
+
+    record.images[0].setAttribute("x", firstX.toFixed(2));
+    record.images[1].setAttribute("x", (firstX + wrapWidth - overlap).toFixed(2));
+  }
+
+  function updateParallaxLayers(deltaMs){
+    const motionMultiplier = getParallaxSpeedMultiplier();
+    const dt = deltaMs / 1000;
+
+    parallaxLayerRecords.forEach(record => {
+      record.offset += record.speed * motionMultiplier * dt * 60;
+      applyParallaxLayerPosition(record);
+    });
+  }
+
+  function parallaxFrameLoop(now){
+    if(!parallaxLastFrameTime){
+      parallaxLastFrameTime = now;
+    }
+
+    const delta = Math.min(40, now - parallaxLastFrameTime);
+    parallaxLastFrameTime = now;
+
+    if(!document.hidden){
+      updateParallaxLayers(delta);
+    }
+
+    parallaxAnimationFrame = requestAnimationFrame(parallaxFrameLoop);
+  }
+
+  function startParallaxLoop(){
+    if(parallaxAnimationFrame) return;
+    parallaxLastFrameTime = 0;
+    parallaxAnimationFrame = requestAnimationFrame(parallaxFrameLoop);
+  }
+
+  function createParallaxLayer(parent, config){
+    const layer = el("g", {
+      id:`parallax-${config.key}`,
+      opacity:String(config.opacity ?? 1),
+      "pointer-events":"none"
+    }, parent);
+
+    const images = [];
+    for(let i = 0; i < 2; i += 1){
+      const image = el("image", {
+        x:String(i * config.width),
+        y:String(config.y),
+        width:String(config.width),
+        height:String(config.height),
+        preserveAspectRatio:config.preserveAspectRatio || "none"
+      }, layer);
+      setSvgImageHref(image, config.href);
+      images.push(image);
+    }
+
+    const record = {
+      ...config,
+      layer,
+      images,
+      offset:0
+    };
+
+    parallaxLayerRecords.push(record);
+    applyParallaxLayerPosition(record);
+    return record;
+  }
+
+  function renderParallaxForeground(){
+    parallaxFrontGroup = el("g", {
+      id:"parallaxFrontGroup",
+      "pointer-events":"none"
+    });
+
+    createParallaxLayer(parallaxFrontGroup, PARALLAX_CONFIG.foreground);
+  }
+
   function background(){
-    const bg = el("g", {id:"background"});
+    parallaxLayerRecords.length = 0;
+    parallaxBackGroup = el("g", {id:"background"});
+
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.sky);
 
     el("rect", {
-      x:0,
-      y:0,
-      width:1280,
-      height:720,
-      fill:"#278eca"
-    }, bg);
+      x:"0",
+      y:"420",
+      width:"1280",
+      height:"300",
+      fill:"url(#sandGrad)",
+      opacity:".98"
+    }, parallaxBackGroup);
 
-    addStaticBackgroundImage(
-      bg,
-      "desertSkyLayer",
-      "desert-sky.webp?v=122"
-    );
+    el("rect", {
+      x:"0",
+      y:"500",
+      width:"1280",
+      height:"220",
+      fill:"#cb8844",
+      opacity:".55"
+    }, parallaxBackGroup);
 
-    addMovingParallaxImage(bg, {
-      id:"desertFarMountainsLayer",
-      href:"desert-mountains-far.webp?v=122",
-      speed:7
-    });
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.far);
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.mid);
 
-    addMovingParallaxImage(bg, {
-      id:"desertMidMountainsLayer",
-      href:"desert-mountains-mid.webp?v=122",
-      speed:15
-    });
-
-    addMovingParallaxImage(bg, {
-      id:"desertForegroundLayer",
-      href:"desert-foreground.webp?v=122",
-      speed:28
-    });
-
-    startParallaxLoop();
-
-    const track = el("g", {id:"track"}, bg);
+    const track = el("g", {id:"track"}, parallaxBackGroup);
     const trackImage = el("image", {
       href:"train-track.webp?v=84",
       x:trainX(-260),
@@ -2927,12 +2996,7 @@
       height:trainLen(27),
       preserveAspectRatio:"none"
     }, track);
-
-    trackImage.setAttributeNS(
-      "http://www.w3.org/1999/xlink",
-      "href",
-      "train-track.webp?v=84"
-    );
+    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
   }
 
   function addWheel(layer, cx, cy, size, version = 72){
@@ -3077,6 +3141,10 @@
     trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     trainCarRegistry.splice(0, trainCarRegistry.length);
 
+    stopParallaxLoop();
+    parallaxBackGroup?.remove();
+    parallaxFrontGroup?.remove();
+
     trainPositionGroup?.remove();
     wagonDropCoverPositionGroup?.remove();
     fallingObjectsLayer?.remove();
@@ -3090,6 +3158,9 @@
     fallingObjectsLayer = null;
     settledObjectsLayer = null;
     collisionDebugLayer = null;
+    parallaxBackGroup = null;
+    parallaxFrontGroup = null;
+    parallaxLayerRecords.length = 0;
   }
 
   function scheduleNextTrainStage(){
@@ -3116,6 +3187,8 @@
       cancelAnimationFrame(trainAnimationFrame);
       trainAnimationFrame = 0;
     }
+
+    stopParallaxLoop();
 
     if(stageTransitionTimer){
       clearTimeout(stageTransitionTimer);
@@ -3615,8 +3688,6 @@
     trainVisualParts.splice(0, trainVisualParts.length);
     trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     activeBalloons.splice(0, activeBalloons.length);
-    parallaxLayers.splice(0, parallaxLayers.length);
-    parallaxLastTime = 0;
 
     defs();
     background();
@@ -3648,6 +3719,9 @@
     wagonForegroundCoverLayer = wagonDropCoverLayer;
     renderWagonDropCovers();
 
+    // العناصر الأمامية تتحرك أمام القطار مع طبقة بارالاكس مستقلة.
+    renderParallaxForeground();
+
     // الصندوق يبقى فوق القطار أثناء السقوط الحر.
     // عند ملامسة جدار/قاع العربة يُنقل إلى settledObjectsLayer خلف الواجهة الأمامية.
     fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
@@ -3658,12 +3732,14 @@
 
     updateTrainVisualCulling();
 
+    startParallaxLoop();
+
     // المرحلة الأولى: يبدأ القطار خارج الشاشة من اليسار ثم يدخل حتى تستقر العربة في المنتصف.
     startTrainEntry();
   }
 
   startTrainStage(0);
-  /* إصدار 122: تطبيق أربع طبقات صحراء مستقلة وقابلة للتكرار أفقيًا دون فواصل، مع الحفاظ على منطق اللعبة والفيزياء كما هو. */
+  /* إصدار 122: توحيد جميع مسارات استقرار الصندوق في موضع نهائي حتمي يضمن ظهور 66% منه فوق واجهة العربة. */
 })();
 </script>
 </body>
