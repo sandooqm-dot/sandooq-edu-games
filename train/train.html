@@ -241,13 +241,12 @@
   }
 
   function answerBalloon(parent, options = {}){
-    // إصدار 72:
-    // بالون/منطاد تجريبي مرسوم بالكامل بالكود داخل SVG.
-    // لا يعتمد على صورة خارجية، والنص قابل للتغيير لاحقًا من بيانات اللعبة.
+    // البالون مرسوم بالكامل داخل SVG، ومحتواه يُقرأ من بيانات النشاط عند توفرها.
     const x = options.x ?? 760;
     const y = options.y ?? 165;
     const scale = options.scale ?? 1;
-    const lines = options.lines || ["ما أجمل", "الزهور!"];
+    const media = normalizeRuntimeMedia(options.media || {text:(options.lines || []).join(" ")});
+    const lines = options.lines || mediaTextLines(media, ["ما أجمل", "الزهور!"]);
 
     const g = el("g", {
       id:options.id || "answerBalloonDemo",
@@ -301,14 +300,17 @@
       "stroke-width":3.2
     }, g);
 
-    // خطوط جسم البالون لإحساس الشكل المعدني/المنفوخ.
-    [-42,-18,8,34].forEach((yy, idx) => {
+    // إبقاء الخطين الداكنين فقط وإزالة الخطين الأبيضين من جسم البالون.
+    [
+      {yy:8, idx:2},
+      {yy:34, idx:3}
+    ].forEach(({yy, idx}) => {
       el("path", {
         d:`M-120 ${yy} C-58 ${yy - 16 + idx * 4} 52 ${yy - 14 + idx * 3} 120 ${yy - 2}`,
         fill:"none",
-        stroke:idx < 2 ? "#eef4ff" : "#4e566c",
-        "stroke-width":idx < 2 ? 2.2 : 1.6,
-        opacity:idx < 2 ? ".55" : ".35"
+        stroke:"#4e566c",
+        "stroke-width":1.6,
+        opacity:".35"
       }, g);
     });
 
@@ -335,27 +337,43 @@
       el("circle", {cx, cy:7, r:5, fill:"#858899", stroke:"#55586a", "stroke-width":1.5}, gondola);
     });
 
+    const hasImage = Boolean(media.imageData);
+    const hasText = Boolean(String(media.text || "").trim());
+
+    const mediaImage = el("image", {
+      x:hasText ? -102 : -54,
+      y:hasText ? -31 : -39,
+      width:hasText ? 60 : 108,
+      height:hasText ? 60 : 78,
+      preserveAspectRatio:"xMidYMid meet",
+      opacity:hasImage ? "1" : "0",
+      "pointer-events":"none",
+      "data-role":"balloon-media-image"
+    }, g);
+    if(hasImage) setSvgImageHref(mediaImage, media.imageData);
+
     // النص من الكود، وليس جزءًا من صورة.
     const text = el("text", {
-      x:0,
-      y:-10,
+      x:hasImage && hasText ? 27 : 0,
+      y:hasImage && hasText ? -8 : -10,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
       fill:"#050505",
       stroke:"#ffffff",
       "stroke-width":2.7,
       "paint-order":"stroke fill",
-      "font-size":37,
+      "font-size":hasImage && hasText ? 28 : 37,
       "font-weight":900,
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl",
-      style:"direction:rtl;unicode-bidi:plaintext"
+      style:"direction:rtl;unicode-bidi:plaintext",
+      "data-role":"balloon-media-text"
     }, g);
 
     lines.forEach((line, index) => {
       el("tspan", {
-        x:0,
-        dy:index === 0 ? 0 : 40
+        x:hasImage && hasText ? 27 : 0,
+        dy:index === 0 ? 0 : (hasImage && hasText ? 31 : 40)
       }, text).textContent = line;
     });
 
@@ -373,6 +391,7 @@
   let collisionDebugLayer = null;
   const collisionMap = [];
 
+  // خلفية الإصدار 133 مضافة فوق أساس الإصدار 120 دون نقل أي تعديل متعلق بالصناديق أو الفيزياء.
   let parallaxBackGroup = null;
   let parallaxFrontGroup = null;
   let parallaxAnimationFrame = 0;
@@ -381,50 +400,41 @@
 
   const PARALLAX_IMAGE_VERSION = 125;
   const PARALLAX_ASSETS = {
-    sky:`desert-sky-125.webp?v=${PARALLAX_IMAGE_VERSION}`,
-    far:`desert-mountains-far-125.webp?v=${PARALLAX_IMAGE_VERSION}`,
-    mid:`desert-mountains-mid-125.webp?v=${PARALLAX_IMAGE_VERSION}`,
-    foreground:`desert-foreground-125.webp?v=${PARALLAX_IMAGE_VERSION}`
+    top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
+    bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
+  // إصدار 125: أساس الإصدار 124 نفسه بالكامل، مع ربط بيانات index ومنطق الإجابات الصحيحة والخاطئة دون تغيير الخلفية أو السكة أو الفيزياء.
+  const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
-    sky:{
-      key:"sky",
-      href:PARALLAX_ASSETS.sky,
+    top:{
+      key:"top",
+      href:PARALLAX_ASSETS.top,
       width:2560,
-      height:720,
+      height:560,
       y:0,
-      speed:0,
+      speed:PARALLAX_MAX_SPEED * .30,
       opacity:1,
       preserveAspectRatio:"none"
     },
-    far:{
-      key:"far",
-      href:PARALLAX_ASSETS.far,
+    middle:{
+      key:"middle",
+      href:PARALLAX_ASSETS.middle,
       width:2560,
-      height:720,
-      y:0,
-      speed:6,
+      height:240,
+      y:300,
+      speed:204,
       opacity:1,
       preserveAspectRatio:"none"
     },
-    mid:{
-      key:"mid",
-      href:PARALLAX_ASSETS.mid,
+    bottom:{
+      key:"bottom",
+      href:PARALLAX_ASSETS.bottom,
       width:2560,
-      height:720,
-      y:0,
-      speed:12,
-      opacity:1,
-      preserveAspectRatio:"none"
-    },
-    foreground:{
-      key:"foreground",
-      href:PARALLAX_ASSETS.foreground,
-      width:2560,
-      height:720,
-      y:0,
-      speed:22,
+      height:220,
+      y:500,
+      speed:480,
       opacity:1,
       preserveAspectRatio:"none"
     }
@@ -493,8 +503,16 @@
   let activeQuestionPointer = 0;
   const completedQuestionWagons = new Set();
   let stageCompleteTriggered = false;
+  let pendingTrainProgressReview = false;
 
-  const BALLOONS_PER_ROUND = 5;
+  // خط كشف منطقي شفاف داخل كل عربة.
+  // لا يُرسم ولا يضاف كجسم تصادم، لذلك لا يراه اللاعب ولا يؤثر على الفيزياء.
+  const WAGON_CAPTURE_CONFIRM_MS = 220;
+  const WAGON_CAPTURE_LINE_OFFSET = 12;
+  const WAGON_CAPTURE_MIN_OVERLAP = .32;
+  const WAGON_CAPTURE_MIN_DEPTH = 6;
+
+  const BALLOON_FLOW_SIZE = 5;
   const MEDIUM_BALLOON_SCALE = .80;
   const MAX_ACTIVE_FALLING_BOXES = 4;
   // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
@@ -627,7 +645,8 @@
     setTimeout(() => burst.remove(), 760);
   }
 
-  function answerBox(parent, textLines = ["ما أجمل", "الزهور!"]){
+  function answerBox(parent, textLines = ["ما أجمل", "الزهور!"], mediaInput = null){
+    const media = normalizeRuntimeMedia(mediaInput || {text:(textLines || []).join(" ")});
     const g = el("g", {
       filter:"url(#answerBoxShadow)"
     }, parent);
@@ -690,16 +709,31 @@
       opacity:".36"
     }, g);
 
+    const hasImage = Boolean(media.imageData);
+    const hasText = Boolean(String(media.text || "").trim());
+
+    const mediaImage = el("image", {
+      x:hasText ? -49 : -31,
+      y:hasText ? -21 : -27,
+      width:hasText ? 38 : 62,
+      height:hasText ? 42 : 54,
+      preserveAspectRatio:"xMidYMid meet",
+      opacity:hasImage ? "1" : "0",
+      "pointer-events":"none"
+    }, g);
+    if(hasImage) setSvgImageHref(mediaImage, media.imageData);
+
+    const textX = hasImage && hasText ? 19 : 0;
     const text = el("text", {
-      x:0,
+      x:textX,
       y:textLines.length > 1 ? -7 : 1,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
       fill:"url(#answerBoxTextCream)",
       stroke:"#1f1715",
-      "stroke-width":4.3,
+      "stroke-width":hasImage && hasText ? 3.5 : 4.3,
       "paint-order":"stroke fill",
-      "font-size":28,
+      "font-size":hasImage && hasText ? 20 : 28,
       "font-weight":1000,
       "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
       direction:"rtl",
@@ -708,8 +742,8 @@
 
     textLines.slice(0, 2).forEach((line, index) => {
       el("tspan", {
-        x:0,
-        dy:index === 0 ? 0 : 32
+        x:textX,
+        dy:index === 0 ? 0 : (hasImage && hasText ? 24 : 32)
       }, text).textContent = line;
     });
 
@@ -763,16 +797,6 @@
     width:96,
     height:72
   };
-
-  // أبعاد رسم الصندوق الفعلية داخل answerBox، وليست أبعاد جسم Matter.js.
-  const ANSWER_BOX_VISUAL = {
-    halfWidth:56,
-    halfHeight:34,
-    height:68
-  };
-
-  // النسبة المطلوبة من الصندوق التي تبقى ظاهرة فوق واجهة العربة.
-  const WAGON_BOX_VISIBLE_RATIO = .66;
 
   // تصغير القطار والسكة فقط. البالونات والصناديق تبقى بنفس الحجم.
   const TRAIN_SCALE = .92;
@@ -885,9 +909,8 @@
       floor:{
         inset:14,
         h:18,
-        // موضع القاع متوافق هندسيًا مع خط الحجب العلوي للعربة،
-        // بحيث يظهر قرابة ثلثي الصندوق بعد استقراره.
-        yOffsetFromTop:37,
+        // موضع القاع محسوب ليظهر قرابة 60%–70% من الصندوق فوق واجهة العربة.
+        yOffsetFromTop:45,
         friction:1.05,
         frictionStatic:1.35,
         restitution:.12
@@ -1096,6 +1119,13 @@
       if(typeof onComplete === "function"){
         onComplete();
       }
+
+      // أي صندوق استقر أثناء حركة القطار يُحتسب فورًا،
+      // لكن قرار التوقف/التقدم/الخروج ينتظر انتهاء الحركة الحالية
+      // حتى لا تُلغى الحركة أو تبدأ من جديد فتبدو أبطأ.
+      if(nextState === "playing" && pendingTrainProgressReview){
+        reviewTrainProgressAfterMotion();
+      }
     }
 
     trainAnimationFrame = requestAnimationFrame(frame);
@@ -1166,6 +1196,14 @@
   }
 
   function advanceTrainToQuestionWagon(wagonIndex){
+    // لا نعيد تشغيل حركة قائمة؛ تسجيل الصناديق أثناء الحركة لا يغير سرعتها.
+    if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
+      pendingTrainProgressReview = true;
+      return;
+    }
+
+    if(trainMotionState === "exiting" || trainMotionState === "done") return;
+
     trainMotionState = "advancing";
 
     const targetOffset = trainOffsetForWagonIndex(wagonIndex);
@@ -1173,6 +1211,29 @@
     animateTrainTo(targetOffset, TRAIN_MOTION.betweenDuration, "playing", () => {
       syncTrainPhysicsToVisualOffset();
     });
+  }
+
+  function reviewTrainProgressAfterMotion(){
+    pendingTrainProgressReview = false;
+
+    if(stageCompleteTriggered || trainMotionState !== "playing") return;
+
+    if(areAllQuestionWagonsCompleted()){
+      requestTrainExit();
+      return;
+    }
+
+    // إذا بقيت عربة سؤال ظاهرة وغير مكتملة، يبقى القطار في موضعه الحالي.
+    if(hasPlayableUncompletedQuestionWagonNow()){
+      return;
+    }
+
+    const nextIndex = nextUncompletedQuestionWagonIndex();
+    if(nextIndex !== undefined){
+      const nextPointer = QUESTION_WAGON_INDICES.indexOf(nextIndex);
+      if(nextPointer >= 0) activeQuestionPointer = nextPointer;
+      advanceTrainToQuestionWagon(nextIndex);
+    }
   }
 
   function isQuestionWagonIndex(index){
@@ -1213,35 +1274,56 @@
     return QUESTION_WAGON_INDICES.find(index => !completedQuestionWagons.has(index));
   }
 
-  function handleQuestionWagonSettled(well){
+  function handleQuestionWagonSettled(well,item = null){
     if(!well) return;
     if(!isQuestionWagonIndex(well.index)) return;
 
-    completedQuestionWagons.add(well.index);
+    if(TRAIN_ANSWER_LOGIC_ENABLED){
+      const car = trainCarRegistry[well.index];
+      const wagonId = String(car?.wagonId || "");
+      const balloonId = String(item?.balloonId || "");
+      if(!wagonId || !balloonId) return;
 
-    if(areAllQuestionWagonsCompleted()){
-      requestTrainExit();
+      if(!acceptedBalloonIds.has(balloonId)){
+        acceptedBalloonIds.add(balloonId);
+        const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
+        accepted.add(balloonId);
+        acceptedBalloonIdsByWagon.set(wagonId,accepted);
+      }
+
+      const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
+      const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
+      if(expected.size && accepted.size >= expected.size){
+        completedQuestionWagons.add(well.index);
+      }
+    }else{
+      completedQuestionWagons.add(well.index);
+    }
+
+    // أثناء دخول القطار أو تقدمه نحتسب العربة الآن،
+    // لكن لا نوقف الحركة ولا نعيد تشغيلها. القرار التالي يُراجع بعد انتهائها.
+    if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
+      pendingTrainProgressReview = true;
       return;
     }
 
-    // إذا بقيت أي عربة سؤال ظاهرة وغير مكتملة، نترك القطار ثابتًا.
-    if(hasPlayableUncompletedQuestionWagonNow()){
-      return;
-    }
-
-    // إذا لم يبق أي سؤال ظاهر، يتقدم القطار للنافذة التالية فقط.
-    const nextIndex = nextUncompletedQuestionWagonIndex();
-    if(nextIndex !== undefined){
-      const nextPointer = QUESTION_WAGON_INDICES.indexOf(nextIndex);
-      if(nextPointer >= 0) activeQuestionPointer = nextPointer;
-      advanceTrainToQuestionWagon(nextIndex);
-    }
+    reviewTrainProgressAfterMotion();
   }
 
   function requestTrainExit(){
-    if(stageCompleteTriggered || trainMotionState !== "playing") return;
+    if(stageCompleteTriggered) return;
+
+    // إذا اكتملت آخر عربة أثناء حركة قائمة، لا نقطع الحركة.
+    // نؤجل الخروج حتى تنتهي الحركة بنفس سرعتها الأصلية.
+    if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
+      pendingTrainProgressReview = true;
+      return;
+    }
+
+    if(trainMotionState !== "playing") return;
 
     stageCompleteTriggered = true;
+    pendingTrainProgressReview = false;
     trainMotionState = "exiting";
 
     // البالونات المتبقية تطير للأعلى طبيعيًا وتصبح غير قابلة للفرقعة.
@@ -1322,7 +1404,7 @@
 
     const pending = pendingMatterSpawns.splice(0, pendingMatterSpawns.length);
     pending.forEach(job => {
-      spawnMatterAnswerBox(job.startX, job.startY, job.textLines, true);
+      spawnMatterAnswerBox(job.startX, job.startY, job.textLines, job.meta || {}, true);
     });
   }
 
@@ -1947,19 +2029,237 @@
     return null;
   }
 
+  function getWagonCaptureLineY(well){
+    if(!well) return Number.POSITIVE_INFINITY;
+
+    // الخط الشفاف يقع أسفل حافة فتحة العربة بقليل.
+    return well.top + trainLen(WAGON_CAPTURE_LINE_OFFSET);
+  }
+
+  function isMatterBodyPastWagonCaptureLine(body, well){
+    if(!body || !well) return false;
+
+    const overlapRatio = getBodyHorizontalOverlapRatio(body, well);
+    const centerInside = body.position.x >= well.left &&
+      body.position.x <= well.right;
+
+    if(!centerInside && overlapRatio < WAGON_CAPTURE_MIN_OVERLAP){
+      return false;
+    }
+
+    const captureLineY = getWagonCaptureLineY(well);
+    const bodyBottom = body.bounds?.max?.y ??
+      (body.position.y + BOX.bottom);
+    const bodyTop = body.bounds?.min?.y ??
+      (body.position.y - BOX.top);
+
+    // يكفي أن ينزل جزء واضح من الصندوق تحت الخط مع بقائه داخل ارتفاع العربة.
+    return bodyBottom >= captureLineY + trainLen(WAGON_CAPTURE_MIN_DEPTH) &&
+      bodyTop <= well.bottom + trainLen(12);
+  }
+
+  function getCaptureWellByMatterBody(body){
+    if(!body) return null;
+
+    let bestWell = null;
+    let bestScore = -Infinity;
+
+    for(const zone of collisionMap){
+      if(zone.type !== "well" ||
+         !isMatterBodyPastWagonCaptureLine(body, zone)){
+        continue;
+      }
+
+      const overlapRatio = getBodyHorizontalOverlapRatio(body, zone);
+      const centerX = (zone.left + zone.right) / 2;
+      const distancePenalty = Math.abs(body.position.x - centerX) /
+        Math.max(1, zone.right - zone.left);
+      const captureDepth = Math.max(
+        0,
+        (body.bounds?.max?.y ?? body.position.y + BOX.bottom) -
+          getWagonCaptureLineY(zone)
+      );
+
+      const score =
+        overlapRatio * 12 +
+        Math.min(captureDepth / 40, 1.5) -
+        distancePenalty;
+
+      if(score > bestScore){
+        bestScore = score;
+        bestWell = zone;
+      }
+    }
+
+    return bestWell;
+  }
+
+  function resetWagonCaptureCandidate(item){
+    if(!item) return;
+    item.captureCandidateWellIndex = null;
+    item.captureCandidateSince = 0;
+  }
+
+  function updateWagonCaptureConfirmation(item, now){
+    if(!item || item.done || item.settleCommitted || !item.body){
+      return false;
+    }
+
+    const captureWell = getCaptureWellByMatterBody(item.body);
+
+    if(!captureWell){
+      resetWagonCaptureCandidate(item);
+      return false;
+    }
+
+    if(item.captureCandidateWellIndex !== captureWell.index){
+      item.captureCandidateWellIndex = captureWell.index;
+      item.captureCandidateSince = now;
+      return false;
+    }
+
+    if(!item.captureCandidateSince){
+      item.captureCandidateSince = now;
+      return false;
+    }
+
+    if(now - item.captureCandidateSince < WAGON_CAPTURE_CONFIRM_MS){
+      return false;
+    }
+
+    // بقي الصندوق داخل العربة وتحت الخط الشفاف للمدة المطلوبة.
+    // هنا فقط نعتمد العربة، دون أي تغيير في السقوط أو النطات قبل ذلك.
+    return commitMatterBoxToWagon(item, captureWell);
+  }
+
+  function getBodyHorizontalOverlapRatio(body, well){
+    if(!body || !well) return 0;
+
+    const bodyLeft = body.bounds?.min?.x ?? (body.position.x - BOX.left);
+    const bodyRight = body.bounds?.max?.x ?? (body.position.x + BOX.right);
+    const bodyWidth = Math.max(1, bodyRight - bodyLeft);
+    const overlap = Math.max(
+      0,
+      Math.min(bodyRight, well.right) - Math.max(bodyLeft, well.left)
+    );
+
+    return overlap / bodyWidth;
+  }
+
   function isBodyInsideWell(body, well){
-    return body.position.x >= well.left + 2 &&
-      body.position.x <= well.right - 2 &&
-      body.position.y >= well.top &&
+    if(!body || !well) return false;
+
+    const overlapRatio = getBodyHorizontalOverlapRatio(body, well);
+    const centerInside = body.position.x >= well.left && body.position.x <= well.right;
+    const verticalInside = body.position.y >= well.top - 8 &&
       body.position.y <= well.bottom + 30;
+
+    return verticalInside && (centerInside || overlapRatio >= .45);
   }
 
   function getWellByMatterBody(body){
+    if(!body) return null;
+
+    let bestWell = null;
+    let bestScore = -Infinity;
+
     for(const zone of collisionMap){
-      if(zone.type !== "well") continue;
-      if(isBodyInsideWell(body, zone)) return zone;
+      if(zone.type !== "well" || !isBodyInsideWell(body, zone)) continue;
+
+      const overlapRatio = getBodyHorizontalOverlapRatio(body, zone);
+      const centerX = (zone.left + zone.right) / 2;
+      const distancePenalty = Math.abs(body.position.x - centerX) /
+        Math.max(1, zone.right - zone.left);
+      const score = overlapRatio * 10 - distancePenalty;
+
+      if(score > bestScore){
+        bestScore = score;
+        bestWell = zone;
+      }
     }
-    return null;
+
+    return bestWell;
+  }
+
+  function isMatterBodyAtWellFloor(body, well, tolerance = 10){
+    if(!body || !well) return false;
+
+    const overlapRatio = getBodyHorizontalOverlapRatio(body, well);
+    if(overlapRatio < .48) return false;
+
+    const floorHalfHeight = trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.h) / 2;
+    const floorTop = well.floorY - floorHalfHeight;
+    const bodyBottom = body.bounds?.max?.y ?? (body.position.y + BOX.bottom);
+    const bodyTop = body.bounds?.min?.y ?? (body.position.y - BOX.top);
+
+    return bodyBottom >= floorTop - Math.max(4, tolerance) &&
+      bodyBottom <= well.floorY + floorHalfHeight + 24 &&
+      bodyTop < floorTop &&
+      body.velocity.y >= -.75;
+  }
+
+  function placeMatterBoxExactlyOnWellFloor(body, well){
+    if(!body || !well || !Matter || !Matter.Body) return;
+
+    const lowerExtent = Math.max(
+      BOX.bottom,
+      body.bounds?.max?.y !== undefined
+        ? body.bounds.max.y - body.position.y
+        : BOX.bottom
+    );
+
+    const floorTop = well.floorY -
+      trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.h) / 2;
+
+    Matter.Body.setPosition(body, {
+      x:clamp(
+        body.position.x,
+        well.left + BOX.left * .55,
+        well.right - BOX.right * .55
+      ),
+      y:floorTop - lowerExtent + .5
+    });
+
+    Matter.Body.setVelocity(body, {x:0, y:0});
+    Matter.Body.setAngularVelocity(body, 0);
+  }
+
+  function commitMatterBoxToWagon(item, well, floorBody = null){
+    if(!item || item.done || item.settleCommitted || !item.body || !well) return false;
+
+    const targetCar = trainCarRegistry[well.index];
+    const landedWagonId = String(targetCar?.wagonId || "");
+
+    if(TRAIN_ANSWER_LOGIC_ENABLED && item.targetWagonId && landedWagonId !== item.targetWagonId){
+      item.settleCommitted = true;
+      item.currentWellIndex = well.index;
+      item.lastWellIndex = well.index;
+      breakMatterBox(item);
+      return true;
+    }
+
+    item.settleCommitted = true;
+    item.insideWagon = true;
+    item.currentWellIndex = well.index;
+    item.lastWellIndex = well.index;
+
+    // قفل النطاطات يتبع العربة الفعلية الحالية بدل أول عربة لمسها الصندوق.
+    item.lockedWellIndex = well.index;
+    item.lastWagonContactAt = performance.now();
+
+    if(!item.enteredWellAt){
+      item.enteredWellAt = item.lastWagonContactAt;
+    }
+
+    if(floorBody){
+      placeMatterBoxExactlyOnWagonFloor(item.body, floorBody);
+    }else{
+      placeMatterBoxExactlyOnWellFloor(item.body, well);
+    }
+
+    moveMatterBoxBehindWagonCover(item);
+    settleMatterBoxAsVisualOnly(item, well);
+    return true;
   }
 
   function syncMatterBox(item){
@@ -1981,6 +2281,30 @@
     item.insideWagonLayer = true;
     settledObjectsLayer.appendChild(item.node);
     syncMatterBox(item);
+  }
+
+  function placeMatterBoxExactlyOnWagonFloor(body, floorBody){
+    if(!body || !floorBody || !Matter || !Matter.Body) return;
+
+    // نستخدم حدود الجسم الحالية حتى تبقى زاوية الصندوق كما هي.
+    const lowerExtent = Math.max(
+      BOX.bottom,
+      body.bounds && body.bounds.max
+        ? body.bounds.max.y - body.position.y
+        : BOX.bottom
+    );
+
+    const floorTop = floorBody.bounds && floorBody.bounds.min
+      ? floorBody.bounds.min.y
+      : floorBody.position.y - trainLen(TRAIN_PHYSICS_PROFILES.wagon.floor.h) / 2;
+
+    Matter.Body.setPosition(body, {
+      x:body.position.x,
+      y:floorTop - lowerExtent + .5
+    });
+
+    Matter.Body.setVelocity(body, {x:0, y:0});
+    Matter.Body.setAngularVelocity(body, 0);
   }
 
   function applySmartGapBounceToMatter(item, body, gapBody, activeMode = false){
@@ -2228,12 +2552,16 @@
 
   function handleMatterCollision(bodyA, bodyB){
     const item = bodyA && bodyA.sgItem;
-    if(!item || item.done || !bodyB) return;
+    if(!item || item.done || item.settleCommitted || !bodyB) return;
 
     stopFreeFallAirDrift(item);
 
     if(bodyB.label === "kill-track"){
-      if(!item.insideWagon){
+      const actualWell = getWellByMatterBody(bodyA);
+
+      if(actualWell && isMatterBodyAtWellFloor(bodyA, actualWell)){
+        commitMatterBoxToWagon(item, actualWell);
+      }else if(!actualWell){
         breakMatterBox(item);
       }
       return;
@@ -2265,27 +2593,11 @@
     }
 
     if(bodyB.sgType === "wagon-floor"){
-      item.insideWagon = true;
-      item.lastWagonContactAt = performance.now();
+      // القاع الذي اصطدم به الصندوق هو مصدر الحقيقة، لا أول عربة لمسها سابقًا.
+      const actualWell = getWellByIndex(bodyB.sgWellIndex) || getWellByMatterBody(bodyA);
 
-      if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
-        item.lockedWellIndex = bodyB.sgWellIndex;
-      }
-
-      item.lastWellIndex = item.lockedWellIndex;
-
-      if(!item.enteredWellAt){
-        item.enteredWellAt = performance.now();
-      }
-
-      const settledWell =
-        getWellByIndex(item.lockedWellIndex) ||
-        getWellByIndex(bodyB.sgWellIndex) ||
-        getWellByMatterBody(bodyA);
-
-      if(settledWell){
-        moveMatterBoxBehindWagonCover(item);
-        settleMatterBoxAsVisualOnly(item, settledWell);
+      if(actualWell){
+        commitMatterBoxToWagon(item, actualWell, bodyB);
       }
 
       return;
@@ -2295,14 +2607,13 @@
       item.insideWagon = true;
       item.lastWagonContactAt = performance.now();
 
-      if(item.lockedWellIndex === null || item.lockedWellIndex === undefined){
-        item.lockedWellIndex = bodyB.sgWellIndex;
-      }
-
-      item.lastWellIndex = item.lockedWellIndex;
+      // عند انتقال الصندوق بسبب نطة إلى عربة أخرى نحدّث العربة الحالية فورًا.
+      item.currentWellIndex = bodyB.sgWellIndex;
+      item.lastWellIndex = bodyB.sgWellIndex;
+      item.lockedWellIndex = bodyB.sgWellIndex;
 
       if(!item.enteredWellAt){
-        item.enteredWellAt = performance.now();
+        item.enteredWellAt = item.lastWagonContactAt;
       }
 
       moveMatterBoxBehindWagonCover(item);
@@ -2341,53 +2652,26 @@
 
     cleanupMatterBox(item, true);
     trackImpactBurst(fallingObjectsLayer || svg, x, Math.min(y + BOX.bottom, 610));
+    resolveMatterBoxAttempt(item,false);
   }
 
   function settleMatterBoxAsVisualOnly(item, well){
-    if(!item || item.done || !item.body || !item.node || !well || !well.car) return;
+    if(!item || item.done || !item.body || !item.node) return;
 
     const body = item.body;
     const node = item.node;
-    const car = well.car;
-    const angle = Number(body.angle) || 0;
-    const r = angle * 180 / Math.PI;
+    const x = body.position.x;
+    const y = body.position.y;
+    const r = body.angle * 180 / Math.PI;
 
-    // مسار نهائي موحّد لكل حالات الاستقرار.
-    // سواء وصل الاستقرار من تصادم القاع أو من عداد الثبات،
-    // الموضع النهائي يُحسب هنا فقط من شكل العربة والصندوق.
-    const sin = Math.abs(Math.sin(angle));
-    const cos = Math.abs(Math.cos(angle));
-    const visualVerticalExtent =
-      ANSWER_BOX_VISUAL.halfWidth * sin +
-      ANSWER_BOX_VISUAL.halfHeight * cos;
-
-    const occlusionY = car.y + trainLen(1);
-    const targetVisibleHeight =
-      ANSWER_BOX_VISUAL.height * WAGON_BOX_VISIBLE_RATIO;
-
-    const finalY =
-      occlusionY - targetVisibleHeight + visualVerticalExtent;
-
-    const minLocalX = car.x + ANSWER_BOX_VISUAL.halfWidth;
-    const maxLocalX = car.right - ANSWER_BOX_VISUAL.halfWidth;
-    const localX = clamp(
-      body.position.x - trainVisualOffsetX,
-      minLocalX,
-      maxLocalX
-    );
-
-    Matter.Body.setPosition(body, {
-      x:localX + trainVisualOffsetX,
-      y:finalY
-    });
-    Matter.Body.setVelocity(body, {x:0, y:0});
-    Matter.Body.setAngularVelocity(body, 0);
+    const localX = x - trainVisualOffsetX;
 
     node.setAttribute(
       "transform",
-      `translate(${localX.toFixed(2)} ${finalY.toFixed(2)}) rotate(${r.toFixed(2)})`
+      `translate(${localX.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
     );
 
+    // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
     node.removeAttribute("filter");
 
     cleanupMatterBox(item, false);
@@ -2398,23 +2682,49 @@
     }
 
     settledVisualMatterBoxes.push(item);
-    rememberSettledBox(node, well.index);
+    rememberSettledBox(node, well && well.index);
 
-    handleQuestionWagonSettled(well);
+    // نسجل الإجابة الصحيحة للعربة المحددة، ولا نكمل العربة حتى تصل كل إجاباتها.
+    handleQuestionWagonSettled(well,item);
+    resolveMatterBoxAttempt(item,true);
   }
 
   function updateMatterBoxState(item){
-    if(!item || item.done || !item.body || !item.node) return;
+    if(!item || item.done || item.settleCommitted || !item.body || !item.node) return;
 
     const body = item.body;
     applyFreeFallAirDrift(item);
     syncMatterBox(item);
 
-    const activeWell = item.insideWagon
-      ? (getWellByIndex(item.lastWellIndex) || getWellByMatterBody(body))
-      : getWellByMatterBody(body);
+    // خط كشف شفاف + مهلة قصيرة:
+    // إذا بقي جزء واضح من الصندوق داخل العربة 220ms يُحتسب،
+    // حتى لو كان مائلًا أو لم يصل القاع بالشكل المثالي.
+    if(updateWagonCaptureConfirmation(item, performance.now())){
+      return;
+    }
 
-    if(item.insideWagon && activeWell){
+    // فحص هندسي احتياطي كل إطار: لا نعتمد فقط على collisionStart،
+    // لأن القطار نفسه قد يكون متحركًا أو قد يقفز الصندوق إلى عربة بعيدة.
+    const actualWell = getWellByMatterBody(body);
+
+    if(actualWell){
+      item.insideWagon = true;
+      item.currentWellIndex = actualWell.index;
+      item.lastWellIndex = actualWell.index;
+      item.lockedWellIndex = actualWell.index;
+      item.lastWagonContactAt = performance.now();
+
+      if(!item.enteredWellAt){
+        item.enteredWellAt = item.lastWagonContactAt;
+      }
+
+      moveMatterBoxBehindWagonCover(item);
+
+      if(isMatterBodyAtWellFloor(body, actualWell)){
+        commitMatterBoxToWagon(item, actualWell);
+        return;
+      }
+
       const speed = body.speed;
       const angular = Math.abs(body.angularVelocity);
 
@@ -2424,16 +2734,18 @@
         item.stableFrames = 0;
       }
 
-      if(item.stableFrames > 40){
-        settleMatterBoxAsVisualOnly(item, activeWell);
+      // احتياط إضافي للصندوق الهادئ قرب القاع، حتى لو فات حدث الاصطدام.
+      if(item.stableFrames > 18 && isMatterBodyAtWellFloor(body, actualWell, 22)){
+        commitMatterBoxToWagon(item, actualWell);
         return;
       }
+    }else{
+      item.stableFrames = 0;
     }
 
-    // إذا كان الصندوق خارج العربات ولم يدخل أي عربة، يترك حتى يصل السكة ثم ينكسر.
-    // هذا فحص احتياطي بجانب حساس السكة، لمنع أي صندوق من البقاء خارج إطار القطار.
+    // إذا كان الصندوق خارج كل العربات، يترك حتى يصل السكة ثم ينكسر.
     const trackBreakY = trainY(TRAIN_PHYSICS_PROFILES.track.y) - BOX.bottom + 6;
-    if(!item.insideWagon && body.position.y >= trackBreakY){
+    if(!actualWell && body.position.y >= trackBreakY){
       breakMatterBox(item);
       return;
     }
@@ -2487,16 +2799,16 @@
 
     const oldest = liveBoxes[0];
     if(oldest){
-      cleanupMatterBox(oldest, true);
+      breakMatterBox(oldest);
     }else{
       activeFallingBoxes = 0;
     }
   }
 
-  function spawnMatterAnswerBox(startX, startY, textLines, fromQueue = false){
+  function spawnMatterAnswerBox(startX, startY, textLines, meta = {}, fromQueue = false){
     if(!isMatterReady() || !matterEngine){
       if(!fromQueue){
-        pendingMatterSpawns.push({startX, startY, textLines});
+        pendingMatterSpawns.push({startX, startY, textLines, meta});
       }
       loadMatterLibrary();
       return false;
@@ -2504,8 +2816,10 @@
 
     releaseOldestMatterBoxIfNeeded();
 
+    const relation = meta.relation || null;
+    const media = normalizeRuntimeMedia(meta.media || relation?.balloon || {text:(textLines || []).join(" ")});
     const layer = fallingObjectsLayer || svg;
-    const node = answerBox(layer, textLines);
+    const node = answerBox(layer, textLines, media);
 
     const body = Matter.Bodies.rectangle(startX, startY + 54, BOX.width, BOX.height, {
       label:"answer-box",
@@ -2523,12 +2837,19 @@
       node,
       body,
       textLines,
+      media,
+      relation,
+      balloonId:String(meta.balloonId || relation?.balloonId || ""),
+      targetWagonId:String(meta.targetWagonId || relation?.targetWagonId || relation?.wagonId || ""),
+      sourceBalloonItem:meta.sourceBalloonItem || null,
       spawnedAt:performance.now(),
       insideWagon:false,
       insideWagonLayer:false,
       enteredWellAt:0,
       lastWellIndex:null,
+      currentWellIndex:null,
       lockedWellIndex:null,
+      settleCommitted:false,
       lastTopEdgeBumperAt:0,
       lastGapSmartAt:0,
       lastPassengerBounceAt:0,
@@ -2536,6 +2857,8 @@
       firstSurfaceContactAt:0,
       airDriftActive:true,
       stableFrames:0,
+      captureCandidateWellIndex:null,
+      captureCandidateSince:0,
       done:false
     };
 
@@ -2548,27 +2871,296 @@
     return true;
   }
 
-  function spawnFallingAnswerBox(startX, startY, textLines){
+  function spawnFallingAnswerBox(startX, startY, textLines, meta = {}){
     // مسار واحد فقط: نفس نظام المختبر Matter.js.
-    return spawnMatterAnswerBox(startX, startY, textLines);
+    return spawnMatterAnswerBox(startX, startY, textLines, meta);
   }
 
-  const BALLOON_SPEED_LEVEL = 6; // مؤقتًا: لاحقًا يرتبط بشريط السرعة من 1 إلى 10.
+  const TRAIN_PAYLOAD_KEY = "sandooq_train_payload_v1";
+
+  function readTrainRuntimePayload(){
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const payloadId = String(params.get("payloadId") || "").trim();
+      const keys = payloadId
+        ? [`${TRAIN_PAYLOAD_KEY}_${payloadId}`, TRAIN_PAYLOAD_KEY]
+        : [TRAIN_PAYLOAD_KEY];
+
+      for(const key of keys){
+        const raw = sessionStorage.getItem(key);
+        if(!raw) continue;
+        const payload = JSON.parse(raw);
+        if(payload && typeof payload === "object") return payload;
+      }
+    } catch (_) {}
+
+    return null;
+  }
+
+  const TRAIN_RUNTIME_PAYLOAD = readTrainRuntimePayload();
+
+  function normalizeRuntimeMedia(raw){
+    if(!raw || typeof raw !== "object"){
+      return {text:String(raw || "").trim(), imageData:""};
+    }
+
+    return {
+      text:String(raw.text ?? raw.label ?? raw.title ?? "").trim(),
+      imageData:String(raw.imageData ?? raw.image ?? raw.src ?? "").trim()
+    };
+  }
+
+  function mediaIdentity(media){
+    const normalized = normalizeRuntimeMedia(media);
+    return `${normalized.text.replace(/\s+/g," ").toLocaleLowerCase("ar")}|${normalized.imageData}`;
+  }
+
+  function mediaTextLines(media, fallback = ["", ""]){
+    const text = String(normalizeRuntimeMedia(media).text || "").trim();
+    if(!text) return fallback.slice(0,2);
+
+    const explicit = text.split(/\n+/).map(v=>v.trim()).filter(Boolean);
+    if(explicit.length > 1) return explicit.slice(0,2);
+
+    const words = text.split(/\s+/).filter(Boolean);
+    if(words.length <= 2) return [text];
+
+    const midpoint = Math.ceil(words.length / 2);
+    return [words.slice(0,midpoint).join(" "), words.slice(midpoint).join(" ")];
+  }
+
+  function normalizeRuntimeRelation(raw,index){
+    const wagon = normalizeRuntimeMedia(raw?.wagon || raw?.car || raw?.answer);
+    const balloon = normalizeRuntimeMedia(raw?.balloon || raw?.question || raw?.item);
+    const relationId = String(raw?.relationId || raw?.id || `train-content-${index + 1}`);
+    const fallbackWagonId = `wagon-${index + 1}-${mediaIdentity(wagon).slice(0,24)}`;
+    const wagonId = String(raw?.targetWagonId || raw?.wagonId || fallbackWagonId);
+
+    return {
+      relationId,
+      id:relationId,
+      wagonId,
+      targetWagonId:wagonId,
+      balloonId:String(raw?.balloonId || `balloon-${relationId}`),
+      wagon,
+      balloon
+    };
+  }
+
+  const TRAIN_RUNTIME_RELATIONS = (Array.isArray(TRAIN_RUNTIME_PAYLOAD?.contents)
+    ? TRAIN_RUNTIME_PAYLOAD.contents
+    : Array.isArray(TRAIN_RUNTIME_PAYLOAD?.entries)
+      ? TRAIN_RUNTIME_PAYLOAD.entries
+      : [])
+    .map(normalizeRuntimeRelation)
+    .filter(entry =>
+      (entry.wagon.text || entry.wagon.imageData) &&
+      (entry.balloon.text || entry.balloon.imageData)
+    );
+
+  const TRAIN_RUNTIME_WAGONS = [];
+  const runtimeWagonIds = new Set();
+  TRAIN_RUNTIME_RELATIONS.forEach(entry => {
+    if(runtimeWagonIds.has(entry.wagonId)) return;
+    runtimeWagonIds.add(entry.wagonId);
+    TRAIN_RUNTIME_WAGONS.push({
+      wagonId:entry.wagonId,
+      media:entry.wagon,
+      text:entry.wagon.text || ""
+    });
+  });
+
+  const TRAIN_ANSWER_LOGIC_ENABLED = TRAIN_RUNTIME_RELATIONS.length > 0 && TRAIN_RUNTIME_WAGONS.length > 0;
+
+  function readTrainStageCount(){
+    const params = new URLSearchParams(window.location.search);
+    const rawQueryValue = params.get("stages");
+    const queryValue = rawQueryValue === null || rawQueryValue === "" ? Number.NaN : Number(rawQueryValue);
+    if(Number.isFinite(queryValue)) return clamp(Math.round(queryValue),3,20);
+
+    const payloadValue = Number(TRAIN_RUNTIME_PAYLOAD?.stageCount ?? TRAIN_RUNTIME_PAYLOAD?.stages);
+    if(Number.isFinite(payloadValue)) return clamp(Math.round(payloadValue),3,20);
+
+    return 20;
+  }
+
+  const TRAIN_RUNTIME_STAGE_COUNT = readTrainStageCount();
+
+  const acceptedBalloonIds = new Set();
+  const expectedBalloonIdsByWagon = new Map();
+  const acceptedBalloonIdsByWagon = new Map();
+  let currentStageRelations = [];
+  let stageBalloonCursor = 0;
+
+  function setBalloonMedia(balloon, mediaInput){
+    if(!balloon) return;
+    const media = normalizeRuntimeMedia(mediaInput);
+    const lines = mediaTextLines(media,["",""]);
+    const hasImage = Boolean(media.imageData);
+    const hasText = Boolean(media.text);
+    const image = balloon.querySelector('[data-role="balloon-media-image"]');
+    const text = balloon.querySelector('[data-role="balloon-media-text"]');
+
+    if(image){
+      image.setAttribute("x", hasText ? "-102" : "-54");
+      image.setAttribute("y", hasText ? "-31" : "-39");
+      image.setAttribute("width", hasText ? "60" : "108");
+      image.setAttribute("height", hasText ? "60" : "78");
+      image.setAttribute("opacity", hasImage ? "1" : "0");
+      if(hasImage) setSvgImageHref(image,media.imageData);
+    }
+
+    if(text){
+      const textX = hasImage && hasText ? 27 : 0;
+      text.setAttribute("x",String(textX));
+      text.setAttribute("y",hasImage && hasText ? "-8" : "-10");
+      text.setAttribute("font-size",hasImage && hasText ? "28" : "37");
+      text.innerHTML = "";
+      lines.slice(0,2).forEach((line,index)=>{
+        el("tspan",{
+          x:textX,
+          dy:index === 0 ? 0 : (hasImage && hasText ? 31 : 40)
+        },text).textContent = line || "";
+      });
+    }
+  }
+
+  function resolveMatterBoxAttempt(item, success){
+    const source = item?.sourceBalloonItem;
+    if(!source) return;
+
+    source.attemptPending = false;
+    source.pendingRetryContent = success ? null : (item.relation || source.config?.content || null);
+    source.resetAt = performance.now() + (success ? 260 : 850);
+  }
+
+  function readBalloonSpeedLevel(){
+    const params = new URLSearchParams(window.location.search);
+    const speedParam = params.get("speed");
+    const querySpeed = speedParam === null || speedParam === ""
+      ? Number.NaN
+      : Number(speedParam);
+
+    if(Number.isFinite(querySpeed)){
+      return clamp(Math.round(querySpeed), 1, 10);
+    }
+
+    const payloadSpeed = Number(TRAIN_RUNTIME_PAYLOAD?.balloonSpeed ?? TRAIN_RUNTIME_PAYLOAD?.speedLevel);
+
+    if(Number.isFinite(payloadSpeed)){
+      return clamp(Math.round(payloadSpeed), 1, 10);
+    }
+
+    return 3;
+  }
+
+  const BALLOON_SPEED_LEVEL = readBalloonSpeedLevel();
 
   const BALLOON_FLIGHT = {
     startX:1355,
     endX:-230,
-    minY:112,
-    maxY:292,
+    minY:92,
+    maxY:318,
     baseY:178,
     scale:.92,
     speedLevel:BALLOON_SPEED_LEVEL
   };
 
   function speedFromLevel(level){
-    const safeLevel = clamp(Number(level) || 1, 1, 10);
-    // سرعة بطيئة الآن، وقابلة للتوسيع لاحقًا من شريط السرعة.
-    return 24 + safeLevel * 9;
+    const safeLevel = clamp(Number(level) || 3, 1, 10);
+    const progress = (safeLevel - 1) / 9;
+
+    // تدرج واضح: المستوى 1 بطيء، والمستوى 10 سريع جدًا،
+    // مع منحنى ناعم يحافظ على قابلية الضغط في المستويات الوسطى.
+    return 34 + Math.pow(progress, 1.12) * 106;
+  }
+
+  function verticalTempoFromLevel(level){
+    const safeLevel = clamp(Number(level) || 3, 1, 10);
+    const progress = (safeLevel - 1) / 9;
+
+    // السرعة الرأسية تتأثر قليلًا فقط حتى لا تتحول الحركة إلى اهتزاز مزعج.
+    return .90 + progress * .25;
+  }
+
+  const BALLOON_MOTION_PROFILES = [
+    {
+      id:"gentle-float",
+      minY:166,
+      maxY:228,
+      cycle:8.6,
+      phaseOffset:.08
+    },
+    {
+      id:"medium-wave",
+      minY:112,
+      maxY:270,
+      cycle:7.4,
+      phaseOffset:.36
+    },
+    {
+      id:"sky-to-train",
+      minY:62,
+      maxY:334,
+      cycle:10.6,
+      phaseOffset:.02
+    },
+    {
+      id:"high-arc",
+      minY:76,
+      maxY:252,
+      cycle:8.9,
+      phaseOffset:.58
+    },
+    {
+      id:"low-sweep",
+      minY:154,
+      maxY:332,
+      cycle:9.7,
+      phaseOffset:.24
+    },
+    {
+      id:"long-wave",
+      minY:92,
+      maxY:302,
+      cycle:11.2,
+      phaseOffset:.72
+    }
+  ];
+
+  function balloonSafeMaxY(scale){
+    // أسفل البالون والسلة يبقى فوق أعلى القطار بمسافة أمان واضحة.
+    const trainTopY = trainY(424);
+    const balloonBottomExtent = 90 * (Number(scale) || MEDIUM_BALLOON_SCALE);
+    const clearance = 30;
+    return Math.min(BALLOON_FLIGHT.maxY, trainTopY - balloonBottomExtent - clearance);
+  }
+
+  function balloonYForProfile(profile, motionTime, scale){
+    const safeMin = Math.max(BALLOON_FLIGHT.minY, Number(profile.minY) || BALLOON_FLIGHT.minY);
+    const safeMax = Math.min(
+      Number(profile.maxY) || BALLOON_FLIGHT.maxY,
+      balloonSafeMaxY(scale)
+    );
+
+    const cycle = Math.max(4, Number(profile.cycle) || 8);
+    const phase = (
+      motionTime / cycle +
+      (Number(profile.phaseOffset) || 0)
+    ) % 1;
+
+    // منحنى جيبي طويل يبدأ وينتهي بسرعة رأسية صفرية.
+    const smoothTravel = (1 - Math.cos(phase * Math.PI * 2)) / 2;
+
+    return safeMin + (safeMax - safeMin) * smoothTravel;
+  }
+
+  function balloonProfileY(item){
+    return balloonYForProfile(
+      item.config.motionProfile,
+      item.state.motionTime,
+      item.config.scale
+    );
   }
 
   const BALLOON_TEXT_BANK = [
@@ -2593,6 +3185,29 @@
   let balloonTextCursor = 0;
   let balloonLoopStarted = false;
   let balloonLoopLastTime = 0;
+  let balloonMotionProfileCursor = 0;
+
+  function assignedStageBalloonIds(exceptItem = null){
+    return new Set(activeBalloons
+      .filter(item => item && item !== exceptItem && item.config?.content && (item.attemptPending || !item.popped))
+      .map(item => item.config.content.balloonId));
+  }
+
+  function nextStageBalloonContent(exceptItem = null){
+    if(!TRAIN_ANSWER_LOGIC_ENABLED) return null;
+    if(!currentStageRelations.length) return null;
+
+    const assigned = assignedStageBalloonIds(exceptItem);
+    for(let offset = 0; offset < currentStageRelations.length; offset++){
+      const index = (stageBalloonCursor + offset) % currentStageRelations.length;
+      const relation = currentStageRelations[index];
+      if(acceptedBalloonIds.has(relation.balloonId) || assigned.has(relation.balloonId)) continue;
+      stageBalloonCursor = (index + 1) % currentStageRelations.length;
+      return relation;
+    }
+
+    return null;
+  }
 
   function nextBalloonLines(){
     const lines = BALLOON_TEXT_BANK[balloonTextCursor % BALLOON_TEXT_BANK.length];
@@ -2601,29 +3216,57 @@
   }
 
   function setBalloonLines(balloon, lines){
-    const tspans = balloon.querySelectorAll("text tspan");
+    const textNode = balloon.querySelector('[data-role="balloon-media-text"]');
+    if(!textNode) return;
+    const tspans = textNode.querySelectorAll("tspan");
     if(tspans[0]) tspans[0].textContent = lines[0] || "";
     if(tspans[1]) tspans[1].textContent = lines[1] || "";
   }
 
+  function nextBalloonMotionProfile(previousId = ""){
+    const activeIds = new Set(
+      activeBalloons
+        .filter(item => item && !item.popped && !item.flyAway)
+        .map(item => item.config?.motionProfile?.id)
+        .filter(Boolean)
+    );
+
+    const total = BALLOON_MOTION_PROFILES.length;
+
+    for(let offset = 0; offset < total; offset++){
+      const index = (balloonMotionProfileCursor + offset) % total;
+      const profile = BALLOON_MOTION_PROFILES[index];
+
+      if(profile.id === previousId || activeIds.has(profile.id)) continue;
+
+      balloonMotionProfileCursor = (index + 1) % total;
+      return profile;
+    }
+
+    for(let offset = 0; offset < total; offset++){
+      const index = (balloonMotionProfileCursor + offset) % total;
+      const profile = BALLOON_MOTION_PROFILES[index];
+
+      if(profile.id === previousId) continue;
+
+      balloonMotionProfileCursor = (index + 1) % total;
+      return profile;
+    }
+
+    return BALLOON_MOTION_PROFILES[0];
+  }
+
   function createBalloonMotionState(config, index = 0){
-    const now = performance.now();
+    const motionTime = index * 1.31;
+
     return {
-      x:(config.startX ?? 1355) + index * 168 + Math.random() * 34,
-      y:(config.baseY ?? 178) + (Math.random() * 34 - 17),
-      lastTime:now,
-      phaseA:Math.random() * Math.PI * 2,
-      phaseB:Math.random() * Math.PI * 2,
-      phaseC:Math.random() * Math.PI * 2,
-      drift:0,
-      driftTarget:0,
-      nextDriftAt:now + 650 + Math.random() * 1200
+      x:(config.startX ?? 1355) + index * 225,
+      y:balloonYForProfile(config.motionProfile, motionTime, config.scale),
+      motionTime
     };
   }
 
   function releaseStageBalloonsUpward(){
-    // عند اكتمال المستوى: ننتظر لحظة قصيرة ثم تطير البالونات المتبقية للأعلى/اليسار
-    // من مواقعها الحالية، بنفس إحساس حركتها أثناء اللعب، وتصبح غير قابلة للفرقعة.
     const now = performance.now();
 
     activeBalloons.forEach(item => {
@@ -2640,36 +3283,87 @@
       item.node.style.pointerEvents = "none";
       item.node.style.cursor = "default";
 
-      // لا نعيد إظهار البالون الذي كان مفرقعًا ومخفيًا أصلًا.
       if(item.node.style.display !== "none"){
         item.node.setAttribute("opacity", "1");
       }
     });
   }
 
-  function recycleBalloon(item, now, forceFarRight = false){
-    const rightMost = activeBalloons.reduce((max, other) => {
-      if(other === item || other.popped) return max;
-      return Math.max(max, other.state.x);
-    }, BALLOON_FLIGHT.startX);
+  function nextContinuousSpawnX(item){
+    const startX = BALLOON_FLIGHT.startX;
+    const minimumSpacing = 188;
 
-    item.config.lines = nextBalloonLines();
-    setBalloonLines(item.node, item.config.lines);
+    const nearbyRightBalloons = activeBalloons
+      .filter(other =>
+        other !== item &&
+        !other.popped &&
+        !other.flyAway &&
+        other.node?.style.display !== "none" &&
+        other.state.x > 1080
+      )
+      .map(other => other.state.x)
+      .sort((a, b) => a - b);
+
+    let spawnX = startX;
+
+    for(const x of nearbyRightBalloons){
+      if(Math.abs(x - spawnX) < minimumSpacing){
+        spawnX = x + minimumSpacing;
+      }
+    }
+
+    return clamp(spawnX, startX, startX + 245);
+  }
+
+  function recycleBalloon(item, now, forceFarRight = false){
+    const previousProfileId = item.config.motionProfile?.id || "";
+    const motionProfile = nextBalloonMotionProfile(previousProfileId);
+
+    let content = null;
+    if(TRAIN_ANSWER_LOGIC_ENABLED){
+      content = item.pendingRetryContent || nextStageBalloonContent(item);
+      if(content && acceptedBalloonIds.has(content.balloonId)) content = null;
+
+      if(!content){
+        item.pendingRetryContent = null;
+        item.config.content = null;
+        item.attemptPending = false;
+        item.node.style.display = "none";
+        item.node.style.pointerEvents = "none";
+        item.popped = true;
+        item.resetAt = now + 420;
+        return;
+      }
+
+      item.pendingRetryContent = null;
+      item.config.content = content;
+      item.config.media = content.balloon;
+      item.config.lines = mediaTextLines(content.balloon,["",""]);
+      setBalloonMedia(item.node,content.balloon);
+    }else{
+      item.config.lines = nextBalloonLines();
+      setBalloonLines(item.node, item.config.lines);
+    }
+
+    item.config.motionProfile = motionProfile;
+    item.config.minY = motionProfile.minY;
+    item.config.maxY = motionProfile.maxY;
+    item.spawnSerial = (item.spawnSerial || 0) + 1;
+    item.attemptPending = false;
+
+    item.node.setAttribute("data-motion-profile", motionProfile.id);
 
     item.state.x = forceFarRight
-      ? BALLOON_FLIGHT.startX + item.index * 168 + Math.random() * 38
-      : Math.max(BALLOON_FLIGHT.startX + Math.random() * 90, rightMost + 156 + Math.random() * 52);
+      ? BALLOON_FLIGHT.startX + item.index * 225
+      : nextContinuousSpawnX(item);
 
-    item.state.y = item.config.baseY + (Math.random() * 40 - 20);
-    item.state.phaseA = Math.random() * Math.PI * 2;
-    item.state.phaseB = Math.random() * Math.PI * 2;
-    item.state.phaseC = Math.random() * Math.PI * 2;
-    item.state.drift = 0;
-    item.state.driftTarget = Math.random() * 44 - 22;
-    item.state.nextDriftAt = now + 750 + Math.random() * 1700;
+    item.state.motionTime =
+      (item.spawnSerial * 1.37 + item.index * .71) % motionProfile.cycle;
+    item.state.y = balloonProfileY(item);
 
-    // تحديث المكان الجديد وهو مخفي أولًا، ثم إظهاره.
-    // هذا يمنع لمحة ظهور البالون القديم بعد الفرقعة بدون لمس القطار أو الفيزياء.
+    item.speed = speedFromLevel(item.config.speedLevel);
+    item.verticalTempo = 1;
+
     item.node.setAttribute(
       "transform",
       `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
@@ -2678,13 +3372,12 @@
     item.node.style.display = "";
     item.node.setAttribute("opacity", "1");
     item.node.style.pointerEvents = "auto";
+    item.node.style.cursor = "pointer";
     item.popped = false;
     item.resetAt = 0;
   }
 
   function canPopBalloonNow(){
-    // يسمح بالفرقعة أثناء دخول القطار، وأثناء اللعب، وأثناء تقدمه للنافذة التالية.
-    // يمنع فقط أثناء خروج القطار أو نهاية المرحلة أو طيران البالونات للأعلى.
     return trainMotionState === "entering" ||
       trainMotionState === "playing" ||
       trainMotionState === "advancing";
@@ -2693,23 +3386,36 @@
   function popPooledBalloon(item, now){
     if(item.popped || item.flyAway) return;
     if(!canPopBalloonNow()) return;
+    if(TRAIN_ANSWER_LOGIC_ENABLED && !item.config.content) return;
 
     item.popped = true;
-    item.resetAt = now + 950;
+    item.attemptPending = true;
+    item.resetAt = Number.POSITIVE_INFINITY;
 
     item.node.setAttribute("opacity", "0");
     item.node.style.display = "none";
     item.node.style.pointerEvents = "none";
 
     balloonBurst(fallingObjectsLayer || svg, item.state.x, item.state.y, item.config.scale);
-    spawnFallingAnswerBox(item.state.x, item.state.y, item.config.lines || ["ما أجمل", "الزهور!"]);
+    const relation = item.config.content || null;
+    spawnFallingAnswerBox(
+      item.state.x,
+      item.state.y,
+      item.config.lines || ["ما أجمل", "الزهور!"],
+      {
+        relation,
+        media:relation?.balloon || item.config.media,
+        balloonId:relation?.balloonId || "",
+        targetWagonId:relation?.targetWagonId || relation?.wagonId || "",
+        sourceBalloonItem:item
+      }
+    );
   }
 
   function updateBalloonItem(item, now, dtMs){
     const dt = dtMs / 1000;
 
     if(item.flyAway){
-      // ننتظر أجزاء من الثانية بعد سقوط الصندوق الأخير، ثم يصعد البالون للأعلى/اليسار.
       const elapsed = now - (item.flyAwayStartedAt || now);
       if(elapsed < (item.flyAwayDelay || 0)){
         return;
@@ -2724,7 +3430,6 @@
         `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
       );
 
-      // يبقى واضحًا أثناء الصعود، ثم يختفي قرب خروجه من أعلى الشاشة.
       const fade = clamp((item.state.y + 120) / 120, 0, 1);
 
       if(item.node.style.display !== "none"){
@@ -2746,28 +3451,10 @@
       return;
     }
 
-    const speed = item.speed;
+    item.state.x -= item.speed * dt;
 
-    const speedPulse =
-      0.96 +
-      Math.sin(now * 0.0011 + item.state.phaseB) * 0.045 +
-      Math.sin(now * 0.0021 + item.state.phaseC) * 0.024;
-
-    item.state.x -= speed * speedPulse * dt;
-
-    if(now >= item.state.nextDriftAt){
-      item.state.driftTarget = Math.random() * 48 - 24;
-      item.state.nextDriftAt = now + 900 + Math.random() * 2100;
-    }
-
-    item.state.drift += (item.state.driftTarget - item.state.drift) * 0.018;
-
-    const wave =
-      Math.sin(now * 0.00125 + item.state.phaseA) * 29 +
-      Math.sin(now * 0.00235 + item.state.phaseB) * 10 +
-      Math.sin(now * 0.00058 + item.state.phaseC) * 14;
-
-    item.state.y = clamp(item.config.baseY + wave + item.state.drift, item.config.minY, item.config.maxY);
+    item.state.motionTime += dt * item.verticalTempo;
+    item.state.y = balloonProfileY(item);
 
     item.node.setAttribute(
       "transform",
@@ -2784,7 +3471,7 @@
     balloonLoopStarted = true;
 
     function frame(now){
-      const dtMs = balloonLoopLastTime ? clamp(now - balloonLoopLastTime, 0, 100) : 16;
+      const dtMs = balloonLoopLastTime ? clamp(now - balloonLoopLastTime, 0, 50) : 16;
       balloonLoopLastTime = now;
 
       for(const item of activeBalloons){
@@ -2798,46 +3485,64 @@
   }
 
   function balloonsLayer(){
-    const balloons = el("g", {id:"balloonsLayer"});
+    const balloons = el("g", {
+      id:"balloonsLayer",
+      "data-speed-level":String(BALLOON_SPEED_LEVEL),
+      "data-flow-size":String(BALLOON_FLOW_SIZE)
+    });
 
-    // نظام جولات خفيف: 5 بالونات نشطة فقط، وتُعاد تدويرها حتى نهاية الجولة.
-    const ACTIVE_BALLOONS = BALLOONS_PER_ROUND;
-    const yPattern = [158, 126, 196, 232, 174];
-    const scalePattern = [MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE, MEDIUM_BALLOON_SCALE];
-    const speedPattern = [1.08, 1.16, 1.02, 1.12, 1.06];
+    const ACTIVE_BALLOONS = BALLOON_FLOW_SIZE;
 
     for(let index = 0; index < ACTIVE_BALLOONS; index++){
-      const lines = nextBalloonLines();
+      const content = TRAIN_ANSWER_LOGIC_ENABLED ? nextStageBalloonContent() : null;
+      const media = content?.balloon || {text:(nextBalloonLines() || []).join(" ")};
+      const lines = mediaTextLines(media,["",""]);
+      const motionProfile = nextBalloonMotionProfile();
+      const initialMotionTime = index * 1.31;
+      const initialY = balloonYForProfile(
+        motionProfile,
+        initialMotionTime,
+        MEDIUM_BALLOON_SCALE
+      );
+
       const config = {
         ...BALLOON_FLIGHT,
         lines,
+        media,
+        content,
         scale:MEDIUM_BALLOON_SCALE,
-        baseY:yPattern[index],
-        minY:88,
-        maxY:312,
-        speedLevel:BALLOON_SPEED_LEVEL,
-        speedMultiplier:speedPattern[index]
+        baseY:initialY,
+        minY:motionProfile.minY,
+        maxY:motionProfile.maxY,
+        motionProfile,
+        speedLevel:BALLOON_SPEED_LEVEL
       };
 
       const balloon = answerBalloon(balloons, {
         id:`answerBalloonDemo-${index}`,
-        x:BALLOON_FLIGHT.startX + index * 168,
-        y:config.baseY,
+        x:BALLOON_FLIGHT.startX + index * 225,
+        y:initialY,
         scale:config.scale,
         lines:config.lines,
+        media:config.media,
         shadow:false
       });
 
       balloon.style.pointerEvents = "auto";
       balloon.style.cursor = "pointer";
+      balloon.setAttribute("data-motion-profile", motionProfile.id);
 
       const item = {
         node:balloon,
         index,
         config,
         state:createBalloonMotionState(config, index),
-        speed:speedFromLevel(config.speedLevel) * (config.speedMultiplier || 1),
+        speed:speedFromLevel(config.speedLevel),
+        verticalTempo:1,
+        spawnSerial:0,
         popped:false,
+        attemptPending:false,
+        pendingRetryContent:null,
         resetAt:0,
         flyAway:false,
         flyAwayStartedAt:0,
@@ -2845,6 +3550,13 @@
         flyAwaySpeed:0,
         flyAwayDrift:0
       };
+
+      if(TRAIN_ANSWER_LOGIC_ENABLED && !content){
+        balloon.style.display = "none";
+        balloon.style.pointerEvents = "none";
+        item.popped = true;
+        item.resetAt = performance.now() + 420;
+      }
 
       balloon.addEventListener("pointerdown", event => {
         event.preventDefault();
@@ -2871,8 +3583,7 @@
   }
 
   function getParallaxSpeedMultiplier(){
-    if(trainMotionState === "done") return .45;
-    if(trainMotionState === "playing") return .7;
+    // حركة الخلفية مستقلة عن حالة القطار وتستمر بين المراحل.
     return 1;
   }
 
@@ -2893,7 +3604,8 @@
     const dt = deltaMs / 1000;
 
     parallaxLayerRecords.forEach(record => {
-      record.offset += record.speed * motionMultiplier * dt * 60;
+      // السرعات بوحدة بكسل/ثانية فعلية، بلا معامل إضافي.
+      record.offset += record.speed * motionMultiplier * dt;
       applyParallaxLayerPosition(record);
     });
   }
@@ -2952,9 +3664,7 @@
   }
 
   function renderParallaxForeground(){
-    // لم نعد نرسم العناصر الأمامية فوق القطار.
-    // طبقة foreground تُرسم الآن داخل background() خلف القطار والسكة
-    // حتى يبقى القطار واضحًا فوقها كما اتفقنا.
+    // لا توجد طبقة خلفية أمام القطار؛ الشرائح الثلاث كلها خلف السكة والقطار.
     parallaxFrontGroup = null;
     return null;
   }
@@ -2963,25 +3673,67 @@
     parallaxLayerRecords.length = 0;
     parallaxBackGroup = el("g", {id:"background"});
 
-    // الطبقات الأربع الآن كلها صور كاملة 2560×720.
-    // الجبال/الكثبان والعناصر الأمامية موجودة داخل لوحات كاملة بخلفية شفافة،
-    // لذلك نرسمها كلها من (0,0) فوق بعضها حتى تعطي نفس المشهد المرجعي.
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.sky);
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.far);
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.mid);
-    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.foreground);
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.top);
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.middle);
+    createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.bottom);
 
-    // السكة تبقى فوق الخلفية كلها، بينما القطار يرسم فوق السكة والخلفيات.
+    // السكة فوق الخلفية، والقطار فوقهما.
+    // تبقى بالحجم المصغّر نفسه، لكن نبدأ أول قطعة خارج الطرف الأيسر
+    // ونستخدم تداخلًا واسعًا لإخفاء الهوامش الشفافة الموجودة داخل صورة السكة.
     const track = el("g", {id:"track"}, parallaxBackGroup);
-    const trackImage = el("image", {
-      href:"train-track.webp?v=84",
-      x:trainX(-260),
-      y:trainY(604),
-      width:trainLen(1800),
-      height:trainLen(27),
-      preserveAspectRatio:"none"
+    const TRACK_VISUAL_SCALE = .70;
+    const TRACK_TILE_OVERLAP = 96;
+    const TRACK_EDGE_BLEED = 110;
+    const trackSegmentWidth = trainLen(1800 * TRACK_VISUAL_SCALE);
+    const trackSegmentHeight = trainLen(27 * TRACK_VISUAL_SCALE);
+    const trackY = trainY(604);
+    const trackStep = trackSegmentWidth - TRACK_TILE_OVERLAP;
+    const trackStartX = -TRACK_EDGE_BLEED;
+    const trackEndX = 1280 + TRACK_EDGE_BLEED;
+
+    for(let x = trackStartX; x < trackEndX; x += trackStep){
+      const trackImage = el("image", {
+        href:"train-track.webp?v=84",
+        x,
+        y:trackY,
+        width:trackSegmentWidth,
+        height:trackSegmentHeight,
+        preserveAspectRatio:"none"
+      }, track);
+      trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
+    }
+
+    // خط معدني متصل فوق جميع القطع: يغلق أي شق دقيق عند الوصل
+    // ويضمن اكتمال السكة حتى بعد طرفي الشاشة بدون تغيير موضعها.
+    const railY = trackY + trainLen(2.4 * TRACK_VISUAL_SCALE);
+    el("line", {
+      x1:-TRACK_EDGE_BLEED,
+      y1:railY,
+      x2:1280 + TRACK_EDGE_BLEED,
+      y2:railY,
+      stroke:"#343438",
+      "stroke-width":trainLen(4.8 * TRACK_VISUAL_SCALE),
+      "stroke-linecap":"square"
     }, track);
-    trackImage.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-track.webp?v=84");
+    el("line", {
+      x1:-TRACK_EDGE_BLEED,
+      y1:railY - trainLen(.45),
+      x2:1280 + TRACK_EDGE_BLEED,
+      y2:railY - trainLen(.45),
+      stroke:"#8e8f94",
+      "stroke-width":trainLen(2.5 * TRACK_VISUAL_SCALE),
+      "stroke-linecap":"square"
+    }, track);
+    el("line", {
+      x1:-TRACK_EDGE_BLEED,
+      y1:railY - trainLen(1.05),
+      x2:1280 + TRACK_EDGE_BLEED,
+      y2:railY - trainLen(1.05),
+      stroke:"#e4e5e7",
+      "stroke-width":trainLen(.75),
+      "stroke-linecap":"square",
+      opacity:".86"
+    }, track);
   }
 
   function addWheel(layer, cx, cy, size, version = 72){
@@ -3041,8 +3793,8 @@
     ["A","C","P","A","C","A","P","A","C","A","P","A","C","A","A","C"]
   ];
 
-  const MAX_TRAIN_STAGE = 20;
-  const STAGE_CHANGE_DELAY = 2500;
+  const MAX_TRAIN_STAGE = TRAIN_RUNTIME_STAGE_COUNT;
+  const STAGE_CHANGE_DELAY = 120;
 
   let currentStageIndex = 0;
   let currentTrainStage = null;
@@ -3055,27 +3807,77 @@
     return TRAIN_STAGE_LABELS[answerIndex % TRAIN_STAGE_LABELS.length];
   }
 
+  function stageAnswerCapacity(stageNumber){
+    const pattern = TRAIN_STAGE_PATTERNS[stageNumber - 1] || TRAIN_STAGE_PATTERNS[TRAIN_STAGE_PATTERNS.length - 1];
+    return pattern.filter(token => token === "A").length;
+  }
+
+  function stageRuntimeWagonStart(stageNumber){
+    let total = 0;
+    for(let index = 1; index < stageNumber; index++) total += stageAnswerCapacity(index);
+    return total;
+  }
+
+  function selectRuntimeWagonsForStage(stageNumber,capacity){
+    if(!TRAIN_RUNTIME_WAGONS.length || capacity <= 0) return [];
+    const count = Math.min(capacity,TRAIN_RUNTIME_WAGONS.length);
+    const start = stageRuntimeWagonStart(stageNumber) % TRAIN_RUNTIME_WAGONS.length;
+    return Array.from({length:count},(_,offset)=>TRAIN_RUNTIME_WAGONS[(start + offset) % TRAIN_RUNTIME_WAGONS.length]);
+  }
+
   function buildTrainCarsForStage(stageNumber){
     const pattern = TRAIN_STAGE_PATTERNS[stageNumber - 1] || TRAIN_STAGE_PATTERNS[TRAIN_STAGE_PATTERNS.length - 1];
+    const runtimeWagons = TRAIN_ANSWER_LOGIC_ENABLED
+      ? selectRuntimeWagonsForStage(stageNumber,stageAnswerCapacity(stageNumber))
+      : [];
     let answerCursor = 0;
 
     return pattern.map(token => {
       if(token === "A"){
+        if(TRAIN_ANSWER_LOGIC_ENABLED){
+          const runtimeWagon = runtimeWagons[answerCursor];
+          answerCursor += 1;
+          if(!runtimeWagon) return {type:"passenger"};
+          return {
+            type:"answer",
+            text:runtimeWagon.media.text || "",
+            media:runtimeWagon.media,
+            wagonId:runtimeWagon.wagonId
+          };
+        }
+
         const text = getStageAnswerLabel(answerCursor);
         answerCursor += 1;
-        return {type:"answer", text};
+        return {type:"answer", text, media:{text,imageData:""}, wagonId:`demo-wagon-${stageNumber}-${answerCursor}`};
       }
 
-      if(token === "P"){
-        return {type:"passenger"};
-      }
-
-      if(token === "C"){
-        return {type:"coal"};
-      }
-
+      if(token === "P") return {type:"passenger"};
+      if(token === "C") return {type:"coal"};
       return null;
     }).filter(Boolean);
+  }
+
+  function rebuildStageAnswerLogic(){
+    acceptedBalloonIds.clear();
+    acceptedBalloonIdsByWagon.clear();
+    expectedBalloonIdsByWagon.clear();
+    stageBalloonCursor = 0;
+
+    if(!TRAIN_ANSWER_LOGIC_ENABLED){
+      currentStageRelations = [];
+      return;
+    }
+
+    const activeWagonIds = new Set(TRAIN_CARS
+      .filter(car => car?.type === "answer" && car.wagonId)
+      .map(car => car.wagonId));
+
+    currentStageRelations = TRAIN_RUNTIME_RELATIONS.filter(entry => activeWagonIds.has(entry.targetWagonId));
+    currentStageRelations.forEach(entry => {
+      const expected = expectedBalloonIdsByWagon.get(entry.targetWagonId) || new Set();
+      expected.add(entry.balloonId);
+      expectedBalloonIdsByWagon.set(entry.targetWagonId,expected);
+    });
   }
 
   function updateQuestionWagonIndices(){
@@ -3090,6 +3892,7 @@
 
     TRAIN_CARS = buildTrainCarsForStage(stageNumber);
     updateQuestionWagonIndices();
+    rebuildStageAnswerLogic();
 
     currentTrainStage = {
       number:stageNumber,
@@ -3126,10 +3929,7 @@
     trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     trainCarRegistry.splice(0, trainCarRegistry.length);
 
-    stopParallaxLoop();
-    parallaxBackGroup?.remove();
-    parallaxFrontGroup?.remove();
-
+    // الخلفية والسكة دائمتان بين المراحل؛ نحذف عناصر المرحلة فقط.
     trainPositionGroup?.remove();
     wagonDropCoverPositionGroup?.remove();
     fallingObjectsLayer?.remove();
@@ -3143,9 +3943,7 @@
     fallingObjectsLayer = null;
     settledObjectsLayer = null;
     collisionDebugLayer = null;
-    parallaxBackGroup = null;
-    parallaxFrontGroup = null;
-    parallaxLayerRecords.length = 0;
+    // لا نحذف parallaxBackGroup ولا parallaxLayerRecords، فتستمر الحركة بلا انقطاع.
   }
 
   function scheduleNextTrainStage(){
@@ -3173,14 +3971,14 @@
       trainAnimationFrame = 0;
     }
 
-    stopParallaxLoop();
-
     if(stageTransitionTimer){
       clearTimeout(stageTransitionTimer);
       stageTransitionTimer = 0;
     }
 
     completedQuestionWagons.clear();
+    acceptedBalloonIds.clear();
+    acceptedBalloonIdsByWagon.clear();
 
     trainVisualOffsetX = TRAIN_MOTION.enterOffset;
 
@@ -3190,6 +3988,7 @@
     trainMotionState = "entering";
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
+    pendingTrainProgressReview = false;
 
     pendingMatterSpawns.length = 0;
     matterBoxes.slice().forEach(item => cleanupMatterBox(item, true));
@@ -3285,6 +4084,42 @@
 
   const trainCarRegistry = [];
 
+  function renderWagonMedia(parent,car,x,y,width,height){
+    const media = normalizeRuntimeMedia(car?.media || {text:car?.text || ""});
+    const hasImage = Boolean(media.imageData);
+    const hasText = Boolean(media.text);
+
+    if(hasImage){
+      const image = el("image",{
+        x:hasText ? x + width * .13 : x + width * .35,
+        y:y + height * .25,
+        width:hasText ? width * .20 : width * .30,
+        height:height * .48,
+        preserveAspectRatio:"xMidYMid meet",
+        "pointer-events":"none"
+      },parent);
+      setSvgImageHref(image,media.imageData);
+    }
+
+    if(hasText){
+      el("text", {
+        x:hasImage ? x + width * .61 : x + width / 2,
+        y:y + height * .56,
+        "text-anchor":"middle",
+        "dominant-baseline":"middle",
+        fill:"#ffe28a",
+        stroke:"#5b2618",
+        "stroke-width":hasImage ? trainLen(2.2) : trainLen(2.6),
+        "paint-order":"stroke fill",
+        "font-size":hasImage ? trainLen(22) : trainLen(30),
+        "font-weight":900,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"rtl",
+        "pointer-events":"none"
+      }, parent).textContent = media.text;
+    }
+  }
+
   function answerWagon(train, car, index){
     // قالب عربة الإجابة:
     // نفس العربة المعتمدة سابقًا، لكن صارت قابلة للتكرار حسب عدد الإجابات.
@@ -3312,6 +4147,8 @@
     trainCarRegistry[index] = {
       type:car.type,
       text:car.text,
+      media:normalizeRuntimeMedia(car.media || {text:car.text || ""}),
+      wagonId:String(car.wagonId || `wagon-${index}`),
       x:wagonX,
       y:wagonY,
       width:wagonW,
@@ -3350,20 +4187,7 @@
     }, bodyLayer);
     wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
-    el("text", {
-      x:wagonX + wagonW / 2,
-      y:wagonY + wagonH * .56,
-      "text-anchor":"middle",
-      "dominant-baseline":"middle",
-      fill:"#ffe28a",
-      stroke:"#5b2618",
-      "stroke-width":trainLen(2.6),
-      "paint-order":"stroke fill",
-      "font-size":trainLen(30),
-      "font-weight":900,
-      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
-      direction:"rtl"
-    }, bodyLayer).textContent = car.text;
+    renderWagonMedia(bodyLayer,car,wagonX,wagonY,wagonW,wagonH);
 
     registerTrainVisualPart(carVisualGroup, wagonX, wagonX + wagonW);
   }
@@ -3470,20 +4294,7 @@
       }, wagonForegroundCoverLayer);
       wagonBody.setAttributeNS("http://www.w3.org/1999/xlink", "href", "train-wagon.webp?v=84");
 
-      el("text", {
-        x:car.centerX,
-        y:car.y + car.height * .56,
-        "text-anchor":"middle",
-        "dominant-baseline":"middle",
-        fill:"#ffe28a",
-        stroke:"#5b2618",
-        "stroke-width":2.6,
-        "paint-order":"stroke fill",
-        "font-size":30,
-        "font-weight":900,
-        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
-        direction:"rtl"
-      }, wagonForegroundCoverLayer).textContent = car.text;
+      renderWagonMedia(wagonForegroundCoverLayer,car,car.x,car.y,car.width,car.height);
     });
   }
 
@@ -3645,37 +4456,31 @@
       });
 
       // نص العربة فوق الواجهة الأمامية.
-      el("text", {
-        x:car.centerX,
-        y:car.y + car.height * .56,
-        "text-anchor":"middle",
-        "dominant-baseline":"middle",
-        fill:"#ffe28a",
-        stroke:"#5b2618",
-        "stroke-width":trainLen(2.6),
-        "paint-order":"stroke fill",
-        "font-size":trainLen(30),
-        "font-weight":900,
-        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
-        direction:"rtl",
-        "pointer-events":"none"
-      }, coverGroup).textContent = car.text;
+      renderWagonMedia(coverGroup,car,car.x,car.y,car.width,car.height);
 
       registerTrainVisualPart(coverGroup, car.left, car.right, trainCoverVisualParts);
     });
   }
 
   function build(){
-    clear();
+    const persistentBackgroundReady = !!svg.querySelector("#background") &&
+      parallaxBackGroup &&
+      parallaxLayerRecords.length === 3;
 
-    // كل مرحلة تُبنى من الصفر بصريًا، لذلك نفرغ السجلات المرتبطة بالرسم الحالي.
+    // نبني الخلفية والسكة مرة واحدة فقط، ثم نُبقيهما أثناء جميع المراحل.
+    if(!persistentBackgroundReady){
+      clear();
+      defs();
+      background();
+      startParallaxLoop();
+    }
+
+    // كل مرحلة تعيد بناء عناصرها فقط فوق الخلفية المستمرة.
     trainCarRegistry.splice(0, trainCarRegistry.length);
     trainVisualParts.splice(0, trainVisualParts.length);
     trainCoverVisualParts.splice(0, trainCoverVisualParts.length);
     activeBalloons.splice(0, activeBalloons.length);
 
-    defs();
-    background();
     balloonsLayer();
 
     // المجموعة الخارجية لحركة دخول وخروج القطار.
@@ -3704,7 +4509,6 @@
     wagonForegroundCoverLayer = wagonDropCoverLayer;
     renderWagonDropCovers();
 
-    // العناصر الأمامية تتحرك أمام القطار مع طبقة بارالاكس مستقلة.
     renderParallaxForeground();
 
     // الصندوق يبقى فوق القطار أثناء السقوط الحر.
@@ -3716,7 +4520,6 @@
     loadMatterLibrary();
 
     updateTrainVisualCulling();
-
     startParallaxLoop();
 
     // المرحلة الأولى: يبدأ القطار خارج الشاشة من اليسار ثم يدخل حتى تستقر العربة في المنتصف.
@@ -3724,7 +4527,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 125: استبدال طبقات الخلفية بالصور الأربع التي أرسلها المستخدم نفسها، بعد تحويل خلفية المربعات إلى شفافية حقيقية وترتيبها داخل لوحات 2560×720. */
+  /* إصدار 125: ربط محتويات index بالعربات والبالونات، واعتماد المطابقة بالمعرّفات، وانفجار الإجابة الخاطئة وإعادتها للمحاولة، فوق أساس 124 نفسه. */
 })();
 </script>
 </body>
