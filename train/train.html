@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 135</title>
+  <title>قطار الإجابات - إصدار 136</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -471,7 +471,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 135: زيادة مسافات وتوقيتات دخول البالونات لمنع الازدحام وإتاحة وقت أدق لاختيار إجابات العربات القادمة.
+  // إصدار 136: إعادة معايرة سرعات البالونات بحيث تكون السرعة 5 هي السرعة المتوسطة الافتراضية وتساوي سرعة 8 السابقة.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -3400,24 +3400,37 @@
     source.resetAt = performance.now() + (success ? 260 : 850);
   }
 
+  const BALLOON_SPEED_SCALE_VERSION = 2;
+  const LEGACY_BALLOON_SPEED_LEVEL_MAP = [1,1,1,2,3,3,4,5,6,7];
+
+  function normalizeBalloonSpeedLevel(value, scaleVersion = BALLOON_SPEED_SCALE_VERSION){
+    const level = clamp(Math.round(Number(value) || 5), 1, 10);
+    if(Number(scaleVersion) >= BALLOON_SPEED_SCALE_VERSION) return level;
+    return LEGACY_BALLOON_SPEED_LEVEL_MAP[level - 1] || 5;
+  }
+
   function readBalloonSpeedLevel(){
     const params = new URLSearchParams(window.location.search);
     const speedParam = params.get("speed");
     const querySpeed = speedParam === null || speedParam === ""
       ? Number.NaN
       : Number(speedParam);
+    const hasRuntimePayload = Boolean(TRAIN_RUNTIME_PAYLOAD && typeof TRAIN_RUNTIME_PAYLOAD === "object");
+    const payloadScaleVersion = hasRuntimePayload
+      ? Number(TRAIN_RUNTIME_PAYLOAD?.speedScaleVersion || 1)
+      : BALLOON_SPEED_SCALE_VERSION;
 
     if(Number.isFinite(querySpeed)){
-      return clamp(Math.round(querySpeed), 1, 10);
+      return normalizeBalloonSpeedLevel(querySpeed, payloadScaleVersion);
     }
 
     const payloadSpeed = Number(TRAIN_RUNTIME_PAYLOAD?.balloonSpeed ?? TRAIN_RUNTIME_PAYLOAD?.speedLevel);
 
     if(Number.isFinite(payloadSpeed)){
-      return clamp(Math.round(payloadSpeed), 1, 10);
+      return normalizeBalloonSpeedLevel(payloadSpeed, payloadScaleVersion);
     }
 
-    return 3;
+    return 5;
   }
 
   const BALLOON_SPEED_LEVEL = readBalloonSpeedLevel();
@@ -3432,21 +3445,18 @@
     speedLevel:BALLOON_SPEED_LEVEL
   };
 
-  function speedFromLevel(level){
-    const safeLevel = clamp(Number(level) || 3, 1, 10);
-    const progress = (safeLevel - 1) / 9;
+  const BALLOON_SPEED_BY_LEVEL = [50,66,82,98,114,126,138,150,162,174];
 
-    // تدرج واضح: المستوى 1 بطيء، والمستوى 10 سريع جدًا،
-    // مع منحنى ناعم يحافظ على قابلية الضغط في المستويات الوسطى.
-    return 34 + Math.pow(progress, 1.12) * 106;
+  function speedFromLevel(level){
+    const safeLevel = clamp(Math.round(Number(level) || 5), 1, 10);
+    return BALLOON_SPEED_BY_LEVEL[safeLevel - 1];
   }
 
   function verticalTempoFromLevel(level){
-    const safeLevel = clamp(Number(level) || 3, 1, 10);
-    const progress = (safeLevel - 1) / 9;
+    const horizontalSpeed = speedFromLevel(level);
 
-    // السرعة الرأسية تتأثر قليلًا فقط حتى لا تتحول الحركة إلى اهتزاز مزعج.
-    return .90 + progress * .25;
+    // تتدرج الحركة الرأسية مع السلم الجديد، وتطابق السرعة 5 إحساس السرعة 8 السابقة.
+    return .90 + ((horizontalSpeed - 34) / 106) * .25;
   }
 
   const BALLOON_MOTION_PROFILES = [
