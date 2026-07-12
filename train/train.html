@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 128</title>
+  <title>قطار الإجابات - إصدار 129</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -208,6 +208,16 @@
     el("stop", {offset:"0%", "stop-color":"#fff0a0"}, wagonFrontGold);
     el("stop", {offset:"38%", "stop-color":"#e8b53f"}, wagonFrontGold);
     el("stop", {offset:"100%", "stop-color":"#9f5c0b"}, wagonFrontGold);
+
+    const levelSignWood = el("linearGradient", {id:"levelSignWoodGrad", x1:"0", y1:"0", x2:"0", y2:"1"}, d);
+    el("stop", {offset:"0%", "stop-color":"#c77b3e"}, levelSignWood);
+    el("stop", {offset:"48%", "stop-color":"#a95b2b"}, levelSignWood);
+    el("stop", {offset:"100%", "stop-color":"#7d3d1d"}, levelSignWood);
+
+    const levelSignPost = el("linearGradient", {id:"levelSignPostGrad", x1:"0", y1:"0", x2:"1", y2:"0"}, d);
+    el("stop", {offset:"0%", "stop-color":"#6e3219"}, levelSignPost);
+    el("stop", {offset:"45%", "stop-color":"#b96631"}, levelSignPost);
+    el("stop", {offset:"100%", "stop-color":"#71361b"}, levelSignPost);
   }
 
   function makeCloud(parent, x, y, scale){
@@ -398,14 +408,28 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 128;
+  // لافتة المستوى: عنصر أرضي مستقل يبقى خلف القطار وفوق الخلفية.
+  let levelSignLayer = null;
+  let levelSignGroup = null;
+  let levelSignTextNode = null;
+  let levelSignAnimationFrame = 0;
+  let levelSignAnimationToken = 0;
+  let levelSignX = 640;
+  const LEVEL_SIGN_CONFIG = {
+    centerX:640,
+    enterX:1485,
+    exitX:-225,
+    centerHoldMs:260
+  };
+
+  const PARALLAX_IMAGE_VERSION = 129;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 128: ستة بالونات متدرجة تدخل من خارج اليمين بسرعات متفاوتة، مع بقاء جميع إجابات المعلم قابلة للتكرار والاحتساب الصحيح أكثر من مرة.
+  // إصدار 129: إضافة لافتة خشبية للمستوى، تثبت في المنتصف قبل دخول القطار ثم تتحرك مع الأرضية بعد استقراره، وتعود بين المراحل.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -1145,6 +1169,8 @@
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
         syncTrainPhysicsToVisualOffset();
+        // تبقى اللافتة ثابتة في المنتصف حتى يستقر القطار، ثم تنسحب مع سرعة الأرضية الأمامية.
+        releaseLevelSignWithGround();
       });
     });
   }
@@ -3794,6 +3820,159 @@
     return record;
   }
 
+  function stageLevelLabel(stageNumber){
+    const ordinals = [
+      "الأول","الثاني","الثالث","الرابع","الخامس",
+      "السادس","السابع","الثامن","التاسع","العاشر",
+      "الحادي عشر","الثاني عشر","الثالث عشر","الرابع عشر","الخامس عشر",
+      "السادس عشر","السابع عشر","الثامن عشر","التاسع عشر","العشرون"
+    ];
+    const index = Math.max(0, Number(stageNumber || 1) - 1);
+    return `المستوى ${ordinals[index] || stageNumber}`;
+  }
+
+  function setLevelSignPosition(x){
+    levelSignX = Number(x) || 0;
+    if(levelSignGroup){
+      levelSignGroup.setAttribute("transform", `translate(${levelSignX.toFixed(2)} 0)`);
+    }
+  }
+
+  function setLevelSignText(stageNumber){
+    if(!levelSignTextNode) return;
+    const label = stageLevelLabel(stageNumber);
+    levelSignTextNode.textContent = label;
+    const length = Array.from(label).length;
+    const fontSize = length <= 13 ? 27 : length <= 17 ? 23 : 20;
+    levelSignTextNode.setAttribute("font-size", String(fontSize));
+  }
+
+  function cancelLevelSignAnimation(){
+    levelSignAnimationToken += 1;
+    if(levelSignAnimationFrame){
+      cancelAnimationFrame(levelSignAnimationFrame);
+      levelSignAnimationFrame = 0;
+    }
+  }
+
+  function animateLevelSignTo(targetX, onComplete){
+    if(!levelSignGroup){
+      if(typeof onComplete === "function") onComplete();
+      return;
+    }
+
+    cancelLevelSignAnimation();
+    const token = levelSignAnimationToken;
+    const startX = levelSignX;
+    const distance = Math.abs(targetX - startX);
+    const groundSpeed = Math.max(1, Number(PARALLAX_CONFIG.bottom.speed) || 480);
+    const duration = Math.max(160, distance / groundSpeed * 1000);
+    const startedAt = performance.now();
+
+    levelSignGroup.style.display = "";
+
+    function frame(now){
+      if(token !== levelSignAnimationToken) return;
+      const progress = clamp((now - startedAt) / duration, 0, 1);
+      setLevelSignPosition(startX + (targetX - startX) * progress);
+
+      if(progress < 1){
+        levelSignAnimationFrame = requestAnimationFrame(frame);
+        return;
+      }
+
+      levelSignAnimationFrame = 0;
+      setLevelSignPosition(targetX);
+      if(typeof onComplete === "function") onComplete();
+    }
+
+    levelSignAnimationFrame = requestAnimationFrame(frame);
+  }
+
+  function showLevelSignAtCenter(stageNumber){
+    cancelLevelSignAnimation();
+    setLevelSignText(stageNumber);
+    if(levelSignGroup) levelSignGroup.style.display = "";
+    setLevelSignPosition(LEVEL_SIGN_CONFIG.centerX);
+  }
+
+  function bringLevelSignIn(stageNumber, onComplete){
+    cancelLevelSignAnimation();
+    setLevelSignText(stageNumber);
+    if(levelSignGroup) levelSignGroup.style.display = "";
+    setLevelSignPosition(LEVEL_SIGN_CONFIG.enterX);
+    animateLevelSignTo(LEVEL_SIGN_CONFIG.centerX, onComplete);
+  }
+
+  function releaseLevelSignWithGround(){
+    animateLevelSignTo(LEVEL_SIGN_CONFIG.exitX, () => {
+      if(levelSignGroup) levelSignGroup.style.display = "none";
+    });
+  }
+
+  function renderLevelSign(parent){
+    levelSignLayer = el("g", {
+      id:"levelSignLayer",
+      "pointer-events":"none"
+    }, parent);
+
+    levelSignGroup = el("g", {
+      id:"levelSignGroup",
+      transform:`translate(${LEVEL_SIGN_CONFIG.centerX} 0)`,
+      filter:"url(#softShadow)",
+      "pointer-events":"none"
+    }, levelSignLayer);
+
+    // ظل خفيف على الأرض.
+    el("ellipse", {cx:0, cy:556, rx:38, ry:7, fill:"#6f3b1d", opacity:".22"}, levelSignGroup);
+
+    // العمود خلف اللوح، مع طرف سفلي مدفون في الرمل.
+    el("rect", {x:-10, y:337, width:20, height:218, rx:5, fill:"url(#levelSignPostGrad)", stroke:"#673016", "stroke-width":2.2}, levelSignGroup);
+    el("path", {d:"M-8 349 C-1 366 2 392 -6 421 M7 379 C0 402 1 448 7 478", fill:"none", stroke:"#d58a4a", "stroke-width":2, opacity:".32"}, levelSignGroup);
+
+    // ثلاث ألواح خشبية غير منتظمة لتعطي الشكل نفسه الموجود في المرجع.
+    const planks = [
+      "M-99 293 L94 289 L99 311 L-96 315 Z",
+      "M-96 311 L99 307 L96 333 L-101 336 Z",
+      "M-101 333 L96 329 L91 354 L-96 358 Z"
+    ];
+    planks.forEach((d, index) => {
+      el("path", {
+        d,
+        fill:"url(#levelSignWoodGrad)",
+        stroke:"#743719",
+        "stroke-width":2.6,
+        opacity:index === 1 ? ".98" : "1"
+      }, levelSignGroup);
+    });
+
+    // خطوط الخشب والمسامير.
+    el("path", {d:"M-84 304 C-36 298 23 300 82 297 M-83 325 C-23 319 31 321 80 317 M-83 346 C-28 340 24 343 77 338", fill:"none", stroke:"#6f3217", "stroke-width":2, opacity:".34"}, levelSignGroup);
+    [-82,82].forEach(cx => {
+      el("circle", {cx, cy:322, r:3.3, fill:"#542714", stroke:"#d18a4a", "stroke-width":1}, levelSignGroup);
+    });
+
+    levelSignTextNode = el("text", {
+      x:0,
+      y:326,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#ffffff",
+      stroke:"rgba(74,35,16,.38)",
+      "stroke-width":2.2,
+      "paint-order":"stroke fill",
+      "font-size":27,
+      "font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl",
+      style:"direction:rtl;unicode-bidi:plaintext"
+    }, levelSignGroup);
+
+    setLevelSignText(currentStageIndex + 1);
+    setLevelSignPosition(LEVEL_SIGN_CONFIG.centerX);
+    return levelSignLayer;
+  }
+
   function renderParallaxForeground(){
     // لا توجد طبقة خلفية أمام القطار؛ الشرائح الثلاث كلها خلف السكة والقطار.
     parallaxFrontGroup = null;
@@ -3807,6 +3986,9 @@
     createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.top);
     createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.middle);
     createParallaxLayer(parallaxBackGroup, PARALLAX_CONFIG.bottom);
+
+    // اللافتة خلف القطار وقبل السكة، حتى تبدو مغروسة في الأرض ويغطي القطار جزءًا منها عند مروره.
+    renderLevelSign(parallaxBackGroup);
 
     // السكة فوق الخلفية، والقطار فوقهما.
     // تبقى بالحجم المصغّر نفسه، لكن نبدأ أول قطعة خارج الطرف الأيسر
@@ -4121,10 +4303,23 @@
     }
 
     const scheduledGeneration = stageGeneration;
+    const nextStageIndex = currentStageIndex + 1;
+    const nextStageNumber = nextStageIndex + 1;
+
     stageTransitionTimer = setTimeout(() => {
       stageTransitionTimer = 0;
       if(scheduledGeneration !== stageGeneration) return;
-      startTrainStage(currentStageIndex + 1);
+
+      // أثناء الفراغ بين المستويين تدخل اللافتة من اليمين بسرعة الأرضية،
+      // ثم تتوقف في المنتصف قبل بدء دخول القطار الجديد.
+      bringLevelSignIn(nextStageNumber, () => {
+        if(scheduledGeneration !== stageGeneration) return;
+        stageTransitionTimer = setTimeout(() => {
+          stageTransitionTimer = 0;
+          if(scheduledGeneration !== stageGeneration) return;
+          startTrainStage(nextStageIndex);
+        }, LEVEL_SIGN_CONFIG.centerHoldMs);
+      });
     }, STAGE_CHANGE_DELAY);
   }
 
@@ -4636,6 +4831,7 @@
       clear();
       defs();
       background();
+      showLevelSignAtCenter(currentStageIndex + 1);
       startParallaxLoop();
     }
 
@@ -4691,7 +4887,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 126: جميع إجابات النشاط تظهر كبالونات عشوائية، مع ضمان وجود الإجابة الصحيحة لكل عربة ظاهرة، وإبطاء الطبقة الوسطى. */
+  /* إصدار 129: لافتة مستوى خشبية ثابتة قبل كل مرحلة، تتحرك مع الأرضية بعد استقرار القطار وتدخل من اليمين بين المراحل. */
 })();
 </script>
 </body>
