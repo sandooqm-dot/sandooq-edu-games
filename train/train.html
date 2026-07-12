@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 131</title>
+  <title>قطار الإجابات - إصدار 132</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -399,7 +399,28 @@
   let wagonDropCoverLayer = null;
   let trainPositionGroup = null;
   let collisionDebugLayer = null;
+  let feedbackEffectsLayer = null;
+  let locomotiveSmokeLayer = null;
+  let locomotiveSmokeNextAt = 0;
   const collisionMap = [];
+
+  const CORRECT_POINTS = 10;
+  let totalScore = 0;
+
+  const LOCOMOTIVE_SMOKE_CONFIG = {
+    asset:"train-smoke-132.webp?v=132",
+    chimneyRawX:1066,
+    chimneyRawY:424,
+    intervalMinMs:2100,
+    intervalMaxMs:2850,
+    durationMs:5200,
+    baseWidth:154,
+    baseHeight:132,
+    startScale:.20,
+    endScale:1.35,
+    driftX:-230,
+    driftY:-430
+  };
 
   // خلفية الإصدار 133 مضافة فوق أساس الإصدار 120 دون نقل أي تعديل متعلق بالصناديق أو الفيزياء.
   let parallaxBackGroup = null;
@@ -422,14 +443,14 @@
     centerHoldMs:150
   };
 
-  const PARALLAX_IMAGE_VERSION = 131;
+  const PARALLAX_IMAGE_VERSION = 132;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 131: بداية متدرجة للبالونات، وتكثيف إجابة العربة الحالية، واستمرار التدفق قبل خروج البالونات بالكامل.
+  // إصدار 132: مؤثرات الصح والنقاط والخطأ والانفجار، مع دخان متكرر من مدخنة القاطرة يكبر ويتلاشى تدريجيًا.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -801,22 +822,152 @@
     return g;
   }
 
-  function trackImpactBurst(parent, x, y){
+  function correctAnswerFeedback(x, y, points = CORRECT_POINTS){
+    const layer = feedbackEffectsLayer || fallingObjectsLayer || svg;
+    const group = el("g", {
+      transform:`translate(${x} ${y})`,
+      "pointer-events":"none"
+    }, layer);
+
+    const check = el("text", {
+      x:44,
+      y:-26,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#20c95a",
+      stroke:"#ffffff",
+      "stroke-width":5,
+      "paint-order":"stroke fill",
+      "font-size":42,
+      "font-weight":1000,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      opacity:"0"
+    }, group);
+    check.textContent = "✓";
+
+    const checkOpacity = el("animate", {
+      attributeName:"opacity",
+      values:"0;1;1;0",
+      keyTimes:"0;.16;.70;1",
+      dur:".58s",
+      fill:"freeze"
+    }, check);
+    const checkScale = el("animateTransform", {
+      attributeName:"transform",
+      type:"scale",
+      values:".72;1.18;1;.92",
+      keyTimes:"0;.18;.68;1",
+      dur:".58s",
+      fill:"freeze"
+    }, check);
+    checkOpacity.beginElement();
+    checkScale.beginElement();
+
+    totalScore += Number(points) || 0;
+
+    setTimeout(() => {
+      if(!group.isConnected) return;
+
+      const score = el("text", {
+        x:48,
+        y:-24,
+        "text-anchor":"middle",
+        "dominant-baseline":"middle",
+        fill:"#ffd52a",
+        stroke:"#7a4a00",
+        "stroke-width":4.5,
+        "paint-order":"stroke fill",
+        "font-size":36,
+        "font-weight":1000,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        opacity:"0"
+      }, group);
+      score.textContent = `+${Number(points) || 0}`;
+
+      const scoreOpacity = el("animate", {
+        attributeName:"opacity",
+        values:"0;1;1;0",
+        keyTimes:"0;.16;.62;1",
+        dur:".82s",
+        fill:"freeze"
+      }, score);
+      const scoreRise = el("animate", {
+        attributeName:"y",
+        values:"-24;-36;-58",
+        keyTimes:"0;.38;1",
+        dur:".82s",
+        fill:"freeze"
+      }, score);
+      const scoreSize = el("animate", {
+        attributeName:"font-size",
+        values:"30;41;36",
+        keyTimes:"0;.24;1",
+        dur:".82s",
+        fill:"freeze"
+      }, score);
+      scoreOpacity.beginElement();
+      scoreRise.beginElement();
+      scoreSize.beginElement();
+    }, 430);
+
+    setTimeout(() => group.remove(), 1380);
+  }
+
+  function trackImpactBurst(parent, x, y, showWrongMark = false){
+    const layer = feedbackEffectsLayer || parent || fallingObjectsLayer || svg;
     const burst = el("g", {
       transform:`translate(${x} ${y})`,
-      opacity:"1"
-    }, parent);
+      opacity:"1",
+      "pointer-events":"none"
+    }, layer);
 
-    for(let i = 0; i < 12; i++){
-      const angle = Math.PI + Math.random() * Math.PI;
-      const dist = 20 + Math.random() * 48;
+    const dustCloud = [
+      [-32,-5,26,18],[-12,-22,25,19],[13,-25,28,20],[36,-8,28,19],
+      [30,14,25,17],[5,22,31,19],[-23,19,29,18],[-43,8,24,17],
+      [0,-2,36,24]
+    ];
+
+    dustCloud.forEach(([cx,cy,rx,ry], index) => {
+      const puff = el("ellipse", {
+        cx,
+        cy,
+        rx,
+        ry,
+        fill:index % 3 === 0 ? "#b8bbc3" : (index % 2 ? "#9da2ad" : "#c8c9ce"),
+        stroke:"#8b909b",
+        "stroke-width":1.4,
+        opacity:".82"
+      }, burst);
+
+      const puffOpacity = el("animate", {
+        attributeName:"opacity",
+        values:".82;.66;.25;0",
+        keyTimes:"0;.36;.72;1",
+        dur:".82s",
+        fill:"freeze"
+      }, puff);
+      const puffScale = el("animateTransform", {
+        attributeName:"transform",
+        type:"scale",
+        values:".72;1;1.20",
+        keyTimes:"0;.34;1",
+        dur:".82s",
+          fill:"freeze"
+      }, puff);
+      puffOpacity.beginElement();
+      puffScale.beginElement();
+    });
+
+    for(let i = 0; i < 10; i++){
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 28 + Math.random() * 48;
       const dx = Math.cos(angle) * dist;
-      const dy = Math.sin(angle) * dist * .42;
+      const dy = Math.sin(angle) * dist * .62;
       const dot = el("circle", {
         cx:0,
         cy:0,
-        r:3 + Math.random() * 4,
-        fill:i % 2 ? "#8a5a34" : "#d2a36a",
+        r:2.6 + Math.random() * 3.8,
+        fill:i % 2 ? "#8f949e" : "#c6b29a",
         opacity:".75"
       }, burst);
       const move = el("animateTransform", {
@@ -824,20 +975,94 @@
         type:"translate",
         from:"0 0",
         to:`${dx.toFixed(1)} ${dy.toFixed(1)}`,
-        dur:".38s",
+        dur:".62s",
         fill:"freeze"
       }, dot);
       const fade = el("animate", {
         attributeName:"opacity",
-        values:".75;.35;0",
-        dur:".42s",
+        values:".75;.42;0",
+        dur:".66s",
         fill:"freeze"
       }, dot);
       move.beginElement();
       fade.beginElement();
     }
 
-    setTimeout(() => burst.remove(), 520);
+    const boom = el("text", {
+      x:0,
+      y:-2,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#e92323",
+      stroke:"#fff1a8",
+      "stroke-width":4.8,
+      "paint-order":"stroke fill",
+      "font-size":39,
+      "font-weight":1000,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      opacity:"0"
+    }, burst);
+    boom.textContent = "بووم!";
+
+    const boomOpacity = el("animate", {
+      attributeName:"opacity",
+      values:"0;1;1;0",
+      keyTimes:"0;.14;.68;1",
+      dur:".72s",
+      fill:"freeze"
+    }, boom);
+    const boomScale = el("animateTransform", {
+      attributeName:"transform",
+      type:"scale",
+      values:".70;1.18;1;.92",
+      keyTimes:"0;.18;.64;1",
+      dur:".72s",
+      fill:"freeze"
+    }, boom);
+    boomOpacity.beginElement();
+    boomScale.beginElement();
+
+    if(showWrongMark){
+      setTimeout(() => {
+        if(!burst.isConnected) return;
+
+        const wrong = el("text", {
+          x:40,
+          y:-30,
+          "text-anchor":"middle",
+          "dominant-baseline":"middle",
+          fill:"#ef3038",
+          stroke:"#ffffff",
+          "stroke-width":5,
+          "paint-order":"stroke fill",
+          "font-size":40,
+          "font-weight":1000,
+          "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+          opacity:"0"
+        }, burst);
+        wrong.textContent = "✕";
+
+        const wrongOpacity = el("animate", {
+          attributeName:"opacity",
+          values:"0;1;1;0",
+          keyTimes:"0;.18;.66;1",
+          dur:".58s",
+          fill:"freeze"
+        }, wrong);
+        const wrongScale = el("animateTransform", {
+          attributeName:"transform",
+          type:"scale",
+          values:".72;1.16;1;.92",
+          keyTimes:"0;.20;.68;1",
+          dur:".58s",
+              fill:"freeze"
+        }, wrong);
+        wrongOpacity.beginElement();
+        wrongScale.beginElement();
+      }, 190);
+    }
+
+    setTimeout(() => burst.remove(), 980);
   }
 
   const BOX = {
@@ -2290,7 +2515,7 @@
       item.settleCommitted = true;
       item.currentWellIndex = well.index;
       item.lastWellIndex = well.index;
-      breakMatterBox(item);
+      breakMatterBox(item,{wrongWagon:true});
       return true;
     }
 
@@ -2700,14 +2925,19 @@
     activeFallingBoxes = Math.max(0, activeFallingBoxes - 1);
   }
 
-  function breakMatterBox(item){
+  function breakMatterBox(item, options = {}){
     if(!item || item.done) return;
 
     const x = item.body ? item.body.position.x : 0;
     const y = item.body ? item.body.position.y : 610;
 
     cleanupMatterBox(item, true);
-    trackImpactBurst(fallingObjectsLayer || svg, x, Math.min(y + BOX.bottom, 610));
+    trackImpactBurst(
+      feedbackEffectsLayer || fallingObjectsLayer || svg,
+      x,
+      Math.min(y + BOX.bottom, 610),
+      Boolean(options.wrongWagon)
+    );
     resolveMatterBoxAttempt(item,false);
   }
 
@@ -2726,6 +2956,8 @@
       "transform",
       `translate(${localX.toFixed(2)} ${y.toFixed(2)}) rotate(${r.toFixed(2)})`
     );
+
+    correctAnswerFeedback(x, y, CORRECT_POINTS);
 
     // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
     node.removeAttribute("filter");
@@ -3920,6 +4152,116 @@
     node.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);
   }
 
+  function ensureLocomotiveSmokeLayer(){
+    if(locomotiveSmokeLayer && locomotiveSmokeLayer.isConnected){
+      svg.appendChild(locomotiveSmokeLayer);
+      return locomotiveSmokeLayer;
+    }
+
+    locomotiveSmokeLayer = el("g", {
+      id:"locomotiveSmokeLayer",
+      "pointer-events":"none"
+    });
+    return locomotiveSmokeLayer;
+  }
+
+  function locomotiveChimneyScreenPoint(){
+    return {
+      x:trainX(LOCOMOTIVE_SMOKE_CONFIG.chimneyRawX) + trainVisualOffsetX,
+      y:trainY(LOCOMOTIVE_SMOKE_CONFIG.chimneyRawY)
+    };
+  }
+
+  function scheduleNextLocomotiveSmoke(now){
+    const range = Math.max(
+      0,
+      LOCOMOTIVE_SMOKE_CONFIG.intervalMaxMs - LOCOMOTIVE_SMOKE_CONFIG.intervalMinMs
+    );
+    locomotiveSmokeNextAt = now +
+      LOCOMOTIVE_SMOKE_CONFIG.intervalMinMs +
+      Math.random() * range;
+  }
+
+  function spawnLocomotiveSmoke(now){
+    const layer = ensureLocomotiveSmokeLayer();
+    const point = locomotiveChimneyScreenPoint();
+    const config = LOCOMOTIVE_SMOKE_CONFIG;
+
+    const outer = el("g", {
+      transform:`translate(${point.x.toFixed(2)} ${point.y.toFixed(2)})`,
+      opacity:".9",
+      "pointer-events":"none"
+    }, layer);
+
+    const inner = el("g", {
+      transform:`scale(${config.startScale})`
+    }, outer);
+
+    const smokeImage = el("image", {
+      href:config.asset,
+      x:-config.baseWidth / 2,
+      y:-config.baseHeight / 2,
+      width:config.baseWidth,
+      height:config.baseHeight,
+      preserveAspectRatio:"xMidYMid meet"
+    }, inner);
+    setSvgImageHref(smokeImage, config.asset);
+
+    const travel = el("animateTransform", {
+      attributeName:"transform",
+      type:"translate",
+      from:`${point.x.toFixed(2)} ${point.y.toFixed(2)}`,
+      to:`${(point.x + config.driftX).toFixed(2)} ${(point.y + config.driftY).toFixed(2)}`,
+      dur:`${config.durationMs}ms`,
+      fill:"freeze"
+    }, outer);
+
+    const fade = el("animate", {
+      attributeName:"opacity",
+      values:".90;.80;.70;.56;.38;.18;0",
+      keyTimes:"0;.12;.25;.42;.62;.82;1",
+      dur:`${config.durationMs}ms`,
+      fill:"freeze"
+    }, outer);
+
+    const grow = el("animateTransform", {
+      attributeName:"transform",
+      type:"scale",
+      values:`${config.startScale};.40;.70;1;${config.endScale}`,
+      keyTimes:"0;.18;.43;.72;1",
+      dur:`${config.durationMs}ms`,
+      fill:"freeze"
+    }, inner);
+
+    travel.beginElement();
+    fade.beginElement();
+    grow.beginElement();
+
+    setTimeout(() => outer.remove(), config.durationMs + 180);
+    scheduleNextLocomotiveSmoke(now);
+  }
+
+  function updateLocomotiveSmoke(now){
+    if(trainMotionState === "done") return;
+
+    const point = locomotiveChimneyScreenPoint();
+    const chimneyVisible = point.x >= -24 && point.x <= 1304 &&
+      point.y >= -30 && point.y <= 740;
+
+    if(!chimneyVisible){
+      locomotiveSmokeNextAt = 0;
+      return;
+    }
+
+    if(!locomotiveSmokeNextAt){
+      locomotiveSmokeNextAt = now + 180;
+    }
+
+    if(now >= locomotiveSmokeNextAt){
+      spawnLocomotiveSmoke(now);
+    }
+  }
+
   function stopParallaxLoop(){
     if(parallaxAnimationFrame){
       cancelAnimationFrame(parallaxAnimationFrame);
@@ -4025,6 +4367,7 @@
 
     if(!document.hidden){
       updateParallaxLayers(delta, now);
+      updateLocomotiveSmoke(now);
     }
 
     parallaxAnimationFrame = requestAnimationFrame(parallaxFrameLoop);
@@ -4540,6 +4883,7 @@
     trainPositionGroup?.remove();
     wagonDropCoverPositionGroup?.remove();
     fallingObjectsLayer?.remove();
+    feedbackEffectsLayer?.remove();
     collisionDebugLayer?.remove();
     svg.querySelector("#balloonsLayer")?.remove();
 
@@ -4548,8 +4892,10 @@
     wagonDropCoverLayer = null;
     wagonForegroundCoverLayer = null;
     fallingObjectsLayer = null;
+    feedbackEffectsLayer = null;
     settledObjectsLayer = null;
     collisionDebugLayer = null;
+    // لا نحذف طبقة الدخان؛ الغيمات الموجودة تكمل تلاشيها طبيعيًا بين المستويات.
     // لا نحذف parallaxBackGroup ولا parallaxLayerRecords، فتستمر الحركة بلا انقطاع.
   }
 
@@ -4628,6 +4974,7 @@
     balloonStreamSequence = 0;
     balloonInitialFillComplete = false;
     lastSpawnedBalloonItem = null;
+    locomotiveSmokeNextAt = 0;
     matterLastTime = 0;
     matterAccumulator = 0;
 
@@ -5138,9 +5485,16 @@
 
     renderParallaxForeground();
 
+    ensureLocomotiveSmokeLayer();
+
     // الصندوق يبقى فوق القطار أثناء السقوط الحر.
     // عند ملامسة جدار/قاع العربة يُنقل إلى settledObjectsLayer خلف الواجهة الأمامية.
     fallingObjectsLayer = el("g", {id:"fallingObjectsLayer"});
+
+    feedbackEffectsLayer = el("g", {
+      id:"feedbackEffectsLayer",
+      "pointer-events":"none"
+    });
 
     // خريطة تصادم غير مرئية للقطار: أحواض، حواف، نطاطات، فواصل ذكية، قاطرة، وسكة.
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
@@ -5154,7 +5508,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 130: لافتة أقصر وأخفض، تباطؤ موحّد للوسطى والسفلية أثناء الانتقال، وتسارع تدريجي بعد استقرار القطار مع انتقالات أقصر. */
+  /* إصدار 132: إضافة تغذية بصرية للإجابات الصحيحة والخاطئة ودخان متحرك متدرج من مدخنة القاطرة. */
 })();
 </script>
 </body>
