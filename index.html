@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-logic-v66 -->
+<!-- version: index-train-logic-v67 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11734,18 +11734,17 @@
           <h4 class="choices-config-group-title">عدد المراحل</h4>
           <p class="choices-config-group-note">اختر عدد مراحل اللعبة من 3 إلى 20.</p>
           <div class="train-range-wrap">
-            <output class="train-range-value" id="trainStagesValue" for="trainStagesRange">3 مراحل</output>
-            <input class="train-range" id="trainStagesRange" type="range" min="3" max="20" step="1" value="3" dir="ltr" aria-label="عدد مراحل قطار الإجابات"/>
+            <output class="train-range-value" id="trainStagesValue" for="trainStagesRange">5 مراحل</output>
+            <input class="train-range" id="trainStagesRange" type="range" min="3" max="20" step="1" value="5" dir="ltr" aria-label="عدد مراحل قطار الإجابات"/>
             <div class="train-range-labels"><span>3</span><span>20</span></div>
           </div>
         </div>
 
         <div class="choices-config-group">
           <h4 class="choices-config-group-title">سرعة البالونات</h4>
-          <p class="choices-config-group-note">اختر مستوى السرعة من 1 إلى 10.</p>
           <div class="train-range-wrap">
-            <output class="train-range-value" id="trainSpeedValue" for="trainSpeedRange">3</output>
-            <input class="train-range" id="trainSpeedRange" type="range" min="1" max="10" step="1" value="3" dir="ltr" aria-label="سرعة بالونات قطار الإجابات"/>
+            <output class="train-range-value" id="trainSpeedValue" for="trainSpeedRange">5</output>
+            <input class="train-range" id="trainSpeedRange" type="range" min="1" max="10" step="1" value="5" dir="ltr" aria-label="سرعة بالونات قطار الإجابات"/>
             <div class="train-range-labels"><span>1</span><span>10</span></div>
           </div>
         </div>
@@ -17336,16 +17335,30 @@
   const speedValue = document.getElementById("trainSpeedValue");
 
   let contentType = "text";
-  let stageCount = 3;
-  let balloonSpeed = 3;
+  let stageCount = 5;
+  let balloonSpeed = 5;
   let contents = [];
   let contentSequence = 0;
+
+  const TRAIN_SPEED_SCALE_VERSION = 2;
+  const LEGACY_TRAIN_SPEED_LEVEL_MAP = [1,1,1,2,3,3,4,5,6,7];
 
   function clampNumber(value,min,max,fallback){
     const number = Number(value);
     return Number.isFinite(number)
       ? Math.max(min,Math.min(max,Math.round(number)))
       : fallback;
+  }
+
+  function normalizeTrainSpeedLevel(value,scaleVersion = TRAIN_SPEED_SCALE_VERSION){
+    const level = clampNumber(value,1,10,5);
+    if (Number(scaleVersion) >= TRAIN_SPEED_SCALE_VERSION) return level;
+    return LEGACY_TRAIN_SPEED_LEVEL_MAP[level - 1] || 5;
+  }
+
+  function trainStagesLabel(value){
+    const count = clampNumber(value,3,20,5);
+    return `${count} ${count >= 3 && count <= 10 ? "مراحل" : "مرحلة"}`;
   }
 
   function blankMedia(){
@@ -17442,6 +17455,7 @@
       payloadVersion:2,
       answerLogicVersion:1,
       wrongAnswerBehavior:"explode-and-retry",
+      speedScaleVersion:TRAIN_SPEED_SCALE_VERSION,
       name:currentName(),
       gameName:currentName(),
       theme:"desert",
@@ -17476,8 +17490,8 @@
       contentType = ["text","images","mixed"].includes(payload?.contentType || payload?.type)
         ? String(payload.contentType || payload.type)
         : "text";
-      stageCount = clampNumber(payload?.stageCount ?? payload?.stages,3,20,3);
-      balloonSpeed = clampNumber(payload?.balloonSpeed ?? payload?.speedLevel,1,10,3);
+      stageCount = clampNumber(payload?.stageCount ?? payload?.stages,3,20,5);
+      balloonSpeed = normalizeTrainSpeedLevel(payload?.balloonSpeed ?? payload?.speedLevel,payload?.speedScaleVersion || 1);
       const rawContents = Array.isArray(payload?.contents)
         ? payload.contents
         : (Array.isArray(payload?.entries) ? payload.entries : []);
@@ -17496,7 +17510,7 @@
     });
 
     if (stagesRange) stagesRange.value = String(stageCount);
-    if (stagesValue) stagesValue.textContent = `${stageCount} ${stageCount === 3 ? "مراحل" : "مرحلة"}`;
+    if (stagesValue) stagesValue.textContent = trainStagesLabel(stageCount);
 
     if (speedRange) speedRange.value = String(balloonSpeed);
     if (speedValue) speedValue.textContent = String(balloonSpeed);
@@ -17739,6 +17753,7 @@
       payloadVersion:2,
       answerLogicVersion:1,
       wrongAnswerBehavior:"explode-and-retry",
+      speedScaleVersion:TRAIN_SPEED_SCALE_VERSION,
       name:currentName(),
       gameName:currentName(),
       theme:"desert",
@@ -17862,13 +17877,13 @@
   });
 
   stagesRange?.addEventListener("input",()=>{
-    stageCount = clampNumber(stagesRange.value,3,20,3);
+    stageCount = clampNumber(stagesRange.value,3,20,5);
     updateControls();
     saveDraft();
   });
 
   speedRange?.addEventListener("input",()=>{
-    balloonSpeed = clampNumber(speedRange.value,1,10,3);
+    balloonSpeed = clampNumber(speedRange.value,1,10,5);
     updateControls();
     saveDraft();
   });
