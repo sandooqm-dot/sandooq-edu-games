@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 133</title>
+  <title>قطار الإجابات - إصدار 134</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -471,7 +471,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 133: إضافة طائرة الدرجة بين المستويات، ونظام نقاط 10/5 بحسب جودة سقوط الصندوق.
+  // إصدار 134: الحفاظ على الطائرة والنقاط، مع تحسين جدولة البالونات وتجهيز إجابات العربات القادمة مبكرًا.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -588,23 +588,21 @@
   const WAGON_CAPTURE_MIN_OVERLAP = .32;
   const WAGON_CAPTURE_MIN_DEPTH = 6;
 
-  // نظام تدفق متدرج:
-  // يظهر عادة خمسة بالونات، ويصل إلى ستة عند استمرار الحركة.
-  // يوجد عدد إضافي من العناصر المخفية لإبقاء التدفق مستمرًا عند فرقعة أكثر من بالون.
-  const BALLOON_VISIBLE_TARGET = 5;
+  // إصدار 134: ستة بالونات ظاهرة مع عنصرين احتياطيين خارج الشاشة،
+  // وبداية متدرجة بنمط فردي/ثنائي، وتجهيز مبكر لإجابات العربة الحالية والتالية.
+  const BALLOON_VISIBLE_TARGET = 6;
   const BALLOON_VISIBLE_LIMIT = 6;
+  const BALLOON_ACTIVE_STREAM_LIMIT = 8;
   const BALLOON_POOL_SIZE = 10;
-  const BALLOON_INITIAL_SPAWN_MIN_MS = 620;
-  const BALLOON_INITIAL_SPAWN_MAX_MS = 880;
-  const BALLOON_CONTINUOUS_SPAWN_MIN_MS = 520;
-  const BALLOON_CONTINUOUS_SPAWN_MAX_MS = 760;
-  const BALLOON_CONTINUOUS_TRIGGER_X = 735;
+  const BALLOON_CONTINUOUS_TRIGGER_X = 585;
   const BALLOON_EARLY_RECYCLE_X = -45;
   const BALLOON_ENTRY_ZONE_X = 1410;
   const BALLOON_ENTRY_MAX_COUNT = 2;
   const BALLOON_ENTRY_MIN_SPACING = 112;
   const BALLOON_REPEAT_GAP_COUNT = 1;
-  const BALLOON_PRIORITY_PATTERN = ["current","next","current","random","random","current"];
+  const BALLOON_PRIORITY_PATTERN = ["current","next","current","next","distractor","current"];
+  const BALLOON_INITIAL_DELAY_PATTERN_MS = [760, 820, 280, 920, 740, 360];
+  const BALLOON_CONTINUOUS_DELAY_PATTERN_MS = [620, 300, 760, 650, 320, 720];
   const BALLOON_SPEED_MULTIPLIERS = [.78, .90, 1.04, 1.20, .84, 1.12];
   const MEDIUM_BALLOON_SCALE = .76;
   const MAX_ACTIVE_FALLING_BOXES = 4;
@@ -3558,6 +3556,10 @@
   let balloonStreamLastSpawnAt = 0;
   let balloonStreamSequence = 0;
   let balloonInitialFillComplete = false;
+  let balloonInitialDelayCursor = 0;
+  let balloonContinuousDelayCursor = 0;
+  let balloonPrioritySignature = "";
+  let balloonPriorityPrefetchQueue = [];
   let lastSpawnedBalloonItem = null;
 
   function activeUncompletedWagonIds(){
@@ -3673,25 +3675,56 @@
     return chooseRelationWithRepeatGap(stageBalloonDeck);
   }
 
-  function nextStageBalloonContent(){
+  function nextDistractorStageRelation(){
+    const explicitDistractors = currentStageDistractorRelations.filter(relationIsStillAvailable);
+    if(explicitDistractors.length){
+      return chooseRelationWithRepeatGap(explicitDistractors);
+    }
+
+    const activeIds = new Set(currentStageActiveWagonIds);
+    const fallbackDistractors = stageBalloonDeck.filter(relation =>
+      relationIsStillAvailable(relation) && !activeIds.has(relation.targetWagonId)
+    );
+    return chooseRelationWithRepeatGap(fallbackDistractors);
+  }
+
+  function refreshBalloonPriorityPrefetchQueue(){
+    const wagonIds = priorityUncompletedWagonIds();
+    const signature = wagonIds.slice(0,2).join("|");
+
+    if(signature !== balloonPrioritySignature){
+      balloonPrioritySignature = signature;
+      balloonPriorityPrefetchQueue = [];
+      if(wagonIds[0]) balloonPriorityPrefetchQueue.push("current");
+      if(wagonIds[1]) balloonPriorityPrefetchQueue.push("next");
+      stageBalloonPriorityCursor = 0;
+    }
+
+    return wagonIds;
+  }
+
+  function nextStageBalloonContent(preferredType = ""){
     if(!TRAIN_ANSWER_LOGIC_ENABLED || !stageBalloonDeck.length) return null;
 
     stageBalloonSpawnCounter += 1;
 
-    // كل دورة من ستة بالونات:
-    // ثلاثة لإجابة العربة الحالية، واحد للعربة التالية، واثنان من بنك الإجابات العام.
-    const patternType = BALLOON_PRIORITY_PATTERN[
+    const wagonIds = refreshBalloonPriorityPrefetchQueue();
+    const patternType = preferredType || BALLOON_PRIORITY_PATTERN[
       stageBalloonPriorityCursor % BALLOON_PRIORITY_PATTERN.length
     ];
-    stageBalloonPriorityCursor += 1;
 
-    const wagonIds = priorityUncompletedWagonIds();
+    if(!preferredType){
+      stageBalloonPriorityCursor += 1;
+    }
+
     let selected = null;
 
     if(patternType === "current"){
       selected = nextRelationForWagon(wagonIds[0]);
     }else if(patternType === "next"){
       selected = nextRelationForWagon(wagonIds[1]);
+    }else if(patternType === "distractor"){
+      selected = nextDistractorStageRelation();
     }
 
     return selected || nextGeneralStageRelation();
@@ -3828,14 +3861,17 @@
   }
 
   function balloonSpawnDelay(initial = false){
-    const min = initial
-      ? BALLOON_INITIAL_SPAWN_MIN_MS
-      : BALLOON_CONTINUOUS_SPAWN_MIN_MS;
-    const max = initial
-      ? BALLOON_INITIAL_SPAWN_MAX_MS
-      : BALLOON_CONTINUOUS_SPAWN_MAX_MS;
+    const pattern = initial
+      ? BALLOON_INITIAL_DELAY_PATTERN_MS
+      : BALLOON_CONTINUOUS_DELAY_PATTERN_MS;
+    const cursor = initial
+      ? balloonInitialDelayCursor++
+      : balloonContinuousDelayCursor++;
+    const baseDelay = pattern[cursor % pattern.length];
+    const jitter = (Math.random() - .5) * 90;
 
-    return min + Math.random() * Math.max(0, max - min);
+    // التأخير القصير يصنع زوجًا خفيفًا، والتأخير الأطول يفصل الدفعات بوضوح.
+    return Math.max(240, baseDelay + jitter);
   }
 
   function canUseBalloonEntry(){
@@ -3860,8 +3896,8 @@
     );
   }
 
-  function activateBalloonForStream(item, now){
-    recycleBalloon(item, now, false);
+  function activateBalloonForStream(item, now, preferredType = ""){
+    recycleBalloon(item, now, false, preferredType);
 
     if(item.popped || item.node.style.display === "none") return false;
 
@@ -3887,33 +3923,40 @@
       return;
     }
 
-    let visible = visibleStreamBalloons();
+    let active = visibleStreamBalloons();
     const ready = readyStreamBalloons(now);
     if(!ready.length || now < balloonStreamNextSpawnAt) return;
 
     const initialFill = !balloonInitialFillComplete;
-    const triggerItem = visible
+    const triggerItem = active
       .filter(item =>
         !item.streamTriggerFired &&
         item.state.x <= BALLOON_CONTINUOUS_TRIGGER_X
       )
       .sort((a,b) => a.streamSequence - b.streamSequence)[0] || null;
 
+    refreshBalloonPriorityPrefetchQueue();
+    let preferredType = "";
     let shouldSpawn = false;
 
-    if(visible.length === 0){
+    if(active.length === 0){
       shouldSpawn = true;
-    }else if(initialFill && visible.length < BALLOON_VISIBLE_TARGET){
+    }else if(initialFill && active.length < BALLOON_VISIBLE_TARGET){
       shouldSpawn = true;
-    }else if(visible.length < BALLOON_VISIBLE_TARGET){
+    }else if(!initialFill && active.length < BALLOON_VISIBLE_TARGET){
+      // تعويض أي بالون فُرقع، مع إبقاء العدد الأساسي ستة.
       shouldSpawn = true;
-    }else if(visible.length < BALLOON_VISIBLE_LIMIT && triggerItem){
+    }else if(triggerItem && active.length < BALLOON_ACTIVE_STREAM_LIMIT){
+      // عندما تتجاوز مجموعة البالونات منتصف الشاشة بقليل،
+      // نجهز أولًا إجابة للعربة الحالية ثم للعربة التالية قبل المشتتات.
+      preferredType = balloonPriorityPrefetchQueue[0] || "";
       shouldSpawn = true;
-    }else if(visible.length >= BALLOON_VISIBLE_LIMIT && triggerItem){
+    }else if(triggerItem && active.length >= BALLOON_ACTIVE_STREAM_LIMIT){
       const recyclable = leftmostRecyclableBalloon();
       if(recyclable){
         parkBalloonForStream(recyclable,now,0);
-        visible = visibleStreamBalloons();
+        active = visibleStreamBalloons();
+        preferredType = balloonPriorityPrefetchQueue[0] || "";
         shouldSpawn = true;
       }
     }
@@ -3922,24 +3965,30 @@
 
     if(triggerItem) triggerItem.streamTriggerFired = true;
 
-    const activated = activateBalloonForStream(ready[0],now);
+    const readyItem = ready[0];
+    const usedPriorityContent = Boolean(preferredType && !readyItem.pendingRetryContent);
+    const activated = activateBalloonForStream(readyItem,now,preferredType);
     if(!activated) return;
 
-    const visibleAfter = visibleStreamBalloons().length;
-    if(visibleAfter >= BALLOON_VISIBLE_TARGET){
+    if(usedPriorityContent && balloonPriorityPrefetchQueue[0] === preferredType){
+      balloonPriorityPrefetchQueue.shift();
+    }
+
+    const activeAfter = visibleStreamBalloons().length;
+    if(activeAfter >= BALLOON_VISIBLE_TARGET){
       balloonInitialFillComplete = true;
     }
 
     balloonStreamNextSpawnAt = now + balloonSpawnDelay(!balloonInitialFillComplete);
   }
 
-  function recycleBalloon(item, now, forceFarRight = false){
+  function recycleBalloon(item, now, forceFarRight = false, preferredType = ""){
     const previousProfileId = item.config.motionProfile?.id || "";
     const motionProfile = nextBalloonMotionProfile(previousProfileId);
 
     let content = null;
     if(TRAIN_ANSWER_LOGIC_ENABLED){
-      content = item.pendingRetryContent || nextStageBalloonContent();
+      content = item.pendingRetryContent || nextStageBalloonContent(preferredType);
 
       if(!content){
         item.pendingRetryContent = null;
@@ -4119,6 +4168,7 @@
       "data-pool-size":String(POOL_SIZE),
       "data-visible-target":String(BALLOON_VISIBLE_TARGET),
       "data-visible-limit":String(BALLOON_VISIBLE_LIMIT),
+      "data-active-stream-limit":String(BALLOON_ACTIVE_STREAM_LIMIT),
       "data-required-count":String(currentStageRequiredRelations.length),
       "data-distractor-count":String(currentStageDistractorRelations.length)
     });
@@ -4200,6 +4250,10 @@
     balloonStreamLastSpawnAt = 0;
     balloonStreamSequence = 0;
     balloonInitialFillComplete = false;
+    balloonInitialDelayCursor = 0;
+    balloonContinuousDelayCursor = 0;
+    balloonPrioritySignature = "";
+    balloonPriorityPrefetchQueue = [];
     lastSpawnedBalloonItem = null;
 
     startBalloonPoolLoop();
@@ -4950,6 +5004,8 @@
     stageBalloonSpawnCounter = 0;
     stageBalloonPriorityCursor = 0;
     stageCorrectWagonCursor = 0;
+    balloonPrioritySignature = "";
+    balloonPriorityPrefetchQueue = [];
     recentDisplayedBalloonIds.length = 0;
 
     if(!TRAIN_ANSWER_LOGIC_ENABLED){
@@ -5147,6 +5203,10 @@
     balloonStreamLastSpawnAt = 0;
     balloonStreamSequence = 0;
     balloonInitialFillComplete = false;
+    balloonInitialDelayCursor = 0;
+    balloonContinuousDelayCursor = 0;
+    balloonPrioritySignature = "";
+    balloonPriorityPrefetchQueue = [];
     lastSpawnedBalloonItem = null;
     locomotiveSmokeNextAt = 0;
     matterLastTime = 0;
