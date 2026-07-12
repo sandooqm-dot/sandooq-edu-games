@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 130</title>
+  <title>قطار الإجابات - إصدار 131</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -422,14 +422,14 @@
     centerHoldMs:150
   };
 
-  const PARALLAX_IMAGE_VERSION = 130;
+  const PARALLAX_IMAGE_VERSION = 131;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 130: تقصير عمود اللافتة وخفض لوحها، والتحكم التدريجي بسرعة الطبقتين الوسطى والسفلية أثناء الانتقال، مع تقليل زمن الانتقال بين المستويات.
+  // إصدار 131: بداية متدرجة للبالونات، وتكثيف إجابة العربة الحالية، واستمرار التدفق قبل خروج البالونات بالكامل.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -546,12 +546,23 @@
   const WAGON_CAPTURE_MIN_OVERLAP = .32;
   const WAGON_CAPTURE_MIN_DEPTH = 6;
 
-  // تدفق متدرج: ستة بالونات فقط في النظام، تدخل كلها من خارج اليمين
-  // وتتحرك بسرعات متفاوتة. جميع إجابات المعلم تبقى قابلة للظهور والتكرار.
-  const BALLOON_STREAM_SIZE = 6;
-  const CORRECT_BALLOON_CADENCE = 4;
-  const BALLOON_STREAM_SPACING = 188;
+  // نظام تدفق متدرج:
+  // يظهر عادة خمسة بالونات، ويصل إلى ستة عند استمرار الحركة.
+  // يوجد عدد إضافي من العناصر المخفية لإبقاء التدفق مستمرًا عند فرقعة أكثر من بالون.
+  const BALLOON_VISIBLE_TARGET = 5;
+  const BALLOON_VISIBLE_LIMIT = 6;
+  const BALLOON_POOL_SIZE = 10;
+  const BALLOON_INITIAL_SPAWN_MIN_MS = 620;
+  const BALLOON_INITIAL_SPAWN_MAX_MS = 880;
+  const BALLOON_CONTINUOUS_SPAWN_MIN_MS = 520;
+  const BALLOON_CONTINUOUS_SPAWN_MAX_MS = 760;
+  const BALLOON_CONTINUOUS_TRIGGER_X = 735;
+  const BALLOON_EARLY_RECYCLE_X = -45;
+  const BALLOON_ENTRY_ZONE_X = 1410;
+  const BALLOON_ENTRY_MAX_COUNT = 2;
+  const BALLOON_ENTRY_MIN_SPACING = 112;
   const BALLOON_REPEAT_GAP_COUNT = 1;
+  const BALLOON_PRIORITY_PATTERN = ["current","next","current","random","random","current"];
   const BALLOON_SPEED_MULTIPLIERS = [.78, .90, 1.04, 1.20, .84, 1.12];
   const MEDIUM_BALLOON_SCALE = .76;
   const MAX_ACTIVE_FALLING_BOXES = 4;
@@ -3041,6 +3052,7 @@
   let stageBalloonDeck = [];
   let stageBalloonCursor = 0;
   let stageBalloonSpawnCounter = 0;
+  let stageBalloonPriorityCursor = 0;
   let stageCorrectWagonCursor = 0;
   const recentDisplayedBalloonIds = [];
 
@@ -3054,8 +3066,8 @@
   }
 
   function currentBalloonFlowSize(){
-    // ستة بالونات ثابتة في النظام، والظاهر داخل الشاشة عادة خمسة أو ستة.
-    return BALLOON_STREAM_SIZE;
+    // عناصر احتياطية مخفية تسمح بالتدفق المستمر، مع حد أقصى ستة بالونات ظاهرة.
+    return BALLOON_POOL_SIZE;
   }
 
   function setBalloonMedia(balloon, mediaInput){
@@ -3252,6 +3264,11 @@
   let balloonLoopStarted = false;
   let balloonLoopLastTime = 0;
   let balloonMotionProfileCursor = 0;
+  let balloonStreamNextSpawnAt = 0;
+  let balloonStreamLastSpawnAt = 0;
+  let balloonStreamSequence = 0;
+  let balloonInitialFillComplete = false;
+  let lastSpawnedBalloonItem = null;
 
   function activeUncompletedWagonIds(){
     return currentStageActiveWagonIds.filter(wagonId => {
@@ -3293,30 +3310,57 @@
     return relation;
   }
 
+  function priorityUncompletedWagonIds(){
+    const uncompleted = activeUncompletedWagonIds();
+    if(!uncompleted.length) return [];
+
+    const ordered = [];
+    const add = wagonId => {
+      if(!wagonId || !uncompleted.includes(wagonId) || ordered.includes(wagonId)) return;
+      ordered.push(wagonId);
+    };
+
+    const currentCarIndex = QUESTION_WAGON_INDICES[activeQuestionPointer];
+    add(TRAIN_CARS[currentCarIndex]?.wagonId);
+
+    QUESTION_WAGON_INDICES.forEach(index => add(TRAIN_CARS[index]?.wagonId));
+    uncompleted.forEach(add);
+
+    return ordered;
+  }
+
+  function nextRelationForWagon(wagonId){
+    if(!wagonId) return null;
+
+    const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
+    const allCandidates = currentStageRequiredRelations.filter(relation =>
+      relation.targetWagonId === wagonId && relationIsStillAvailable(relation)
+    );
+
+    if(!allCandidates.length) return null;
+
+    // نعطي أولوية للإجابات التي لم تُحتسب بعد، مع بقاء الإجابات السابقة قابلة للظهور.
+    const unaccepted = allCandidates.filter(relation => !accepted.has(relation.balloonId));
+    return chooseRelationWithRepeatGap(unaccepted.length ? unaccepted : allCandidates);
+  }
+
   function nextCorrectStageRelation(){
-    const wagonIds = activeUncompletedWagonIds();
+    const wagonIds = priorityUncompletedWagonIds();
     if(!wagonIds.length) return null;
 
     for(let offset = 0; offset < wagonIds.length; offset++){
       const wagonIndex = (stageCorrectWagonCursor + offset) % wagonIds.length;
-      const wagonId = wagonIds[wagonIndex];
-      const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
-      const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
+      const relation = nextRelationForWagon(wagonIds[wagonIndex]);
 
-      const candidates = currentStageRequiredRelations.filter(relation =>
-        relation.targetWagonId === wagonId &&
-        expected.has(relation.balloonId) &&
-        !accepted.has(relation.balloonId)
-      );
-
-      if(candidates.length){
+      if(relation){
         stageCorrectWagonCursor = (wagonIndex + 1) % wagonIds.length;
-        return chooseRelationWithRepeatGap(candidates);
+        return relation;
       }
     }
 
     return null;
   }
+
   function nextGeneralStageRelation(){
     if(!stageBalloonDeck.length) return null;
 
@@ -3338,23 +3382,29 @@
 
     return chooseRelationWithRepeatGap(stageBalloonDeck);
   }
+
   function nextStageBalloonContent(){
     if(!TRAIN_ANSWER_LOGIC_ENABLED || !stageBalloonDeck.length) return null;
 
     stageBalloonSpawnCounter += 1;
 
-    // كل أربعة بالونات تقريبًا نضمن فرصة صحيحة لعربة لم تكتمل بعد.
-    // بقية البالونات تأتي من جميع إجابات المعلم، بما فيها الإجابات التي نجحت سابقًا.
-    const correctDue =
-      stageBalloonSpawnCounter === 1 ||
-      stageBalloonSpawnCounter % CORRECT_BALLOON_CADENCE === 0;
+    // كل دورة من ستة بالونات:
+    // ثلاثة لإجابة العربة الحالية، واحد للعربة التالية، واثنان من بنك الإجابات العام.
+    const patternType = BALLOON_PRIORITY_PATTERN[
+      stageBalloonPriorityCursor % BALLOON_PRIORITY_PATTERN.length
+    ];
+    stageBalloonPriorityCursor += 1;
 
-    if(correctDue){
-      const correct = nextCorrectStageRelation();
-      if(correct) return correct;
+    const wagonIds = priorityUncompletedWagonIds();
+    let selected = null;
+
+    if(patternType === "current"){
+      selected = nextRelationForWagon(wagonIds[0]);
+    }else if(patternType === "next"){
+      selected = nextRelationForWagon(wagonIds[1]);
     }
 
-    return nextGeneralStageRelation();
+    return selected || nextGeneralStageRelation();
   }
 
   function nextBalloonLines(){
@@ -3410,8 +3460,8 @@
   }
 
   function initialBalloonX(index){
-    // جميع البالونات تبدأ كاملة خارج الطرف الأيمن، ثم تدخل بالتتابع دون ظهور مفاجئ.
-    return BALLOON_FLIGHT.startX + 135 + index * BALLOON_STREAM_SPACING;
+    // كل عناصر المسبح تبدأ مخفية خارج الطرف الأيمن، ثم يفعّلها المجدول واحدًا بعد الآخر.
+    return BALLOON_FLIGHT.startX + 115;
   }
 
   function createBalloonMotionState(config, index = 0){
@@ -3447,30 +3497,150 @@
     });
   }
 
-  function nextContinuousSpawnX(item){
-    const startX = BALLOON_FLIGHT.startX;
-    const minimumSpacing = BALLOON_STREAM_SPACING;
+  function visibleStreamBalloons(){
+    return activeBalloons.filter(item =>
+      item &&
+      !item.popped &&
+      !item.flyAway &&
+      item.node?.style.display !== "none"
+    );
+  }
 
-    const nearbyRightBalloons = activeBalloons
-      .filter(other =>
-        other !== item &&
-        !other.popped &&
-        !other.flyAway &&
-        other.node?.style.display !== "none" &&
-        other.state.x > 1080
+  function readyStreamBalloons(now){
+    return activeBalloons
+      .filter(item =>
+        item &&
+        item.popped &&
+        !item.flyAway &&
+        !item.attemptPending &&
+        now >= (Number(item.resetAt) || 0)
       )
+      .sort((a,b) => {
+        const retryA = a.pendingRetryContent ? 0 : 1;
+        const retryB = b.pendingRetryContent ? 0 : 1;
+        return retryA - retryB || a.index - b.index;
+      });
+  }
+
+  function parkBalloonForStream(item, now, readyDelay = 0){
+    if(!item?.node) return;
+
+    item.node.setAttribute("opacity","0");
+    item.node.style.display = "none";
+    item.node.style.pointerEvents = "none";
+    item.node.style.cursor = "default";
+
+    item.popped = true;
+    item.streamActive = false;
+    item.streamTriggerFired = false;
+    item.attemptPending = false;
+    item.resetAt = now + Math.max(0, Number(readyDelay) || 0);
+  }
+
+  function balloonSpawnDelay(initial = false){
+    const min = initial
+      ? BALLOON_INITIAL_SPAWN_MIN_MS
+      : BALLOON_CONTINUOUS_SPAWN_MIN_MS;
+    const max = initial
+      ? BALLOON_INITIAL_SPAWN_MAX_MS
+      : BALLOON_CONTINUOUS_SPAWN_MAX_MS;
+
+    return min + Math.random() * Math.max(0, max - min);
+  }
+
+  function canUseBalloonEntry(){
+    const visible = visibleStreamBalloons();
+    const crowded = visible.filter(item => item.state.x > BALLOON_ENTRY_ZONE_X);
+    return crowded.length < BALLOON_ENTRY_MAX_COUNT;
+  }
+
+  function nextContinuousSpawnX(item){
+    const baseX = BALLOON_FLIGHT.startX + 115;
+    const rightSide = visibleStreamBalloons()
+      .filter(other => other !== item && other.state.x > 1260)
       .map(other => other.state.x)
-      .sort((a, b) => a - b);
+      .sort((a,b) => b - a);
 
-    let spawnX = startX;
+    if(!rightSide.length) return baseX;
 
-    for(const x of nearbyRightBalloons){
-      if(Math.abs(x - spawnX) < minimumSpacing){
-        spawnX = x + minimumSpacing;
+    return clamp(
+      rightSide[0] + BALLOON_ENTRY_MIN_SPACING,
+      baseX,
+      baseX + 210
+    );
+  }
+
+  function activateBalloonForStream(item, now){
+    recycleBalloon(item, now, false);
+
+    if(item.popped || item.node.style.display === "none") return false;
+
+    balloonStreamSequence += 1;
+    item.streamActive = true;
+    item.streamTriggerFired = false;
+    item.streamSequence = balloonStreamSequence;
+    lastSpawnedBalloonItem = item;
+    balloonStreamLastSpawnAt = now;
+    return true;
+  }
+
+  function leftmostRecyclableBalloon(){
+    return visibleStreamBalloons()
+      .filter(item => item.state.x < BALLOON_EARLY_RECYCLE_X)
+      .sort((a,b) => a.state.x - b.state.x)[0] || null;
+  }
+
+  function updateBalloonStreamScheduler(now){
+    if(stageCompleteTriggered ||
+       trainMotionState === "exiting" ||
+       trainMotionState === "done"){
+      return;
+    }
+
+    let visible = visibleStreamBalloons();
+    const ready = readyStreamBalloons(now);
+    if(!ready.length || now < balloonStreamNextSpawnAt) return;
+
+    const initialFill = !balloonInitialFillComplete;
+    const triggerItem = visible
+      .filter(item =>
+        !item.streamTriggerFired &&
+        item.state.x <= BALLOON_CONTINUOUS_TRIGGER_X
+      )
+      .sort((a,b) => a.streamSequence - b.streamSequence)[0] || null;
+
+    let shouldSpawn = false;
+
+    if(visible.length === 0){
+      shouldSpawn = true;
+    }else if(initialFill && visible.length < BALLOON_VISIBLE_TARGET){
+      shouldSpawn = true;
+    }else if(visible.length < BALLOON_VISIBLE_TARGET){
+      shouldSpawn = true;
+    }else if(visible.length < BALLOON_VISIBLE_LIMIT && triggerItem){
+      shouldSpawn = true;
+    }else if(visible.length >= BALLOON_VISIBLE_LIMIT && triggerItem){
+      const recyclable = leftmostRecyclableBalloon();
+      if(recyclable){
+        parkBalloonForStream(recyclable,now,0);
+        visible = visibleStreamBalloons();
+        shouldSpawn = true;
       }
     }
 
-    return clamp(spawnX, startX, startX + 420);
+    if(!shouldSpawn || !canUseBalloonEntry()) return;
+
+    if(triggerItem) triggerItem.streamTriggerFired = true;
+
+    const activated = activateBalloonForStream(ready[0],now);
+    if(!activated) return;
+
+    const visibleAfter = visibleStreamBalloons().length;
+    if(visibleAfter >= BALLOON_VISIBLE_TARGET){
+      balloonInitialFillComplete = true;
+    }
+
+    balloonStreamNextSpawnAt = now + balloonSpawnDelay(!balloonInitialFillComplete);
   }
 
   function recycleBalloon(item, now, forceFarRight = false){
@@ -3489,7 +3659,10 @@
         item.node.removeAttribute("data-target-wagon-id");
         item.node.style.display = "none";
         item.node.style.pointerEvents = "none";
+        item.node.style.cursor = "default";
         item.popped = true;
+        item.streamActive = false;
+        item.streamTriggerFired = false;
         item.resetAt = now + 420;
         return;
       }
@@ -3537,6 +3710,8 @@
     item.node.style.pointerEvents = "auto";
     item.node.style.cursor = "pointer";
     item.popped = false;
+    item.streamActive = true;
+    item.streamTriggerFired = false;
     item.resetAt = 0;
   }
 
@@ -3608,9 +3783,7 @@
     }
 
     if(item.popped){
-      if(now >= item.resetAt){
-        recycleBalloon(item, now, false);
-      }
+      // إعادة إدخال البالون أصبحت تحت تحكم مجدول التدفق، حتى لا تظهر عدة بالونات دفعة واحدة.
       return;
     }
 
@@ -3625,7 +3798,7 @@
     );
 
     if(item.state.x < item.config.endX){
-      recycleBalloon(item, now, false);
+      parkBalloonForStream(item,now,0);
     }
   }
 
@@ -3641,6 +3814,7 @@
         updateBalloonItem(item, now, dtMs);
       }
 
+      updateBalloonStreamScheduler(now);
       requestAnimationFrame(frame);
     }
 
@@ -3648,19 +3822,20 @@
   }
 
   function balloonsLayer(){
-    const ACTIVE_BALLOONS = currentBalloonFlowSize();
+    const POOL_SIZE = currentBalloonFlowSize();
     const balloons = el("g", {
       id:"balloonsLayer",
       "data-speed-level":String(BALLOON_SPEED_LEVEL),
-      "data-flow-size":String(ACTIVE_BALLOONS),
+      "data-pool-size":String(POOL_SIZE),
+      "data-visible-target":String(BALLOON_VISIBLE_TARGET),
+      "data-visible-limit":String(BALLOON_VISIBLE_LIMIT),
       "data-required-count":String(currentStageRequiredRelations.length),
       "data-distractor-count":String(currentStageDistractorRelations.length)
     });
 
-    for(let index = 0; index < ACTIVE_BALLOONS; index++){
-      const content = TRAIN_ANSWER_LOGIC_ENABLED ? nextStageBalloonContent() : null;
-      const media = content?.balloon || {text:(nextBalloonLines() || []).join(" ")};
-      const lines = mediaTextLines(media,["",""]);
+    const now = performance.now();
+
+    for(let index = 0; index < POOL_SIZE; index++){
       const motionProfile = nextBalloonMotionProfile();
       const initialMotionTime = index * 1.31;
       const initialY = balloonYForProfile(
@@ -3671,9 +3846,9 @@
 
       const config = {
         ...BALLOON_FLIGHT,
-        lines,
-        media,
-        content,
+        lines:["",""],
+        media:{text:"",imageData:""},
+        content:null,
         scale:MEDIUM_BALLOON_SCALE,
         baseY:initialY,
         minY:motionProfile.minY,
@@ -3692,14 +3867,12 @@
         shadow:false
       });
 
-      balloon.style.pointerEvents = "auto";
-      balloon.style.cursor = "pointer";
+      balloon.style.pointerEvents = "none";
+      balloon.style.cursor = "default";
+      balloon.style.display = "none";
+      balloon.setAttribute("opacity","0");
       balloon.setAttribute("data-motion-profile", motionProfile.id);
       balloon.setAttribute("data-speed-multiplier", balloonSpeedMultiplier(index, 0).toFixed(2));
-      if(content){
-        balloon.setAttribute("data-balloon-id", String(content.balloonId || ""));
-        balloon.setAttribute("data-target-wagon-id", String(content.targetWagonId || content.wagonId || ""));
-      }
 
       const item = {
         node:balloon,
@@ -3710,23 +3883,19 @@
         speed:speedFromLevel(config.speedLevel) * balloonSpeedMultiplier(index, 0),
         verticalTempo:.92 + balloonSpeedMultiplier(index, 0) * .12,
         spawnSerial:0,
-        popped:false,
+        streamSequence:0,
+        streamActive:false,
+        streamTriggerFired:false,
+        popped:true,
         attemptPending:false,
         pendingRetryContent:null,
-        resetAt:0,
+        resetAt:now,
         flyAway:false,
         flyAwayStartedAt:0,
         flyAwayDelay:0,
         flyAwaySpeed:0,
         flyAwayDrift:0
       };
-
-      if(TRAIN_ANSWER_LOGIC_ENABLED && !content){
-        balloon.style.display = "none";
-        balloon.style.pointerEvents = "none";
-        item.popped = true;
-        item.resetAt = performance.now() + 420;
-      }
 
       balloon.addEventListener("pointerdown", event => {
         event.preventDefault();
@@ -3735,6 +3904,13 @@
 
       activeBalloons.push(item);
     }
+
+    // البداية متدرجة: يظهر أول بالون سريعًا، ثم البقية واحدًا بعد الآخر.
+    balloonStreamNextSpawnAt = now + 90;
+    balloonStreamLastSpawnAt = 0;
+    balloonStreamSequence = 0;
+    balloonInitialFillComplete = false;
+    lastSpawnedBalloonItem = null;
 
     startBalloonPoolLoop();
   }
@@ -4261,6 +4437,7 @@
     expectedBalloonIdsByWagon.clear();
     stageBalloonCursor = 0;
     stageBalloonSpawnCounter = 0;
+    stageBalloonPriorityCursor = 0;
     stageCorrectWagonCursor = 0;
     recentDisplayedBalloonIds.length = 0;
 
@@ -4446,6 +4623,11 @@
 
     activeBalloons.splice(0, activeBalloons.length);
     balloonLoopLastTime = 0;
+    balloonStreamNextSpawnAt = 0;
+    balloonStreamLastSpawnAt = 0;
+    balloonStreamSequence = 0;
+    balloonInitialFillComplete = false;
+    lastSpawnedBalloonItem = null;
     matterLastTime = 0;
     matterAccumulator = 0;
 
