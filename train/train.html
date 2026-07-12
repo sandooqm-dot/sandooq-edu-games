@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 127</title>
+  <title>قطار الإجابات - إصدار 128</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -398,14 +398,14 @@
   let parallaxLastFrameTime = 0;
   const parallaxLayerRecords = [];
 
-  const PARALLAX_IMAGE_VERSION = 127;
+  const PARALLAX_IMAGE_VERSION = 128;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 127: تدفق مستمر وكثيف للبالونات من جميع إجابات النشاط، مع تكرار الإجابة الصحيحة دوريًا وعدم ربط عدد البالونات بعدد العربات.
+  // إصدار 128: ستة بالونات متدرجة تدخل من خارج اليمين بسرعات متفاوتة، مع بقاء جميع إجابات المعلم قابلة للتكرار والاحتساب الصحيح أكثر من مرة.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -512,11 +512,13 @@
   const WAGON_CAPTURE_MIN_OVERLAP = .32;
   const WAGON_CAPTURE_MIN_DEPTH = 6;
 
-  // تدفق ثابت وكثيف مثل ألعاب فرقعة البالونات:
-  // العدد لا يعتمد على عدد العربات الحالية، والبالونات تُعاد تدويرها باستمرار.
-  const BALLOON_STREAM_SIZE = 15;
+  // تدفق متدرج: ستة بالونات فقط في النظام، تدخل كلها من خارج اليمين
+  // وتتحرك بسرعات متفاوتة. جميع إجابات المعلم تبقى قابلة للظهور والتكرار.
+  const BALLOON_STREAM_SIZE = 6;
   const CORRECT_BALLOON_CADENCE = 4;
-  const BALLOON_STREAM_SPACING = 118;
+  const BALLOON_STREAM_SPACING = 188;
+  const BALLOON_REPEAT_GAP_COUNT = 1;
+  const BALLOON_SPEED_MULTIPLIERS = [.78, .90, 1.04, 1.20, .84, 1.12];
   const MEDIUM_BALLOON_SCALE = .76;
   const MAX_ACTIVE_FALLING_BOXES = 4;
   // بعد تجميد الصناديق فور ملامسة القاع، لم نعد نحتاج حذف القديم.
@@ -1293,7 +1295,6 @@
         const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
         accepted.add(balloonId);
         acceptedBalloonIdsByWagon.set(wagonId,accepted);
-        retireAcceptedBalloonCopies(balloonId);
       }
 
       const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
@@ -2235,14 +2236,6 @@
     const targetCar = trainCarRegistry[well.index];
     const landedWagonId = String(targetCar?.wagonId || "");
 
-    // قد توجد نسخ بصرية متكررة من الإجابة نفسها داخل التدفق.
-    // بعد احتساب إحداها لا نسمح لأي نسخة أخرى بالاستقرار أو الاحتساب مرة ثانية.
-    if(TRAIN_ANSWER_LOGIC_ENABLED && item.balloonId && acceptedBalloonIds.has(item.balloonId)){
-      item.settleCommitted = true;
-      breakMatterBox(item);
-      return true;
-    }
-
     if(TRAIN_ANSWER_LOGIC_ENABLED && item.targetWagonId && landedWagonId !== item.targetWagonId){
       item.settleCommitted = true;
       item.currentWellIndex = well.index;
@@ -3010,6 +3003,7 @@
   let stageBalloonCursor = 0;
   let stageBalloonSpawnCounter = 0;
   let stageCorrectWagonCursor = 0;
+  const recentDisplayedBalloonIds = [];
 
   function shuffledTrainRelations(list){
     const copy = Array.isArray(list) ? list.slice() : [];
@@ -3021,7 +3015,7 @@
   }
 
   function currentBalloonFlowSize(){
-    // عدد ثابت وكبير لا يتغير حسب عدد العربات.
+    // ستة بالونات ثابتة في النظام، والظاهر داخل الشاشة عادة خمسة أو ستة.
     return BALLOON_STREAM_SIZE;
   }
 
@@ -3229,11 +3223,35 @@
   }
 
   function relationIsStillAvailable(relation){
-    return Boolean(
-      relation &&
-      relation.balloonId &&
-      !acceptedBalloonIds.has(relation.balloonId)
-    );
+    // الإجابة لا تُحذف من بنك العرض بعد نجاحها؛ قد تظهر وتُحتسب مرة أخرى.
+    return Boolean(relation && relation.balloonId);
+  }
+
+  function isRecentlyDisplayedRelation(relation){
+    const balloonId = String(relation?.balloonId || "");
+    return Boolean(balloonId && recentDisplayedBalloonIds.includes(balloonId));
+  }
+
+  function rememberDisplayedRelation(relation){
+    const balloonId = String(relation?.balloonId || "");
+    if(!balloonId) return;
+
+    recentDisplayedBalloonIds.push(balloonId);
+    while(recentDisplayedBalloonIds.length > BALLOON_REPEAT_GAP_COUNT){
+      recentDisplayedBalloonIds.shift();
+    }
+  }
+
+  function chooseRelationWithRepeatGap(candidates){
+    const pool = shuffledTrainRelations((candidates || []).filter(relationIsStillAvailable));
+    if(!pool.length) return null;
+
+    // نترك بين نسختين من الإجابة نفسها بالونًا آخر متى كان هناك بديل.
+    const spacedPool = pool.filter(relation => !isRecentlyDisplayedRelation(relation));
+    const selectedPool = spacedPool.length ? spacedPool : pool;
+    const relation = selectedPool[stageBalloonCursor++ % selectedPool.length] || null;
+    rememberDisplayedRelation(relation);
+    return relation;
   }
 
   function nextCorrectStageRelation(){
@@ -3246,91 +3264,58 @@
       const expected = expectedBalloonIdsByWagon.get(wagonId) || new Set();
       const accepted = acceptedBalloonIdsByWagon.get(wagonId) || new Set();
 
-      const candidates = shuffledTrainRelations(
-        currentStageRequiredRelations.filter(relation =>
-          relation.targetWagonId === wagonId &&
-          expected.has(relation.balloonId) &&
-          !accepted.has(relation.balloonId) &&
-          relationIsStillAvailable(relation)
-        )
+      const candidates = currentStageRequiredRelations.filter(relation =>
+        relation.targetWagonId === wagonId &&
+        expected.has(relation.balloonId) &&
+        !accepted.has(relation.balloonId)
       );
 
       if(candidates.length){
         stageCorrectWagonCursor = (wagonIndex + 1) % wagonIds.length;
-        return candidates[stageBalloonCursor++ % candidates.length];
+        return chooseRelationWithRepeatGap(candidates);
       }
     }
 
     return null;
   }
+  function nextGeneralStageRelation(){
+    if(!stageBalloonDeck.length) return null;
 
-  function nextDistractorStageRelation(){
-    const activeIds = new Set(activeUncompletedWagonIds());
+    // نمر على بنك جميع الإجابات بالتساوي، ثم نعيد خلطه عند اكتمال الدورة.
+    for(let attempt = 0; attempt < stageBalloonDeck.length; attempt++){
+      if(stageBalloonCursor > 0 && stageBalloonCursor % stageBalloonDeck.length === 0){
+        stageBalloonDeck = shuffledTrainRelations(stageBalloonDeck);
+      }
 
-    let candidates = shuffledTrainRelations(
-      currentStageDistractorRelations.filter(relationIsStillAvailable)
-    );
+      const relation = stageBalloonDeck[stageBalloonCursor % stageBalloonDeck.length];
+      stageBalloonCursor += 1;
 
-    if(!candidates.length){
-      candidates = shuffledTrainRelations(
-        TRAIN_RUNTIME_RELATIONS.filter(relation =>
-          relationIsStillAvailable(relation) &&
-          !activeIds.has(relation.targetWagonId)
-        )
-      );
+      if(!relationIsStillAvailable(relation)) continue;
+      if(isRecentlyDisplayedRelation(relation) && stageBalloonDeck.length > 1) continue;
+
+      rememberDisplayedRelation(relation);
+      return relation;
     }
 
-    if(!candidates.length){
-      candidates = shuffledTrainRelations(
-        TRAIN_RUNTIME_RELATIONS.filter(relationIsStillAvailable)
-      );
-    }
-
-    if(!candidates.length) return null;
-    return candidates[stageBalloonCursor++ % candidates.length];
+    return chooseRelationWithRepeatGap(stageBalloonDeck);
   }
-
   function nextStageBalloonContent(){
     if(!TRAIN_ANSWER_LOGIC_ENABLED || !stageBalloonDeck.length) return null;
 
     stageBalloonSpawnCounter += 1;
 
-    // كل عدة بالونات تظهر إجابة صحيحة مرة أخرى.
-    // يسمح ذلك للطالب بالحصول على فرصة جديدة سريعًا إذا فاتته الإجابة السابقة.
+    // كل أربعة بالونات تقريبًا نضمن فرصة صحيحة لعربة لم تكتمل بعد.
+    // بقية البالونات تأتي من جميع إجابات المعلم، بما فيها الإجابات التي نجحت سابقًا.
     const correctDue =
       stageBalloonSpawnCounter === 1 ||
       stageBalloonSpawnCounter % CORRECT_BALLOON_CADENCE === 0;
 
-    let relation = correctDue
-      ? nextCorrectStageRelation()
-      : nextDistractorStageRelation();
-
-    if(!relation){
-      relation = nextCorrectStageRelation() || nextDistractorStageRelation();
+    if(correctDue){
+      const correct = nextCorrectStageRelation();
+      if(correct) return correct;
     }
 
-    // نسمح بتكرار المحتوى بصريًا داخل التدفق؛ المنطق يمنع احتسابه مرتين.
-    return relation || null;
-  }
-
-  function retireAcceptedBalloonCopies(balloonId){
-    if(!balloonId) return;
-    const now = performance.now();
-
-    activeBalloons.forEach(item => {
-      const relation = item?.pendingRetryContent || item?.config?.content || null;
-      if(!relation || String(relation.balloonId || "") !== String(balloonId)) return;
-
-      item.pendingRetryContent = null;
-      item.config.content = null;
-      item.attemptPending = false;
-      item.node.removeAttribute("data-balloon-id");
-      item.node.removeAttribute("data-target-wagon-id");
-      item.node.style.display = "none";
-      item.node.style.pointerEvents = "none";
-      item.popped = true;
-      item.resetAt = now + 180;
-    });
+    return nextGeneralStageRelation();
   }
 
   function nextBalloonLines(){
@@ -3380,10 +3365,14 @@
     return BALLOON_MOTION_PROFILES[0];
   }
 
+  function balloonSpeedMultiplier(index, spawnSerial = 0){
+    const offset = (Number(index) + Number(spawnSerial)) % BALLOON_SPEED_MULTIPLIERS.length;
+    return BALLOON_SPEED_MULTIPLIERS[offset];
+  }
+
   function initialBalloonX(index){
-    // صف متصل من البالونات يبدأ من خارج اليمين ويمتد عبر الشاشة.
-    // اختلاف الارتفاعات يمنع التداخل البصري رغم كثافة التدفق.
-    return BALLOON_FLIGHT.startX + 75 - index * BALLOON_STREAM_SPACING;
+    // جميع البالونات تبدأ كاملة خارج الطرف الأيمن، ثم تدخل بالتتابع دون ظهور مفاجئ.
+    return BALLOON_FLIGHT.startX + 135 + index * BALLOON_STREAM_SPACING;
   }
 
   function createBalloonMotionState(config, index = 0){
@@ -3452,7 +3441,6 @@
     let content = null;
     if(TRAIN_ANSWER_LOGIC_ENABLED){
       content = item.pendingRetryContent || nextStageBalloonContent();
-      if(content && acceptedBalloonIds.has(content.balloonId)) content = null;
 
       if(!content){
         item.pendingRetryContent = null;
@@ -3495,8 +3483,10 @@
       (item.spawnSerial * 1.37 + item.index * .71) % motionProfile.cycle;
     item.state.y = balloonProfileY(item);
 
-    item.speed = speedFromLevel(item.config.speedLevel);
-    item.verticalTempo = 1;
+    item.speedMultiplier = balloonSpeedMultiplier(item.index, item.spawnSerial);
+    item.speed = speedFromLevel(item.config.speedLevel) * item.speedMultiplier;
+    item.verticalTempo = .92 + item.speedMultiplier * .12;
+    item.node.setAttribute("data-speed-multiplier", item.speedMultiplier.toFixed(2));
 
     item.node.setAttribute(
       "transform",
@@ -3666,6 +3656,7 @@
       balloon.style.pointerEvents = "auto";
       balloon.style.cursor = "pointer";
       balloon.setAttribute("data-motion-profile", motionProfile.id);
+      balloon.setAttribute("data-speed-multiplier", balloonSpeedMultiplier(index, 0).toFixed(2));
       if(content){
         balloon.setAttribute("data-balloon-id", String(content.balloonId || ""));
         balloon.setAttribute("data-target-wagon-id", String(content.targetWagonId || content.wagonId || ""));
@@ -3676,8 +3667,9 @@
         index,
         config,
         state:createBalloonMotionState(config, index),
-        speed:speedFromLevel(config.speedLevel),
-        verticalTempo:1,
+        speedMultiplier:balloonSpeedMultiplier(index, 0),
+        speed:speedFromLevel(config.speedLevel) * balloonSpeedMultiplier(index, 0),
+        verticalTempo:.92 + balloonSpeedMultiplier(index, 0) * .12,
         spawnSerial:0,
         popped:false,
         attemptPending:false,
@@ -4003,6 +3995,7 @@
     stageBalloonCursor = 0;
     stageBalloonSpawnCounter = 0;
     stageCorrectWagonCursor = 0;
+    recentDisplayedBalloonIds.length = 0;
 
     if(!TRAIN_ANSWER_LOGIC_ENABLED){
       currentStageRelations = [];
@@ -4027,8 +4020,8 @@
       expectedBalloonIdsByWagon.set(entry.targetWagonId,expected);
     });
 
-    // نبني مصدرًا عشوائيًا من جميع إجابات المعلم.
-    // يمكن إعادة استخدام محتواه بصريًا داخل التدفق المستمر، بينما يمنع المنطق احتساب الإجابة مرتين.
+    // نبني بنكًا عشوائيًا من جميع إجابات المعلم.
+    // الإجابة تبقى في البنك بعد نجاحها، ويمكن أن تسقط صحيحة عدة مرات لاحتساب نقاط مستقبلًا.
     const guaranteed = [];
     const remainingRequired = [];
 
@@ -4149,6 +4142,7 @@
     completedQuestionWagons.clear();
     acceptedBalloonIds.clear();
     acceptedBalloonIdsByWagon.clear();
+    recentDisplayedBalloonIds.length = 0;
 
     trainVisualOffsetX = TRAIN_MOTION.enterOffset;
 
