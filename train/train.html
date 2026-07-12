@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 136</title>
+  <title>قطار الإجابات - إصدار 137</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -407,6 +407,16 @@
   let scorePlaneTextNode = null;
   let scorePlaneAnimationFrame = 0;
   let scorePlaneAnimationToken = 0;
+  let gameHudLayer = null;
+  let gameHudTimerText = null;
+  let gameHudTimerBar = null;
+  let gameHudAttemptsText = null;
+  let stageTimerFrame = 0;
+  let stageTimerStartedAt = 0;
+  let stageTimerRemainingMs = 0;
+  let stageTimerRunning = false;
+  let attemptsRemaining = 0;
+  let gameOverByAttempts = false;
   const collisionMap = [];
 
   const LANDING_SCORE_CONFIG = {
@@ -471,7 +481,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 136: إعادة معايرة سرعات البالونات بحيث تكون السرعة 5 هي السرعة المتوسطة الافتراضية وتساوي سرعة 8 السابقة.
+  // إصدار 137: إضافة مؤقت تنازلي لكل مستوى ونظام محاولات اختياري للعبة.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -1461,6 +1471,7 @@
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
         syncTrainPhysicsToVisualOffset();
+        startStageCountdown();
         // تبقى اللافتة ثابتة في المنتصف حتى يستقر القطار، ثم تنسحب مع سرعة الأرضية الأمامية.
         releaseLevelSignWithGround();
       });
@@ -1648,6 +1659,7 @@
 
     stageCompleteTriggered = true;
     pendingTrainProgressReview = false;
+    stopStageCountdown();
     trainMotionState = "exiting";
 
     // تبدأ الطبقتان الوسطى والسفلية بالتباطؤ تدريجيًا فور انتهاء المستوى.
@@ -2989,6 +3001,7 @@
       Math.min(y + BOX.bottom, 610),
       Boolean(options.wrongWagon)
     );
+    if(options.wrongWagon) loseAttempt();
     resolveMatterBoxAttempt(item,false);
   }
 
@@ -3147,6 +3160,7 @@
   }
 
   function spawnMatterAnswerBox(startX, startY, textLines, meta = {}, fromQueue = false){
+    if(gameOverByAttempts || stageCompleteTriggered) return false;
     if(!isMatterReady() || !matterEngine){
       if(!fromQueue){
         pendingMatterSpawns.push({startX, startY, textLines, meta});
@@ -3242,6 +3256,48 @@
   }
 
   const TRAIN_RUNTIME_PAYLOAD = readTrainRuntimePayload();
+
+  function readOptionalRuntimeNumber(queryKey,payloadKeys,min,max,fallback = 0){
+    const params = new URLSearchParams(window.location.search);
+    const queryRaw = params.get(queryKey);
+    const queryValue = queryRaw === null || queryRaw === "" ? Number.NaN : Number(queryRaw);
+    if(Number.isFinite(queryValue)) return clamp(Math.round(queryValue),min,max);
+
+    for(const key of payloadKeys){
+      const payloadValue = Number(TRAIN_RUNTIME_PAYLOAD?.[key]);
+      if(Number.isFinite(payloadValue)) return clamp(Math.round(payloadValue),min,max);
+    }
+
+    return fallback;
+  }
+
+  const TRAIN_COUNTDOWN_SECONDS = readOptionalRuntimeNumber(
+    "timer",
+    ["countdownTotalSeconds"],
+    0,
+    5999,
+    TRAIN_RUNTIME_PAYLOAD?.countdownEnabled
+      ? clamp(
+          Math.round(Number(TRAIN_RUNTIME_PAYLOAD?.countdownMinutes || 0) * 60 +
+            Number(TRAIN_RUNTIME_PAYLOAD?.countdownSeconds || 0)),
+          1,
+          5999
+        )
+      : 0
+  );
+
+  const TRAIN_ATTEMPTS_TOTAL = readOptionalRuntimeNumber(
+    "attempts",
+    ["attemptsCount"],
+    0,
+    10,
+    TRAIN_RUNTIME_PAYLOAD?.attemptsEnabled
+      ? clamp(Math.round(Number(TRAIN_RUNTIME_PAYLOAD?.attemptsCount) || 10),1,10)
+      : 0
+  );
+
+  const TRAIN_COUNTDOWN_ENABLED = TRAIN_COUNTDOWN_SECONDS > 0;
+  const TRAIN_ATTEMPTS_ENABLED = TRAIN_ATTEMPTS_TOTAL > 0;
 
   function normalizeRuntimeMedia(raw){
     if(!raw || typeof raw !== "object"){
@@ -5134,6 +5190,204 @@
     // لا نحذف parallaxBackGroup ولا parallaxLayerRecords، فتستمر الحركة بلا انقطاع.
   }
 
+  function formatCountdownTime(totalSeconds){
+    const seconds = Math.max(0,Math.ceil(Number(totalSeconds) || 0));
+    const minutesPart = Math.floor(seconds / 60);
+    const secondsPart = seconds % 60;
+    return `${minutesPart}:${String(secondsPart).padStart(2,"0")}`;
+  }
+
+  function ensureGameHud(){
+    if(gameHudLayer?.isConnected) return;
+
+    gameHudLayer = el("g", {
+      id:"gameHudLayer",
+      "pointer-events":"none"
+    });
+
+    if(TRAIN_COUNTDOWN_ENABLED){
+      gameHudTimerText = el("text", {
+        x:18,
+        y:31,
+        fill:"#ffffff",
+        stroke:"#294b76",
+        "stroke-width":3,
+        "paint-order":"stroke fill",
+        "font-size":27,
+        "font-weight":1000,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"ltr"
+      }, gameHudLayer);
+
+      el("rect", {
+        x:82,
+        y:10,
+        width:930,
+        height:21,
+        rx:2,
+        fill:"rgba(35,62,104,.72)"
+      }, gameHudLayer);
+
+      gameHudTimerBar = el("rect", {
+        x:82,
+        y:10,
+        width:930,
+        height:21,
+        rx:2,
+        fill:"#ffffff"
+      }, gameHudLayer);
+    }
+
+    if(TRAIN_ATTEMPTS_ENABLED){
+      const attemptsGroup = el("g", {transform:"translate(1040 6)"}, gameHudLayer);
+      const heart = el("text", {
+        x:0,
+        y:27,
+        fill:"#e8295f",
+        stroke:"#7b1738",
+        "stroke-width":2,
+        "paint-order":"stroke fill",
+        "font-size":28,
+        "font-weight":1000
+      }, attemptsGroup);
+      heart.textContent = "♥";
+
+      gameHudAttemptsText = el("text", {
+        x:34,
+        y:27,
+        fill:"#ffffff",
+        stroke:"#294b76",
+        "stroke-width":3,
+        "paint-order":"stroke fill",
+        "font-size":25,
+        "font-weight":1000,
+        "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+        direction:"ltr"
+      }, attemptsGroup);
+    }
+
+    updateGameHud();
+  }
+
+  function updateGameHud(){
+    if(TRAIN_COUNTDOWN_ENABLED && gameHudTimerText && gameHudTimerBar){
+      const remainingSeconds = stageTimerRemainingMs / 1000;
+      const ratio = clamp(
+        stageTimerRemainingMs / Math.max(1,TRAIN_COUNTDOWN_SECONDS * 1000),
+        0,
+        1
+      );
+      gameHudTimerText.textContent = formatCountdownTime(remainingSeconds);
+      gameHudTimerBar.setAttribute("width",(930 * ratio).toFixed(2));
+    }
+
+    if(TRAIN_ATTEMPTS_ENABLED && gameHudAttemptsText){
+      gameHudAttemptsText.textContent = `${attemptsRemaining}/${TRAIN_ATTEMPTS_TOTAL}`;
+    }
+  }
+
+  function stopStageCountdown(){
+    stageTimerRunning = false;
+    if(stageTimerFrame){
+      cancelAnimationFrame(stageTimerFrame);
+      stageTimerFrame = 0;
+    }
+  }
+
+  function resetStageCountdown(){
+    stopStageCountdown();
+    stageTimerRemainingMs = TRAIN_COUNTDOWN_SECONDS * 1000;
+    stageTimerStartedAt = 0;
+    updateGameHud();
+  }
+
+  function startStageCountdown(){
+    if(!TRAIN_COUNTDOWN_ENABLED || stageTimerRunning || stageCompleteTriggered || gameOverByAttempts) return;
+
+    stageTimerRunning = true;
+    stageTimerStartedAt = performance.now();
+    const startingRemaining = stageTimerRemainingMs || TRAIN_COUNTDOWN_SECONDS * 1000;
+
+    function frame(now){
+      if(!stageTimerRunning) return;
+
+      const elapsed = now - stageTimerStartedAt;
+      stageTimerRemainingMs = Math.max(0,startingRemaining - elapsed);
+      updateGameHud();
+
+      if(stageTimerRemainingMs <= 0){
+        stopStageCountdown();
+        handleStageTimeExpired();
+        return;
+      }
+
+      stageTimerFrame = requestAnimationFrame(frame);
+    }
+
+    stageTimerFrame = requestAnimationFrame(frame);
+  }
+
+  function handleStageTimeExpired(){
+    if(stageCompleteTriggered || gameOverByAttempts) return;
+    requestTrainExit();
+  }
+
+  function showAttemptsEndedMessage(){
+    const layer = feedbackEffectsLayer || svg;
+    const group = el("g", {
+      id:"attemptsEndedMessage",
+      transform:"translate(640 300)",
+      "pointer-events":"none"
+    }, layer);
+
+    el("rect", {
+      x:-220,
+      y:-62,
+      width:440,
+      height:124,
+      rx:28,
+      fill:"rgba(32,46,72,.90)",
+      stroke:"#ffffff",
+      "stroke-width":4
+    }, group);
+
+    const text = el("text", {
+      x:0,
+      y:8,
+      "text-anchor":"middle",
+      "dominant-baseline":"middle",
+      fill:"#ffffff",
+      "font-size":42,
+      "font-weight":1000,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif",
+      direction:"rtl"
+    }, group);
+    text.textContent = "انتهت المحاولات";
+  }
+
+  function endGameByAttempts(){
+    if(gameOverByAttempts) return;
+    gameOverByAttempts = true;
+    stopStageCountdown();
+    stageCompleteTriggered = true;
+    trainMotionState = "exiting";
+    setParallaxMotionMode("transition", PARALLAX_MOTION_CONFIG.rampDownMs);
+    releaseStageBalloonsUpward();
+    clearActiveFallingMatterBoxes();
+    showAttemptsEndedMessage();
+
+    animateTrainTo(getSafeTrainExitOffset(), TRAIN_MOTION.exitDuration, "done", () => {
+      trainMotionState = "done";
+    });
+  }
+
+  function loseAttempt(){
+    if(!TRAIN_ATTEMPTS_ENABLED || gameOverByAttempts || attemptsRemaining <= 0) return;
+    attemptsRemaining = Math.max(0,attemptsRemaining - 1);
+    updateGameHud();
+    if(attemptsRemaining <= 0) endGameByAttempts();
+  }
+
   function scheduleNextTrainStage(){
     if(stageTransitionTimer){
       clearTimeout(stageTransitionTimer);
@@ -5197,6 +5451,7 @@
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
     pendingTrainProgressReview = false;
+    resetStageCountdown();
 
     pendingMatterSpawns.length = 0;
     matterBoxes.slice().forEach(item => cleanupMatterBox(item, true));
@@ -5695,6 +5950,8 @@
       startParallaxLoop();
     }
 
+    ensureGameHud();
+
     // كل مرحلة تعيد بناء عناصرها فقط فوق الخلفية المستمرة.
     trainCarRegistry.splice(0, trainCarRegistry.length);
     trainVisualParts.splice(0, trainVisualParts.length);
@@ -5742,6 +5999,8 @@
       "pointer-events":"none"
     });
 
+    if(gameHudLayer?.isConnected) svg.appendChild(gameHudLayer);
+
     // خريطة تصادم غير مرئية للقطار: أحواض، حواف، نطاطات، فواصل ذكية، قاطرة، وسكة.
     collisionDebugLayer = el("g", {id:"collisionDebugLayer"});
     loadMatterLibrary();
@@ -5753,8 +6012,9 @@
     startTrainEntry();
   }
 
+  attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
   startTrainStage(0);
-  /* إصدار 133: مبني مباشرة من train-132(1).html؛ طائرة الدرجة ونقاط 10/5 فقط. */
+  /* إصدار 137: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
 })();
 </script>
 </body>
