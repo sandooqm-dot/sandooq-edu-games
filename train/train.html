@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 129</title>
+  <title>قطار الإجابات - إصدار 130</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -417,19 +417,19 @@
   let levelSignX = 640;
   const LEVEL_SIGN_CONFIG = {
     centerX:640,
-    enterX:1485,
+    enterX:1405,
     exitX:-225,
-    centerHoldMs:260
+    centerHoldMs:150
   };
 
-  const PARALLAX_IMAGE_VERSION = 129;
+  const PARALLAX_IMAGE_VERSION = 130;
   const PARALLAX_ASSETS = {
     top:`desert-top-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     middle:`desert-middle-126.webp?v=${PARALLAX_IMAGE_VERSION}`,
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 129: إضافة لافتة خشبية للمستوى، تثبت في المنتصف قبل دخول القطار ثم تتحرك مع الأرضية بعد استقراره، وتعود بين المراحل.
+  // إصدار 130: تقصير عمود اللافتة وخفض لوحها، والتحكم التدريجي بسرعة الطبقتين الوسطى والسفلية أثناء الانتقال، مع تقليل زمن الانتقال بين المستويات.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -463,6 +463,16 @@
       preserveAspectRatio:"none"
     }
   };
+
+  // أثناء الانتقال تتحرك الطبقتان الوسطى والسفلية بالسرعة البطيئة نفسها.
+  // بعد استقرار القطار تعود كل طبقة تدريجيًا إلى سرعتها الطبيعية.
+  const PARALLAX_MOTION_CONFIG = {
+    transitionSpeed:140,
+    rampDownMs:900,
+    rampUpMs:1450
+  };
+  let parallaxMotionMode = "transition";
+  let parallaxSpeedTween = null;
 
   // لا نرسم أو نشغّل أجزاء القطار البعيدة خارج الشاشة.
   // الهامش يجعل الجزء يبدأ العمل قبل ظهوره بقليل حتى لا يلاحظ اللاعب أي انتقال.
@@ -514,10 +524,10 @@
     centerOffset:90,
     exitOffset:1450,
 
-    // تخفيض إضافي خفيف للسرعة مع إبقاء مزامنة الفيزياء كما هي.
-    enterDuration:8400,
-    betweenDuration:6000,
-    exitDuration:10000
+    // تقليل خفيف لزمن الدخول والخروج والانتقال مع إبقاء مزامنة الفيزياء كما هي.
+    enterDuration:6800,
+    betweenDuration:5000,
+    exitDuration:6800
   };
 
   let trainVisualOffsetX = TRAIN_MOTION.enterOffset;
@@ -1357,6 +1367,9 @@
     stageCompleteTriggered = true;
     pendingTrainProgressReview = false;
     trainMotionState = "exiting";
+
+    // تبدأ الطبقتان الوسطى والسفلية بالتباطؤ تدريجيًا فور انتهاء المستوى.
+    setParallaxMotionMode("transition", PARALLAX_MOTION_CONFIG.rampDownMs);
 
     // البالونات المتبقية تطير للأعلى طبيعيًا وتصبح غير قابلة للفرقعة.
     releaseStageBalloonsUpward();
@@ -3739,9 +3752,68 @@
     parallaxLastFrameTime = 0;
   }
 
-  function getParallaxSpeedMultiplier(){
-    // حركة الخلفية مستقلة عن حالة القطار وتستمر بين المراحل.
-    return 1;
+  function parallaxTargetSpeed(record, mode = parallaxMotionMode){
+    if(!record) return 0;
+    if(record.key === "middle" || record.key === "bottom"){
+      return mode === "transition"
+        ? PARALLAX_MOTION_CONFIG.transitionSpeed
+        : record.baseSpeed;
+    }
+    return record.baseSpeed;
+  }
+
+  function setParallaxMotionMode(mode, durationMs = 0){
+    parallaxMotionMode = mode === "gameplay" ? "gameplay" : "transition";
+    const duration = Math.max(0, Number(durationMs) || 0);
+    const startedAt = performance.now();
+
+    const entries = parallaxLayerRecords.map(record => ({
+      record,
+      from:Number(record.currentSpeed ?? record.baseSpeed ?? record.speed) || 0,
+      to:parallaxTargetSpeed(record, parallaxMotionMode)
+    }));
+
+    if(!duration){
+      entries.forEach(entry => {
+        entry.record.currentSpeed = entry.to;
+      });
+      parallaxSpeedTween = null;
+      return;
+    }
+
+    parallaxSpeedTween = {startedAt, duration, entries};
+  }
+
+  function updateParallaxSpeedTween(now){
+    const tween = parallaxSpeedTween;
+    if(!tween) return;
+
+    const raw = clamp((now - tween.startedAt) / tween.duration, 0, 1);
+    const eased = raw < .5
+      ? 2 * raw * raw
+      : 1 - Math.pow(-2 * raw + 2, 2) / 2;
+
+    tween.entries.forEach(entry => {
+      entry.record.currentSpeed = entry.from + (entry.to - entry.from) * eased;
+    });
+
+    if(raw >= 1){
+      tween.entries.forEach(entry => {
+        entry.record.currentSpeed = entry.to;
+      });
+      parallaxSpeedTween = null;
+    }
+  }
+
+  function getCurrentParallaxSpeed(key){
+    const record = parallaxLayerRecords.find(item => item.key === key);
+    if(record) return Number(record.currentSpeed ?? record.baseSpeed ?? record.speed) || 0;
+    const config = PARALLAX_CONFIG[key];
+    if(!config) return 0;
+    if((key === "middle" || key === "bottom") && parallaxMotionMode === "transition"){
+      return PARALLAX_MOTION_CONFIG.transitionSpeed;
+    }
+    return Number(config.speed) || 0;
   }
 
   function applyParallaxLayerPosition(record){
@@ -3756,13 +3828,13 @@
     record.images[1].setAttribute("x", (firstX + wrapWidth - overlap).toFixed(2));
   }
 
-  function updateParallaxLayers(deltaMs){
-    const motionMultiplier = getParallaxSpeedMultiplier();
+  function updateParallaxLayers(deltaMs, now){
+    updateParallaxSpeedTween(now);
     const dt = deltaMs / 1000;
 
     parallaxLayerRecords.forEach(record => {
-      // السرعات بوحدة بكسل/ثانية فعلية، بلا معامل إضافي.
-      record.offset += record.speed * motionMultiplier * dt;
+      // السرعة الحالية قد تكون بطيئة أثناء الانتقال أو تعود تدريجيًا إلى السرعة الطبيعية.
+      record.offset += (Number(record.currentSpeed) || 0) * dt;
       applyParallaxLayerPosition(record);
     });
   }
@@ -3776,7 +3848,7 @@
     parallaxLastFrameTime = now;
 
     if(!document.hidden){
-      updateParallaxLayers(delta);
+      updateParallaxLayers(delta, now);
     }
 
     parallaxAnimationFrame = requestAnimationFrame(parallaxFrameLoop);
@@ -3808,10 +3880,17 @@
       images.push(image);
     }
 
+    const baseSpeed = Number(config.speed) || 0;
+    const initialSpeed = (config.key === "middle" || config.key === "bottom") && parallaxMotionMode === "transition"
+      ? PARALLAX_MOTION_CONFIG.transitionSpeed
+      : baseSpeed;
+
     const record = {
       ...config,
       layer,
       images,
+      baseSpeed,
+      currentSpeed:initialSpeed,
       offset:0
     };
 
@@ -3863,27 +3942,29 @@
 
     cancelLevelSignAnimation();
     const token = levelSignAnimationToken;
-    const startX = levelSignX;
-    const distance = Math.abs(targetX - startX);
-    const groundSpeed = Math.max(1, Number(PARALLAX_CONFIG.bottom.speed) || 480);
-    const duration = Math.max(160, distance / groundSpeed * 1000);
-    const startedAt = performance.now();
+    const direction = targetX >= levelSignX ? 1 : -1;
+    let lastTime = performance.now();
 
     levelSignGroup.style.display = "";
 
     function frame(now){
       if(token !== levelSignAnimationToken) return;
-      const progress = clamp((now - startedAt) / duration, 0, 1);
-      setLevelSignPosition(startX + (targetX - startX) * progress);
 
-      if(progress < 1){
-        levelSignAnimationFrame = requestAnimationFrame(frame);
+      const delta = Math.min(40, Math.max(0, now - lastTime));
+      lastTime = now;
+      const groundSpeed = Math.max(1, getCurrentParallaxSpeed("bottom"));
+      const step = groundSpeed * (delta / 1000);
+      const remaining = Math.abs(targetX - levelSignX);
+
+      if(remaining <= step + .01){
+        levelSignAnimationFrame = 0;
+        setLevelSignPosition(targetX);
+        if(typeof onComplete === "function") onComplete();
         return;
       }
 
-      levelSignAnimationFrame = 0;
-      setLevelSignPosition(targetX);
-      if(typeof onComplete === "function") onComplete();
+      setLevelSignPosition(levelSignX + direction * step);
+      levelSignAnimationFrame = requestAnimationFrame(frame);
     }
 
     levelSignAnimationFrame = requestAnimationFrame(frame);
@@ -3898,6 +3979,7 @@
 
   function bringLevelSignIn(stageNumber, onComplete){
     cancelLevelSignAnimation();
+    setParallaxMotionMode("transition", 0);
     setLevelSignText(stageNumber);
     if(levelSignGroup) levelSignGroup.style.display = "";
     setLevelSignPosition(LEVEL_SIGN_CONFIG.enterX);
@@ -3905,6 +3987,8 @@
   }
 
   function releaseLevelSignWithGround(){
+    // تتسارع الأرض والطبقة الوسطى تدريجيًا، واللافتة تتحرك وفق السرعة الحالية للأرض في كل إطار.
+    setParallaxMotionMode("gameplay", PARALLAX_MOTION_CONFIG.rampUpMs);
     animateLevelSignTo(LEVEL_SIGN_CONFIG.exitX, () => {
       if(levelSignGroup) levelSignGroup.style.display = "none";
     });
@@ -3926,15 +4010,16 @@
     // ظل خفيف على الأرض.
     el("ellipse", {cx:0, cy:556, rx:38, ry:7, fill:"#6f3b1d", opacity:".22"}, levelSignGroup);
 
-    // العمود خلف اللوح، مع طرف سفلي مدفون في الرمل.
-    el("rect", {x:-10, y:337, width:20, height:218, rx:5, fill:"url(#levelSignPostGrad)", stroke:"#673016", "stroke-width":2.2}, levelSignGroup);
-    el("path", {d:"M-8 349 C-1 366 2 392 -6 421 M7 379 C0 402 1 448 7 478", fill:"none", stroke:"#d58a4a", "stroke-width":2, opacity:".32"}, levelSignGroup);
+    // العمود أقصر، مع إبقاء طرفه السفلي في الموضع نفسه داخل الرمل.
+    // خُفّض لوح اللافتة قليلًا دون تحريك المجموعة كاملة.
+    el("rect", {x:-10, y:357, width:20, height:198, rx:5, fill:"url(#levelSignPostGrad)", stroke:"#673016", "stroke-width":2.2}, levelSignGroup);
+    el("path", {d:"M-8 369 C-1 386 2 412 -6 441 M7 399 C0 422 1 458 7 488", fill:"none", stroke:"#d58a4a", "stroke-width":2, opacity:".32"}, levelSignGroup);
 
     // ثلاث ألواح خشبية غير منتظمة لتعطي الشكل نفسه الموجود في المرجع.
     const planks = [
-      "M-99 293 L94 289 L99 311 L-96 315 Z",
-      "M-96 311 L99 307 L96 333 L-101 336 Z",
-      "M-101 333 L96 329 L91 354 L-96 358 Z"
+      "M-99 313 L94 309 L99 331 L-96 335 Z",
+      "M-96 331 L99 327 L96 353 L-101 356 Z",
+      "M-101 353 L96 349 L91 374 L-96 378 Z"
     ];
     planks.forEach((d, index) => {
       el("path", {
@@ -3947,14 +4032,14 @@
     });
 
     // خطوط الخشب والمسامير.
-    el("path", {d:"M-84 304 C-36 298 23 300 82 297 M-83 325 C-23 319 31 321 80 317 M-83 346 C-28 340 24 343 77 338", fill:"none", stroke:"#6f3217", "stroke-width":2, opacity:".34"}, levelSignGroup);
+    el("path", {d:"M-84 324 C-36 318 23 320 82 317 M-83 345 C-23 339 31 341 80 337 M-83 366 C-28 360 24 363 77 358", fill:"none", stroke:"#6f3217", "stroke-width":2, opacity:".34"}, levelSignGroup);
     [-82,82].forEach(cx => {
-      el("circle", {cx, cy:322, r:3.3, fill:"#542714", stroke:"#d18a4a", "stroke-width":1}, levelSignGroup);
+      el("circle", {cx, cy:342, r:3.3, fill:"#542714", stroke:"#d18a4a", "stroke-width":1}, levelSignGroup);
     });
 
     levelSignTextNode = el("text", {
       x:0,
-      y:326,
+      y:346,
       "text-anchor":"middle",
       "dominant-baseline":"middle",
       fill:"#ffffff",
@@ -4887,7 +4972,7 @@
   }
 
   startTrainStage(0);
-  /* إصدار 129: لافتة مستوى خشبية ثابتة قبل كل مرحلة، تتحرك مع الأرضية بعد استقرار القطار وتدخل من اليمين بين المراحل. */
+  /* إصدار 130: لافتة أقصر وأخفض، تباطؤ موحّد للوسطى والسفلية أثناء الانتقال، وتسارع تدريجي بعد استقرار القطار مع انتقالات أقصر. */
 })();
 </script>
 </body>
