@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 134</title>
+  <title>قطار الإجابات - إصدار 135</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -471,7 +471,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 134: الحفاظ على الطائرة والنقاط، مع تحسين جدولة البالونات وتجهيز إجابات العربات القادمة مبكرًا.
+  // إصدار 135: زيادة مسافات وتوقيتات دخول البالونات لمنع الازدحام وإتاحة وقت أدق لاختيار إجابات العربات القادمة.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -588,21 +588,21 @@
   const WAGON_CAPTURE_MIN_OVERLAP = .32;
   const WAGON_CAPTURE_MIN_DEPTH = 6;
 
-  // إصدار 134: ستة بالونات ظاهرة مع عنصرين احتياطيين خارج الشاشة،
-  // وبداية متدرجة بنمط فردي/ثنائي، وتجهيز مبكر لإجابات العربة الحالية والتالية.
+  // إصدار 135: ستة بالونات أساسية مع بالون تمهيدي واحد فقط خارج الشاشة،
+  // وفواصل زمنية ومسافات دخول أطول تمنع الازدحام وتمنح المجدول وقتًا لاختيار محتوى العربة الحالية والتالية.
   const BALLOON_VISIBLE_TARGET = 6;
   const BALLOON_VISIBLE_LIMIT = 6;
-  const BALLOON_ACTIVE_STREAM_LIMIT = 8;
+  const BALLOON_ACTIVE_STREAM_LIMIT = 7;
   const BALLOON_POOL_SIZE = 10;
-  const BALLOON_CONTINUOUS_TRIGGER_X = 585;
+  const BALLOON_CONTINUOUS_TRIGGER_X = 560;
   const BALLOON_EARLY_RECYCLE_X = -45;
   const BALLOON_ENTRY_ZONE_X = 1410;
-  const BALLOON_ENTRY_MAX_COUNT = 2;
-  const BALLOON_ENTRY_MIN_SPACING = 112;
+  const BALLOON_ENTRY_MAX_COUNT = 1;
+  const BALLOON_ENTRY_MIN_SPACING = 235;
   const BALLOON_REPEAT_GAP_COUNT = 1;
   const BALLOON_PRIORITY_PATTERN = ["current","next","current","next","distractor","current"];
-  const BALLOON_INITIAL_DELAY_PATTERN_MS = [760, 820, 280, 920, 740, 360];
-  const BALLOON_CONTINUOUS_DELAY_PATTERN_MS = [620, 300, 760, 650, 320, 720];
+  const BALLOON_INITIAL_DELAY_PATTERN_MS = [2100, 2500, 2250, 2850, 2150, 2650];
+  const BALLOON_CONTINUOUS_DELAY_PATTERN_MS = [1650, 2050, 1800, 2250, 1700, 2100];
   const BALLOON_SPEED_MULTIPLIERS = [.78, .90, 1.04, 1.20, .84, 1.12];
   const MEDIUM_BALLOON_SCALE = .76;
   const MAX_ACTIVE_FALLING_BOXES = 4;
@@ -3868,10 +3868,11 @@
       ? balloonInitialDelayCursor++
       : balloonContinuousDelayCursor++;
     const baseDelay = pattern[cursor % pattern.length];
-    const jitter = (Math.random() - .5) * 90;
+    const jitter = (Math.random() - .5) * 180;
 
-    // التأخير القصير يصنع زوجًا خفيفًا، والتأخير الأطول يفصل الدفعات بوضوح.
-    return Math.max(240, baseDelay + jitter);
+    // الفواصل الأطول تمنع تجمع البالونات رغم اختلاف السرعات،
+    // وتترك وقتًا كافيًا لتحديث أولوية العربة الحالية والعربة التالية قبل إنشاء البالون القادم.
+    return Math.max(initial ? 1850 : 1450, baseDelay + jitter);
   }
 
   function canUseBalloonEntry(){
