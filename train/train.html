@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 138</title>
+  <title>قطار الإجابات - إصدار 139</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -124,6 +124,9 @@
 
   function clear(){
     svg.innerHTML = "";
+    lastTrainCullingOffset = Number.NaN;
+    lastTrainTransform = "";
+    lastWagonCoverTransform = "";
   }
 
   function defs(){
@@ -411,6 +414,9 @@
   let gameHudTimerText = null;
   let gameHudTimerBar = null;
   let gameHudAttemptsText = null;
+  let lastHudTimerText = "";
+  let lastHudTimerBarWidth = -1;
+  let lastHudAttemptsText = "";
   let stageTimerFrame = 0;
   let stageTimerStartedAt = 0;
   let stageTimerRemainingMs = 0;
@@ -481,7 +487,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 138: تحميل بيانات القطار من sessionStorage ثم localStorage ثم IndexedDB قبل بناء اللعبة.
+  // إصدار 139: تحسينات أداء داخلية دون تغيير شكل اللعبة أو سلوكها.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -529,8 +535,12 @@
   // لا نرسم أو نشغّل أجزاء القطار البعيدة خارج الشاشة.
   // الهامش يجعل الجزء يبدأ العمل قبل ظهوره بقليل حتى لا يلاحظ اللاعب أي انتقال.
   const TRAIN_VIEWPORT_MARGIN = 360;
+  const TRAIN_CULLING_STEP_PX = 8;
   const trainVisualParts = [];
   const trainCoverVisualParts = [];
+  let lastTrainCullingOffset = Number.NaN;
+  let lastTrainTransform = "";
+  let lastWagonCoverTransform = "";
 
   function registerTrainVisualPart(node, left, right, collection = trainVisualParts){
     if(!node) return;
@@ -544,7 +554,13 @@
       worldLeft <= 1280 + TRAIN_VIEWPORT_MARGIN;
   }
 
-  function updateTrainVisualCulling(){
+  function updateTrainVisualCulling(force = false){
+    if(!force && Number.isFinite(lastTrainCullingOffset) &&
+      Math.abs(trainVisualOffsetX - lastTrainCullingOffset) < TRAIN_CULLING_STEP_PX){
+      return;
+    }
+    lastTrainCullingOffset = trainVisualOffsetX;
+
     const updatePart = part => {
       if(!part || !part.node) return;
       const visible = isTrainRangeNearViewport(part.left, part.right);
@@ -565,7 +581,10 @@
       if(!record || !record.node || record.wagonIndex === null || record.wagonIndex === undefined) return;
       const car = trainCarRegistry[record.wagonIndex];
       if(!car) return;
-      record.node.style.display = isTrainRangeNearViewport(car.left, car.right) ? "" : "none";
+      const visible = isTrainRangeNearViewport(car.left, car.right);
+      if(record.viewportVisible === visible) return;
+      record.viewportVisible = visible;
+      record.node.style.display = visible ? "" : "none";
     });
   }
 
@@ -632,7 +651,7 @@
   }
 
   function rememberSettledBox(node, wagonIndex){
-    const record = {node, wagonIndex};
+    const record = {node, wagonIndex, viewportVisible:null};
     settledBoxes.push(record);
 
     if(wagonIndex !== null && wagonIndex !== undefined){
@@ -1378,7 +1397,7 @@
   let matterAccumulator = 0;
   const MATTER_FIXED_STEP_MS = 1000 / 60;
   const MATTER_MAX_FRAME_MS = 100;
-  const MATTER_MAX_SUBSTEPS = 5;
+  const MATTER_MAX_SUBSTEPS = 4;
   let matterLibraryLoading = false;
 
   const matterBoxes = [];
@@ -1402,12 +1421,14 @@
 
     const transform = `translate(${x.toFixed(2)} 0)`;
 
-    if(trainPositionGroup){
+    if(trainPositionGroup && transform !== lastTrainTransform){
       trainPositionGroup.setAttribute("transform", transform);
+      lastTrainTransform = transform;
     }
 
-    if(wagonDropCoverPositionGroup){
+    if(wagonDropCoverPositionGroup && transform !== lastWagonCoverTransform){
       wagonDropCoverPositionGroup.setAttribute("transform", transform);
+      lastWagonCoverTransform = transform;
     }
 
     updateTrainVisualCulling();
@@ -1753,8 +1774,8 @@
     if(!matterEngine){
       matterEngine = Matter.Engine.create({
         enableSleeping:true,
-        positionIterations:10,
-        velocityIterations:10,
+        positionIterations:8,
+        velocityIterations:8,
         constraintIterations:2
       });
 
@@ -4189,11 +4210,11 @@
     item.speed = speedFromLevel(item.config.speedLevel) * item.speedMultiplier;
     item.verticalTempo = .92 + item.speedMultiplier * .12;
     item.node.setAttribute("data-speed-multiplier", item.speedMultiplier.toFixed(2));
-
-    item.node.setAttribute(
-      "transform",
-      `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
-    );
+      const transform = `translate(${item.state.x.toFixed(1)} ${item.state.y.toFixed(1)}) scale(${item.config.scale})`;
+      if(item.lastTransform !== transform){
+        item.node.setAttribute("transform", transform);
+        item.lastTransform = transform;
+      }
 
     item.node.style.display = "";
     item.node.setAttribute("opacity", "1");
@@ -4252,16 +4273,20 @@
       const flyDt = Math.min(dt, .05);
       item.state.y -= item.flyAwaySpeed * flyDt;
       item.state.x += item.flyAwayDrift * flyDt;
-
-      item.node.setAttribute(
-        "transform",
-        `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
-      );
+      const transform = `translate(${item.state.x.toFixed(1)} ${item.state.y.toFixed(1)}) scale(${item.config.scale})`;
+      if(item.lastTransform !== transform){
+        item.node.setAttribute("transform", transform);
+        item.lastTransform = transform;
+      }
 
       const fade = clamp((item.state.y + 120) / 120, 0, 1);
 
       if(item.node.style.display !== "none"){
-        item.node.setAttribute("opacity", fade.toFixed(2));
+        const opacity = fade.toFixed(2);
+        if(item.lastOpacity !== opacity){
+          item.node.setAttribute("opacity", opacity);
+          item.lastOpacity = opacity;
+        }
       }
 
       if(item.state.y < -135 || item.state.x < -230){
@@ -4281,11 +4306,11 @@
 
     item.state.motionTime += dt * item.verticalTempo;
     item.state.y = balloonProfileY(item);
-
-    item.node.setAttribute(
-      "transform",
-      `translate(${item.state.x.toFixed(2)} ${item.state.y.toFixed(2)}) scale(${item.config.scale})`
-    );
+      const transform = `translate(${item.state.x.toFixed(1)} ${item.state.y.toFixed(1)}) scale(${item.config.scale})`;
+      if(item.lastTransform !== transform){
+        item.node.setAttribute("transform", transform);
+        item.lastTransform = transform;
+      }
 
     if(item.state.x < item.config.endX){
       parkBalloonForStream(item,now,0);
@@ -5350,6 +5375,9 @@
       }, attemptsGroup);
     }
 
+    lastHudTimerText = "";
+    lastHudTimerBarWidth = -1;
+    lastHudAttemptsText = "";
     updateGameHud();
   }
 
@@ -5361,12 +5389,25 @@
         0,
         1
       );
-      gameHudTimerText.textContent = formatCountdownTime(remainingSeconds);
-      gameHudTimerBar.setAttribute("width",(930 * ratio).toFixed(2));
+      const timerText = formatCountdownTime(remainingSeconds);
+      if(timerText !== lastHudTimerText){
+        gameHudTimerText.textContent = timerText;
+        lastHudTimerText = timerText;
+      }
+
+      const barWidth = Math.round(930 * ratio * 2) / 2;
+      if(barWidth !== lastHudTimerBarWidth){
+        gameHudTimerBar.setAttribute("width",String(barWidth));
+        lastHudTimerBarWidth = barWidth;
+      }
     }
 
     if(TRAIN_ATTEMPTS_ENABLED && gameHudAttemptsText){
-      gameHudAttemptsText.textContent = `${attemptsRemaining}/${TRAIN_ATTEMPTS_TOTAL}`;
+      const attemptsText = `${attemptsRemaining}/${TRAIN_ATTEMPTS_TOTAL}`;
+      if(attemptsText !== lastHudAttemptsText){
+        gameHudAttemptsText.textContent = attemptsText;
+        lastHudAttemptsText = attemptsText;
+      }
     }
   }
 
@@ -6098,7 +6139,7 @@
 
   attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
   startTrainStage(0);
-  /* إصدار 138: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
+  /* إصدار 139: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
 })();
 </script>
 </body>
