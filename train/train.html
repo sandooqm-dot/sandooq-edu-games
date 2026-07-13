@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 137</title>
+  <title>قطار الإجابات - إصدار 138</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -109,7 +109,7 @@
   </main>
 
 <script>
-(() => {
+(async() => {
   "use strict";
 
   const svg = document.getElementById("stage");
@@ -481,7 +481,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 137: إضافة مؤقت تنازلي لكل مستوى ونظام محاولات اختياري للعبة.
+  // إصدار 138: تحميل بيانات القطار من sessionStorage ثم localStorage ثم IndexedDB قبل بناء اللعبة.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -3236,26 +3236,110 @@
 
   const TRAIN_PAYLOAD_KEY = "sandooq_train_payload_v1";
 
-  function readTrainRuntimePayload(){
+  function parseTrainPayload(raw){
+    if(!raw) return null;
     try {
-      const params = new URLSearchParams(window.location.search);
-      const payloadId = String(params.get("payloadId") || "").trim();
-      const keys = payloadId
-        ? [`${TRAIN_PAYLOAD_KEY}_${payloadId}`, TRAIN_PAYLOAD_KEY]
-        : [TRAIN_PAYLOAD_KEY];
+      const payload = typeof raw === "string" ? JSON.parse(raw) : raw;
+      return payload && typeof payload === "object" ? payload : null;
+    } catch (_) {
+      return null;
+    }
+  }
 
+  function readTrainPayloadFromIndexedDb(payloadId){
+    if(!payloadId || !("indexedDB" in window)) return Promise.resolve(null);
+
+    return new Promise((resolve)=>{
+      const request = indexedDB.open("sandooq_edu_games_v1",1);
+
+      request.onerror = ()=>resolve(null);
+      request.onupgradeneeded = ()=>{
+        const db = request.result;
+        if(!db.objectStoreNames.contains("payloads")){
+          db.createObjectStore("payloads",{keyPath:"key"});
+        }
+      };
+
+      request.onsuccess = ()=>{
+        const db = request.result;
+        try {
+          const tx = db.transaction("payloads","readonly");
+          const getRequest = tx.objectStore("payloads").get(`train:${payloadId}`);
+
+          getRequest.onsuccess = ()=>{
+            const payload = parseTrainPayload(getRequest.result?.payload);
+            db.close();
+            resolve(payload);
+          };
+          getRequest.onerror = ()=>{
+            db.close();
+            resolve(null);
+          };
+        } catch (_) {
+          db.close();
+          resolve(null);
+        }
+      };
+    });
+  }
+
+  async function readTrainRuntimePayload(){
+    const params = new URLSearchParams(window.location.search);
+    const payloadId = String(params.get("payloadId") || "").trim();
+    const keys = payloadId
+      ? [`${TRAIN_PAYLOAD_KEY}_${payloadId}`, TRAIN_PAYLOAD_KEY]
+      : [TRAIN_PAYLOAD_KEY];
+
+    // 1) نفس جلسة التصفح.
+    try {
       for(const key of keys){
-        const raw = sessionStorage.getItem(key);
-        if(!raw) continue;
-        const payload = JSON.parse(raw);
-        if(payload && typeof payload === "object") return payload;
+        const payload = parseTrainPayload(sessionStorage.getItem(key));
+        if(payload) return payload;
       }
     } catch (_) {}
+
+    // 2) نسخة مشتركة على النطاق نفسه، وهي أكثر ثباتًا في Safari عند الانتقال لمجلد فرعي.
+    try {
+      for(const key of keys){
+        const payload = parseTrainPayload(localStorage.getItem(key));
+        if(payload) return payload;
+      }
+    } catch (_) {}
+
+    // 3) المصدر الدائم الذي كتبه index قبل الانتقال.
+    const indexedPayload = await readTrainPayloadFromIndexedDb(payloadId);
+    if(indexedPayload) return indexedPayload;
 
     return null;
   }
 
-  const TRAIN_RUNTIME_PAYLOAD = readTrainRuntimePayload();
+  const TRAIN_RUNTIME_PAYLOAD_ID = String(
+    new URLSearchParams(window.location.search).get("payloadId") || ""
+  ).trim();
+
+  const TRAIN_RUNTIME_PAYLOAD = await readTrainRuntimePayload();
+
+  if(TRAIN_RUNTIME_PAYLOAD_ID && !TRAIN_RUNTIME_PAYLOAD){
+    clear();
+    const errorGroup = el("g",{"pointer-events":"none"});
+    el("rect",{
+      x:250,y:240,width:780,height:220,rx:28,
+      fill:"#ffffff",stroke:"#111111","stroke-width":4
+    },errorGroup);
+    const title = el("text",{
+      x:640,y:315,"text-anchor":"middle",
+      fill:"#d62828","font-size":34,"font-weight":900,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif"
+    },errorGroup);
+    title.textContent = "تعذر تحميل محتويات اللعبة";
+    const note = el("text",{
+      x:640,y:380,"text-anchor":"middle",
+      fill:"#222222","font-size":24,"font-weight":700,
+      "font-family":"system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif"
+    },errorGroup);
+    note.textContent = "ارجع إلى صفحة الإعدادات واضغط اختبار اللعبة مرة أخرى.";
+    return;
+  }
 
   function readOptionalRuntimeNumber(queryKey,payloadKeys,min,max,fallback = 0){
     const params = new URLSearchParams(window.location.search);
@@ -6014,7 +6098,7 @@
 
   attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
   startTrainStage(0);
-  /* إصدار 137: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
+  /* إصدار 138: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
 })();
 </script>
 </body>
