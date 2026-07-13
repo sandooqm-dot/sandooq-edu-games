@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 140</title>
+  <title>قطار الإجابات - إصدار 141</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -100,12 +100,463 @@
       from{transform:rotate(0deg)}
       to{transform:rotate(360deg)}
     }
+    /* start-end-overlay-v1: بوابة تشغيل متزامنة مع الصوت + نهاية موحدة. */
+    .activity-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:220;
+      overflow:hidden;
+      padding:clamp(18px,4vw,44px);
+      direction:rtl;
+      background:rgba(17,17,17,.12);
+      pointer-events:none;
+    }
+
+    .activity-overlay.is-visible{
+      display:flex;
+    }
+
+    .activity-overlay .celebration-card{
+      position:relative;
+      width:min(520px,86vw);
+      min-height:clamp(260px,44vh,420px);
+      border:2px solid rgba(255,255,255,.86);
+      border-radius:28px;
+      background:rgba(255,255,255,.78);
+      -webkit-backdrop-filter:blur(9px);
+      backdrop-filter:blur(9px);
+      box-shadow:0 18px 45px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.72);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:clamp(22px,4.6vw,44px);
+      pointer-events:auto;
+      animation:activityCelebrationPop .62s cubic-bezier(.2,1.12,.22,1) both;
+      overflow:hidden;
+    }
+
+    .activity-overlay .celebration-card::before{
+      content:"";
+      position:absolute;
+      width:92%;
+      aspect-ratio:1/1;
+      left:50%;
+      top:45%;
+      transform:translate(-50%,-50%);
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(239,213,83,.32) 0%,rgba(239,213,83,.14) 34%,rgba(255,255,255,0) 68%);
+      animation:activityCelebrationGlow 2.4s ease-in-out infinite;
+      pointer-events:none;
+    }
+
+    .activity-overlay .celebration-icon{
+      position:relative;
+      width:clamp(92px,17vw,144px);
+      height:clamp(92px,17vw,144px);
+      margin-bottom:clamp(12px,2.6vw,20px);
+      filter:drop-shadow(0 8px 14px rgba(0,0,0,.15));
+      animation:activityIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s;
+      z-index:1;
+    }
+
+    .activity-overlay .celebration-title{
+      position:relative;
+      z-index:1;
+      margin:0;
+      color:#102b57;
+      font-size:clamp(34px,6.2vw,64px);
+      line-height:1.05;
+      font-weight:900;
+      text-shadow:0 2px 0 rgba(255,255,255,.70);
+    }
+
+    .activity-overlay .celebration-subtitle{
+      position:relative;
+      z-index:1;
+      margin:clamp(8px,1.7vw,14px) 0 0;
+      color:#26364a;
+      font-size:clamp(17px,2.7vw,28px);
+      line-height:1.35;
+      font-weight:800;
+    }
+
+    .activity-overlay .celebration-actions{
+      position:relative;
+      z-index:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(12px,2.2vw,20px);
+      margin-top:clamp(22px,4vw,34px);
+      flex-wrap:wrap;
+    }
+
+    .activity-overlay .celebration-actions button{
+      min-width:clamp(118px,18vw,178px);
+      height:clamp(44px,6.4vh,58px);
+      border:3px solid #111;
+      border-radius:15px;
+      font-size:clamp(17px,2.5vw,25px);
+      font-weight:900;
+      line-height:1;
+      padding:0 clamp(20px,3vw,32px);
+      box-shadow:0 5px 0 rgba(0,0,0,.22);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .activity-overlay .celebration-actions button:active{
+      transform:translateY(2px);
+      box-shadow:0 3px 0 rgba(0,0,0,.22);
+    }
+
+    .activity-overlay .restart-btn{
+      background:linear-gradient(180deg,#2fa7f2 0%,#1688d3 56%,#0d6fb4 100%);
+      color:#fff;
+    }
+
+    .activity-overlay .home-btn{
+      background:linear-gradient(180deg,#ffe56d 0%,#efd553 58%,#dfc13f 100%);
+      color:#111;
+    }
+
+    .activity-overlay .celebration-confetti{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      z-index:0;
+    }
+
+    .activity-overlay .celebration-confetti span{
+      position:absolute;
+      top:-12vh;
+      width:clamp(8px,1.2vw,14px);
+      height:clamp(14px,2vw,24px);
+      border-radius:4px;
+      background:var(--confetti-color,#efd553);
+      opacity:.9;
+      transform:rotate(var(--confetti-rotate,0deg));
+      animation:activityConfettiFall var(--confetti-duration,4.4s) linear infinite;
+      animation-delay:var(--confetti-delay,0s);
+    }
+
+    .activity-overlay .celebration-spark{
+      position:absolute;
+      width:8px;
+      height:8px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 0 0 4px rgba(255,255,255,.28),0 0 18px rgba(239,213,83,.86);
+      animation:activitySparkTwinkle 1.8s ease-in-out infinite;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .activity-overlay .spark-one{left:18%;top:26%;animation-delay:.1s}
+    .activity-overlay .spark-two{right:17%;top:31%;animation-delay:.55s}
+    .activity-overlay .spark-three{left:24%;bottom:24%;animation-delay:.85s}
+    .activity-overlay .spark-four{right:23%;bottom:27%;animation-delay:1.15s}
+
+    .activity-start-card{
+      min-height:clamp(250px,40vh,370px) !important;
+    }
+
+    .activity-start-btn{
+      min-width:clamp(150px,23vw,220px) !important;
+    }
+
+    .game-page.activity-ended .stage,
+    .game-page.activity-ended .fixed-controls,
+    .wheel-page.activity-ended .wheel-stage,
+    .wheel-page.activity-ended .fixed-controls,
+    .wheel-page.activity-ended .selected-result{
+      visibility:hidden !important;
+      pointer-events:none !important;
+    }
+
+    @keyframes activityCelebrationPop{
+      0%{opacity:0;transform:scale(.82) translateY(20px)}
+      70%{opacity:1;transform:scale(1.035) translateY(0)}
+      100%{opacity:1;transform:scale(1) translateY(0)}
+    }
+
+    @keyframes activityIconPop{
+      0%{opacity:0;transform:scale(.5) rotate(-12deg)}
+      72%{opacity:1;transform:scale(1.12) rotate(3deg)}
+      100%{opacity:1;transform:scale(1) rotate(0)}
+    }
+
+    @keyframes activityCelebrationGlow{
+      0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}
+      50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}
+    }
+
+    @keyframes activityConfettiFall{
+      0%{transform:translate3d(0,-12vh,0) rotate(var(--confetti-rotate,0deg));opacity:0}
+      9%{opacity:.95}
+      100%{transform:translate3d(var(--confetti-drift,0px),112vh,0) rotate(calc(var(--confetti-rotate,0deg) + 680deg));opacity:0}
+    }
+
+    @keyframes activitySparkTwinkle{
+      0%,100%{opacity:.25;transform:scale(.72)}
+      45%{opacity:1;transform:scale(1.22)}
+    }
+
+    @media(max-width:430px){
+      .activity-overlay .celebration-card{
+        width:min(360px,88vw);
+        min-height:clamp(250px,42vh,360px);
+        border-radius:24px;
+      }
+
+      .activity-overlay .celebration-actions{
+        gap:10px;
+      }
+
+      .activity-overlay .celebration-actions button{
+        min-width:118px;
+        height:42px;
+        font-size:16px;
+        border-radius:12px;
+        padding:0 18px;
+      }
+    }
+
+    /* open-box-v75: البداية والنهاية مطابقتان للعجلة في الحجم والحركة والتوقيت. */
+    .start-gate .celebration-card,
+    #endCelebration .finish-card{
+      width:min(390px,82vw) !important;
+      min-height:0 !important;
+      max-height:calc(100dvh - max(20px,var(--safe-top)) - max(20px,var(--safe-bottom))) !important;
+      padding:clamp(16px,2.8vw,24px) !important;
+      border-radius:clamp(20px,2.4vw,26px) !important;
+    }
+    .start-gate .celebration-icon,
+    #endCelebration .finish-trophy{
+      width:clamp(76px,12vw,106px) !important;
+      height:clamp(76px,12vw,106px) !important;
+      margin-bottom:clamp(6px,1.2vw,10px) !important;
+    }
+    .start-gate .celebration-title,
+    #endCelebration .finish-title{
+      font-size:clamp(30px,4.8vw,48px) !important;
+      line-height:1.02 !important;
+    }
+    .start-gate .celebration-subtitle,
+    #endCelebration .finish-subtitle{
+      margin-top:clamp(6px,1.1vw,10px) !important;
+      font-size:clamp(15px,2.1vw,22px) !important;
+      line-height:1.25 !important;
+    }
+    .start-gate .celebration-actions,
+    #endCelebration .finish-actions{
+      margin-top:clamp(14px,2.2vw,20px) !important;
+      gap:clamp(8px,1.2vw,12px) !important;
+      flex-wrap:nowrap !important;
+    }
+    .start-gate .activity-start-btn{
+      min-width:clamp(136px,20vw,184px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(16px,2.1vw,21px) !important;
+      padding-inline:clamp(16px,2.4vw,24px) !important;
+    }
+    #endCelebration .finish-actions button{
+      min-width:clamp(104px,15vw,145px) !important;
+      height:clamp(40px,5.5vh,48px) !important;
+      font-size:clamp(15px,2vw,20px) !important;
+      padding-inline:clamp(12px,1.8vw,20px) !important;
+    }
+
+    .start-gate .celebration-card{animation:startCardPop .62s cubic-bezier(.2,1.12,.22,1) both !important}
+    .start-gate .celebration-card::before{animation:startGlow 2.4s ease-in-out infinite !important}
+    .start-gate .celebration-icon{animation:startIconPop .72s cubic-bezier(.2,1.18,.22,1) both .12s !important}
+    .start-gate .celebration-spark{animation:startSpark 1.8s ease-in-out infinite !important}
+
+    #endCelebration{
+      background:rgba(17,17,17,.14);
+      z-index:220;
+    }
+    #endCelebration .finish-card{
+      animation:none;
+      opacity:0;
+      transform:translate3d(0,18px,0) scale(.965);
+      transform-origin:center;
+    }
+    .train-page.ended #endCelebration .finish-card{animation:finishPanelIn .52s cubic-bezier(.2,.9,.2,1) both}
+    #endCelebration .finish-trophy{
+      animation:none !important;
+      opacity:0;
+      transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);
+      transform-origin:center;
+      filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.12));
+      will-change:transform,opacity,filter;
+    }
+    #endCelebration.finish-sequence-start .finish-trophy{animation:finishTrophyArrival 2.52s cubic-bezier(.16,.82,.18,1) both !important}
+    #endCelebration .finish-title,
+    #endCelebration .finish-subtitle{visibility:hidden;opacity:0;will-change:transform,opacity,filter}
+    #endCelebration.finish-message-in .finish-title{visibility:visible;animation:finishTitleBurst .68s cubic-bezier(.16,1.22,.2,1) both}
+    #endCelebration.finish-message-in .finish-subtitle{visibility:visible;animation:finishSubtitleBurst .62s cubic-bezier(.18,1.08,.2,1) both .055s}
+    #endCelebration .finish-actions{
+      visibility:hidden;
+      opacity:0;
+      transform:translate3d(0,28px,0) scale(.94);
+      pointer-events:none;
+      will-change:transform,opacity;
+    }
+    #endCelebration.finish-actions-in .finish-actions{visibility:visible;pointer-events:auto;animation:finishActionsRise .62s cubic-bezier(.18,1.08,.2,1) both}
+    #endCelebration .finish-confetti{opacity:0;transition:none}
+    #endCelebration .finish-confetti span{animation:none;opacity:0}
+    #endCelebration.finish-confetti-on .finish-confetti{opacity:1}
+    #endCelebration.finish-confetti-on .finish-confetti span{
+      animation:finishConfettiBurst 2.45s cubic-bezier(.18,.72,.22,1) 1 both;
+      animation-delay:0s !important;
+    }
+    #endCelebration.finish-confetti-on .finish-confetti span:nth-child(3n+2){animation-delay:.055s !important}
+    #endCelebration.finish-confetti-on .finish-confetti span:nth-child(3n){animation-delay:.11s !important}
+
+    @keyframes startCardPop{0%{opacity:0;transform:scale(.82) translateY(20px)}70%{opacity:1;transform:scale(1.035) translateY(0)}100%{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes startIconPop{0%{opacity:0;transform:scale(.5) rotate(-12deg)}72%{opacity:1;transform:scale(1.12) rotate(3deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+    @keyframes startGlow{0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.92)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+    @keyframes startSpark{0%,100%{opacity:.25;transform:scale(.72)}45%{opacity:1;transform:scale(1.22)}}
+    @keyframes finishPanelIn{0%{opacity:0;transform:translate3d(0,18px,0) scale(.965)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishTrophyArrival{0%{opacity:0;transform:translate3d(185%,-82%,0) scale(.14) rotate(34deg);filter:blur(9px) drop-shadow(0 8px 14px rgba(0,0,0,.10))}18%{opacity:1;filter:blur(1.5px) drop-shadow(0 10px 18px rgba(0,0,0,.16))}62%{opacity:1;transform:translate3d(-10%,7%,0) scale(1.13) rotate(-7deg);filter:blur(0) drop-shadow(0 10px 18px rgba(0,0,0,.17))}77%{transform:translate3d(5%,-4%,0) scale(.965) rotate(3deg)}89%{transform:translate3d(-2%,2%,0) scale(1.025) rotate(-1.2deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0) drop-shadow(0 8px 14px rgba(0,0,0,.15))}}
+    @keyframes finishTitleBurst{0%{opacity:0;transform:translate3d(0,24px,0) scale(.22) rotate(-3deg);filter:blur(8px)}55%{opacity:1;transform:translate3d(0,-3px,0) scale(1.16) rotate(1deg);filter:blur(0)}78%{transform:translate3d(0,1px,0) scale(.97) rotate(-.35deg)}100%{opacity:1;transform:translate3d(0,0,0) scale(1) rotate(0);filter:blur(0)}}
+    @keyframes finishSubtitleBurst{0%{opacity:0;transform:translate3d(0,18px,0) scale(.72);filter:blur(5px)}62%{opacity:1;transform:translate3d(0,-2px,0) scale(1.055);filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+    @keyframes finishActionsRise{0%{opacity:0;transform:translate3d(0,28px,0) scale(.94)}70%{opacity:1;transform:translate3d(0,-3px,0) scale(1.02)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+    @keyframes finishConfettiBurst{0%{opacity:0;transform:translate3d(0,-9vh,0) rotate(var(--confetti-rotate,0deg)) scale(.55)}8%{opacity:.96}72%{opacity:.92}100%{opacity:0;transform:translate3d(var(--confetti-drift,0px),108vh,0) rotate(calc(var(--confetti-rotate,0deg) + 620deg)) scale(1)}}
+
+    @media(max-height:520px) and (orientation:landscape){
+      .start-gate .celebration-card,
+      #endCelebration .finish-card{width:min(360px,78vw) !important;padding:12px 18px !important;border-radius:20px !important}
+      .start-gate .celebration-icon,
+      #endCelebration .finish-trophy{width:72px !important;height:72px !important;margin-bottom:5px !important}
+      .start-gate .celebration-title,
+      #endCelebration .finish-title{font-size:34px !important}
+      .start-gate .celebration-subtitle,
+      #endCelebration .finish-subtitle{margin-top:5px !important;font-size:17px !important}
+      .start-gate .celebration-actions,
+      #endCelebration .finish-actions{margin-top:10px !important}
+      .start-gate .activity-start-btn,
+      #endCelebration .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
+    }
+
+
+    /* train-v141: نفس بوابة البداية وحركة الكاميرا الافتتاحية في افتح الصندوق. */
+    .train-page.intro-playing .stage{
+      transform-origin:center center;
+      will-change:transform;
+      pointer-events:none;
+    }
+    .train-page.intro-done .stage{
+      transform:translate3d(0,0,0) scale(1.04);
+    }
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 </head>
 <body>
   <main class="train-page" id="page">
     <svg class="stage" id="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="خلفية وسكة قطار الإجابات"></svg>
+    <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
+      <div class="celebration-card activity-start-card" role="dialog" aria-modal="true" aria-labelledby="startGateTitle">
+        <span class="celebration-spark spark-one" aria-hidden="true"></span>
+        <span class="celebration-spark spark-two" aria-hidden="true"></span>
+        <span class="celebration-spark spark-three" aria-hidden="true"></span>
+        <span class="celebration-spark spark-four" aria-hidden="true"></span>
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+      <defs>
+        <linearGradient id="startBlue" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stop-color="#2fa7f2"/>
+          <stop offset="100%" stop-color="#0d6fb4"/>
+        </linearGradient>
+      </defs>
+      <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.76)" stroke="rgba(255,255,255,.92)" stroke-width="5"/>
+      <circle cx="60" cy="60" r="35" fill="url(#startBlue)"/>
+      <path d="M52 42l27 18-27 18z" fill="#fff"/>
+    </svg>
+        <h1 class="celebration-title" id="startGateTitle">ابدأ اللعبة</h1>
+        <p class="celebration-subtitle">اضغط للبدء وتشغيل الصوت</p>
+        <div class="celebration-actions">
+          <button class="restart-btn activity-start-btn" type="button" id="startGameBtn">تشغيل</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="activity-overlay end-celebration" id="endCelebration" aria-hidden="true">
+      <div class="celebration-confetti finish-confetti" aria-hidden="true">
+        <span style="left:9%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-0.23s; --confetti-drift:-36px; --confetti-rotate:31deg"></span>
+        <span style="left:16%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-0.46s; --confetti-drift:-18px; --confetti-rotate:62deg"></span>
+        <span style="left:23%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-0.69s; --confetti-drift:0px; --confetti-rotate:93deg"></span>
+        <span style="left:30%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.92s; --confetti-drift:18px; --confetti-rotate:124deg"></span>
+        <span style="left:37%; --confetti-color:#8e24aa; --confetti-duration:5.25s; --confetti-delay:-1.15s; --confetti-drift:36px; --confetti-rotate:155deg"></span>
+        <span style="left:44%; --confetti-color:#ffd166; --confetti-duration:3.60s; --confetti-delay:-1.38s; --confetti-drift:54px; --confetti-rotate:6deg"></span>
+        <span style="left:51%; --confetti-color:#06b6d4; --confetti-duration:3.93s; --confetti-delay:-1.61s; --confetti-drift:-54px; --confetti-rotate:37deg"></span>
+        <span style="left:58%; --confetti-color:#efd553; --confetti-duration:4.26s; --confetti-delay:-1.84s; --confetti-drift:-36px; --confetti-rotate:68deg"></span>
+        <span style="left:65%; --confetti-color:#1688d3; --confetti-duration:4.59s; --confetti-delay:-2.07s; --confetti-drift:-18px; --confetti-rotate:99deg"></span>
+        <span style="left:72%; --confetti-color:#f47a45; --confetti-duration:4.92s; --confetti-delay:-2.30s; --confetti-drift:0px; --confetti-rotate:130deg"></span>
+        <span style="left:79%; --confetti-color:#e91e63; --confetti-duration:5.25s; --confetti-delay:-2.53s; --confetti-drift:18px; --confetti-rotate:161deg"></span>
+        <span style="left:86%; --confetti-color:#43a047; --confetti-duration:3.60s; --confetti-delay:-2.76s; --confetti-drift:36px; --confetti-rotate:12deg"></span>
+        <span style="left:93%; --confetti-color:#8e24aa; --confetti-duration:3.93s; --confetti-delay:-2.99s; --confetti-drift:54px; --confetti-rotate:43deg"></span>
+        <span style="left:4%; --confetti-color:#ffd166; --confetti-duration:4.26s; --confetti-delay:-0.02s; --confetti-drift:-54px; --confetti-rotate:74deg"></span>
+        <span style="left:11%; --confetti-color:#06b6d4; --confetti-duration:4.59s; --confetti-delay:-0.25s; --confetti-drift:-36px; --confetti-rotate:105deg"></span>
+        <span style="left:18%; --confetti-color:#efd553; --confetti-duration:4.92s; --confetti-delay:-0.48s; --confetti-drift:-18px; --confetti-rotate:136deg"></span>
+        <span style="left:25%; --confetti-color:#1688d3; --confetti-duration:5.25s; --confetti-delay:-0.71s; --confetti-drift:0px; --confetti-rotate:167deg"></span>
+        <span style="left:32%; --confetti-color:#f47a45; --confetti-duration:3.60s; --confetti-delay:-0.94s; --confetti-drift:18px; --confetti-rotate:18deg"></span>
+        <span style="left:39%; --confetti-color:#e91e63; --confetti-duration:3.93s; --confetti-delay:-1.17s; --confetti-drift:36px; --confetti-rotate:49deg"></span>
+        <span style="left:46%; --confetti-color:#43a047; --confetti-duration:4.26s; --confetti-delay:-1.40s; --confetti-drift:54px; --confetti-rotate:80deg"></span>
+        <span style="left:53%; --confetti-color:#8e24aa; --confetti-duration:4.59s; --confetti-delay:-1.63s; --confetti-drift:-54px; --confetti-rotate:111deg"></span>
+        <span style="left:60%; --confetti-color:#ffd166; --confetti-duration:4.92s; --confetti-delay:-1.86s; --confetti-drift:-36px; --confetti-rotate:142deg"></span>
+        <span style="left:67%; --confetti-color:#06b6d4; --confetti-duration:5.25s; --confetti-delay:-2.09s; --confetti-drift:-18px; --confetti-rotate:173deg"></span>
+        <span style="left:74%; --confetti-color:#efd553; --confetti-duration:3.60s; --confetti-delay:-2.32s; --confetti-drift:0px; --confetti-rotate:24deg"></span>
+        <span style="left:81%; --confetti-color:#1688d3; --confetti-duration:3.93s; --confetti-delay:-2.55s; --confetti-drift:18px; --confetti-rotate:55deg"></span>
+        <span style="left:88%; --confetti-color:#f47a45; --confetti-duration:4.26s; --confetti-delay:-2.78s; --confetti-drift:36px; --confetti-rotate:86deg"></span>
+        <span style="left:95%; --confetti-color:#e91e63; --confetti-duration:4.59s; --confetti-delay:-3.01s; --confetti-drift:54px; --confetti-rotate:117deg"></span>
+        <span style="left:6%; --confetti-color:#43a047; --confetti-duration:4.92s; --confetti-delay:-0.04s; --confetti-drift:-54px; --confetti-rotate:148deg"></span>
+      </div>
+
+      <div class="celebration-card finish-card" role="status" aria-live="polite">
+        <span class="celebration-spark spark-one" aria-hidden="true"></span>
+        <span class="celebration-spark spark-two" aria-hidden="true"></span>
+        <span class="celebration-spark spark-three" aria-hidden="true"></span>
+        <span class="celebration-spark spark-four" aria-hidden="true"></span>
+
+        <svg class="celebration-icon finish-trophy" viewBox="0 0 120 120" aria-hidden="true">
+          <defs>
+            <linearGradient id="cupGold" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#fff08a"/>
+              <stop offset="45%" stop-color="#efd553"/>
+              <stop offset="100%" stop-color="#f4a51f"/>
+            </linearGradient>
+            <linearGradient id="cupBlue" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#24a6ef"/>
+              <stop offset="100%" stop-color="#116eb5"/>
+            </linearGradient>
+          </defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.72)" stroke="rgba(255,255,255,.90)" stroke-width="5"/>
+          <path d="M38 26h44v13c0 22-8 35-22 38C46 74 38 61 38 39V26z" fill="url(#cupGold)" stroke="#111" stroke-opacity=".16" stroke-width="2"/>
+          <path d="M38 36H23c1 17 9 28 22 30" fill="none" stroke="url(#cupGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M82 36h15c-1 17-9 28-22 30" fill="none" stroke="url(#cupGold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M55 76h10v13H55z" fill="#e7a51d"/>
+          <path d="M42 89h36v10H42z" fill="url(#cupBlue)" rx="5"/>
+          <path d="M36 99h48v8H36z" fill="#102b57" opacity=".92"/>
+          <path d="M60 34l5.2 10.6 11.7 1.7-8.5 8.2 2 11.6L60 60.6 49.6 66l2-11.6-8.5-8.2 11.7-1.7L60 34z" fill="#fff" opacity=".92"/>
+        </svg>
+
+        <h1 class="celebration-title finish-title">أحسنتم!</h1>
+        <p class="celebration-subtitle finish-subtitle">انتهى النشاط بنجاح</p>
+
+        <div class="celebration-actions finish-actions">
+          <button class="restart-btn" type="button" id="endRestartBtn">إعادة</button>
+          <button class="home-btn" type="button" id="endHomeBtn">الصفحة الرئيسية</button>
+        </div>
+      </div>
+    </section>
   </main>
 
 <script>
@@ -239,6 +690,148 @@
   document.addEventListener("pointerdown", unlockTrainAudio, {capture:true, once:true});
   document.addEventListener("touchstart", unlockTrainAudio, {capture:true, once:true, passive:true});
   document.addEventListener("keydown", unlockTrainAudio, {capture:true, once:true});
+
+  const trainPage = document.getElementById("page");
+  const startGate = document.getElementById("startGate");
+  const startGameBtn = document.getElementById("startGameBtn");
+  const endCelebration = document.getElementById("endCelebration");
+  const endRestartBtn = document.getElementById("endRestartBtn");
+  const endHomeBtn = document.getElementById("endHomeBtn");
+
+  const trainGateAudio = (()=>{
+    const intro = new Audio("../sounds/theme-default.mp3?v=1");
+    const finish = new Audio("../sounds/match-finish.mp3?v=1");
+    [intro,finish].forEach(audio=>{
+      audio.preload = "auto";
+      audio.playsInline = true;
+      audio.setAttribute("playsinline","");
+      audio.volume = 1;
+      try{ audio.load(); }catch(_){ }
+    });
+    function stop(audio){
+      try{ audio.pause(); audio.currentTime = 0; }catch(_){ }
+    }
+    function play(audio){
+      stop(audio);
+      const result = audio.play();
+      if(result && typeof result.catch === "function") result.catch(()=>{});
+    }
+    return {
+      playIntro:()=>play(intro),
+      stopIntro:()=>stop(intro),
+      playFinish:()=>play(finish),
+      stopFinish:()=>stop(finish)
+    };
+  })();
+
+  let trainGameStarted = false;
+  let trainStartGatePending = true;
+  let finishSequenceToken = 0;
+  let finishSequenceTimers = [];
+
+  function wait(ms){ return new Promise(resolve=>setTimeout(resolve,ms)); }
+  function clearTrainFinishTimers(){
+    finishSequenceTimers.forEach(clearTimeout);
+    finishSequenceTimers = [];
+  }
+  function resetTrainFinishClasses(){
+    endCelebration?.classList.remove(
+      "finish-sequence-start","finish-message-in","finish-actions-in","finish-confetti-on"
+    );
+  }
+  function queueTrainFinishStep(token,delay,classNames){
+    const timer=setTimeout(()=>{
+      if(token!==finishSequenceToken) return;
+      classNames.forEach(name=>endCelebration?.classList.add(name));
+    },delay);
+    finishSequenceTimers.push(timer);
+  }
+  async function showTrainEndCelebration(){
+    const token=++finishSequenceToken;
+    clearTrainFinishTimers();
+    resetTrainFinishClasses();
+    stopTrainMovementSound();
+    trainPage?.classList.add("activity-ended","ended");
+    endCelebration?.classList.add("is-visible");
+    endCelebration?.setAttribute("aria-hidden","false");
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    if(token!==finishSequenceToken) return;
+    endCelebration?.classList.add("finish-sequence-start");
+    trainGateAudio.playFinish();
+    queueTrainFinishStep(token,2680,["finish-message-in","finish-confetti-on"]);
+    queueTrainFinishStep(token,3180,["finish-actions-in"]);
+  }
+  function hideTrainEndCelebration(){
+    finishSequenceToken += 1;
+    clearTrainFinishTimers();
+    resetTrainFinishClasses();
+    trainGateAudio.stopFinish();
+    trainPage?.classList.remove("activity-ended","ended");
+    endCelebration?.classList.remove("is-visible");
+    endCelebration?.setAttribute("aria-hidden","true");
+  }
+  async function playTrainOpeningIntro(){
+    trainPage?.classList.remove("intro-done");
+    trainPage?.classList.add("intro-playing");
+    const holdMs=2200;
+    const zoomMs=7600;
+    const startScale=1;
+    const endScale=1.04;
+    const stageNode=document.getElementById("stage");
+    if(!stageNode) return;
+    stageNode.style.transform=`translate3d(0,0,0) scale(${startScale})`;
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      await new Promise(resolve=>{
+        let started=null;
+        const frame=now=>{
+          if(started===null) started=now;
+          const elapsed=now-started;
+          if(elapsed<holdMs){
+            stageNode.style.transform=`translate3d(0,0,0) scale(${startScale})`;
+            requestAnimationFrame(frame);
+            return;
+          }
+          const p=Math.max(0,Math.min(1,(elapsed-holdMs)/zoomMs));
+          const eased=-(Math.cos(Math.PI*p)-1)/2;
+          const scale=startScale+(endScale-startScale)*eased;
+          stageNode.style.transform=`translate3d(0,0,0) scale(${scale.toFixed(5)})`;
+          if(p<1) requestAnimationFrame(frame); else resolve();
+        };
+        requestAnimationFrame(frame);
+      });
+    }else{
+      stageNode.style.transform=`translate3d(0,0,0) scale(${endScale})`;
+    }
+    trainPage?.classList.remove("intro-playing");
+    trainPage?.classList.add("intro-done");
+  }
+  async function startTrainFromGate(event){
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if(trainGameStarted) return;
+    trainGameStarted=true;
+    unlockTrainAudio();
+    trainGateAudio.playIntro();
+    startGate?.classList.remove("is-visible");
+    startGate?.setAttribute("aria-hidden","true");
+    await playTrainOpeningIntro();
+    trainStartGatePending=false;
+    startTrainEntry();
+  }
+  startGameBtn?.addEventListener("click",startTrainFromGate);
+  endRestartBtn?.addEventListener("click",event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    hideTrainEndCelebration();
+    window.location.reload();
+  });
+  endHomeBtn?.addEventListener("click",event=>{
+    event.preventDefault();
+    event.stopPropagation();
+    trainGateAudio.stopFinish();
+    window.location.href="../index.html";
+  });
 
   function el(name, attrs = {}, parent = svg){
     const node = document.createElementNS(NS, name);
@@ -612,7 +1205,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 140: إضافة مؤثرات صوتية مرتبطة بأحداث القطار والبالونات والصناديق.
+  // إصدار 141: إضافة بداية ونهاية مطابقتين لافتح الصندوق واستبدال صوت حركة القطار.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -5659,12 +6252,15 @@
     const scheduledGeneration = stageGeneration;
 
     // تظهر الطائرة مباشرة بعد اختفاء القطار وتعرض الدرجة التراكمية الحالية.
-    startScorePlaneFlyover(totalScore);
-
     if(!hasNextTrainStage()){
       trainMotionState = "done";
+      startScorePlaneFlyover(totalScore,()=>{
+        showTrainEndCelebration();
+      });
       return;
     }
+
+    startScorePlaneFlyover(totalScore);
 
     const nextStageIndex = currentStageIndex + 1;
     const nextStageNumber = nextStageIndex + 1;
@@ -6270,14 +6866,24 @@
     updateTrainVisualCulling();
     startParallaxLoop();
 
-    // المرحلة الأولى: يبدأ القطار خارج الشاشة من اليسار ثم يدخل حتى تستقر العربة في المنتصف.
-    startTrainEntry();
+    // قبل الضغط على تشغيل نبني المشهد فقط، ويبقى القطار خارج الشاشة.
+    if(trainStartGatePending){
+      setTrainVisualOffset(TRAIN_MOTION.enterOffset);
+      syncTrainPhysicsToVisualOffset();
+    }else{
+      startTrainEntry();
+    }
   }
 
   attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
+  startGate?.classList.add("is-visible");
+  startGate?.setAttribute("aria-hidden","false");
+  endCelebration?.classList.remove("is-visible");
+  endCelebration?.setAttribute("aria-hidden","true");
+  resetTrainFinishClasses();
   startTrainStage(0);
   /* إصدار 139: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
-  window.addEventListener("pagehide", stopTrainMovementSound);
+  window.addEventListener("pagehide",()=>{ stopTrainMovementSound(); trainGateAudio.stopIntro(); trainGateAudio.stopFinish(); });
   window.addEventListener("beforeunload", stopTrainMovementSound);
 
 })();
