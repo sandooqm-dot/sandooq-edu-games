@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-logic-v68 -->
+<!-- version: index-train-logic-v69 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10593,34 +10593,13 @@
     /* صفحة إعداد قطار الإجابات */
     .train-cover{
       position:relative;
-      background:
-        linear-gradient(180deg,#c8d4ef 0 44%,#e8c388 45% 72%,#b9783c 73% 100%) !important;
+      background:#d9ecff url("train/train-preview.webp") center center/cover no-repeat !important;
       overflow:hidden;
     }
 
-    .train-cover::before{
-      content:"";
-      position:absolute;
-      left:8%;
-      right:4%;
-      bottom:17%;
-      height:58%;
-      background:url("train/train-engine-transparent.png") center bottom/contain no-repeat;
-      filter:drop-shadow(0 5px 4px rgba(0,0,0,.18));
-      z-index:2;
-    }
-
+    .train-cover::before,
     .train-cover::after{
-      content:"";
-      position:absolute;
-      left:-6%;
-      right:-6%;
-      bottom:13%;
-      height:7px;
-      border-top:4px solid #4d4b4a;
-      border-bottom:3px solid #6c482b;
-      background:#c69a66;
-      z-index:1;
+      display:none !important;
     }
 
 
@@ -11070,6 +11049,262 @@
       .train-add-content{
         min-height:50px;
         font-size:16px;
+      }
+    }
+
+    /* v69: إعادة تصميم إعدادات قطار الإجابات */
+    .train-settings-grid{
+      grid-template-columns:1.2fr repeat(2,minmax(220px,1fr));
+      align-items:stretch;
+    }
+
+    .train-inline-setting{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .train-number-setting{
+      width:100%;
+      display:grid;
+      grid-template-columns:86px minmax(0,1fr);
+      align-items:center;
+      gap:14px;
+      direction:ltr;
+    }
+
+    .train-number-select{
+      width:86px;
+      height:48px;
+      border:3px solid var(--ink);
+      border-radius:13px;
+      background:var(--title-yellow);
+      color:#111;
+      text-align:center;
+      text-align-last:center;
+      font-size:20px;
+      font-weight:950;
+      outline:none;
+      cursor:pointer;
+      direction:ltr;
+      padding:0 8px;
+    }
+
+    .train-number-slider{
+      min-width:0;
+      display:grid;
+      gap:8px;
+      direction:rtl;
+    }
+
+    .train-number-slider .choices-config-group-title{
+      margin:0;
+      text-align:center;
+    }
+
+    .train-time-fields{
+      width:min(100%,240px);
+      gap:8px;
+    }
+
+    .train-time-field input{
+      height:38px;
+      border-radius:11px;
+      font-size:18px;
+    }
+
+    .train-time-field span{
+      font-size:12px;
+    }
+
+    .train-attempts-wrap{
+      grid-template-columns:52px minmax(0,1fr);
+      align-items:center;
+      gap:10px;
+      direction:ltr;
+    }
+
+    .train-attempts-value{
+      min-width:48px;
+      width:48px;
+      min-height:38px;
+      padding:4px 6px;
+      font-size:17px;
+      border-radius:10px;
+    }
+
+    .train-attempts-slider{
+      min-width:0;
+      display:grid;
+      gap:5px;
+    }
+
+    .train-content-fields{
+      gap:14px;
+    }
+
+    .train-content-side{
+      border:none;
+      background:transparent;
+      padding:0;
+      gap:8px;
+    }
+
+    .train-content-side-title{
+      text-align:right;
+      padding-inline:4px;
+    }
+
+    .train-compact-text-row{
+      display:grid;
+      grid-template-columns:48px minmax(0,1fr);
+      align-items:center;
+      gap:8px;
+      direction:ltr;
+    }
+
+    .train-content-eye{
+      width:48px;
+      height:48px;
+      border:3px solid var(--ink);
+      border-radius:12px;
+      background:#5e88db;
+      color:#fff;
+      font-size:23px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.16);
+    }
+
+    .train-content-eye.is-hidden{
+      background:#7185b6;
+    }
+
+    .train-text-input{
+      min-height:56px;
+      border-width:3px;
+      border-radius:17px;
+      font-size:clamp(15px,1.55vw,19px);
+      direction:rtl;
+    }
+
+    .train-compact-image-row{
+      min-width:0;
+      min-height:54px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 44px auto 34px;
+      align-items:center;
+      gap:7px;
+      border:3px solid var(--ink);
+      border-radius:17px;
+      background:#fff;
+      padding:6px 8px;
+      direction:ltr;
+    }
+
+    .train-compact-image-name{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      text-align:right;
+      direction:rtl;
+      font-size:13px;
+      font-weight:800;
+    }
+
+    .train-compact-image-preview{
+      width:44px;
+      height:40px;
+      border:2px solid var(--ink);
+      border-radius:9px;
+      background:#f5f5f5;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      cursor:pointer;
+      font-size:20px;
+    }
+
+    .train-compact-image-preview img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+    }
+
+    .train-image-upload{
+      min-width:102px;
+      min-height:38px;
+      border:2px solid var(--ink);
+      border-radius:12px;
+      background:var(--orange);
+      color:#fff;
+      padding:5px 10px;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .train-compact-image-clear{
+      width:32px;
+      height:32px;
+      border:2px solid var(--ink);
+      border-radius:10px;
+      background:#f05d5b;
+      color:#fff;
+      font-size:18px;
+      font-weight:950;
+      cursor:pointer;
+    }
+
+    .train-add-content{
+      width:auto;
+      min-width:190px;
+      min-height:46px;
+      padding:8px 18px;
+      font-size:16px;
+      border-radius:16px;
+    }
+
+    .train-add-content span:first-child{
+      font-size:20px;
+    }
+
+    @media(max-width:900px){
+      .train-settings-grid{
+        grid-template-columns:1fr;
+      }
+      .train-number-setting{
+        grid-template-columns:72px minmax(0,1fr);
+      }
+      .train-number-select{
+        width:72px;
+      }
+    }
+
+    @media(max-width:760px){
+      .train-number-setting{
+        grid-template-columns:64px minmax(0,1fr);
+        gap:9px;
+      }
+      .train-number-select{
+        width:64px;
+        height:42px;
+        font-size:17px;
+      }
+      .train-content-fields{
+        grid-template-columns:1fr;
+      }
+      .train-compact-image-row{
+        grid-template-columns:minmax(0,1fr) 40px auto 30px;
+      }
+      .train-image-upload{
+        min-width:94px;
+        font-size:12px;
+      }
+      .train-time-fields{
+        width:min(100%,210px);
       }
     }
 
@@ -11771,17 +12006,6 @@
   </div>
 
   <div class="train-setup-body">
-    <section class="choices-section choices-theme-section">
-      <div class="train-theme-current">
-        <div class="train-theme-copy">
-          <h3 class="choices-section-title">ثيم اللعبة</h3>
-          <p class="train-theme-note">الثيم المتوفر حاليًا لقطار الإجابات</p>
-        </div>
-        <span class="train-theme-name">صحراء</span>
-        <span class="train-theme-preview" aria-label="ثيم الصحراء"></span>
-      </div>
-    </section>
-
     <section class="choices-section">
       <div class="choices-section-head">
         <h3 class="choices-section-title">إعدادات اللعبة</h3>
@@ -11798,22 +12022,55 @@
           </div>
         </div>
 
-        <div class="choices-config-group">
-          <h4 class="choices-config-group-title">عدد المراحل</h4>
-          <p class="choices-config-group-note">اختر عدد مراحل اللعبة من 3 إلى 20.</p>
-          <div class="train-range-wrap">
-            <output class="train-range-value" id="trainStagesValue" for="trainStagesRange">5 مراحل</output>
-            <input class="train-range" id="trainStagesRange" type="range" min="3" max="20" step="1" value="5" dir="ltr" aria-label="عدد مراحل قطار الإجابات"/>
-            <div class="train-range-labels"><span>3</span><span>20</span></div>
+        <div class="choices-config-group train-inline-setting">
+          <div class="train-number-setting">
+            <select class="train-number-select" id="trainStagesSelect" aria-label="اختيار عدد المراحل">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5" selected>5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+            </select>
+            <div class="train-number-slider">
+              <h4 class="choices-config-group-title">عدد المراحل</h4>
+              <input class="train-range" id="trainStagesRange" type="range" min="3" max="20" step="1" value="5" dir="ltr" aria-label="عدد مراحل قطار الإجابات"/>
+              <div class="train-range-labels"><span>3</span><span>20</span></div>
+            </div>
           </div>
         </div>
 
-        <div class="choices-config-group">
-          <h4 class="choices-config-group-title">سرعة البالونات</h4>
-          <div class="train-range-wrap">
-            <output class="train-range-value" id="trainSpeedValue" for="trainSpeedRange">5</output>
-            <input class="train-range" id="trainSpeedRange" type="range" min="1" max="10" step="1" value="5" dir="ltr" aria-label="سرعة بالونات قطار الإجابات"/>
-            <div class="train-range-labels"><span>1</span><span>10</span></div>
+        <div class="choices-config-group train-inline-setting">
+          <div class="train-number-setting">
+            <select class="train-number-select" id="trainSpeedSelect" aria-label="اختيار سرعة البالونات">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5" selected>5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+            <div class="train-number-slider">
+              <h4 class="choices-config-group-title">سرعة البالونات</h4>
+              <input class="train-range" id="trainSpeedRange" type="range" min="1" max="10" step="1" value="5" dir="ltr" aria-label="سرعة بالونات قطار الإجابات"/>
+              <div class="train-range-labels"><span>1</span><span>10</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -11836,27 +12093,29 @@
             <div class="train-advanced-control" id="trainCountdownFields" hidden>
               <div class="train-time-fields">
                 <label class="train-time-field">
-                  <span>الدقائق</span>
-                  <input id="trainCountdownMinutes" type="number" min="0" max="99" step="1" value="1" inputmode="numeric" aria-label="دقائق المؤقت"/>
-                </label>
-                <label class="train-time-field">
                   <span>الثواني</span>
                   <input id="trainCountdownSeconds" type="number" min="0" max="59" step="1" value="0" inputmode="numeric" aria-label="ثواني المؤقت"/>
+                </label>
+                <label class="train-time-field">
+                  <span>الدقائق</span>
+                  <input id="trainCountdownMinutes" type="number" min="0" max="99" step="1" value="1" inputmode="numeric" aria-label="دقائق المؤقت"/>
                 </label>
               </div>
             </div>
           </div>
 
           <div class="choices-advanced-row train-advanced-attempts-row">
-            <div class="choices-advanced-label"><strong>عدد محاولات اللعبة</strong></div>
+            <div class="choices-advanced-label"><strong>إضافة عدد محاولات للعبة</strong></div>
             <button class="quiz-sound-toggle" id="trainAttemptsToggleBtn" type="button" aria-pressed="false" aria-label="تفعيل عدد محاولات اللعبة">
               <span>×</span><span>✓</span>
             </button>
             <div class="train-advanced-control" id="trainAttemptsControl" hidden>
               <div class="train-attempts-wrap">
                 <output class="train-attempts-value" id="trainAttemptsValue" for="trainAttemptsRange">10</output>
-                <input class="train-range" id="trainAttemptsRange" type="range" min="1" max="10" step="1" value="10" dir="ltr" aria-label="عدد محاولات لعبة القطار"/>
-                <div class="train-range-labels"><span>1</span><span>10</span></div>
+                <div class="train-attempts-slider">
+                  <input class="train-range" id="trainAttemptsRange" type="range" min="1" max="10" step="1" value="10" dir="ltr" aria-label="عدد محاولات لعبة القطار"/>
+                  <div class="train-range-labels"><span>1</span><span>10</span></div>
+                </div>
               </div>
             </div>
           </div>
@@ -11867,10 +12126,9 @@
     <section class="choices-section">
       <div class="choices-section-head">
         <h3 class="choices-section-title">محتويات اللعبة</h3>
-        <p class="choices-section-note">أدخل محتوى العربة، ثم محتوى البالون المرتبط بها. لتخصيص أكثر من بالون للعربة نفسها، كرر محتوى العربة مع بالونات مختلفة.</p>
       </div>
       <div class="train-contents-editor" id="trainContentsEditor"></div>
-      <button class="train-add-content" id="addTrainContentBtn" type="button"><span>＋</span><span>إضافة محتويات جديدة</span></button>
+      <button class="train-add-content" id="addTrainContentBtn" type="button"><span>＋</span><span>إضافة محتوى</span></button>
     </section>
 
     <div class="choices-actions">
@@ -17443,9 +17701,9 @@
   const contentsEditor = document.getElementById("trainContentsEditor");
   const addContentBtn = document.getElementById("addTrainContentBtn");
   const stagesRange = document.getElementById("trainStagesRange");
-  const stagesValue = document.getElementById("trainStagesValue");
+  const stagesSelect = document.getElementById("trainStagesSelect");
   const speedRange = document.getElementById("trainSpeedRange");
-  const speedValue = document.getElementById("trainSpeedValue");
+  const speedSelect = document.getElementById("trainSpeedSelect");
   const advancedToggleBtn = document.getElementById("trainAdvancedToggleBtn");
   const advancedActionText = document.getElementById("trainAdvancedActionText");
   const advancedPanel = document.getElementById("trainAdvancedPanel");
@@ -17569,7 +17827,7 @@
 
   function ensureInitialContents(){
     if (contents.length) return;
-    contents = [createContent(),createContent(),createContent()];
+    contents = [createContent()];
   }
 
   function currentName(){
@@ -17656,10 +17914,10 @@
     });
 
     if (stagesRange) stagesRange.value = String(stageCount);
-    if (stagesValue) stagesValue.textContent = trainStagesLabel(stageCount);
+    if (stagesSelect) stagesSelect.value = String(stageCount);
 
     if (speedRange) speedRange.value = String(balloonSpeed);
-    if (speedValue) speedValue.textContent = String(balloonSpeed);
+    if (speedSelect) speedSelect.value = String(balloonSpeed);
 
     countdownToggleBtn?.classList.toggle("is-on",countdownEnabled);
     countdownToggleBtn?.setAttribute("aria-pressed",countdownEnabled ? "true" : "false");
@@ -17726,14 +17984,8 @@
   }
 
   function createImageControl(media,onChange,label){
-    const wrap = document.createElement("div");
-    wrap.className = "train-image-control";
-
-    const preview = document.createElement("div");
-    preview.className = "train-image-preview";
-
-    const actions = document.createElement("div");
-    actions.className = "train-image-actions";
+    const row = document.createElement("div");
+    row.className = "train-compact-image-row";
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
@@ -17743,14 +17995,20 @@
     const upload = document.createElement("button");
     upload.type = "button";
     upload.className = "train-image-upload";
-    upload.textContent = media.imageData ? "تغيير" : "رفع صورة";
-    upload.setAttribute("aria-label",`رفع ${label}`);
+    upload.textContent = media.imageData ? "تغيير الصورة" : "إضافة صورة";
+    upload.setAttribute("aria-label",`${media.imageData ? "تغيير" : "رفع"} ${label}`);
+
+    const preview = document.createElement("span");
+    preview.className = "train-compact-image-preview";
+
+    const fileName = document.createElement("span");
+    fileName.className = "train-compact-image-name";
 
     const clear = document.createElement("button");
     clear.type = "button";
-    clear.className = "train-image-clear";
-    clear.textContent = "حذف";
-    clear.hidden = !media.imageData;
+    clear.className = "train-compact-image-clear";
+    clear.textContent = "×";
+    clear.setAttribute("aria-label",`حذف ${label}`);
 
     function refresh(){
       preview.textContent = "";
@@ -17760,13 +18018,15 @@
         image.alt = media.imageName || label;
         preview.appendChild(image);
       } else {
-        preview.textContent = "لا توجد صورة";
+        preview.textContent = "🖼️";
       }
-      upload.textContent = media.imageData ? "تغيير" : "رفع صورة";
+      fileName.textContent = media.imageName || "لم يتم اختيار صورة";
+      upload.textContent = media.imageData ? "تغيير الصورة" : "إضافة صورة";
       clear.hidden = !media.imageData;
     }
 
     upload.addEventListener("click",()=>fileInput.click());
+    preview.addEventListener("click",()=>fileInput.click());
 
     clear.addEventListener("click",()=>{
       media.imageName = "";
@@ -17787,10 +18047,45 @@
       fileInput.value = "";
     });
 
-    actions.append(upload,clear,fileInput);
-    wrap.append(preview,actions);
+    row.append(fileName,preview,upload,clear,fileInput);
     refresh();
-    return wrap;
+    return row;
+  }
+
+  function createTextControl(media,onChange,placeholder,label){
+    const row = document.createElement("div");
+    row.className = "train-compact-text-row";
+
+    const eye = document.createElement("button");
+    eye.type = "button";
+    eye.className = "train-content-eye";
+    eye.innerHTML = "◉";
+    eye.setAttribute("aria-label",`إخفاء ${label}`);
+    eye.setAttribute("aria-pressed","false");
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "train-text-input";
+    input.maxLength = 90;
+    input.placeholder = placeholder;
+    input.value = media.text;
+
+    eye.addEventListener("click",()=>{
+      const hidden = input.type === "password";
+      input.type = hidden ? "text" : "password";
+      eye.classList.toggle("is-hidden",!hidden);
+      eye.textContent = hidden ? "◉" : "⊘";
+      eye.setAttribute("aria-pressed",hidden ? "false" : "true");
+      eye.setAttribute("aria-label",`${hidden ? "إخفاء" : "إظهار"} ${label}`);
+    });
+
+    input.addEventListener("input",()=>{
+      media.text = input.value;
+      onChange();
+    });
+
+    row.append(eye,input);
+    return row;
   }
 
   function createSideEditor(entry,key,title){
@@ -17804,29 +18099,20 @@
     side.appendChild(heading);
 
     if (contentType === "text" || contentType === "mixed") {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "train-text-input";
-      input.maxLength = 90;
-      input.placeholder = key === "wagon"
-        ? "اكتب محتوى العربة..."
-        : "اكتب محتوى البالون...";
-      input.value = media.text;
-      input.addEventListener("input",()=>{
-        media.text = input.value;
-        saveDraft();
-      });
-      side.appendChild(input);
+      side.appendChild(createTextControl(
+        media,
+        saveDraft,
+        key === "wagon" ? "اكتب محتوى العربة..." : "اكتب محتوى البالون...",
+        key === "wagon" ? "محتوى العربة" : "محتوى البالون"
+      ));
     }
 
     if (contentType === "images" || contentType === "mixed") {
-      side.appendChild(
-        createImageControl(
-          media,
-          saveDraft,
-          key === "wagon" ? "صورة العربة" : "صورة البالون"
-        )
-      );
+      side.appendChild(createImageControl(
+        media,
+        saveDraft,
+        key === "wagon" ? "صورة العربة" : "صورة البالون"
+      ));
     }
 
     return side;
@@ -17887,9 +18173,9 @@
     );
   }
 
-  function validate(){
-    if (!currentName()) {
-      alert("يرجى كتابة اسم اللعبة قبل المتابعة.");
+  function validate(requireName = true){
+    if (requireName && !currentName()) {
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
       gameNameInput?.focus();
       return false;
     }
@@ -17963,7 +18249,7 @@
   }
 
   async function openTrainPage(){
-    if (!validate()) return;
+    if (!validate(false)) return;
 
     const payloadId = `train_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
     const payload = runtimePayload(payloadId);
@@ -17994,7 +18280,7 @@
   }
 
   async function saveTrainGame(){
-    if (!validate()) return;
+    if (!validate(true)) return;
 
     const payloadId = `saved_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
     const payload = runtimePayload(payloadId);
@@ -18098,8 +18384,20 @@
     saveDraft();
   });
 
+  stagesSelect?.addEventListener("change",()=>{
+    stageCount = clampNumber(stagesSelect.value,3,20,5);
+    updateControls();
+    saveDraft();
+  });
+
   speedRange?.addEventListener("input",()=>{
     balloonSpeed = clampNumber(speedRange.value,1,10,5);
+    updateControls();
+    saveDraft();
+  });
+
+  speedSelect?.addEventListener("change",()=>{
+    balloonSpeed = clampNumber(speedSelect.value,1,10,5);
     updateControls();
     saveDraft();
   });
