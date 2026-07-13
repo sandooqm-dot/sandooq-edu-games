@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-logic-v72 -->
+<!-- version: index-train-logic-v73 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18419,6 +18419,13 @@
       sessionStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
       sessionStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
       sessionStorage.setItem(TRAIN_DRAFT_KEY,JSON.stringify(draftPayload()));
+    } catch (_) {}
+
+    // نسخة تشغيل احتياطية مشتركة بين صفحة index ومجلد train.
+    // localStorage يبقى على نفس النطاق حتى عند انتقال Safari إلى مسار فرعي.
+    try {
+      localStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
+      localStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
     } catch (_) {}
 
     await writeRuntimePayloadToDb(`train:${payloadId}`,payload);
