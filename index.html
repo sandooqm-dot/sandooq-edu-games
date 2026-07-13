@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-logic-v69 -->
+<!-- version: index-train-logic-v70 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11308,6 +11308,148 @@
       }
     }
 
+
+    /* v70: توحيد محرر محتويات القطار مع محرر لعبة المطابقة */
+    .train-contents-editor{
+      display:grid;
+      gap:16px;
+    }
+
+    .train-content-card.match-pair-entry{
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#fff;
+      padding:clamp(14px,2vw,22px);
+      box-shadow:0 5px 0 rgba(0,0,0,.10);
+      display:grid;
+      gap:14px;
+    }
+
+    .train-content-card .match-pair-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .train-content-card .match-pair-number{
+      font-size:clamp(18px,1.8vw,24px);
+      font-weight:950;
+      line-height:1.1;
+    }
+
+    .train-content-card .match-remove-pair{
+      min-width:88px;
+      min-height:40px;
+      border:2px solid var(--ink);
+      border-radius:13px;
+      background:#f05d5b;
+      color:#fff;
+      padding:5px 12px;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      box-shadow:0 3px 0 rgba(0,0,0,.13);
+    }
+
+    .train-content-card .match-remove-pair:disabled{
+      opacity:.48;
+      cursor:not-allowed;
+    }
+
+    .train-content-fields.match-pair-cards{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:12px;
+    }
+
+    .train-match-card-editor.match-card-editor{
+      min-width:0;
+      border:2px solid rgba(17,17,17,.16);
+      border-radius:18px;
+      background:#f8f8f8;
+      padding:14px;
+      display:grid;
+      gap:12px;
+    }
+
+    .train-match-card-editor .match-card-editor-title{
+      margin:0;
+      text-align:center;
+      font-size:clamp(17px,1.7vw,22px);
+      font-weight:950;
+    }
+
+    .train-match-card-editor .match-text-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) 46px;
+      gap:8px;
+      align-items:stretch;
+    }
+
+    .train-match-card-editor .match-text-row .quiz-text-review-btn{
+      position:static;
+      width:46px;
+      height:auto;
+      min-height:46px;
+      transform:none;
+    }
+
+    .train-match-card-editor .match-image-picker-wrap{
+      padding:0;
+      border:0;
+      background:transparent;
+    }
+
+    .train-match-card-editor .quiz-image-picker-button{
+      width:100%;
+    }
+
+    .train-add-content{
+      width:auto !important;
+      min-width:132px !important;
+      min-height:38px !important;
+      height:38px !important;
+      margin:2px auto 0 !important;
+      border:2px solid var(--ink) !important;
+      border-radius:13px !important;
+      background:#1688d3 !important;
+      color:#fff !important;
+      padding:0 13px !important;
+      font-size:13px !important;
+      line-height:1 !important;
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      gap:5px !important;
+      box-shadow:0 3px 0 rgba(0,0,0,.14) !important;
+    }
+
+    .train-add-content span:first-child{
+      font-size:18px !important;
+    }
+
+    @media(max-width:760px){
+      .train-content-card.match-pair-entry{
+        border-radius:18px;
+        padding:12px;
+      }
+
+      .train-content-fields.match-pair-cards{
+        grid-template-columns:1fr;
+      }
+
+      .train-content-card .match-remove-pair{
+        min-width:78px;
+        min-height:38px;
+        font-size:13px;
+      }
+    }
+
 </style>
 </head>
 <body>
@@ -17984,59 +18126,56 @@
   }
 
   function createImageControl(media,onChange,label){
-    const row = document.createElement("div");
-    row.className = "train-compact-image-row";
+    const group = document.createElement("div");
+    group.className = "match-field-group";
+
+    const wrap = document.createElement("div");
+    wrap.className = "quiz-image-picker-wrap match-image-picker-wrap";
 
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "image/*";
-    fileInput.hidden = true;
+    fileInput.className = "image-picker-input quiz-file-input";
+    fileInput.setAttribute("aria-label",label);
 
-    const upload = document.createElement("button");
-    upload.type = "button";
-    upload.className = "train-image-upload";
-    upload.textContent = media.imageData ? "تغيير الصورة" : "إضافة صورة";
-    upload.setAttribute("aria-label",`${media.imageData ? "تغيير" : "رفع"} ${label}`);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quiz-image-picker-button";
 
-    const preview = document.createElement("span");
-    preview.className = "train-compact-image-preview";
+    const action = document.createElement("span");
+    action.className = "quiz-image-picker-action";
 
-    const fileName = document.createElement("span");
-    fileName.className = "train-compact-image-name";
-
-    const clear = document.createElement("button");
-    clear.type = "button";
-    clear.className = "train-compact-image-clear";
-    clear.textContent = "×";
-    clear.setAttribute("aria-label",`حذف ${label}`);
+    const info = document.createElement("span");
+    info.className = "quiz-image-picker-info";
 
     function refresh(){
-      preview.textContent = "";
-      if (media.imageData) {
-        const image = document.createElement("img");
-        image.src = media.imageData;
-        image.alt = media.imageName || label;
-        preview.appendChild(image);
+      const data = String(media.imageData || "");
+      button.classList.toggle("has-image",Boolean(data));
+      action.textContent = data ? "تغيير الصورة" : "اختيار صورة";
+      info.innerHTML = "";
+
+      if (data) {
+        const thumb = document.createElement("img");
+        thumb.className = "quiz-image-picker-thumb";
+        thumb.alt = "";
+        thumb.src = data;
+
+        const name = document.createElement("span");
+        name.className = "quiz-image-picker-name";
+        name.textContent = media.imageName || "صورة";
+        info.append(thumb,name);
       } else {
-        preview.textContent = "🖼️";
+        const state = document.createElement("span");
+        state.className = "quiz-image-picker-state";
+        state.textContent = "لم تضع صورة";
+        info.appendChild(state);
       }
-      fileName.textContent = media.imageName || "لم يتم اختيار صورة";
-      upload.textContent = media.imageData ? "تغيير الصورة" : "إضافة صورة";
-      clear.hidden = !media.imageData;
     }
 
-    upload.addEventListener("click",()=>fileInput.click());
-    preview.addEventListener("click",()=>fileInput.click());
-
-    clear.addEventListener("click",()=>{
-      media.imageName = "";
-      media.imageData = "";
-      refresh();
-      onChange();
-    });
-
+    button.addEventListener("click",()=>fileInput.click());
     fileInput.addEventListener("change",async()=>{
       const file = fileInput.files?.[0];
+      if (!file) return;
       const result = await readImage(file);
       if (result.imageData) {
         media.imageName = result.imageName;
@@ -18047,54 +18186,55 @@
       fileInput.value = "";
     });
 
-    row.append(fileName,preview,upload,clear,fileInput);
     refresh();
-    return row;
+    button.append(action,info);
+    wrap.append(fileInput,button);
+    group.appendChild(wrap);
+    return group;
   }
 
   function createTextControl(media,onChange,placeholder,label){
-    const row = document.createElement("div");
-    row.className = "train-compact-text-row";
+    const group = document.createElement("div");
+    group.className = "match-field-group";
 
-    const eye = document.createElement("button");
-    eye.type = "button";
-    eye.className = "train-content-eye";
-    eye.innerHTML = "◉";
-    eye.setAttribute("aria-label",`إخفاء ${label}`);
-    eye.setAttribute("aria-pressed","false");
+    const row = document.createElement("div");
+    row.className = "match-text-row";
 
     const input = document.createElement("input");
     input.type = "text";
-    input.className = "train-text-input";
+    input.className = "quiz-text-input";
     input.maxLength = 90;
     input.placeholder = placeholder;
-    input.value = media.text;
-
-    eye.addEventListener("click",()=>{
-      const hidden = input.type === "password";
-      input.type = hidden ? "text" : "password";
-      eye.classList.toggle("is-hidden",!hidden);
-      eye.textContent = hidden ? "◉" : "⊘";
-      eye.setAttribute("aria-pressed",hidden ? "false" : "true");
-      eye.setAttribute("aria-label",`${hidden ? "إخفاء" : "إظهار"} ${label}`);
-    });
-
+    input.value = media.text || "";
     input.addEventListener("input",()=>{
       media.text = input.value;
       onChange();
     });
 
-    row.append(eye,input);
-    return row;
+    const review = createMatchReviewButton({
+      label:`مراجعة ${label}`,
+      getValue:()=>input.value,
+      maxLength:90,
+      placeholder,
+      onSave:(nextValue)=>{
+        input.value = nextValue;
+        media.text = nextValue;
+        onChange();
+      }
+    });
+
+    row.append(input,review);
+    group.appendChild(row);
+    return group;
   }
 
   function createSideEditor(entry,key,title){
     const media = entry[key];
     const side = document.createElement("section");
-    side.className = "train-content-side";
+    side.className = "match-card-editor train-match-card-editor";
 
     const heading = document.createElement("h4");
-    heading.className = "train-content-side-title";
+    heading.className = "match-card-editor-title";
     heading.textContent = title;
     side.appendChild(heading);
 
@@ -18126,19 +18266,19 @@
 
     contents.forEach((entry,index)=>{
       const card = document.createElement("article");
-      card.className = "train-content-card";
+      card.className = "match-pair-entry train-content-card";
 
       const head = document.createElement("div");
-      head.className = "train-content-card-head";
+      head.className = "match-pair-head";
 
-      const title = document.createElement("h4");
-      title.className = "train-content-card-title";
+      const title = document.createElement("span");
+      title.className = "match-pair-number";
       title.textContent = `المحتوى ${index + 1}`;
 
       const remove = document.createElement("button");
       remove.type = "button";
-      remove.className = "train-remove-content";
-      remove.textContent = "حذف";
+      remove.className = "match-remove-pair train-remove-content";
+      remove.innerHTML = "<span>×</span><span>إزالة</span>";
       remove.disabled = contents.length <= 1;
       remove.addEventListener("click",()=>{
         if (contents.length <= 1) return;
@@ -18150,7 +18290,7 @@
       head.append(title,remove);
 
       const fields = document.createElement("div");
-      fields.className = "train-content-fields";
+      fields.className = "match-pair-cards train-content-fields";
       fields.append(
         createSideEditor(entry,"wagon","محتوى العربة"),
         createSideEditor(entry,"balloon","محتوى البالون")
