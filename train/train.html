@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 141</title>
+  <title>قطار الإجابات - إصدار 142</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -567,7 +567,7 @@
   const NS = "http://www.w3.org/2000/svg";
 
   const TRAIN_AUDIO_PATHS = Object.freeze({
-    move:"../sounds/train-move.mp3",
+    move:"../sounds/train-move-142.mp3",
     levelBell:"../sounds/train-level-bell.mp3",
     whistle:"../sounds/train-whistle.mp3",
     bounce:"../sounds/train-bounce.mp3",
@@ -587,10 +587,13 @@
   });
 
   const trainAudioTemplates = Object.create(null);
+  const trainAudioPools = Object.create(null);
+  const trainAudioPoolCursor = Object.create(null);
   let trainAudioUnlocked = false;
-  let trainMoveSoundTimer = 0;
-  let trainMoveSoundToken = 0;
+  let trainMoveAudio = null;
   let trainMoveSoundMode = "";
+  let lastCorrectDropAudio = null;
+  let trainExitSequencePending = false;
 
   function getTrainAudioTemplate(name){
     if(trainAudioTemplates[name]) return trainAudioTemplates[name];
@@ -613,80 +616,108 @@
   }
 
   function unlockTrainAudio(){
+    // فتح جلسة الصوت من ضغطة المستخدم دون تشغيل أي ملف، حتى تبقى البداية صامتة
+    // ويكون أول صوت مسموع هو نغمة الافتتاح فقط.
     if(trainAudioUnlocked) return;
     trainAudioUnlocked = true;
-    Object.keys(TRAIN_AUDIO_PATHS).forEach(name => {
-      const audio = getTrainAudioTemplate(name);
-      if(!audio) return;
-      const oldVolume = audio.volume;
-      audio.volume = 0;
-      const attempt = audio.play();
-      if(attempt && typeof attempt.then === "function"){
-        attempt.then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-          audio.volume = oldVolume;
-        }).catch(() => {
-          audio.volume = oldVolume;
-        });
-      }else{
-        audio.pause();
-        audio.currentTime = 0;
-        audio.volume = oldVolume;
-      }
+    preloadTrainAudio();
+  }
+
+  function getTrainAudioPool(name){
+    if(trainAudioPools[name]) return trainAudioPools[name];
+    const template = getTrainAudioTemplate(name);
+    if(!template) return [];
+    const size = name === "bounce" || name === "balloonPop" ? 4 : 3;
+    const pool = Array.from({length:size},()=>{
+      const audio = template.cloneNode(true);
+      audio.preload = "auto";
+      audio.playsInline = true;
+      audio.setAttribute("playsinline","");
+      audio.volume = TRAIN_AUDIO_VOLUMES[name] ?? .75;
+      try{ audio.load(); }catch(_){ }
+      return audio;
     });
+    trainAudioPools[name] = pool;
+    trainAudioPoolCursor[name] = 0;
+    return pool;
   }
 
   function playTrainSound(name, options = {}){
-    const template = getTrainAudioTemplate(name);
-    if(!template) return null;
-    const audio = template.cloneNode(true);
-    audio.preload = "auto";
-    audio.playsInline = true;
-    audio.volume = clamp(
-      Number(options.volume ?? TRAIN_AUDIO_VOLUMES[name] ?? .75),
-      0,
-      1
-    );
-    if(Number.isFinite(options.playbackRate)){
-      audio.playbackRate = clamp(Number(options.playbackRate), .6, 1.8);
+    if(name === "move") return null;
+    const pool = getTrainAudioPool(name);
+    if(!pool.length) return null;
+
+    let audio = pool.find(item => item.paused || item.ended);
+    if(!audio){
+      const cursor = trainAudioPoolCursor[name] || 0;
+      audio = pool[cursor % pool.length];
+      trainAudioPoolCursor[name] = (cursor + 1) % pool.length;
+      try{ audio.pause(); }catch(_){ }
     }
+
+    try{ audio.currentTime = 0; }catch(_){ }
+    audio.volume = clamp(Number(options.volume ?? TRAIN_AUDIO_VOLUMES[name] ?? .75),0,1);
+    audio.playbackRate = Number.isFinite(options.playbackRate)
+      ? clamp(Number(options.playbackRate),.6,1.8)
+      : 1;
     const attempt = audio.play();
-    if(attempt && typeof attempt.catch === "function") attempt.catch(() => {});
-    audio.addEventListener("ended", () => audio.remove(), {once:true});
+    if(attempt && typeof attempt.catch === "function") attempt.catch(()=>{});
     return audio;
   }
 
-  function trainMoveSoundInterval(mode){
-    if(mode === "entering" || mode === "exiting") return 1200;
-    if(mode === "advancing") return 1480;
-    return 1360;
+  function waitForAudioToFinish(audio, fallbackMs = 2400){
+    if(!audio || audio.ended) return Promise.resolve();
+    return new Promise(resolve=>{
+      let completed = false;
+      const finish = ()=>{
+        if(completed) return;
+        completed = true;
+        clearTimeout(timer);
+        audio.removeEventListener("ended",finish);
+        audio.removeEventListener("error",finish);
+        resolve();
+      };
+      const timer = setTimeout(finish,Math.max(250,fallbackMs));
+      audio.addEventListener("ended",finish,{once:true});
+      audio.addEventListener("error",finish,{once:true});
+    });
+  }
+
+  function ensureTrainMoveAudio(){
+    if(trainMoveAudio) return trainMoveAudio;
+    trainMoveAudio = new Audio(TRAIN_AUDIO_PATHS.move);
+    trainMoveAudio.preload = "auto";
+    trainMoveAudio.playsInline = true;
+    trainMoveAudio.setAttribute("playsinline","");
+    trainMoveAudio.loop = true;
+    trainMoveAudio.volume = TRAIN_AUDIO_VOLUMES.move;
+    try{ trainMoveAudio.load(); }catch(_){ }
+    return trainMoveAudio;
   }
 
   function stopTrainMovementSound(){
-    trainMoveSoundToken += 1;
     trainMoveSoundMode = "";
-    if(trainMoveSoundTimer){
-      clearTimeout(trainMoveSoundTimer);
-      trainMoveSoundTimer = 0;
-    }
+    if(!trainMoveAudio) return;
+    try{
+      trainMoveAudio.pause();
+      trainMoveAudio.currentTime = 0;
+    }catch(_){ }
   }
 
   function startTrainMovementSound(mode){
-    stopTrainMovementSound();
     trainMoveSoundMode = mode || "advancing";
-    const token = trainMoveSoundToken;
-
-    const tick = () => {
-      if(token !== trainMoveSoundToken || !trainMoveSoundMode) return;
-      playTrainSound("move");
-      trainMoveSoundTimer = setTimeout(tick, trainMoveSoundInterval(trainMoveSoundMode));
-    };
-
-    tick();
+    const audio = ensureTrainMoveAudio();
+    audio.volume = TRAIN_AUDIO_VOLUMES.move;
+    audio.playbackRate = 1;
+    if(!audio.paused) return;
+    try{ audio.currentTime = 0; }catch(_){ }
+    const attempt = audio.play();
+    if(attempt && typeof attempt.catch === "function") attempt.catch(()=>{});
   }
 
   preloadTrainAudio();
+  ["levelBell","whistle","bounce","balloonPop","correctDrop","boxBreak"].forEach(getTrainAudioPool);
+  ensureTrainMoveAudio();
   document.addEventListener("pointerdown", unlockTrainAudio, {capture:true, once:true});
   document.addEventListener("touchstart", unlockTrainAudio, {capture:true, once:true, passive:true});
   document.addEventListener("keydown", unlockTrainAudio, {capture:true, once:true});
@@ -1205,7 +1236,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 141: إضافة بداية ونهاية مطابقتين لافتح الصندوق واستبدال صوت حركة القطار.
+  // إصدار 142: تشغيل صوت القطار بلا فواصل وترتيب أصوات النهاية ومنع أصوات فتح النظام.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -2388,11 +2419,10 @@
     reviewTrainProgressAfterMotion();
   }
 
-  function requestTrainExit(){
-    if(stageCompleteTriggered) return;
+  async function requestTrainExit(){
+    if(stageCompleteTriggered || trainExitSequencePending) return;
 
     // إذا اكتملت آخر عربة أثناء حركة قائمة، لا نقطع الحركة.
-    // نؤجل الخروج حتى تنتهي الحركة بنفس سرعتها الأصلية.
     if(trainMotionState === "entering" || trainMotionState === "advancing" || trainAnimationFrame){
       pendingTrainProgressReview = true;
       return;
@@ -2401,22 +2431,22 @@
     if(trainMotionState !== "playing") return;
 
     stageCompleteTriggered = true;
+    trainExitSequencePending = true;
     pendingTrainProgressReview = false;
     stopStageCountdown();
-    playTrainSound("whistle");
+
+    // في الإجابة الأخيرة: صوت السقوط الصحيح كاملًا أولًا، ثم الصافرة كاملة، ثم خروج القطار.
+    await waitForAudioToFinish(lastCorrectDropAudio,2600);
+    const whistleAudio = playTrainSound("whistle");
+    await waitForAudioToFinish(whistleAudio,3500);
+
     trainMotionState = "exiting";
-
-    // تبدأ الطبقتان الوسطى والسفلية بالتباطؤ تدريجيًا فور انتهاء المستوى.
     setParallaxMotionMode("transition", PARALLAX_MOTION_CONFIG.rampDownMs);
-
-    // البالونات المتبقية تطير للأعلى طبيعيًا وتصبح غير قابلة للفرقعة.
     releaseStageBalloonsUpward();
-
     clearActiveFallingMatterBoxes();
 
-    // خروج آمن: نحسب مسافة الخروج حسب طول القطار، مع الحفاظ على دخول القطار القديم كما هو.
-    // بعد الاختفاء الكامل ننتظر قليلًا ثم ندخل المرحلة التالية.
     animateTrainTo(getSafeTrainExitOffset(), TRAIN_MOTION.exitDuration, "done", () => {
+      trainExitSequencePending = false;
       disposeFinishedStageRuntime();
       scheduleNextTrainStage();
     });
@@ -3770,7 +3800,7 @@
 
     const awardedPoints = landingPointsFor(item, body);
     item.awardedPoints = awardedPoints;
-    playTrainSound("correctDrop");
+    lastCorrectDropAudio = playTrainSound("correctDrop");
     correctAnswerFeedback(x, y, awardedPoints);
 
     // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
@@ -6219,17 +6249,18 @@
     text.textContent = "انتهت المحاولات";
   }
 
-  function endGameByAttempts(){
+  async function endGameByAttempts(){
     if(gameOverByAttempts) return;
     gameOverByAttempts = true;
     stopStageCountdown();
     stageCompleteTriggered = true;
-    playTrainSound("whistle");
+    showAttemptsEndedMessage();
+    const whistleAudio = playTrainSound("whistle");
+    await waitForAudioToFinish(whistleAudio,3500);
     trainMotionState = "exiting";
     setParallaxMotionMode("transition", PARALLAX_MOTION_CONFIG.rampDownMs);
     releaseStageBalloonsUpward();
     clearActiveFallingMatterBoxes();
-    showAttemptsEndedMessage();
 
     animateTrainTo(getSafeTrainExitOffset(), TRAIN_MOTION.exitDuration, "done", () => {
       trainMotionState = "done";
@@ -6308,6 +6339,8 @@
     trainMotionState = "entering";
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
+    trainExitSequencePending = false;
+    lastCorrectDropAudio = null;
     pendingTrainProgressReview = false;
     resetStageCountdown();
 
