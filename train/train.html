@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>قطار الإجابات - إصدار 139</title>
+  <title>قطار الإجابات - إصدار 140</title>
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -114,6 +114,131 @@
 
   const svg = document.getElementById("stage");
   const NS = "http://www.w3.org/2000/svg";
+
+  const TRAIN_AUDIO_PATHS = Object.freeze({
+    move:"../sounds/train-move.mp3",
+    levelBell:"../sounds/train-level-bell.mp3",
+    whistle:"../sounds/train-whistle.mp3",
+    bounce:"../sounds/train-bounce.mp3",
+    balloonPop:"../sounds/train-balloon-pop.mp3",
+    correctDrop:"../sounds/train-correct-drop.mp3",
+    boxBreak:"../sounds/train-box-break.mp3"
+  });
+
+  const TRAIN_AUDIO_VOLUMES = Object.freeze({
+    move:.58,
+    levelBell:.82,
+    whistle:.78,
+    bounce:.68,
+    balloonPop:.78,
+    correctDrop:.78,
+    boxBreak:.80
+  });
+
+  const trainAudioTemplates = Object.create(null);
+  let trainAudioUnlocked = false;
+  let trainMoveSoundTimer = 0;
+  let trainMoveSoundToken = 0;
+  let trainMoveSoundMode = "";
+
+  function getTrainAudioTemplate(name){
+    if(trainAudioTemplates[name]) return trainAudioTemplates[name];
+    const src = TRAIN_AUDIO_PATHS[name];
+    if(!src) return null;
+    const audio = new Audio(src);
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.setAttribute("playsinline","");
+    audio.volume = TRAIN_AUDIO_VOLUMES[name] ?? .75;
+    trainAudioTemplates[name] = audio;
+    return audio;
+  }
+
+  function preloadTrainAudio(){
+    Object.keys(TRAIN_AUDIO_PATHS).forEach(name => {
+      const audio = getTrainAudioTemplate(name);
+      try{ audio?.load(); }catch(_){ }
+    });
+  }
+
+  function unlockTrainAudio(){
+    if(trainAudioUnlocked) return;
+    trainAudioUnlocked = true;
+    Object.keys(TRAIN_AUDIO_PATHS).forEach(name => {
+      const audio = getTrainAudioTemplate(name);
+      if(!audio) return;
+      const oldVolume = audio.volume;
+      audio.volume = 0;
+      const attempt = audio.play();
+      if(attempt && typeof attempt.then === "function"){
+        attempt.then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = oldVolume;
+        }).catch(() => {
+          audio.volume = oldVolume;
+        });
+      }else{
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = oldVolume;
+      }
+    });
+  }
+
+  function playTrainSound(name, options = {}){
+    const template = getTrainAudioTemplate(name);
+    if(!template) return null;
+    const audio = template.cloneNode(true);
+    audio.preload = "auto";
+    audio.playsInline = true;
+    audio.volume = clamp(
+      Number(options.volume ?? TRAIN_AUDIO_VOLUMES[name] ?? .75),
+      0,
+      1
+    );
+    if(Number.isFinite(options.playbackRate)){
+      audio.playbackRate = clamp(Number(options.playbackRate), .6, 1.8);
+    }
+    const attempt = audio.play();
+    if(attempt && typeof attempt.catch === "function") attempt.catch(() => {});
+    audio.addEventListener("ended", () => audio.remove(), {once:true});
+    return audio;
+  }
+
+  function trainMoveSoundInterval(mode){
+    if(mode === "entering" || mode === "exiting") return 1200;
+    if(mode === "advancing") return 1480;
+    return 1360;
+  }
+
+  function stopTrainMovementSound(){
+    trainMoveSoundToken += 1;
+    trainMoveSoundMode = "";
+    if(trainMoveSoundTimer){
+      clearTimeout(trainMoveSoundTimer);
+      trainMoveSoundTimer = 0;
+    }
+  }
+
+  function startTrainMovementSound(mode){
+    stopTrainMovementSound();
+    trainMoveSoundMode = mode || "advancing";
+    const token = trainMoveSoundToken;
+
+    const tick = () => {
+      if(token !== trainMoveSoundToken || !trainMoveSoundMode) return;
+      playTrainSound("move");
+      trainMoveSoundTimer = setTimeout(tick, trainMoveSoundInterval(trainMoveSoundMode));
+    };
+
+    tick();
+  }
+
+  preloadTrainAudio();
+  document.addEventListener("pointerdown", unlockTrainAudio, {capture:true, once:true});
+  document.addEventListener("touchstart", unlockTrainAudio, {capture:true, once:true, passive:true});
+  document.addEventListener("keydown", unlockTrainAudio, {capture:true, once:true});
 
   function el(name, attrs = {}, parent = svg){
     const node = document.createElementNS(NS, name);
@@ -487,7 +612,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 139: تحسينات أداء داخلية دون تغيير شكل اللعبة أو سلوكها.
+  // إصدار 140: إضافة مؤثرات صوتية مرتبطة بأحداث القطار والبالونات والصناديق.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
@@ -1448,6 +1573,8 @@
 
     const startX = trainVisualOffsetX;
     const startTime = performance.now();
+    const movementSoundMode = trainMotionState;
+    startTrainMovementSound(movementSoundMode);
 
     function frame(now){
       const t = clamp((now - startTime) / duration, 0, 1);
@@ -1464,6 +1591,7 @@
 
       setTrainVisualOffset(targetX);
       trainAnimationFrame = 0;
+      stopTrainMovementSound();
 
       if(nextState){
         trainMotionState = nextState;
@@ -1492,6 +1620,7 @@
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
         syncTrainPhysicsToVisualOffset();
+        playTrainSound("levelBell");
         startStageCountdown();
         // تبقى اللافتة ثابتة في المنتصف حتى يستقر القطار، ثم تنسحب مع سرعة الأرضية الأمامية.
         releaseLevelSignWithGround();
@@ -1681,6 +1810,7 @@
     stageCompleteTriggered = true;
     pendingTrainProgressReview = false;
     stopStageCountdown();
+    playTrainSound("whistle");
     trainMotionState = "exiting";
 
     // تبدأ الطبقتان الوسطى والسفلية بالتباطؤ تدريجيًا فور انتهاء المستوى.
@@ -2789,6 +2919,7 @@
     }
 
     item.lastPassengerBounceAt = now;
+    playTrainSound("bounce");
     markLandingQualityPenalty(item, "passenger-bounce");
 
     Matter.Body.setVelocity(body, {
@@ -2818,6 +2949,7 @@
     }
 
     item.lastRoofBounceAt = now;
+    playTrainSound("bounce");
     markLandingQualityPenalty(item, "driver-roof");
 
     const incomingY = Math.abs(body.velocity.y);
@@ -3015,6 +3147,7 @@
     const x = item.body ? item.body.position.x : 0;
     const y = item.body ? item.body.position.y : 610;
 
+    playTrainSound("boxBreak");
     cleanupMatterBox(item, true);
     trackImpactBurst(
       feedbackEffectsLayer || fallingObjectsLayer || svg,
@@ -3044,6 +3177,7 @@
 
     const awardedPoints = landingPointsFor(item, body);
     item.awardedPoints = awardedPoints;
+    playTrainSound("correctDrop");
     correctAnswerFeedback(x, y, awardedPoints);
 
     // بعد الاستقرار يصبح بصريًا فقط: نخفف الفلتر الثقيل أيضًا لتقليل الضغط على الجوال.
@@ -4245,6 +4379,7 @@
     item.node.style.display = "none";
     item.node.style.pointerEvents = "none";
 
+    playTrainSound("balloonPop");
     balloonBurst(fallingObjectsLayer || svg, item.state.x, item.state.y, item.config.scale);
     const relation = item.config.content || null;
     spawnFallingAnswerBox(
@@ -5256,6 +5391,7 @@
   }
 
   function disposeFinishedStageRuntime(){
+    stopTrainMovementSound();
     pendingMatterSpawns.length = 0;
     matterBoxes.slice().forEach(item => cleanupMatterBox(item, true));
 
@@ -5495,6 +5631,7 @@
     gameOverByAttempts = true;
     stopStageCountdown();
     stageCompleteTriggered = true;
+    playTrainSound("whistle");
     trainMotionState = "exiting";
     setParallaxMotionMode("transition", PARALLAX_MOTION_CONFIG.rampDownMs);
     releaseStageBalloonsUpward();
@@ -6140,6 +6277,9 @@
   attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
   startTrainStage(0);
   /* إصدار 139: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
+  window.addEventListener("pagehide", stopTrainMovementSound);
+  window.addEventListener("beforeunload", stopTrainMovementSound);
+
 })();
 </script>
 </body>
