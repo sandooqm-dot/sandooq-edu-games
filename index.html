@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-logic-v70 -->
+<!-- version: index-train-logic-v71 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18729,6 +18729,70 @@
   }
 
   window.SandooqSaveFlow = {run};
+})();
+</script>
+
+
+<script>
+(() => {
+  "use strict";
+
+  function openTrainSetupReliably(event){
+    const target = event.target instanceof Element
+      ? event.target.closest("[data-template='train']")
+      : null;
+
+    if (!target) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (typeof window.openTrainSetupScreen === "function") {
+      window.openTrainSetupScreen();
+      return;
+    }
+
+    const screen = document.getElementById("trainSetupScreen");
+    if (!screen) return;
+
+    document.body.classList.add("subpage");
+
+    [
+      "createScreen",
+      "wheelSetupScreen",
+      "choicesSetupScreen",
+      "matchSetupScreen",
+      "orderSetupScreen",
+      "trainSetupScreen",
+      "savedScreen",
+      "backupScreen",
+      "settingsScreen"
+    ].forEach((id) => {
+      const node = document.getElementById(id);
+      if (node) node.classList.toggle("active", id === "trainSetupScreen");
+    });
+
+    const homeShell = document.getElementById("homeShell");
+    if (homeShell) homeShell.style.display = "none";
+
+    const homeButton = document.getElementById("homeButton");
+    if (homeButton) homeButton.textContent = "العودة للالعاب";
+
+    try {
+      window.scrollTo({top:0, behavior:"auto"});
+    } catch (_) {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  document.addEventListener("click", openTrainSetupReliably, true);
+
+  // ضمان أن البطاقة قابلة للنقر فوق كامل مساحتها.
+  const trainCard = document.querySelector("[data-template='train']");
+  if (trainCard) {
+    trainCard.style.pointerEvents = "auto";
+    trainCard.setAttribute("aria-controls", "trainSetupScreen");
+  }
 })();
 </script>
 
