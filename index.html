@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-train-logic-v71 -->
+<!-- version: index-train-logic-v72 -->
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18193,6 +18193,23 @@
     return group;
   }
 
+  function createTrainReviewButton({label,getValue,maxLength,placeholder,onSave}){
+    if (typeof createSetupReviewButton === "function") {
+      return createSetupReviewButton({label,getValue,maxLength,placeholder,onSave});
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quiz-text-review-btn";
+    button.textContent = "◉";
+    button.setAttribute("aria-label",label);
+    button.addEventListener("click",()=>{
+      const value = window.prompt(placeholder,getValue());
+      if (value !== null) onSave(String(value).slice(0,maxLength));
+    });
+    return button;
+  }
+
   function createTextControl(media,onChange,placeholder,label){
     const group = document.createElement("div");
     group.className = "match-field-group";
@@ -18211,7 +18228,7 @@
       onChange();
     });
 
-    const review = createMatchReviewButton({
+    const review = createTrainReviewButton({
       label:`مراجعة ${label}`,
       getValue:()=>input.value,
       maxLength:90,
