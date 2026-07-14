@@ -6794,7 +6794,9 @@
 
   function handleStageTimeExpired(){
     if(stageCompleteTriggered || gameOverByAttempts) return;
-    requestTrainExit();
+    // انتهاء المؤقت ينهي النشاط بنفس مسار نفاد المحاولات
+    // حتى تظهر شاشة الكأس النهائية نفسها في الحالتين.
+    endGameByAttempts();
   }
 
   function showAttemptsEndedMessage(){
