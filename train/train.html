@@ -4576,6 +4576,29 @@
     });
   }
 
+  function mergeCanonicalTrainContents(payload,payloadId){
+    if(!payload || typeof payload !== "object") return payload;
+    const keys = ["sandooq_train_contents_v2"];
+    for(const storage of [sessionStorage,localStorage]){
+      try{
+        for(const key of keys){
+          const raw = storage.getItem(key);
+          if(!raw) continue;
+          const canonical = parseTrainPayload(raw);
+          const canonicalId = String(canonical?.payloadId || "");
+          if(canonicalId && payloadId && canonicalId !== payloadId) continue;
+          const entries = Array.isArray(canonical?.contents)
+            ? canonical.contents
+            : (Array.isArray(canonical?.entries) ? canonical.entries : []);
+          if(entries.length){
+            return {...payload,contents:entries,entries};
+          }
+        }
+      }catch(_){ }
+    }
+    return payload;
+  }
+
   async function readTrainRuntimePayload(){
     const params = new URLSearchParams(window.location.search);
     const payloadId = String(params.get("payloadId") || "").trim();
@@ -4587,7 +4610,7 @@
     try {
       for(const key of keys){
         const payload = parseTrainPayload(sessionStorage.getItem(key));
-        if(payload) return payload;
+        if(payload) return mergeCanonicalTrainContents(payload,payloadId);
       }
     } catch (_) {}
 
@@ -4595,13 +4618,13 @@
     try {
       for(const key of keys){
         const payload = parseTrainPayload(localStorage.getItem(key));
-        if(payload) return payload;
+        if(payload) return mergeCanonicalTrainContents(payload,payloadId);
       }
     } catch (_) {}
 
     // 3) المصدر الدائم الذي كتبه index قبل الانتقال.
     const indexedPayload = await readTrainPayloadFromIndexedDb(payloadId);
-    if(indexedPayload) return indexedPayload;
+    if(indexedPayload) return mergeCanonicalTrainContents(indexedPayload,payloadId);
 
     return null;
   }
@@ -6622,6 +6645,9 @@
 
   function ensureGameHud(){
     if(gameHudLayer?.isConnected) return;
+    // لا ننشئ طبقة HUD أصلًا عندما يكون المؤقت والمحاولات معطّلين.
+    // بهذه الطريقة لا يبقى أي عنصر فارغ أو قيمة افتراضية ظاهرة في اللعبة.
+    if(!TRAIN_COUNTDOWN_ENABLED && !TRAIN_ATTEMPTS_ENABLED) return;
 
     gameHudLayer = el("g", {
       id:"gameHudLayer",
