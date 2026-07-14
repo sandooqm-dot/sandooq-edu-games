@@ -566,384 +566,283 @@
   const svg = document.getElementById("stage");
   const NS = "http://www.w3.org/2000/svg";
 
-  const TRAIN_AUDIO_PATHS = Object.freeze({
-    move:"../sounds/train-move-143.wav?v=143",
-    levelBell:"../sounds/train-level-bell.mp3",
-    whistle:"../sounds/train-whistle.mp3",
-    bounce:"../sounds/train-bounce.mp3",
-    balloonPop:"../sounds/train-balloon-pop.mp3",
-    correctDrop:"../sounds/train-correct-drop.mp3",
-    boxBreak:"../sounds/train-box-break.mp3"
-  });
+  /*
+    train-audio-v145:
+    نفس بنية Audio البسيطة والمجرّبة في لعبة «افتح الصندوق».
+    كل مؤثر يملك عنصر Audio مستقلًا كي تعمل المؤثرات المختلفة معًا،
+    بينما صوت حركة القطار عنصر دائم لا يُعاد تشغيله بين المراحل.
+  */
+  const trainAudio = (() => {
+    const SOUND_FILES = Object.freeze({
+      move:"../sounds/train-move-143.wav?v=143",
+      levelBell:"../sounds/train-level-bell.mp3",
+      whistle:"../sounds/train-whistle.mp3",
+      bounce:"../sounds/train-bounce.mp3",
+      balloonPop:"../sounds/train-balloon-pop.mp3",
+      correctDrop:"../sounds/train-correct-drop.mp3",
+      boxBreak:"../sounds/train-box-break.mp3",
+      intro:"../sounds/theme-default.mp3?v=1",
+      finish:"../sounds/match-finish.mp3?v=1"
+    });
 
-  const TRAIN_AUDIO_VOLUMES = Object.freeze({
-    move:.58,
-    levelBell:.82,
-    whistle:.78,
-    bounce:.68,
-    balloonPop:.78,
-    correctDrop:.78,
-    boxBreak:.80
-  });
+    const VOLUMES = Object.freeze({
+      move:.58,
+      levelBell:.82,
+      whistle:.78,
+      bounce:.68,
+      balloonPop:.78,
+      correctDrop:.78,
+      boxBreak:.80,
+      intro:1,
+      finish:1
+    });
 
-  const TRAIN_AUDIO_POOL_SIZES = Object.freeze({
-    levelBell:2,
-    whistle:2,
-    bounce:6,
-    balloonPop:8,
-    correctDrop:5,
-    boxBreak:6
-  });
+    const cache = Object.create(null);
+    let enabled = true;
+    let movementWanted = false;
+    let movementResumeArmed = false;
 
-  const trainAudioTemplates = Object.create(null);
-  const trainAudioPools = Object.create(null);
-  const trainAudioBuffers = Object.create(null);
-  const trainAudioBufferPromises = Object.create(null);
-  let trainAudioContext = null;
-  let trainAudioUnlocked = false;
-  let trainMoveAudio = null;
-  let trainMoveSource = null;
-  let trainMoveGain = null;
-  let trainMoveSoundWanted = false;
-  let trainMoveSoundMode = "";
+    function boundedVolume(value, fallback){
+      const number = Number(value);
+      return Number.isFinite(number)
+        ? Math.max(0, Math.min(1, number))
+        : fallback;
+    }
+
+    function getAudio(name){
+      const src = SOUND_FILES[name];
+      if(!src) return null;
+
+      if(!cache[name]){
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        audio.loop = name === "move";
+        audio.volume = VOLUMES[name] ?? 1;
+        audio.playsInline = true;
+        audio.setAttribute("playsinline","");
+        audio.setAttribute("webkit-playsinline","");
+        cache[name] = audio;
+      }
+
+      return cache[name];
+    }
+
+    function resetAudio(audio){
+      if(!audio) return;
+      try{
+        audio.pause();
+        audio.currentTime = 0;
+      }catch(_){ }
+    }
+
+    function playNamed(name, options = {}){
+      if(!enabled || name === "move") return null;
+
+      const audio = getAudio(name);
+      if(!audio) return null;
+
+      try{
+        audio.pause();
+        audio.currentTime = 0;
+        audio.loop = false;
+        audio.volume = boundedVolume(options.volume, VOLUMES[name] ?? 1);
+        audio.playbackRate = Number.isFinite(Number(options.playbackRate))
+          ? Math.max(.6, Math.min(1.8, Number(options.playbackRate)))
+          : 1;
+
+        audio.sgTrainPlayToken = (audio.sgTrainPlayToken || 0) + 1;
+        const playAttempt = audio.play();
+        audio.sgTrainPlayAttempt = playAttempt || null;
+        if(playAttempt && typeof playAttempt.catch === "function"){
+          playAttempt.catch(()=>{});
+        }
+        return audio;
+      }catch(_){
+        return null;
+      }
+    }
+
+    function disarmMovementResume(){
+      if(!movementResumeArmed) return;
+      movementResumeArmed = false;
+      document.removeEventListener("pointerdown", resumeMovementFromGesture, true);
+      document.removeEventListener("touchstart", resumeMovementFromGesture, true);
+      document.removeEventListener("keydown", resumeMovementFromGesture, true);
+    }
+
+    function resumeMovementFromGesture(){
+      disarmMovementResume();
+      if(movementWanted) startMovement();
+    }
+
+    function armMovementResume(){
+      if(movementResumeArmed || !movementWanted) return;
+      movementResumeArmed = true;
+      document.addEventListener("pointerdown", resumeMovementFromGesture, true);
+      document.addEventListener("touchstart", resumeMovementFromGesture, true);
+      document.addEventListener("keydown", resumeMovementFromGesture, true);
+    }
+
+    function startMovement(){
+      if(!enabled) return null;
+      movementWanted = true;
+
+      const audio = getAudio("move");
+      if(!audio) return null;
+
+      audio.loop = true;
+      audio.volume = VOLUMES.move;
+      audio.playbackRate = 1;
+
+      if(!audio.paused && !audio.ended){
+        disarmMovementResume();
+        return audio;
+      }
+
+      try{
+        if(audio.ended || !Number.isFinite(audio.currentTime)){
+          audio.currentTime = 0;
+        }
+        const playAttempt = audio.play();
+        audio.sgTrainPlayAttempt = playAttempt || null;
+        if(playAttempt && typeof playAttempt.then === "function"){
+          playAttempt.then(disarmMovementResume).catch(armMovementResume);
+        }
+      }catch(_){
+        armMovementResume();
+      }
+
+      return audio;
+    }
+
+    function stopMovement(){
+      movementWanted = false;
+      disarmMovementResume();
+      resetAudio(cache.move);
+    }
+
+    function stopNamed(name){
+      if(name === "move"){
+        stopMovement();
+        return;
+      }
+      resetAudio(cache[name]);
+    }
+
+    function stopAll(){
+      movementWanted = false;
+      disarmMovementResume();
+      Object.values(cache).forEach(resetAudio);
+    }
+
+    function preload(){
+      Object.keys(SOUND_FILES).forEach(name => {
+        const audio = getAudio(name);
+        try{ audio?.load?.(); }catch(_){ }
+      });
+    }
+
+    function unlock(){
+      preload();
+    }
+
+    function setEnabled(value){
+      enabled = value !== false;
+      if(!enabled) stopAll();
+    }
+
+    function ready(name){
+      const audio = getAudio(name);
+      if(!audio || audio.readyState >= 2) return Promise.resolve();
+
+      return new Promise(resolve => {
+        let done = false;
+        const finish = () => {
+          if(done) return;
+          done = true;
+          audio.removeEventListener("loadeddata", finish);
+          audio.removeEventListener("canplaythrough", finish);
+          audio.removeEventListener("error", finish);
+          resolve();
+        };
+        audio.addEventListener("loadeddata", finish, {once:true});
+        audio.addEventListener("canplaythrough", finish, {once:true});
+        audio.addEventListener("error", finish, {once:true});
+        try{ audio.load(); }catch(_){ }
+        window.setTimeout(finish, 900);
+      });
+    }
+
+    return {
+      unlock,
+      preload,
+      ready,
+      setEnabled,
+      playNamed,
+      stopNamed,
+      stopAll,
+      startMovement,
+      stopMovement
+    };
+  })();
+
   let lastCorrectDropAudio = null;
   let trainExitSequencePending = false;
   let levelBellStageGeneration = -1;
 
-  function getTrainAudioContext(){
-    if(trainAudioContext) return trainAudioContext;
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if(!AudioContextClass) return null;
-    try{
-      trainAudioContext = new AudioContextClass({latencyHint:"interactive"});
-    }catch(_){
-      try{ trainAudioContext = new AudioContextClass(); }catch(__){ return null; }
-    }
-    return trainAudioContext;
-  }
-
-  function decodeTrainAudioData(context, bytes){
-    return new Promise((resolve,reject)=>{
-      let settled = false;
-      const succeed = buffer => {
-        if(settled) return;
-        settled = true;
-        resolve(buffer);
-      };
-      const fail = error => {
-        if(settled) return;
-        settled = true;
-        reject(error);
-      };
-      try{
-        const result = context.decodeAudioData(bytes.slice(0),succeed,fail);
-        if(result && typeof result.then === "function") result.then(succeed,fail);
-      }catch(error){
-        fail(error);
-      }
-    });
-  }
-
-  function preloadTrainAudioBuffer(name){
-    if(trainAudioBuffers[name]) return Promise.resolve(trainAudioBuffers[name]);
-    if(trainAudioBufferPromises[name]) return trainAudioBufferPromises[name];
-    const src = TRAIN_AUDIO_PATHS[name];
-    const context = getTrainAudioContext();
-    if(!src || !context || typeof fetch !== "function") return Promise.resolve(null);
-
-    trainAudioBufferPromises[name] = fetch(src,{cache:"force-cache"})
-      .then(response=>{
-        if(!response.ok) throw new Error(`Audio ${name} failed: ${response.status}`);
-        return response.arrayBuffer();
-      })
-      .then(bytes=>decodeTrainAudioData(context,bytes))
-      .then(buffer=>{
-        trainAudioBuffers[name] = buffer;
-        return buffer;
-      })
-      .catch(()=>null);
-
-    return trainAudioBufferPromises[name];
-  }
-
-  function getTrainAudioTemplate(name){
-    if(trainAudioTemplates[name]) return trainAudioTemplates[name];
-    const src = TRAIN_AUDIO_PATHS[name];
-    if(!src) return null;
-    const audio = new Audio(src);
-    audio.preload = "auto";
-    audio.playsInline = true;
-    audio.setAttribute("playsinline","");
-    audio.volume = TRAIN_AUDIO_VOLUMES[name] ?? .75;
-    trainAudioTemplates[name] = audio;
-    return audio;
-  }
-
-  function preloadTrainAudio(){
-    Object.keys(TRAIN_AUDIO_PATHS).forEach(name => {
-      const audio = getTrainAudioTemplate(name);
-      try{ audio?.load(); }catch(_){ }
-      preloadTrainAudioBuffer(name);
-    });
-  }
-
   function unlockTrainAudio(){
-    if(trainAudioUnlocked) return;
-    trainAudioUnlocked = true;
-    const context = getTrainAudioContext();
-    if(context && context.state === "suspended"){
-      const resumeAttempt = context.resume();
-      if(resumeAttempt && typeof resumeAttempt.catch === "function") resumeAttempt.catch(()=>{});
-    }
-    preloadTrainAudio();
-  }
-
-  function makeTrainPoolAudio(template,name){
-    const audio = template.cloneNode(true);
-    audio.preload = "auto";
-    audio.playsInline = true;
-    audio.setAttribute("playsinline","");
-    audio.volume = TRAIN_AUDIO_VOLUMES[name] ?? .75;
-    try{ audio.load(); }catch(_){ }
-    return audio;
-  }
-
-  function getTrainAudioPool(name){
-    if(trainAudioPools[name]) return trainAudioPools[name];
-    const template = getTrainAudioTemplate(name);
-    if(!template) return [];
-    const size = TRAIN_AUDIO_POOL_SIZES[name] || 4;
-    const pool = Array.from({length:size},()=>makeTrainPoolAudio(template,name));
-    trainAudioPools[name] = pool;
-    return pool;
-  }
-
-  function createTrainBufferHandle(source,gain){
-    let ended = false;
-    let finish;
-    const finished = new Promise(resolve=>{ finish = resolve; });
-    const complete = ()=>{
-      if(ended) return;
-      ended = true;
-      try{ source.disconnect(); }catch(_){ }
-      try{ gain.disconnect(); }catch(_){ }
-      finish();
-    };
-    source.onended = complete;
-    return {
-      source,
-      gain,
-      finished,
-      get ended(){ return ended; },
-      stop(){
-        if(ended) return;
-        try{ source.stop(0); }catch(_){ }
-        complete();
-      }
-    };
-  }
-
-  function playTrainBufferSound(name,options){
-    const context = getTrainAudioContext();
-    const buffer = trainAudioBuffers[name];
-    if(!context || context.state !== "running" || !buffer) return null;
-    try{
-      const source = context.createBufferSource();
-      const gain = context.createGain();
-      source.buffer = buffer;
-      source.playbackRate.value = Number.isFinite(options.playbackRate)
-        ? clamp(Number(options.playbackRate),.6,1.8)
-        : 1;
-      gain.gain.value = clamp(Number(options.volume ?? TRAIN_AUDIO_VOLUMES[name] ?? .75),0,1);
-      source.connect(gain);
-      gain.connect(context.destination);
-      const handle = createTrainBufferHandle(source,gain);
-      source.start(0);
-      return handle;
-    }catch(_){
-      return null;
-    }
-  }
-
-  function createTrainMediaHandle(audio,playAttempt){
-    let ended = false;
-    let resolveFinished;
-    let handle = null;
-    const finished = new Promise(resolve=>{ resolveFinished = resolve; });
-    const complete = ()=>{
-      if(ended) return;
-      ended = true;
-      audio.removeEventListener("ended",complete);
-      audio.removeEventListener("error",complete);
-      if(audio.sgTrainHandle === handle) audio.sgTrainHandle = null;
-      resolveFinished();
-    };
-    handle = {
-      media:audio,
-      finished,
-      get ended(){ return ended || audio.ended; },
-      stop(){
-        if(ended) return;
-        try{ audio.pause(); }catch(_){ }
-        complete();
-      }
-    };
-    audio.sgTrainHandle = handle;
-    audio.sgTrainStartedAt = performance.now();
-    audio.addEventListener("ended",complete,{once:true});
-    audio.addEventListener("error",complete,{once:true});
-    if(playAttempt && typeof playAttempt.catch === "function") playAttempt.catch(complete);
-    return handle;
-  }
-
-  function playTrainPoolSound(name,options){
-    const pool = getTrainAudioPool(name);
-    if(!pool.length) return null;
-
-    let audio = pool.find(item => item.paused || item.ended || !item.sgTrainHandle || item.sgTrainHandle.ended);
-    if(!audio){
-      const template = getTrainAudioTemplate(name);
-      if(template && pool.length < 12){
-        audio = makeTrainPoolAudio(template,name);
-        pool.push(audio);
-      }else{
-        audio = pool.reduce((oldest,item)=>(item.sgTrainStartedAt || 0) < (oldest.sgTrainStartedAt || 0) ? item : oldest,pool[0]);
-        audio.sgTrainHandle?.stop?.();
-      }
-    }
-
-    audio.sgTrainHandle?.stop?.();
-    try{ audio.currentTime = 0; }catch(_){ }
-    audio.volume = clamp(Number(options.volume ?? TRAIN_AUDIO_VOLUMES[name] ?? .75),0,1);
-    audio.playbackRate = Number.isFinite(options.playbackRate)
-      ? clamp(Number(options.playbackRate),.6,1.8)
-      : 1;
-    const attempt = audio.play();
-    return createTrainMediaHandle(audio,attempt);
+    trainAudio.unlock();
   }
 
   function playTrainSound(name, options = {}){
-    if(name === "move" || !trainAudioUnlocked) return null;
+    if(name === "move") return trainAudio.startMovement();
     if(trainExitSequencePending && name !== "whistle") return null;
-    return playTrainBufferSound(name,options) || playTrainPoolSound(name,options);
+    return trainAudio.playNamed(name, options);
   }
 
   function waitForAudioToFinish(audio, fallbackMs = 12000){
     if(!audio || audio.ended) return Promise.resolve();
-    if(audio.finished && typeof audio.finished.then === "function"){
-      let timer = 0;
-      const safety = new Promise(resolve=>{ timer = setTimeout(resolve,Math.max(1000,fallbackMs)); });
-      return Promise.race([audio.finished,safety]).finally(()=>clearTimeout(timer));
-    }
 
-    const media = audio.media || audio;
-    if(!media || media.ended) return Promise.resolve();
-    return new Promise(resolve=>{
+    const playToken = audio.sgTrainPlayToken || 0;
+    return new Promise(resolve => {
       let completed = false;
-      const finish = ()=>{
+      let timer = 0;
+
+      const finish = () => {
         if(completed) return;
         completed = true;
-        clearTimeout(timer);
-        media.removeEventListener("ended",finish);
-        media.removeEventListener("error",finish);
+        window.clearTimeout(timer);
+        audio.removeEventListener("ended", onEnded);
+        audio.removeEventListener("error", finish);
         resolve();
       };
-      const durationMs = Number.isFinite(media.duration) && media.duration > 0
-        ? media.duration * 1000 / Math.max(.01,Number(media.playbackRate) || 1) + 1500
-        : 0;
-      const timer = setTimeout(finish,Math.max(1000,fallbackMs,durationMs));
-      media.addEventListener("ended",finish,{once:true});
-      media.addEventListener("error",finish,{once:true});
+
+      const onEnded = () => {
+        if((audio.sgTrainPlayToken || 0) === playToken) finish();
+      };
+
+      const durationMs = Number.isFinite(audio.duration) && audio.duration > 0
+        ? (audio.duration - (Number(audio.currentTime) || 0)) * 1000 /
+          Math.max(.01, Number(audio.playbackRate) || 1) + 500
+        : Math.min(Math.max(1000, fallbackMs), 12000);
+
+      timer = window.setTimeout(finish, Math.max(500, durationMs));
+      audio.addEventListener("ended", onEnded, {once:true});
+      audio.addEventListener("error", finish, {once:true});
+
+      const playAttempt = audio.sgTrainPlayAttempt;
+      if(playAttempt && typeof playAttempt.catch === "function"){
+        playAttempt.catch(finish);
+      }
     });
   }
 
-  function ensureTrainMoveAudio(){
-    if(trainMoveAudio) return trainMoveAudio;
-    trainMoveAudio = new Audio(TRAIN_AUDIO_PATHS.move);
-    trainMoveAudio.preload = "auto";
-    trainMoveAudio.playsInline = true;
-    trainMoveAudio.setAttribute("playsinline","");
-    trainMoveAudio.loop = true;
-    trainMoveAudio.volume = TRAIN_AUDIO_VOLUMES.move;
-    try{ trainMoveAudio.load(); }catch(_){ }
-    return trainMoveAudio;
-  }
-
-  function stopTrainMovementFallback(){
-    if(!trainMoveAudio) return;
-    try{
-      trainMoveAudio.pause();
-      trainMoveAudio.currentTime = 0;
-    }catch(_){ }
+  function startTrainMovementSound(){
+    trainAudio.startMovement();
   }
 
   function stopTrainMovementSound(){
-    trainMoveSoundWanted = false;
-    trainMoveSoundMode = "";
-    const source = trainMoveSource;
-    trainMoveSource = null;
-    trainMoveGain = null;
-    if(source){
-      source.onended = null;
-      try{ source.stop(0); }catch(_){ }
-      try{ source.disconnect(); }catch(_){ }
-    }
-    stopTrainMovementFallback();
-  }
-
-  function startTrainMovementSound(mode){
-    trainMoveSoundMode = mode || "advancing";
-    trainMoveSoundWanted = true;
-
-    const context = getTrainAudioContext();
-    if(context && context.state === "suspended"){
-      const resumeAttempt = context.resume();
-      if(resumeAttempt && typeof resumeAttempt.then === "function"){
-        resumeAttempt.then(()=>{
-          if(trainMoveSoundWanted) startTrainMovementSound(trainMoveSoundMode);
-        }).catch(()=>{});
-      }
-    }
-
-    const buffer = trainAudioBuffers.move;
-    if(context && context.state === "running" && buffer){
-      if(trainMoveSource) return;
-      stopTrainMovementFallback();
-      try{
-        const source = context.createBufferSource();
-        const gain = context.createGain();
-        source.buffer = buffer;
-        source.loop = true;
-        source.playbackRate.value = 1;
-        gain.gain.value = TRAIN_AUDIO_VOLUMES.move;
-        source.connect(gain);
-        gain.connect(context.destination);
-        trainMoveSource = source;
-        trainMoveGain = gain;
-        source.onended = ()=>{
-          if(trainMoveSource === source) trainMoveSource = null;
-          if(trainMoveSoundWanted) startTrainMovementSound(trainMoveSoundMode);
-        };
-        source.start(0);
-        return;
-      }catch(_){
-        trainMoveSource = null;
-        trainMoveGain = null;
-      }
-    }
-
-    const audio = ensureTrainMoveAudio();
-    audio.volume = TRAIN_AUDIO_VOLUMES.move;
-    audio.playbackRate = 1;
-    if(audio.paused){
-      try{ audio.currentTime = 0; }catch(_){ }
-      const attempt = audio.play();
-      if(attempt && typeof attempt.catch === "function") attempt.catch(()=>{});
-    }
-
-    preloadTrainAudioBuffer("move").then(loaded=>{
-      if(loaded && trainMoveSoundWanted) startTrainMovementSound(trainMoveSoundMode);
-    });
+    trainAudio.stopMovement();
   }
 
   function playStageLevelBellOnce(){
@@ -952,9 +851,7 @@
     playTrainSound("levelBell");
   }
 
-  preloadTrainAudio();
-  ["levelBell","whistle","bounce","balloonPop","correctDrop","boxBreak"].forEach(getTrainAudioPool);
-  ensureTrainMoveAudio();
+  trainAudio.preload();
   document.addEventListener("pointerdown", unlockTrainAudio, {capture:true, once:true});
   document.addEventListener("touchstart", unlockTrainAudio, {capture:true, once:true, passive:true});
   document.addEventListener("keydown", unlockTrainAudio, {capture:true, once:true});
@@ -966,32 +863,20 @@
   const endRestartBtn = document.getElementById("endRestartBtn");
   const endHomeBtn = document.getElementById("endHomeBtn");
 
-  const trainGateAudio = (()=>{
-    const intro = new Audio("../sounds/theme-default.mp3?v=1");
-    const finish = new Audio("../sounds/match-finish.mp3?v=1");
-    [intro,finish].forEach(audio=>{
-      audio.preload = "auto";
-      audio.playsInline = true;
-      audio.setAttribute("playsinline","");
-      audio.volume = 1;
-      try{ audio.load(); }catch(_){ }
-    });
-    function stop(audio){
-      audio.sgTrainHandle?.stop?.();
-      try{ audio.pause(); audio.currentTime = 0; }catch(_){ }
+  const trainGateAudio = {
+    playIntro(){
+      return trainAudio.playNamed("intro");
+    },
+    stopIntro(){
+      trainAudio.stopNamed("intro");
+    },
+    playFinish(){
+      return trainAudio.playNamed("finish");
+    },
+    stopFinish(){
+      trainAudio.stopNamed("finish");
     }
-    function play(audio){
-      stop(audio);
-      const result = audio.play();
-      return createTrainMediaHandle(audio,result);
-    }
-    return {
-      playIntro:()=>play(intro),
-      stopIntro:()=>stop(intro),
-      playFinish:()=>play(finish),
-      stopFinish:()=>stop(finish)
-    };
-  })();
+  };
 
   let trainGameStarted = false;
   let trainStartGatePending = true;
@@ -1080,23 +965,32 @@
     event?.stopPropagation?.();
     if(trainGameStarted) return;
     trainGameStarted=true;
+
     unlockTrainAudio();
     trainGateAudio.playIntro();
     startGate?.classList.remove("is-visible");
     startGate?.setAttribute("aria-hidden","true");
-    // دخول القطار مرتبط بانتهاء الحركة الافتتاحية المضمونة، وليس بحدث ended
-    // لملف الصوت؛ سفاري قد لا يرسل هذا الحدث بعد استعادة الصفحة أو تبديل الاتجاه.
-    await playTrainOpeningIntro();
-    trainGateAudio.stopIntro();
-    trainStartGatePending=false;
-    startTrainEntry();
+
+    // نغمة البداية لا تتحكم في منطق اللعبة ولا ننتظر حدث ended منها.
+    // بعد انتهاء الحركة الافتتاحية يبدأ القطار وصوته الدائم مباشرة.
+    try{
+      await playTrainOpeningIntro();
+    }finally{
+      trainGateAudio.stopIntro();
+      trainStartGatePending=false;
+      startTrainEntry();
+    }
   }
   startGameBtn?.addEventListener("click",startTrainFromGate);
 
-  // سفاري يعيد الصفحة أحيانًا من BFCache بالحالة السابقة بعد إخفاء بوابة البداية.
-  // إعادة التحميل عند الاستعادة تعيد بناء الجولة وتُظهر زر البداية دائمًا.
+  // أي صفحة لعبة مستعادة بعد جولة سابقة تُبنى من جديد من نقطة البداية.
   window.addEventListener("pageshow",event=>{
-    if(event.persisted) window.location.reload();
+    if(event.persisted || trainGameStarted){
+      window.location.reload();
+      return;
+    }
+    startGate?.classList.add("is-visible");
+    startGate?.setAttribute("aria-hidden","false");
   });
   endRestartBtn?.addEventListener("click",event=>{
     event.preventDefault();
@@ -7172,15 +7066,26 @@
     }
   }
 
-  attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
-  startGate?.classList.add("is-visible");
-  startGate?.setAttribute("aria-hidden","false");
-  endCelebration?.classList.remove("is-visible");
-  endCelebration?.setAttribute("aria-hidden","true");
-  resetTrainFinishClasses();
-  startTrainStage(0);
+  function initializeTrainGame(){
+    trainGameStarted = false;
+    trainStartGatePending = true;
+    attemptsRemaining = TRAIN_ATTEMPTS_TOTAL;
+    trainAudio.preload();
+
+    startGate?.classList.add("is-visible");
+    startGate?.setAttribute("aria-hidden","false");
+    endCelebration?.classList.remove("is-visible");
+    endCelebration?.setAttribute("aria-hidden","true");
+    resetTrainFinishClasses();
+    startTrainStage(0);
+    void trainAudio.ready("finish");
+  }
+
+  initializeTrainGame();
   /* إصدار 139: مؤقت تنازلي للمستوى وعدد محاولات اختياري للعبة. */
-  window.addEventListener("pagehide",()=>{ stopTrainMovementSound(); trainGateAudio.stopIntro(); trainGateAudio.stopFinish(); });
+  window.addEventListener("pagehide",()=>{
+    trainAudio.stopAll();
+  },{passive:true});
   window.addEventListener("beforeunload", stopTrainMovementSound);
 
 })();
