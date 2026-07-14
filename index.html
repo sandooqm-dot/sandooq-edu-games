@@ -12761,8 +12761,24 @@
         sessionStorage.removeItem(config.payloadKey);
         sessionStorage.setItem(`${config.payloadKey}_${runtimeId}`,JSON.stringify(payload));
         sessionStorage.setItem(config.payloadKey,JSON.stringify(payload));
+        if(gameType === "train"){
+          sessionStorage.setItem("sandooq_train_contents_v2",JSON.stringify({
+            payloadId:runtimeId,
+            contents:payload.contents,
+            entries:payload.entries
+          }));
+        }
       } catch (_) {
         /* IndexedDB هو المصدر الأساسي عند كبر الصور. */
+      }
+      if(gameType === "train"){
+        try{
+          localStorage.setItem("sandooq_train_contents_v2",JSON.stringify({
+            payloadId:runtimeId,
+            contents:payload.contents,
+            entries:payload.entries
+          }));
+        }catch(_){ }
       }
       await writePayload(`${config.dbPrefix}:${runtimeId}`,payload);
 
@@ -17863,6 +17879,7 @@
   "use strict";
 
   const TRAIN_PAYLOAD_KEY = "sandooq_train_payload_v1";
+  const TRAIN_CONTENTS_KEY = "sandooq_train_contents_v2";
   const TRAIN_DRAFT_KEY = "sandooq_train_draft_v1";
   const TRAIN_PAGE_URL = "train/train.html";
 
@@ -18494,6 +18511,7 @@
       sessionStorage.removeItem(TRAIN_PAYLOAD_KEY);
       sessionStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
       sessionStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
+      sessionStorage.setItem(TRAIN_CONTENTS_KEY,JSON.stringify({payloadId,contents:payload.contents,entries:payload.entries}));
       sessionStorage.setItem(TRAIN_DRAFT_KEY,JSON.stringify(draftPayload()));
     } catch (_) {}
 
@@ -18502,6 +18520,7 @@
     try {
       localStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
       localStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
+      localStorage.setItem(TRAIN_CONTENTS_KEY,JSON.stringify({payloadId,contents:payload.contents,entries:payload.entries}));
     } catch (_) {}
 
     await writeRuntimePayloadToDb(`train:${payloadId}`,payload);
