@@ -1295,6 +1295,14 @@
     event.preventDefault();
     event.stopPropagation();
     trainAudio.stopAll();
+    try{
+      sessionStorage.setItem("sandooq_train_return_v1", String(Date.now()));
+      if(history.length > 1){
+        history.back();
+        return;
+      }
+    }catch(_){ }
+    // عند فتح اللعبة مباشرة دون صفحة الإدخال نستخدم صفحة الفهرس كخيار احتياطي.
     window.location.href = "../index.html";
   });
 
