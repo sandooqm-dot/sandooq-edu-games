@@ -1081,17 +1081,23 @@
     if(trainGameStarted) return;
     trainGameStarted=true;
     unlockTrainAudio();
-    const introAudio = trainGateAudio.playIntro();
+    trainGateAudio.playIntro();
     startGate?.classList.remove("is-visible");
     startGate?.setAttribute("aria-hidden","true");
-    await Promise.all([
-      playTrainOpeningIntro(),
-      waitForAudioToFinish(introAudio,15000)
-    ]);
+    // دخول القطار مرتبط بانتهاء الحركة الافتتاحية المضمونة، وليس بحدث ended
+    // لملف الصوت؛ سفاري قد لا يرسل هذا الحدث بعد استعادة الصفحة أو تبديل الاتجاه.
+    await playTrainOpeningIntro();
+    trainGateAudio.stopIntro();
     trainStartGatePending=false;
     startTrainEntry();
   }
   startGameBtn?.addEventListener("click",startTrainFromGate);
+
+  // سفاري يعيد الصفحة أحيانًا من BFCache بالحالة السابقة بعد إخفاء بوابة البداية.
+  // إعادة التحميل عند الاستعادة تعيد بناء الجولة وتُظهر زر البداية دائمًا.
+  window.addEventListener("pageshow",event=>{
+    if(event.persisted) window.location.reload();
+  });
   endRestartBtn?.addEventListener("click",event=>{
     event.preventDefault();
     event.stopPropagation();
@@ -1477,7 +1483,7 @@
     bottom:`desert-bottom-126.webp?v=${PARALLAX_IMAGE_VERSION}`
   };
 
-  // إصدار 143: محرك صوت منخفض التأخير، حركة قطار مستمرة، وتسلسل نهاية مضبوط بالحدث الصوتي.
+  // إصدار 144: بدء حتمي بعد المقدمة وإعادة ضبط صحيحة عند استعادة الصفحة في سفاري.
   const PARALLAX_MAX_SPEED = 120;
   const PARALLAX_CONFIG = {
     top:{
