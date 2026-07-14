@@ -1237,14 +1237,16 @@
     trainGameStarted=true;
 
     unlockTrainAudio();
-    trainGateAudio.playIntro();
+    const introAudio = trainGateAudio.playIntro();
     startGate?.classList.remove("is-visible");
     startGate?.setAttribute("aria-hidden","true");
 
-    // نغمة البداية لا تتحكم في منطق اللعبة ولا ننتظر حدث ended منها.
-    // بعد انتهاء الحركة الافتتاحية يبدأ القطار وصوته الدائم مباشرة.
+    // لا يبدأ القطار إلا بعد اكتمال الحركة الافتتاحية وانتهاء نغمة البداية فعليًا.
     try{
-      await playTrainOpeningIntro();
+      await Promise.all([
+        playTrainOpeningIntro(),
+        waitForAudioToFinish(introAudio, 12000)
+      ]);
     }finally{
       trainGateAudio.stopIntro();
       trainStartGatePending=false;
@@ -2658,7 +2660,11 @@
     requestAnimationFrame(() => {
       animateTrainTo(TRAIN_MOTION.centerOffset, TRAIN_MOTION.enterDuration, "playing", () => {
         syncTrainPhysicsToVisualOffset();
-        playStageLevelBellOnce();
+        // في المرحلة الأولى تكون اللافتة ثابتة أصلًا؛ لذلك تُسمع النغمة
+        // فور استقرار القطار. أما المراحل التالية فتُشغّل عند استقرار اللافتة.
+        if(currentStageIndex === 0) playStageLevelBellOnce();
+        balloonsGameplayUnlocked = true;
+        balloonStreamNextSpawnAt = performance.now();
         startStageCountdown();
         // تبقى اللافتة ثابتة في المنتصف حتى يستقر القطار، ثم تنسحب مع سرعة الأرضية الأمامية.
         releaseLevelSignWithGround();
@@ -4935,6 +4941,7 @@
   let balloonLoopLastTime = 0;
   let balloonMotionProfileCursor = 0;
   let balloonStreamNextSpawnAt = 0;
+  let balloonsGameplayUnlocked = false;
   let balloonStreamLastSpawnAt = 0;
   let balloonStreamSequence = 0;
   let balloonInitialFillComplete = false;
@@ -5300,7 +5307,8 @@
   }
 
   function updateBalloonStreamScheduler(now){
-    if(stageCompleteTriggered ||
+    if(!balloonsGameplayUnlocked ||
+       stageCompleteTriggered ||
        trainMotionState === "exiting" ||
        trainMotionState === "done"){
       return;
@@ -6115,7 +6123,11 @@
     setLevelSignText(stageNumber);
     if(levelSignGroup) levelSignGroup.style.display = "";
     setLevelSignPosition(LEVEL_SIGN_CONFIG.enterX);
-    animateLevelSignTo(LEVEL_SIGN_CONFIG.centerX, onComplete);
+    animateLevelSignTo(LEVEL_SIGN_CONFIG.centerX, () => {
+      // تُسمع نغمة المرحلة لحظة وصول لوحة المستوى إلى موضعها الثابت.
+      playStageLevelBellOnce();
+      if(typeof onComplete === "function") onComplete();
+    });
   }
 
   function releaseLevelSignWithGround(){
@@ -6796,6 +6808,7 @@
     // هذا يسمح باللعب أثناء الحركة بدون فصل بين الشكل والتصادم.
     trainPhysicsOffsetX = TRAIN_MOTION.enterOffset;
     trainMotionState = "entering";
+    balloonsGameplayUnlocked = false;
     activeQuestionPointer = 0;
     stageCompleteTriggered = false;
     trainExitSequencePending = false;
