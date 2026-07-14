@@ -1563,8 +1563,9 @@
       el("circle", {cx, cy:7, r:5, fill:"#858899", stroke:"#55586a", "stroke-width":1.5}, gondola);
     });
 
-    const hasImage = Boolean(media.imageData);
-    const hasText = Boolean(String(media.text || "").trim());
+    const visibleMedia = mediaVisibility(media);
+    const hasImage = visibleMedia.hasImage;
+    const hasText = visibleMedia.hasText;
 
     const mediaImage = el("image", {
       x:hasText ? -102 : -54,
@@ -2043,8 +2044,9 @@
       opacity:".36"
     }, g);
 
-    const hasImage = Boolean(media.imageData);
-    const hasText = Boolean(String(media.text || "").trim());
+    const visibleMedia = mediaVisibility(media);
+    const hasImage = visibleMedia.hasImage;
+    const hasText = visibleMedia.hasText;
 
     const mediaImage = el("image", {
       x:hasText ? -49 : -31,
@@ -4281,7 +4283,9 @@
       Math.min(y + BOX.bottom, 610),
       Boolean(options.wrongWagon)
     );
-    if(options.wrongWagon) loseAttempt();
+    // كل صندوق يتحطم يُحسب كمحاولة واحدة، سواء اصطدم بعربة خاطئة
+    // أو خرج من المسار أو اصطدم بعائق آخر.
+    loseAttempt();
     resolveMatterBoxAttempt(item,false);
   }
 
@@ -4674,22 +4678,38 @@
 
   function normalizeRuntimeMedia(raw){
     if(!raw || typeof raw !== "object"){
-      return {text:String(raw || "").trim(), imageData:""};
+      return {text:String(raw || "").trim(), imageData:"", contentType:"text"};
     }
+
+    const rawType = String(raw.contentType || raw.type || "");
+    const contentType = ["text","images","mixed"].includes(rawType)
+      ? rawType
+      : "mixed";
 
     return {
       text:String(raw.text ?? raw.label ?? raw.title ?? "").trim(),
-      imageData:String(raw.imageData ?? raw.image ?? raw.src ?? "").trim()
+      imageData:String(raw.imageData ?? raw.image ?? raw.src ?? "").trim(),
+      contentType
     };
   }
 
-  function mediaIdentity(media){
+  function mediaVisibility(media){
     const normalized = normalizeRuntimeMedia(media);
-    return `${normalized.text.replace(/\s+/g," ").toLocaleLowerCase("ar")}|${normalized.imageData}`;
+    const hasText = (normalized.contentType === "text" || normalized.contentType === "mixed") &&
+      Boolean(normalized.text);
+    const hasImage = (normalized.contentType === "images" || normalized.contentType === "mixed") &&
+      Boolean(normalized.imageData);
+    return {media:normalized,hasText,hasImage};
+  }
+
+  function mediaIdentity(media){
+    const visible = mediaVisibility(media);
+    return `${visible.hasText ? visible.media.text.replace(/\s+/g," ").toLocaleLowerCase("ar") : ""}|${visible.hasImage ? visible.media.imageData : ""}`;
   }
 
   function mediaTextLines(media, fallback = ["", ""]){
-    const text = String(normalizeRuntimeMedia(media).text || "").trim();
+    const visible = mediaVisibility(media);
+    const text = visible.hasText ? String(visible.media.text || "").trim() : "";
     if(!text) return fallback.slice(0,2);
 
     const explicit = text.split(/\n+/).map(v=>v.trim()).filter(Boolean);
@@ -4727,8 +4747,8 @@
       : [])
     .map(normalizeRuntimeRelation)
     .filter(entry =>
-      (entry.wagon.text || entry.wagon.imageData) &&
-      (entry.balloon.text || entry.balloon.imageData)
+      (mediaVisibility(entry.wagon).hasText || mediaVisibility(entry.wagon).hasImage) &&
+      (mediaVisibility(entry.balloon).hasText || mediaVisibility(entry.balloon).hasImage)
     );
 
   const TRAIN_RUNTIME_WAGONS = [];
@@ -4791,8 +4811,9 @@
     if(!balloon) return;
     const media = normalizeRuntimeMedia(mediaInput);
     const lines = mediaTextLines(media,["",""]);
-    const hasImage = Boolean(media.imageData);
-    const hasText = Boolean(media.text);
+    const visibleMedia = mediaVisibility(media);
+    const hasImage = visibleMedia.hasImage;
+    const hasText = visibleMedia.hasText;
     const image = balloon.querySelector('[data-role="balloon-media-image"]');
     const text = balloon.querySelector('[data-role="balloon-media-text"]');
 
@@ -6777,7 +6798,6 @@
     stopStageCountdown();
     stageCompleteTriggered = true;
     trainExitSequencePending = true;
-    showAttemptsEndedMessage();
     const whistleAudio = playTrainSound("whistle");
     await waitForAudioToFinish(whistleAudio,12000);
     trainMotionState = "exiting";
@@ -6789,6 +6809,7 @@
       trainMotionState = "done";
       trainExitSequencePending = false;
       stopTrainMovementSound();
+      showTrainEndCelebration();
     });
   }
 
@@ -6977,8 +6998,9 @@
 
   function renderWagonMedia(parent,car,x,y,width,height){
     const media = normalizeRuntimeMedia(car?.media || {text:car?.text || ""});
-    const hasImage = Boolean(media.imageData);
-    const hasText = Boolean(media.text);
+    const visibleMedia = mediaVisibility(media);
+    const hasImage = visibleMedia.hasImage;
+    const hasText = visibleMedia.hasText;
 
     if(hasImage){
       const image = el("image",{
