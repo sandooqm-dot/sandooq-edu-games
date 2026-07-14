@@ -2,28 +2,36 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>صنّف الكلمات</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Tajawal:wght@400;700;800&family=Noto+Kufi+Arabic:wght@400;700;800&family=Noto+Naskh+Arabic:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
-    :root{--blue:#4d7bd8;--yellow:#f4d34f;--ink:#171717;--green:#48a868;--red:#ef5b5b}
-    *{box-sizing:border-box}
-    html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none;touch-action:none}
-    body{position:fixed;inset:0;margin:0;min-height:100vh;background:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink);-webkit-overflow-scrolling:auto}
-    body.theme-classic{background:#fff}body.theme-classroom{background:#fff9e9}body.theme-sky-clouds{background:#bfeaf8}body.theme-forest{background:#d9f1e2}body.theme-math{background:#f5f4e7}body.theme-english{background:#c8eeee}body.theme-flowers{background:#f8edf3}body.theme-national-day{background:#dcefe9}body.theme-founding-day{background:#e7ddcc}
-    .page{position:fixed;inset:0;width:100dvw;height:100dvh;min-height:0;margin:0;padding:0;overflow:hidden;--fit-scale:1;--group-columns:2;--groups-max-width:920px;--group-height:clamp(250px,38vh,370px);--word-min-width:clamp(105px,9vw,148px);--word-min-height:clamp(50px,6.3vh,66px);--word-font:clamp(20px,2vw,30px);--word-py:clamp(9px,1vw,13px);--word-px:clamp(19px,1.9vw,30px)}
+    :root{--blue:#4d7bd8;--yellow:#f4d34f;--ink:#171717;--green:#48a868;--red:#ef5b5b;--game-font:"Noto Naskh Arabic",Tahoma,Arial,sans-serif;--intro-bg-final-scale:1.12}
+    *{box-sizing:border-box;font-family:var(--game-font);-webkit-tap-highlight-color:transparent}
+    html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+    body{margin:0;min-height:100vh;background:#fff;color:var(--ink)}
+    .page{position:fixed;inset:0;width:100dvw;height:100dvh;min-height:0;margin:0;padding:0;overflow:hidden;isolation:isolate;--fit-scale:1;--content-direction:rtl;--group-columns:2;--groups-max-width:920px;--group-height:clamp(250px,38vh,370px);--word-min-width:clamp(105px,9vw,148px);--word-min-height:clamp(50px,6.3vh,66px);--word-font:clamp(20px,2vw,30px);--word-py:clamp(9px,1vw,13px);--word-px:clamp(19px,1.9vw,30px)}
+    .page[data-font="cairo"]{--game-font:"Cairo","Noto Sans Arabic",Tahoma,Arial,sans-serif}.page[data-font="tajawal"]{--game-font:"Tajawal","Noto Sans Arabic",Tahoma,Arial,sans-serif}.page[data-font="noto-kufi"]{--game-font:"Noto Kufi Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif}.page[data-font="noto-naskh"]{--game-font:"Noto Naskh Arabic","Traditional Arabic",Tahoma,serif}
+    .theme-background{position:absolute;inset:0;z-index:0;pointer-events:none;background-color:#fff;background-position:center;background-size:cover;background-repeat:no-repeat;transform:translate3d(0,0,0) scale(1);transform-origin:center;will-change:transform;backface-visibility:hidden}
+    .theme-classic .theme-background{background:#fff}.theme-classroom .theme-background{background:#fff url("../theme-classroom-bg-v2.webp?v=2") center/cover no-repeat}.theme-sky-clouds .theme-background{background:#63cef3 url("../theme-sky-clouds-bg.webp?v=45") center/cover no-repeat}.theme-forest .theme-background{background:#7ccfef url("../theme-forest-bg.webp?v=45") center/cover no-repeat}.theme-math .theme-background{background:#f5f4e7 url("../theme-math-bg.webp?v=45") center/cover no-repeat}.theme-english .theme-background{background:#72d0d2 url("../theme-english-bg.webp?v=46") center/cover no-repeat}.theme-flowers .theme-background{background:#f8edf3 url("../theme-flowers-bg.webp?v=48") center/cover no-repeat}.theme-national-day .theme-background{background:#165f55 url("../theme-national-day-v2-bg.webp?v=53") center/cover no-repeat}.theme-founding-day .theme-background{background:#d7c9b1 url("../theme-founding-day-bg.webp?v=1") center/cover no-repeat}
+    .page.intro-camera .theme-background{transition:transform 7.6s cubic-bezier(.18,.72,.2,1);transform:translate3d(0,0,0) scale(var(--intro-bg-final-scale))}.page.intro-done .theme-background{transform:translate3d(0,0,0) scale(var(--intro-bg-final-scale))}
+    .page.pre-start .stage,.page.pre-start .game-logo,.page.pre-start .fixed-controls{visibility:hidden;opacity:0}.page.intro-playing .game-layout,.page.intro-camera .game-layout{visibility:hidden;opacity:0}.page.intro-pre-reveal .game-layout{visibility:visible;opacity:0}.page.intro-reveal .game-layout{visibility:visible;opacity:1;transition:opacity .82s ease}.page.intro-playing .fixed-controls{opacity:0;pointer-events:none}.page.intro-playing .game-logo{animation:introLogoFade .75s ease-out both}
+    @keyframes introLogoFade{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
     .page[data-group-density="medium"]{--group-height:clamp(205px,29vh,285px)}
     .page[data-group-density="compact"]{--group-height:clamp(155px,22vh,225px)}
     .page[data-word-density="medium"]{--word-min-width:clamp(88px,7.5vw,124px);--word-min-height:clamp(44px,5.3vh,56px);--word-font:clamp(18px,1.65vw,25px);--word-py:clamp(7px,.8vw,10px);--word-px:clamp(14px,1.45vw,22px)}
     .page[data-word-density="compact"]{--word-min-width:clamp(72px,6vw,104px);--word-min-height:clamp(38px,4.7vh,48px);--word-font:clamp(15px,1.35vw,21px);--word-py:clamp(5px,.65vw,8px);--word-px:clamp(10px,1.1vw,17px)}
-    .stage{position:absolute;inset:clamp(72px,8.5vh,88px) clamp(10px,2vw,30px) calc(50px + env(safe-area-inset-bottom)) clamp(10px,2vw,30px);display:flex;align-items:flex-end;justify-content:center;overflow:hidden;direction:ltr;touch-action:none}
-    .game-layout{width:100%;max-width:1480px;min-height:100%;display:flex;flex-direction:column;align-items:center;transform:scale(var(--fit-scale));transform-origin:center bottom;will-change:transform;direction:rtl}
+    .stage{position:absolute;z-index:2;inset:clamp(72px,8.5vh,88px) clamp(10px,2vw,30px) calc(68px + env(safe-area-inset-bottom)) clamp(10px,2vw,30px);display:flex;align-items:flex-end;justify-content:center;overflow:hidden;direction:ltr}
+    .game-layout{width:100%;max-width:1480px;min-height:100%;display:flex;flex-direction:column;align-items:center;transform:scale(var(--fit-scale));transform-origin:center bottom;will-change:transform;direction:var(--content-direction)}
     .topbar{display:none}
     .game-logo{position:fixed;top:max(5px,env(safe-area-inset-top));left:max(6px,env(safe-area-inset-left));width:clamp(56px,5.2vw,78px);height:auto;z-index:20;object-fit:contain}
-    h1{display:none}
-    .back-btn,.restart-btn{border:3px solid var(--ink);border-radius:12px;padding:8px 20px;background:var(--yellow);font-size:17px;font-weight:950;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.18);touch-action:manipulation}
+    .topbar h1{display:none}
+    .back-btn,.restart-btn{border:3px solid var(--ink);border-radius:12px;padding:8px 20px;background:var(--yellow);font-size:17px;font-weight:950;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.18)}
     .back-btn:active,.restart-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
     .score{display:none}
-    .groups{width:min(100%,var(--groups-max-width));display:grid;grid-template-columns:repeat(var(--group-columns),minmax(0,1fr));justify-content:center;align-items:stretch;align-content:end;gap:clamp(14px,2.2vw,32px);margin:auto auto 0;direction:rtl}
+    .groups{width:min(100%,var(--groups-max-width));display:grid;grid-template-columns:repeat(var(--group-columns),minmax(0,1fr));justify-content:center;align-items:stretch;align-content:end;gap:clamp(14px,2.2vw,32px);margin:auto auto 0;direction:var(--content-direction)}
     .group{width:100%;min-width:0;min-height:var(--group-height);background:rgba(255,255,255,.5);border:clamp(3px,.3vw,4px) solid rgba(36,26,67,.72);border-radius:clamp(20px,2vw,30px);box-shadow:0 clamp(5px,.7vw,8px) 0 rgba(36,26,67,.18),0 12px 20px rgba(0,0,0,.10);padding:0 0 clamp(12px,1.4vw,20px);overflow:hidden}
     .group.is-over{border-color:rgba(36,26,67,.72);transform:none;box-shadow:0 clamp(5px,.7vw,8px) 0 rgba(36,26,67,.18),0 12px 20px rgba(0,0,0,.10)}
     .group-title{text-align:center;color:#fff;font-size:clamp(22px,2.5vw,36px);font-weight:1000;line-height:1.2;margin:0 0 clamp(12px,1.6vw,22px);padding:clamp(12px,1.45vw,20px) 12px;border-radius:clamp(16px,1.7vw,25px) clamp(16px,1.7vw,25px) 7px 7px;background:#283c78;min-height:clamp(58px,7.5vh,84px);display:grid;place-items:center}
@@ -32,7 +40,7 @@
     .word-bank{width:min(1320px,100%);flex:0 0 auto;background:transparent;border:0;border-radius:0;padding:0 4px;margin:clamp(7px,1.6vh,16px) auto clamp(30px,5.4vh,64px)}
     .word-bank h2{display:none}
     .words{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(10px,1.25vw,17px)}
-    .word{flex:0 0 auto;border:clamp(2px,.22vw,3px) solid rgba(36,26,67,.72);border-radius:clamp(11px,1.2vw,18px);background:#3788d8;color:#fff;padding:var(--word-py) var(--word-px);min-width:var(--word-min-width);min-height:var(--word-min-height);max-width:min(280px,80vw);font-size:var(--word-font);line-height:1.15;font-weight:900;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none;-webkit-touch-callout:none;box-shadow:0 clamp(4px,.55vw,7px) 0 rgba(36,26,67,.30),0 9px 14px rgba(0,0,0,.10)}
+    .word{flex:0 0 auto;border:clamp(2px,.22vw,3px) solid rgba(36,26,67,.72);border-radius:clamp(11px,1.2vw,18px);background:#3788d8;color:#fff;padding:var(--word-py) var(--word-px);min-width:var(--word-min-width);min-height:var(--word-min-height);max-width:min(280px,80vw);font-size:var(--word-font);line-height:1.15;font-weight:900;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:grab;touch-action:none;user-select:none;box-shadow:0 clamp(4px,.55vw,7px) 0 rgba(36,26,67,.30),0 9px 14px rgba(0,0,0,.10)}
     .word.word-color-0{background:#3788d8}.word.word-color-1{background:#ee7b35}.word.word-color-2{background:#28a66a}.word.word-color-3{background:#9c55c7}
     .word:active{cursor:grabbing}.word.is-placed{cursor:default}.word.is-wrong{animation:none;border-color:rgba(36,26,67,.72)}
     .group .word{cursor:default;opacity:1;filter:none}
@@ -40,19 +48,26 @@
     .drag-ghost{position:fixed;z-index:1000;pointer-events:none;opacity:.96;transform:translate(-50%,-50%) scale(1.04);box-shadow:0 10px 24px rgba(0,0,0,.24)}
     .word.is-drag-source{opacity:.22}
     .page.is-dragging,.page.is-dragging *{user-select:none}
-    .fixed-controls{position:fixed;left:max(6px,env(safe-area-inset-left));bottom:calc(6px + env(safe-area-inset-bottom));height:auto;background:transparent;z-index:30;padding:0}
-    .fixed-controls .back-btn{position:static;min-width:68px;height:34px;border-width:2.5px;border-radius:10px;padding:0 12px;font-size:14px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+    .fixed-controls{position:fixed;left:max(clamp(16px,2.6vw,34px),env(safe-area-inset-left));bottom:calc(clamp(14px,2.4vw,28px) + env(safe-area-inset-bottom));height:auto;background:transparent;z-index:30;padding:0;transition:opacity .34s ease,transform .34s ease}
+    .fixed-controls .back-btn{position:static}
     .message{display:none}
-    .end{position:fixed;inset:0;background:rgba(16,32,58,.78);display:grid;place-items:center;padding:20px;z-index:5}.end[hidden]{display:none}
-    .end-card{width:min(390px,92vw);background:#fff;border:4px solid var(--ink);border-radius:28px;padding:28px;text-align:center;box-shadow:0 10px 0 rgba(0,0,0,.22)}
-    .trophy{font-size:76px;line-height:1;margin-bottom:8px}.end-card h2{margin:0 0 8px;font-size:32px}.end-card p{font-size:19px;font-weight:800}
+    .activity-overlay{position:absolute;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,28,56,.58);backdrop-filter:blur(5px)}
+    .activity-overlay.is-visible{display:flex}
+    .overlay-card{position:relative;width:min(430px,92vw);overflow:hidden;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(245,249,255,.98));border:4px solid #241a43;border-radius:30px;padding:30px 24px;text-align:center;box-shadow:0 11px 0 rgba(36,26,67,.30),0 24px 48px rgba(0,0,0,.24);animation:overlayPop .55s cubic-bezier(.18,1.05,.22,1) both}
+    .overlay-icon{width:82px;height:82px;margin:0 auto 10px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(145deg,#2fa7f2,#0d6fb4);color:#fff;font-size:45px;box-shadow:0 7px 0 rgba(13,111,180,.25)}
+    .overlay-card h1,.overlay-card h2{margin:0;color:#241a43;font-size:clamp(28px,4vw,39px);font-weight:1000}.overlay-card p{margin:8px 0 0;color:#4d4961;font-size:18px;font-weight:800}.overlay-actions{display:flex;justify-content:center;gap:10px;margin-top:20px}.start-btn,.restart-btn,.home-btn{min-height:46px;border:3px solid #111;border-radius:14px;padding:8px 22px;font-size:18px;font-weight:950;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.18)}.start-btn,.restart-btn{background:#1688d3;color:#fff}.home-btn{background:#efd553;color:#111}
+    .end-card .overlay-icon{background:linear-gradient(145deg,#f6dc61,#e8b72a);font-size:47px}.end.is-visible .overlay-icon{animation:trophyBounce .72s cubic-bezier(.18,1.05,.22,1) both}.end.is-visible .overlay-card h2{animation:finishText .5s .18s both}.end.is-visible .overlay-actions{animation:finishText .5s .34s both}
+    .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}.confetti span{position:absolute;top:-12%;width:10px;height:18px;border-radius:3px;background:var(--c,#efd553);animation:confettiFall 2.4s linear infinite}.confetti span:nth-child(1){left:10%;--c:#1688d3;animation-delay:.1s}.confetti span:nth-child(2){left:25%;--c:#ef5b5b;animation-delay:.55s}.confetti span:nth-child(3){left:43%;--c:#28ad6d;animation-delay:.2s}.confetti span:nth-child(4){left:62%;--c:#9c55c7;animation-delay:.8s}.confetti span:nth-child(5){left:78%;--c:#f2a32a;animation-delay:.35s}.confetti span:nth-child(6){left:91%;--c:#1688d3;animation-delay:1s}
+    @keyframes overlayPop{from{opacity:0;transform:scale(.82) translateY(18px)}to{opacity:1;transform:scale(1) translateY(0)}}@keyframes trophyBounce{0%{opacity:0;transform:scale(.45) rotate(-12deg)}70%{transform:scale(1.13) rotate(4deg)}100%{opacity:1;transform:scale(1) rotate(0)}}@keyframes finishText{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}@keyframes confettiFall{to{transform:translate3d(20px,520px,0) rotate(560deg)}}
     @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-    @media(max-width:760px){.stage{inset:66px 8px calc(48px + env(safe-area-inset-bottom))}.word-bank{margin-top:5px;margin-bottom:24px}.groups{gap:13px}.fixed-controls{left:max(5px,env(safe-area-inset-left));bottom:calc(5px + env(safe-area-inset-bottom))}.fixed-controls .back-btn{height:32px;min-width:64px;font-size:13px;padding:0 10px}}
-    @media(max-height:560px) and (orientation:landscape){.stage{inset:54px 10px calc(46px + env(safe-area-inset-bottom))}.word-bank{margin-top:4px;margin-bottom:22px}.group-title{min-height:46px;padding-block:8px}.group-items{padding:8px}}
+    @media(prefers-reduced-motion:reduce){.page.intro-camera .theme-background{transition-duration:.01ms}.overlay-card,.end.is-visible .overlay-icon,.end.is-visible .overlay-card h2,.end.is-visible .overlay-actions,.confetti span{animation-duration:.01ms!important}}
+    @media(max-width:760px){.stage{inset:66px 8px calc(62px + env(safe-area-inset-bottom))}.word-bank{margin-top:5px;margin-bottom:24px}.groups{gap:13px}.fixed-controls{left:max(12px,env(safe-area-inset-left));bottom:calc(12px + env(safe-area-inset-bottom))}.fixed-controls .back-btn{height:40px;min-width:82px;font-size:15px;padding:0 14px}}
+    @media(max-height:560px) and (orientation:landscape){.stage{inset:54px 10px calc(58px + env(safe-area-inset-bottom))}.word-bank{margin-top:4px;margin-bottom:22px}.group-title{min-height:46px;padding-block:8px}.group-items{padding:8px}}
   </style>
 </head>
 <body>
-  <main class="page" id="page">
+  <main class="page pre-start theme-classic" id="page" data-font="noto-naskh">
+    <div class="theme-background" aria-hidden="true"></div>
     <img class="game-logo" src="../logo.PNG" alt="" onerror="this.style.display='none'">
     <section class="stage" id="stage">
       <div class="game-layout" id="gameLayout">
@@ -60,63 +75,64 @@
         <div class="groups" id="groups"></div>
       </div>
     </section>
+    <nav class="fixed-controls"><button class="back-btn" id="backBtn" type="button">رجوع</button></nav>
+    <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
+      <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+        <div class="overlay-icon" aria-hidden="true">▶</div>
+        <h1 id="startTitle">ابدأ اللعبة</h1>
+        <p>اضغط للبدء وتشغيل الصوت</p>
+        <div class="overlay-actions"><button class="start-btn" id="startBtn" type="button">تشغيل</button></div>
+      </div>
+    </section>
+    <section class="activity-overlay end" id="end" aria-hidden="true">
+      <div class="overlay-card end-card" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+        <div class="confetti" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="overlay-icon" aria-hidden="true">🏆</div>
+        <h2 id="finishTitle">انتهى النشاط</h2>
+        <p id="endText"></p>
+        <div class="overlay-actions"><button class="restart-btn" id="restartBtn" type="button">إعادة اللعب</button><button class="home-btn" id="homeBtn" type="button">العودة للألعاب</button></div>
+      </div>
+    </section>
   </main>
-  <nav class="fixed-controls"><button class="back-btn" id="backBtn" type="button">رجوع</button></nav>
-  <section class="end" id="end" hidden><div class="end-card"><div class="trophy">🏆</div><h2>انتهى النشاط</h2><p id="endText"></p><button class="restart-btn" id="restartBtn" type="button">إعادة اللعب</button></div></section>
   <script>
   (async()=>{
     "use strict";
-    const KEY="sandooq_classify_words_payload_v1";
-    const params=new URLSearchParams(location.search); const payloadId=String(params.get("payloadId")||"");
-    const parse=v=>{try{const x=typeof v==="string"?JSON.parse(v):v;return x&&typeof x==="object"?x:null}catch(_){return null}};
-    async function read(){
-      const keys=payloadId?[`${KEY}_${payloadId}`,KEY]:[KEY];
-      for(const store of [sessionStorage,localStorage]){try{for(const k of keys){const p=parse(store.getItem(k));if(p)return p}}catch(_){}}
-      return null;
-    }
-    const payload=await read();
-    const allowedThemes=new Set(["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"]);
-    const selectedTheme=String(params.get("theme")||payload?.theme||payload?.selectedTheme||"classic");
-    document.body.className=`theme-${allowedThemes.has(selectedTheme)?selectedTheme:"classic"}`;
-    const groups=(Array.isArray(payload?.groups)?payload.groups:[]).map((g,i)=>({id:String(g.id||`group-${i+1}`),name:String(g.name||`المجموعة ${i+1}`).trim(),words:(Array.isArray(g.words)?g.words:[]).map((w,j)=>({id:String(w.id||`${i+1}-${j+1}`),text:String(w.text||w.label||w).trim()})).filter(w=>w.text)})).filter(g=>g.words.length);
-    const page=document.getElementById("page"),stage=document.getElementById("stage"),gameLayout=document.getElementById("gameLayout"),groupsNode=document.getElementById("groups"),wordsNode=document.getElementById("words"),endNode=document.getElementById("end"),endText=document.getElementById("endText");
-    let total=groups.reduce((n,g)=>n+g.words.length,0), placed=0, finished=false;
-    let layoutFrame=0,dragGestureActive=false;
-    const wordGroup=new Map(); groups.forEach(g=>g.words.forEach(w=>wordGroup.set(w.id,g.id)));
-    function update(){if(total&&placed===total&&!finished){finished=true;endText.textContent=`أحسنت! صنّفت ${total} كلمات بشكل صحيح.`;setTimeout(()=>endNode.hidden=false,280)}}
-    function place(word,group){if(word.dataset.placed)return;const expected=wordGroup.get(word.dataset.id);if(expected!==group.dataset.id)return;word.dataset.placed="1";word.classList.add("is-placed");group.querySelector(".group-items").appendChild(word);placed++;scheduleLayout();update()}
-    let wordColorIndex=0;
-    function makeWord(w){const b=document.createElement("button");b.type="button";b.className=`word word-color-${wordColorIndex++%4}`;b.textContent=w.text;b.dataset.id=w.id;b.draggable=false;b.addEventListener("dragstart",e=>e.preventDefault());return b}
-    groups.forEach(g=>{const box=document.createElement("section");box.className="group";box.dataset.id=g.id;const title=document.createElement("h2");title.className="group-title";title.textContent=g.name;const items=document.createElement("div");items.className="group-items";box.append(title,items);groupsNode.appendChild(box)});
-    groups.forEach(g=>g.words.forEach(w=>wordsNode.appendChild(makeWord(w))));
+    const KEY="sandooq_classify_words_payload_v1",MAX_GROUPS=4,MAX_WORDS=36;
+    const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+    const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
+    const params=new URLSearchParams(location.search),payloadId=String(params.get("payloadId")||"");
+    const page=document.getElementById("page"),stage=document.getElementById("stage"),gameLayout=document.getElementById("gameLayout"),groupsNode=document.getElementById("groups"),wordsNode=document.getElementById("words"),startGate=document.getElementById("startGate"),startBtn=document.getElementById("startBtn"),endNode=document.getElementById("end"),endText=document.getElementById("endText"),backBtn=document.getElementById("backBtn"),restartBtn=document.getElementById("restartBtn"),homeBtn=document.getElementById("homeBtn");
+    const parse=value=>{try{const parsed=typeof value==="string"?JSON.parse(value):value;return parsed&&typeof parsed==="object"?parsed:null}catch(_){return null}};
+    async function readPayload(){const keys=payloadId?[`${KEY}_${payloadId}`,KEY]:[KEY];for(const store of [sessionStorage,localStorage]){try{for(const key of keys){const value=parse(store.getItem(key));if(value)return value}}catch(_){}}return null}
+    const normalizeTheme=value=>THEMES.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"classic";
+    const normalizeFont=value=>FONTS.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"noto-naskh";
+    function normalizeGroups(source){let remaining=MAX_WORDS;return (Array.isArray(source)?source:[]).slice(0,MAX_GROUPS).map((group,groupIndex)=>{const words=(Array.isArray(group?.words)?group.words:[]).map((word,wordIndex)=>{const text=typeof word==="object"?word?.text??word?.label??"":word;return {id:String(word?.id||`${groupIndex+1}-${wordIndex+1}`),text:String(text||"").trim()}}).filter(word=>word.text).slice(0,remaining);remaining-=words.length;return {id:String(group?.id||`group-${groupIndex+1}`),name:String(group?.name||group?.title||`المجموعة ${groupIndex+1}`).trim(),words}}).filter(group=>group.words.length)}
+    function normalizePayload(raw){const contentLanguage=raw?.contentLanguage==="en"||raw?.language==="en"?"en":"ar";return {gameName:String(raw?.gameName||raw?.name||"صنّف الكلمات").trim()||"صنّف الكلمات",theme:normalizeTheme(params.get("theme")||raw?.theme||raw?.selectedTheme),contentLanguage,fontFamily:normalizeFont(raw?.fontFamily),soundEnabled:raw?.soundEnabled!==false&&raw?.sounds?.enabled!==false,groups:normalizeGroups(raw?.groups)}}
+    const payload=normalizePayload(await readPayload()||{}),groups=payload.groups;
+    let total=groups.reduce((sum,group)=>sum+group.words.length,0),placed=0,finished=false,gameStarted=false,layoutFrame=0,introTimer=0,wordColorIndex=0;
+    const wordGroup=new Map();groups.forEach(group=>group.words.forEach(word=>wordGroup.set(word.id,group.id)));
+    function applyAppearance(){THEMES.forEach(theme=>page.classList.remove(`theme-${theme}`));page.classList.add(`theme-${payload.theme}`);page.dataset.font=payload.fontFamily;page.dataset.language=payload.contentLanguage;const direction=payload.contentLanguage==="en"?"ltr":"rtl";page.style.setProperty("--content-direction",direction);document.documentElement.lang=payload.contentLanguage;document.documentElement.dir=direction;gameLayout.dir=direction;groupsNode.dir=direction;wordsNode.dir=direction;document.title=`${payload.gameName} - صندوق الألعاب التعليمية`}
+    const SOUND_FILES={place:"../sounds/match-card-flip.mp3?v=1",finish:"../sounds/match-finish.mp3?v=1"};
+    const sfx=(()=>{let context=null,master=null;const buffers=new Map(),loading=new Map(),active=new Set();function enabled(){return payload.soundEnabled}function ensure(){try{context||=new(window.AudioContext||window.webkitAudioContext)();if(!master&&context){master=context.createGain();master.gain.value=.9;master.connect(context.destination)}if(context?.state==="suspended")context.resume()}catch(_){}return context}async function load(name){if(buffers.has(name))return buffers.get(name);if(loading.has(name))return loading.get(name);const promise=(async()=>{const ctx=ensure();if(!ctx||!SOUND_FILES[name])return null;try{const response=await fetch(SOUND_FILES[name]);const bytes=await response.arrayBuffer();const buffer=await ctx.decodeAudioData(bytes.slice(0));buffers.set(name,buffer);return buffer}catch(_){return null}})();loading.set(name,promise);const result=await promise;loading.delete(name);return result}async function play(name,volume=1){if(!enabled())return;const ctx=ensure(),buffer=await load(name);if(!ctx||!master||!buffer)return;try{const source=ctx.createBufferSource(),gain=ctx.createGain();gain.gain.value=Math.max(0,Math.min(1.2,volume));source.buffer=buffer;source.connect(gain).connect(master);active.add(source);source.onended=()=>{active.delete(source);try{source.disconnect();gain.disconnect()}catch(_){}};source.start()}catch(_){}}function unlock(){if(!enabled())return;ensure();Object.keys(SOUND_FILES).forEach(load)}function stop(){active.forEach(source=>{try{source.stop()}catch(_){}});active.clear()}return {unlock,play,stop}})();
+    const themeAudio=(()=>{const files={default:"../sounds/theme-default.mp3?v=1","sky-clouds":"../sounds/theme-sky-clouds.mp3?v=1","national-day":"../sounds/theme-national-day.mp3?v=1","founding-day":"../sounds/theme-founding-day.mp3?v=1"};let audio=null,fadeTimer=0;const key=theme=>["sky-clouds","national-day","founding-day"].includes(theme)?theme:"default";function ensure(){const src=files[key(payload.theme)];if(!audio||audio.dataset.src!==src){stop();audio=new Audio(src);audio.dataset.src=src;audio.preload="auto";audio.loop=false;audio.volume=1;audio.setAttribute("playsinline","");audio.setAttribute("webkit-playsinline","")}return audio}function preload(){if(!payload.soundEnabled)return;try{ensure().load()}catch(_){}}function play(){if(!payload.soundEnabled)return;try{const target=ensure();target.pause();target.currentTime=0;target.volume=1;target.play()?.catch?.(()=>{})}catch(_){}}function stop(){if(fadeTimer)clearInterval(fadeTimer);fadeTimer=0;try{audio?.pause();if(audio)audio.currentTime=0}catch(_){}}function fadeOut(duration=400){if(!audio||audio.paused){stop();return}const started=performance.now(),startVolume=audio.volume;if(fadeTimer)clearInterval(fadeTimer);fadeTimer=setInterval(()=>{const progress=Math.min(1,(performance.now()-started)/duration);audio.volume=Math.max(0,startVolume*(1-progress));if(progress>=1)stop()},30)}return {preload,play,fadeOut,stop}})();
+    function showFinish(){endNode.classList.add("is-visible");endNode.setAttribute("aria-hidden","false");sfx.play("finish",1)}
+    function update(){if(total&&placed===total&&!finished){finished=true;endText.textContent=payload.contentLanguage==="en"?`Great! You classified ${total} words correctly.`:`أحسنت! صنّفت ${total} كلمة بشكل صحيح.`;setTimeout(showFinish,320)}}
+    function place(word,group){if(!gameStarted||finished||word.dataset.placed)return;const expected=wordGroup.get(word.dataset.id);if(expected!==group.dataset.id)return;word.dataset.placed="1";word.draggable=false;word.classList.add("is-placed");group.querySelector(".group-items").appendChild(word);placed++;sfx.play("place",.82);scheduleLayout();update()}
+    function makeWord(word){const button=document.createElement("button");button.type="button";button.className=`word word-color-${wordColorIndex++%4}`;button.textContent=word.text;button.dataset.id=word.id;button.lang=payload.contentLanguage;button.dir=payload.contentLanguage==="en"?"ltr":"rtl";button.draggable=true;button.addEventListener("dragstart",event=>{if(!gameStarted||finished){event.preventDefault();return}event.dataTransfer.setData("text/plain",word.id)});return button}
+    function render(){groupsNode.textContent="";wordsNode.textContent="";groups.forEach(group=>{const box=document.createElement("section");box.className="group";box.dataset.id=group.id;const title=document.createElement("h2");title.className="group-title";title.textContent=group.name;title.lang=payload.contentLanguage;const items=document.createElement("div");items.className="group-items";box.append(title,items);box.addEventListener("dragover",event=>event.preventDefault());box.addEventListener("drop",event=>{event.preventDefault();const id=event.dataTransfer.getData("text/plain"),word=wordsNode.querySelector(`[data-id="${CSS.escape(id)}"]`);if(word)place(word,box)});groupsNode.appendChild(box)});groups.forEach(group=>group.words.forEach(word=>wordsNode.appendChild(makeWord(word))))}
     function viewportSize(){const viewport=window.visualViewport;return {width:Math.max(280,Number(viewport?.width)||document.documentElement.clientWidth||window.innerWidth||280),height:Math.max(260,Number(viewport?.height)||document.documentElement.clientHeight||window.innerHeight||260)}}
-    function chooseColumns(count,width,height){if(count<=1)return 1;if(width<560)return 1;const wide=width/height>=1.45;if(wide){if(count<=4)return count;if(count<=6)return 3;if(count<=8)return 4;return Math.min(5,Math.ceil(count/2))}if(count<=2)return 2;if(count<=4)return 2;if(count<=6)return 3;return Math.min(4,Math.ceil(count/2))}
-    function configureLayout(){const view=viewportSize(),count=Math.max(1,groups.length),columns=Math.min(count,chooseColumns(count,view.width,view.height));page.dataset.groupDensity=count<=2?"roomy":count<=4?"medium":"compact";page.dataset.wordDensity=total<=9?"roomy":total<=14?"medium":"compact";page.style.setProperty("--group-columns",String(columns));const cardWidth=count<=2?440:count<=4?355:300;const gap=32;groupsNode.style.setProperty("--groups-max-width",`${Math.min(1480,columns*cardWidth+Math.max(0,columns-1)*gap)}px`);scheduleLayout()}
-    function fitLayout(){page.style.setProperty("--fit-scale","1");const availableWidth=Math.max(1,stage.clientWidth),availableHeight=Math.max(1,stage.clientHeight),contentWidth=Math.max(1,gameLayout.scrollWidth),contentHeight=Math.max(1,gameLayout.scrollHeight);const scale=Math.max(.44,Math.min(1,(availableWidth-2)/contentWidth,(availableHeight-2)/contentHeight));page.style.setProperty("--fit-scale",scale.toFixed(4))}
+    function chooseColumns(count,width,height){if(count<=1)return 1;if(width<560)return 1;const wide=width/height>=1.45;if(wide)return Math.min(count,4);return count<=2?2:2}
+    function configureLayout(){const view=viewportSize(),count=Math.max(1,groups.length),columns=Math.min(count,chooseColumns(count,view.width,view.height));page.dataset.groupDensity=count<=2?"roomy":"medium";page.dataset.wordDensity=total<=9?"roomy":total<=14?"medium":"compact";page.style.setProperty("--group-columns",String(columns));const cardWidth=count<=2?440:355,gap=32;groupsNode.style.setProperty("--groups-max-width",`${Math.min(1480,columns*cardWidth+Math.max(0,columns-1)*gap)}px`);scheduleLayout()}
+    function fitLayout(){page.style.setProperty("--fit-scale","1");const availableWidth=Math.max(1,stage.clientWidth),availableHeight=Math.max(1,stage.clientHeight),contentWidth=Math.max(1,gameLayout.scrollWidth),contentHeight=Math.max(1,gameLayout.scrollHeight),scale=Math.max(.38,Math.min(1,(availableWidth-2)/contentWidth,(availableHeight-2)/contentHeight));page.style.setProperty("--fit-scale",scale.toFixed(4))}
     function scheduleLayout(){cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(()=>requestAnimationFrame(fitLayout))}
-    function blockSafariPan(event){if(dragGestureActive&&event.cancelable)event.preventDefault()}
-    document.addEventListener("touchmove",blockSafariPan,{capture:true,passive:false});
-    document.addEventListener("gesturestart",blockSafariPan,{capture:true,passive:false});
-    wordsNode.addEventListener("pointerdown",e=>{
-      const word=e.target.closest(".word");
-      if(!word||word.dataset.placed||(e.pointerType==="mouse"&&e.button!==0))return;
-      e.preventDefault();
-      dragGestureActive=true;
-      const rect=word.getBoundingClientRect();
-      const startX=e.clientX,startY=e.clientY; let dragging=false,ghost=null;
-      let over=null,cleaned=false;
-      const move=ev=>{if(!dragging){if(Math.hypot(ev.clientX-startX,ev.clientY-startY)<5)return;dragging=true;ghost=word.cloneNode(true);ghost.classList.add("drag-ghost");ghost.removeAttribute("data-placed");ghost.style.width=`${rect.width}px`;ghost.style.height=`${rect.height}px`;document.body.appendChild(ghost);word.classList.add("is-drag-source");page.classList.add("is-dragging")}ghost.style.left=`${ev.clientX}px`;ghost.style.top=`${ev.clientY}px`;over=document.elementFromPoint(ev.clientX,ev.clientY)?.closest(".group")||null;if(ev.cancelable)ev.preventDefault()};
-      const cleanup=(shouldPlace)=>{if(cleaned)return;cleaned=true;window.removeEventListener("pointermove",move,true);window.removeEventListener("pointerup",finish,true);window.removeEventListener("pointercancel",cancel,true);dragGestureActive=false;ghost?.remove();word.classList.remove("is-drag-source");page.classList.remove("is-dragging");try{word.releasePointerCapture?.(e.pointerId)}catch(_){}if(dragging&&shouldPlace&&over)place(word,over)};
-      const finish=()=>cleanup(true),cancel=()=>cleanup(false);
-      window.addEventListener("pointermove",move,{capture:true,passive:false});window.addEventListener("pointerup",finish,{capture:true,passive:false});
-      window.addEventListener("pointercancel",cancel,{capture:true,passive:false});
-      try{word.setPointerCapture?.(e.pointerId)}catch(_){ }
-    });
-    document.getElementById("backBtn").onclick=()=>{try{if(history.length>1){history.back();return}}catch(_){}location.href="../index.html"};document.getElementById("restartBtn").onclick=()=>location.reload();
-    window.addEventListener("resize",configureLayout,{passive:true});
-    if(window.visualViewport){window.visualViewport.addEventListener("resize",configureLayout,{passive:true});window.visualViewport.addEventListener("scroll",scheduleLayout,{passive:true})}
-    document.fonts?.ready?.then(scheduleLayout).catch(()=>{});
-    configureLayout();update();
+    function prefersReducedMotion(){return !!window.matchMedia?.("(prefers-reduced-motion:reduce)")?.matches}
+    function finishIntro(){themeAudio.fadeOut(450);page.classList.remove("intro-camera");page.classList.add("intro-pre-reveal");configureLayout();requestAnimationFrame(()=>requestAnimationFrame(()=>{page.classList.remove("intro-pre-reveal");page.classList.add("intro-reveal");setTimeout(()=>{page.classList.remove("intro-playing","intro-reveal");page.classList.add("intro-done")},prefersReducedMotion()?20:850)}))}
+    function startGame(){if(gameStarted)return;gameStarted=true;sfx.unlock();themeAudio.preload();themeAudio.play();startGate.classList.remove("is-visible");startGate.setAttribute("aria-hidden","true");page.classList.remove("pre-start");page.classList.add("intro-playing");requestAnimationFrame(()=>page.classList.add("intro-camera"));clearTimeout(introTimer);introTimer=setTimeout(finishIntro,prefersReducedMotion()?80:7600)}
+    wordsNode.addEventListener("pointerdown",event=>{const word=event.target.closest(".word");if(!gameStarted||finished||!word||word.dataset.placed||event.button>0)return;event.preventDefault();const rect=word.getBoundingClientRect(),startX=event.clientX,startY=event.clientY;let dragging=false,ghost=null,over=null;const move=moveEvent=>{if(!dragging){if(Math.hypot(moveEvent.clientX-startX,moveEvent.clientY-startY)<5)return;dragging=true;ghost=word.cloneNode(true);ghost.classList.add("drag-ghost");ghost.removeAttribute("data-placed");ghost.style.width=`${rect.width}px`;ghost.style.height=`${rect.height}px`;document.body.appendChild(ghost);word.classList.add("is-drag-source");page.classList.add("is-dragging")}ghost.style.left=`${moveEvent.clientX}px`;ghost.style.top=`${moveEvent.clientY}px`;over=document.elementFromPoint(moveEvent.clientX,moveEvent.clientY)?.closest(".group")||null;if(moveEvent.cancelable)moveEvent.preventDefault()};const finish=()=>{window.removeEventListener("pointermove",move,true);window.removeEventListener("pointerup",finish,true);if(!dragging)return;ghost?.remove();word.classList.remove("is-drag-source");page.classList.remove("is-dragging");if(over)place(word,over)};window.addEventListener("pointermove",move,{capture:true,passive:false});window.addEventListener("pointerup",finish,{capture:true,passive:false});try{word.setPointerCapture?.(event.pointerId)}catch(_){}});
+    function goBack(){themeAudio.stop();sfx.stop();try{if(history.length>1){history.back();return}}catch(_){}location.href="../index.html"}
+    startBtn.addEventListener("click",startGame);backBtn.addEventListener("click",goBack);homeBtn.addEventListener("click",()=>{themeAudio.stop();sfx.stop();location.href="../index.html"});restartBtn.addEventListener("click",()=>location.reload());
+    window.addEventListener("resize",configureLayout,{passive:true});if(window.visualViewport){window.visualViewport.addEventListener("resize",configureLayout,{passive:true});window.visualViewport.addEventListener("scroll",scheduleLayout,{passive:true})}
+    applyAppearance();render();configureLayout();themeAudio.preload();if(document.fonts?.ready)document.fonts.ready.then(scheduleLayout).catch(()=>{});
   })();
   </script>
 </body>
