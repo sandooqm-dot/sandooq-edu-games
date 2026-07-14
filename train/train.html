@@ -567,18 +567,18 @@
   const NS = "http://www.w3.org/2000/svg";
 
   /*
-    train-audio-v146:
+    train-audio-v147:
     نفس بنية Audio البسيطة والمجرّبة في لعبة «افتح الصندوق».
     كل مؤثر يملك عنصر Audio مستقلًا كي تعمل المؤثرات المختلفة معًا،
-    بينما يُدار تكرار صوت القطار بفاصل صامت ثابت دون إعادة تشغيله من المراحل.
+    وصوت القطار الجديد يعمل بتكرار أصلي متصل دون مؤقتات أو مسافات مضافة.
   */
   const trainAudio = (() => {
     const SOUND_FILES = Object.freeze({
-      move:"../sounds/train-move-143.wav?v=143",
+      move:"../sounds/train-move-147.wav?v=147",
       levelBell:"../sounds/train-level-bell.mp3",
       whistle:"../sounds/train-whistle.mp3",
       bounce:"../sounds/train-bounce.mp3",
-      balloonPop:"../sounds/train-balloon-pop.mp3",
+      balloonPop:"../sounds/train-balloon-pop-147.wav?v=147",
       correctDrop:"../sounds/train-correct-drop.mp3",
       boxBreak:"../sounds/train-box-break.mp3",
       intro:"../sounds/theme-default.mp3?v=1",
@@ -586,7 +586,7 @@
     });
 
     const VOLUMES = Object.freeze({
-      move:.42,
+      move:.34,
       levelBell:.82,
       whistle:.78,
       bounce:.68,
@@ -597,19 +597,10 @@
       finish:1
     });
 
-    // ملف الفرقعة يبدأ بصمت مسموع؛ نتجاوزه حتى يبدأ المؤثر مع ضغط البالون نفسه.
-    const START_OFFSETS = Object.freeze({
-      balloonPop:.40
-    });
-
-    // مقطع حركة القطار قصير، لذلك نضيف صمتًا خفيفًا بعد كل تشغيل بدل loop المتصل.
-    const MOVE_REPEAT_GAP_MS = 300;
-
     const cache = Object.create(null);
     let enabled = true;
     let movementWanted = false;
     let movementResumeArmed = false;
-    let movementGapTimer = 0;
 
     function boundedVolume(value, fallback){
       const number = Number(value);
@@ -625,14 +616,11 @@
       if(!cache[name]){
         const audio = new Audio(src);
         audio.preload = "auto";
-        audio.loop = false;
+        audio.loop = name === "move";
         audio.volume = VOLUMES[name] ?? 1;
         audio.playsInline = true;
         audio.setAttribute("playsinline","");
         audio.setAttribute("webkit-playsinline","");
-        if(name === "move"){
-          audio.addEventListener("ended", scheduleMovementRepeat);
-        }
         cache[name] = audio;
       }
 
@@ -655,16 +643,7 @@
 
       try{
         audio.pause();
-        const startOffset = START_OFFSETS[name] ?? 0;
-        try{
-          if(typeof audio.fastSeek === "function" && startOffset > 0){
-            audio.fastSeek(startOffset);
-          }else{
-            audio.currentTime = startOffset;
-          }
-        }catch(_){
-          audio.currentTime = 0;
-        }
+        audio.currentTime = 0;
         audio.loop = false;
         audio.volume = boundedVolume(options.volume, VOLUMES[name] ?? 1);
         audio.playbackRate = Number.isFinite(Number(options.playbackRate))
@@ -704,29 +683,21 @@
       document.addEventListener("keydown", resumeMovementFromGesture, true);
     }
 
-    function clearMovementGapTimer(){
-      if(!movementGapTimer) return;
-      window.clearTimeout(movementGapTimer);
-      movementGapTimer = 0;
-    }
+    function startMovement(){
+      if(!enabled) return null;
+      movementWanted = true;
 
-    function scheduleMovementRepeat(){
-      clearMovementGapTimer();
-      if(!movementWanted || !enabled) return;
-
-      movementGapTimer = window.setTimeout(() => {
-        movementGapTimer = 0;
-        if(movementWanted && enabled) playMovementCycle();
-      }, MOVE_REPEAT_GAP_MS);
-    }
-
-    function playMovementCycle(){
       const audio = getAudio("move");
-      if(!audio || !movementWanted || !enabled) return audio;
+      if(!audio) return null;
 
-      audio.loop = false;
+      audio.loop = true;
       audio.volume = VOLUMES.move;
       audio.playbackRate = 1;
+
+      if(!audio.paused && !audio.ended){
+        disarmMovementResume();
+        return audio;
+      }
 
       try{ audio.currentTime = 0; }catch(_){ }
 
@@ -743,24 +714,8 @@
       return audio;
     }
 
-    function startMovement(){
-      if(!enabled) return null;
-      movementWanted = true;
-
-      const audio = getAudio("move");
-      if(!audio) return null;
-
-      if(movementGapTimer || (!audio.paused && !audio.ended)){
-        disarmMovementResume();
-        return audio;
-      }
-
-      return playMovementCycle();
-    }
-
     function stopMovement(){
       movementWanted = false;
-      clearMovementGapTimer();
       disarmMovementResume();
       resetAudio(cache.move);
     }
@@ -775,7 +730,6 @@
 
     function stopAll(){
       movementWanted = false;
-      clearMovementGapTimer();
       disarmMovementResume();
       Object.values(cache).forEach(resetAudio);
     }
