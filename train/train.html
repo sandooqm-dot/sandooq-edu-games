@@ -4677,8 +4677,11 @@
   const TRAIN_ATTEMPTS_ENABLED = TRAIN_ATTEMPTS_TOTAL > 0;
 
   function normalizeRuntimeMedia(raw){
+    if(raw && typeof raw === "object" && raw.media && typeof raw.media === "object"){
+      raw = raw.media;
+    }
     if(!raw || typeof raw !== "object"){
-      return {text:String(raw || "").trim(), imageData:"", contentType:"text"};
+      return {text:String(raw || "").trim(), imageData:"", contentType:"text", type:"text"};
     }
 
     const rawType = String(raw.contentType || raw.type || "");
@@ -4689,7 +4692,8 @@
     return {
       text:String(raw.text ?? raw.label ?? raw.title ?? "").trim(),
       imageData:String(raw.imageData ?? raw.image ?? raw.src ?? "").trim(),
-      contentType
+      contentType,
+      type:contentType
     };
   }
 
@@ -4723,8 +4727,12 @@
   }
 
   function normalizeRuntimeRelation(raw,index){
-    const wagon = normalizeRuntimeMedia(raw?.wagon || raw?.car || raw?.answer);
-    const balloon = normalizeRuntimeMedia(raw?.balloon || raw?.question || raw?.item);
+    const wagon = normalizeRuntimeMedia(
+      raw?.wagon || raw?.wagonContent || raw?.car || raw?.answer || raw?.wagonMedia
+    );
+    const balloon = normalizeRuntimeMedia(
+      raw?.balloon || raw?.balloonContent || raw?.question || raw?.item || raw?.balloonMedia
+    );
     const relationId = String(raw?.relationId || raw?.id || `train-content-${index + 1}`);
     const fallbackWagonId = `wagon-${index + 1}-${mediaIdentity(wagon).slice(0,24)}`;
     const wagonId = String(raw?.targetWagonId || raw?.wagonId || fallbackWagonId);
@@ -4740,11 +4748,15 @@
     };
   }
 
-  const TRAIN_RUNTIME_RELATIONS = (Array.isArray(TRAIN_RUNTIME_PAYLOAD?.contents)
+  const TRAIN_RUNTIME_SOURCE_ENTRIES = Array.isArray(TRAIN_RUNTIME_PAYLOAD?.contents)
     ? TRAIN_RUNTIME_PAYLOAD.contents
     : Array.isArray(TRAIN_RUNTIME_PAYLOAD?.entries)
       ? TRAIN_RUNTIME_PAYLOAD.entries
-      : [])
+      : Array.isArray(TRAIN_RUNTIME_PAYLOAD?.items)
+        ? TRAIN_RUNTIME_PAYLOAD.items
+        : [];
+
+  const TRAIN_RUNTIME_RELATIONS = TRAIN_RUNTIME_SOURCE_ENTRIES
     .map(normalizeRuntimeRelation)
     .filter(entry =>
       (mediaVisibility(entry.wagon).hasText || mediaVisibility(entry.wagon).hasImage) &&
