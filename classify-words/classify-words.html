@@ -1,1 +1,72 @@
-.
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>صنّف الكلمات</title>
+  <style>
+    :root{--blue:#4d7bd8;--yellow:#f4d34f;--ink:#171717;--green:#48a868;--red:#ef5b5b}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:linear-gradient(180deg,#eaf3ff,#fff8dc);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink)}
+    .page{width:min(1180px,100%);margin:auto;padding:18px 16px 34px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+    h1{margin:0;font-size:clamp(25px,4vw,42px);font-weight:1000}
+    .back-btn,.restart-btn{border:3px solid var(--ink);border-radius:14px;padding:10px 20px;background:var(--yellow);font-size:17px;font-weight:950;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.18)}
+    .back-btn:active,.restart-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+    .score{background:#fff;border:3px solid var(--ink);border-radius:14px;padding:8px 16px;font-size:18px;font-weight:950}
+    .groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-bottom:22px}
+    .group{min-height:220px;background:#fff;border:3px solid var(--ink);border-radius:18px;box-shadow:0 5px 0 rgba(0,0,0,.12);padding:13px;transition:.18s}
+    .group.is-over{border-color:var(--blue);background:#eef4ff;transform:translateY(-3px)}
+    .group-title{text-align:center;font-size:clamp(19px,2.5vw,27px);font-weight:1000;margin:0 0 12px;padding:9px;border-radius:11px;background:#f4f4f4}
+    .group-items{display:grid;gap:8px;min-height:140px;align-content:start}
+    .word-bank{background:rgba(255,255,255,.82);border:3px solid var(--blue);border-radius:18px;padding:14px}
+    .word-bank h2{font-size:22px;margin:0 0 10px;text-align:center}
+    .words{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+    .word{border:3px solid var(--ink);border-radius:13px;background:#fff;padding:9px 16px;min-height:44px;font-size:18px;font-weight:900;cursor:grab;touch-action:none;user-select:none;box-shadow:0 3px 0 rgba(0,0,0,.14)}
+    .word:active{cursor:grabbing}.word.is-placed{background:#e8f7eb;border-color:var(--green);cursor:default}.word.is-wrong{animation:shake .32s;border-color:var(--red)}
+    .group .word{font-size:16px;padding:7px 11px;cursor:default;box-shadow:none}
+    .empty{color:#929292;text-align:center;padding:36px 8px;font-weight:800}
+    .message{text-align:center;min-height:32px;margin:13px;font-weight:950;font-size:19px}
+    .end{position:fixed;inset:0;background:rgba(16,32,58,.78);display:grid;place-items:center;padding:20px;z-index:5}.end[hidden]{display:none}
+    .end-card{width:min(390px,92vw);background:#fff;border:4px solid var(--ink);border-radius:28px;padding:28px;text-align:center;box-shadow:0 10px 0 rgba(0,0,0,.22)}
+    .trophy{font-size:76px;line-height:1;margin-bottom:8px}.end-card h2{margin:0 0 8px;font-size:32px}.end-card p{font-size:19px;font-weight:800}
+    @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+    @media(max-width:600px){.page{padding:12px 10px 24px}.topbar{flex-wrap:wrap}.topbar h1{order:1;width:100%;text-align:center}.groups{grid-template-columns:1fr}.group{min-height:170px}.group-items{min-height:100px}}
+  </style>
+</head>
+<body>
+  <main class="page" id="page">
+    <div class="topbar"><button class="back-btn" id="backBtn" type="button">رجوع</button><h1>صنّف الكلمات</h1><div class="score" id="score">0 / 0</div></div>
+    <div class="groups" id="groups"></div>
+    <div class="message" id="message" aria-live="polite"></div>
+    <section class="word-bank"><h2>الكلمات</h2><div class="words" id="words"></div></section>
+  </main>
+  <section class="end" id="end" hidden><div class="end-card"><div class="trophy">🏆</div><h2>انتهى النشاط</h2><p id="endText"></p><button class="restart-btn" id="restartBtn" type="button">إعادة اللعب</button></div></section>
+  <script>
+  (async()=>{
+    "use strict";
+    const KEY="sandooq_classify_words_payload_v1";
+    const params=new URLSearchParams(location.search); const payloadId=String(params.get("payloadId")||"");
+    const parse=v=>{try{const x=typeof v==="string"?JSON.parse(v):v;return x&&typeof x==="object"?x:null}catch(_){return null}};
+    async function read(){
+      const keys=payloadId?[`${KEY}_${payloadId}`,KEY]:[KEY];
+      for(const store of [sessionStorage,localStorage]){try{for(const k of keys){const p=parse(store.getItem(k));if(p)return p}}catch(_){}}
+      return null;
+    }
+    const payload=await read();
+    const groups=(Array.isArray(payload?.groups)?payload.groups:[]).map((g,i)=>({id:String(g.id||`group-${i+1}`),name:String(g.name||`المجموعة ${i+1}`).trim(),words:(Array.isArray(g.words)?g.words:[]).map((w,j)=>({id:String(w.id||`${i+1}-${j+1}`),text:String(w.text||w.label||w).trim()})).filter(w=>w.text)})).filter(g=>g.words.length);
+    const groupsNode=document.getElementById("groups"), wordsNode=document.getElementById("words"), scoreNode=document.getElementById("score"), messageNode=document.getElementById("message"), endNode=document.getElementById("end"), endText=document.getElementById("endText");
+    let total=groups.reduce((n,g)=>n+g.words.length,0), placed=0, finished=false;
+    const wordGroup=new Map(); groups.forEach(g=>g.words.forEach(w=>wordGroup.set(w.id,g.id)));
+    function update(){scoreNode.textContent=`${placed} / ${total}`;if(total&&placed===total&&!finished){finished=true;endText.textContent=`أحسنت! صنّفت ${total} كلمات بشكل صحيح.`;setTimeout(()=>endNode.hidden=false,280)}}
+    function place(word,group){if(word.dataset.placed)return;const expected=wordGroup.get(word.dataset.id);if(expected!==group.dataset.id){word.classList.remove("is-wrong");void word.offsetWidth;word.classList.add("is-wrong");messageNode.textContent="حاول مرة أخرى";return}word.dataset.placed="1";word.classList.add("is-placed");group.querySelector(".group-items").appendChild(word);placed++;messageNode.textContent="إجابة صحيحة ✓";update()}
+    function makeWord(w){const b=document.createElement("button");b.type="button";b.className="word";b.textContent=w.text;b.dataset.id=w.id;b.draggable=true;b.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",w.id));return b}
+    groups.forEach(g=>{const box=document.createElement("section");box.className="group";box.dataset.id=g.id;const title=document.createElement("h2");title.className="group-title";title.textContent=g.name;const items=document.createElement("div");items.className="group-items";const empty=document.createElement("div");empty.className="empty";empty.textContent="اسحب الكلمات إلى هنا";items.append(empty);box.append(title,items);box.addEventListener("dragover",e=>{e.preventDefault();box.classList.add("is-over")});box.addEventListener("dragleave",()=>box.classList.remove("is-over"));box.addEventListener("drop",e=>{e.preventDefault();box.classList.remove("is-over");const w=wordsNode.querySelector(`[data-id="${CSS.escape(e.dataTransfer.getData("text/plain"))}"]`);if(w)place(w,box)});groupsNode.appendChild(box)});
+    groups.forEach(g=>g.words.forEach(w=>wordsNode.appendChild(makeWord(w))));
+    wordsNode.addEventListener("pointerdown",e=>{const word=e.target.closest(".word");if(!word||word.dataset.placed)return;const move=e=>{word.style.position="fixed";word.style.zIndex=20;word.style.left=`${e.clientX-word.offsetWidth/2}px`;word.style.top=`${e.clientY-word.offsetHeight/2}px`};const up=e=>{document.removeEventListener("pointermove",move);document.removeEventListener("pointerup",up);word.style.position="";word.style.zIndex="";word.style.left="";word.style.top="";const hit=document.elementFromPoint(e.clientX,e.clientY)?.closest(".group");if(hit)place(word,hit)};document.addEventListener("pointermove",move);document.addEventListener("pointerup",up,{once:true})});
+    document.getElementById("backBtn").onclick=()=>{try{history.back()}catch(_){location.href="../index.html"}};document.getElementById("restartBtn").onclick=()=>location.reload();
+    if(!groups.length){messageNode.textContent="لا توجد محتويات للعبة."}update();
+  })();
+  </script>
+</body>
+</html>
