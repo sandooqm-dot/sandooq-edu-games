@@ -11384,6 +11384,44 @@
       font-weight:950;
     }
 
+    .train-side-content-mode{
+      display:grid;
+      gap:7px;
+      margin-top:-2px;
+    }
+
+    .train-side-content-mode-label{
+      text-align:right;
+      color:#555;
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .train-side-content-mode-buttons{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:6px;
+      direction:rtl;
+    }
+
+    .train-side-content-mode-btn{
+      min-height:34px;
+      border:2px solid var(--ink);
+      border-radius:11px;
+      background:#fff;
+      color:var(--ink);
+      padding:4px 5px;
+      font-size:clamp(11px,1.15vw,14px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 2px 0 rgba(0,0,0,.12);
+    }
+
+    .train-side-content-mode-btn.is-active{
+      background:var(--orange,#f47745);
+      color:#fff;
+    }
+
     .train-match-card-editor .match-text-row{
       display:grid;
       grid-template-columns:minmax(0,1fr) 46px;
@@ -12154,16 +12192,6 @@
       </div>
 
       <div class="train-settings-grid">
-        <div class="choices-config-group">
-          <h4 class="choices-config-group-title">نوع المحتوى</h4>
-          <p class="choices-config-group-note">اختر شكل محتوى العربات والبالونات.</p>
-          <div class="choices-mode-grid train-content-mode-grid" aria-label="نوع محتوى قطار الإجابات">
-            <button class="choices-mode-btn active" data-train-content-type="text" type="button"><strong>نصوص</strong></button>
-            <button class="choices-mode-btn" data-train-content-type="images" type="button"><strong>صور</strong></button>
-            <button class="choices-mode-btn" data-train-content-type="mixed" type="button"><strong>نصوص وصور</strong></button>
-          </div>
-        </div>
-
         <div class="choices-config-group train-inline-setting">
           <div class="train-number-setting">
             <select class="train-number-select" id="trainStagesSelect" aria-label="اختيار عدد المراحل">
@@ -17891,7 +17919,7 @@
   }
 
   function blankMedia(){
-    return {text:"",imageName:"",imageData:""};
+    return {text:"",imageName:"",imageData:"",contentType:"text"};
   }
 
   function createContent(){
@@ -17903,22 +17931,27 @@
     };
   }
 
-  function normalizeMedia(raw){
+  function normalizeMedia(raw,fallbackType = "text"){
+    const rawType = String(raw?.contentType || raw?.type || "");
+    const contentType = ["text","images","mixed"].includes(rawType)
+      ? rawType
+      : (["text","images","mixed"].includes(fallbackType) ? fallbackType : "text");
     return {
       text:String(raw?.text || raw?.label || ""),
       imageName:String(raw?.imageName || raw?.name || ""),
-      imageData:String(raw?.imageData || raw?.image || raw?.data || "")
+      imageData:String(raw?.imageData || raw?.image || raw?.data || ""),
+      contentType
     };
   }
 
-  function normalizeContent(raw,index){
+  function normalizeContent(raw,index,fallbackType = "text"){
     return {
       id:String(raw?.id || raw?.relationId || `train-content-${index + 1}`),
       wagonId:String(raw?.wagonId || raw?.targetWagonId || ""),
       balloonId:String(raw?.balloonId || ""),
       targetWagonId:String(raw?.targetWagonId || raw?.wagonId || ""),
-      wagon:normalizeMedia(raw?.wagon || raw?.car || raw?.answer),
-      balloon:normalizeMedia(raw?.balloon || raw?.question || raw?.item)
+      wagon:normalizeMedia(raw?.wagon || raw?.car || raw?.answer,fallbackType),
+      balloon:normalizeMedia(raw?.balloon || raw?.question || raw?.item,fallbackType)
     };
   }
 
@@ -18041,7 +18074,7 @@
       const rawContents = Array.isArray(payload?.contents)
         ? payload.contents
         : (Array.isArray(payload?.entries) ? payload.entries : []);
-      contents = rawContents.map(normalizeContent);
+      contents = rawContents.map((entry,index)=>normalizeContent(entry,index,contentType));
       if (gameNameInput) gameNameInput.value = String(payload?.name || payload?.gameName || "");
       ensureInitialContents();
       return true;
@@ -18245,6 +18278,45 @@
     return group;
   }
 
+  function createTrainContentModeControl(media,onChange,label){
+    const group = document.createElement("div");
+    group.className = "train-side-content-mode";
+
+    const modeLabel = document.createElement("div");
+    modeLabel.className = "train-side-content-mode-label";
+    modeLabel.textContent = "نوع المحتوى";
+
+    const buttons = document.createElement("div");
+    buttons.className = "train-side-content-mode-buttons";
+    buttons.setAttribute("aria-label",`نوع ${label}`);
+
+    const modes = [
+      ["text","نصوص"],
+      ["images","صور"],
+      ["mixed","نصوص وصور"]
+    ];
+
+    modes.forEach(([value,text])=>{
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "train-side-content-mode-btn";
+      button.textContent = text;
+      button.setAttribute("aria-label",`${label}: ${text}`);
+      button.setAttribute("aria-pressed",String(media.contentType === value));
+      button.classList.toggle("is-active",media.contentType === value);
+      button.addEventListener("click",()=>{
+        if (media.contentType === value) return;
+        media.contentType = value;
+        renderContents();
+        saveDraft();
+      });
+      buttons.appendChild(button);
+    });
+
+    group.append(modeLabel,buttons);
+    return group;
+  }
+
   function createSideEditor(entry,key,title){
     const media = entry[key];
     const side = document.createElement("section");
@@ -18253,9 +18325,9 @@
     const heading = document.createElement("h4");
     heading.className = "match-card-editor-title";
     heading.textContent = title;
-    side.appendChild(heading);
+    side.append(heading,createTrainContentModeControl(media,saveDraft,title));
 
-    if (contentType === "text" || contentType === "mixed") {
+    if (media.contentType === "text" || media.contentType === "mixed") {
       side.appendChild(createTextControl(
         media,
         saveDraft,
@@ -18264,7 +18336,7 @@
       ));
     }
 
-    if (contentType === "images" || contentType === "mixed") {
+    if (media.contentType === "images" || media.contentType === "mixed") {
       side.appendChild(createImageControl(
         media,
         saveDraft,
@@ -18319,8 +18391,11 @@
   }
 
   function sideComplete(media){
-    if (contentType === "text") return Boolean(String(media.text || "").trim());
-    if (contentType === "images") return Boolean(media.imageData);
+    const type = ["text","images","mixed"].includes(media?.contentType)
+      ? media.contentType
+      : contentType;
+    if (type === "text") return Boolean(String(media.text || "").trim());
+    if (type === "images") return Boolean(media.imageData);
     return Boolean(String(media.text || "").trim() && media.imageData);
   }
 
