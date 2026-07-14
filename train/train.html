@@ -457,12 +457,42 @@
       transform:translate3d(0,0,0) scale(1.04);
     }
 
+    /* زر الرجوع مطابق لزر لعبة افتح الصندوق. */
+    .train-back-btn{
+      position:fixed;
+      left:clamp(16px, 2.6vw, 34px);
+      bottom:calc(14px + var(--safe-bottom));
+      z-index:95;
+      height:clamp(34px, 4.8vh, 44px);
+      min-width:clamp(78px, 8vw, 108px);
+      padding:0 clamp(15px, 2vw, 24px);
+      border:2.5px solid #111;
+      border-radius:11px;
+      background:#efd553;
+      color:#111;
+      font-size:clamp(14px, 1.7vw, 19px);
+      font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .train-back-btn:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.20);
+    }
+    .train-page.activity-ended .train-back-btn{visibility:hidden;pointer-events:none}
+
   </style>
   <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
 </head>
 <body>
   <main class="train-page" id="page">
     <svg class="stage" id="stage" viewBox="0 0 1280 720" preserveAspectRatio="none" role="img" aria-label="خلفية وسكة قطار الإجابات"></svg>
+    <button class="train-back-btn" id="backBtn" type="button">رجوع</button>
     <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
       <div class="celebration-card activity-start-card" role="dialog" aria-modal="true" aria-labelledby="startGateTitle">
         <span class="celebration-spark spark-one" aria-hidden="true"></span>
@@ -579,6 +609,7 @@
       move:"../sounds/train-move.wav?v=151",
       levelBell:"../sounds/train-level-bell.mp3",
       whistle:"../sounds/train-whistle.mp3",
+      plane:"../sounds/train-plane.mp3?v=1",
       bounce:"../sounds/train-bounce.mp3",
       balloonPop:BALLOON_POP_AUDIO_DATA,
       correctDrop:"../sounds/train-correct-drop.mp3",
@@ -591,6 +622,7 @@
       move:.34,
       levelBell:.82,
       whistle:.78,
+      plane:.58,
       bounce:.68,
       balloonPop:.78,
       correctDrop:.78,
@@ -1070,6 +1102,10 @@
     return trainAudio.playNamed(name, options);
   }
 
+  function stopTrainSound(name){
+    trainAudio.stopNamed(name);
+  }
+
   function waitForAudioToFinish(audio, fallbackMs = 12000){
     if(!audio || audio.ended) return Promise.resolve();
 
@@ -1129,6 +1165,7 @@
   const trainPage = document.getElementById("page");
   const startGate = document.getElementById("startGate");
   const startGameBtn = document.getElementById("startGameBtn");
+  const backBtn = document.getElementById("backBtn");
   const endCelebration = document.getElementById("endCelebration");
   const endRestartBtn = document.getElementById("endRestartBtn");
   const endHomeBtn = document.getElementById("endHomeBtn");
@@ -1254,6 +1291,12 @@
     }
   }
   startGameBtn?.addEventListener("click",startTrainFromGate);
+  backBtn?.addEventListener("click", event => {
+    event.preventDefault();
+    event.stopPropagation();
+    trainAudio.stopAll();
+    window.location.href = "../index.html";
+  });
 
   // أي صفحة لعبة مستعادة بعد جولة سابقة تُبنى من جديد من نقطة البداية.
   window.addEventListener("pageshow",event=>{
@@ -5799,6 +5842,7 @@
 
   function cancelScorePlaneFlyover(removeLayer = false){
     scorePlaneAnimationToken += 1;
+    stopTrainSound("plane");
 
     if(scorePlaneAnimationFrame){
       cancelAnimationFrame(scorePlaneAnimationFrame);
@@ -5820,6 +5864,7 @@
 
   function startScorePlaneFlyover(score, onComplete){
     cancelScorePlaneFlyover(false);
+    playTrainSound("plane");
     const layer = ensureScorePlaneLayer();
     layer.style.display = "";
     svg.appendChild(layer);
@@ -5877,6 +5922,7 @@
 
       scorePlaneAnimationFrame = 0;
       if(scorePlaneLayer) scorePlaneLayer.style.display = "none";
+      stopTrainSound("plane");
       if(typeof onComplete === "function") onComplete();
     }
 
