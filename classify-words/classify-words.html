@@ -7,49 +7,59 @@
   <style>
     :root{--blue:#4d7bd8;--yellow:#f4d34f;--ink:#171717;--green:#48a868;--red:#ef5b5b}
     *{box-sizing:border-box}
+    html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
     body{margin:0;min-height:100vh;background:#fff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif;color:var(--ink)}
     body.theme-classic{background:#fff}body.theme-classroom{background:#fff9e9}body.theme-sky-clouds{background:#bfeaf8}body.theme-forest{background:#d9f1e2}body.theme-math{background:#f5f4e7}body.theme-english{background:#c8eeee}body.theme-flowers{background:#f8edf3}body.theme-national-day{background:#dcefe9}body.theme-founding-day{background:#e7ddcc}
-    .page{width:min(1480px,100%);min-height:100svh;margin:auto;padding:clamp(58px,7vh,78px) clamp(14px,3vw,44px) 92px;display:flex;flex-direction:column;align-items:center}
+    .page{position:fixed;inset:0;width:100dvw;height:100dvh;min-height:0;margin:0;padding:0;overflow:hidden;--fit-scale:1;--group-columns:2;--groups-max-width:920px;--group-height:clamp(250px,38vh,370px);--word-min-width:clamp(105px,9vw,148px);--word-min-height:clamp(50px,6.3vh,66px);--word-font:clamp(20px,2vw,30px);--word-py:clamp(9px,1vw,13px);--word-px:clamp(19px,1.9vw,30px)}
+    .page[data-group-density="medium"]{--group-height:clamp(205px,29vh,285px)}
+    .page[data-group-density="compact"]{--group-height:clamp(155px,22vh,225px)}
+    .page[data-word-density="medium"]{--word-min-width:clamp(88px,7.5vw,124px);--word-min-height:clamp(44px,5.3vh,56px);--word-font:clamp(18px,1.65vw,25px);--word-py:clamp(7px,.8vw,10px);--word-px:clamp(14px,1.45vw,22px)}
+    .page[data-word-density="compact"]{--word-min-width:clamp(72px,6vw,104px);--word-min-height:clamp(38px,4.7vh,48px);--word-font:clamp(15px,1.35vw,21px);--word-py:clamp(5px,.65vw,8px);--word-px:clamp(10px,1.1vw,17px)}
+    .stage{position:absolute;inset:clamp(72px,8.5vh,88px) clamp(10px,2vw,30px) calc(68px + env(safe-area-inset-bottom)) clamp(10px,2vw,30px);display:flex;align-items:flex-end;justify-content:center;overflow:hidden;direction:ltr}
+    .game-layout{width:100%;max-width:1480px;min-height:100%;display:flex;flex-direction:column;align-items:center;transform:scale(var(--fit-scale));transform-origin:center bottom;will-change:transform;direction:rtl}
     .topbar{display:none}
-    .game-logo{position:fixed;top:10px;left:clamp(12px,2.5vw,34px);width:clamp(76px,9vw,118px);height:auto;z-index:20;object-fit:contain}
+    .game-logo{position:fixed;top:max(5px,env(safe-area-inset-top));left:max(6px,env(safe-area-inset-left));width:clamp(56px,5.2vw,78px);height:auto;z-index:20;object-fit:contain}
     h1{display:none}
     .back-btn,.restart-btn{border:3px solid var(--ink);border-radius:12px;padding:8px 20px;background:var(--yellow);font-size:17px;font-weight:950;cursor:pointer;box-shadow:0 4px 0 rgba(0,0,0,.18)}
     .back-btn:active,.restart-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
     .score{display:none}
-    .groups{width:100%;display:flex;flex-wrap:wrap;justify-content:center;align-items:stretch;align-content:flex-start;gap:clamp(18px,3vw,44px);margin:0 auto;direction:rtl}
-    .group{flex:0 1 clamp(280px,31vw,430px);width:clamp(280px,31vw,430px);min-width:0;min-height:clamp(250px,40vh,390px);background:rgba(255,255,255,.5);border:clamp(3px,.3vw,4px) solid rgba(36,26,67,.72);border-radius:clamp(20px,2vw,30px);box-shadow:0 clamp(5px,.7vw,8px) 0 rgba(36,26,67,.18),0 12px 20px rgba(0,0,0,.10);padding:0 0 clamp(14px,1.8vw,24px);overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}
-    .group.is-over{border-color:#1688d3;transform:translateY(-3px);box-shadow:0 clamp(5px,.7vw,8px) 0 rgba(22,136,211,.28),0 12px 22px rgba(0,0,0,.12)}
+    .groups{width:min(100%,var(--groups-max-width));display:grid;grid-template-columns:repeat(var(--group-columns),minmax(0,1fr));justify-content:center;align-items:stretch;align-content:end;gap:clamp(14px,2.2vw,32px);margin:auto auto 0;direction:rtl}
+    .group{width:100%;min-width:0;min-height:var(--group-height);background:rgba(255,255,255,.5);border:clamp(3px,.3vw,4px) solid rgba(36,26,67,.72);border-radius:clamp(20px,2vw,30px);box-shadow:0 clamp(5px,.7vw,8px) 0 rgba(36,26,67,.18),0 12px 20px rgba(0,0,0,.10);padding:0 0 clamp(12px,1.4vw,20px);overflow:hidden}
+    .group.is-over{border-color:rgba(36,26,67,.72);transform:none;box-shadow:0 clamp(5px,.7vw,8px) 0 rgba(36,26,67,.18),0 12px 20px rgba(0,0,0,.10)}
     .group-title{text-align:center;color:#fff;font-size:clamp(22px,2.5vw,36px);font-weight:1000;line-height:1.2;margin:0 0 clamp(12px,1.6vw,22px);padding:clamp(12px,1.45vw,20px) 12px;border-radius:clamp(16px,1.7vw,25px) clamp(16px,1.7vw,25px) 7px 7px;background:#283c78;min-height:clamp(58px,7.5vh,84px);display:grid;place-items:center}
     .group:nth-child(2) .group-title{background:#704093}.group:nth-child(3) .group-title{background:#9a4b35}.group:nth-child(4) .group-title{background:#256a59}.group:nth-child(5) .group-title{background:#6b4e93}
-    .group-items{display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;align-items:flex-start;gap:clamp(9px,1vw,14px);min-height:clamp(165px,28vh,275px);padding:clamp(10px,1.5vw,20px);border:0;border-radius:0;background:transparent}
-    .word-bank{width:min(1260px,100%);background:transparent;border:0;border-radius:0;padding:0 4px;margin:0 auto clamp(20px,3.2vh,38px)}
+    .group-items{display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;align-items:flex-start;gap:clamp(8px,.9vw,13px);min-height:0;padding:clamp(9px,1.25vw,17px);border:0;border-radius:0;background:transparent}
+    .word-bank{width:min(1320px,100%);flex:0 0 auto;background:transparent;border:0;border-radius:0;padding:0 4px;margin:clamp(7px,1.6vh,16px) auto clamp(30px,5.4vh,64px)}
     .word-bank h2{display:none}
     .words{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:clamp(10px,1.25vw,17px)}
-    .word{flex:0 0 auto;border:clamp(2px,.22vw,3px) solid rgba(36,26,67,.72);border-radius:clamp(11px,1.2vw,18px);background:#3788d8;color:#fff;padding:clamp(9px,1vw,13px) clamp(19px,1.9vw,30px);min-width:clamp(105px,9vw,148px);min-height:clamp(50px,6.3vh,66px);max-width:min(280px,80vw);font-size:clamp(20px,2vw,30px);line-height:1.15;font-weight:900;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:grab;touch-action:none;user-select:none;box-shadow:0 clamp(4px,.55vw,7px) 0 rgba(36,26,67,.30),0 9px 14px rgba(0,0,0,.10)}
+    .word{flex:0 0 auto;border:clamp(2px,.22vw,3px) solid rgba(36,26,67,.72);border-radius:clamp(11px,1.2vw,18px);background:#3788d8;color:#fff;padding:var(--word-py) var(--word-px);min-width:var(--word-min-width);min-height:var(--word-min-height);max-width:min(280px,80vw);font-size:var(--word-font);line-height:1.15;font-weight:900;text-align:center;white-space:normal;overflow-wrap:anywhere;cursor:grab;touch-action:none;user-select:none;box-shadow:0 clamp(4px,.55vw,7px) 0 rgba(36,26,67,.30),0 9px 14px rgba(0,0,0,.10)}
     .word.word-color-0{background:#3788d8}.word.word-color-1{background:#ee7b35}.word.word-color-2{background:#28a66a}.word.word-color-3{background:#9c55c7}
-    .word:active{cursor:grabbing}.word.is-placed{cursor:default}.word.is-wrong{animation:shake .32s;border-color:var(--red)}
+    .word:active{cursor:grabbing}.word.is-placed{cursor:default}.word.is-wrong{animation:none;border-color:rgba(36,26,67,.72)}
     .group .word{cursor:default;opacity:1;filter:none}
     .empty{display:none}
     .drag-ghost{position:fixed;z-index:1000;pointer-events:none;opacity:.96;transform:translate(-50%,-50%) scale(1.04);box-shadow:0 10px 24px rgba(0,0,0,.24)}
     .word.is-drag-source{opacity:.22}
     .page.is-dragging,.page.is-dragging *{user-select:none}
-    .fixed-controls{position:fixed;left:clamp(16px,2.6vw,34px);bottom:clamp(14px,2.4vw,28px);height:auto;background:transparent;z-index:30;padding:0}
+    .fixed-controls{position:fixed;left:max(clamp(16px,2.6vw,34px),env(safe-area-inset-left));bottom:calc(clamp(14px,2.4vw,28px) + env(safe-area-inset-bottom));height:auto;background:transparent;z-index:30;padding:0}
     .fixed-controls .back-btn{position:static}
     .message{display:none}
     .end{position:fixed;inset:0;background:rgba(16,32,58,.78);display:grid;place-items:center;padding:20px;z-index:5}.end[hidden]{display:none}
     .end-card{width:min(390px,92vw);background:#fff;border:4px solid var(--ink);border-radius:28px;padding:28px;text-align:center;box-shadow:0 10px 0 rgba(0,0,0,.22)}
     .trophy{font-size:76px;line-height:1;margin-bottom:8px}.end-card h2{margin:0 0 8px;font-size:32px}.end-card p{font-size:19px;font-weight:800}
     @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-    @media(max-width:760px){.page{padding:58px 10px 78px}.word-bank{margin-bottom:18px}.groups{gap:16px}.group{flex-basis:min(100%,430px);width:min(100%,430px);min-height:205px}.group-items{min-height:120px}.fixed-controls{left:12px;bottom:12px}.fixed-controls .back-btn{height:40px;min-width:82px;font-size:15px;padding:0 14px}}
-    @media(max-height:560px) and (orientation:landscape){.page{padding-top:48px}.word-bank{margin-bottom:14px}.word{min-height:44px;font-size:19px;padding-block:7px}.group{min-height:205px}.group-title{min-height:50px;padding-block:9px}.group-items{min-height:120px;padding:10px}}
+    @media(max-width:760px){.stage{inset:66px 8px calc(62px + env(safe-area-inset-bottom))}.word-bank{margin-top:5px;margin-bottom:24px}.groups{gap:13px}.fixed-controls{left:max(12px,env(safe-area-inset-left));bottom:calc(12px + env(safe-area-inset-bottom))}.fixed-controls .back-btn{height:40px;min-width:82px;font-size:15px;padding:0 14px}}
+    @media(max-height:560px) and (orientation:landscape){.stage{inset:54px 10px calc(58px + env(safe-area-inset-bottom))}.word-bank{margin-top:4px;margin-bottom:22px}.group-title{min-height:46px;padding-block:8px}.group-items{padding:8px}}
   </style>
 </head>
 <body>
   <main class="page" id="page">
     <img class="game-logo" src="../logo.PNG" alt="" onerror="this.style.display='none'">
-    <div class="topbar"></div>
-    <section class="word-bank"><div class="words" id="words"></div></section>
-    <div class="groups" id="groups"></div>
+    <section class="stage" id="stage">
+      <div class="game-layout" id="gameLayout">
+        <section class="word-bank"><div class="words" id="words"></div></section>
+        <div class="groups" id="groups"></div>
+      </div>
+    </section>
   </main>
   <nav class="fixed-controls"><button class="back-btn" id="backBtn" type="button">رجوع</button></nav>
   <section class="end" id="end" hidden><div class="end-card"><div class="trophy">🏆</div><h2>انتهى النشاط</h2><p id="endText"></p><button class="restart-btn" id="restartBtn" type="button">إعادة اللعب</button></div></section>
@@ -69,15 +79,21 @@
     const selectedTheme=String(params.get("theme")||payload?.theme||payload?.selectedTheme||"classic");
     document.body.className=`theme-${allowedThemes.has(selectedTheme)?selectedTheme:"classic"}`;
     const groups=(Array.isArray(payload?.groups)?payload.groups:[]).map((g,i)=>({id:String(g.id||`group-${i+1}`),name:String(g.name||`المجموعة ${i+1}`).trim(),words:(Array.isArray(g.words)?g.words:[]).map((w,j)=>({id:String(w.id||`${i+1}-${j+1}`),text:String(w.text||w.label||w).trim()})).filter(w=>w.text)})).filter(g=>g.words.length);
-    const groupsNode=document.getElementById("groups"), wordsNode=document.getElementById("words"), endNode=document.getElementById("end"), endText=document.getElementById("endText");
+    const page=document.getElementById("page"),stage=document.getElementById("stage"),gameLayout=document.getElementById("gameLayout"),groupsNode=document.getElementById("groups"),wordsNode=document.getElementById("words"),endNode=document.getElementById("end"),endText=document.getElementById("endText");
     let total=groups.reduce((n,g)=>n+g.words.length,0), placed=0, finished=false;
+    let layoutFrame=0;
     const wordGroup=new Map(); groups.forEach(g=>g.words.forEach(w=>wordGroup.set(w.id,g.id)));
     function update(){if(total&&placed===total&&!finished){finished=true;endText.textContent=`أحسنت! صنّفت ${total} كلمات بشكل صحيح.`;setTimeout(()=>endNode.hidden=false,280)}}
-    function place(word,group){if(word.dataset.placed)return;const expected=wordGroup.get(word.dataset.id);if(expected!==group.dataset.id){word.classList.remove("is-wrong");void word.offsetWidth;word.classList.add("is-wrong");return}word.dataset.placed="1";word.classList.add("is-placed");group.querySelector(".group-items").appendChild(word);placed++;update()}
+    function place(word,group){if(word.dataset.placed)return;const expected=wordGroup.get(word.dataset.id);if(expected!==group.dataset.id)return;word.dataset.placed="1";word.classList.add("is-placed");group.querySelector(".group-items").appendChild(word);placed++;scheduleLayout();update()}
     let wordColorIndex=0;
     function makeWord(w){const b=document.createElement("button");b.type="button";b.className=`word word-color-${wordColorIndex++%4}`;b.textContent=w.text;b.dataset.id=w.id;b.draggable=true;b.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",w.id));return b}
-    groups.forEach(g=>{const box=document.createElement("section");box.className="group";box.dataset.id=g.id;const title=document.createElement("h2");title.className="group-title";title.textContent=g.name;const items=document.createElement("div");items.className="group-items";box.append(title,items);box.addEventListener("dragover",e=>{e.preventDefault();box.classList.add("is-over")});box.addEventListener("dragleave",()=>box.classList.remove("is-over"));box.addEventListener("drop",e=>{e.preventDefault();box.classList.remove("is-over");const w=wordsNode.querySelector(`[data-id="${CSS.escape(e.dataTransfer.getData("text/plain"))}"]`);if(w)place(w,box)});groupsNode.appendChild(box)});
+    groups.forEach(g=>{const box=document.createElement("section");box.className="group";box.dataset.id=g.id;const title=document.createElement("h2");title.className="group-title";title.textContent=g.name;const items=document.createElement("div");items.className="group-items";box.append(title,items);box.addEventListener("dragover",e=>e.preventDefault());box.addEventListener("drop",e=>{e.preventDefault();const w=wordsNode.querySelector(`[data-id="${CSS.escape(e.dataTransfer.getData("text/plain"))}"]`);if(w)place(w,box)});groupsNode.appendChild(box)});
     groups.forEach(g=>g.words.forEach(w=>wordsNode.appendChild(makeWord(w))));
+    function viewportSize(){const viewport=window.visualViewport;return {width:Math.max(280,Number(viewport?.width)||document.documentElement.clientWidth||window.innerWidth||280),height:Math.max(260,Number(viewport?.height)||document.documentElement.clientHeight||window.innerHeight||260)}}
+    function chooseColumns(count,width,height){if(count<=1)return 1;if(width<560)return 1;const wide=width/height>=1.45;if(wide){if(count<=4)return count;if(count<=6)return 3;if(count<=8)return 4;return Math.min(5,Math.ceil(count/2))}if(count<=2)return 2;if(count<=4)return 2;if(count<=6)return 3;return Math.min(4,Math.ceil(count/2))}
+    function configureLayout(){const view=viewportSize(),count=Math.max(1,groups.length),columns=Math.min(count,chooseColumns(count,view.width,view.height));page.dataset.groupDensity=count<=2?"roomy":count<=4?"medium":"compact";page.dataset.wordDensity=total<=9?"roomy":total<=14?"medium":"compact";page.style.setProperty("--group-columns",String(columns));const cardWidth=count<=2?440:count<=4?355:300;const gap=32;groupsNode.style.setProperty("--groups-max-width",`${Math.min(1480,columns*cardWidth+Math.max(0,columns-1)*gap)}px`);scheduleLayout()}
+    function fitLayout(){page.style.setProperty("--fit-scale","1");const availableWidth=Math.max(1,stage.clientWidth),availableHeight=Math.max(1,stage.clientHeight),contentWidth=Math.max(1,gameLayout.scrollWidth),contentHeight=Math.max(1,gameLayout.scrollHeight);const scale=Math.max(.44,Math.min(1,(availableWidth-2)/contentWidth,(availableHeight-2)/contentHeight));page.style.setProperty("--fit-scale",scale.toFixed(4))}
+    function scheduleLayout(){cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(()=>requestAnimationFrame(fitLayout))}
     wordsNode.addEventListener("pointerdown",e=>{
       const word=e.target.closest(".word");
       if(!word||word.dataset.placed||e.button>0)return;
@@ -85,13 +101,16 @@
       const rect=word.getBoundingClientRect();
       const startX=e.clientX,startY=e.clientY; let dragging=false,ghost=null;
       let over=null;
-      const move=ev=>{if(!dragging){if(Math.hypot(ev.clientX-startX,ev.clientY-startY)<5)return;dragging=true;ghost=word.cloneNode(true);ghost.classList.add("drag-ghost");ghost.removeAttribute("data-placed");ghost.style.width=`${rect.width}px`;ghost.style.height=`${rect.height}px`;document.body.appendChild(ghost);word.classList.add("is-drag-source");document.getElementById("page").classList.add("is-dragging")}ghost.style.left=`${ev.clientX}px`;ghost.style.top=`${ev.clientY}px`;const hit=document.elementFromPoint(ev.clientX,ev.clientY)?.closest(".group");if(over!==hit){over?.classList.remove("is-over");over=hit;over?.classList.add("is-over")}if(ev.cancelable)ev.preventDefault()};
-      const finish=ev=>{window.removeEventListener("pointermove",move,true);window.removeEventListener("pointerup",finish,true);if(!dragging)return;over?.classList.remove("is-over");ghost?.remove();word.classList.remove("is-drag-source");document.getElementById("page").classList.remove("is-dragging");if(over)place(word,over)};
+      const move=ev=>{if(!dragging){if(Math.hypot(ev.clientX-startX,ev.clientY-startY)<5)return;dragging=true;ghost=word.cloneNode(true);ghost.classList.add("drag-ghost");ghost.removeAttribute("data-placed");ghost.style.width=`${rect.width}px`;ghost.style.height=`${rect.height}px`;document.body.appendChild(ghost);word.classList.add("is-drag-source");page.classList.add("is-dragging")}ghost.style.left=`${ev.clientX}px`;ghost.style.top=`${ev.clientY}px`;over=document.elementFromPoint(ev.clientX,ev.clientY)?.closest(".group")||null;if(ev.cancelable)ev.preventDefault()};
+      const finish=ev=>{window.removeEventListener("pointermove",move,true);window.removeEventListener("pointerup",finish,true);if(!dragging)return;ghost?.remove();word.classList.remove("is-drag-source");page.classList.remove("is-dragging");if(over)place(word,over)};
       window.addEventListener("pointermove",move,{capture:true,passive:false});window.addEventListener("pointerup",finish,{capture:true,passive:false});
       try{word.setPointerCapture?.(e.pointerId)}catch(_){ }
     });
     document.getElementById("backBtn").onclick=()=>{try{if(history.length>1){history.back();return}}catch(_){}location.href="../index.html"};document.getElementById("restartBtn").onclick=()=>location.reload();
-    update();
+    window.addEventListener("resize",configureLayout,{passive:true});
+    if(window.visualViewport){window.visualViewport.addEventListener("resize",configureLayout,{passive:true});window.visualViewport.addEventListener("scroll",scheduleLayout,{passive:true})}
+    document.fonts?.ready?.then(scheduleLayout).catch(()=>{});
+    configureLayout();update();
   })();
   </script>
 </body>
