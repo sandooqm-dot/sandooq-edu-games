@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: fill-v5-independent-word-completion -->
+  <!-- version: fill-v6-bidi-numeric-math -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3674,6 +3674,31 @@
       unicode-bidi:plaintext;
     }
 
+    .question-text.is-math-question{
+      display:flex !important;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      align-content:center;
+      gap:.16em .5em;
+      width:100% !important;
+      max-width:100% !important;
+      unicode-bidi:isolate;
+    }
+
+    .fill-math-expression{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      direction:ltr;
+      unicode-bidi:isolate;
+      white-space:nowrap;
+    }
+
+    .fill-math-expression .fill-letter-slots{
+      margin-inline:.09em;
+    }
+
     /* fill-v2: خانات الحروف داخل موضع الفراغ، وبنك الحروف أسفل السؤال. */
     .question-view.is-letter-mode{
       justify-content:flex-start;
@@ -5879,8 +5904,85 @@
       return result;
     }
 
+    function isNumericMathText(value){
+      const text = String(value || "").trim();
+      return Boolean(
+        text &&
+        /[0-9٠-٩۰-۹]/u.test(text) &&
+        /^[0-9٠-٩۰-۹\s+\-−–—=×÷*\/().,،٫٬%٪…_]+$/u.test(text)
+      );
+    }
+
+    function isNumericMathQuestion(value){
+      const text = String(value || "").trim();
+      return isNumericMathText(text);
+    }
+
     function letterWordDirection(word){
-      return /[A-Za-z]/u.test(String(word || "")) ? "ltr" : "rtl";
+      const value = String(word || "");
+      return /[A-Za-z]/u.test(value) || isNumericMathText(value) ? "ltr" : "rtl";
+    }
+
+    function applyBidiValueDirection(element,value){
+      if (!element) return;
+      const text = String(value || "");
+      const direction = currentContentLanguage === "en" || isNumericMathText(text)
+        ? "ltr"
+        : "rtl";
+      element.textContent = text;
+      element.setAttribute("dir",direction);
+      element.style.direction = direction;
+      element.style.unicodeBidi = "plaintext";
+    }
+
+    function appendMathTextGroups(element,value){
+      const text = String(value || "");
+      const markerPattern = /…+|\.{3,}/gu;
+      let cursor = 0;
+      let foundMarker = false;
+
+      for (const marker of text.matchAll(markerPattern)) {
+        foundMarker = true;
+        const group = document.createElement("span");
+        group.className = "fill-math-expression";
+        group.setAttribute("dir","ltr");
+        group.textContent = text.slice(cursor,marker.index).trim() + marker[0];
+        element.appendChild(group);
+        cursor = marker.index + marker[0].length;
+      }
+
+      const trailing = text.slice(cursor).trim();
+      if (trailing) {
+        const group = document.createElement("span");
+        group.className = "fill-math-expression";
+        group.setAttribute("dir","ltr");
+        group.textContent = trailing;
+        element.appendChild(group);
+      }
+
+      if (!foundMarker && !trailing) {
+        const group = document.createElement("span");
+        group.className = "fill-math-expression";
+        group.setAttribute("dir","ltr");
+        group.textContent = text;
+        element.appendChild(group);
+      }
+    }
+
+    function renderBidiQuestionText(element,value){
+      if (!element) return;
+      const text = String(value || "");
+      const languageDirection = currentContentLanguage === "en" ? "ltr" : "rtl";
+      element.classList.toggle("is-math-question",isNumericMathQuestion(text));
+      element.setAttribute("dir",languageDirection);
+      element.style.direction = languageDirection;
+      element.style.unicodeBidi = "isolate";
+      element.textContent = "";
+      if (isNumericMathQuestion(text)) {
+        appendMathTextGroups(element,text);
+      } else {
+        element.textContent = text;
+      }
     }
 
     function createLetterQuestionState(item,index){
@@ -6371,31 +6473,69 @@
 
       const questionText = String(item.questionText || "");
       const markerPattern = /…+|\.{3,}/gu;
+      const mathQuestion = isNumericMathQuestion(questionText);
+      const languageDirection = currentContentLanguage === "en" ? "ltr" : "rtl";
+      text.classList.toggle("is-math-question",mathQuestion);
+      text.setAttribute("dir",languageDirection);
+      text.style.direction = languageDirection;
+      text.style.unicodeBidi = "isolate";
       let cursor = 0;
       let wordIndex = 0;
       for (const marker of questionText.matchAll(markerPattern)) {
         if (wordIndex >= state.wordRanges.length) break;
-        if (marker.index > cursor) {
+        const expression = mathQuestion ? document.createElement("span") : null;
+        if (expression) {
+          expression.className = "fill-math-expression";
+          expression.setAttribute("dir","ltr");
+          expression.appendChild(
+            document.createTextNode(questionText.slice(cursor,marker.index).trim())
+          );
+        } else if (marker.index > cursor) {
           text.appendChild(document.createTextNode(questionText.slice(cursor,marker.index)));
         }
         const slots = document.createElement("span");
         slots.className = "fill-letter-slots";
         slots.dataset.fillWordIndex = String(wordIndex);
         slots.setAttribute("aria-label",`فراغ الإجابة ${wordIndex + 1}`);
-        text.appendChild(slots);
+        if (expression) {
+          expression.appendChild(slots);
+          text.appendChild(expression);
+        } else {
+          text.appendChild(slots);
+        }
         cursor = marker.index + marker[0].length;
         wordIndex += 1;
       }
       if (cursor < questionText.length) {
-        text.appendChild(document.createTextNode(questionText.slice(cursor)));
+        const trailingText = questionText.slice(cursor);
+        if (mathQuestion && trailingText.trim()) {
+          const trailing = document.createElement("span");
+          trailing.className = "fill-math-expression";
+          trailing.setAttribute("dir","ltr");
+          trailing.textContent = trailingText.trim();
+          text.appendChild(trailing);
+        } else {
+          text.appendChild(document.createTextNode(trailingText));
+        }
       }
       while (wordIndex < state.wordRanges.length) {
-        text.appendChild(document.createTextNode(" "));
+        const expression = mathQuestion ? document.createElement("span") : null;
+        if (expression) {
+          expression.className = "fill-math-expression";
+          expression.setAttribute("dir","ltr");
+        } else {
+          text.appendChild(document.createTextNode(" "));
+        }
         const slots = document.createElement("span");
         slots.className = "fill-letter-slots";
         slots.dataset.fillWordIndex = String(wordIndex);
         slots.setAttribute("aria-label",`فراغ الإجابة ${wordIndex + 1}`);
-        text.appendChild(slots);
+        if (expression) {
+          expression.appendChild(slots);
+          text.appendChild(expression);
+        } else {
+          text.appendChild(slots);
+        }
         wordIndex += 1;
       }
 
@@ -6497,7 +6637,7 @@
         const text = document.createElement("div");
         text.className = "question-text";
         text.dataset.fitText = "question";
-        text.textContent = item.questionText;
+        renderBidiQuestionText(text,item.questionText);
         fitZone.appendChild(text);
         questionCard.appendChild(fitZone);
       }
@@ -6528,7 +6668,7 @@
           const text = document.createElement("span");
           text.className = "choice-text";
           text.dataset.fitText = "choice";
-          text.textContent = choice.text;
+          applyBidiValueDirection(text,choice.text);
           fitZone.appendChild(text);
           button.appendChild(fitZone);
         }

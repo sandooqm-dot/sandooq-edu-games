@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v78-train-disabled-features-persistence -->
+<!-- version: index-v79-fill-bidi-numeric-math -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -16641,6 +16641,26 @@
     return match ? match[0] : "";
   }
 
+  function isFillNumericMathText(value){
+    const text = String(value || "").trim();
+    return Boolean(
+      text &&
+      /[0-9٠-٩۰-۹]/u.test(text) &&
+      /^[0-9٠-٩۰-۹\s+\-−–—=×÷*\/().,،٫٬%٪…_]+$/u.test(text)
+    );
+  }
+
+  function applyFillFieldDirection(field,value = field?.value){
+    if (!field) return;
+    const numericMath = isFillNumericMathText(value);
+    const direction = fillContentLanguage === "en" || numericMath ? "ltr" : "rtl";
+    field.dir = direction;
+    field.style.direction = direction;
+    field.style.textAlign = fillContentLanguage === "en" ? "left" : "right";
+    field.style.unicodeBidi = "plaintext";
+    field.dataset.numericMath = numericMath ? "true" : "false";
+  }
+
   function normalizeFillHex(value,fallback){
     const raw = String(value || "").trim();
     return /^#[0-9a-f]{6}$/i.test(raw) ? raw.toUpperCase() : fallback;
@@ -16733,6 +16753,7 @@
 
     const nextValue = value.slice(0,position) + blank + value.slice(position);
     input.value = nextValue;
+    applyFillFieldDirection(input,nextValue);
     if (persist) question.questionText = nextValue;
     try {
       input.focus({preventScroll:true});
@@ -16980,6 +17001,9 @@
 
     fillTextEditorTextarea = document.createElement("textarea");
     fillTextEditorTextarea.className = "quiz-text-editor-textarea";
+    fillTextEditorTextarea.addEventListener("input",()=>{
+      applyFillFieldDirection(fillTextEditorTextarea);
+    });
 
     const saveButton = document.createElement("button");
     saveButton.type = "button";
@@ -17049,8 +17073,7 @@
     fillTextEditorTextarea.maxLength = maxLength;
     fillTextEditorTextarea.value = String(value || "");
     fillTextEditorTextarea.placeholder = String(placeholder || "");
-    fillTextEditorTextarea.dir = fillContentLanguage === "en" ? "ltr" : "rtl";
-    fillTextEditorTextarea.style.textAlign = fillContentLanguage === "en" ? "left" : "right";
+    applyFillFieldDirection(fillTextEditorTextarea);
     fillTextEditorSaveHandler = onSave;
     fillTextEditorBlankQuestionIndex = Number.isInteger(blankQuestionIndex)
       ? blankQuestionIndex
@@ -17417,9 +17440,10 @@
       questionInput.maxLength = 220;
       questionInput.placeholder = "اكتب السؤال هنا";
       questionInput.value = question.questionText || "";
-      questionInput.dir = fillContentLanguage === "en" ? "ltr" : "rtl";
+      applyFillFieldDirection(questionInput);
 
       questionInput.addEventListener("input",()=>{
+        applyFillFieldDirection(questionInput);
         fillQuestions[questionIndex].questionText = questionInput.value;
         saveFillDraft();
       });
@@ -17431,6 +17455,7 @@
         placeholder:"اكتب السؤال هنا..",
         onSave:(value)=>{
           questionInput.value = value;
+          applyFillFieldDirection(questionInput,value);
           fillQuestions[questionIndex].questionText = value;
           saveFillDraft();
         },
@@ -17466,7 +17491,7 @@
           wordInput.spellcheck = false;
           wordInput.placeholder = "اكتب كلمة واحدة";
           wordInput.value = normalizeFillSingleWord(word);
-          wordInput.dir = fillContentLanguage === "en" ? "ltr" : "rtl";
+          applyFillFieldDirection(wordInput);
 
           wordInput.addEventListener("beforeinput",(event)=>{
             if (event.inputType === "insertText" && /\s/u.test(String(event.data || ""))) {
@@ -17481,12 +17506,14 @@
           wordInput.addEventListener("input",()=>{
             const normalized = normalizeFillSingleWord(wordInput.value);
             if (wordInput.value !== normalized) wordInput.value = normalized;
+            applyFillFieldDirection(wordInput,normalized);
             const target = fillQuestions[questionIndex];
             target.letterWords = getFillLetterWords(target);
             target.letterWords[wordIndex] = normalized;
             target.letterWord = target.letterWords[0] || "";
             syncFillQuestionBlank(target);
             questionInput.value = target.questionText;
+            applyFillFieldDirection(questionInput,target.questionText);
             saveFillDraft();
           });
 
@@ -17564,13 +17591,16 @@
           input.maxLength = 100;
           input.placeholder = `الخيار ${choiceIndex + 1}`;
           input.value = choice.text || "";
+          applyFillFieldDirection(input);
 
           input.addEventListener("input",()=>{
+            applyFillFieldDirection(input);
             const targetQuestion = fillQuestions[questionIndex];
             targetQuestion.choices[choiceIndex].text = input.value;
             if (targetQuestion.correctChoiceIndex === choiceIndex) {
               syncFillQuestionBlank(targetQuestion);
               questionInput.value = targetQuestion.questionText;
+              applyFillFieldDirection(questionInput,targetQuestion.questionText);
             }
             saveFillDraft();
           });
@@ -17582,11 +17612,13 @@
             placeholder:"اكتب الاختيار هنا..",
             onSave:(value)=>{
               input.value = value;
+              applyFillFieldDirection(input,value);
               const targetQuestion = fillQuestions[questionIndex];
               targetQuestion.choices[choiceIndex].text = value;
               if (targetQuestion.correctChoiceIndex === choiceIndex) {
                 syncFillQuestionBlank(targetQuestion);
                 questionInput.value = targetQuestion.questionText;
+                applyFillFieldDirection(questionInput,targetQuestion.questionText);
               }
               saveFillDraft();
             }
