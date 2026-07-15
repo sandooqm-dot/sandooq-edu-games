@@ -1,7 +1,7 @@
 <!doctype html>
+<!-- version: classify-words-v11 -->
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: classify-words-11 -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <title>صنّف الكلمات</title>
@@ -112,31 +112,23 @@
     const page=document.getElementById("page"),themeBackground=page.querySelector(".theme-background"),stage=document.getElementById("stage"),gameLayout=document.getElementById("gameLayout"),groupsNode=document.getElementById("groups"),wordsNode=document.getElementById("words"),startGate=document.getElementById("startGate"),startBtn=document.getElementById("startBtn"),finishView=document.getElementById("finishView"),finishTitle=document.getElementById("finishTitle"),finishSubtitle=document.getElementById("finishSubtitle"),fixedControls=page.querySelector(".fixed-controls"),backBtn=document.getElementById("backBtn"),restartBtn=document.getElementById("restartBtn"),homeBtn=document.getElementById("homeBtn");
     const parse=value=>{try{const parsed=typeof value==="string"?JSON.parse(value):value;return parsed&&typeof parsed==="object"?parsed:null}catch(_){return null}};
     function readPayloadFromDb(key){if(!("indexedDB" in window))return Promise.resolve(null);return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(null);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readonly"),get=tx.objectStore("payloads").get(key);get.onsuccess=()=>resolve(get.result?.payload||null);get.onerror=()=>resolve(null);tx.oncomplete=tx.onerror=tx.onabort=()=>db.close()}catch(_){db.close();resolve(null)}}})}
-    function readStoragePayload(store,key){try{return parse(store.getItem(key))}catch(_){return null}}
     async function readPayload(){
       const stores=[sessionStorage,localStorage];
       if(payloadId){
         const exactKey=`${KEY}_${payloadId}`;
         for(const store of stores){
-          const exact=readStoragePayload(store,exactKey);
-          if(exact)return exact;
+          try{const value=parse(store.getItem(exactKey));if(value)return value}catch(_){}
         }
-
-        const exactDb=await readPayloadFromDb(`classify-words:${payloadId}`);
-        if(exactDb)return exactDb;
-
+        const exactStored=await readPayloadFromDb(`classify-words:${payloadId}`);
+        if(exactStored)return exactStored;
         for(const store of stores){
-          const fallback=readStoragePayload(store,KEY);
-          if(fallback&&String(fallback.payloadId||"")===payloadId)return fallback;
+          try{const value=parse(store.getItem(KEY));if(value?.payloadId===payloadId)return value}catch(_){}
         }
-
-        const latest=await readPayloadFromDb("classify-words:latest");
-        return latest&&String(latest.payloadId||"")===payloadId?latest:null;
+        const latestStored=await readPayloadFromDb("classify-words:latest");
+        return latestStored?.payloadId===payloadId?latestStored:null;
       }
-
       for(const store of stores){
-        const fallback=readStoragePayload(store,KEY);
-        if(fallback)return fallback;
+        try{const value=parse(store.getItem(KEY));if(value)return value}catch(_){}
       }
       return readPayloadFromDb("classify-words:latest");
     }
