@@ -10602,35 +10602,6 @@
       display:none !important;
     }
 
-    /* معاينة لعبة صنّف الكلمات وصورة الثيم الكلاسيكي الخاصة بها. */
-    .template-cover.classify-words-cover{
-      background-color:#fff !important;
-      background-image:url("classify-words/classify-words-preview.webp?v=1") !important;
-      background-position:center !important;
-      background-size:contain !important;
-      background-repeat:no-repeat !important;
-    }
-
-    .template-cover.classify-words-cover::before,
-    .template-cover.classify-words-cover::after{
-      display:none !important;
-      content:none !important;
-    }
-
-    #classifyWordsSetupScreen .theme-art.classic{
-      background-color:#fff !important;
-      background-image:url("classify-words/classify-words-preview.webp?v=1") !important;
-      background-position:center !important;
-      background-size:contain !important;
-      background-repeat:no-repeat !important;
-    }
-
-    #classifyWordsSetupScreen .theme-art.classic::before,
-    #classifyWordsSetupScreen .theme-art.classic::after{
-      display:none !important;
-      content:none !important;
-    }
-
 
     /* إعدادات المؤقت والمحاولات في قطار الإجابات */
     .train-advanced-time-row,
@@ -11300,18 +11271,6 @@
       font-size:20px;
     }
 
-    .classify-groups-editor{display:grid;gap:14px}
-    .classify-group-card{border:3px solid var(--ink);border-radius:20px;background:#fff;padding:15px;box-shadow:0 5px 0 rgba(0,0,0,.1);display:grid;gap:10px}
-    .classify-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .classify-group-name,.classify-word-input{width:100%;border:2px solid var(--ink);border-radius:12px;background:#fff;min-height:44px;padding:8px 12px;text-align:center;font-size:17px;font-weight:850;outline:none}
-    .classify-group-name{font-size:20px;font-weight:950}
-    .classify-words-list{display:grid;gap:8px}
-    .classify-word-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
-    .classify-remove{min-width:70px;min-height:40px;border:2px solid var(--ink);border-radius:11px;background:#f05d5b;color:#fff;font-weight:950;cursor:pointer}
-    .classify-add-word{justify-self:center;border:2px solid var(--ink);border-radius:11px;background:#eaf1ff;color:#204eac;padding:7px 14px;font-weight:900;cursor:pointer}
-    .classify-add-word:disabled,.classify-remove:disabled,#addClassifyGroupBtn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.2)}
-    #classifyLimitsStatus{margin-inline-start:auto;font-weight:900;color:#3159a8;white-space:nowrap}
-
     @media(max-width:900px){
       .train-settings-grid{
         grid-template-columns:1fr;
@@ -11625,13 +11584,6 @@
 <div class="template-content">
 <h3 class="template-title">قطار الإجابات</h3>
 <p class="template-desc">أسقط محتوى البالون داخل عربة الإجابة الصحيحة.</p>
-</div>
-</button>
-<button class="template-card" data-template="classify-words" type="button">
-<div aria-hidden="true" class="template-cover classify-words-cover"></div>
-<div class="template-content">
-<h3 class="template-title">صنّف الكلمات</h3>
-<p class="template-desc">اسحب كل كلمة إلى مجموعتها الصحيحة.</p>
 </div>
 </button>
 </div>
@@ -12356,76 +12308,6 @@
   </div>
 </section>
 
-<section class="choices-setup" id="classifyWordsSetupScreen">
-  <div class="game-name-panel">
-    <div class="game-name-head"><span class="game-name-title">ادخل اسم اللعبة</span><span class="game-name-note">سيتم حفظ اللعبة في الألعاب المحفوظة بهذا الاسم</span></div>
-    <input class="game-name-input" id="classifyWordsGameNameInput" maxlength="60" placeholder="اكتب اسم اللعبة هنا.." type="text"/>
-  </div>
-  <div class="choices-setup-body">
-    <section class="choices-section choices-theme-section">
-      <div class="choices-theme-current">
-        <div class="choices-theme-title-wrap"><h3 class="choices-section-title">اختر ثيم اللعبة</h3></div>
-        <button class="choices-theme-change" id="toggleClassifyThemeListBtn" type="button">تغيير</button>
-        <span aria-hidden="true" class="choices-theme-preview theme-art classic" id="classifyCurrentThemePreview"></span>
-      </div>
-      <div class="choices-theme-list" hidden id="classifyThemeListPanel">
-        <div class="choices-theme-card active" data-classify-theme="classic"><span class="theme-art classic"></span><span class="choices-theme-name">كلاسيكي</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="classroom"><span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="sky-clouds"><span class="theme-art sky-clouds"></span><span class="choices-theme-name">سماء وغيوم</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="forest"><span class="theme-art forest"></span><span class="choices-theme-name">غابة</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="math"><span class="theme-art math"></span><span class="choices-theme-name">رياضيات</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="english"><span class="theme-art english"></span><span class="choices-theme-name">إنجليزي</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="flowers"><span class="theme-art flowers"></span><span class="choices-theme-name">أزهار وورود</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="national-day"><span class="theme-art national-day"></span><span class="choices-theme-name">اليوم الوطني</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="founding-day"><span class="theme-art founding-day"></span><span class="choices-theme-name">يوم التأسيس</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-      </div>
-    </section>
-
-    <section class="choices-section">
-      <div class="choices-section-head"><h3 class="choices-section-title">إعدادات طريقة اللعب</h3></div>
-      <div class="choices-config-grid">
-        <div class="choices-config-group">
-          <h4 class="choices-config-group-title">لغة المحتوى</h4>
-          <div class="choices-mode-grid" aria-label="لغة محتوى لعبة صنّف الكلمات">
-            <button class="choices-mode-btn active" data-classify-language="ar" type="button"><strong>العربية</strong></button>
-            <button class="choices-mode-btn" data-classify-language="en" type="button"><strong>الإنجليزية</strong></button>
-          </div>
-        </div>
-      </div>
-
-      <button class="choices-advanced-toggle" id="classifyAdvancedToggleBtn" type="button" aria-expanded="false">
-        <span>⚙ الإعدادات المتقدمة</span>
-        <span class="choices-advanced-action" aria-hidden="true"><span class="choices-advanced-arrow">▼</span><span class="choices-advanced-action-text" id="classifyAdvancedActionText">عرض</span></span>
-      </button>
-      <div class="choices-advanced-panel" id="classifyAdvancedPanel" aria-hidden="true">
-        <div class="choices-advanced-inner">
-          <div class="choices-advanced-row">
-            <div class="choices-advanced-label"><strong>أصوات اللعبة</strong></div>
-            <button class="quiz-sound-toggle is-on" id="classifySoundToggleBtn" type="button" aria-pressed="true" aria-label="إيقاف أصوات اللعبة"><span>×</span><span>✓</span></button>
-          </div>
-          <div class="choices-advanced-row">
-            <label class="choices-advanced-label" for="classifyFontSelect"><strong>نوع الخط</strong></label>
-            <select class="quiz-font-select" id="classifyFontSelect">
-              <option value="cairo">كايرو</option>
-              <option value="tajawal">تجوال</option>
-              <option value="noto-kufi">نوتو كوفي</option>
-              <option value="noto-naskh" selected>نوتو نسخ</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="choices-section">
-      <div class="choices-section-head"><h3 class="choices-section-title">مجموعات اللعبة</h3><span class="choices-config-group-note" id="classifyLimitsStatus">مجموعتان • 0/36 كلمة</span></div>
-      <p class="choices-config-group-note">الحد الأقصى 4 مجموعات و36 كلمة في اللعبة.</p>
-      <div id="classifyWordsGroupsEditor" class="classify-groups-editor"></div>
-      <button class="train-add-content" id="addClassifyGroupBtn" type="button"><span>＋</span><span>إضافة مجموعة</span></button>
-    </section>
-    <div class="choices-actions"><button class="choices-test-btn" id="testClassifyWordsBtn" type="button">اختبار اللعبة</button><button class="choices-save-btn" id="saveClassifyWordsBtn" type="button">حفظ اللعبة</button></div>
-  </div>
-</section>
-
 
 <div class="match-color-modal" id="matchColorModal" hidden aria-hidden="true">
   <div class="match-color-backdrop" data-match-color-close></div>
@@ -12624,8 +12506,7 @@
     quiz:"الاختيارات",
     match:"المطابقة",
     order:"الترتيب",
-    train:"قطار الإجابات",
-    "classify-words":"صنّف الكلمات"
+    train:"قطار الإجابات"
   };
 
   const TYPE_CONFIG = {
@@ -12634,8 +12515,7 @@
     quiz:{ page:"choices.html", payloadKey:"sandooq_quiz_payload_v1", draftKey:"sandooq_quiz_draft_v2", hash:"#choicesSetup", dbPrefix:"quiz" },
     match:{ page:"match.html", payloadKey:"sandooq_match_payload_v1", draftKey:"sandooq_match_draft_v1", hash:"#matchSetup", dbPrefix:"match" },
     order:{ page:"order.html", payloadKey:"sandooq_order_payload_v1", draftKey:"sandooq_order_draft_v1", hash:"#orderSetup", dbPrefix:"order" },
-    train:{ page:"train/train.html", payloadKey:"sandooq_train_payload_v1", draftKey:"sandooq_train_draft_v1", hash:"#trainSetup", dbPrefix:"train" },
-    "classify-words":{ page:"classify-words/classify-words.html", payloadKey:"sandooq_classify_words_payload_v1", draftKey:"sandooq_classify_words_draft_v1", hash:"#classifyWordsSetup", dbPrefix:"classify-words" }
+    train:{ page:"train/train.html", payloadKey:"sandooq_train_payload_v1", draftKey:"sandooq_train_draft_v1", hash:"#trainSetup", dbPrefix:"train" }
   };
 
   let saving = false;
@@ -12881,33 +12761,17 @@
         sessionStorage.removeItem(config.payloadKey);
         sessionStorage.setItem(`${config.payloadKey}_${runtimeId}`,JSON.stringify(payload));
         sessionStorage.setItem(config.payloadKey,JSON.stringify(payload));
-        if(gameType === "train"){
-          sessionStorage.setItem("sandooq_train_contents_v2",JSON.stringify({
-            payloadId:runtimeId,
-            contents:payload.contents,
-            entries:payload.entries
-          }));
-        }
       } catch (_) {
         /* IndexedDB هو المصدر الأساسي عند كبر الصور. */
-      }
-      if(gameType === "train"){
-        try{
-          localStorage.setItem("sandooq_train_contents_v2",JSON.stringify({
-            payloadId:runtimeId,
-            contents:payload.contents,
-            entries:payload.entries
-          }));
-        }catch(_){ }
       }
       await writePayload(`${config.dbPrefix}:${runtimeId}`,payload);
 
       const url = new URL(config.page,window.location.href);
       url.searchParams.set("payloadId",runtimeId);
       url.searchParams.set("theme",String(payload.theme || payload.selectedTheme || "classic"));
-      if (["open-box","classify-words"].includes(gameType)) url.searchParams.set("intro","1");
+      if (gameType === "open-box") url.searchParams.set("intro","1");
       if (gameType === "quiz") url.searchParams.set("mode",String(payload.displayMode || "direct"));
-      if (["quiz","match","order","train","classify-words"].includes(gameType)) url.searchParams.set("return","index.html");
+      if (["quiz","match","order","train"].includes(gameType)) url.searchParams.set("return","index.html");
       url.searchParams.set("v",String(Date.now()));
       window.location.href = `${url.pathname}${url.search}`;
     } catch (error) {
@@ -13402,8 +13266,8 @@
   const OPEN_BOX_PAGE_URL = "open-box.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
-  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "classifyWordsSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
-  const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "classifyWordsSetupScreen"]);
+  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen"]);
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
   const wheelItemsEditor = document.getElementById("wheelItemsEditor");
@@ -17999,7 +17863,6 @@
   "use strict";
 
   const TRAIN_PAYLOAD_KEY = "sandooq_train_payload_v1";
-  const TRAIN_CONTENTS_KEY = "sandooq_train_contents_v2";
   const TRAIN_DRAFT_KEY = "sandooq_train_draft_v1";
   const TRAIN_PAGE_URL = "train/train.html";
 
@@ -18631,7 +18494,6 @@
       sessionStorage.removeItem(TRAIN_PAYLOAD_KEY);
       sessionStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
       sessionStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
-      sessionStorage.setItem(TRAIN_CONTENTS_KEY,JSON.stringify({payloadId,contents:payload.contents,entries:payload.entries}));
       sessionStorage.setItem(TRAIN_DRAFT_KEY,JSON.stringify(draftPayload()));
     } catch (_) {}
 
@@ -18640,7 +18502,6 @@
     try {
       localStorage.setItem(`${TRAIN_PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));
       localStorage.setItem(TRAIN_PAYLOAD_KEY,JSON.stringify(payload));
-      localStorage.setItem(TRAIN_CONTENTS_KEY,JSON.stringify({payloadId,contents:payload.contents,entries:payload.entries}));
     } catch (_) {}
 
     await writeRuntimePayloadToDb(`train:${payloadId}`,payload);
@@ -18832,8 +18693,7 @@
     quiz:["sandooq_quiz_draft_v2"],
     match:["sandooq_match_draft_v1"],
     order:["sandooq_order_draft_v1"],
-    train:["sandooq_train_draft_v1"],
-    "classify-words":["sandooq_classify_words_draft_v1"]
+    train:["sandooq_train_draft_v1"]
   };
 
   const INDEXED_DRAFT_KEYS = {
@@ -19036,46 +18896,5 @@
 })();
 </script>
 
-<script>
-(()=>{
-  "use strict";
-  const KEY="sandooq_classify_words_payload_v1",DRAFT="sandooq_classify_words_draft_v1",PAGE="classify-words/classify-words.html",MAX_GROUPS=4,MAX_WORDS=36;
-  const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
-  const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
-  const setup=document.getElementById("classifyWordsSetupScreen"),nameInput=document.getElementById("classifyWordsGameNameInput"),editor=document.getElementById("classifyWordsGroupsEditor"),addGroupBtn=document.getElementById("addClassifyGroupBtn"),limitsStatus=document.getElementById("classifyLimitsStatus"),themeList=document.getElementById("classifyThemeListPanel"),themeToggle=document.getElementById("toggleClassifyThemeListBtn"),themePreview=document.getElementById("classifyCurrentThemePreview"),advancedToggle=document.getElementById("classifyAdvancedToggleBtn"),advancedAction=document.getElementById("classifyAdvancedActionText"),advancedPanel=document.getElementById("classifyAdvancedPanel"),soundToggle=document.getElementById("classifySoundToggleBtn"),fontSelect=document.getElementById("classifyFontSelect");
-  if(!setup||!editor)return;
-  let groups=[],seq=0,theme="classic",contentLanguage="ar",soundEnabled=true,fontFamily="noto-naskh",advancedOpen=false;
-  const id=()=>`classify-${Date.now()}-${++seq}`;
-  function newGroup(){return {id:id(),name:"",words:[{id:id(),text:""}]}}
-  const normalizeTheme=value=>THEMES.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"classic";
-  const normalizeFont=value=>FONTS.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"noto-naskh";
-  function normalizeGroups(source){let remaining=MAX_WORDS;return (Array.isArray(source)?source:[]).slice(0,MAX_GROUPS).map(raw=>{const words=(Array.isArray(raw?.words)?raw.words:[]).slice(0,remaining).map(w=>({id:String(w?.id||id()),text:String(w?.text??w?.label??w??"")}));if(!words.length&&remaining>0)words.push({id:id(),text:""});remaining-=words.length;return {id:String(raw?.id||id()),name:String(raw?.name||raw?.title||""),words}}).filter(g=>g.words.length)}
-  const wordSlotCount=()=>groups.reduce((sum,g)=>sum+g.words.length,0);
-  const filledWordCount=()=>groups.reduce((sum,g)=>sum+g.words.filter(w=>w.text.trim()).length,0);
-  function payload(){let remaining=MAX_WORDS;const normalizedGroups=groups.slice(0,MAX_GROUPS).map(g=>{const words=g.words.filter(w=>w.text.trim()).slice(0,remaining).map(w=>({id:w.id,text:w.text.trim()}));remaining-=words.length;return {id:g.id,name:g.name.trim(),words}});return {gameType:"classify-words",gameTemplate:"classify-words",payloadVersion:2,name:String(nameInput?.value||"").trim(),gameName:String(nameInput?.value||"").trim(),theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},fontFamily,intro:true,introMode:"classify-camera",groups:normalizedGroups,limits:{maxGroups:MAX_GROUPS,maxWords:MAX_WORDS},updatedAt:Date.now()}}
-  function saveDraft(){try{sessionStorage.setItem(DRAFT,JSON.stringify(payload()))}catch(_){}
-  }
-  function syncSettings(){if(themePreview){themePreview.className=`choices-theme-preview theme-art ${theme}`;themePreview.setAttribute("aria-label",theme)}themeList?.querySelectorAll("[data-classify-theme]").forEach(card=>card.classList.toggle("active",card.dataset.classifyTheme===theme));setup.querySelectorAll("[data-classify-language]").forEach(btn=>btn.classList.toggle("active",btn.dataset.classifyLanguage===contentLanguage));soundToggle?.classList.toggle("is-on",soundEnabled);soundToggle?.setAttribute("aria-pressed",soundEnabled?"true":"false");soundToggle?.setAttribute("aria-label",soundEnabled?"إيقاف أصوات اللعبة":"تشغيل أصوات اللعبة");if(fontSelect)fontSelect.value=fontFamily;advancedToggle?.setAttribute("aria-expanded",advancedOpen?"true":"false");advancedPanel?.classList.toggle("is-open",advancedOpen);advancedPanel?.setAttribute("aria-hidden",advancedOpen?"false":"true");if(advancedAction)advancedAction.textContent=advancedOpen?"إخفاء":"عرض"}
-  function render(){editor.textContent="";const direction=contentLanguage==="en"?"ltr":"rtl";groups.forEach((g,gi)=>{const card=document.createElement("article");card.className="classify-group-card";const head=document.createElement("div");head.className="classify-group-head";const name=document.createElement("input");name.className="classify-group-name";name.placeholder=`اسم المجموعة ${gi+1}`;name.value=g.name;name.dir=direction;name.lang=contentLanguage;name.maxLength=80;name.addEventListener("input",()=>{g.name=name.value;saveDraft()});const remove=document.createElement("button");remove.className="classify-remove";remove.type="button";remove.textContent="إزالة";remove.disabled=groups.length<=2;remove.addEventListener("click",()=>{if(groups.length>2){groups.splice(gi,1);render();saveDraft()}});head.append(name,remove);const list=document.createElement("div");list.className="classify-words-list";g.words.forEach((w,wi)=>{const row=document.createElement("div");row.className="classify-word-row";const input=document.createElement("input");input.className="classify-word-input";input.placeholder=`كلمة ${wi+1}`;input.value=w.text;input.dir=direction;input.lang=contentLanguage;input.maxLength=80;input.addEventListener("input",()=>{w.text=input.value;updateLimits();saveDraft()});const del=document.createElement("button");del.className="classify-remove";del.type="button";del.textContent="حذف";del.disabled=g.words.length<=1;del.addEventListener("click",()=>{if(g.words.length>1){g.words.splice(wi,1);render();saveDraft()}});row.append(input,del);list.append(row)});const add=document.createElement("button");add.className="classify-add-word";add.type="button";add.textContent="＋ إضافة كلمة";add.disabled=wordSlotCount()>=MAX_WORDS;add.addEventListener("click",()=>{if(wordSlotCount()>=MAX_WORDS){alert("الحد الأقصى للكلمات هو 36 كلمة.");return}g.words.push({id:id(),text:""});render();saveDraft()});card.append(head,list,add);editor.append(card)});updateLimits();syncSettings()}
-  function updateLimits(){const filled=filledWordCount();if(limitsStatus)limitsStatus.textContent=`${groups.length}/4 مجموعات • ${filled}/36 كلمة`;if(addGroupBtn){addGroupBtn.disabled=groups.length>=MAX_GROUPS||wordSlotCount()>=MAX_WORDS;addGroupBtn.title=groups.length>=MAX_GROUPS?"تم الوصول إلى الحد الأقصى للمجموعات":""}editor.querySelectorAll(".classify-add-word").forEach(btn=>btn.disabled=wordSlotCount()>=MAX_WORDS)}
-  function valid(){const p=payload(),validGroups=p.groups.filter(g=>g.name&&g.words.length);const totalWords=validGroups.reduce((sum,g)=>sum+g.words.length,0);if(validGroups.length<2){alert("أضف مجموعتين على الأقل مع اسم وكلمة لكل مجموعة.");return false}if(validGroups.length>MAX_GROUPS){alert("الحد الأقصى للمجموعات هو 4 مجموعات.");return false}if(totalWords>MAX_WORDS){alert("الحد الأقصى للكلمات هو 36 كلمة.");return false}if(validGroups.length!==p.groups.length){alert("اكتب اسمًا وكلمة واحدة على الأقل لكل مجموعة.");return false}return true}
-  async function openGame(){if(!valid())return;const p=payload(),payloadId=`classify_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;p.payloadId=payloadId;try{sessionStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));sessionStorage.setItem(KEY,JSON.stringify(p));sessionStorage.setItem(DRAFT,JSON.stringify(p));localStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));localStorage.setItem(KEY,JSON.stringify(p))}catch(_){}const url=new URL(PAGE,location.href);url.searchParams.set("payloadId",payloadId);url.searchParams.set("theme",theme);url.searchParams.set("intro","1");url.searchParams.set("v",String(Date.now()));location.href=`${url.pathname}${url.search}`}
-  async function saveGame(){if(!valid()||!nameInput.value.trim()){alert("يرجى كتابة اسم اللعبة قبل الحفظ.");return}const p=payload();const task=()=>window.SandooqSavedGames?.saveGame({gameType:"classify-words",name:p.name,payload:p});if(window.SandooqSaveFlow?.run)await window.SandooqSaveFlow.run({gameType:"classify-words",saveTask:task});else await task()}
-  function applySavedSettings(raw={}){theme=normalizeTheme(raw.theme||raw.selectedTheme);contentLanguage=raw.contentLanguage==="en"||raw.language==="en"?"en":"ar";soundEnabled=raw.soundEnabled!==false&&raw?.sounds?.enabled!==false;fontFamily=normalizeFont(raw.fontFamily)}
-  function reset(){groups=[newGroup(),newGroup()];theme="classic";contentLanguage="ar";soundEnabled=true;fontFamily="noto-naskh";advancedOpen=false;if(nameInput)nameInput.value=""}
-  function open(){if(!groups.length)groups=[newGroup(),newGroup()];window.openEduScreen?.("classifyWordsSetupScreen");render();saveDraft()}
-  document.querySelectorAll('[data-template="classify-words"]').forEach(b=>b.addEventListener("click",()=>{reset();open()}));
-  addGroupBtn?.addEventListener("click",()=>{if(groups.length>=MAX_GROUPS){alert("الحد الأقصى للمجموعات هو 4 مجموعات.");return}if(wordSlotCount()>=MAX_WORDS){alert("الحد الأقصى للكلمات هو 36 كلمة.");return}groups.push(newGroup());render();saveDraft()});
-  themeToggle?.addEventListener("click",()=>{if(themeList)themeList.hidden=!themeList.hidden});
-  themeList?.querySelectorAll(".choices-theme-activate").forEach(button=>button.addEventListener("click",()=>{const card=button.closest("[data-classify-theme]");theme=normalizeTheme(card?.dataset.classifyTheme);themeList.hidden=true;syncSettings();saveDraft()}));
-  setup.querySelectorAll("[data-classify-language]").forEach(button=>button.addEventListener("click",()=>{contentLanguage=button.dataset.classifyLanguage==="en"?"en":"ar";render();saveDraft()}));
-  advancedToggle?.addEventListener("click",()=>{advancedOpen=!advancedOpen;syncSettings()});
-  soundToggle?.addEventListener("click",()=>{soundEnabled=!soundEnabled;syncSettings();saveDraft()});
-  fontSelect?.addEventListener("change",()=>{fontFamily=normalizeFont(fontSelect.value);syncSettings();saveDraft()});
-  document.getElementById("testClassifyWordsBtn")?.addEventListener("click",openGame);document.getElementById("saveClassifyWordsBtn")?.addEventListener("click",saveGame);nameInput?.addEventListener("input",saveDraft);
-  try{const old=JSON.parse(sessionStorage.getItem(DRAFT)||"null");if(old?.groups?.length){groups=normalizeGroups(old.groups);nameInput.value=old.name||old.gameName||"";applySavedSettings(old)}}catch(_){};if(!groups.length)groups=[newGroup(),newGroup()];render();window.openClassifyWordsSetup=open;
-  (async()=>{const pending=await window.SandooqSavedGames?.consumePendingEdit("classify-words");if(pending?.payload?.groups){groups=normalizeGroups(pending.payload.groups);nameInput.value=pending.payload.name||pending.payload.gameName||"";applySavedSettings(pending.payload);open()}})();
-})();
-</script>
 </body>
 </html>
