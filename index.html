@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-classify-words-v67 -->
+<!-- version: index-classify-words-v68 -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -11303,20 +11303,25 @@
       font-size:20px;
     }
 
-    .classify-groups-editor{display:grid;gap:16px}
-    .classify-group-card{border:3px solid var(--ink);border-radius:22px;background:#fff;padding:clamp(13px,1.8vw,20px);box-shadow:0 5px 0 rgba(0,0,0,.1);display:grid;gap:14px}
-    .classify-group-head,.classify-word-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .classify-group-number{font-size:clamp(19px,1.9vw,25px);font-weight:950;line-height:1.1}
-    .classify-word-number{font-size:clamp(15px,1.45vw,18px);font-weight:950;line-height:1.1}
-    .classify-content-editor{min-width:0;border:2px solid rgba(17,17,17,.16);border-radius:18px;background:#f8f8f8;padding:12px;display:grid;gap:10px}
-    .classify-content-label{margin:0;text-align:right;color:#333;font-size:15px;font-weight:950}
+    .classify-groups-editor{display:grid;gap:22px}
+    .classify-group-block{min-width:0;display:grid;gap:10px}
+    .classify-group-head{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:3px solid var(--ink);border-radius:18px;background:#5e88db;padding:8px clamp(12px,2vw,20px);box-shadow:0 4px 0 rgba(0,0,0,.14)}
+    .classify-group-number{color:#fff;font-size:clamp(19px,1.9vw,25px);font-weight:950;line-height:1.1}
+    .classify-group-card{min-width:0;border:3px solid var(--ink);border-radius:22px;background:#fff;padding:clamp(16px,2vw,24px);box-shadow:0 5px 0 rgba(0,0,0,.1);display:grid;gap:14px}
+    .classify-section-title{margin:0;text-align:right;color:#111;font-size:clamp(17px,1.65vw,21px);font-weight:950;line-height:1.35}
+    .classify-contents-title{margin-top:8px;padding-top:16px;border-top:2px solid rgba(17,17,17,.14)}
+    .classify-word-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .classify-word-number{color:#111;font-size:clamp(15px,1.45vw,18px);font-weight:950;line-height:1.1}
+    .classify-content-editor{min-width:0;border:0;border-radius:0;background:transparent;padding:0;display:grid;gap:10px}
     .classify-content-mode{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
     .classify-content-mode-btn{min-height:38px;border:2px solid var(--ink);border-radius:12px;background:#fff;color:#111;padding:5px 8px;font-size:14px;font-weight:950;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.12)}
     .classify-content-mode-btn.is-active{background:var(--orange,#f47745);color:#fff}
     .classify-group-name,.classify-word-input{width:100%;border:3px solid var(--ink);border-radius:14px;background:#fff;min-height:50px;padding:8px 12px;text-align:center;font-size:17px;font-weight:850;outline:none}
     .classify-group-name{font-size:20px;font-weight:950}
-    .classify-words-list{display:grid;gap:10px}
-    .classify-word-card{border:2px solid rgba(17,17,17,.14);border-radius:17px;background:#fbfbfb;padding:11px;display:grid;gap:10px}
+    .classify-words-list{display:grid;gap:0}
+    .classify-word-card{border:0;border-bottom:2px solid rgba(17,17,17,.12);border-radius:0;background:transparent;padding:12px 0 16px;display:grid;gap:10px}
+    .classify-word-card:first-child{padding-top:4px}
+    .classify-word-card:last-child{border-bottom:0;padding-bottom:4px}
     .classify-image-control{min-width:0;min-height:58px;display:grid;grid-template-columns:58px minmax(0,1fr) auto 36px;align-items:center;gap:8px;border:3px solid var(--ink);border-radius:15px;background:#fff;padding:6px 8px;direction:ltr}
     .classify-image-preview{width:58px;height:48px;border:2px solid var(--ink);border-radius:10px;background:#f3f3f3;display:grid;place-items:center;overflow:hidden;color:#777;font-size:20px;font-weight:900}
     .classify-image-preview img{width:100%;height:100%;object-fit:contain;display:block}
@@ -11325,7 +11330,7 @@
     .classify-image-clear{width:34px;height:34px;border:2px solid var(--ink);border-radius:10px;background:#f05d5b;color:#fff;font-size:19px;font-weight:950;line-height:1;cursor:pointer}
     .classify-image-input{display:none!important}
     .classify-remove{min-width:78px;min-height:40px;border:2px solid var(--ink);border-radius:12px;background:#f05d5b;color:#fff;padding:5px 10px;font-weight:950;cursor:pointer}
-    .classify-add-word{justify-self:center;min-width:150px;min-height:40px;border:2px solid var(--ink);border-radius:13px;background:#eaf1ff;color:#204eac;padding:7px 14px;font-weight:950;cursor:pointer}
+    .classify-add-word{justify-self:center;min-width:min(100%,290px);min-height:46px;border:3px solid var(--ink);border-radius:15px;background:var(--title-yellow,#efd553);color:#111;padding:8px 18px;font-size:15px;font-weight:950;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.14)}
     .classify-add-word:disabled,.classify-remove:disabled,#addClassifyGroupBtn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.2)}
     #classifyLimitsStatus{margin-inline-start:auto;font-weight:900;color:#3159a8;white-space:nowrap}
     #classifyWordsSetupScreen .choices-advanced-panel.is-open{max-height:920px!important}
@@ -11333,15 +11338,19 @@
     .classify-advanced-color-row{padding-inline-start:clamp(10px,2vw,24px);background:#fafafa}
 
     @media(max-width:760px){
-      .classify-group-card{padding:11px;border-radius:18px;gap:11px}
-      .classify-content-editor{padding:9px;border-radius:15px}
-      .classify-word-card{padding:9px;border-radius:14px}
+      .classify-groups-editor{gap:18px}
+      .classify-group-block{gap:8px}
+      .classify-group-head{min-height:52px;border-radius:16px;padding:7px 10px}
+      .classify-group-card{padding:14px 11px;border-radius:18px;gap:11px}
+      .classify-content-editor{padding:0}
+      .classify-word-card{padding:10px 0 14px}
       .classify-image-control{grid-template-columns:48px minmax(0,1fr) 88px 32px;gap:6px;padding:5px 6px}
       .classify-image-preview{width:48px;height:42px}
       .classify-image-pick{min-width:88px;padding-inline:6px;font-size:12px}
       .classify-image-clear{width:30px;height:30px}
       .classify-group-name,.classify-word-input{min-height:46px;font-size:15px}
       .classify-remove{min-width:68px;font-size:12px}
+      .classify-add-word{width:100%;min-width:0;font-size:13px;padding-inline:10px}
     }
 
     @media(max-width:900px){
@@ -19141,6 +19150,8 @@
   const setup=document.getElementById("classifyWordsSetupScreen"),nameInput=document.getElementById("classifyWordsGameNameInput"),editor=document.getElementById("classifyWordsGroupsEditor"),addGroupBtn=document.getElementById("addClassifyGroupBtn"),limitsStatus=document.getElementById("classifyLimitsStatus"),themeList=document.getElementById("classifyThemeListPanel"),themeToggle=document.getElementById("toggleClassifyThemeListBtn"),themePreview=document.getElementById("classifyCurrentThemePreview"),advancedToggle=document.getElementById("classifyAdvancedToggleBtn"),advancedAction=document.getElementById("classifyAdvancedActionText"),advancedPanel=document.getElementById("classifyAdvancedPanel"),soundToggle=document.getElementById("classifySoundToggleBtn"),fontSelect=document.getElementById("classifyFontSelect"),textColorSwatch=document.getElementById("classifyTextColorSwatch"),groupColorsToggle=document.getElementById("classifyGroupColorsToggleBtn"),unifiedItemsToggle=document.getElementById("classifyUnifiedItemsToggleBtn"),unifiedItemColorRow=document.getElementById("classifyUnifiedItemColorRow"),unifiedItemColorSwatch=document.getElementById("classifyUnifiedItemColorSwatch");
   if(!setup||!editor)return;
   const DEFAULT_GROUP_COLORS=["#283c78","#704093","#9a4b35","#256a59"],DEFAULT_TEXT_COLOR="#ffffff",DEFAULT_ITEM_COLOR="#3788d8";
+  const GROUP_ORDINALS=["الأولى","الثانية","الثالثة","الرابعة"];
+  const CONTENT_ORDINALS=["الأول","الثاني","الثالث","الرابع","الخامس","السادس","السابع","الثامن","التاسع","العاشر"];
   const groupColorRows=DEFAULT_GROUP_COLORS.map((_,index)=>document.getElementById(`classifyGroupColorRow${index+1}`));
   const groupColorSwatches=DEFAULT_GROUP_COLORS.map((_,index)=>document.getElementById(`classifyGroupColorSwatch${index+1}`));
   let groups=[],seq=0,theme="classic",contentLanguage="ar",soundEnabled=true,fontFamily="noto-naskh",advancedOpen=false,textColor=DEFAULT_TEXT_COLOR,groupColorsEnabled=false,groupColors=DEFAULT_GROUP_COLORS.slice(),unifiedItemsEnabled=false,unifiedItemColor=DEFAULT_ITEM_COLOR,draftSaveTimer=0,draftSaveChain=Promise.resolve();
@@ -19171,8 +19182,111 @@
   function createImageControl(media,label){const control=document.createElement("div");control.className="classify-image-control";const preview=document.createElement("span");preview.className="classify-image-preview";if(media.imageData){const image=document.createElement("img");image.src=media.imageData;image.alt="";preview.appendChild(image)}else preview.textContent="▧";const name=document.createElement("span");name.className="classify-image-name";name.textContent=media.imageName||"لم تختر صورة";const input=document.createElement("input");input.type="file";input.accept="image/*";input.className="classify-image-input";const pick=document.createElement("button");pick.type="button";pick.className="classify-image-pick";pick.textContent=media.imageData?"تغيير الصورة":"اختيار صورة";pick.addEventListener("click",()=>input.click());input.addEventListener("change",async()=>{const file=input.files?.[0];if(!file)return;pick.disabled=true;pick.textContent="جارٍ التجهيز...";const result=await readImage(file);if(result.imageData){media.imageName=result.imageName;media.imageData=result.imageData}render();saveDraft()});const clear=document.createElement("button");clear.type="button";clear.className="classify-image-clear";clear.textContent="×";clear.hidden=!media.imageData;clear.setAttribute("aria-label",`حذف ${label}`);clear.addEventListener("click",()=>{media.imageName="";media.imageData="";render();saveDraft()});control.append(preview,name,pick,clear,input);return control}
   function createContentMode(media,label){const modes=document.createElement("div");modes.className="classify-content-mode";modes.setAttribute("aria-label",`نوع ${label}`);[["text","نص"],["image","صورة"]].forEach(([value,text])=>{const button=document.createElement("button");button.type="button";button.className="classify-content-mode-btn";button.classList.toggle("is-active",media.contentType===value);button.setAttribute("aria-pressed",media.contentType===value?"true":"false");button.textContent=text;button.addEventListener("click",()=>{if(media.contentType===value)return;media.contentType=value;render();saveDraft()});modes.appendChild(button)});return modes}
   function createTextControl(media,textKey,placeholder,className){const input=document.createElement("input");input.type="text";input.className=className;input.maxLength=80;input.placeholder=placeholder;input.value=media[textKey]||"";input.dir="auto";input.addEventListener("input",()=>{media[textKey]=input.value;updateLimits();saveDraft()});return input}
-  function createContentEditor(media,{label,textKey,placeholder,className}){const section=document.createElement("section");section.className="classify-content-editor";const heading=document.createElement("h4");heading.className="classify-content-label";heading.textContent=label;section.append(heading,createContentMode(media,label));if(media.contentType==="image")section.appendChild(createImageControl(media,label));else section.appendChild(createTextControl(media,textKey,placeholder,className));return section}
-  function render(){editor.textContent="";groups.forEach((group,groupIndex)=>{const card=document.createElement("article");card.className="classify-group-card";const head=document.createElement("div");head.className="classify-group-head";const number=document.createElement("span");number.className="classify-group-number";number.textContent=`المجموعة ${groupIndex+1}`;const remove=document.createElement("button");remove.className="classify-remove";remove.type="button";remove.textContent="× إزالة";remove.disabled=groups.length<=2;remove.addEventListener("click",()=>{if(groups.length<=2)return;groups.splice(groupIndex,1);render();saveDraft()});head.append(number,remove);card.append(head,createContentEditor(group,{label:"محتوى المجموعة",textKey:"name",placeholder:`اكتب اسم المجموعة ${groupIndex+1}`,className:"classify-group-name"}));const listTitle=document.createElement("h4");listTitle.className="classify-content-label";listTitle.textContent="محتويات المجموعة";const list=document.createElement("div");list.className="classify-words-list";group.words.forEach((word,wordIndex)=>{const wordCard=document.createElement("article");wordCard.className="classify-word-card";const wordHead=document.createElement("div");wordHead.className="classify-word-head";const wordNumber=document.createElement("span");wordNumber.className="classify-word-number";wordNumber.textContent=`المحتوى ${wordIndex+1}`;const del=document.createElement("button");del.className="classify-remove";del.type="button";del.textContent="حذف";del.disabled=group.words.length<=1;del.addEventListener("click",()=>{if(group.words.length<=1)return;group.words.splice(wordIndex,1);render();saveDraft()});wordHead.append(wordNumber,del);wordCard.append(wordHead,createContentEditor(word,{label:"نوع المحتوى",textKey:"text",placeholder:`اكتب المحتوى ${wordIndex+1}`,className:"classify-word-input"}));list.appendChild(wordCard)});const add=document.createElement("button");add.className="classify-add-word";add.type="button";add.textContent="＋ إضافة محتوى";add.disabled=wordSlotCount()>=MAX_WORDS;add.addEventListener("click",()=>{if(wordSlotCount()>=MAX_WORDS){alert("الحد الأقصى هو 36 محتوى.");return}group.words.push(newWord());render();saveDraft()});card.append(listTitle,list,add);editor.appendChild(card)});updateLimits();syncSettings()}
+  function createContentEditor(media,{label,textKey,placeholder,className}){
+    const section=document.createElement("section");
+    section.className="classify-content-editor";
+    section.appendChild(createContentMode(media,label));
+    if(media.contentType==="image") section.appendChild(createImageControl(media,label));
+    else section.appendChild(createTextControl(media,textKey,placeholder,className));
+    return section;
+  }
+
+  function render(){
+    editor.textContent="";
+    groups.forEach((group,groupIndex)=>{
+      const block=document.createElement("article");
+      block.className="classify-group-block";
+
+      const head=document.createElement("div");
+      head.className="classify-group-head";
+      const number=document.createElement("span");
+      number.className="classify-group-number";
+      number.textContent=`المجموعة ${GROUP_ORDINALS[groupIndex]||groupIndex+1}`;
+      const remove=document.createElement("button");
+      remove.className="classify-remove";
+      remove.type="button";
+      remove.textContent="× إزالة";
+      remove.disabled=groups.length<=2;
+      remove.addEventListener("click",()=>{
+        if(groups.length<=2)return;
+        groups.splice(groupIndex,1);
+        render();
+        saveDraft();
+      });
+      head.append(number,remove);
+
+      const card=document.createElement("div");
+      card.className="classify-group-card";
+      const groupTitle=document.createElement("h4");
+      groupTitle.className="classify-section-title";
+      groupTitle.textContent="اسم المجموعة";
+      const groupEditor=createContentEditor(group,{
+        label:"اسم المجموعة",
+        textKey:"name",
+        placeholder:`اكتب اسم المجموعة ${groupIndex+1}`,
+        className:"classify-group-name"
+      });
+
+      const listTitle=document.createElement("h4");
+      listTitle.className="classify-section-title classify-contents-title";
+      listTitle.textContent="المحتويات الخاصة بالمجموعة";
+      const list=document.createElement("div");
+      list.className="classify-words-list";
+
+      group.words.forEach((word,wordIndex)=>{
+        const wordCard=document.createElement("article");
+        wordCard.className="classify-word-card";
+        const wordHead=document.createElement("div");
+        wordHead.className="classify-word-head";
+        const wordNumber=document.createElement("span");
+        wordNumber.className="classify-word-number";
+        wordNumber.textContent=`المحتوى ${CONTENT_ORDINALS[wordIndex]||wordIndex+1}`;
+        const del=document.createElement("button");
+        del.className="classify-remove";
+        del.type="button";
+        del.textContent="حذف";
+        del.disabled=group.words.length<=1;
+        del.addEventListener("click",()=>{
+          if(group.words.length<=1)return;
+          group.words.splice(wordIndex,1);
+          render();
+          saveDraft();
+        });
+        wordHead.append(wordNumber,del);
+        wordCard.append(
+          wordHead,
+          createContentEditor(word,{
+            label:`المحتوى ${wordIndex+1}`,
+            textKey:"text",
+            placeholder:`اكتب المحتوى ${wordIndex+1}`,
+            className:"classify-word-input"
+          })
+        );
+        list.appendChild(wordCard);
+      });
+
+      const add=document.createElement("button");
+      add.className="classify-add-word";
+      add.type="button";
+      add.textContent="＋ إضافة محتوى جديد للمجموعة";
+      add.disabled=wordSlotCount()>=MAX_WORDS;
+      add.addEventListener("click",()=>{
+        if(wordSlotCount()>=MAX_WORDS){
+          alert("الحد الأقصى هو 36 محتوى.");
+          return;
+        }
+        group.words.push(newWord());
+        render();
+        saveDraft();
+      });
+
+      card.append(groupTitle,groupEditor,listTitle,list,add);
+      block.append(head,card);
+      editor.appendChild(block);
+    });
+    updateLimits();
+    syncSettings();
+  }
   function updateLimits(){const filled=filledWordCount();if(limitsStatus)limitsStatus.textContent=`${groups.length}/4 مجموعات • ${filled}/36 محتوى`;if(addGroupBtn){addGroupBtn.disabled=groups.length>=MAX_GROUPS||wordSlotCount()>=MAX_WORDS;addGroupBtn.title=groups.length>=MAX_GROUPS?"تم الوصول إلى الحد الأقصى للمجموعات":""}editor.querySelectorAll(".classify-add-word").forEach(button=>button.disabled=wordSlotCount()>=MAX_WORDS)}
   function valid(){if(groups.length<2){alert("أضف مجموعتين على الأقل.");return false}if(groups.length>MAX_GROUPS){alert("الحد الأقصى للمجموعات هو 4 مجموعات.");return false}if(wordSlotCount()>MAX_WORDS){alert("الحد الأقصى هو 36 محتوى.");return false}for(let index=0;index<groups.length;index+=1){const group=groups[index];if(!mediaComplete(group,"name")){alert(`أكمل محتوى المجموعة ${index+1}.`);return false}if(!group.words.length){alert(`أضف محتوى واحدًا على الأقل للمجموعة ${index+1}.`);return false}if(group.words.some(word=>!mediaComplete(word))){alert(`أكمل جميع محتويات المجموعة ${index+1}.`);return false}}return true}
   async function openGame(){if(!valid())return;const p=runtimePayload(),payloadId=`classify_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;p.payloadId=payloadId;try{sessionStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));sessionStorage.setItem(KEY,JSON.stringify(p));sessionStorage.setItem(DRAFT,JSON.stringify(draftPayload()))}catch(_){}try{localStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));localStorage.setItem(KEY,JSON.stringify(p))}catch(_){}await Promise.all([writePayloadToDb(`classify-words:${payloadId}`,p),writePayloadToDb("classify-words:latest",p)]);const url=new URL(PAGE,location.href);url.searchParams.set("payloadId",payloadId);url.searchParams.set("theme",theme);url.searchParams.set("intro","1");url.searchParams.set("return","index.html");url.searchParams.set("v",String(Date.now()));location.href=`${url.pathname}${url.search}`}
