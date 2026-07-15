@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-fill-v77-text-choices-only -->
+<!-- version: index-v78-train-disabled-features-persistence -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -13342,6 +13342,8 @@
       }
       if(gameType === "train"){
         try{
+          localStorage.setItem(`${config.payloadKey}_${runtimeId}`,JSON.stringify(payload));
+          localStorage.setItem(config.payloadKey,JSON.stringify(payload));
           localStorage.setItem("sandooq_train_contents_v2",JSON.stringify({
             payloadId:runtimeId,
             contents:payload.contents,
@@ -13357,6 +13359,30 @@
       if (["open-box","classify-words"].includes(gameType)) url.searchParams.set("intro","1");
       if (["quiz","fill"].includes(gameType)) url.searchParams.set("mode",String(payload.displayMode || "direct"));
       if (["quiz","fill","match","order","train"].includes(gameType)) url.searchParams.set("return","index.html");
+      if (gameType === "train") {
+        const rawTimerSeconds = Number(payload.countdownTotalSeconds);
+        const fallbackTimerSeconds =
+          Number(payload.countdownMinutes || 0) * 60 +
+          Number(payload.countdownSeconds || 0);
+        const timerSeconds = payload.countdownEnabled === true
+          ? Math.max(
+              1,
+              Math.min(
+                5999,
+                Math.round(
+                  Number.isFinite(rawTimerSeconds) && rawTimerSeconds > 0
+                    ? rawTimerSeconds
+                    : (fallbackTimerSeconds || 60)
+                )
+              )
+            )
+          : 0;
+        const attemptsTotal = payload.attemptsEnabled === true
+          ? Math.max(1,Math.min(10,Math.round(Number(payload.attemptsCount) || 10)))
+          : 0;
+        url.searchParams.set("timer",String(timerSeconds));
+        url.searchParams.set("attempts",String(attemptsTotal));
+      }
       if (gameType === "classify-words") {
         const source = launchSource === "home" ? "home" : "saved";
         url.searchParams.set("launch",source);
