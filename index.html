@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-fill-v72 -->
+<!-- version: index-fill-v73 -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -11609,6 +11609,42 @@
       opacity:1 !important;
     }
 
+    #fillSetupScreen .fill-blank-tool-row{
+      display:flex;
+      justify-content:flex-start;
+      align-items:center;
+      margin:4px 0 10px;
+    }
+
+    #fillSetupScreen .fill-blank-tool{
+      appearance:none;
+      width:auto;
+      min-width:72px;
+      min-height:42px;
+      padding:6px 16px;
+      border:3px solid #111;
+      border-radius:13px;
+      background:#2f8edb;
+      color:#fff;
+      box-shadow:0 4px 0 rgba(0,0,0,.24);
+      font:inherit;
+      font-size:18px;
+      font-weight:900;
+      cursor:grab;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+
+    #fillSetupScreen .fill-blank-tool:active{
+      cursor:grabbing;
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.24);
+    }
+
+    #fillSetupScreen .fill-question-text-input.is-blank-drop-target{
+      border-color:#2f8edb;
+      box-shadow:0 0 0 4px rgba(47,142,219,.18);
+    }
 </style>
 </head>
 <body>
@@ -16398,6 +16434,127 @@
     return match ? match[0] : "";
   }
 
+  function getFillAnswerWord(question){
+    if (fillAnswerMode === "letters") {
+      return normalizeFillSingleWord(question?.letterWord);
+    }
+
+    if (fillChoicesType !== "text") return "";
+    const correctIndex = Number.isInteger(question?.correctChoiceIndex)
+      ? question.correctChoiceIndex
+      : -1;
+    return String(question?.choices?.[correctIndex]?.text || "").trim();
+  }
+
+  function getFillBlankText(question){
+    const answer = getFillAnswerWord(question).replace(/\s+/gu,"");
+    const length = Array.from(answer).length;
+    return length > 0 ? "…".repeat(length) : "";
+  }
+
+  function syncFillQuestionBlank(question){
+    if (!question || !/…+/u.test(String(question.questionText || ""))) return;
+    const blank = getFillBlankText(question);
+    if (!blank) return;
+    question.questionText = String(question.questionText || "").replace(/…+/u,blank);
+  }
+
+  function getFillPointerPosition(input,clientX){
+    const rect = input.getBoundingClientRect();
+    if (!rect.width) return input.selectionStart ?? input.value.length;
+    const rawRatio = (clientX - rect.left) / rect.width;
+    const ratio = Math.max(0,Math.min(1,rawRatio));
+    const direction = getComputedStyle(input).direction;
+    const visualRatio = direction === "rtl" ? 1 - ratio : ratio;
+    return Math.round(visualRatio * input.value.length);
+  }
+
+  function insertFillBlank(questionIndex,input,requestedPosition){
+    const question = fillQuestions[questionIndex];
+    if (!question || !input) return;
+
+    const blank = getFillBlankText(question);
+    if (!blank) {
+      alert(
+        fillAnswerMode === "letters"
+          ? "يرجى كتابة الكلمة أولاً ثم إضافة الفراغ."
+          : "يرجى كتابة الاختيار الصحيح وتحديده أولاً ثم إضافة الفراغ."
+      );
+      return;
+    }
+
+    let value = String(input.value || "");
+    let position = Number.isInteger(requestedPosition)
+      ? requestedPosition
+      : (input.selectionStart ?? value.length);
+    position = Math.max(0,Math.min(value.length,position));
+
+    const previousBlank = /…+/u.exec(value);
+    if (previousBlank) {
+      const start = previousBlank.index;
+      const end = start + previousBlank[0].length;
+      value = value.slice(0,start) + value.slice(end);
+      if (position > end) {
+        position -= previousBlank[0].length;
+      } else if (position >= start) {
+        position = start;
+      }
+    }
+
+    const nextValue = value.slice(0,position) + blank + value.slice(position);
+    input.value = nextValue;
+    question.questionText = nextValue;
+    try {
+      input.focus({preventScroll:true});
+    } catch (_) {
+      input.focus();
+    }
+    const nextCaret = position + blank.length;
+    input.setSelectionRange(nextCaret,nextCaret);
+    saveFillDraft();
+  }
+
+  function bindFillBlankTool(button,input,questionIndex){
+    if (!button || !input) return;
+    let dragged = false;
+
+    button.draggable = true;
+    button.addEventListener("click",()=>{
+      if (dragged) return;
+      insertFillBlank(questionIndex,input,input.selectionStart ?? input.value.length);
+    });
+
+    button.addEventListener("dragstart",(event)=>{
+      dragged = true;
+      event.dataTransfer?.setData("text/plain","fill-blank");
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = "copy";
+    });
+
+    button.addEventListener("dragend",()=>{
+      window.setTimeout(()=>{ dragged = false; },0);
+      input.classList.remove("is-blank-drop-target");
+    });
+
+    input.addEventListener("dragover",(event)=>{
+      event.preventDefault();
+      input.classList.add("is-blank-drop-target");
+      const position = getFillPointerPosition(input,event.clientX);
+      input.setSelectionRange(position,position);
+      if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+    });
+
+    input.addEventListener("dragleave",()=>{
+      input.classList.remove("is-blank-drop-target");
+    });
+
+    input.addEventListener("drop",(event)=>{
+      event.preventDefault();
+      input.classList.remove("is-blank-drop-target");
+      const position = getFillPointerPosition(input,event.clientX);
+      insertFillBlank(questionIndex,input,position);
+    });
+  }
+
   function sanitizeFillDataInPlace(){
     fillQuestionType = "text";
     fillQuestions = fillQuestions.map((question)=>{
@@ -16429,6 +16586,8 @@
           return next;
         });
       }
+
+      syncFillQuestionBlank(clean);
 
       return clean;
     });
@@ -16902,6 +17061,53 @@
         entry.appendChild(coverField);
       }
 
+      const qLabel = document.createElement("div");
+      qLabel.className = "quiz-field-label";
+      qLabel.textContent = "نص السؤال";
+      entry.appendChild(qLabel);
+
+      const blankToolRow = document.createElement("div");
+      blankToolRow.className = "fill-blank-tool-row";
+
+      const blankTool = document.createElement("button");
+      blankTool.type = "button";
+      blankTool.className = "fill-blank-tool";
+      blankTool.textContent = "فراغ";
+      blankTool.setAttribute("aria-label",`إضافة فراغ إلى نص السؤال ${questionIndex + 1}`);
+      blankToolRow.appendChild(blankTool);
+      entry.appendChild(blankToolRow);
+
+      const questionFieldRow = document.createElement("div");
+      questionFieldRow.className = "quiz-text-field-with-review";
+
+      const questionInput = document.createElement("input");
+      questionInput.className = "quiz-text-input fill-question-text-input";
+      questionInput.type = "text";
+      questionInput.maxLength = 220;
+      questionInput.placeholder = "اكتب السؤال هنا";
+      questionInput.value = question.questionText || "";
+
+      questionInput.addEventListener("input",()=>{
+        fillQuestions[questionIndex].questionText = questionInput.value;
+        saveFillDraft();
+      });
+
+      const questionReviewButton = createFillReviewButton({
+        label:`مراجعة نص السؤال ${questionIndex + 1}`,
+        getValue:()=> questionInput.value,
+        maxLength:220,
+        placeholder:"اكتب السؤال هنا..",
+        onSave:(value)=>{
+          questionInput.value = value;
+          fillQuestions[questionIndex].questionText = value;
+          saveFillDraft();
+        }
+      });
+
+      questionFieldRow.append(questionInput,questionReviewButton);
+      entry.appendChild(questionFieldRow);
+      bindFillBlankTool(blankTool,questionInput,questionIndex);
+
       if (fillAnswerMode === "letters") {
         const wordLabel = document.createElement("div");
         wordLabel.className = "quiz-field-label";
@@ -16938,63 +17144,15 @@
           if (wordInput.value !== normalized) {
             wordInput.value = normalized;
           }
-          fillQuestions[questionIndex].letterWord = normalized;
+          const target = fillQuestions[questionIndex];
+          target.letterWord = normalized;
+          syncFillQuestionBlank(target);
+          questionInput.value = target.questionText;
           saveFillDraft();
         });
 
         entry.appendChild(wordInput);
       } else {
-      const qLabel = document.createElement("div");
-      qLabel.className = "quiz-field-label";
-      qLabel.textContent =
-        fillQuestionType === "text"
-          ? "نص السؤال"
-          : "صورة السؤال";
-
-      entry.appendChild(qLabel);
-
-      if (fillQuestionType === "text") {
-        const fieldRow = document.createElement("div");
-        fieldRow.className = "quiz-text-field-with-review";
-
-        const input = document.createElement("input");
-        input.className = "quiz-text-input";
-        input.type = "text";
-        input.maxLength = 220;
-        input.placeholder = "اكتب السؤال هنا";
-        input.value = question.questionText || "";
-
-        input.addEventListener("input",()=>{
-          fillQuestions[questionIndex].questionText = input.value;
-          saveFillDraft();
-        });
-
-        const reviewButton = createFillReviewButton({
-          label:`مراجعة نص السؤال ${questionIndex + 1}`,
-          getValue:()=> input.value,
-          maxLength:220,
-          placeholder:"اكتب السؤال هنا..",
-          onSave:(value)=>{
-            input.value = value;
-            fillQuestions[questionIndex].questionText = value;
-            saveFillDraft();
-          }
-        });
-
-        fieldRow.append(input,reviewButton);
-        entry.appendChild(fieldRow);
-      } else {
-        entry.appendChild(createFillImagePicker({
-          data:question.questionImageData,
-          name:question.questionImageName,
-          label:`صورة السؤال ${questionIndex + 1}`,
-          onChange:({imageData,imageName})=>{
-            fillQuestions[questionIndex].questionImageData = imageData;
-            fillQuestions[questionIndex].questionImageName = imageName;
-            fillQuestions[questionIndex].questionText = "";
-          }
-        }));
-      }
 
       const choicesTitleRow = document.createElement("div");
       choicesTitleRow.className = "quiz-choices-title-row";
@@ -17026,9 +17184,12 @@
           input.value = choice.text || "";
 
           input.addEventListener("input",()=>{
-            fillQuestions[questionIndex]
-              .choices[choiceIndex]
-              .text = input.value;
+            const targetQuestion = fillQuestions[questionIndex];
+            targetQuestion.choices[choiceIndex].text = input.value;
+            if (targetQuestion.correctChoiceIndex === choiceIndex) {
+              syncFillQuestionBlank(targetQuestion);
+              questionInput.value = targetQuestion.questionText;
+            }
             saveFillDraft();
           });
 
@@ -17039,9 +17200,12 @@
             placeholder:"اكتب الاختيار هنا..",
             onSave:(value)=>{
               input.value = value;
-              fillQuestions[questionIndex]
-                .choices[choiceIndex]
-                .text = value;
+              const targetQuestion = fillQuestions[questionIndex];
+              targetQuestion.choices[choiceIndex].text = value;
+              if (targetQuestion.correctChoiceIndex === choiceIndex) {
+                syncFillQuestionBlank(targetQuestion);
+                questionInput.value = targetQuestion.questionText;
+              }
               saveFillDraft();
             }
           });
@@ -17317,22 +17481,23 @@
         return false;
       }
 
-      if (fillAnswerMode === "letters") {
-        const word = normalizeFillSingleWord(question.letterWord);
-        if (!word) {
-          alert(`يرجى كتابة كلمة السؤال ${number}.`);
-          return false;
-        }
-        continue;
-      }
-
-      if (fillQuestionType === "text" && !String(question.questionText || "").trim()) {
+      if (!String(question.questionText || "").trim()) {
         alert(`يرجى كتابة نص السؤال ${number}.`);
         return false;
       }
-      if (fillQuestionType === "image" && !question.questionImageData) {
-        alert(`يرجى اختيار صورة للسؤال ${number}.`);
+
+      if (!/…+/u.test(String(question.questionText || ""))) {
+        alert(`يرجى إضافة الفراغ داخل نص السؤال ${number}.`);
         return false;
+      }
+
+      if (fillAnswerMode === "letters") {
+        const word = normalizeFillSingleWord(question.letterWord);
+        if (!word) {
+          alert(`يرجى كتابة كلمة الإجابة للسؤال ${number}.`);
+          return false;
+        }
+        continue;
       }
       if (question.choices.length < FILL_MIN_CHOICES) {
         alert(`السؤال ${number} يجب أن يحتوي على خيارين على الأقل.`);
@@ -17374,6 +17539,8 @@
       payloadId,
       questions:fillQuestions.map((question)=>({
         answerMode:fillAnswerMode,
+        blankText:getFillBlankText(question),
+        blankLength:Array.from(getFillAnswerWord(question).replace(/\s+/gu,"")).length,
         word:fillAnswerMode === "letters"
           ? normalizeFillSingleWord(question.letterWord)
           : "",
@@ -17390,9 +17557,7 @@
           ? question.coverImageName
           : "",
         questionType:fillQuestionType,
-        questionText:fillAnswerMode === "letters"
-          ? normalizeFillSingleWord(question.letterWord)
-          : (fillQuestionType === "text" ? String(question.questionText || "").trim() : ""),
+        questionText:String(question.questionText || "").trim(),
         questionImageData:fillQuestionType === "image" ? question.questionImageData : "",
         questionImageName:fillQuestionType === "image" ? question.questionImageName : "",
         choicesType:fillChoicesType,
