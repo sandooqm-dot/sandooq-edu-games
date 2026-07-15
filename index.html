@@ -2,11 +2,8 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-classify-words-v68 -->
+<!-- version: index-train-logic-v73 -->
 <meta charset="utf-8"/>
-<meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
-<meta content="no-cache" http-equiv="Pragma"/>
-<meta content="0" http-equiv="Expires"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10605,35 +10602,6 @@
       display:none !important;
     }
 
-    /* معاينة لعبة صنّف الكلمات وصورة الثيم الكلاسيكي الخاصة بها. */
-    .template-cover.classify-words-cover{
-      background-color:#fff !important;
-      background-image:url("classify-words/classify-words-preview.webp?v=1") !important;
-      background-position:center !important;
-      background-size:contain !important;
-      background-repeat:no-repeat !important;
-    }
-
-    .template-cover.classify-words-cover::before,
-    .template-cover.classify-words-cover::after{
-      display:none !important;
-      content:none !important;
-    }
-
-    #classifyWordsSetupScreen .theme-art.classic{
-      background-color:#fff !important;
-      background-image:url("classify-words/classify-words-preview.webp?v=1") !important;
-      background-position:center !important;
-      background-size:contain !important;
-      background-repeat:no-repeat !important;
-    }
-
-    #classifyWordsSetupScreen .theme-art.classic::before,
-    #classifyWordsSetupScreen .theme-art.classic::after{
-      display:none !important;
-      content:none !important;
-    }
-
 
     /* إعدادات المؤقت والمحاولات في قطار الإجابات */
     .train-advanced-time-row,
@@ -11303,55 +11271,15 @@
       font-size:20px;
     }
 
-    .classify-groups-editor{display:grid;gap:22px}
-    .classify-group-block{min-width:0;display:grid;gap:10px}
-    .classify-group-head{min-height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px;border:3px solid var(--ink);border-radius:18px;background:#5e88db;padding:8px clamp(12px,2vw,20px);box-shadow:0 4px 0 rgba(0,0,0,.14)}
-    .classify-group-number{color:#fff;font-size:clamp(19px,1.9vw,25px);font-weight:950;line-height:1.1}
-    .classify-group-card{min-width:0;border:3px solid var(--ink);border-radius:22px;background:#fff;padding:clamp(16px,2vw,24px);box-shadow:0 5px 0 rgba(0,0,0,.1);display:grid;gap:14px}
-    .classify-section-title{margin:0;text-align:right;color:#111;font-size:clamp(17px,1.65vw,21px);font-weight:950;line-height:1.35}
-    .classify-contents-title{margin-top:8px;padding-top:16px;border-top:2px solid rgba(17,17,17,.14)}
-    .classify-word-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .classify-word-number{color:#111;font-size:clamp(15px,1.45vw,18px);font-weight:950;line-height:1.1}
-    .classify-content-editor{min-width:0;border:0;border-radius:0;background:transparent;padding:0;display:grid;gap:10px}
-    .classify-content-mode{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-    .classify-content-mode-btn{min-height:38px;border:2px solid var(--ink);border-radius:12px;background:#fff;color:#111;padding:5px 8px;font-size:14px;font-weight:950;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.12)}
-    .classify-content-mode-btn.is-active{background:var(--orange,#f47745);color:#fff}
-    .classify-group-name,.classify-word-input{width:100%;border:3px solid var(--ink);border-radius:14px;background:#fff;min-height:50px;padding:8px 12px;text-align:center;font-size:17px;font-weight:850;outline:none}
+    .classify-groups-editor{display:grid;gap:14px}
+    .classify-group-card{border:3px solid var(--ink);border-radius:20px;background:#fff;padding:15px;box-shadow:0 5px 0 rgba(0,0,0,.1);display:grid;gap:10px}
+    .classify-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .classify-group-name,.classify-word-input{width:100%;border:2px solid var(--ink);border-radius:12px;background:#fff;min-height:44px;padding:8px 12px;text-align:center;font-size:17px;font-weight:850;outline:none}
     .classify-group-name{font-size:20px;font-weight:950}
-    .classify-words-list{display:grid;gap:0}
-    .classify-word-card{border:0;border-bottom:2px solid rgba(17,17,17,.12);border-radius:0;background:transparent;padding:12px 0 16px;display:grid;gap:10px}
-    .classify-word-card:first-child{padding-top:4px}
-    .classify-word-card:last-child{border-bottom:0;padding-bottom:4px}
-    .classify-image-control{min-width:0;min-height:58px;display:grid;grid-template-columns:58px minmax(0,1fr) auto 36px;align-items:center;gap:8px;border:3px solid var(--ink);border-radius:15px;background:#fff;padding:6px 8px;direction:ltr}
-    .classify-image-preview{width:58px;height:48px;border:2px solid var(--ink);border-radius:10px;background:#f3f3f3;display:grid;place-items:center;overflow:hidden;color:#777;font-size:20px;font-weight:900}
-    .classify-image-preview img{width:100%;height:100%;object-fit:contain;display:block}
-    .classify-image-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;direction:rtl;color:#555;font-size:13px;font-weight:850}
-    .classify-image-pick{min-width:104px;min-height:39px;border:2px solid var(--ink);border-radius:12px;background:var(--orange,#f47745);color:#fff;padding:5px 10px;font-size:13px;font-weight:950;cursor:pointer}
-    .classify-image-clear{width:34px;height:34px;border:2px solid var(--ink);border-radius:10px;background:#f05d5b;color:#fff;font-size:19px;font-weight:950;line-height:1;cursor:pointer}
-    .classify-image-input{display:none!important}
-    .classify-remove{min-width:78px;min-height:40px;border:2px solid var(--ink);border-radius:12px;background:#f05d5b;color:#fff;padding:5px 10px;font-weight:950;cursor:pointer}
-    .classify-add-word{justify-self:center;min-width:min(100%,290px);min-height:46px;border:3px solid var(--ink);border-radius:15px;background:var(--title-yellow,#efd553);color:#111;padding:8px 18px;font-size:15px;font-weight:950;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.14)}
-    .classify-add-word:disabled,.classify-remove:disabled,#addClassifyGroupBtn:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.2)}
-    #classifyLimitsStatus{margin-inline-start:auto;font-weight:900;color:#3159a8;white-space:nowrap}
-    #classifyWordsSetupScreen .choices-advanced-panel.is-open{max-height:920px!important}
-    .classify-advanced-color-row[hidden]{display:none!important}
-    .classify-advanced-color-row{padding-inline-start:clamp(10px,2vw,24px);background:#fafafa}
-
-    @media(max-width:760px){
-      .classify-groups-editor{gap:18px}
-      .classify-group-block{gap:8px}
-      .classify-group-head{min-height:52px;border-radius:16px;padding:7px 10px}
-      .classify-group-card{padding:14px 11px;border-radius:18px;gap:11px}
-      .classify-content-editor{padding:0}
-      .classify-word-card{padding:10px 0 14px}
-      .classify-image-control{grid-template-columns:48px minmax(0,1fr) 88px 32px;gap:6px;padding:5px 6px}
-      .classify-image-preview{width:48px;height:42px}
-      .classify-image-pick{min-width:88px;padding-inline:6px;font-size:12px}
-      .classify-image-clear{width:30px;height:30px}
-      .classify-group-name,.classify-word-input{min-height:46px;font-size:15px}
-      .classify-remove{min-width:68px;font-size:12px}
-      .classify-add-word{width:100%;min-width:0;font-size:13px;padding-inline:10px}
-    }
+    .classify-words-list{display:grid;gap:8px}
+    .classify-word-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+    .classify-remove{min-width:70px;min-height:40px;border:2px solid var(--ink);border-radius:11px;background:#f05d5b;color:#fff;font-weight:950;cursor:pointer}
+    .classify-add-word{justify-self:center;border:2px solid var(--ink);border-radius:11px;background:#eaf1ff;color:#204eac;padding:7px 14px;font-weight:900;cursor:pointer}
 
     @media(max-width:900px){
       .train-settings-grid{
@@ -11570,42 +11498,6 @@
       }
     }
 
-    /* v67: إبقاء بطاقات إنشاء الألعاب كاملة وقابلة للتمرير في Safari. */
-    html.create-template-page,
-    body.create-template-page{
-      height:auto !important;
-      min-height:100% !important;
-      max-height:none !important;
-      overflow-x:hidden !important;
-      overflow-y:auto !important;
-      -webkit-overflow-scrolling:touch;
-    }
-
-    body.create-template-page .page{
-      height:auto !important;
-      min-height:100dvh !important;
-      max-height:none !important;
-      overflow:visible !important;
-    }
-
-    body.create-template-page #createScreen.active,
-    body.create-template-page #createScreen .template-list{
-      height:auto !important;
-      min-height:0 !important;
-      max-height:none !important;
-      overflow:visible !important;
-    }
-
-    body.create-template-page #createScreen{
-      margin-bottom:calc(12px + var(--safe-bottom));
-    }
-
-    body.create-template-page #classifyWordsTemplateCard{
-      display:grid !important;
-      visibility:visible !important;
-      opacity:1 !important;
-    }
-
 </style>
 </head>
 <body>
@@ -11704,8 +11596,8 @@
 <p class="template-desc">أسقط محتوى البالون داخل عربة الإجابة الصحيحة.</p>
 </div>
 </button>
-<button aria-controls="classifyWordsSetupScreen" class="template-card" data-template="classify-words" id="classifyWordsTemplateCard" type="button">
-<div aria-hidden="true" class="template-cover classify-words-cover"></div>
+<button class="template-card" data-template="classify-words" type="button">
+<div aria-hidden="true" class="template-cover train-cover"></div>
 <div class="template-content">
 <h3 class="template-title">صنّف الكلمات</h3>
 <p class="template-desc">اسحب كل كلمة إلى مجموعتها الصحيحة.</p>
@@ -12439,88 +12331,9 @@
     <input class="game-name-input" id="classifyWordsGameNameInput" maxlength="60" placeholder="اكتب اسم اللعبة هنا.." type="text"/>
   </div>
   <div class="choices-setup-body">
-    <section class="choices-section choices-theme-section">
-      <div class="choices-theme-current">
-        <div class="choices-theme-title-wrap"><h3 class="choices-section-title">اختر ثيم اللعبة</h3></div>
-        <button class="choices-theme-change" id="toggleClassifyThemeListBtn" type="button">تغيير</button>
-        <span aria-hidden="true" class="choices-theme-preview theme-art classic" id="classifyCurrentThemePreview"></span>
-      </div>
-      <div class="choices-theme-list" hidden id="classifyThemeListPanel">
-        <div class="choices-theme-card active" data-classify-theme="classic"><span class="theme-art classic"></span><span class="choices-theme-name">كلاسيكي</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="classroom"><span class="theme-art classroom"></span><span class="choices-theme-name">فصل مدرسي</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="sky-clouds"><span class="theme-art sky-clouds"></span><span class="choices-theme-name">سماء وغيوم</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="forest"><span class="theme-art forest"></span><span class="choices-theme-name">غابة</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="math"><span class="theme-art math"></span><span class="choices-theme-name">رياضيات</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="english"><span class="theme-art english"></span><span class="choices-theme-name">إنجليزي</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="flowers"><span class="theme-art flowers"></span><span class="choices-theme-name">أزهار وورود</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="national-day"><span class="theme-art national-day"></span><span class="choices-theme-name">اليوم الوطني</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-        <div class="choices-theme-card" data-classify-theme="founding-day"><span class="theme-art founding-day"></span><span class="choices-theme-name">يوم التأسيس</span><button class="choices-theme-activate" type="button">تفعيل</button></div>
-      </div>
-    </section>
-
     <section class="choices-section">
-      <div class="choices-section-head"><h3 class="choices-section-title">إعدادات طريقة اللعب</h3></div>
-      <button class="choices-advanced-toggle" id="classifyAdvancedToggleBtn" type="button" aria-expanded="false">
-        <span>⚙ الإعدادات المتقدمة</span>
-        <span class="choices-advanced-action" aria-hidden="true"><span class="choices-advanced-arrow">▼</span><span class="choices-advanced-action-text" id="classifyAdvancedActionText">عرض</span></span>
-      </button>
-      <div class="choices-advanced-panel" id="classifyAdvancedPanel" aria-hidden="true">
-        <div class="choices-advanced-inner">
-          <div class="choices-advanced-row">
-            <div class="choices-advanced-label"><strong>أصوات اللعبة</strong></div>
-            <button class="quiz-sound-toggle is-on" id="classifySoundToggleBtn" type="button" aria-pressed="true" aria-label="إيقاف أصوات اللعبة"><span>×</span><span>✓</span></button>
-          </div>
-          <div class="choices-advanced-row">
-            <label class="choices-advanced-label" for="classifyFontSelect"><strong>نوع الخط</strong></label>
-            <select class="quiz-font-select" id="classifyFontSelect">
-              <option value="cairo">كايرو</option>
-              <option value="tajawal">تجوال</option>
-              <option value="noto-kufi">نوتو كوفي</option>
-              <option value="noto-naskh" selected>نوتو نسخ</option>
-            </select>
-          </div>
-          <div class="choices-advanced-row">
-            <div class="choices-advanced-label"><strong>لون النص</strong></div>
-            <div class="match-color-control">
-              <button class="match-color-change" data-classify-color-target="text" type="button">تغيير</button>
-              <span class="match-color-swatch" id="classifyTextColorSwatch" aria-label="لون النص المختار"></span>
-            </div>
-          </div>
-          <div class="choices-advanced-row">
-            <div class="choices-advanced-label"><strong>تغيير ألوان المجموعات</strong></div>
-            <button class="quiz-sound-toggle" id="classifyGroupColorsToggleBtn" type="button" aria-pressed="false" aria-label="تشغيل تغيير ألوان المجموعات"><span>×</span><span>✓</span></button>
-          </div>
-          <div class="choices-advanced-row classify-advanced-color-row" id="classifyGroupColorRow1" hidden>
-            <div class="choices-advanced-label"><strong>لون بطاقة المجموعة الأولى</strong></div>
-            <div class="match-color-control"><button class="match-color-change" data-classify-color-target="group-0" type="button">تغيير</button><span class="match-color-swatch" id="classifyGroupColorSwatch1" aria-label="لون المجموعة الأولى"></span></div>
-          </div>
-          <div class="choices-advanced-row classify-advanced-color-row" id="classifyGroupColorRow2" hidden>
-            <div class="choices-advanced-label"><strong>لون بطاقة المجموعة الثانية</strong></div>
-            <div class="match-color-control"><button class="match-color-change" data-classify-color-target="group-1" type="button">تغيير</button><span class="match-color-swatch" id="classifyGroupColorSwatch2" aria-label="لون المجموعة الثانية"></span></div>
-          </div>
-          <div class="choices-advanced-row classify-advanced-color-row" id="classifyGroupColorRow3" hidden>
-            <div class="choices-advanced-label"><strong>لون بطاقة المجموعة الثالثة</strong></div>
-            <div class="match-color-control"><button class="match-color-change" data-classify-color-target="group-2" type="button">تغيير</button><span class="match-color-swatch" id="classifyGroupColorSwatch3" aria-label="لون المجموعة الثالثة"></span></div>
-          </div>
-          <div class="choices-advanced-row classify-advanced-color-row" id="classifyGroupColorRow4" hidden>
-            <div class="choices-advanced-label"><strong>لون بطاقة المجموعة الرابعة</strong></div>
-            <div class="match-color-control"><button class="match-color-change" data-classify-color-target="group-3" type="button">تغيير</button><span class="match-color-swatch" id="classifyGroupColorSwatch4" aria-label="لون المجموعة الرابعة"></span></div>
-          </div>
-          <div class="choices-advanced-row">
-            <div class="choices-advanced-label"><strong>توحيد ألوان مربعات الكلمات والصور</strong></div>
-            <button class="quiz-sound-toggle" id="classifyUnifiedItemsToggleBtn" type="button" aria-pressed="false" aria-label="تشغيل توحيد ألوان مربعات الكلمات والصور"><span>×</span><span>✓</span></button>
-          </div>
-          <div class="choices-advanced-row classify-advanced-color-row" id="classifyUnifiedItemColorRow" hidden>
-            <div class="choices-advanced-label"><strong>لون مربعات الكلمات والصور</strong></div>
-            <div class="match-color-control"><button class="match-color-change" data-classify-color-target="item" type="button">تغيير</button><span class="match-color-swatch" id="classifyUnifiedItemColorSwatch" aria-label="لون مربعات الكلمات والصور"></span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="choices-section">
-      <div class="choices-section-head"><h3 class="choices-section-title">مجموعات اللعبة</h3><span class="choices-config-group-note" id="classifyLimitsStatus">2/4 مجموعات • 0/36 محتوى</span></div>
-      <p class="choices-config-group-note">الحد الأقصى 4 مجموعات و36 محتوى في اللعبة.</p>
+      <div class="choices-section-head"><h3 class="choices-section-title">مجموعات اللعبة</h3></div>
+      <p class="choices-config-group-note">اكتب اسم كل مجموعة، ثم أضف الكلمات التابعة لها.</p>
       <div id="classifyWordsGroupsEditor" class="classify-groups-editor"></div>
       <button class="train-add-content" id="addClassifyGroupBtn" type="button"><span>＋</span><span>إضافة مجموعة</span></button>
     </section>
@@ -13007,9 +12820,9 @@
       const url = new URL(config.page,window.location.href);
       url.searchParams.set("payloadId",runtimeId);
       url.searchParams.set("theme",String(payload.theme || payload.selectedTheme || "classic"));
-      if (["open-box","classify-words"].includes(gameType)) url.searchParams.set("intro","1");
+      if (gameType === "open-box") url.searchParams.set("intro","1");
       if (gameType === "quiz") url.searchParams.set("mode",String(payload.displayMode || "direct"));
-      if (["quiz","match","order","train","classify-words"].includes(gameType)) url.searchParams.set("return","index.html");
+      if (["quiz","match","order","train"].includes(gameType)) url.searchParams.set("return","index.html");
       url.searchParams.set("v",String(Date.now()));
       window.location.href = `${url.pathname}${url.search}`;
     } catch (error) {
@@ -13591,10 +13404,7 @@
   function openScreen(id){
     const isSubpage = Boolean(id);
     const isGameSetup = gameSetupScreens.has(id);
-    const isCreateTemplatePage = id === "createScreen";
     document.body.classList.toggle("subpage", isSubpage);
-    document.body.classList.toggle("create-template-page", isCreateTemplatePage);
-    document.documentElement.classList.toggle("create-template-page", isCreateTemplatePage);
 
     screens.forEach((sid)=>{
       const el = document.getElementById(sid);
@@ -19144,169 +18954,26 @@
 <script>
 (()=>{
   "use strict";
-  const KEY="sandooq_classify_words_payload_v1",DRAFT="sandooq_classify_words_draft_v1",PAGE="classify-words/classify-words.html",MAX_GROUPS=4,MAX_WORDS=36;
-  const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
-  const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
-  const setup=document.getElementById("classifyWordsSetupScreen"),nameInput=document.getElementById("classifyWordsGameNameInput"),editor=document.getElementById("classifyWordsGroupsEditor"),addGroupBtn=document.getElementById("addClassifyGroupBtn"),limitsStatus=document.getElementById("classifyLimitsStatus"),themeList=document.getElementById("classifyThemeListPanel"),themeToggle=document.getElementById("toggleClassifyThemeListBtn"),themePreview=document.getElementById("classifyCurrentThemePreview"),advancedToggle=document.getElementById("classifyAdvancedToggleBtn"),advancedAction=document.getElementById("classifyAdvancedActionText"),advancedPanel=document.getElementById("classifyAdvancedPanel"),soundToggle=document.getElementById("classifySoundToggleBtn"),fontSelect=document.getElementById("classifyFontSelect"),textColorSwatch=document.getElementById("classifyTextColorSwatch"),groupColorsToggle=document.getElementById("classifyGroupColorsToggleBtn"),unifiedItemsToggle=document.getElementById("classifyUnifiedItemsToggleBtn"),unifiedItemColorRow=document.getElementById("classifyUnifiedItemColorRow"),unifiedItemColorSwatch=document.getElementById("classifyUnifiedItemColorSwatch");
+  const KEY="sandooq_classify_words_payload_v1",DRAFT="sandooq_classify_words_draft_v1",PAGE="classify-words/classify-words.html";
+  const setup=document.getElementById("classifyWordsSetupScreen"),nameInput=document.getElementById("classifyWordsGameNameInput"),editor=document.getElementById("classifyWordsGroupsEditor");
   if(!setup||!editor)return;
-  const DEFAULT_GROUP_COLORS=["#283c78","#704093","#9a4b35","#256a59"],DEFAULT_TEXT_COLOR="#ffffff",DEFAULT_ITEM_COLOR="#3788d8";
-  const GROUP_ORDINALS=["الأولى","الثانية","الثالثة","الرابعة"];
-  const CONTENT_ORDINALS=["الأول","الثاني","الثالث","الرابع","الخامس","السادس","السابع","الثامن","التاسع","العاشر"];
-  const groupColorRows=DEFAULT_GROUP_COLORS.map((_,index)=>document.getElementById(`classifyGroupColorRow${index+1}`));
-  const groupColorSwatches=DEFAULT_GROUP_COLORS.map((_,index)=>document.getElementById(`classifyGroupColorSwatch${index+1}`));
-  let groups=[],seq=0,theme="classic",contentLanguage="ar",soundEnabled=true,fontFamily="noto-naskh",advancedOpen=false,textColor=DEFAULT_TEXT_COLOR,groupColorsEnabled=false,groupColors=DEFAULT_GROUP_COLORS.slice(),unifiedItemsEnabled=false,unifiedItemColor=DEFAULT_ITEM_COLOR,draftSaveTimer=0,draftSaveChain=Promise.resolve();
+  let groups=[],seq=0;
   const id=()=>`classify-${Date.now()}-${++seq}`;
-  function newWord(){return {id:id(),contentType:"text",text:"",imageName:"",imageData:""}}
-  function newGroup(){return {id:id(),contentType:"text",name:"",imageName:"",imageData:"",words:[newWord()]}}
-  const normalizeTheme=value=>THEMES.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"classic";
-  const normalizeFont=value=>FONTS.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"noto-naskh";
-  function normalizeHex(value,fallback){const raw=String(value||"").trim();const short=raw.match(/^#?([0-9a-f]{3})$/i);if(short)return `#${short[1].split("").map(char=>char+char).join("")}`.toLowerCase();const full=raw.match(/^#?([0-9a-f]{6})$/i);return full?`#${full[1]}`.toLowerCase():fallback}
-  function normalizeContentType(value,raw={}){const normalized=String(value||"").trim().toLowerCase();if(["image","images","picture"].includes(normalized))return "image";if(["text","texts"].includes(normalized))return "text";return String(raw?.imageData||raw?.image||raw?.data||"")?"image":"text"}
-  function normalizeGroups(source){let remaining=MAX_WORDS;return (Array.isArray(source)?source:[]).slice(0,MAX_GROUPS).map(raw=>{const safeRaw=raw&&typeof raw==="object"?raw:{};const words=(Array.isArray(safeRaw.words)?safeRaw.words:[]).slice(0,remaining).map(value=>{const word=value&&typeof value==="object"?value:{text:value};return {id:String(word.id||id()),contentType:normalizeContentType(word.contentType||word.type,word),text:String(word.text??word.label??""),imageName:String(word.imageName||word.name||""),imageData:String(word.imageData||word.image||word.data||"")}});if(!words.length&&remaining>0)words.push(newWord());remaining-=words.length;return {id:String(safeRaw.id||id()),contentType:normalizeContentType(safeRaw.contentType||safeRaw.type,safeRaw),name:String(safeRaw.name??safeRaw.text??safeRaw.title??""),imageName:String(safeRaw.imageName||""),imageData:String(safeRaw.imageData||safeRaw.image||safeRaw.data||""),words}}).filter(group=>group.words.length)}
-  const wordSlotCount=()=>groups.reduce((sum,g)=>sum+g.words.length,0);
-  const mediaComplete=(media,textKey="text")=>normalizeContentType(media?.contentType||media?.type,media)==="image"?Boolean(String(media?.imageData||"")):Boolean(String(media?.[textKey]||"").trim());
-  const filledWordCount=()=>groups.reduce((sum,g)=>sum+g.words.filter(word=>mediaComplete(word)).length,0);
-  function serializeWord(word){const contentType=normalizeContentType(word.contentType,word),text=String(word.text||"").trim();return {id:String(word.id||id()),contentType,type:contentType,text,label:text,imageName:String(word.imageName||""),imageData:String(word.imageData||"")}}
-  function serializeGroup(group,words){const contentType=normalizeContentType(group.contentType,group),name=String(group.name||"").trim();return {id:String(group.id||id()),contentType,type:contentType,name,text:name,imageName:String(group.imageName||""),imageData:String(group.imageData||""),words}}
-  function buildPayload({runtime=false}={}){let remaining=MAX_WORDS;const serializedGroups=groups.slice(0,MAX_GROUPS).map(group=>{let sourceWords=group.words.slice(0,remaining);if(runtime)sourceWords=sourceWords.filter(word=>mediaComplete(word));const words=sourceWords.map(serializeWord);remaining-=words.length;return serializeGroup(group,words)}).filter(group=>!runtime||(mediaComplete(group,"name")&&group.words.length));const appearance={textColor:normalizeHex(textColor,DEFAULT_TEXT_COLOR),groupColorsEnabled:Boolean(groupColorsEnabled),groupColors:DEFAULT_GROUP_COLORS.map((fallback,index)=>normalizeHex(groupColors[index],fallback)),unifiedItemsEnabled:Boolean(unifiedItemsEnabled),unifiedItemColor:normalizeHex(unifiedItemColor,DEFAULT_ITEM_COLOR)};return {gameType:"classify-words",gameTemplate:"classify-words",payloadVersion:3,name:String(nameInput?.value||"").trim(),gameName:String(nameInput?.value||"").trim(),theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},fontFamily,intro:true,introMode:"classify-camera",textColor:appearance.textColor,groupColorsEnabled:appearance.groupColorsEnabled,customGroupColorsEnabled:appearance.groupColorsEnabled,groupColors:appearance.groupColors,unifiedItemsEnabled:appearance.unifiedItemsEnabled,unifyItemColors:appearance.unifiedItemsEnabled,unifiedItemColor:appearance.unifiedItemColor,wordCardColor:appearance.unifiedItemColor,appearance,groups:serializedGroups,limits:{maxGroups:MAX_GROUPS,maxWords:MAX_WORDS},updatedAt:Date.now()}}
-  const draftPayload=()=>buildPayload({runtime:false});
-  const runtimePayload=()=>buildPayload({runtime:true});
-  function writePayloadToDb(key,payload){if(!("indexedDB" in window))return Promise.resolve(false);return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(false);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readwrite");tx.objectStore("payloads").put({key,payload,updatedAt:Date.now()});tx.oncomplete=()=>{db.close();resolve(true)};tx.onerror=tx.onabort=()=>{db.close();resolve(false)}}catch(_){db.close();resolve(false)}}})}
-  function readPayloadFromDb(key){if(!("indexedDB" in window))return Promise.resolve(null);return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(null);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readonly"),get=tx.objectStore("payloads").get(key);get.onsuccess=()=>resolve(get.result?.payload||null);get.onerror=()=>resolve(null);tx.oncomplete=tx.onerror=tx.onabort=()=>db.close()}catch(_){db.close();resolve(null)}}})}
-  function saveDraft(){const draft=draftPayload();try{sessionStorage.setItem(DRAFT,JSON.stringify(draft))}catch(_){}clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(()=>{draftSaveChain=draftSaveChain.catch(()=>false).then(()=>writePayloadToDb("draft:classify-words",draft))},180)}
-  function syncToggle(button,enabled,onLabel,offLabel){button?.classList.toggle("is-on",enabled);button?.setAttribute("aria-pressed",enabled?"true":"false");button?.setAttribute("aria-label",enabled?onLabel:offLabel)}
-  function syncSettings(){if(themePreview){themePreview.className=`choices-theme-preview theme-art ${theme}`;themePreview.setAttribute("aria-label",theme)}themeList?.querySelectorAll("[data-classify-theme]").forEach(card=>card.classList.toggle("active",card.dataset.classifyTheme===theme));syncToggle(soundToggle,soundEnabled,"إيقاف أصوات اللعبة","تشغيل أصوات اللعبة");syncToggle(groupColorsToggle,groupColorsEnabled,"إيقاف تغيير ألوان المجموعات","تشغيل تغيير ألوان المجموعات");syncToggle(unifiedItemsToggle,unifiedItemsEnabled,"إيقاف توحيد ألوان مربعات الكلمات والصور","تشغيل توحيد ألوان مربعات الكلمات والصور");if(fontSelect)fontSelect.value=fontFamily;if(textColorSwatch)textColorSwatch.style.background=normalizeHex(textColor,DEFAULT_TEXT_COLOR);groupColorRows.forEach(row=>{if(row)row.hidden=!groupColorsEnabled});groupColorSwatches.forEach((swatch,index)=>{if(swatch)swatch.style.background=normalizeHex(groupColors[index],DEFAULT_GROUP_COLORS[index])});if(unifiedItemColorRow)unifiedItemColorRow.hidden=!unifiedItemsEnabled;if(unifiedItemColorSwatch)unifiedItemColorSwatch.style.background=normalizeHex(unifiedItemColor,DEFAULT_ITEM_COLOR);advancedToggle?.setAttribute("aria-expanded",advancedOpen?"true":"false");advancedPanel?.classList.toggle("is-open",advancedOpen);advancedPanel?.setAttribute("aria-hidden",advancedOpen?"false":"true");if(advancedAction)advancedAction.textContent=advancedOpen?"إخفاء":"عرض"}
-  function setClassifyColor(target,value){const fallback=target==="text"?DEFAULT_TEXT_COLOR:target==="item"?DEFAULT_ITEM_COLOR:DEFAULT_GROUP_COLORS[Math.max(0,Number(target.split("-")[1])||0)];const color=normalizeHex(value,fallback);if(target==="text")textColor=color;else if(target==="item")unifiedItemColor=color;else if(target.startsWith("group-")){const index=Math.max(0,Math.min(3,Number(target.split("-")[1])||0));groupColors[index]=color}syncSettings();saveDraft()}
-  function openClassifyColorPicker(target){const groupIndex=target.startsWith("group-")?Math.max(0,Math.min(3,Number(target.split("-")[1])||0)):-1;const titles=["لون بطاقة المجموعة الأولى","لون بطاقة المجموعة الثانية","لون بطاقة المجموعة الثالثة","لون بطاقة المجموعة الرابعة"];const config=target==="text"?{title:"لون النص",color:textColor,fallback:DEFAULT_TEXT_COLOR}:target==="item"?{title:"لون مربعات الكلمات والصور",color:unifiedItemColor,fallback:DEFAULT_ITEM_COLOR}:{title:titles[groupIndex],color:groupColors[groupIndex],fallback:DEFAULT_GROUP_COLORS[groupIndex]};if(typeof window.openSharedGameColorPicker==="function"){window.openSharedGameColorPicker({...config,onChange:color=>setClassifyColor(target,color)});return}const picker=document.createElement("input");picker.type="color";picker.value=normalizeHex(config.color,config.fallback);picker.addEventListener("input",()=>setClassifyColor(target,picker.value));picker.click()}
-  function readImage(file){return new Promise(resolve=>{if(!file||!String(file.type||"").startsWith("image/")){resolve({imageName:"",imageData:""});return}const reader=new FileReader();reader.onerror=()=>resolve({imageName:"",imageData:""});reader.onload=()=>{const original=String(reader.result||"");const image=new Image();image.onerror=()=>resolve({imageName:file.name||"صورة",imageData:original});image.onload=()=>{try{const maxSide=900,ratio=Math.min(1,maxSide/Math.max(image.naturalWidth||1,image.naturalHeight||1)),width=Math.max(1,Math.round((image.naturalWidth||1)*ratio)),height=Math.max(1,Math.round((image.naturalHeight||1)*ratio)),canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;const context=canvas.getContext("2d",{alpha:false});context.fillStyle="#fff";context.fillRect(0,0,width,height);context.drawImage(image,0,0,width,height);resolve({imageName:file.name||"صورة",imageData:canvas.toDataURL("image/jpeg",.82)})}catch(_){resolve({imageName:file.name||"صورة",imageData:original})}};image.src=original};reader.readAsDataURL(file)})}
-  function createImageControl(media,label){const control=document.createElement("div");control.className="classify-image-control";const preview=document.createElement("span");preview.className="classify-image-preview";if(media.imageData){const image=document.createElement("img");image.src=media.imageData;image.alt="";preview.appendChild(image)}else preview.textContent="▧";const name=document.createElement("span");name.className="classify-image-name";name.textContent=media.imageName||"لم تختر صورة";const input=document.createElement("input");input.type="file";input.accept="image/*";input.className="classify-image-input";const pick=document.createElement("button");pick.type="button";pick.className="classify-image-pick";pick.textContent=media.imageData?"تغيير الصورة":"اختيار صورة";pick.addEventListener("click",()=>input.click());input.addEventListener("change",async()=>{const file=input.files?.[0];if(!file)return;pick.disabled=true;pick.textContent="جارٍ التجهيز...";const result=await readImage(file);if(result.imageData){media.imageName=result.imageName;media.imageData=result.imageData}render();saveDraft()});const clear=document.createElement("button");clear.type="button";clear.className="classify-image-clear";clear.textContent="×";clear.hidden=!media.imageData;clear.setAttribute("aria-label",`حذف ${label}`);clear.addEventListener("click",()=>{media.imageName="";media.imageData="";render();saveDraft()});control.append(preview,name,pick,clear,input);return control}
-  function createContentMode(media,label){const modes=document.createElement("div");modes.className="classify-content-mode";modes.setAttribute("aria-label",`نوع ${label}`);[["text","نص"],["image","صورة"]].forEach(([value,text])=>{const button=document.createElement("button");button.type="button";button.className="classify-content-mode-btn";button.classList.toggle("is-active",media.contentType===value);button.setAttribute("aria-pressed",media.contentType===value?"true":"false");button.textContent=text;button.addEventListener("click",()=>{if(media.contentType===value)return;media.contentType=value;render();saveDraft()});modes.appendChild(button)});return modes}
-  function createTextControl(media,textKey,placeholder,className){const input=document.createElement("input");input.type="text";input.className=className;input.maxLength=80;input.placeholder=placeholder;input.value=media[textKey]||"";input.dir="auto";input.addEventListener("input",()=>{media[textKey]=input.value;updateLimits();saveDraft()});return input}
-  function createContentEditor(media,{label,textKey,placeholder,className}){
-    const section=document.createElement("section");
-    section.className="classify-content-editor";
-    section.appendChild(createContentMode(media,label));
-    if(media.contentType==="image") section.appendChild(createImageControl(media,label));
-    else section.appendChild(createTextControl(media,textKey,placeholder,className));
-    return section;
+  function newGroup(){return {id:id(),name:"",words:[{id:id(),text:""}]}}
+  function normalize(raw,i){return {id:String(raw?.id||id()),name:String(raw?.name||raw?.title||""),words:(Array.isArray(raw?.words)?raw.words:[]).map((w,j)=>({id:String(w?.id||id()),text:String(w?.text??w?.label??w??"")}))}}
+  function payload(){return {gameType:"classify-words",gameTemplate:"classify-words",payloadVersion:1,name:String(nameInput?.value||"").trim(),gameName:String(nameInput?.value||"").trim(),groups:groups.map(g=>({id:g.id,name:g.name.trim(),words:g.words.filter(w=>w.text.trim()).map(w=>({id:w.id,text:w.text.trim()}))})),updatedAt:Date.now()}}
+  function saveDraft(){try{sessionStorage.setItem(DRAFT,JSON.stringify(payload()))}catch(_){}
   }
-
-  function render(){
-    editor.textContent="";
-    groups.forEach((group,groupIndex)=>{
-      const block=document.createElement("article");
-      block.className="classify-group-block";
-
-      const head=document.createElement("div");
-      head.className="classify-group-head";
-      const number=document.createElement("span");
-      number.className="classify-group-number";
-      number.textContent=`المجموعة ${GROUP_ORDINALS[groupIndex]||groupIndex+1}`;
-      const remove=document.createElement("button");
-      remove.className="classify-remove";
-      remove.type="button";
-      remove.textContent="× إزالة";
-      remove.disabled=groups.length<=2;
-      remove.addEventListener("click",()=>{
-        if(groups.length<=2)return;
-        groups.splice(groupIndex,1);
-        render();
-        saveDraft();
-      });
-      head.append(number,remove);
-
-      const card=document.createElement("div");
-      card.className="classify-group-card";
-      const groupTitle=document.createElement("h4");
-      groupTitle.className="classify-section-title";
-      groupTitle.textContent="اسم المجموعة";
-      const groupEditor=createContentEditor(group,{
-        label:"اسم المجموعة",
-        textKey:"name",
-        placeholder:`اكتب اسم المجموعة ${groupIndex+1}`,
-        className:"classify-group-name"
-      });
-
-      const listTitle=document.createElement("h4");
-      listTitle.className="classify-section-title classify-contents-title";
-      listTitle.textContent="المحتويات الخاصة بالمجموعة";
-      const list=document.createElement("div");
-      list.className="classify-words-list";
-
-      group.words.forEach((word,wordIndex)=>{
-        const wordCard=document.createElement("article");
-        wordCard.className="classify-word-card";
-        const wordHead=document.createElement("div");
-        wordHead.className="classify-word-head";
-        const wordNumber=document.createElement("span");
-        wordNumber.className="classify-word-number";
-        wordNumber.textContent=`المحتوى ${CONTENT_ORDINALS[wordIndex]||wordIndex+1}`;
-        const del=document.createElement("button");
-        del.className="classify-remove";
-        del.type="button";
-        del.textContent="حذف";
-        del.disabled=group.words.length<=1;
-        del.addEventListener("click",()=>{
-          if(group.words.length<=1)return;
-          group.words.splice(wordIndex,1);
-          render();
-          saveDraft();
-        });
-        wordHead.append(wordNumber,del);
-        wordCard.append(
-          wordHead,
-          createContentEditor(word,{
-            label:`المحتوى ${wordIndex+1}`,
-            textKey:"text",
-            placeholder:`اكتب المحتوى ${wordIndex+1}`,
-            className:"classify-word-input"
-          })
-        );
-        list.appendChild(wordCard);
-      });
-
-      const add=document.createElement("button");
-      add.className="classify-add-word";
-      add.type="button";
-      add.textContent="＋ إضافة محتوى جديد للمجموعة";
-      add.disabled=wordSlotCount()>=MAX_WORDS;
-      add.addEventListener("click",()=>{
-        if(wordSlotCount()>=MAX_WORDS){
-          alert("الحد الأقصى هو 36 محتوى.");
-          return;
-        }
-        group.words.push(newWord());
-        render();
-        saveDraft();
-      });
-
-      card.append(groupTitle,groupEditor,listTitle,list,add);
-      block.append(head,card);
-      editor.appendChild(block);
-    });
-    updateLimits();
-    syncSettings();
-  }
-  function updateLimits(){const filled=filledWordCount();if(limitsStatus)limitsStatus.textContent=`${groups.length}/4 مجموعات • ${filled}/36 محتوى`;if(addGroupBtn){addGroupBtn.disabled=groups.length>=MAX_GROUPS||wordSlotCount()>=MAX_WORDS;addGroupBtn.title=groups.length>=MAX_GROUPS?"تم الوصول إلى الحد الأقصى للمجموعات":""}editor.querySelectorAll(".classify-add-word").forEach(button=>button.disabled=wordSlotCount()>=MAX_WORDS)}
-  function valid(){if(groups.length<2){alert("أضف مجموعتين على الأقل.");return false}if(groups.length>MAX_GROUPS){alert("الحد الأقصى للمجموعات هو 4 مجموعات.");return false}if(wordSlotCount()>MAX_WORDS){alert("الحد الأقصى هو 36 محتوى.");return false}for(let index=0;index<groups.length;index+=1){const group=groups[index];if(!mediaComplete(group,"name")){alert(`أكمل محتوى المجموعة ${index+1}.`);return false}if(!group.words.length){alert(`أضف محتوى واحدًا على الأقل للمجموعة ${index+1}.`);return false}if(group.words.some(word=>!mediaComplete(word))){alert(`أكمل جميع محتويات المجموعة ${index+1}.`);return false}}return true}
-  async function openGame(){if(!valid())return;const p=runtimePayload(),payloadId=`classify_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;p.payloadId=payloadId;try{sessionStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));sessionStorage.setItem(KEY,JSON.stringify(p));sessionStorage.setItem(DRAFT,JSON.stringify(draftPayload()))}catch(_){}try{localStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));localStorage.setItem(KEY,JSON.stringify(p))}catch(_){}await Promise.all([writePayloadToDb(`classify-words:${payloadId}`,p),writePayloadToDb("classify-words:latest",p)]);const url=new URL(PAGE,location.href);url.searchParams.set("payloadId",payloadId);url.searchParams.set("theme",theme);url.searchParams.set("intro","1");url.searchParams.set("return","index.html");url.searchParams.set("v",String(Date.now()));location.href=`${url.pathname}${url.search}`}
-  async function saveGame(){if(!valid()||!nameInput.value.trim()){alert("يرجى كتابة اسم اللعبة قبل الحفظ.");return}const p=runtimePayload();const task=()=>window.SandooqSavedGames?.saveGame({gameType:"classify-words",name:p.name,payload:p});if(window.SandooqSaveFlow?.run)await window.SandooqSaveFlow.run({gameType:"classify-words",saveTask:task});else await task()}
-  function applySavedSettings(raw={}){const appearance=raw.appearance||{};theme=normalizeTheme(raw.theme||raw.selectedTheme);contentLanguage=raw.contentLanguage==="en"||raw.language==="en"?"en":"ar";soundEnabled=raw.soundEnabled!==false&&raw?.sounds?.enabled!==false;fontFamily=normalizeFont(raw.fontFamily);textColor=normalizeHex(raw.textColor||appearance.textColor,DEFAULT_TEXT_COLOR);groupColorsEnabled=Boolean(raw.groupColorsEnabled??raw.customGroupColorsEnabled??appearance.groupColorsEnabled??false);const savedColors=Array.isArray(raw.groupColors)?raw.groupColors:Array.isArray(appearance.groupColors)?appearance.groupColors:[];groupColors=DEFAULT_GROUP_COLORS.map((fallback,index)=>normalizeHex(savedColors[index],fallback));unifiedItemsEnabled=Boolean(raw.unifiedItemsEnabled??raw.unifyItemColors??appearance.unifiedItemsEnabled??false);unifiedItemColor=normalizeHex(raw.unifiedItemColor||raw.wordCardColor||appearance.unifiedItemColor,DEFAULT_ITEM_COLOR)}
-  function reset(){groups=[newGroup(),newGroup()];theme="classic";contentLanguage="ar";soundEnabled=true;fontFamily="noto-naskh";advancedOpen=false;textColor=DEFAULT_TEXT_COLOR;groupColorsEnabled=false;groupColors=DEFAULT_GROUP_COLORS.slice();unifiedItemsEnabled=false;unifiedItemColor=DEFAULT_ITEM_COLOR;if(nameInput)nameInput.value=""}
-  function open(){if(!groups.length)groups=[newGroup(),newGroup()];window.openEduScreen?.("classifyWordsSetupScreen");render();saveDraft()}
-  document.querySelectorAll('[data-template="classify-words"]').forEach(b=>b.addEventListener("click",()=>{reset();open()}));
-  addGroupBtn?.addEventListener("click",()=>{if(groups.length>=MAX_GROUPS){alert("الحد الأقصى للمجموعات هو 4 مجموعات.");return}if(wordSlotCount()>=MAX_WORDS){alert("الحد الأقصى هو 36 محتوى.");return}groups.push(newGroup());render();saveDraft()});
-  themeToggle?.addEventListener("click",()=>{if(themeList)themeList.hidden=!themeList.hidden});
-  themeList?.querySelectorAll(".choices-theme-activate").forEach(button=>button.addEventListener("click",()=>{const card=button.closest("[data-classify-theme]");theme=normalizeTheme(card?.dataset.classifyTheme);themeList.hidden=true;syncSettings();saveDraft()}));
-  advancedToggle?.addEventListener("click",()=>{advancedOpen=!advancedOpen;syncSettings()});
-  soundToggle?.addEventListener("click",()=>{soundEnabled=!soundEnabled;syncSettings();saveDraft()});
-  groupColorsToggle?.addEventListener("click",()=>{groupColorsEnabled=!groupColorsEnabled;syncSettings();saveDraft()});
-  unifiedItemsToggle?.addEventListener("click",()=>{unifiedItemsEnabled=!unifiedItemsEnabled;syncSettings();saveDraft()});
-  setup.querySelectorAll("[data-classify-color-target]").forEach(button=>button.addEventListener("click",()=>openClassifyColorPicker(button.dataset.classifyColorTarget||"text")));
-  fontSelect?.addEventListener("change",()=>{fontFamily=normalizeFont(fontSelect.value);syncSettings();saveDraft()});
+  function render(){editor.textContent="";groups.forEach((g,gi)=>{const card=document.createElement("article");card.className="classify-group-card";const head=document.createElement("div");head.className="classify-group-head";const name=document.createElement("input");name.className="classify-group-name";name.placeholder=`اسم المجموعة ${gi+1}`;name.value=g.name;name.addEventListener("input",()=>{g.name=name.value;saveDraft()});const remove=document.createElement("button");remove.className="classify-remove";remove.type="button";remove.textContent="إزالة";remove.disabled=groups.length<=1;remove.addEventListener("click",()=>{if(groups.length>1){groups.splice(gi,1);render();saveDraft()}});head.append(name,remove);const list=document.createElement("div");list.className="classify-words-list";g.words.forEach((w,wi)=>{const row=document.createElement("div");row.className="classify-word-row";const input=document.createElement("input");input.className="classify-word-input";input.placeholder=`كلمة ${wi+1}`;input.value=w.text;input.addEventListener("input",()=>{w.text=input.value;saveDraft()});const del=document.createElement("button");del.className="classify-remove";del.type="button";del.textContent="حذف";del.disabled=g.words.length<=1;del.addEventListener("click",()=>{if(g.words.length>1){g.words.splice(wi,1);render();saveDraft()}});row.append(input,del);list.append(row)});const add=document.createElement("button");add.className="classify-add-word";add.type="button";add.textContent="＋ إضافة كلمة";add.addEventListener("click",()=>{g.words.push({id:id(),text:""});render();saveDraft()});card.append(head,list,add);editor.append(card)})}
+  function valid(){const validGroups=groups.filter(g=>g.name.trim()&&g.words.some(w=>w.text.trim()));if(validGroups.length<2){alert("أضف مجموعتين على الأقل مع اسم وكلمة لكل مجموعة.");return false}return true}
+  async function openGame(){if(!valid())return;const p=payload(),payloadId=`classify_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;p.payloadId=payloadId;try{sessionStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));sessionStorage.setItem(KEY,JSON.stringify(p));sessionStorage.setItem(DRAFT,JSON.stringify(p));localStorage.setItem(`${KEY}_${payloadId}`,JSON.stringify(p));localStorage.setItem(KEY,JSON.stringify(p))}catch(_){}const url=new URL(PAGE,location.href);url.searchParams.set("payloadId",payloadId);url.searchParams.set("v",String(Date.now()));location.href=`${url.pathname}${url.search}`}
+  async function saveGame(){if(!valid()||!nameInput.value.trim()){alert("يرجى كتابة اسم اللعبة قبل الحفظ.");return}const p=payload();const task=()=>window.SandooqSavedGames?.saveGame({gameType:"classify-words",name:p.name,payload:p});if(window.SandooqSaveFlow?.run)await window.SandooqSaveFlow.run({gameType:"classify-words",saveTask:task});else await task()}
+  function open(){if(!groups.length)groups=[newGroup()];window.openEduScreen?.("classifyWordsSetupScreen");render();saveDraft()}
+  document.querySelectorAll('[data-template="classify-words"]').forEach(b=>b.addEventListener("click",()=>{groups=[newGroup(),newGroup()];open()}));
+  document.getElementById("addClassifyGroupBtn")?.addEventListener("click",()=>{groups.push(newGroup());render();saveDraft()});
   document.getElementById("testClassifyWordsBtn")?.addEventListener("click",openGame);document.getElementById("saveClassifyWordsBtn")?.addEventListener("click",saveGame);nameInput?.addEventListener("input",saveDraft);
-  let restoredSessionDraft=false;try{const old=JSON.parse(sessionStorage.getItem(DRAFT)||"null");if(old?.groups?.length){groups=normalizeGroups(old.groups);nameInput.value=old.name||old.gameName||"";applySavedSettings(old);restoredSessionDraft=true}}catch(_){};if(!groups.length)groups=[newGroup(),newGroup()];render();window.openClassifyWordsSetup=open;
-  (async()=>{const pending=await window.SandooqSavedGames?.consumePendingEdit("classify-words");if(pending?.payload?.groups){groups=normalizeGroups(pending.payload.groups);nameInput.value=pending.payload.name||pending.payload.gameName||"";applySavedSettings(pending.payload);open();return}if(!restoredSessionDraft){const storedDraft=await readPayloadFromDb("draft:classify-words");if(storedDraft?.groups?.length){groups=normalizeGroups(storedDraft.groups);nameInput.value=storedDraft.name||storedDraft.gameName||"";applySavedSettings(storedDraft);render()}}})();
+  try{const old=JSON.parse(sessionStorage.getItem(DRAFT)||"null");if(old?.groups?.length){groups=old.groups.map(normalize);nameInput.value=old.name||""}}catch(_){};if(!groups.length)groups=[newGroup(),newGroup()];render();window.openClassifyWordsSetup=open;
+  (async()=>{const pending=await window.SandooqSavedGames?.consumePendingEdit("classify-words");if(pending?.payload?.groups){groups=pending.payload.groups.map(normalize);nameInput.value=pending.payload.name||"";open()}})();
 })();
 </script>
 </body>
