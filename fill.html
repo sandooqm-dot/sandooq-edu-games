@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: fill-v4-multi-word-language-colors -->
+  <!-- version: fill-v5-independent-word-completion -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3664,7 +3664,7 @@
     .game-page[data-content-language="en"] .question-text,
     .game-page[data-content-language="en"] .choice-text{
       direction:ltr;
-      text-align:left;
+      text-align:center;
       unicode-bidi:plaintext;
     }
 
@@ -3787,6 +3787,18 @@
       animation-delay:calc((var(--wave-count,1) - 1) * 120ms + 470ms);
     }
 
+    .fill-letter-slots.is-settled{
+      display:inline;
+      margin-inline:.1em;
+      vertical-align:baseline;
+      white-space:normal;
+      letter-spacing:normal;
+      word-spacing:normal;
+      direction:var(--fill-word-direction,rtl);
+      unicode-bidi:isolate;
+      animation:none;
+    }
+
     @keyframes completedLetterWave{
       0%,100%{transform:scale(1)}
       48%{transform:scale(1.17) translateY(-4px)}
@@ -3878,18 +3890,6 @@
     .game-page.fill-letter-dragging *{
       touch-action:none !important;
       overscroll-behavior:none !important;
-    }
-
-    .fill-letter-complete-mark{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      margin-inline-start:.22em;
-      color:#9bffaf;
-      font-size:.9em;
-      font-weight:1000;
-      text-shadow:0 2px 0 rgba(0,0,0,.28);
-      animation:fillLetterPlaced .42s cubic-bezier(.2,1.22,.25,1) both;
     }
 
     .game-page.direct-intro-playing .question-view.is-visible .fill-letter-board,
@@ -5930,8 +5930,10 @@
         items,
         bank,
         slots:Array(items.length).fill(null),
+        completedWords:words.map(()=>false),
+        celebratingWords:words.map(()=>false),
+        settledWords:words.map(()=>false),
         completed:false,
-        celebrating:false
       };
     }
 
@@ -5949,8 +5951,10 @@
       if (completed.has(index) && !state.completed) {
         state.slots = state.items.map((entry)=>entry.id);
         state.bank = [];
+        state.completedWords = state.words.map(()=>true);
+        state.celebratingWords = state.words.map(()=>false);
+        state.settledWords = state.words.map(()=>true);
         state.completed = true;
-        state.celebrating = false;
       }
       return state;
     }
@@ -5998,11 +6002,20 @@
       slotsContainers.forEach((slotsContainer,wordIndex)=>{
         const range = state.wordRanges[wordIndex];
         if (!range) return;
+        const isCelebrating = Boolean(state.celebratingWords?.[wordIndex]);
+        const isSettled = Boolean(state.settledWords?.[wordIndex]);
         slotsContainer.textContent = "";
-        slotsContainer.classList.toggle("is-completing",Boolean(state.celebrating));
-        slotsContainer.style.setProperty("--wave-count",String(Math.max(1,state.items.length)));
+        slotsContainer.classList.toggle("is-completing",isCelebrating);
+        slotsContainer.classList.toggle("is-settled",isSettled);
+        slotsContainer.style.setProperty("--wave-count",String(Math.max(1,range.length)));
         slotsContainer.style.setProperty("--fill-word-direction",range.direction);
         slotsContainer.setAttribute("dir",range.direction);
+
+        if (isSettled) {
+          slotsContainer.textContent = range.word;
+          slotsContainer.setAttribute("aria-label",`الكلمة المكتملة ${range.word}`);
+          return;
+        }
 
         for (let offset = 0; offset < range.length; offset += 1) {
           const slotIndex = range.start + offset;
@@ -6010,7 +6023,7 @@
           const slot = document.createElement("button");
           slot.type = "button";
           slot.className = "fill-letter-slot";
-          slot.style.setProperty("--wave-index",String(slotIndex));
+          slot.style.setProperty("--wave-index",String(offset));
           slot.dataset.letterSlotIndex = String(slotIndex);
           slot.setAttribute("aria-label",`خانة الحرف ${offset + 1} من الكلمة ${wordIndex + 1}`);
           if (itemId) {
@@ -6022,36 +6035,52 @@
           slotsContainer.appendChild(slot);
         }
       });
-
-      questionCard.querySelector(".fill-letter-complete-mark")?.remove();
-      if (state.completed) {
-        const completeMark = document.createElement("span");
-        completeMark.className = "fill-letter-complete-mark";
-        completeMark.textContent = "✓";
-        completeMark.setAttribute("aria-hidden","true");
-        slotsContainers[slotsContainers.length - 1]?.insertAdjacentElement("afterend",completeMark);
-      }
     }
 
-    function markLetterQuestionComplete(item,state){
+    function isLetterWordFilled(state,wordIndex){
+      const range = state.wordRanges?.[wordIndex];
+      if (!range || !range.length) return false;
+      return state.slots
+        .slice(range.start,range.start + range.length)
+        .every(Boolean);
+    }
+
+    function markLetterQuestionComplete(item,state,questionIndex){
       if (state.completed) return;
       state.completed = true;
-      state.celebrating = true;
+      if (displayMode !== "cards") completed.add(questionIndex);
+      if (activeQuestionIndex !== questionIndex) return;
       answerLocked = true;
-      if (displayMode !== "cards") completed.add(activeQuestionIndex);
       choicesGrid.querySelectorAll(".fill-letter-tile").forEach((tile)=>{
         tile.disabled = true;
       });
       questionView.classList.add("is-answered");
+      renderLetterSlots(item,state);
+      updateNavigationButtons();
+    }
+
+    function markLetterWordComplete(item,state,wordIndex){
+      if (
+        state.completedWords?.[wordIndex] ||
+        !isLetterWordFilled(state,wordIndex)
+      ) return;
+
+      const range = state.wordRanges[wordIndex];
+      const questionIndex = activeQuestionIndex;
+      state.completedWords[wordIndex] = true;
+      state.celebratingWords[wordIndex] = true;
       choicesAudio.unlock();
       choicesAudio.playOpen();
       renderLetterSlots(item,state);
-      updateNavigationButtons();
-      const completedQuestionIndex = activeQuestionIndex;
-      const waveDuration = Math.max(900,state.items.length * 120 + 680);
+
+      const waveDuration = Math.max(780,range.length * 120 + 560);
       window.setTimeout(()=>{
-        state.celebrating = false;
-        if (activeQuestionIndex === completedQuestionIndex) {
+        state.celebratingWords[wordIndex] = false;
+        state.settledWords[wordIndex] = true;
+        const allWordsSettled = state.settledWords.every(Boolean);
+        if (allWordsSettled) {
+          markLetterQuestionComplete(item,state,questionIndex);
+        } else if (activeQuestionIndex === questionIndex) {
           renderLetterSlots(item,state);
         }
       },waveDuration);
@@ -6079,17 +6108,9 @@
       sourceTile?.remove();
       renderLetterSlots(item,state);
 
-      if (firstEmptyLetterSlot(state) < 0) {
-        const completedQuestionIndex = activeQuestionIndex;
-        window.setTimeout(()=>{
-          if (
-            activeQuestionIndex === completedQuestionIndex &&
-            !state.completed &&
-            firstEmptyLetterSlot(state) < 0
-          ) {
-            markLetterQuestionComplete(item,state);
-          }
-        },300);
+      const completedWordIndex = expectedItem.wordIndex;
+      if (isLetterWordFilled(state,completedWordIndex)) {
+        markLetterWordComplete(item,state,completedWordIndex);
       }
       return true;
     }
