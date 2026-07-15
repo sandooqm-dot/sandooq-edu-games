@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-fill-v71 -->
+<!-- version: index-fill-v72 -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -12080,14 +12080,14 @@
 
       <div class="choices-config-grid">
         <div class="choices-config-group">
-          <h4 class="choices-config-group-title">نوع السؤال</h4>
-          <div class="choices-mode-grid" aria-label="نوع السؤال">
-            <button class="choices-mode-btn active" data-fill-question-type="text" type="button"><strong>نص</strong></button>
-            <button class="choices-mode-btn" data-fill-question-type="image" type="button"><strong>صورة</strong></button>
+          <h4 class="choices-config-group-title">طريقة الإجابة</h4>
+          <div class="choices-mode-grid" aria-label="طريقة الإجابة">
+            <button class="choices-mode-btn" data-fill-answer-mode="letters" type="button"><strong>ترتيب الحروف</strong></button>
+            <button class="choices-mode-btn active" data-fill-answer-mode="choices" type="button"><strong>اختيارات</strong></button>
           </div>
         </div>
 
-        <div class="choices-config-group">
+        <div class="choices-config-group" id="fillChoicesTypeGroup">
           <h4 class="choices-config-group-title">نوع الاختيارات</h4>
           <div class="choices-mode-grid" aria-label="نوع الاختيارات">
             <button class="choices-mode-btn active" data-fill-choices-type="text" type="button"><strong>نصوص</strong></button>
@@ -16316,7 +16316,9 @@
   const fillSoundToggleBtn = document.getElementById("fillSoundToggleBtn");
   const fillFontSelect = document.getElementById("fillFontSelect");
   const fillCoverTypeGroup = document.getElementById("fillCoverTypeGroup");
+  const fillChoicesTypeGroup = document.getElementById("fillChoicesTypeGroup");
 
+  let fillAnswerMode = "choices";
   let fillQuestionType = "text";
   let fillChoicesType = "text";
   let fillDisplayMode = "direct";
@@ -16347,6 +16349,7 @@
       questionText:"",
       questionImageData:"",
       questionImageName:"",
+      letterWord:"",
       choices:[createFillChoice(),createFillChoice()],
       correctChoiceIndex:-1
     };
@@ -16360,6 +16363,7 @@
       questionText:String(question?.questionText || ""),
       questionImageData:question?.questionImageData || "",
       questionImageName:question?.questionImageName || "",
+      letterWord:String(question?.letterWord || question?.word || ""),
       choices:Array.isArray(question?.choices)
         ? question.choices.map((choice)=>(
           {
@@ -16389,16 +16393,18 @@
     return clean;
   }
 
+  function normalizeFillSingleWord(value){
+    const match = String(value || "").match(/^[^\s]*/u);
+    return match ? match[0] : "";
+  }
+
   function sanitizeFillDataInPlace(){
+    fillQuestionType = "text";
     fillQuestions = fillQuestions.map((question)=>{
       const clean = ensureFillQuestionStructure(question);
-
-      if (fillQuestionType === "text") {
-        clean.questionImageData = "";
-        clean.questionImageName = "";
-      } else {
-        clean.questionText = "";
-      }
+      clean.questionImageData = "";
+      clean.questionImageName = "";
+      clean.letterWord = normalizeFillSingleWord(clean.letterWord);
 
       if (["english-numbers","arabic-numbers"].includes(fillCoverType)) {
         clean.coverText = "";
@@ -16411,24 +16417,26 @@
         clean.coverText = "";
       }
 
-      clean.choices = clean.choices.map((choice,index)=>{
-        const next = {...choice,isCorrect:index === clean.correctChoiceIndex};
-        if (fillChoicesType === "text") {
-          next.imageData = "";
-          next.imageName = "";
-        } else {
-          next.text = "";
-        }
-        return next;
-      });
+      if (fillAnswerMode === "choices") {
+        clean.choices = clean.choices.map((choice,index)=>{
+          const next = {...choice,isCorrect:index === clean.correctChoiceIndex};
+          if (fillChoicesType === "text") {
+            next.imageData = "";
+            next.imageName = "";
+          } else {
+            next.text = "";
+          }
+          return next;
+        });
+      }
 
       return clean;
     });
   }
 
   function updateFillModeButtons(){
-    document.querySelectorAll("[data-fill-question-type]").forEach((button)=>{
-      button.classList.toggle("active",button.dataset.fillQuestionType === fillQuestionType);
+    document.querySelectorAll("[data-fill-answer-mode]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.fillAnswerMode === fillAnswerMode);
     });
     document.querySelectorAll("[data-fill-choices-type]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.fillChoicesType === fillChoicesType);
@@ -16441,6 +16449,9 @@
     });
     if (fillCoverTypeGroup) {
       fillCoverTypeGroup.hidden = fillDisplayMode !== "cards";
+    }
+    if (fillChoicesTypeGroup) {
+      fillChoicesTypeGroup.hidden = fillAnswerMode === "letters";
     }
   }
 
@@ -16891,6 +16902,48 @@
         entry.appendChild(coverField);
       }
 
+      if (fillAnswerMode === "letters") {
+        const wordLabel = document.createElement("div");
+        wordLabel.className = "quiz-field-label";
+        wordLabel.textContent = "الكلمة";
+        entry.appendChild(wordLabel);
+
+        const wordInput = document.createElement("input");
+        wordInput.className = "quiz-text-input";
+        wordInput.type = "text";
+        wordInput.maxLength = 60;
+        wordInput.autocomplete = "off";
+        wordInput.autocapitalize = "off";
+        wordInput.spellcheck = false;
+        wordInput.placeholder = "اكتب كلمة واحدة";
+        wordInput.value = normalizeFillSingleWord(question.letterWord);
+
+        wordInput.addEventListener("beforeinput",(event)=>{
+          if (
+            event.inputType === "insertText" &&
+            /\s/u.test(String(event.data || ""))
+          ) {
+            event.preventDefault();
+          }
+        });
+
+        wordInput.addEventListener("keydown",(event)=>{
+          if (event.key === " " || event.key === "Enter") {
+            event.preventDefault();
+          }
+        });
+
+        wordInput.addEventListener("input",()=>{
+          const normalized = normalizeFillSingleWord(wordInput.value);
+          if (wordInput.value !== normalized) {
+            wordInput.value = normalized;
+          }
+          fillQuestions[questionIndex].letterWord = normalized;
+          saveFillDraft();
+        });
+
+        entry.appendChild(wordInput);
+      } else {
       const qLabel = document.createElement("div");
       qLabel.className = "quiz-field-label";
       qLabel.textContent =
@@ -17150,6 +17203,7 @@
       });
 
       entry.appendChild(addChoice);
+      }
       fillQuestionsEditor.appendChild(entry);
 
       if (pendingFillQuestionEnter === questionIndex) {
@@ -17174,6 +17228,7 @@
       gameName:String(fillGameNameInput?.value || "").trim(),
       theme:fillTheme,
       selectedTheme:fillTheme,
+      answerMode:fillAnswerMode,
       questionType:fillQuestionType,
       choicesType:fillChoicesType,
       displayMode:fillDisplayMode,
@@ -17206,7 +17261,8 @@
       fillTheme = typeof normalizeGameTheme === "function"
         ? normalizeGameTheme(draft.theme || draft.selectedTheme || "classic")
         : String(draft.theme || "classic");
-      fillQuestionType = draft.questionType === "image" ? "image" : "text";
+      fillAnswerMode = draft.answerMode === "letters" ? "letters" : "choices";
+      fillQuestionType = "text";
       fillChoicesType = draft.choicesType === "images" ? "images" : "text";
       fillDisplayMode = draft.displayMode === "cards" ? "cards" : "direct";
       fillCoverType = ["english-numbers","arabic-numbers","images","text"].includes(draft.coverType)
@@ -17261,6 +17317,15 @@
         return false;
       }
 
+      if (fillAnswerMode === "letters") {
+        const word = normalizeFillSingleWord(question.letterWord);
+        if (!word) {
+          alert(`يرجى كتابة كلمة السؤال ${number}.`);
+          return false;
+        }
+        continue;
+      }
+
       if (fillQuestionType === "text" && !String(question.questionText || "").trim()) {
         alert(`يرجى كتابة نص السؤال ${number}.`);
         return false;
@@ -17308,6 +17373,13 @@
       gameName:String(fillGameNameInput?.value || "").trim(),
       payloadId,
       questions:fillQuestions.map((question)=>({
+        answerMode:fillAnswerMode,
+        word:fillAnswerMode === "letters"
+          ? normalizeFillSingleWord(question.letterWord)
+          : "",
+        letterWord:fillAnswerMode === "letters"
+          ? normalizeFillSingleWord(question.letterWord)
+          : "",
         coverText:fillDisplayMode === "cards" && fillCoverType === "text"
           ? String(question.coverText || "").trim()
           : "",
@@ -17318,17 +17390,19 @@
           ? question.coverImageName
           : "",
         questionType:fillQuestionType,
-        questionText:fillQuestionType === "text" ? String(question.questionText || "").trim() : "",
+        questionText:fillAnswerMode === "letters"
+          ? normalizeFillSingleWord(question.letterWord)
+          : (fillQuestionType === "text" ? String(question.questionText || "").trim() : ""),
         questionImageData:fillQuestionType === "image" ? question.questionImageData : "",
         questionImageName:fillQuestionType === "image" ? question.questionImageName : "",
         choicesType:fillChoicesType,
-        choices:question.choices.map((choice,index)=>({
+        choices:fillAnswerMode === "letters" ? [] : question.choices.map((choice,index)=>({
           text:fillChoicesType === "text" ? String(choice.text || "").trim() : "",
           imageData:fillChoicesType === "images" ? choice.imageData : "",
           imageName:fillChoicesType === "images" ? choice.imageName : "",
           isCorrect:index === question.correctChoiceIndex
         })),
-        correctChoiceIndex:question.correctChoiceIndex
+        correctChoiceIndex:fillAnswerMode === "letters" ? -1 : question.correctChoiceIndex
       })),
       updatedAt:Date.now()
     };
@@ -17385,9 +17459,10 @@
     button.addEventListener("click",openFillSetup);
   });
 
-  document.querySelectorAll("[data-fill-question-type]").forEach((button)=>{
+  document.querySelectorAll("[data-fill-answer-mode]").forEach((button)=>{
     button.addEventListener("click",()=>{
-      fillQuestionType = button.dataset.fillQuestionType === "image" ? "image" : "text";
+      fillAnswerMode = button.dataset.fillAnswerMode === "letters" ? "letters" : "choices";
+      fillQuestionType = "text";
       sanitizeFillDataInPlace();
       updateFillModeButtons();
       renderFillQuestions();
@@ -17397,6 +17472,7 @@
 
   document.querySelectorAll("[data-fill-choices-type]").forEach((button)=>{
     button.addEventListener("click",()=>{
+      if (fillAnswerMode === "letters") return;
       fillChoicesType = button.dataset.fillChoicesType === "images" ? "images" : "text";
       sanitizeFillDataInPlace();
       updateFillModeButtons();
