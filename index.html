@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-fill-v73 -->
+<!-- version: index-fill-v74 -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -11613,23 +11613,25 @@
       display:flex;
       justify-content:flex-start;
       align-items:center;
+      gap:9px;
       margin:4px 0 10px;
     }
 
     #fillSetupScreen .fill-blank-tool{
       appearance:none;
       width:auto;
-      min-width:72px;
-      min-height:42px;
-      padding:6px 16px;
-      border:3px solid #111;
-      border-radius:13px;
+      min-width:46px;
+      min-height:28px;
+      padding:3px 9px;
+      border:2px solid #111;
+      border-radius:8px;
       background:#2f8edb;
       color:#fff;
-      box-shadow:0 4px 0 rgba(0,0,0,.24);
+      box-shadow:0 2px 0 rgba(0,0,0,.22);
       font:inherit;
-      font-size:18px;
+      font-size:12px;
       font-weight:900;
+      line-height:1;
       cursor:grab;
       user-select:none;
       -webkit-user-select:none;
@@ -11639,6 +11641,46 @@
       cursor:grabbing;
       transform:translateY(2px);
       box-shadow:0 2px 0 rgba(0,0,0,.24);
+    }
+
+    #fillSetupScreen .fill-blank-hint{
+      color:rgba(47,142,219,.72);
+      font-size:12px;
+      font-weight:850;
+      line-height:1.35;
+    }
+
+    #fillChoicesTypeGroup[hidden]{
+      display:none !important;
+    }
+
+    .quiz-text-editor-actions{
+      position:relative;
+      min-height:50px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .quiz-text-editor-blank{
+      position:absolute;
+      right:0;
+      min-width:58px;
+      min-height:34px;
+      padding:5px 11px;
+      border:2px solid #111;
+      border-radius:10px;
+      background:#2f8edb;
+      color:#fff;
+      font:inherit;
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 2px 0 rgba(0,0,0,.2);
+    }
+
+    .quiz-text-editor-blank[hidden]{
+      display:none !important;
     }
 
     #fillSetupScreen .fill-question-text-input.is-blank-drop-target{
@@ -16469,7 +16511,7 @@
     return Math.round(visualRatio * input.value.length);
   }
 
-  function insertFillBlank(questionIndex,input,requestedPosition){
+  function insertFillBlank(questionIndex,input,requestedPosition,persist = true){
     const question = fillQuestions[questionIndex];
     if (!question || !input) return;
 
@@ -16503,7 +16545,7 @@
 
     const nextValue = value.slice(0,position) + blank + value.slice(position);
     input.value = nextValue;
-    question.questionText = nextValue;
+    if (persist) question.questionText = nextValue;
     try {
       input.focus({preventScroll:true});
     } catch (_) {
@@ -16511,7 +16553,7 @@
     }
     const nextCaret = position + blank.length;
     input.setSelectionRange(nextCaret,nextCaret);
-    saveFillDraft();
+    if (persist) saveFillDraft();
   }
 
   function bindFillBlankTool(button,input,questionIndex){
@@ -16610,7 +16652,9 @@
       fillCoverTypeGroup.hidden = fillDisplayMode !== "cards";
     }
     if (fillChoicesTypeGroup) {
-      fillChoicesTypeGroup.hidden = fillAnswerMode === "letters";
+      const shouldHideChoicesType = fillAnswerMode === "letters";
+      fillChoicesTypeGroup.hidden = shouldHideChoicesType;
+      fillChoicesTypeGroup.style.display = shouldHideChoicesType ? "none" : "";
     }
   }
 
@@ -16712,12 +16756,15 @@
   let fillTextEditorOverlay = null;
   let fillTextEditorTextarea = null;
   let fillTextEditorSaveHandler = null;
+  let fillTextEditorBlankButton = null;
+  let fillTextEditorBlankQuestionIndex = -1;
 
   function closeFillTextEditor(){
     if (!fillTextEditorOverlay) return;
     fillTextEditorOverlay.classList.remove("is-open");
     fillTextEditorOverlay.setAttribute("aria-hidden","true");
     fillTextEditorSaveHandler = null;
+    fillTextEditorBlankQuestionIndex = -1;
   }
 
   function ensureFillTextEditor(){
@@ -16746,6 +16793,16 @@
     saveButton.className = "quiz-text-editor-save";
     saveButton.textContent = "حفظ";
 
+    const actions = document.createElement("div");
+    actions.className = "quiz-text-editor-actions";
+
+    fillTextEditorBlankButton = document.createElement("button");
+    fillTextEditorBlankButton.type = "button";
+    fillTextEditorBlankButton.className = "quiz-text-editor-blank";
+    fillTextEditorBlankButton.textContent = "فراغ";
+    fillTextEditorBlankButton.hidden = true;
+    fillTextEditorBlankButton.setAttribute("aria-label","إضافة فراغ إلى نص السؤال");
+
     closeButton.addEventListener("click",closeFillTextEditor);
 
     fillTextEditorOverlay.addEventListener("click",(event)=>{
@@ -16761,6 +16818,16 @@
       closeFillTextEditor();
     });
 
+    fillTextEditorBlankButton.addEventListener("click",()=>{
+      if (fillTextEditorBlankQuestionIndex < 0) return;
+      insertFillBlank(
+        fillTextEditorBlankQuestionIndex,
+        fillTextEditorTextarea,
+        fillTextEditorTextarea.selectionStart ?? fillTextEditorTextarea.value.length,
+        false
+      );
+    });
+
     document.addEventListener("keydown",(event)=>{
       if (
         event.key === "Escape" &&
@@ -16770,17 +16837,24 @@
       }
     });
 
-    dialog.append(closeButton,fillTextEditorTextarea,saveButton);
+    actions.append(fillTextEditorBlankButton,saveButton);
+    dialog.append(closeButton,fillTextEditorTextarea,actions);
     fillTextEditorOverlay.appendChild(dialog);
     document.body.appendChild(fillTextEditorOverlay);
   }
 
-  function openFillTextEditor({value,maxLength,onSave,placeholder}){
+  function openFillTextEditor({value,maxLength,onSave,placeholder,blankQuestionIndex = -1}){
     ensureFillTextEditor();
     fillTextEditorTextarea.maxLength = maxLength;
     fillTextEditorTextarea.value = String(value || "");
     fillTextEditorTextarea.placeholder = String(placeholder || "");
     fillTextEditorSaveHandler = onSave;
+    fillTextEditorBlankQuestionIndex = Number.isInteger(blankQuestionIndex)
+      ? blankQuestionIndex
+      : -1;
+    if (fillTextEditorBlankButton) {
+      fillTextEditorBlankButton.hidden = fillTextEditorBlankQuestionIndex < 0;
+    }
     fillTextEditorOverlay.classList.add("is-open");
     fillTextEditorOverlay.setAttribute("aria-hidden","false");
 
@@ -16793,7 +16867,7 @@
     },30);
   }
 
-  function createFillReviewButton({label,getValue,maxLength,onSave,placeholder}){
+  function createFillReviewButton({label,getValue,maxLength,onSave,placeholder,blankQuestionIndex = -1}){
     const button = document.createElement("button");
     button.type = "button";
     button.className = "quiz-text-review-btn";
@@ -16809,7 +16883,8 @@
         value:getValue(),
         maxLength,
         onSave,
-        placeholder
+        placeholder,
+        blankQuestionIndex
       });
     });
 
@@ -17074,7 +17149,12 @@
       blankTool.className = "fill-blank-tool";
       blankTool.textContent = "فراغ";
       blankTool.setAttribute("aria-label",`إضافة فراغ إلى نص السؤال ${questionIndex + 1}`);
-      blankToolRow.appendChild(blankTool);
+
+      const blankHint = document.createElement("span");
+      blankHint.className = "fill-blank-hint";
+      blankHint.textContent = "اضغط على زر فراغ لاضافة فراغ في السؤال";
+
+      blankToolRow.append(blankTool,blankHint);
       entry.appendChild(blankToolRow);
 
       const questionFieldRow = document.createElement("div");
@@ -17101,7 +17181,8 @@
           questionInput.value = value;
           fillQuestions[questionIndex].questionText = value;
           saveFillDraft();
-        }
+        },
+        blankQuestionIndex:questionIndex
       });
 
       questionFieldRow.append(questionInput,questionReviewButton);
