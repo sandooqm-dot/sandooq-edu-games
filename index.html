@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-fill-v76-preview-and-order -->
+<!-- version: index-fill-v77-text-choices-only -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -11675,10 +11675,6 @@
       line-height:1.35;
     }
 
-    #fillChoicesTypeGroup[hidden]{
-      display:none !important;
-    }
-
     .quiz-text-editor-actions{
       position:relative;
       min-height:50px;
@@ -12249,14 +12245,6 @@
           <div class="choices-mode-grid" aria-label="طريقة الإجابة">
             <button class="choices-mode-btn" data-fill-answer-mode="letters" type="button"><strong>ترتيب الحروف</strong></button>
             <button class="choices-mode-btn active" data-fill-answer-mode="choices" type="button"><strong>اختيارات</strong></button>
-          </div>
-        </div>
-
-        <div class="choices-config-group" id="fillChoicesTypeGroup">
-          <h4 class="choices-config-group-title">نوع الاختيارات</h4>
-          <div class="choices-mode-grid" aria-label="نوع الاختيارات">
-            <button class="choices-mode-btn active" data-fill-choices-type="text" type="button"><strong>نصوص</strong></button>
-            <button class="choices-mode-btn" data-fill-choices-type="images" type="button"><strong>صور</strong></button>
           </div>
         </div>
 
@@ -16528,7 +16516,6 @@
   const fillSoundToggleBtn = document.getElementById("fillSoundToggleBtn");
   const fillFontSelect = document.getElementById("fillFontSelect");
   const fillCoverTypeGroup = document.getElementById("fillCoverTypeGroup");
-  const fillChoicesTypeGroup = document.getElementById("fillChoicesTypeGroup");
   const fillTextColorSwatch = document.getElementById("fillTextColorSwatch");
   const fillQuestionColorSwatch = document.getElementById("fillQuestionColorSwatch");
   const fillAnswerColorSwatch = document.getElementById("fillAnswerColorSwatch");
@@ -16536,7 +16523,7 @@
 
   let fillAnswerMode = "choices";
   let fillQuestionType = "text";
-  let fillChoicesType = "text";
+  const fillChoicesType = "text";
   let fillContentLanguage = "ar";
   let fillDisplayMode = "direct";
   let fillCoverType = "english-numbers";
@@ -16821,9 +16808,6 @@
     document.querySelectorAll("[data-fill-answer-mode]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.fillAnswerMode === fillAnswerMode);
     });
-    document.querySelectorAll("[data-fill-choices-type]").forEach((button)=>{
-      button.classList.toggle("active",button.dataset.fillChoicesType === fillChoicesType);
-    });
     document.querySelectorAll("[data-fill-language]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.fillLanguage === fillContentLanguage);
     });
@@ -16835,11 +16819,6 @@
     });
     if (fillCoverTypeGroup) {
       fillCoverTypeGroup.hidden = fillDisplayMode !== "cards";
-    }
-    if (fillChoicesTypeGroup) {
-      const shouldHideChoicesType = fillAnswerMode === "letters";
-      fillChoicesTypeGroup.hidden = shouldHideChoicesType;
-      fillChoicesTypeGroup.style.display = shouldHideChoicesType ? "none" : "";
     }
     if (fillSetupScreen) {
       fillSetupScreen.dataset.contentLanguage = fillContentLanguage;
@@ -17816,7 +17795,6 @@
         : String(draft.theme || "classic");
       fillAnswerMode = draft.answerMode === "letters" ? "letters" : "choices";
       fillQuestionType = "text";
-      fillChoicesType = draft.choicesType === "images" ? "images" : "text";
       fillContentLanguage = draft.contentLanguage === "en" || draft.language === "en" ? "en" : "ar";
       fillDisplayMode = draft.displayMode === "cards" ? "cards" : "direct";
       fillCoverType = ["english-numbers","arabic-numbers","images","text"].includes(draft.coverType)
@@ -18038,17 +18016,6 @@
     button.addEventListener("click",()=>{
       fillAnswerMode = button.dataset.fillAnswerMode === "letters" ? "letters" : "choices";
       fillQuestionType = "text";
-      sanitizeFillDataInPlace();
-      updateFillModeButtons();
-      renderFillQuestions();
-      saveFillDraft();
-    });
-  });
-
-  document.querySelectorAll("[data-fill-choices-type]").forEach((button)=>{
-    button.addEventListener("click",()=>{
-      if (fillAnswerMode === "letters") return;
-      fillChoicesType = button.dataset.fillChoicesType === "images" ? "images" : "text";
       sanitizeFillDataInPlace();
       updateFillModeButtons();
       renderFillQuestions();
