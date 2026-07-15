@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-fill-v75-localized-fields-only -->
+<!-- version: index-fill-v76-preview-and-order -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -9595,6 +9595,31 @@
       content:none !important;
     }
 
+    /* صورة معاينة أكمل الفراغ في قائمة الألعاب والثيم الكلاسيكي. */
+    .template-cover.fill-cover{
+      background-color:#fff !important;
+      background-image:url("fill-classic.webp?v=1") !important;
+      background-position:center !important;
+      background-size:contain !important;
+      background-repeat:no-repeat !important;
+    }
+
+    .template-cover.fill-cover::before,
+    .template-cover.fill-cover::after,
+    #fillSetupScreen .theme-art.classic::before,
+    #fillSetupScreen .theme-art.classic::after{
+      display:none !important;
+      content:none !important;
+    }
+
+    #fillSetupScreen .theme-art.classic{
+      background-color:#fff !important;
+      background-image:url("fill-classic.webp?v=1") !important;
+      background-position:center !important;
+      background-size:contain !important;
+      background-repeat:no-repeat !important;
+    }
+
     body[data-setup-template="open-box"] .wheel-setup .cover-type-panel .setup-toggle-grid{
       display:grid !important;
       grid-template-columns:repeat(2,minmax(0,1fr)) !important;
@@ -11826,13 +11851,6 @@
 <p class="template-desc">أسئلة متعددة الخيارات.</p>
 </div>
 </button>
-<button class="template-card" data-template="fill" type="button">
-<div aria-hidden="true" class="template-cover quiz-cover"></div>
-<div class="template-content">
-<h3 class="template-title">أكمل الفراغ</h3>
-<p class="template-desc">أكمل الفراغ باختيار الإجابة الصحيحة.</p>
-</div>
-</button>
 <button class="template-card" data-template="matching" type="button">
 <div aria-hidden="true" class="template-cover match-cover"></div>
 <div class="template-content">
@@ -11852,6 +11870,13 @@
 <div class="template-content">
 <h3 class="template-title">قطار الإجابات</h3>
 <p class="template-desc">أسقط محتوى البالون داخل عربة الإجابة الصحيحة.</p>
+</div>
+</button>
+<button class="template-card" data-template="fill" type="button">
+<div aria-hidden="true" class="template-cover fill-cover"></div>
+<div class="template-content">
+<h3 class="template-title">أكمل الفراغ</h3>
+<p class="template-desc">أكمل الفراغ باختيار الإجابة الصحيحة.</p>
 </div>
 </button>
 <button aria-controls="classifyWordsSetupScreen" class="template-card" data-template="classify-words" id="classifyWordsTemplateCard" type="button">
