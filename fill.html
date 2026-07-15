@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: fill-v1-from-choices-v43 -->
+  <!-- version: fill-v2-letter-slots-inside-question -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3657,6 +3657,267 @@
       #finishView .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
     }
 
+    /* fill-v2: خانات الحروف داخل موضع الفراغ، وبنك الحروف أسفل السؤال. */
+    .question-view.is-letter-mode{
+      justify-content:flex-start;
+      padding-top:clamp(26px,4.5vh,50px);
+      transform:translateY(clamp(34px,5.5vh,54px));
+    }
+
+    .question-view.is-letter-mode .question-card{
+      width:min(88%,1120px);
+      height:clamp(142px,23vh,220px);
+      flex:none;
+      overflow:visible;
+      padding:clamp(5px,.5vw,8px) !important;
+    }
+
+    .question-view.is-letter-mode .question-fit-zone{
+      width:calc(100% - clamp(10px,.7vw,16px)) !important;
+      height:calc(100% - clamp(10px,.8vh,16px)) !important;
+      overflow:visible !important;
+      pointer-events:auto;
+    }
+
+    .fill-letter-question{
+      display:block !important;
+      width:100% !important;
+      max-width:100% !important;
+      overflow:visible !important;
+      line-height:1.5 !important;
+      text-wrap:wrap !important;
+      unicode-bidi:plaintext;
+    }
+
+    .fill-letter-slots{
+      --fill-slot-size:clamp(27px,4.4vw,58px);
+      display:inline-flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(2px,.38vw,6px);
+      max-width:100%;
+      margin-inline:.18em;
+      vertical-align:middle;
+      white-space:normal;
+      direction:var(--fill-word-direction,rtl);
+    }
+
+    .fill-letter-slot{
+      position:relative;
+      flex:0 0 var(--fill-slot-size);
+      width:var(--fill-slot-size);
+      height:clamp(34px,6.3vh,62px);
+      min-width:0;
+      border:clamp(2px,.24vw,4px) solid #102b57;
+      border-radius:clamp(7px,.8vw,12px);
+      background:rgba(255,255,255,.96);
+      color:#111;
+      box-shadow:inset 0 -3px 0 rgba(16,43,87,.12);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      font-family:var(--game-font);
+      font-size:clamp(21px,3.2vw,42px);
+      font-weight:1000;
+      line-height:1;
+      text-shadow:none;
+      touch-action:none;
+      transition:transform .16s ease,background .16s ease,box-shadow .16s ease;
+    }
+
+    .fill-letter-slot:not(.is-filled)::after{
+      content:"";
+      position:absolute;
+      left:16%;
+      right:16%;
+      bottom:12%;
+      height:clamp(3px,.4vw,6px);
+      border-radius:999px;
+      background:#a2a6b4;
+    }
+
+    .fill-letter-slot.is-filled{
+      background:#f2772f;
+      color:#fff;
+      border-color:#111;
+      box-shadow:inset 0 2px 0 rgba(255,255,255,.28),0 3px 0 rgba(0,0,0,.16);
+      animation:fillLetterPlaced .3s cubic-bezier(.2,1.15,.25,1) both;
+    }
+
+    .fill-letter-slot.drag-over{
+      background:#dcefff;
+      transform:scale(1.09);
+      box-shadow:0 0 0 clamp(4px,.55vw,8px) rgba(22,136,211,.25);
+    }
+
+    .fill-letter-slot.is-wrong-target{
+      animation:fillLetterWrong .46s ease both;
+      background:#ffd9d9;
+      border-color:#d92f3f;
+    }
+
+    .question-view.is-letter-mode .choices-grid{
+      display:flex !important;
+      align-items:center;
+      justify-content:center;
+      width:min(90%,1180px) !important;
+      min-height:clamp(86px,18vh,158px);
+      margin-top:clamp(62px,10vh,104px) !important;
+      grid-template-columns:none !important;
+      grid-auto-rows:auto !important;
+      overflow:visible;
+    }
+
+    .fill-letter-board{
+      width:100%;
+      min-height:clamp(74px,14vh,126px);
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:center;
+      align-content:center;
+      gap:clamp(10px,1.35vw,19px);
+      direction:var(--fill-word-direction,rtl);
+      opacity:0;
+      transform:translateY(90px) scale(.93);
+    }
+
+    .question-view.is-visible .fill-letter-board{
+      animation:choiceArrive .68s cubic-bezier(.16,.82,.18,1) .14s both;
+    }
+
+    .fill-letter-tile{
+      position:relative;
+      flex:0 0 clamp(58px,8.2vw,96px);
+      width:clamp(58px,8.2vw,96px);
+      height:clamp(58px,8.2vw,96px);
+      border:clamp(3px,.38vw,5px) solid #102b57;
+      border-radius:clamp(11px,1.3vw,18px);
+      background:#d9dae1;
+      color:#111;
+      box-shadow:0 clamp(4px,.65vw,7px) 0 rgba(36,26,67,.42);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(4px,.6vw,8px);
+      font-family:var(--game-font);
+      font-size:clamp(30px,4.8vw,58px);
+      font-weight:1000;
+      line-height:1;
+      text-shadow:none;
+      cursor:grab;
+      touch-action:none;
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+      -webkit-user-drag:none;
+      transform:translate3d(0,0,0);
+      transition:transform .16s ease,background .16s ease;
+    }
+
+    .fill-letter-tile:active{cursor:grabbing}
+    .fill-letter-tile.is-pointer-active{transform:translateY(-3px) scale(1.04)}
+    .fill-letter-tile.is-drag-source{opacity:.24}
+    .fill-letter-tile.is-wrong{animation:fillLetterWrong .46s ease both}
+
+    .fill-letter-tile.drag-ghost{
+      position:fixed !important;
+      left:0 !important;
+      top:0 !important;
+      z-index:10000 !important;
+      margin:0 !important;
+      opacity:.96;
+      pointer-events:none !important;
+      animation:none !important;
+      transition:none !important;
+      will-change:transform;
+    }
+
+    .game-page.fill-letter-dragging,
+    .game-page.fill-letter-dragging *{
+      touch-action:none !important;
+      overscroll-behavior:none !important;
+    }
+
+    .fill-letter-complete-mark{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      margin-inline-start:.22em;
+      color:#9bffaf;
+      font-size:.9em;
+      font-weight:1000;
+      text-shadow:0 2px 0 rgba(0,0,0,.28);
+      animation:fillLetterPlaced .42s cubic-bezier(.2,1.22,.25,1) both;
+    }
+
+    .game-page.direct-intro-playing .question-view.is-visible .fill-letter-board,
+    .game-page.direct-first-settled .question-view.is-visible .fill-letter-board,
+    .game-page.direct-navigation-playing .question-view.is-visible .fill-letter-board{
+      animation:none !important;
+    }
+
+    @keyframes fillLetterPlaced{
+      0%{transform:scale(.62);opacity:.35}
+      72%{transform:scale(1.12);opacity:1}
+      100%{transform:scale(1);opacity:1}
+    }
+
+    @keyframes fillLetterWrong{
+      0%,100%{transform:translateX(0)}
+      22%{transform:translateX(-8px)}
+      44%{transform:translateX(8px)}
+      66%{transform:translateX(-5px)}
+      84%{transform:translateX(5px)}
+    }
+
+    @media(max-width:560px){
+      .question-view.is-letter-mode{
+        padding-top:clamp(18px,3vh,30px);
+        transform:translateY(clamp(24px,4vh,38px));
+      }
+      .question-view.is-letter-mode .question-card{
+        width:94%;
+        height:clamp(134px,22vh,196px);
+      }
+      .question-view.is-letter-mode .choices-grid{
+        width:94% !important;
+        margin-top:clamp(42px,7vh,64px) !important;
+      }
+      .fill-letter-slots{--fill-slot-size:clamp(24px,8.1vw,38px)}
+      .fill-letter-slot{height:clamp(32px,8.8vw,42px);font-size:clamp(20px,7vw,30px)}
+      .fill-letter-tile{
+        flex-basis:clamp(52px,16vw,72px);
+        width:clamp(52px,16vw,72px);
+        height:clamp(52px,16vw,72px);
+        font-size:clamp(28px,10vw,42px);
+      }
+    }
+
+    @media(max-height:520px) and (orientation:landscape){
+      .question-view.is-letter-mode{
+        padding-top:8px;
+        transform:translateY(18px);
+      }
+      .question-view.is-letter-mode .question-card{
+        width:min(88%,980px);
+        height:clamp(98px,27vh,132px);
+      }
+      .question-view.is-letter-mode .choices-grid{
+        margin-top:clamp(26px,7vh,42px) !important;
+        min-height:clamp(64px,22vh,104px);
+      }
+      .fill-letter-slot{height:clamp(30px,12vh,48px)}
+      .fill-letter-tile{
+        flex-basis:clamp(48px,11vh,66px);
+        width:clamp(48px,11vh,66px);
+        height:clamp(48px,11vh,66px);
+        font-size:clamp(26px,8vh,40px);
+      }
+    }
+
 </style>
 </head>
 
@@ -4366,6 +4627,9 @@
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
     let questionImageZoomOpen = false;
+    const letterQuestionStates = new Map();
+    let activeLetterDragCleanup = null;
+    let suppressLetterClickUntil = 0;
 
     let cardsIntroFrameId = null;
     let cardsIntroLayoutFrozen = false;
@@ -4451,6 +4715,31 @@
       return allowed.includes(raw) ? raw : fallback;
     }
 
+    function normalizeAnswerMode(value){
+      return String(value || "").trim().toLowerCase() === "letters"
+        ? "letters"
+        : "choices";
+    }
+
+    function splitGraphemes(value){
+      const text = String(value || "");
+      if (!text) return [];
+      try {
+        if (typeof Intl?.Segmenter === "function") {
+          return Array.from(
+            new Intl.Segmenter(undefined,{ granularity:"grapheme" }).segment(text),
+            (part)=>part.segment
+          );
+        }
+      } catch (_) {}
+      return Array.from(text);
+    }
+
+    function normalizeLetterWord(value){
+      const match = String(value || "").trim().match(/^[^\s]+/u);
+      return match ? match[0] : "";
+    }
+
     function normalizeSoundEnabled(data){
       if (!data || typeof data !== "object") return true;
       if (data.soundEnabled === false) return false;
@@ -4516,9 +4805,16 @@
         ["text","image","images"],
         ""
       );
+      const globalAnswerMode = normalizeAnswerMode(payload?.answerMode);
 
       return source
         .map((entry)=>{
+          const answerMode = normalizeAnswerMode(
+            entry?.answerMode || globalAnswerMode
+          );
+          const letterWord = answerMode === "letters"
+            ? normalizeLetterWord(entry?.letterWord || entry?.word)
+            : "";
           const rawChoices = Array.isArray(entry?.choices)
             ? entry.choices
             : Array.isArray(entry?.answers)
@@ -4613,22 +4909,36 @@
             coverText:String(entry?.coverText || entry?.boxCoverText || "").trim(),
             coverImageData:entry?.coverImageData || entry?.boxCoverImageData || "",
             coverImageName:entry?.coverImageName || entry?.boxCoverImageName || "",
+            answerMode,
+            letterWord,
+            word:letterWord,
+            blankText:String(entry?.blankText || "").trim() || "…".repeat(splitGraphemes(letterWord).length),
+            blankLength:Math.max(
+              0,
+              Number(entry?.blankLength) || splitGraphemes(letterWord).length
+            ),
             questionType,
             questionText,
             questionImageData,
             choicesType,
-            choices,
-            correctChoiceIndex
+            choices:answerMode === "letters" ? [] : choices,
+            correctChoiceIndex:answerMode === "letters" ? -1 : correctChoiceIndex
           };
 
-          if (questionType === "text") {
+          if (answerMode === "letters") {
+            clean.questionType = "text";
+            clean.questionImageData = "";
+            clean.choicesType = "text";
+          }
+
+          if (clean.questionType === "text") {
             clean.questionImageData = "";
           } else {
             clean.questionText = "";
           }
 
           clean.choices = clean.choices.map((choice)=>{
-            if (choicesType === "text") {
+            if (clean.choicesType === "text") {
               return { ...choice, imageData:"", imageName:"" };
             }
             return { ...choice, text:"" };
@@ -4637,11 +4947,15 @@
           return clean;
         })
         .filter((entry)=>
-          entry.choices.length >= MIN_CHOICES &&
-          (
-            (entry.questionType === "text" && entry.questionText) ||
-            (entry.questionType === "image" && entry.questionImageData)
-          )
+          entry.answerMode === "letters"
+            ? Boolean(entry.questionText && entry.letterWord)
+            : (
+              entry.choices.length >= MIN_CHOICES &&
+              (
+                (entry.questionType === "text" && entry.questionText) ||
+                (entry.questionType === "image" && entry.questionImageData)
+              )
+            )
         )
         .slice(0,MAX_QUESTIONS);
     }
@@ -4679,6 +4993,8 @@
       if (!clean.length) return false;
 
       questions = clean;
+      letterQuestionStates.clear();
+      cancelActiveLetterDrag();
       currentTheme = normalizeTheme(payload?.theme || currentTheme);
       currentFont = normalizeFont(payload?.fontFamily || payload?.font || currentFont);
       displayMode = normalizeDisplayMode(payload || {});
@@ -5425,10 +5741,16 @@
       openQuestionImageZoom(src);
     }
 
+    function getQuestionAnswerElements(){
+      return Array.from(
+        choicesGrid.querySelectorAll(".choice-card, .fill-letter-board")
+      );
+    }
+
     function resetQuestionSceneAnimations(){
       const elements = [
         questionCard,
-        ...choicesGrid.querySelectorAll(".choice-card")
+        ...getQuestionAnswerElements()
       ];
       elements.forEach((element)=>{
         if (!element) return;
@@ -5447,10 +5769,457 @@
       });
     }
 
+    function shuffledLetterIds(ids){
+      const result = ids.slice();
+      for (let index=result.length - 1; index>0; index-=1) {
+        const target = Math.floor(Math.random() * (index + 1));
+        [result[index],result[target]] = [result[target],result[index]];
+      }
+      if (
+        result.length > 1 &&
+        result.every((id,index)=>id === ids[index])
+      ) {
+        result.push(result.shift());
+      }
+      return result;
+    }
+
+    function letterWordDirection(word){
+      return /[A-Za-z]/u.test(String(word || "")) ? "ltr" : "rtl";
+    }
+
+    function createLetterQuestionState(item,index){
+      const letters = splitGraphemes(item.letterWord);
+      const items = letters.map((character,letterIndex)=>({
+        id:`fill-letter-${index}-${letterIndex}`,
+        character,
+        expectedIndex:letterIndex
+      }));
+      const bank = shuffledLetterIds(items.map((entry)=>entry.id));
+      const itemForId = (id)=>items.find((entry)=>entry.id === id);
+      if (
+        bank.length > 1 &&
+        bank.every((id,letterIndex)=>
+          itemForId(id)?.character === letters[letterIndex]
+        )
+      ) {
+        const differentIndex = bank.findIndex(
+          (id)=>itemForId(id)?.character !== itemForId(bank[0])?.character
+        );
+        if (differentIndex > 0) {
+          [bank[0],bank[differentIndex]] = [bank[differentIndex],bank[0]];
+        }
+      }
+      return {
+        word:item.letterWord,
+        items,
+        bank,
+        slots:Array(items.length).fill(null),
+        completed:false
+      };
+    }
+
+    function getLetterQuestionState(index,item){
+      let state = letterQuestionStates.get(index);
+      if (!state || state.word !== item.letterWord) {
+        state = createLetterQuestionState(item,index);
+        letterQuestionStates.set(index,state);
+      }
+
+      if (completed.has(index) && !state.completed) {
+        state.slots = state.items.map((entry)=>entry.id);
+        state.bank = [];
+        state.completed = true;
+      }
+      return state;
+    }
+
+    function firstEmptyLetterSlot(state){
+      return state?.slots?.findIndex((value)=>!value) ?? -1;
+    }
+
+    function letterItemById(state,itemId){
+      return state?.items?.find((entry)=>entry.id === itemId) || null;
+    }
+
+    function cancelActiveLetterDrag(){
+      const cleanup = activeLetterDragCleanup;
+      activeLetterDragCleanup = null;
+      try { cleanup?.(); } catch (_) {}
+      document.querySelectorAll(".fill-letter-tile.drag-ghost").forEach((node)=>node.remove());
+      questionCard.querySelectorAll(".fill-letter-slot.drag-over").forEach((slot)=>slot.classList.remove("drag-over"));
+      choicesGrid.querySelectorAll(".fill-letter-tile.is-drag-source").forEach((tile)=>tile.classList.remove("is-drag-source"));
+      page.classList.remove("fill-letter-dragging");
+    }
+
+    function flashWrongLetter(itemId,slotIndex){
+      choicesAudio.unlock();
+      choicesAudio.playWrong();
+      const tile = choicesGrid.querySelector(`[data-letter-id="${itemId}"]`);
+      const slot = questionCard.querySelector(`[data-letter-slot-index="${slotIndex}"]`);
+      tile?.classList.remove("is-wrong");
+      slot?.classList.remove("is-wrong-target");
+      void tile?.offsetWidth;
+      tile?.classList.add("is-wrong");
+      slot?.classList.add("is-wrong-target");
+      window.setTimeout(()=>{
+        tile?.classList.remove("is-wrong");
+        slot?.classList.remove("is-wrong-target");
+      },500);
+    }
+
+    function renderLetterSlots(item,state){
+      const slotsContainer = questionCard.querySelector(".fill-letter-slots");
+      if (!slotsContainer) return;
+      slotsContainer.textContent = "";
+      slotsContainer.style.setProperty(
+        "--fill-word-direction",
+        letterWordDirection(item.letterWord)
+      );
+      slotsContainer.setAttribute("dir",letterWordDirection(item.letterWord));
+
+      state.slots.forEach((itemId,slotIndex)=>{
+        const slot = document.createElement("button");
+        slot.type = "button";
+        slot.className = "fill-letter-slot";
+        slot.dataset.letterSlotIndex = String(slotIndex);
+        slot.setAttribute("aria-label",`خانة الحرف ${slotIndex + 1}`);
+        if (itemId) {
+          const placedItem = letterItemById(state,itemId);
+          slot.classList.add("is-filled");
+          slot.textContent = placedItem?.character || "";
+          slot.disabled = true;
+        }
+        slotsContainer.appendChild(slot);
+      });
+
+      questionCard.querySelector(".fill-letter-complete-mark")?.remove();
+      if (state.completed) {
+        const completeMark = document.createElement("span");
+        completeMark.className = "fill-letter-complete-mark";
+        completeMark.textContent = "✓";
+        completeMark.setAttribute("aria-hidden","true");
+        slotsContainer.insertAdjacentElement("afterend",completeMark);
+      }
+    }
+
+    function markLetterQuestionComplete(item,state){
+      if (state.completed) return;
+      state.completed = true;
+      answerLocked = true;
+      if (displayMode !== "cards") completed.add(activeQuestionIndex);
+      choicesGrid.querySelectorAll(".fill-letter-tile").forEach((tile)=>{
+        tile.disabled = true;
+      });
+      questionView.classList.add("is-answered");
+      renderLetterSlots(item,state);
+      updateNavigationButtons();
+    }
+
+    function placeLetterItem(itemId,slotIndex){
+      if (answerLocked || interactionLocked) return false;
+      const item = questions[activeQuestionIndex];
+      if (!item || item.answerMode !== "letters") return false;
+      const state = getLetterQuestionState(activeQuestionIndex,item);
+      const letterItem = letterItemById(state,itemId);
+      const expectedItem = state.items[slotIndex];
+      if (!letterItem || !expectedItem || state.slots[slotIndex]) return false;
+
+      if (letterItem.character !== expectedItem.character) {
+        flashWrongLetter(itemId,slotIndex);
+        return false;
+      }
+
+      choicesAudio.unlock();
+      choicesAudio.playOpen();
+      state.slots[slotIndex] = itemId;
+      state.bank = state.bank.filter((id)=>id !== itemId);
+      const sourceTile = choicesGrid.querySelector(`[data-letter-id="${itemId}"]`);
+      sourceTile?.remove();
+      renderLetterSlots(item,state);
+
+      if (firstEmptyLetterSlot(state) < 0) {
+        markLetterQuestionComplete(item,state);
+      }
+      return true;
+    }
+
+    function answerLetterItem(itemId){
+      if (Date.now() < suppressLetterClickUntil) return;
+      const item = questions[activeQuestionIndex];
+      if (!item || item.answerMode !== "letters") return;
+      const state = getLetterQuestionState(activeQuestionIndex,item);
+      const slotIndex = firstEmptyLetterSlot(state);
+      if (slotIndex < 0) return;
+      placeLetterItem(itemId,slotIndex);
+    }
+
+    function magneticLetterTarget(clientX,clientY){
+      const item = questions[activeQuestionIndex];
+      if (!item || item.answerMode !== "letters") return null;
+      const state = getLetterQuestionState(activeQuestionIndex,item);
+      const slotIndex = firstEmptyLetterSlot(state);
+      if (slotIndex < 0) return null;
+      const slot = questionCard.querySelector(`[data-letter-slot-index="${slotIndex}"]`);
+      if (!slot || slot.classList.contains("is-filled")) return null;
+      const rect = slot.getBoundingClientRect();
+      const radius = Math.min(86,Math.max(42,Math.min(rect.width,rect.height) * .95));
+      const dx = Math.max(rect.left - clientX,0,clientX - rect.right);
+      const dy = Math.max(rect.top - clientY,0,clientY - rect.bottom);
+      if (Math.hypot(dx,dy) > radius) return null;
+      return { slot,slotIndex,rect };
+    }
+
+    function attachLetterPointerDrag(element,itemId){
+      let pointerId = null;
+      let pointerType = "";
+      let startX = 0;
+      let startY = 0;
+      let lastX = 0;
+      let lastY = 0;
+      let sourceRect = null;
+      let dragging = false;
+      let settling = false;
+      let ghost = null;
+      let activeTargetSlot = null;
+      let settleTimer = 0;
+      let moveFrame = 0;
+      let pendingX = 0;
+      let pendingY = 0;
+      let ghostOffsetY = 0;
+      let listenersAttached = false;
+
+      const setTargetSlot = (slot)=>{
+        if (activeTargetSlot === slot) return;
+        activeTargetSlot?.classList.remove("drag-over");
+        activeTargetSlot = slot || null;
+        activeTargetSlot?.classList.add("drag-over");
+      };
+
+      const paintGhost = ()=>{
+        moveFrame = 0;
+        if (!ghost) return;
+        ghost.style.transform = `translate3d(${pendingX}px,${pendingY}px,0) translate(-50%,-50%) scale(1.04)`;
+      };
+
+      const queueGhost = (x,y)=>{
+        pendingX = x;
+        pendingY = y;
+        if (!moveFrame) moveFrame = requestAnimationFrame(paintGhost);
+      };
+
+      const removeListeners = ()=>{
+        if (!listenersAttached) return;
+        listenersAttached = false;
+        window.removeEventListener("pointermove",handleMove,true);
+        window.removeEventListener("pointerup",finish,true);
+        window.removeEventListener("pointercancel",cancelPointer,true);
+      };
+
+      const cleanup = ()=>{
+        removeListeners();
+        setTargetSlot(null);
+        if (moveFrame) cancelAnimationFrame(moveFrame);
+        if (settleTimer) clearTimeout(settleTimer);
+        try {
+          if (pointerId !== null && element.hasPointerCapture?.(pointerId)) {
+            element.releasePointerCapture(pointerId);
+          }
+        } catch (_) {}
+        element.classList.remove("is-pointer-active","is-drag-source");
+        page.classList.remove("fill-letter-dragging");
+        ghost?.getAnimations?.().forEach((animation)=>animation.cancel());
+        ghost?.remove();
+        ghost = null;
+        pointerId = null;
+        dragging = false;
+        settling = false;
+        if (activeLetterDragCleanup === cleanup) activeLetterDragCleanup = null;
+      };
+
+      const makeGhost = (clientX,clientY)=>{
+        dragging = true;
+        ghost = element.cloneNode(true);
+        ghost.classList.remove("is-pointer-active","is-drag-source","is-wrong");
+        ghost.classList.add("drag-ghost");
+        ghost.removeAttribute("id");
+        ghost.setAttribute("aria-hidden","true");
+        ghost.tabIndex = -1;
+        ghost.style.width = `${sourceRect.width}px`;
+        ghost.style.height = `${sourceRect.height}px`;
+        document.body.appendChild(ghost);
+        element.classList.add("is-drag-source");
+        page.classList.add("fill-letter-dragging");
+        queueGhost(clientX,clientY - ghostOffsetY);
+      };
+
+      const handleMove = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        lastX = event.clientX;
+        lastY = event.clientY;
+        const threshold = pointerType === "touch" || pointerType === "pen" ? 3 : 4;
+        if (!dragging && Math.hypot(lastX - startX,lastY - startY) >= threshold) {
+          makeGhost(lastX,lastY);
+        }
+        if (!dragging || !ghost) return;
+        queueGhost(lastX,lastY - ghostOffsetY);
+        const target = magneticLetterTarget(lastX,lastY);
+        setTargetSlot(target?.slot || null);
+        if (event.cancelable) event.preventDefault();
+      };
+
+      const animateBack = ()=>{
+        if (!ghost || !sourceRect) {
+          cleanup();
+          return;
+        }
+        const centerX = sourceRect.left + sourceRect.width / 2;
+        const centerY = sourceRect.top + sourceRect.height / 2;
+        ghost.animate([
+          { transform:`translate3d(${lastX}px,${lastY - ghostOffsetY}px,0) translate(-50%,-50%) scale(1.04)`,opacity:.96 },
+          { transform:`translate3d(${centerX}px,${centerY}px,0) translate(-50%,-50%) scale(1)`,opacity:.18 }
+        ],{ duration:220,easing:"cubic-bezier(.22,.72,.24,1)",fill:"forwards" });
+        settleTimer = window.setTimeout(cleanup,215);
+      };
+
+      const finish = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        if (event.cancelable) event.preventDefault();
+        lastX = Number.isFinite(event.clientX) ? event.clientX : lastX;
+        lastY = Number.isFinite(event.clientY) ? event.clientY : lastY;
+
+        if (!dragging) {
+          suppressLetterClickUntil = Date.now() + 420;
+          cleanup();
+          const item = questions[activeQuestionIndex];
+          const state = item ? getLetterQuestionState(activeQuestionIndex,item) : null;
+          const slotIndex = firstEmptyLetterSlot(state);
+          if (slotIndex >= 0) placeLetterItem(itemId,slotIndex);
+          return;
+        }
+
+        suppressLetterClickUntil = Date.now() + 520;
+        settling = true;
+        const target = magneticLetterTarget(lastX,lastY);
+        if (!target) {
+          animateBack();
+          return;
+        }
+
+        const item = questions[activeQuestionIndex];
+        const state = item ? getLetterQuestionState(activeQuestionIndex,item) : null;
+        const letterItem = letterItemById(state,itemId);
+        const expectedItem = state?.items?.[target.slotIndex];
+        const correct = Boolean(letterItem && expectedItem && letterItem.character === expectedItem.character);
+        const destination = correct ? target.rect : sourceRect;
+        const centerX = destination.left + destination.width / 2;
+        const centerY = destination.top + destination.height / 2;
+        setTargetSlot(target.slot);
+        ghost?.animate([
+          { transform:`translate3d(${lastX}px,${lastY - ghostOffsetY}px,0) translate(-50%,-50%) scale(1.04)`,opacity:.96 },
+          { transform:`translate3d(${centerX}px,${centerY}px,0) translate(-50%,-50%) scale(${correct ? .9 : 1})`,opacity:correct ? .24 : .8 }
+        ],{
+          duration:correct ? 145 : 235,
+          easing:correct ? "cubic-bezier(.18,.82,.18,1)" : "cubic-bezier(.22,.72,.24,1)",
+          fill:"forwards"
+        });
+        settleTimer = window.setTimeout(()=>{
+          if (correct) placeLetterItem(itemId,target.slotIndex);
+          else flashWrongLetter(itemId,target.slotIndex);
+          cleanup();
+        },correct ? 135 : 225);
+      };
+
+      const cancelPointer = (event)=>{
+        if (event.pointerId !== pointerId || settling) return;
+        if (event.cancelable) event.preventDefault();
+        cleanup();
+      };
+
+      const begin = (event)=>{
+        if (pointerId !== null || event.button > 0 || answerLocked || interactionLocked) return;
+        if (event.cancelable) event.preventDefault();
+        cancelActiveLetterDrag();
+        pointerId = event.pointerId;
+        pointerType = event.pointerType || "";
+        startX = lastX = event.clientX;
+        startY = lastY = event.clientY;
+        sourceRect = element.getBoundingClientRect();
+        ghostOffsetY = pointerType === "touch" || pointerType === "pen"
+          ? Math.min(34,Math.max(18,sourceRect.height * .35))
+          : 0;
+        element.classList.add("is-pointer-active");
+        activeLetterDragCleanup = cleanup;
+        listenersAttached = true;
+        window.addEventListener("pointermove",handleMove,{ capture:true,passive:false });
+        window.addEventListener("pointerup",finish,{ capture:true,passive:false });
+        window.addEventListener("pointercancel",cancelPointer,{ capture:true,passive:false });
+        try { element.setPointerCapture?.(pointerId); } catch (_) {}
+      };
+
+      element.draggable = false;
+      element.addEventListener("pointerdown",begin,{ passive:false });
+      element.addEventListener("dragstart",(event)=>event.preventDefault());
+      element.addEventListener("contextmenu",(event)=>event.preventDefault());
+    }
+
+    function renderLetterBank(item,state){
+      choicesGrid.textContent = "";
+      const board = document.createElement("div");
+      board.className = "fill-letter-board";
+      board.style.setProperty("--fill-word-direction",letterWordDirection(item.letterWord));
+      board.setAttribute("dir",letterWordDirection(item.letterWord));
+      board.setAttribute("aria-label","حروف الإجابة");
+
+      state.bank.forEach((itemId)=>{
+        const letterItem = letterItemById(state,itemId);
+        if (!letterItem) return;
+        const tile = document.createElement("button");
+        tile.type = "button";
+        tile.className = "fill-letter-tile";
+        tile.dataset.letterId = itemId;
+        tile.textContent = letterItem.character;
+        tile.setAttribute("aria-label",`الحرف ${letterItem.character}`);
+        tile.addEventListener("click",()=>answerLetterItem(itemId));
+        attachLetterPointerDrag(tile,itemId);
+        if (state.completed) tile.disabled = true;
+        board.appendChild(tile);
+      });
+      choicesGrid.appendChild(board);
+    }
+
+    function renderLetterQuestionContent(item,state){
+      const fitZone = document.createElement("div");
+      fitZone.className = "question-fit-zone";
+      const text = document.createElement("div");
+      text.className = "question-text fill-letter-question";
+      text.dataset.fitText = "question";
+
+      const questionText = String(item.questionText || "");
+      const marker = /…+|\.{3,}/u.exec(questionText);
+      const markerStart = marker ? marker.index : questionText.length;
+      const markerEnd = marker ? marker.index + marker[0].length : questionText.length;
+      const before = questionText.slice(0,markerStart);
+      const after = questionText.slice(markerEnd);
+
+      if (before) text.appendChild(document.createTextNode(before));
+      const slots = document.createElement("span");
+      slots.className = "fill-letter-slots";
+      slots.setAttribute("aria-label","فراغ الإجابة");
+      text.appendChild(slots);
+      if (after) text.appendChild(document.createTextNode(after));
+
+      fitZone.appendChild(text);
+      questionCard.appendChild(fitZone);
+      renderLetterSlots(item,state);
+      renderLetterBank(item,state);
+    }
+
     function renderQuestion(index){
       const item = questions[index];
       if (!item) return;
 
+      cancelActiveLetterDrag();
       resetQuestionSceneAnimations();
       activeQuestionIndex = index;
       directQuestionIndex = index;
@@ -5460,15 +6229,17 @@
       answerLocked = questionWasCompleted;
       closeQuestionImageZoom();
 
-      const isImageQuestion = item.questionType === "image";
-      const hasImageChoices = item.choicesType === "images";
+      const isLetterQuestion = item.answerMode === "letters";
+      const isImageQuestion = !isLetterQuestion && item.questionType === "image";
+      const hasImageChoices = !isLetterQuestion && item.choicesType === "images";
 
       questionView.classList.remove(
         "is-answered","has-two-choices","has-image-question","has-image-choices",
         "image-choice-count-2","image-choice-count-3","image-choice-count-4",
-        "image-choice-count-5","image-choice-count-6"
+        "image-choice-count-5","image-choice-count-6","is-letter-mode"
       );
-      questionView.classList.toggle("has-two-choices",!hasImageChoices && item.choices.length === 2);
+      questionView.classList.toggle("is-letter-mode",isLetterQuestion);
+      questionView.classList.toggle("has-two-choices",!isLetterQuestion && !hasImageChoices && item.choices.length === 2);
       questionView.classList.toggle("has-image-question",isImageQuestion);
       questionView.classList.toggle("has-image-choices",hasImageChoices);
       if (hasImageChoices) questionView.classList.add(`image-choice-count-${item.choices.length}`);
@@ -5483,8 +6254,9 @@
 
       choicesGrid.textContent = "";
       choicesGrid.classList.remove(
-        "is-image-choices","choice-count-2","choice-count-3","choice-count-4","choice-count-5","choice-count-6"
+        "is-image-choices","choice-count-2","choice-count-3","choice-count-4","choice-count-5","choice-count-6","is-letter-bank"
       );
+      choicesGrid.classList.toggle("is-letter-bank",isLetterQuestion);
       choicesGrid.classList.toggle("is-image-choices",hasImageChoices);
       choicesGrid.classList.toggle(
         "has-centered-last-choice",
@@ -5500,7 +6272,11 @@
         questionCard.classList.toggle("is-very-long",questionLength > 135);
       }
 
-      if (item.questionType === "image") {
+      if (isLetterQuestion) {
+        const letterState = getLetterQuestionState(index,item);
+        answerLocked = letterState.completed || questionWasCompleted;
+        renderLetterQuestionContent(item,letterState);
+      } else if (item.questionType === "image") {
         const mediaZone = document.createElement("div");
         mediaZone.className = "question-fit-zone question-media-zone question-image-trigger";
         mediaZone.setAttribute("role","button");
@@ -5581,18 +6357,28 @@
       if (questionWasCompleted) {
         questionView.classList.add("is-answered");
 
-        const renderedChoices = Array.from(
-          choicesGrid.querySelectorAll(".choice-card")
-        );
+        if (isLetterQuestion) {
+          const letterState = getLetterQuestionState(index,item);
+          letterState.completed = true;
+          renderLetterSlots(item,letterState);
+          choicesGrid.querySelectorAll(".fill-letter-tile").forEach((tile)=>{
+            tile.disabled = true;
+          });
+        } else {
 
-        renderedChoices.forEach((choiceCard)=>{
-          choiceCard.classList.add("is-disabled");
-          choiceCard.disabled = true;
-        });
+          const renderedChoices = Array.from(
+            choicesGrid.querySelectorAll(".choice-card")
+          );
 
-        const correctCard = renderedChoices[item.correctChoiceIndex];
-        if (correctCard) {
-          showMark(correctCard,"correct");
+          renderedChoices.forEach((choiceCard)=>{
+            choiceCard.classList.add("is-disabled");
+            choiceCard.disabled = true;
+          });
+
+          const correctCard = renderedChoices[item.correctChoiceIndex];
+          if (correctCard) {
+            showMark(correctCard,"correct");
+          }
         }
       }
 
@@ -6100,7 +6886,7 @@
       const sourceRect = source.getBoundingClientRect();
       const elements = [
         questionCard,
-        ...choicesGrid.querySelectorAll(".choice-card")
+        ...getQuestionAnswerElements()
       ];
 
       /*
@@ -6226,7 +7012,7 @@
       const sourceRect = source.getBoundingClientRect();
       const elements = [
         questionCard,
-        ...choicesGrid.querySelectorAll(".choice-card")
+        ...getQuestionAnswerElements()
       ];
 
       /*
@@ -6345,6 +7131,7 @@
 
     async function returnQuestionToBoxes(markCompleted = true){
       if (interactionLocked) return;
+      cancelActiveLetterDrag();
       if (!questionBoxSelected || activeQuestionIndex < 0) {
         questionView.classList.remove("is-visible","is-answered");
         cardsView.classList.remove("is-hidden");
@@ -6443,7 +7230,7 @@
       questionCard.style.removeProperty("opacity");
       questionCard.style.removeProperty("will-change");
 
-      choicesGrid.querySelectorAll(".choice-card").forEach((card)=>{
+      getQuestionAnswerElements().forEach((card)=>{
         card.getAnimations().forEach((animation)=>{
           try { animation.cancel(); } catch (_) {}
         });
@@ -6482,6 +7269,7 @@
     }
 
     async function showEndCelebration(){
+      cancelActiveLetterDrag();
       const token = ++finishSequenceToken;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -6513,6 +7301,7 @@
     }
 
     function restartChoicesActivity(){
+      cancelActiveLetterDrag();
       closeQuestionImageZoom();
       hideEndCelebration();
 
@@ -6533,6 +7322,7 @@
       );
 
       completed.clear();
+      letterQuestionStates.clear();
       activeQuestionIndex = -1;
       activeSourceCard = null;
       questionBoxFocusedIndex = -1;
@@ -6564,7 +7354,7 @@
           questionCard.style.opacity = "1";
           questionCard.style.willChange = "";
 
-          choicesGrid.querySelectorAll(".choice-card").forEach((card)=>{
+          getQuestionAnswerElements().forEach((card)=>{
             card.getAnimations().forEach((animation)=>{
               try { animation.cancel(); } catch (_) {}
             });
@@ -6619,6 +7409,7 @@
       if (interactionLocked) return;
       if (!Number.isInteger(index) || index < 0 || index >= questions.length) return;
 
+      cancelActiveLetterDrag();
       closeQuestionImageZoom();
       interactionLocked = true;
       questionNavigation.hidden = true;
@@ -7027,9 +7818,7 @@
     }
 
     function prepareDirectIntroElementTargets(){
-      const choiceCards = Array.from(
-        choicesGrid.querySelectorAll(".choice-card")
-      );
+      const choiceCards = getQuestionAnswerElements();
 
       const stageRect = stage.getBoundingClientRect();
       const gridRect = choicesGrid.getBoundingClientRect();
