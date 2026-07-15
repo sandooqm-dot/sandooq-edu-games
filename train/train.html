@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
+  <!-- version: train-v15-saved-disabled-features-fix -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>قطار الإجابات - إصدار 142</title>
@@ -4671,30 +4672,56 @@
     return fallback;
   }
 
-  const TRAIN_COUNTDOWN_SECONDS = readOptionalRuntimeNumber(
+  function readRuntimeFeatureFlag(queryKey,payloadKey){
+    const params = new URLSearchParams(window.location.search);
+    const queryRaw = params.get(queryKey);
+    if(queryRaw !== null && queryRaw !== ""){
+      const queryValue = Number(queryRaw);
+      if(Number.isFinite(queryValue)) return queryValue > 0;
+    }
+
+    const payloadValue = TRAIN_RUNTIME_PAYLOAD?.[payloadKey];
+    return typeof payloadValue === "boolean" ? payloadValue : null;
+  }
+
+  const TRAIN_COUNTDOWN_REQUESTED = readRuntimeFeatureFlag(
     "timer",
-    ["countdownTotalSeconds"],
-    0,
-    5999,
-    TRAIN_RUNTIME_PAYLOAD?.countdownEnabled
-      ? clamp(
-          Math.round(Number(TRAIN_RUNTIME_PAYLOAD?.countdownMinutes || 0) * 60 +
-            Number(TRAIN_RUNTIME_PAYLOAD?.countdownSeconds || 0)),
-          1,
-          5999
-        )
-      : 0
+    "countdownEnabled"
   );
 
-  const TRAIN_ATTEMPTS_TOTAL = readOptionalRuntimeNumber(
+  const TRAIN_ATTEMPTS_REQUESTED = readRuntimeFeatureFlag(
     "attempts",
-    ["attemptsCount"],
-    0,
-    10,
-    TRAIN_RUNTIME_PAYLOAD?.attemptsEnabled
-      ? clamp(Math.round(Number(TRAIN_RUNTIME_PAYLOAD?.attemptsCount) || 10),1,10)
-      : 0
+    "attemptsEnabled"
   );
+
+  const TRAIN_COUNTDOWN_SECONDS = TRAIN_COUNTDOWN_REQUESTED === false
+    ? 0
+    : readOptionalRuntimeNumber(
+        "timer",
+        ["countdownTotalSeconds"],
+        0,
+        5999,
+        TRAIN_RUNTIME_PAYLOAD?.countdownEnabled
+          ? clamp(
+              Math.round(Number(TRAIN_RUNTIME_PAYLOAD?.countdownMinutes || 0) * 60 +
+                Number(TRAIN_RUNTIME_PAYLOAD?.countdownSeconds || 0)),
+              1,
+              5999
+            )
+          : 0
+      );
+
+  const TRAIN_ATTEMPTS_TOTAL = TRAIN_ATTEMPTS_REQUESTED === false
+    ? 0
+    : readOptionalRuntimeNumber(
+        "attempts",
+        ["attemptsCount"],
+        0,
+        10,
+        TRAIN_RUNTIME_PAYLOAD?.attemptsEnabled
+          ? clamp(Math.round(Number(TRAIN_RUNTIME_PAYLOAD?.attemptsCount) || 10),1,10)
+          : 0
+      );
 
   const TRAIN_COUNTDOWN_ENABLED = TRAIN_COUNTDOWN_SECONDS > 0;
   const TRAIN_ATTEMPTS_ENABLED = TRAIN_ATTEMPTS_TOTAL > 0;
