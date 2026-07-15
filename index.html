@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-classify-words-v69 -->
+<!-- version: index-classify-words-v70 -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -12964,7 +12964,7 @@
     }
   }
 
-  async function launchRecord(record){
+  async function launchRecord(record,launchSource="saved"){
     try {
       const gameType = normalizeType(record?.gameType);
       const config = TYPE_CONFIG[gameType];
@@ -13010,7 +13010,12 @@
       url.searchParams.set("theme",String(payload.theme || payload.selectedTheme || "classic"));
       if (["open-box","classify-words"].includes(gameType)) url.searchParams.set("intro","1");
       if (gameType === "quiz") url.searchParams.set("mode",String(payload.displayMode || "direct"));
-      if (["quiz","match","order","train","classify-words"].includes(gameType)) url.searchParams.set("return","index.html");
+      if (["quiz","match","order","train"].includes(gameType)) url.searchParams.set("return","index.html");
+      if (gameType === "classify-words") {
+        const source = launchSource === "home" ? "home" : "saved";
+        url.searchParams.set("launch",source);
+        url.searchParams.set("return",source === "saved" ? "index.html#savedGames" : "index.html");
+      }
       url.searchParams.set("v",String(Date.now()));
       window.location.href = `${url.pathname}${url.search}`;
     } catch (error) {
@@ -13134,7 +13139,7 @@
       play.type = "button";
       play.className = "sg-game-action sg-play-game";
       play.textContent = "تشغيل";
-      play.addEventListener("click",()=>launchRecord(record));
+      play.addEventListener("click",()=>launchRecord(record,"saved"));
       const edit = document.createElement("button");
       edit.type = "button";
       edit.className = "sg-game-action sg-edit-game";
@@ -13457,7 +13462,7 @@
     select?.addEventListener("change",()=>{ if (start) start.disabled = !select.value; });
     start?.addEventListener("click",()=>{
       const record = readRegistry().find((item)=>item.storageKey === select?.value);
-      if (record) launchRecord(record);
+      if (record) launchRecord(record,"home");
     });
 
     document.querySelectorAll("[data-open-screen='savedScreen']").forEach((button)=>{
@@ -13608,6 +13613,21 @@
   }
 
   window.openEduScreen = openScreen;
+
+  function applyRequestedScreen(){
+    if (window.location.hash === "#savedGames") {
+      openScreen("savedScreen");
+      window.SandooqSavedGames?.refreshUi?.();
+      return;
+    }
+    if (window.location.hash === "#classifyWordsSetup") {
+      openScreen("classifyWordsSetupScreen");
+    }
+  }
+
+  applyRequestedScreen();
+  window.addEventListener("hashchange",applyRequestedScreen);
+  window.addEventListener("pageshow",applyRequestedScreen);
 
   function entryHint(){
     const target = currentGameTemplate === "open-box" ? "الصناديق" : "أقسام العجلة";
@@ -18943,7 +18963,8 @@
   };
 
   const INDEXED_DRAFT_KEYS = {
-    match:["draft:match"]
+    match:["draft:match"],
+    "classify-words":["draft:classify-words"]
   };
 
   let confirmResolver = null;
@@ -19307,11 +19328,30 @@
     url.searchParams.set("payloadId",payloadId);
     url.searchParams.set("theme",theme);
     url.searchParams.set("intro","1");
-    url.searchParams.set("return","index.html");
+    url.searchParams.set("launch","test");
+    url.searchParams.set("return","index.html#classifyWordsSetup");
     url.searchParams.set("v",String(Date.now()));
     location.href=`${url.pathname}${url.search}`;
   }
-  async function saveGame(){if(!valid()||!nameInput.value.trim()){alert("يرجى كتابة اسم اللعبة قبل الحفظ.");return}const p=runtimePayload();const task=()=>window.SandooqSavedGames?.saveGame({gameType:"classify-words",name:p.name,payload:p});if(window.SandooqSaveFlow?.run)await window.SandooqSaveFlow.run({gameType:"classify-words",saveTask:task});else await task()}
+  async function saveGame(){
+    if(!valid()||!nameInput.value.trim()){
+      alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
+      return;
+    }
+    const p=runtimePayload();
+    const task=()=>window.SandooqSavedGames?.saveGame({gameType:"classify-words",name:p.name,payload:p});
+    clearTimeout(draftSaveTimer);
+    draftSaveTimer=0;
+    await draftSaveChain.catch(()=>false);
+    const saved=window.SandooqSaveFlow?.run
+      ? await window.SandooqSaveFlow.run({gameType:"classify-words",saveTask:task})
+      : Boolean(await task());
+    if(!saved){saveDraft();return;}
+    try{sessionStorage.removeItem(DRAFT)}catch(_){}
+    try{localStorage.removeItem(DRAFT)}catch(_){}
+    reset();
+    render();
+  }
   function applySavedSettings(raw={}){const appearance=raw.appearance||{};theme=normalizeTheme(raw.theme||raw.selectedTheme);contentLanguage=raw.contentLanguage==="en"||raw.language==="en"?"en":"ar";soundEnabled=raw.soundEnabled!==false&&raw?.sounds?.enabled!==false;fontFamily=normalizeFont(raw.fontFamily);textColor=normalizeHex(raw.textColor||appearance.textColor,DEFAULT_TEXT_COLOR);groupColorsEnabled=Boolean(raw.groupColorsEnabled??raw.customGroupColorsEnabled??appearance.groupColorsEnabled??false);const savedColors=Array.isArray(raw.groupColors)?raw.groupColors:Array.isArray(appearance.groupColors)?appearance.groupColors:[];groupColors=DEFAULT_GROUP_COLORS.map((fallback,index)=>normalizeHex(savedColors[index],fallback));unifiedItemsEnabled=Boolean(raw.unifiedItemsEnabled??raw.unifyItemColors??appearance.unifiedItemsEnabled??false);unifiedItemColor=normalizeHex(raw.unifiedItemColor||raw.wordCardColor||appearance.unifiedItemColor,DEFAULT_ITEM_COLOR)}
   function reset(){groups=[newGroup()];theme="classic";contentLanguage="ar";soundEnabled=true;fontFamily="noto-naskh";advancedOpen=false;textColor=DEFAULT_TEXT_COLOR;groupColorsEnabled=false;groupColors=DEFAULT_GROUP_COLORS.slice();unifiedItemsEnabled=false;unifiedItemColor=DEFAULT_ITEM_COLOR;if(nameInput)nameInput.value=""}
   function open(){if(!groups.length)groups=[newGroup()];window.openEduScreen?.("classifyWordsSetupScreen");render();saveDraft()}
