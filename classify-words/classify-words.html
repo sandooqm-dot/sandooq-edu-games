@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
+  <!-- version: classify-words-11 -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <title>صنّف الكلمات</title>
@@ -111,7 +112,34 @@
     const page=document.getElementById("page"),themeBackground=page.querySelector(".theme-background"),stage=document.getElementById("stage"),gameLayout=document.getElementById("gameLayout"),groupsNode=document.getElementById("groups"),wordsNode=document.getElementById("words"),startGate=document.getElementById("startGate"),startBtn=document.getElementById("startBtn"),finishView=document.getElementById("finishView"),finishTitle=document.getElementById("finishTitle"),finishSubtitle=document.getElementById("finishSubtitle"),fixedControls=page.querySelector(".fixed-controls"),backBtn=document.getElementById("backBtn"),restartBtn=document.getElementById("restartBtn"),homeBtn=document.getElementById("homeBtn");
     const parse=value=>{try{const parsed=typeof value==="string"?JSON.parse(value):value;return parsed&&typeof parsed==="object"?parsed:null}catch(_){return null}};
     function readPayloadFromDb(key){if(!("indexedDB" in window))return Promise.resolve(null);return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(null);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readonly"),get=tx.objectStore("payloads").get(key);get.onsuccess=()=>resolve(get.result?.payload||null);get.onerror=()=>resolve(null);tx.oncomplete=tx.onerror=tx.onabort=()=>db.close()}catch(_){db.close();resolve(null)}}})}
-    async function readPayload(){const keys=payloadId?[`${KEY}_${payloadId}`,KEY]:[KEY];for(const store of [sessionStorage,localStorage]){try{for(const key of keys){const value=parse(store.getItem(key));if(value)return value}}catch(_){}}if(payloadId){const stored=await readPayloadFromDb(`classify-words:${payloadId}`);if(stored)return stored}return readPayloadFromDb("classify-words:latest")}
+    function readStoragePayload(store,key){try{return parse(store.getItem(key))}catch(_){return null}}
+    async function readPayload(){
+      const stores=[sessionStorage,localStorage];
+      if(payloadId){
+        const exactKey=`${KEY}_${payloadId}`;
+        for(const store of stores){
+          const exact=readStoragePayload(store,exactKey);
+          if(exact)return exact;
+        }
+
+        const exactDb=await readPayloadFromDb(`classify-words:${payloadId}`);
+        if(exactDb)return exactDb;
+
+        for(const store of stores){
+          const fallback=readStoragePayload(store,KEY);
+          if(fallback&&String(fallback.payloadId||"")===payloadId)return fallback;
+        }
+
+        const latest=await readPayloadFromDb("classify-words:latest");
+        return latest&&String(latest.payloadId||"")===payloadId?latest:null;
+      }
+
+      for(const store of stores){
+        const fallback=readStoragePayload(store,KEY);
+        if(fallback)return fallback;
+      }
+      return readPayloadFromDb("classify-words:latest");
+    }
     const normalizeTheme=value=>THEMES.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"classic";
     const normalizeFont=value=>FONTS.includes(String(value||"").trim().toLowerCase())?String(value).trim().toLowerCase():"noto-naskh";
     function normalizeHex(value,fallback){const raw=String(value||"").trim();const short=raw.match(/^#?([0-9a-f]{3})$/i);if(short)return `#${short[1].split("").map(char=>char+char).join("")}`.toLowerCase();const full=raw.match(/^#?([0-9a-f]{6})$/i);return full?`#${full[1]}`.toLowerCase():fallback}
