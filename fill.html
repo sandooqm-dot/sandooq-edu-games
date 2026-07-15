@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: fill-v2-letter-slots-inside-question -->
+  <!-- version: fill-v4-multi-word-language-colors -->
   <meta charset="utf-8" />
   <meta
     name="viewport"
@@ -3657,6 +3657,23 @@
       #finishView .finish-actions button{height:38px !important;min-height:38px !important;font-size:16px !important}
     }
 
+    .game-page[data-content-language="en"] .question-view{
+      direction:ltr;
+    }
+
+    .game-page[data-content-language="en"] .question-text,
+    .game-page[data-content-language="en"] .choice-text{
+      direction:ltr;
+      text-align:left;
+      unicode-bidi:plaintext;
+    }
+
+    .game-page[data-content-language="ar"] .question-text,
+    .game-page[data-content-language="ar"] .choice-text{
+      direction:rtl;
+      unicode-bidi:plaintext;
+    }
+
     /* fill-v2: خانات الحروف داخل موضع الفراغ، وبنك الحروف أسفل السؤال. */
     .question-view.is-letter-mode{
       justify-content:flex-start;
@@ -4092,6 +4109,13 @@
     const MAX_QUESTIONS = 30;
     const MIN_CHOICES = 2;
     const MAX_CHOICES = 6;
+    const MAX_LETTER_WORDS = 4;
+    const DEFAULT_APPEARANCE = Object.freeze({
+      textColor:"#FFFFFF",
+      questionCardColor:"#9D174D",
+      answerCardColor:"#C2410C",
+      letterCardColor:"#D9DAE1"
+    });
 
     const DEMO_QUESTIONS = [
       {
@@ -4338,7 +4362,8 @@
         go: "sounds/open-box-go.mp3?v=2",
         return: "sounds/open-box-return.mp3?v=2",
         letterPlace: "sounds/match-shuffle-end.mp3?v=1",
-        wrong: "sounds/order-letter-wrong.mp3?v=1",
+        choiceWrong: "sounds/choice-wrong.mp3?v=1",
+        letterWrong: "sounds/order-letter-wrong.mp3?v=1",
         finish: "sounds/match-finish.mp3?v=1"
       };
 
@@ -4347,7 +4372,8 @@
         go: 1,
         return: 1,
         letterPlace: 1,
-        wrong: 1,
+        choiceWrong: 1,
+        letterWrong: 1,
         finish: 1
       };
 
@@ -4356,7 +4382,8 @@
         go: 0,
         return: 0,
         letterPlace: 0,
-        wrong: 0,
+        choiceWrong: 0,
+        letterWrong: 0,
         finish: 0
       };
 
@@ -4484,7 +4511,8 @@
         playGo: ()=> playNamed("go"),
         playReturn: ()=> playNamed("return"),
         playLetterPlace: ()=> playNamed("letterPlace"),
-        playWrong: ()=> playNamed("wrong"),
+        playChoiceWrong: ()=> playNamed("choiceWrong"),
+        playLetterWrong: ()=> playNamed("letterWrong"),
         playFinish: ()=> playNamed("finish")
       };
     })();
@@ -4639,6 +4667,8 @@
 
     let currentTheme = "classroom";
     let currentFont = "noto-naskh";
+    let currentContentLanguage = "ar";
+    let currentAppearance = { ...DEFAULT_APPEARANCE };
     let displayMode = "cards";
     let coverType = "english-numbers";
     let questions = [];
@@ -4766,6 +4796,15 @@
       return match ? match[0] : "";
     }
 
+    function normalizeHexColor(value,fallback){
+      const raw = String(value || "").trim();
+      return /^#[0-9a-f]{6}$/i.test(raw) ? raw.toUpperCase() : fallback;
+    }
+
+    function normalizeContentLanguage(value){
+      return String(value || "").trim().toLowerCase() === "en" ? "en" : "ar";
+    }
+
     function normalizeSoundEnabled(data){
       if (!data || typeof data !== "object") return true;
       if (data.soundEnabled === false) return false;
@@ -4838,9 +4877,17 @@
           const answerMode = normalizeAnswerMode(
             entry?.answerMode || globalAnswerMode
           );
-          const letterWord = answerMode === "letters"
-            ? normalizeLetterWord(entry?.letterWord || entry?.word)
-            : "";
+          const letterWords = answerMode === "letters"
+            ? (
+                Array.isArray(entry?.letterWords) && entry.letterWords.length
+                  ? entry.letterWords
+                  : [entry?.letterWord || entry?.word]
+              )
+                .slice(0,MAX_LETTER_WORDS)
+                .map(normalizeLetterWord)
+                .filter(Boolean)
+            : [];
+          const letterWord = letterWords[0] || "";
           const rawChoices = Array.isArray(entry?.choices)
             ? entry.choices
             : Array.isArray(entry?.answers)
@@ -4937,8 +4984,13 @@
             coverImageName:entry?.coverImageName || entry?.boxCoverImageName || "",
             answerMode,
             letterWord,
+            letterWords,
             word:letterWord,
             blankText:String(entry?.blankText || "").trim() || "…".repeat(splitGraphemes(letterWord).length),
+            blankTexts:letterWords.map((word,wordIndex)=>
+              String(entry?.blankTexts?.[wordIndex] || "").trim() ||
+              "…".repeat(splitGraphemes(word).length)
+            ),
             blankLength:Math.max(
               0,
               Number(entry?.blankLength) || splitGraphemes(letterWord).length
@@ -4974,7 +5026,11 @@
         })
         .filter((entry)=>
           entry.answerMode === "letters"
-            ? Boolean(entry.questionText && entry.letterWord)
+            ? Boolean(
+                entry.questionText &&
+                entry.letterWords.length &&
+                entry.letterWords.every(Boolean)
+              )
             : (
               entry.choices.length >= MIN_CHOICES &&
               (
@@ -5023,6 +5079,28 @@
       cancelActiveLetterDrag();
       currentTheme = normalizeTheme(payload?.theme || currentTheme);
       currentFont = normalizeFont(payload?.fontFamily || payload?.font || currentFont);
+      currentContentLanguage = normalizeContentLanguage(
+        payload?.contentLanguage || payload?.language
+      );
+      const appearance = payload?.appearance || {};
+      currentAppearance = {
+        textColor:normalizeHexColor(
+          payload?.textColor || appearance.textColor,
+          DEFAULT_APPEARANCE.textColor
+        ),
+        questionCardColor:normalizeHexColor(
+          payload?.questionCardColor || appearance.questionCardColor,
+          DEFAULT_APPEARANCE.questionCardColor
+        ),
+        answerCardColor:normalizeHexColor(
+          payload?.answerCardColor || appearance.answerCardColor,
+          DEFAULT_APPEARANCE.answerCardColor
+        ),
+        letterCardColor:normalizeHexColor(
+          payload?.letterCardColor || appearance.letterCardColor,
+          DEFAULT_APPEARANCE.letterCardColor
+        )
+      };
       displayMode = normalizeDisplayMode(payload || {});
       coverType = normalizeCoverType(payload || {});
       quizSoundEnabled = normalizeSoundEnabled(payload);
@@ -5065,6 +5143,8 @@
       }));
       currentTheme = normalizeTheme(getUrlParam("theme") || "classroom");
       currentFont = normalizeFont(getUrlParam("font") || "noto-naskh");
+      currentContentLanguage = "ar";
+      currentAppearance = { ...DEFAULT_APPEARANCE };
       displayMode = getUrlParam("mode") === "cards" ? "cards" : "direct";
       quizSoundEnabled = true;
       choicesAudio.setEnabled(true);
@@ -5079,6 +5159,15 @@
     function applyFont(){
       if (!page) return;
       page.dataset.gameFont = normalizeFont(currentFont);
+    }
+
+    function applyLanguage(){
+      const direction = currentContentLanguage === "en" ? "ltr" : "rtl";
+      page.dataset.contentLanguage = currentContentLanguage;
+      page.setAttribute("dir",direction);
+      stage?.setAttribute("dir",direction);
+      document.documentElement.lang = currentContentLanguage;
+      document.documentElement.dir = direction;
     }
 
     function getVisualViewportMetrics(){
@@ -5223,39 +5312,16 @@
       element.style.setProperty("--panel-color",safeColor);
       element.style.setProperty("--panel-dark",safeColor);
       element.style.setProperty("--panel-light",safeColor);
-      element.style.setProperty("--panel-text","#fff");
+      element.style.setProperty("--panel-text",currentAppearance.textColor);
     }
 
     function applyQuestionPanelColor(element){
-      const colors = getPanelThemeColors();
-      setSolidPanelColor(element,colors.question);
+      setSolidPanelColor(element,currentAppearance.questionCardColor);
     }
 
     function applyChoicePanelColor(element,choiceIndex){
-      const colors = getPanelThemeColors();
-      const choiceColors =
-        Array.isArray(colors.choices) && colors.choices.length
-          ? colors.choices
-          : ["#256A68"];
-
-      let color =
-        choiceColors[
-          Math.abs(Number(choiceIndex) || 0) %
-          choiceColors.length
-        ];
-
-      /*
-        حماية إضافية: حتى لو عُدلت الألوان مستقبلًا،
-        لا نسمح أن يكون لون الاختيار مطابقًا للسؤال.
-      */
-      if (
-        String(color).toLowerCase() ===
-        String(colors.question).toLowerCase()
-      ) {
-        color = "#256A68";
-      }
-
-      setSolidPanelColor(element,color);
+      void choiceIndex;
+      setSolidPanelColor(element,currentAppearance.answerCardColor);
     }
 
     function applyQuestionBoxPalette(button,index){
@@ -5818,18 +5884,36 @@
     }
 
     function createLetterQuestionState(item,index){
-      const letters = splitGraphemes(item.letterWord);
-      const items = letters.map((character,letterIndex)=>({
-        id:`fill-letter-${index}-${letterIndex}`,
-        character,
-        expectedIndex:letterIndex
-      }));
+      const words = Array.isArray(item.letterWords) && item.letterWords.length
+        ? item.letterWords.slice(0,MAX_LETTER_WORDS)
+        : [item.letterWord];
+      const items = [];
+      const wordRanges = [];
+      words.forEach((word,wordIndex)=>{
+        const letters = splitGraphemes(word);
+        const start = items.length;
+        letters.forEach((character,letterIndex)=>{
+          items.push({
+            id:`fill-letter-${index}-${wordIndex}-${letterIndex}`,
+            character,
+            wordIndex,
+            letterIndex,
+            expectedIndex:items.length
+          });
+        });
+        wordRanges.push({
+          word,
+          start,
+          length:letters.length,
+          direction:letterWordDirection(word)
+        });
+      });
       const bank = shuffledLetterIds(items.map((entry)=>entry.id));
       const itemForId = (id)=>items.find((entry)=>entry.id === id);
       if (
         bank.length > 1 &&
         bank.every((id,letterIndex)=>
-          itemForId(id)?.character === letters[letterIndex]
+          itemForId(id)?.character === items[letterIndex]?.character
         )
       ) {
         const differentIndex = bank.findIndex(
@@ -5840,7 +5924,9 @@
         }
       }
       return {
-        word:item.letterWord,
+        wordKey:words.join("\u0001"),
+        words,
+        wordRanges,
         items,
         bank,
         slots:Array(items.length).fill(null),
@@ -5851,7 +5937,11 @@
 
     function getLetterQuestionState(index,item){
       let state = letterQuestionStates.get(index);
-      if (!state || state.word !== item.letterWord) {
+      const words = Array.isArray(item.letterWords) && item.letterWords.length
+        ? item.letterWords.slice(0,MAX_LETTER_WORDS)
+        : [item.letterWord];
+      const wordKey = words.join("\u0001");
+      if (!state || state.wordKey !== wordKey) {
         state = createLetterQuestionState(item,index);
         letterQuestionStates.set(index,state);
       }
@@ -5885,7 +5975,7 @@
 
     function flashWrongLetter(itemId,slotIndex){
       choicesAudio.unlock();
-      choicesAudio.playWrong();
+      choicesAudio.playLetterWrong();
       const tile = choicesGrid.querySelector(`[data-letter-id="${itemId}"]`);
       const slot = questionCard.querySelector(`[data-letter-slot-index="${slotIndex}"]`);
       tile?.classList.remove("is-wrong");
@@ -5900,31 +5990,37 @@
     }
 
     function renderLetterSlots(item,state){
-      const slotsContainer = questionCard.querySelector(".fill-letter-slots");
-      if (!slotsContainer) return;
-      slotsContainer.textContent = "";
-      slotsContainer.classList.toggle("is-completing",Boolean(state.celebrating));
-      slotsContainer.style.setProperty("--wave-count",String(Math.max(1,state.items.length)));
-      slotsContainer.style.setProperty(
-        "--fill-word-direction",
-        letterWordDirection(item.letterWord)
+      const slotsContainers = Array.from(
+        questionCard.querySelectorAll(".fill-letter-slots")
       );
-      slotsContainer.setAttribute("dir",letterWordDirection(item.letterWord));
+      if (!slotsContainers.length) return;
 
-      state.slots.forEach((itemId,slotIndex)=>{
-        const slot = document.createElement("button");
-        slot.type = "button";
-        slot.className = "fill-letter-slot";
-        slot.style.setProperty("--wave-index",String(slotIndex));
-        slot.dataset.letterSlotIndex = String(slotIndex);
-        slot.setAttribute("aria-label",`خانة الحرف ${slotIndex + 1}`);
-        if (itemId) {
-          const placedItem = letterItemById(state,itemId);
-          slot.classList.add("is-filled");
-          slot.textContent = placedItem?.character || "";
-          slot.disabled = true;
+      slotsContainers.forEach((slotsContainer,wordIndex)=>{
+        const range = state.wordRanges[wordIndex];
+        if (!range) return;
+        slotsContainer.textContent = "";
+        slotsContainer.classList.toggle("is-completing",Boolean(state.celebrating));
+        slotsContainer.style.setProperty("--wave-count",String(Math.max(1,state.items.length)));
+        slotsContainer.style.setProperty("--fill-word-direction",range.direction);
+        slotsContainer.setAttribute("dir",range.direction);
+
+        for (let offset = 0; offset < range.length; offset += 1) {
+          const slotIndex = range.start + offset;
+          const itemId = state.slots[slotIndex];
+          const slot = document.createElement("button");
+          slot.type = "button";
+          slot.className = "fill-letter-slot";
+          slot.style.setProperty("--wave-index",String(slotIndex));
+          slot.dataset.letterSlotIndex = String(slotIndex);
+          slot.setAttribute("aria-label",`خانة الحرف ${offset + 1} من الكلمة ${wordIndex + 1}`);
+          if (itemId) {
+            const placedItem = letterItemById(state,itemId);
+            slot.classList.add("is-filled");
+            slot.textContent = placedItem?.character || "";
+            slot.disabled = true;
+          }
+          slotsContainer.appendChild(slot);
         }
-        slotsContainer.appendChild(slot);
       });
 
       questionCard.querySelector(".fill-letter-complete-mark")?.remove();
@@ -5933,7 +6029,7 @@
         completeMark.className = "fill-letter-complete-mark";
         completeMark.textContent = "✓";
         completeMark.setAttribute("aria-hidden","true");
-        slotsContainer.insertAdjacentElement("afterend",completeMark);
+        slotsContainers[slotsContainers.length - 1]?.insertAdjacentElement("afterend",completeMark);
       }
     }
 
@@ -6221,8 +6317,9 @@
       choicesGrid.textContent = "";
       const board = document.createElement("div");
       board.className = "fill-letter-board";
-      board.style.setProperty("--fill-word-direction",letterWordDirection(item.letterWord));
-      board.setAttribute("dir",letterWordDirection(item.letterWord));
+      const bankDirection = currentContentLanguage === "en" ? "ltr" : "rtl";
+      board.style.setProperty("--fill-word-direction",bankDirection);
+      board.setAttribute("dir",bankDirection);
       board.setAttribute("aria-label","حروف الإجابة");
 
       state.bank.forEach((itemId)=>{
@@ -6233,6 +6330,8 @@
         tile.className = "fill-letter-tile";
         tile.dataset.letterId = itemId;
         tile.textContent = letterItem.character;
+        tile.style.background = currentAppearance.letterCardColor;
+        tile.style.color = currentAppearance.textColor;
         tile.setAttribute("aria-label",`الحرف ${letterItem.character}`);
         tile.addEventListener("click",()=>answerLetterItem(itemId));
         attachLetterPointerDrag(tile,itemId);
@@ -6250,18 +6349,34 @@
       text.dataset.fitText = "question";
 
       const questionText = String(item.questionText || "");
-      const marker = /…+|\.{3,}/u.exec(questionText);
-      const markerStart = marker ? marker.index : questionText.length;
-      const markerEnd = marker ? marker.index + marker[0].length : questionText.length;
-      const before = questionText.slice(0,markerStart);
-      const after = questionText.slice(markerEnd);
-
-      if (before) text.appendChild(document.createTextNode(before));
-      const slots = document.createElement("span");
-      slots.className = "fill-letter-slots";
-      slots.setAttribute("aria-label","فراغ الإجابة");
-      text.appendChild(slots);
-      if (after) text.appendChild(document.createTextNode(after));
+      const markerPattern = /…+|\.{3,}/gu;
+      let cursor = 0;
+      let wordIndex = 0;
+      for (const marker of questionText.matchAll(markerPattern)) {
+        if (wordIndex >= state.wordRanges.length) break;
+        if (marker.index > cursor) {
+          text.appendChild(document.createTextNode(questionText.slice(cursor,marker.index)));
+        }
+        const slots = document.createElement("span");
+        slots.className = "fill-letter-slots";
+        slots.dataset.fillWordIndex = String(wordIndex);
+        slots.setAttribute("aria-label",`فراغ الإجابة ${wordIndex + 1}`);
+        text.appendChild(slots);
+        cursor = marker.index + marker[0].length;
+        wordIndex += 1;
+      }
+      if (cursor < questionText.length) {
+        text.appendChild(document.createTextNode(questionText.slice(cursor)));
+      }
+      while (wordIndex < state.wordRanges.length) {
+        text.appendChild(document.createTextNode(" "));
+        const slots = document.createElement("span");
+        slots.className = "fill-letter-slots";
+        slots.dataset.fillWordIndex = String(wordIndex);
+        slots.setAttribute("aria-label",`فراغ الإجابة ${wordIndex + 1}`);
+        text.appendChild(slots);
+        wordIndex += 1;
+      }
 
       fitZone.appendChild(text);
       questionCard.appendChild(fitZone);
@@ -6476,7 +6591,7 @@
       }
 
       choicesAudio.unlock();
-      choicesAudio.playWrong();
+      choicesAudio.playChoiceWrong();
       card.classList.add("is-disabled","is-wrong");
       card.disabled = true;
       showMark(card,"wrong");
@@ -8243,6 +8358,7 @@
       themeIntroAudio.setEnabled(quizSoundEnabled);
       applyTheme();
       applyFont();
+      applyLanguage();
 
       if (displayMode === "cards") {
         interactionLocked = true;

@@ -11687,6 +11687,66 @@
       border-color:#2f8edb;
       box-shadow:0 0 0 4px rgba(47,142,219,.18);
     }
+
+    #fillSetupScreen[data-content-language="en"] .quiz-text-input,
+    #fillSetupScreen[data-content-language="en"] .game-name-input{
+      direction:ltr;
+      text-align:left;
+      unicode-bidi:plaintext;
+    }
+
+    #fillSetupScreen[data-content-language="ar"] .quiz-text-input,
+    #fillSetupScreen[data-content-language="ar"] .game-name-input{
+      direction:rtl;
+      text-align:right;
+      unicode-bidi:plaintext;
+    }
+
+    #fillSetupScreen .fill-letter-words-editor{
+      display:grid;
+      gap:10px;
+    }
+
+    #fillSetupScreen .fill-letter-word-row{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:8px;
+      align-items:center;
+    }
+
+    #fillSetupScreen .fill-remove-word{
+      width:38px;
+      height:38px;
+      border:2px solid #111;
+      border-radius:10px;
+      background:#f35b62;
+      color:#fff;
+      font-size:20px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 2px 0 rgba(0,0,0,.18);
+    }
+
+    #fillSetupScreen .fill-add-word{
+      width:fit-content;
+      max-width:100%;
+      min-width:0;
+      min-height:34px;
+      margin:2px auto 0;
+      padding:6px 13px;
+      border:2px solid #111;
+      border-radius:11px;
+      background:#1688d3;
+      color:#fff;
+      font:inherit;
+      font-size:13px;
+      font-weight:950;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(0,0,0,.15);
+    }
+
+    #fillSetupScreen .fill-add-word[hidden]{display:none !important}
+    #fillAdvancedPanel.is-open{max-height:760px}
 </style>
 </head>
 <body>
@@ -12173,6 +12233,14 @@
           </div>
         </div>
 
+        <div class="choices-config-group" id="fillContentLanguageGroup">
+          <h4 class="choices-config-group-title">لغة المحتوى</h4>
+          <div class="choices-mode-grid" aria-label="لغة المحتوى">
+            <button class="choices-mode-btn" data-fill-language="en" type="button"><strong>الإنجليزية</strong></button>
+            <button class="choices-mode-btn active" data-fill-language="ar" type="button"><strong>العربية</strong></button>
+          </div>
+        </div>
+
         <div class="choices-config-group">
           <h4 class="choices-config-group-title">طريقة العرض</h4>
           <div class="choices-mode-grid" aria-label="طريقة عرض الأسئلة">
@@ -12221,6 +12289,38 @@
               <option value="noto-kufi">نوتو كوفي</option>
               <option value="noto-naskh">نوتو نسخ</option>
             </select>
+          </div>
+
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>لون النص</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-fill-color-target="text" type="button">تغيير</button>
+              <span class="match-color-swatch" id="fillTextColorSwatch" aria-label="لون النص المختار"></span>
+            </div>
+          </div>
+
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>لون بطاقة السؤال</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-fill-color-target="question" type="button">تغيير</button>
+              <span class="match-color-swatch" id="fillQuestionColorSwatch" aria-label="لون بطاقة السؤال"></span>
+            </div>
+          </div>
+
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>لون بطاقات الإجابة</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-fill-color-target="answer" type="button">تغيير</button>
+              <span class="match-color-swatch" id="fillAnswerColorSwatch" aria-label="لون بطاقات الإجابة"></span>
+            </div>
+          </div>
+
+          <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>لون بطاقات الحروف</strong></div>
+            <div class="match-color-control">
+              <button class="match-color-change" data-fill-color-target="letter" type="button">تغيير</button>
+              <span class="match-color-swatch" id="fillLetterColorSwatch" aria-label="لون بطاقات الحروف"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -16379,6 +16479,13 @@
   const FILL_MAX_QUESTIONS = 30;
   const FILL_MIN_CHOICES = 2;
   const FILL_MAX_CHOICES = 6;
+  const FILL_MAX_WORDS = 4;
+  const FILL_DEFAULT_COLORS = Object.freeze({
+    text:"#FFFFFF",
+    question:"#9D174D",
+    answer:"#C2410C",
+    letter:"#D9DAE1"
+  });
 
   const fillSetupScreen = document.getElementById("fillSetupScreen");
   const fillGameNameInput = document.getElementById("fillGameNameInput");
@@ -16395,10 +16502,15 @@
   const fillFontSelect = document.getElementById("fillFontSelect");
   const fillCoverTypeGroup = document.getElementById("fillCoverTypeGroup");
   const fillChoicesTypeGroup = document.getElementById("fillChoicesTypeGroup");
+  const fillTextColorSwatch = document.getElementById("fillTextColorSwatch");
+  const fillQuestionColorSwatch = document.getElementById("fillQuestionColorSwatch");
+  const fillAnswerColorSwatch = document.getElementById("fillAnswerColorSwatch");
+  const fillLetterColorSwatch = document.getElementById("fillLetterColorSwatch");
 
   let fillAnswerMode = "choices";
   let fillQuestionType = "text";
   let fillChoicesType = "text";
+  let fillContentLanguage = "ar";
   let fillDisplayMode = "direct";
   let fillCoverType = "english-numbers";
   let fillTheme = "classic";
@@ -16407,6 +16519,10 @@
   let fillSoundsEnabled = true;
   let fillFont = "noto-naskh";
   let fillAdvancedOpen = false;
+  let fillTextColor = FILL_DEFAULT_COLORS.text;
+  let fillQuestionColor = FILL_DEFAULT_COLORS.question;
+  let fillAnswerColor = FILL_DEFAULT_COLORS.answer;
+  let fillLetterColor = FILL_DEFAULT_COLORS.letter;
   let pendingFillQuestionEnter = -1;
   let pendingFillChoiceEnter = "";
 
@@ -16428,6 +16544,7 @@
       questionImageData:"",
       questionImageName:"",
       letterWord:"",
+      letterWords:[""],
       choices:[createFillChoice(),createFillChoice()],
       correctChoiceIndex:-1
     };
@@ -16441,7 +16558,12 @@
       questionText:String(question?.questionText || ""),
       questionImageData:question?.questionImageData || "",
       questionImageName:question?.questionImageName || "",
-      letterWord:String(question?.letterWord || question?.word || ""),
+      letterWords:(
+        Array.isArray(question?.letterWords) && question.letterWords.length
+          ? question.letterWords
+          : [question?.letterWord || question?.word || ""]
+      ).slice(0,FILL_MAX_WORDS).map((word)=>String(word || "")),
+      letterWord:String(question?.letterWord || question?.word || question?.letterWords?.[0] || ""),
       choices:Array.isArray(question?.choices)
         ? question.choices.map((choice)=>(
           {
@@ -16468,6 +16590,9 @@
       choice.isCorrect = index === clean.correctChoiceIndex;
     });
 
+    clean.letterWords = clean.letterWords.length ? clean.letterWords : [""];
+    clean.letterWord = clean.letterWords[0] || "";
+
     return clean;
   }
 
@@ -16476,9 +16601,22 @@
     return match ? match[0] : "";
   }
 
-  function getFillAnswerWord(question){
+  function normalizeFillHex(value,fallback){
+    const raw = String(value || "").trim();
+    return /^#[0-9a-f]{6}$/i.test(raw) ? raw.toUpperCase() : fallback;
+  }
+
+  function getFillLetterWords(question){
+    const source = Array.isArray(question?.letterWords)
+      ? question.letterWords
+      : [question?.letterWord || question?.word || ""];
+    const words = source.slice(0,FILL_MAX_WORDS).map(normalizeFillSingleWord);
+    return words.length ? words : [""];
+  }
+
+  function getFillAnswerWord(question,wordIndex = 0){
     if (fillAnswerMode === "letters") {
-      return normalizeFillSingleWord(question?.letterWord);
+      return getFillLetterWords(question)[wordIndex] || "";
     }
 
     if (fillChoicesType !== "text") return "";
@@ -16488,17 +16626,24 @@
     return String(question?.choices?.[correctIndex]?.text || "").trim();
   }
 
-  function getFillBlankText(question){
-    const answer = getFillAnswerWord(question).replace(/\s+/gu,"");
+  function getFillBlankText(question,wordIndex = 0){
+    const answer = getFillAnswerWord(question,wordIndex).replace(/\s+/gu,"");
     const length = Array.from(answer).length;
     return length > 0 ? "…".repeat(length) : "";
   }
 
+  function getFillBlankMatches(value){
+    return Array.from(String(value || "").matchAll(/…+/gu));
+  }
+
   function syncFillQuestionBlank(question){
     if (!question || !/…+/u.test(String(question.questionText || ""))) return;
-    const blank = getFillBlankText(question);
-    if (!blank) return;
-    question.questionText = String(question.questionText || "").replace(/…+/u,blank);
+    let blankIndex = 0;
+    question.questionText = String(question.questionText || "").replace(/…+/gu,(current)=>{
+      const blank = getFillBlankText(question,blankIndex);
+      blankIndex += 1;
+      return blank || current;
+    });
   }
 
   function getFillPointerPosition(input,clientX){
@@ -16511,11 +16656,14 @@
     return Math.round(visualRatio * input.value.length);
   }
 
-  function insertFillBlank(questionIndex,input,requestedPosition,persist = true){
+  function insertFillBlank(questionIndex,input,requestedPosition,persist = true,wordIndex = 0){
     const question = fillQuestions[questionIndex];
     if (!question || !input) return;
 
-    const blank = getFillBlankText(question);
+    const safeWordIndex = fillAnswerMode === "letters"
+      ? Math.max(0,Math.min(FILL_MAX_WORDS - 1,Number(wordIndex) || 0))
+      : 0;
+    const blank = getFillBlankText(question,safeWordIndex);
     if (!blank) {
       alert(
         fillAnswerMode === "letters"
@@ -16531,7 +16679,7 @@
       : (input.selectionStart ?? value.length);
     position = Math.max(0,Math.min(value.length,position));
 
-    const previousBlank = /…+/u.exec(value);
+    const previousBlank = getFillBlankMatches(value)[safeWordIndex] || null;
     if (previousBlank) {
       const start = previousBlank.index;
       const end = start + previousBlank[0].length;
@@ -16556,14 +16704,20 @@
     if (persist) saveFillDraft();
   }
 
-  function bindFillBlankTool(button,input,questionIndex){
+  function bindFillBlankTool(button,input,questionIndex,wordIndex = 0){
     if (!button || !input) return;
     let dragged = false;
 
     button.draggable = true;
     button.addEventListener("click",()=>{
       if (dragged) return;
-      insertFillBlank(questionIndex,input,input.selectionStart ?? input.value.length);
+      insertFillBlank(
+        questionIndex,
+        input,
+        input.selectionStart ?? input.value.length,
+        true,
+        wordIndex
+      );
     });
 
     button.addEventListener("dragstart",(event)=>{
@@ -16593,7 +16747,7 @@
       event.preventDefault();
       input.classList.remove("is-blank-drop-target");
       const position = getFillPointerPosition(input,event.clientX);
-      insertFillBlank(questionIndex,input,position);
+      insertFillBlank(questionIndex,input,position,true,wordIndex);
     });
   }
 
@@ -16603,7 +16757,8 @@
       const clean = ensureFillQuestionStructure(question);
       clean.questionImageData = "";
       clean.questionImageName = "";
-      clean.letterWord = normalizeFillSingleWord(clean.letterWord);
+      clean.letterWords = getFillLetterWords(clean);
+      clean.letterWord = clean.letterWords[0] || "";
 
       if (["english-numbers","arabic-numbers"].includes(fillCoverType)) {
         clean.coverText = "";
@@ -16642,6 +16797,9 @@
     document.querySelectorAll("[data-fill-choices-type]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.fillChoicesType === fillChoicesType);
     });
+    document.querySelectorAll("[data-fill-language]").forEach((button)=>{
+      button.classList.toggle("active",button.dataset.fillLanguage === fillContentLanguage);
+    });
     document.querySelectorAll("[data-fill-display-mode]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.fillDisplayMode === fillDisplayMode);
     });
@@ -16655,6 +16813,10 @@
       const shouldHideChoicesType = fillAnswerMode === "letters";
       fillChoicesTypeGroup.hidden = shouldHideChoicesType;
       fillChoicesTypeGroup.style.display = shouldHideChoicesType ? "none" : "";
+    }
+    if (fillSetupScreen) {
+      fillSetupScreen.dataset.contentLanguage = fillContentLanguage;
+      fillSetupScreen.setAttribute("dir",fillContentLanguage === "en" ? "ltr" : "rtl");
     }
   }
 
@@ -16820,11 +16982,19 @@
 
     fillTextEditorBlankButton.addEventListener("click",()=>{
       if (fillTextEditorBlankQuestionIndex < 0) return;
+      const question = fillQuestions[fillTextEditorBlankQuestionIndex];
+      const wordIndex = fillAnswerMode === "letters"
+        ? Math.min(
+            Math.max(0,getFillBlankMatches(fillTextEditorTextarea.value).length),
+            Math.max(0,getFillLetterWords(question).length - 1)
+          )
+        : 0;
       insertFillBlank(
         fillTextEditorBlankQuestionIndex,
         fillTextEditorTextarea,
         fillTextEditorTextarea.selectionStart ?? fillTextEditorTextarea.value.length,
-        false
+        false,
+        wordIndex
       );
     });
 
@@ -16848,6 +17018,8 @@
     fillTextEditorTextarea.maxLength = maxLength;
     fillTextEditorTextarea.value = String(value || "");
     fillTextEditorTextarea.placeholder = String(placeholder || "");
+    fillTextEditorTextarea.dir = fillContentLanguage === "en" ? "ltr" : "rtl";
+    fillTextEditorTextarea.style.textAlign = fillContentLanguage === "en" ? "left" : "right";
     fillTextEditorSaveHandler = onSave;
     fillTextEditorBlankQuestionIndex = Number.isInteger(blankQuestionIndex)
       ? blankQuestionIndex
@@ -16947,6 +17119,43 @@
     if (fillSetupScreen) {
       fillSetupScreen.dataset.quizFont = fillFont;
     }
+
+    if (fillTextColorSwatch) fillTextColorSwatch.style.background = fillTextColor;
+    if (fillQuestionColorSwatch) fillQuestionColorSwatch.style.background = fillQuestionColor;
+    if (fillAnswerColorSwatch) fillAnswerColorSwatch.style.background = fillAnswerColor;
+    if (fillLetterColorSwatch) fillLetterColorSwatch.style.background = fillLetterColor;
+  }
+
+  function setFillColor(target,value){
+    const defaults = FILL_DEFAULT_COLORS;
+    if (target === "text") fillTextColor = normalizeFillHex(value,defaults.text);
+    if (target === "question") fillQuestionColor = normalizeFillHex(value,defaults.question);
+    if (target === "answer") fillAnswerColor = normalizeFillHex(value,defaults.answer);
+    if (target === "letter") fillLetterColor = normalizeFillHex(value,defaults.letter);
+    updateFillAdvancedUI();
+    saveFillDraft();
+  }
+
+  function openFillColorPicker(target){
+    const configs = {
+      text:{title:"لون النص",color:fillTextColor,fallback:FILL_DEFAULT_COLORS.text},
+      question:{title:"لون بطاقة السؤال",color:fillQuestionColor,fallback:FILL_DEFAULT_COLORS.question},
+      answer:{title:"لون بطاقات الإجابة",color:fillAnswerColor,fallback:FILL_DEFAULT_COLORS.answer},
+      letter:{title:"لون بطاقات الحروف",color:fillLetterColor,fallback:FILL_DEFAULT_COLORS.letter}
+    };
+    const config = configs[target] || configs.text;
+    if (typeof window.openSharedGameColorPicker === "function") {
+      window.openSharedGameColorPicker({
+        ...config,
+        onChange:(color)=>setFillColor(target,color)
+      });
+      return;
+    }
+    const picker = document.createElement("input");
+    picker.type = "color";
+    picker.value = normalizeFillHex(config.color,config.fallback);
+    picker.addEventListener("input",()=>setFillColor(target,picker.value));
+    picker.click();
   }
 
   function animateFillRemoval(element,onDone){
@@ -17144,17 +17353,28 @@
       const blankToolRow = document.createElement("div");
       blankToolRow.className = "fill-blank-tool-row";
 
-      const blankTool = document.createElement("button");
-      blankTool.type = "button";
-      blankTool.className = "fill-blank-tool";
-      blankTool.textContent = "فراغ";
-      blankTool.setAttribute("aria-label",`إضافة فراغ إلى نص السؤال ${questionIndex + 1}`);
+      const blankTools = [];
+      const blankToolCount = fillAnswerMode === "letters"
+        ? getFillLetterWords(question).length
+        : 1;
+      for (let wordIndex = 0; wordIndex < blankToolCount; wordIndex += 1) {
+        const blankTool = document.createElement("button");
+        blankTool.type = "button";
+        blankTool.className = "fill-blank-tool";
+        blankTool.textContent = blankToolCount > 1 ? `فراغ ${wordIndex + 1}` : "فراغ";
+        blankTool.setAttribute(
+          "aria-label",
+          `إضافة الفراغ ${wordIndex + 1} إلى نص السؤال ${questionIndex + 1}`
+        );
+        blankToolRow.appendChild(blankTool);
+        blankTools.push(blankTool);
+      }
 
       const blankHint = document.createElement("span");
       blankHint.className = "fill-blank-hint";
       blankHint.textContent = "اضغط على زر فراغ لاضافة فراغ في السؤال";
 
-      blankToolRow.append(blankTool,blankHint);
+      blankToolRow.appendChild(blankHint);
       entry.appendChild(blankToolRow);
 
       const questionFieldRow = document.createElement("div");
@@ -17166,6 +17386,7 @@
       questionInput.maxLength = 220;
       questionInput.placeholder = "اكتب السؤال هنا";
       questionInput.value = question.questionText || "";
+      questionInput.dir = fillContentLanguage === "en" ? "ltr" : "rtl";
 
       questionInput.addEventListener("input",()=>{
         fillQuestions[questionIndex].questionText = questionInput.value;
@@ -17187,52 +17408,101 @@
 
       questionFieldRow.append(questionInput,questionReviewButton);
       entry.appendChild(questionFieldRow);
-      bindFillBlankTool(blankTool,questionInput,questionIndex);
+      blankTools.forEach((blankTool,wordIndex)=>{
+        bindFillBlankTool(blankTool,questionInput,questionIndex,wordIndex);
+      });
 
       if (fillAnswerMode === "letters") {
-        const wordLabel = document.createElement("div");
-        wordLabel.className = "quiz-field-label";
-        wordLabel.textContent = "الكلمة";
-        entry.appendChild(wordLabel);
+        const wordsEditor = document.createElement("div");
+        wordsEditor.className = "fill-letter-words-editor";
+        const words = getFillLetterWords(question);
 
-        const wordInput = document.createElement("input");
-        wordInput.className = "quiz-text-input";
-        wordInput.type = "text";
-        wordInput.maxLength = 60;
-        wordInput.autocomplete = "off";
-        wordInput.autocapitalize = "off";
-        wordInput.spellcheck = false;
-        wordInput.placeholder = "اكتب كلمة واحدة";
-        wordInput.value = normalizeFillSingleWord(question.letterWord);
+        words.forEach((word,wordIndex)=>{
+          const wordLabel = document.createElement("div");
+          wordLabel.className = "quiz-field-label";
+          wordLabel.textContent = words.length > 1 ? `الكلمة ${wordIndex + 1}` : "الكلمة";
+          wordsEditor.appendChild(wordLabel);
 
-        wordInput.addEventListener("beforeinput",(event)=>{
-          if (
-            event.inputType === "insertText" &&
-            /\s/u.test(String(event.data || ""))
-          ) {
-            event.preventDefault();
+          const wordRow = document.createElement("div");
+          wordRow.className = "fill-letter-word-row";
+
+          const wordInput = document.createElement("input");
+          wordInput.className = "quiz-text-input";
+          wordInput.type = "text";
+          wordInput.maxLength = 60;
+          wordInput.autocomplete = "off";
+          wordInput.autocapitalize = "off";
+          wordInput.spellcheck = false;
+          wordInput.placeholder = "اكتب كلمة واحدة";
+          wordInput.value = normalizeFillSingleWord(word);
+          wordInput.dir = fillContentLanguage === "en" ? "ltr" : "rtl";
+
+          wordInput.addEventListener("beforeinput",(event)=>{
+            if (event.inputType === "insertText" && /\s/u.test(String(event.data || ""))) {
+              event.preventDefault();
+            }
+          });
+
+          wordInput.addEventListener("keydown",(event)=>{
+            if (event.key === " " || event.key === "Enter") event.preventDefault();
+          });
+
+          wordInput.addEventListener("input",()=>{
+            const normalized = normalizeFillSingleWord(wordInput.value);
+            if (wordInput.value !== normalized) wordInput.value = normalized;
+            const target = fillQuestions[questionIndex];
+            target.letterWords = getFillLetterWords(target);
+            target.letterWords[wordIndex] = normalized;
+            target.letterWord = target.letterWords[0] || "";
+            syncFillQuestionBlank(target);
+            questionInput.value = target.questionText;
+            saveFillDraft();
+          });
+
+          wordRow.appendChild(wordInput);
+          if (wordIndex > 0) {
+            const removeWord = document.createElement("button");
+            removeWord.type = "button";
+            removeWord.className = "fill-remove-word";
+            removeWord.textContent = "×";
+            removeWord.setAttribute("aria-label",`حذف الكلمة ${wordIndex + 1}`);
+            removeWord.addEventListener("click",()=>{
+              const target = fillQuestions[questionIndex];
+              const currentWords = getFillLetterWords(target);
+              currentWords.splice(wordIndex,1);
+              target.letterWords = currentWords.length ? currentWords : [""];
+              target.letterWord = target.letterWords[0] || "";
+              const blank = getFillBlankMatches(target.questionText)[wordIndex];
+              if (blank) {
+                const start = blank.index;
+                target.questionText = target.questionText.slice(0,start) +
+                  target.questionText.slice(start + blank[0].length);
+              }
+              renderFillQuestions();
+              saveFillDraft();
+            });
+            wordRow.appendChild(removeWord);
           }
+          wordsEditor.appendChild(wordRow);
         });
 
-        wordInput.addEventListener("keydown",(event)=>{
-          if (event.key === " " || event.key === "Enter") {
-            event.preventDefault();
-          }
-        });
-
-        wordInput.addEventListener("input",()=>{
-          const normalized = normalizeFillSingleWord(wordInput.value);
-          if (wordInput.value !== normalized) {
-            wordInput.value = normalized;
-          }
+        const addWord = document.createElement("button");
+        addWord.type = "button";
+        addWord.className = "fill-add-word";
+        addWord.textContent = "اضافة كلمة جديدة";
+        addWord.hidden = words.length >= FILL_MAX_WORDS;
+        addWord.addEventListener("click",()=>{
           const target = fillQuestions[questionIndex];
-          target.letterWord = normalized;
-          syncFillQuestionBlank(target);
-          questionInput.value = target.questionText;
+          const currentWords = getFillLetterWords(target);
+          if (currentWords.length >= FILL_MAX_WORDS) return;
+          currentWords.push("");
+          target.letterWords = currentWords;
+          target.letterWord = currentWords[0] || "";
+          renderFillQuestions();
           saveFillDraft();
         });
-
-        entry.appendChild(wordInput);
+        wordsEditor.appendChild(addWord);
+        entry.appendChild(wordsEditor);
       } else {
 
       const choicesTitleRow = document.createElement("div");
@@ -17469,17 +17739,29 @@
     sanitizeFillDataInPlace();
     return {
       gameTemplate:"fill",
-      payloadVersion:1,
+      payloadVersion:2,
       gameName:String(fillGameNameInput?.value || "").trim(),
       theme:fillTheme,
       selectedTheme:fillTheme,
       answerMode:fillAnswerMode,
       questionType:fillQuestionType,
       choicesType:fillChoicesType,
+      contentLanguage:fillContentLanguage,
+      language:fillContentLanguage,
       displayMode:fillDisplayMode,
       coverType:fillCoverType,
       soundEnabled:fillSoundsEnabled,
       fontFamily:fillFont,
+      textColor:fillTextColor,
+      questionCardColor:fillQuestionColor,
+      answerCardColor:fillAnswerColor,
+      letterCardColor:fillLetterColor,
+      appearance:{
+        textColor:fillTextColor,
+        questionCardColor:fillQuestionColor,
+        answerCardColor:fillAnswerColor,
+        letterCardColor:fillLetterColor
+      },
       activeQuestionIndex:activeFillQuestionIndex,
       questions:fillQuestions,
       updatedAt:Date.now()
@@ -17509,11 +17791,17 @@
       fillAnswerMode = draft.answerMode === "letters" ? "letters" : "choices";
       fillQuestionType = "text";
       fillChoicesType = draft.choicesType === "images" ? "images" : "text";
+      fillContentLanguage = draft.contentLanguage === "en" || draft.language === "en" ? "en" : "ar";
       fillDisplayMode = draft.displayMode === "cards" ? "cards" : "direct";
       fillCoverType = ["english-numbers","arabic-numbers","images","text"].includes(draft.coverType)
         ? draft.coverType
         : "english-numbers";
       fillSoundsEnabled = draft.soundEnabled !== false;
+      const appearance = draft.appearance || {};
+      fillTextColor = normalizeFillHex(draft.textColor || appearance.textColor,FILL_DEFAULT_COLORS.text);
+      fillQuestionColor = normalizeFillHex(draft.questionCardColor || appearance.questionCardColor,FILL_DEFAULT_COLORS.question);
+      fillAnswerColor = normalizeFillHex(draft.answerCardColor || appearance.answerCardColor,FILL_DEFAULT_COLORS.answer);
+      fillLetterColor = normalizeFillHex(draft.letterCardColor || appearance.letterCardColor,FILL_DEFAULT_COLORS.letter);
       fillFont = ["cairo","tajawal","noto-kufi","noto-naskh"].includes(draft.fontFamily)
         ? draft.fontFamily
         : "noto-naskh";
@@ -17573,9 +17861,15 @@
       }
 
       if (fillAnswerMode === "letters") {
-        const word = normalizeFillSingleWord(question.letterWord);
-        if (!word) {
-          alert(`يرجى كتابة كلمة الإجابة للسؤال ${number}.`);
+        const words = getFillLetterWords(question);
+        const emptyWordIndex = words.findIndex((word)=>!word);
+        if (emptyWordIndex >= 0) {
+          alert(`يرجى كتابة الكلمة ${emptyWordIndex + 1} في السؤال ${number}.`);
+          return false;
+        }
+        const blankCount = getFillBlankMatches(question.questionText).length;
+        if (blankCount !== words.length) {
+          alert(`يرجى إضافة ${words.length} فراغات داخل نص السؤال ${number}.`);
           return false;
         }
         continue;
@@ -17620,14 +17914,23 @@
       payloadId,
       questions:fillQuestions.map((question)=>({
         answerMode:fillAnswerMode,
-        blankText:getFillBlankText(question),
-        blankLength:Array.from(getFillAnswerWord(question).replace(/\s+/gu,"")).length,
+        blankText:getFillBlankText(question,0),
+        blankTexts:fillAnswerMode === "letters"
+          ? getFillLetterWords(question).map((_,wordIndex)=>getFillBlankText(question,wordIndex))
+          : [getFillBlankText(question,0)],
+        blankLength:Array.from(getFillAnswerWord(question,0).replace(/\s+/gu,"")).length,
+        blankLengths:fillAnswerMode === "letters"
+          ? getFillLetterWords(question).map((word)=>Array.from(word).length)
+          : [Array.from(getFillAnswerWord(question,0).replace(/\s+/gu,"")).length],
         word:fillAnswerMode === "letters"
-          ? normalizeFillSingleWord(question.letterWord)
+          ? getFillLetterWords(question)[0]
           : "",
         letterWord:fillAnswerMode === "letters"
-          ? normalizeFillSingleWord(question.letterWord)
+          ? getFillLetterWords(question)[0]
           : "",
+        letterWords:fillAnswerMode === "letters"
+          ? getFillLetterWords(question)
+          : [],
         coverText:fillDisplayMode === "cards" && fillCoverType === "text"
           ? String(question.coverText || "").trim()
           : "",
@@ -17727,6 +18030,15 @@
     });
   });
 
+  document.querySelectorAll("[data-fill-language]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      fillContentLanguage = button.dataset.fillLanguage === "en" ? "en" : "ar";
+      updateFillModeButtons();
+      renderFillQuestions();
+      saveFillDraft();
+    });
+  });
+
   document.querySelectorAll("[data-fill-display-mode]").forEach((button)=>{
     button.addEventListener("click",()=>{
       fillDisplayMode = button.dataset.fillDisplayMode === "cards" ? "cards" : "direct";
@@ -17808,6 +18120,12 @@
 
     updateFillAdvancedUI();
     saveFillDraft();
+  });
+
+  document.querySelectorAll("[data-fill-color-target]").forEach((button)=>{
+    button.addEventListener("click",()=>{
+      openFillColorPicker(button.dataset.fillColorTarget || "text");
+    });
   });
 
   fillGameNameInput?.addEventListener("input",saveFillDraft);
