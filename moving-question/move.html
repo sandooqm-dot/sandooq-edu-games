@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v9-continuous-conveyor-motion -->
+  <!-- version: moving-question-v10-index-settings-linked -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
   <title>السؤال المتحرك - صندوق الألعاب التعليمية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@600;700;800;900&family=Noto+Kufi+Arabic:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -93,6 +93,14 @@
         linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df);
     }
 
+    .game-page.theme-classic .theme-background,
+    .game-page.theme-white .theme-background{
+      background:
+        radial-gradient(circle at 15% 16%,rgba(255,255,255,.96) 0 9%,transparent 32%),
+        radial-gradient(circle at 86% 10%,rgba(150,213,244,.38),transparent 30%),
+        linear-gradient(150deg,#f9fcff 0%,#e8f4fb 54%,#f7f2df 100%);
+    }
+
     .game-page.theme-sky-clouds .theme-background{
       background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
     }
@@ -107,6 +115,18 @@
 
     .game-page.theme-english .theme-background{
       background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+    }
+
+    .game-page.theme-flowers .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)),url("theme-flowers-bg.webp?v=48"),linear-gradient(#fff7fb,#f7fff4);
+    }
+
+    .game-page.theme-national-day .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("theme-national-day-v2-bg.webp?v=53"),linear-gradient(#effff8,#e9fff5);
+    }
+
+    .game-page.theme-founding-day .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("theme-founding-day-bg.webp?v=1"),linear-gradient(#f8efe1,#fffaf3);
     }
 
     .game-logo{
@@ -906,7 +926,12 @@
 
     function normalizeTheme(value){
       const theme = safeText(value).toLowerCase().replace(/^theme-/,"");
-      return ["classroom","white","sky-clouds","forest","math","english"].includes(theme) ? theme : "classroom";
+      return ["classic","classroom","white","sky-clouds","forest","math","english","flowers","national-day","founding-day"].includes(theme) ? theme : "classic";
+    }
+
+    function normalizeFont(value){
+      const font = safeText(value).toLowerCase();
+      return ["cairo","tajawal","noto-kufi","noto-naskh"].includes(font) ? font : "noto-naskh";
     }
 
     function normalizeAnswer(item,index){
@@ -947,6 +972,7 @@
         theme:normalizeTheme(source?.theme),
         contentLanguage:(source?.contentLanguage || source?.language) === "ar" ? "ar" : "en",
         soundEnabled:source?.soundEnabled !== false && source?.soundsEnabled !== false,
+        fontFamily:normalizeFont(source?.fontFamily || source?.font),
         settings:{
           deleteCorrectAnswer:settings.deleteCorrectAnswer !== false,
           attemptsEnabled:Boolean(settings.attemptsEnabled),
@@ -1216,6 +1242,13 @@
       document.documentElement.lang = payload.contentLanguage;
       document.documentElement.dir = "rtl";
       document.title = `${payload.gameName} - صندوق الألعاب التعليمية`;
+      const fontMap = {
+        cairo:'"Cairo",Arial,sans-serif',
+        tajawal:'"Tajawal",Arial,sans-serif',
+        "noto-kufi":'"Noto Kufi Arabic",Arial,sans-serif',
+        "noto-naskh":'"Noto Naskh Arabic","Traditional Arabic",serif'
+      };
+      document.documentElement.style.setProperty("--page-font",fontMap[payload.fontFamily] || fontMap["noto-naskh"]);
       document.documentElement.style.setProperty("--question-frame",payload.appearance.stripBorderColor);
       document.documentElement.style.setProperty("--question-text",payload.appearance.textColor);
       document.documentElement.style.setProperty("--answer-unified",payload.appearance.answerColor);
