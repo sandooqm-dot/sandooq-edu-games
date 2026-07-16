@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v7-settle-audio-aligned-film-controls -->
+  <!-- version: moving-question-v9-continuous-conveyor-motion -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
@@ -228,7 +228,7 @@
           transparent var(--film-mark-end) var(--film-period)
         ),
         linear-gradient(180deg,rgba(250,250,250,.98),rgba(231,233,236,.98));
-      background-position:0 50%,0 0;
+      background-position:var(--rail-offset,0px) 50%,0 0;
       background-repeat:repeat-x,no-repeat;
       background-size:var(--film-period) 100%,100% 100%;
       will-change:background-position;
@@ -795,8 +795,9 @@
     const DB_NAME = "sandooq_edu_games_v1";
     const DB_PREFIX = "moving-question";
     const PALETTE = ["#9c4fd0","#1f94db","#f47730","#123fd0","#d90b3d","#23ad6b","#15933b","#e1a400","#7a55c6","#e65353"];
-    const STRIP_MOTION_MS = 2600;
-    const QUESTION_OVERLAP_DELAY_MS = 1100;
+    const STRIP_MOTION_MS = 5200;
+    const QUESTION_SPACING_MS = 950;
+    const STRIP_TRAVEL_PERCENT = 120;
     const WRONG_FEEDBACK_FALLBACK_MS = 1800;
 
     const page = document.getElementById("gamePage");
@@ -885,6 +886,9 @@
     let timerId = null;
     let timerDeadline = 0;
     let railOffset = 0;
+    let stripMotionFrame = null;
+    let stripMotionResolve = null;
+    let stripMotionToken = 0;
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
     let safariTimers = [];
@@ -1317,56 +1321,88 @@
       requestAnimationFrame(()=>mark.classList.add("is-visible"));
     }
 
-    function animateStrip(keyframes,duration = STRIP_MOTION_MS){
-      const last = keyframes[keyframes.length - 1];
-      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
-      const edgeStart = railOffset;
-      const edgeEnd = edgeStart + viewportWidth * 1.1;
-      railOffset = edgeEnd;
-      const edgeStartPosition = `${edgeStart.toFixed(2)}px 50%,0 0`;
-      const edgeEndPosition = `${edgeEnd.toFixed(2)}px 50%,0 0`;
+    function clampMotionProgress(value){
+      return Math.max(0,Math.min(1,Number(value) || 0));
+    }
 
-      if (reducedMotion() || typeof questionContent.animate !== "function") {
-        Object.assign(questionContent.style,last);
-        filmEdges.forEach((edge)=>{edge.style.backgroundPosition=edgeEndPosition});
+    function setQuestionTravel(element,fromPercent,toPercent,progress){
+      if (!element) return;
+      const value = fromPercent + (toPercent - fromPercent) * clampMotionProgress(progress);
+      element.style.transform = `translate3d(${value.toFixed(4)}%,0,0)`;
+      element.style.opacity = "1";
+    }
+
+    function setRailPosition(value){
+      questionStrip.style.setProperty("--rail-offset",`${Number(value || 0).toFixed(2)}px`);
+    }
+
+    function cancelStripMotion(){
+      stripMotionToken += 1;
+      if (stripMotionFrame !== null) cancelAnimationFrame(stripMotionFrame);
+      stripMotionFrame = null;
+      if (stripMotionResolve) {
+        const resolve = stripMotionResolve;
+        stripMotionResolve = null;
+        resolve();
+      }
+    }
+
+    function runSynchronizedStripMotion(duration,railDistance,updateQuestion){
+      cancelStripMotion();
+      const token = stripMotionToken;
+      const motionDuration = Math.max(1,Number(duration) || 1);
+      const edgeStart = railOffset;
+      const edgeEnd = edgeStart + railDistance;
+      railOffset = edgeEnd;
+
+      if (reducedMotion()) {
+        updateQuestion(1,motionDuration);
+        setRailPosition(edgeEnd);
         return Promise.resolve();
       }
 
-      const timing = {
-        duration,
-        easing:"linear",
-        fill:"forwards"
-      };
-      const contentAnimation = questionContent.animate(keyframes,timing);
-      const edgeAnimations = filmEdges.map((edge)=>edge.animate([
-        {backgroundPosition:edgeStartPosition},
-        {backgroundPosition:edgeEndPosition}
-      ],timing));
+      return new Promise((resolve)=>{
+        stripMotionResolve = resolve;
+        const startedAt = performance.now();
+        const draw = (now)=>{
+          if (token !== stripMotionToken) return;
+          const elapsed = Math.min(motionDuration,Math.max(0,now - startedAt));
+          const progress = elapsed / motionDuration;
 
-      return Promise.all([
-        contentAnimation.finished.catch(()=>{}),
-        ...edgeAnimations.map((animation)=>animation.finished.catch(()=>{}))
-      ]).then(()=>{
-        Object.assign(questionContent.style,last);
-        filmEdges.forEach((edge,index)=>{
-          edge.style.backgroundPosition=edgeEndPosition;
-          edgeAnimations[index]?.cancel();
-        });
-        contentAnimation.cancel();
+          updateQuestion(progress,elapsed);
+          setRailPosition(edgeStart + (edgeEnd - edgeStart) * progress);
+
+          if (progress < 1) {
+            stripMotionFrame = requestAnimationFrame(draw);
+            return;
+          }
+
+          stripMotionFrame = null;
+          stripMotionResolve = null;
+          resolve();
+        };
+        stripMotionFrame = requestAnimationFrame(draw);
       });
+    }
+
+    function railDistanceFor(duration){
+      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
+      const oneQuestionDistance = viewportWidth * (STRIP_TRAVEL_PERCENT / 100);
+      return oneQuestionDistance * (duration / STRIP_MOTION_MS);
     }
 
     async function enterQuestion(index){
       renderQuestion(index);
       interactionLocked = true;
-      questionContent.style.transform = "translate3d(-120%,0,0)";
+      questionContent.style.transform = `translate3d(-${STRIP_TRAVEL_PERCENT}%,0,0)`;
       questionContent.style.opacity = "1";
       if (reducedMotion()) audio.play("settle");
       else audio.playEndingAt("settle",STRIP_MOTION_MS);
-      await animateStrip([
-        {transform:"translate3d(-120%,0,0)",opacity:1},
-        {transform:"translate3d(0,0,0)",opacity:1}
-      ],STRIP_MOTION_MS);
+      await runSynchronizedStripMotion(
+        STRIP_MOTION_MS,
+        railDistanceFor(STRIP_MOTION_MS),
+        (progress)=>setQuestionTravel(questionContent,-STRIP_TRAVEL_PERCENT,0,progress)
+      );
       questionContent.style.transform = "translate3d(0,0,0)";
       questionContent.style.opacity = "1";
       interactionLocked = false;
@@ -1375,86 +1411,43 @@
 
     async function exitQuestion(){
       interactionLocked = true;
-      await animateStrip([
-        {transform:"translate3d(0,0,0)",opacity:1},
-        {transform:"translate3d(120%,0,0)",opacity:1}
-      ],STRIP_MOTION_MS);
+      await runSynchronizedStripMotion(
+        STRIP_MOTION_MS,
+        railDistanceFor(STRIP_MOTION_MS),
+        (progress)=>setQuestionTravel(questionContent,0,STRIP_TRAVEL_PERCENT,progress)
+      );
     }
 
     async function transitionToQuestion(index){
       interactionLocked = true;
       const outgoing = questionContent;
+      const totalDuration = QUESTION_SPACING_MS + STRIP_MOTION_MS;
+      const incomingStartPercent = -STRIP_TRAVEL_PERCENT * (totalDuration / STRIP_MOTION_MS);
       const incoming = document.createElement("div");
       incoming.id = "questionContentNext";
       incoming.className = "question-content";
       renderQuestion(index,incoming);
-      incoming.style.transform = "translate3d(-120%,0,0)";
+      incoming.style.transform = `translate3d(${incomingStartPercent.toFixed(4)}%,0,0)`;
       incoming.style.opacity = "1";
       questionWindow.appendChild(incoming);
 
-      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
-      const totalDuration = QUESTION_OVERLAP_DELAY_MS + STRIP_MOTION_MS;
       if (reducedMotion()) audio.play("settle");
       else audio.playEndingAt("settle",totalDuration);
-      const edgeStart = railOffset;
-      const edgeDistance = viewportWidth * 1.1 * (totalDuration / STRIP_MOTION_MS);
-      const edgeEnd = edgeStart + edgeDistance;
-      railOffset = edgeEnd;
-      const edgeStartPosition = `${edgeStart.toFixed(2)}px 50%,0 0`;
-      const edgeEndPosition = `${edgeEnd.toFixed(2)}px 50%,0 0`;
+      await runSynchronizedStripMotion(
+        totalDuration,
+        railDistanceFor(totalDuration),
+        (progress,elapsed)=>{
+          const outgoingProgress = clampMotionProgress(elapsed / STRIP_MOTION_MS);
+          setQuestionTravel(outgoing,0,STRIP_TRAVEL_PERCENT,outgoingProgress);
+          setQuestionTravel(incoming,incomingStartPercent,0,progress);
+        }
+      );
 
-      if (reducedMotion() || typeof outgoing.animate !== "function") {
-        outgoing.remove();
-        incoming.id = "questionContent";
-        incoming.style.transform = "translate3d(0,0,0)";
-        incoming.style.opacity = "1";
-        questionContent = incoming;
-        filmEdges.forEach((edge)=>{edge.style.backgroundPosition=edgeEndPosition});
-      } else {
-        const outgoingAnimation = outgoing.animate([
-          {transform:"translate3d(0,0,0)",opacity:1},
-          {transform:"translate3d(120%,0,0)",opacity:1}
-        ],{
-          duration:STRIP_MOTION_MS,
-          easing:"linear",
-          fill:"forwards"
-        });
-        const incomingAnimation = incoming.animate([
-          {transform:"translate3d(-120%,0,0)",opacity:1},
-          {transform:"translate3d(0,0,0)",opacity:1}
-        ],{
-          duration:STRIP_MOTION_MS,
-          delay:QUESTION_OVERLAP_DELAY_MS,
-          easing:"linear",
-          fill:"forwards"
-        });
-        const edgeAnimations = filmEdges.map((edge)=>edge.animate([
-          {backgroundPosition:edgeStartPosition},
-          {backgroundPosition:edgeEndPosition}
-        ],{
-          duration:totalDuration,
-          easing:"linear",
-          fill:"forwards"
-        }));
-
-        await Promise.all([
-          outgoingAnimation.finished.catch(()=>{}),
-          incomingAnimation.finished.catch(()=>{}),
-          ...edgeAnimations.map((animation)=>animation.finished.catch(()=>{}))
-        ]);
-
-        incoming.style.transform = "translate3d(0,0,0)";
-        incoming.style.opacity = "1";
-        filmEdges.forEach((edge,index)=>{
-          edge.style.backgroundPosition=edgeEndPosition;
-          edgeAnimations[index]?.cancel();
-        });
-        outgoingAnimation.cancel();
-        incomingAnimation.cancel();
-        outgoing.remove();
-        incoming.id = "questionContent";
-        questionContent = incoming;
-      }
+      incoming.style.transform = "translate3d(0,0,0)";
+      incoming.style.opacity = "1";
+      outgoing.remove();
+      incoming.id = "questionContent";
+      questionContent = incoming;
 
       interactionLocked = false;
       answerBank.querySelectorAll(".answer-card").forEach((card)=>{
@@ -1778,10 +1771,9 @@
       themeIntroAudio.stop();
       stopTimer();
       hideFinish();
-      questionContent.getAnimations?.().forEach((animation)=>animation.cancel());
-      filmEdges.forEach((edge)=>edge.getAnimations?.().forEach((animation)=>animation.cancel()));
+      cancelStripMotion();
       railOffset = 0;
-      filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
+      setRailPosition(0);
       gameEnded = false;
       await startGame({playIntro:false});
     }
@@ -1831,6 +1823,7 @@
       audio.stop();
       themeIntroAudio.stop();
       stopTimer();
+      cancelStripMotion();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       if (introFrameId) cancelAnimationFrame(introFrameId);
@@ -1848,9 +1841,9 @@
       buildConfetti();
       renderAnswerBank();
       renderQuestion(0);
-      questionContent.style.transform = "translate3d(-120%,0,0)";
+      questionContent.style.transform = `translate3d(-${STRIP_TRAVEL_PERCENT}%,0,0)`;
       questionContent.style.opacity = "1";
-      filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
+      setRailPosition(0);
       syncVisualViewportFrame();
       collapseSafariBars();
     })();
