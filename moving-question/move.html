@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v12-persistent-draft-delete-answer-setting -->
+  <!-- version: moving-question-v13-content-modes-draft-restore-zoom -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
@@ -24,6 +24,7 @@
       --question-text:#161616;
       --answer-unified:#1688d3;
       --page-font:"Cairo",Arial,sans-serif;
+      --intro-bg-final-scale:1.12;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -754,7 +755,6 @@
 
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
-      <button class="control-btn finish-btn" id="finishBtn" type="button">إنهاء</button>
     </nav>
 
     <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
@@ -836,7 +836,6 @@
     const restartBtn = document.getElementById("restartBtn");
     const homeBtn = document.getElementById("homeBtn");
     const backBtn = document.getElementById("backBtn");
-    const finishBtn = document.getElementById("finishBtn");
     const attemptsHud = document.getElementById("attemptsHud");
     const attemptsText = document.getElementById("attemptsText");
     const timerTrack = document.getElementById("timerTrack");
@@ -934,11 +933,23 @@
       return ["cairo","tajawal","noto-kufi","noto-naskh"].includes(font) ? font : "noto-naskh";
     }
 
+    function normalizeContentMode(value,item={}){
+      const mode=safeText(value).toLowerCase();
+      if (["images","image","picture"].includes(mode)) return "images";
+      if (["mixed","text-image","text+image"].includes(mode)) return "mixed";
+      if (["text","texts"].includes(mode)) return "text";
+      const text=safeText(item?.text || item?.label || item?.value);
+      const image=item?.imageData || item?.image || item?.src || "";
+      return text&&image?"mixed":image?"images":"text";
+    }
+
     function normalizeAnswer(item,index){
-      const imageData = item?.imageData || item?.image || item?.src || "";
-      const text = safeText(item?.text || item?.label || item?.value);
+      const contentType=normalizeContentMode(item?.contentType || item?.type,item);
+      const imageData = contentType==="text" ? "" : (item?.imageData || item?.image || item?.src || "");
+      const text = contentType==="images" ? "" : safeText(item?.text || item?.label || item?.value);
       return {
         id:safeText(item?.id || item?.answerId || `answer-${index + 1}`),
+        contentType,
         text,
         imageData,
         color:normalizeHex(item?.color,PALETTE[index % PALETTE.length])
@@ -950,10 +961,13 @@
         ? item.prompt
         : (item?.questionContent && typeof item.questionContent === "object" ? item.questionContent : null);
       const legacyQuestionText = typeof item?.question === "string" ? item.question : "";
+      const source=prompt || item || {};
+      const contentType=normalizeContentMode(prompt?.contentType || item?.contentType || item?.type,source);
       return {
         id:safeText(item?.id || `question-${index + 1}`),
-        text:safeText(prompt?.text ?? item?.questionText ?? item?.text ?? legacyQuestionText),
-        imageData:prompt?.imageData || prompt?.image || item?.questionImageData || item?.imageData || item?.image || "",
+        contentType,
+        text:contentType==="images" ? "" : safeText(prompt?.text ?? item?.questionText ?? item?.text ?? legacyQuestionText),
+        imageData:contentType==="text" ? "" : (prompt?.imageData || prompt?.image || item?.questionImageData || item?.imageData || item?.image || ""),
         answerId:safeText(item?.answerId || item?.correctAnswerId || item?.correctId)
       };
     }
@@ -1771,7 +1785,7 @@
       const zoomMs = 7600;
       const settlePauseMs = 280;
       const startScale = 1;
-      const endScale = 1.18;
+      const endScale = Number(getComputedStyle(page).getPropertyValue("--intro-bg-final-scale")) || 1.12;
       let startTime = null;
 
       const setFrame = (scale)=>{
@@ -1889,7 +1903,6 @@
     restartBtn.addEventListener("click",restartGame);
     homeBtn.addEventListener("click",goHome);
     backBtn.addEventListener("click",goBack);
-    finishBtn.addEventListener("click",()=>showFinish(false));
     window.addEventListener("resize",()=>scheduleResponsiveLayout(40),{passive:true});
     window.addEventListener("orientationchange",()=>{
       window.setTimeout(()=>{
