@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v1 -->
+  <!-- version: moving-question-v2-infinite-film-safari -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
@@ -27,19 +27,48 @@
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{width:100%;height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
-    body{font-family:var(--page-font);background:#eef5fb;color:var(--ink);touch-action:manipulation}
+    html,body{
+      width:100%;
+      min-height:100%;
+      margin:0;
+      color:var(--ink);
+      background:#eef5fb;
+      -webkit-text-size-adjust:100%;
+    }
+
+    /* نفس معالجة Safari المستخدمة في لعبة افتح الصندوق. */
+    body{
+      min-height:calc(100dvh + 160px);
+      overflow-x:hidden;
+      overflow-y:auto;
+      overscroll-behavior-y:none;
+      -webkit-overflow-scrolling:touch;
+      font-family:var(--page-font);
+    }
+
+    body::after{
+      content:"";
+      display:block;
+      height:160px;
+      pointer-events:none;
+    }
     button{font:inherit}
     [hidden]{display:none !important}
 
     .game-page{
-      position:fixed;
-      inset:0;
+      position:sticky;
+      top:0;
+      width:100%;
+      height:100dvh;
       min-width:280px;
-      min-height:280px;
-      overflow:hidden;
+      min-height:100dvh;
+      overflow-x:hidden;
+      overflow-y:hidden;
       isolation:isolate;
       background:#f7fbff;
+      direction:ltr;
+      user-select:none;
+      touch-action:none;
     }
 
     .theme-background{
@@ -79,14 +108,16 @@
 
     .game-logo{
       position:absolute;
-      z-index:20;
-      top:calc(var(--safe-top) + clamp(10px,1.8vh,20px));
-      left:calc(var(--safe-left) + clamp(12px,2.2vw,28px));
-      width:clamp(76px,8.2vw,126px);
+      z-index:80;
+      top:calc(var(--safe-top) + clamp(10px,1.7vw,22px));
+      left:calc(var(--safe-left) + clamp(12px,2vw,30px));
+      width:clamp(86px,9.2vw,148px);
       height:auto;
+      max-height:clamp(68px,9vw,120px);
       object-fit:contain;
       pointer-events:none;
       user-select:none;
+      -webkit-user-drag:none;
     }
 
     .hud{
@@ -139,10 +170,13 @@
       grid-template-rows:minmax(260px,55vh) minmax(150px,1fr);
       padding:
         calc(var(--safe-top) + clamp(54px,7vh,82px))
-        calc(var(--safe-right) + clamp(18px,3vw,52px))
+        0
         calc(var(--safe-bottom) + clamp(66px,9vh,94px))
-        calc(var(--safe-left) + clamp(18px,3vw,52px));
+        0;
       gap:clamp(16px,2.8vh,32px);
+      direction:ltr;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
     .strip-zone{
@@ -156,34 +190,32 @@
     .glass-panel{
       position:absolute;
       inset:clamp(4px,1vh,12px) 0;
-      border:2px solid rgba(255,255,255,.82);
-      border-radius:clamp(24px,3vw,42px);
-      background:linear-gradient(135deg,rgba(255,255,255,.66),rgba(226,239,249,.40));
-      box-shadow:0 18px 46px rgba(45,72,99,.16),inset 0 0 0 1px rgba(77,105,132,.13);
+      border-top:1px solid rgba(255,255,255,.9);
+      border-bottom:1px solid rgba(255,255,255,.9);
+      background:linear-gradient(135deg,rgba(255,255,255,.58),rgba(220,235,247,.34));
+      box-shadow:0 18px 46px rgba(45,72,99,.14),inset 0 0 0 1px rgba(77,105,132,.08);
       backdrop-filter:blur(13px) saturate(1.15);
       -webkit-backdrop-filter:blur(13px) saturate(1.15);
     }
 
     .strip-viewport{
       position:relative;
-      width:min(94%,1500px);
-      height:clamp(210px,38vh,390px);
+      width:100%;
+      height:clamp(220px,40vh,410px);
       overflow:hidden;
       z-index:2;
-      border-radius:clamp(18px,2vw,30px);
       contain:layout paint;
     }
 
     .question-strip{
       position:absolute;
-      inset:0;
+      inset:0 -2px;
       display:grid;
-      grid-template-rows:clamp(24px,4.4vh,42px) minmax(0,1fr) clamp(24px,4.4vh,42px);
-      border:clamp(4px,.42vw,7px) solid var(--question-frame);
-      border-radius:clamp(18px,2vw,30px);
+      grid-template-rows:clamp(34px,5.7vh,56px) minmax(0,1fr) clamp(34px,5.7vh,56px);
+      border-top:clamp(3px,.3vw,5px) solid var(--question-frame);
+      border-bottom:clamp(3px,.3vw,5px) solid var(--question-frame);
       background:#f8fafc;
-      box-shadow:0 12px 0 rgba(47,55,68,.18),0 20px 40px rgba(33,50,70,.17);
-      will-change:transform,opacity;
+      box-shadow:0 9px 0 rgba(47,55,68,.14),0 18px 36px rgba(33,50,70,.15);
       overflow:hidden;
     }
 
@@ -191,16 +223,18 @@
       position:relative;
       background:
         repeating-linear-gradient(90deg,
-          transparent 0 clamp(22px,2.6vw,42px),
-          color-mix(in srgb,var(--question-frame) 68%,transparent) clamp(22px,2.6vw,42px) clamp(34px,3.5vw,56px),
-          transparent clamp(34px,3.5vw,56px) clamp(58px,6.3vw,100px)
+          transparent 0 clamp(24px,2.4vw,40px),
+          rgba(102,107,114,.55) clamp(24px,2.4vw,40px) clamp(38px,3.6vw,58px),
+          transparent clamp(38px,3.6vw,58px) clamp(70px,6.6vw,106px)
         ),
-        linear-gradient(180deg,rgba(255,255,255,.92),rgba(224,230,238,.96));
-      border-color:var(--question-frame);
+        linear-gradient(180deg,rgba(250,250,250,.98),rgba(231,233,236,.98));
+      background-position:0 50%,0 0;
+      background-repeat:repeat-x,no-repeat;
+      will-change:background-position;
     }
 
-    .film-edge.top{border-bottom:clamp(3px,.35vw,6px) solid var(--question-frame)}
-    .film-edge.bottom{border-top:clamp(3px,.35vw,6px) solid var(--question-frame)}
+    .film-edge.top{border-bottom:2px solid rgba(69,75,84,.24)}
+    .film-edge.bottom{border-top:2px solid rgba(69,75,84,.24)}
 
     .question-content{
       min-width:0;
@@ -213,6 +247,9 @@
       padding:clamp(12px,2.2vw,32px) clamp(22px,4vw,68px);
       background:linear-gradient(100deg,rgba(245,248,252,.96),rgba(255,255,255,.98));
       color:var(--question-text);
+      will-change:transform,opacity;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
     }
 
     .question-content.text-only{grid-template-columns:1fr;grid-template-areas:"text"}
@@ -363,32 +400,45 @@
 
     .fixed-controls{
       position:absolute;
-      z-index:24;
-      left:calc(var(--safe-left) + clamp(16px,2.6vw,42px));
-      right:calc(var(--safe-right) + clamp(16px,2.6vw,42px));
-      bottom:calc(var(--safe-bottom) + clamp(12px,2.3vh,24px));
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
+      z-index:90;
+      left:0;
+      right:0;
+      bottom:calc(14px + var(--safe-bottom));
+      height:clamp(44px,6.2vh,60px);
       pointer-events:none;
     }
 
     .control-btn{
-      min-width:clamp(94px,10vw,146px);
-      height:clamp(48px,6.8vh,68px);
-      border:4px solid #111;
-      border-radius:clamp(13px,1.2vw,19px);
-      box-shadow:0 6px 0 rgba(17,17,17,.23);
+      position:absolute;
+      bottom:0;
+      min-width:clamp(78px,8vw,110px);
+      height:clamp(34px,4.8vh,44px);
+      border:2.5px solid #111;
+      border-radius:11px;
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
       color:#111;
-      font-size:clamp(18px,2vw,29px);
+      font-size:clamp(14px,1.7vw,19px);
       font-weight:900;
+      line-height:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 clamp(15px,2vw,24px);
       cursor:pointer;
       pointer-events:auto;
+      white-space:nowrap;
     }
 
-    .back-btn{background:var(--yellow)}
-    .finish-btn{background:var(--red);color:#fff}
-    .control-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(17,17,17,.23)}
+    .back-btn{
+      left:calc(var(--safe-left) + clamp(16px,2.6vw,34px));
+      background:var(--yellow);
+    }
+    .finish-btn{
+      right:calc(var(--safe-right) + clamp(16px,2.8vw,42px));
+      background:var(--red);
+      color:#fff;
+    }
+    .control-btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.20)}
 
     .activity-overlay{
       position:absolute;
@@ -450,8 +500,8 @@
       .answer-card{flex-basis:calc(50% - 6px);height:clamp(62px,8.2vh,82px);padding:5px 9px}
       .answer-text{font-size:clamp(21px,6vw,32px)}
       .answer-image{width:52px}
-      .game-logo{width:70px}
-      .control-btn{min-width:88px;height:48px;font-size:18px}
+      .game-logo{width:92px;top:calc(var(--safe-top) + 10px);left:calc(var(--safe-left) + 12px)}
+      .control-btn{height:38px;border-width:2px;border-radius:10px;font-size:15px;padding:0 14px}
       .hud-pill{height:38px;min-width:70px;font-size:17px}
     }
 
@@ -462,9 +512,9 @@
       .question-text{font-size:clamp(25px,3.5vw,46px)}
       .answer-card{height:clamp(52px,10.5vh,76px);flex-basis:clamp(130px,18vw,230px)}
       .answer-text{font-size:clamp(22px,2.7vw,36px)}
-      .game-logo{width:70px;top:calc(var(--safe-top) + 7px)}
-      .fixed-controls{bottom:calc(var(--safe-bottom) + 7px)}
-      .control-btn{height:44px;min-width:88px;font-size:17px;border-width:3px}
+      .game-logo{width:clamp(78px,8.8vw,130px);top:calc(var(--safe-top) + 10px)}
+      .fixed-controls{bottom:calc(var(--safe-bottom) + 8px)}
+      .control-btn{height:clamp(32px,8vh,42px);font-size:clamp(14px,3.3vh,20px);border-width:2px;border-radius:10px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
       .celebration-card{min-height:260px;width:min(390px,76vw);padding:16px}
       .celebration-icon{width:78px;height:78px}
       .celebration-title{font-size:36px}
@@ -552,10 +602,14 @@
     const DB_NAME = "sandooq_edu_games_v1";
     const DB_PREFIX = "moving-question";
     const PALETTE = ["#9c4fd0","#1f94db","#f47730","#123fd0","#d90b3d","#23ad6b","#15933b","#e1a400","#7a55c6","#e65353"];
+    const STRIP_MOTION_MS = 2600;
 
     const page = document.getElementById("gamePage");
+    const playfield = document.querySelector(".playfield");
+    const stripViewport = document.getElementById("stripViewport");
     const questionStrip = document.getElementById("questionStrip");
     const questionContent = document.getElementById("questionContent");
+    const filmEdges = [...document.querySelectorAll(".film-edge")];
     const answerBank = document.getElementById("answerBank");
     const startGate = document.getElementById("startGate");
     const finishView = document.getElementById("finishView");
@@ -632,6 +686,10 @@
     let attemptsLeft = 10;
     let timerId = null;
     let timerDeadline = 0;
+    let railOffset = 0;
+    let viewportLayoutFrame = null;
+    let viewportLayoutTimer = null;
+    let safariTimers = [];
 
     const wait = (ms)=>new Promise((resolve)=>setTimeout(resolve,ms));
     const reducedMotion = ()=>window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -903,33 +961,57 @@
       }
     }
 
-    function animateStrip(keyframes,duration){
-      if (reducedMotion() || typeof questionStrip.animate !== "function") {
-        const last = keyframes[keyframes.length - 1];
-        Object.assign(questionStrip.style,last);
+    function animateStrip(keyframes,duration = STRIP_MOTION_MS){
+      const last = keyframes[keyframes.length - 1];
+      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
+      const edgeStart = railOffset;
+      const edgeEnd = edgeStart + viewportWidth * 1.1;
+      railOffset = edgeEnd;
+      const edgeStartPosition = `${edgeStart.toFixed(2)}px 50%,0 0`;
+      const edgeEndPosition = `${edgeEnd.toFixed(2)}px 50%,0 0`;
+
+      if (reducedMotion() || typeof questionContent.animate !== "function") {
+        Object.assign(questionContent.style,last);
+        filmEdges.forEach((edge)=>{edge.style.backgroundPosition=edgeEndPosition});
         return Promise.resolve();
       }
-      const animation = questionStrip.animate(keyframes,{duration,easing:"cubic-bezier(.22,.76,.2,1)",fill:"forwards"});
-      return animation.finished.catch(()=>{}).then(()=>{
-        const last = keyframes[keyframes.length - 1];
-        Object.assign(questionStrip.style,last);
-        animation.cancel();
+
+      const timing = {
+        duration,
+        easing:"cubic-bezier(.32,.72,.28,1)",
+        fill:"forwards"
+      };
+      const contentAnimation = questionContent.animate(keyframes,timing);
+      const edgeAnimations = filmEdges.map((edge)=>edge.animate([
+        {backgroundPosition:edgeStartPosition},
+        {backgroundPosition:edgeEndPosition}
+      ],timing));
+
+      return Promise.all([
+        contentAnimation.finished.catch(()=>{}),
+        ...edgeAnimations.map((animation)=>animation.finished.catch(()=>{}))
+      ]).then(()=>{
+        Object.assign(questionContent.style,last);
+        filmEdges.forEach((edge,index)=>{
+          edge.style.backgroundPosition=edgeEndPosition;
+          edgeAnimations[index]?.cancel();
+        });
+        contentAnimation.cancel();
       });
     }
 
     async function enterQuestion(index){
       renderQuestion(index);
       interactionLocked = true;
-      questionStrip.style.transform = "translate3d(-116%,0,0)";
-      questionStrip.style.opacity = "0";
+      questionContent.style.transform = "translate3d(-110%,0,0)";
+      questionContent.style.opacity = "0.16";
       audio.play("move");
       await animateStrip([
-        {transform:"translate3d(-116%,0,0)",opacity:0},
-        {transform:"translate3d(3%,0,0)",opacity:1,offset:.84},
+        {transform:"translate3d(-110%,0,0)",opacity:.16},
         {transform:"translate3d(0,0,0)",opacity:1}
-      ],1050);
-      questionStrip.style.transform = "translate3d(0,0,0)";
-      questionStrip.style.opacity = "1";
+      ],STRIP_MOTION_MS);
+      questionContent.style.transform = "translate3d(0,0,0)";
+      questionContent.style.opacity = "1";
       interactionLocked = false;
       answerBank.querySelectorAll(".answer-card").forEach((card)=>{card.disabled=false;card.classList.remove("is-correct","is-wrong");card.querySelector(".answer-mark").textContent=""});
     }
@@ -938,8 +1020,8 @@
       interactionLocked = true;
       await animateStrip([
         {transform:"translate3d(0,0,0)",opacity:1},
-        {transform:"translate3d(112%,0,0)",opacity:.2}
-      ],760);
+        {transform:"translate3d(110%,0,0)",opacity:.16}
+      ],STRIP_MOTION_MS);
     }
 
     async function chooseAnswer(button,answer){
@@ -1019,6 +1101,82 @@
       timerId = null;
     }
 
+    function getVisualViewportMetrics(){
+      const visualViewport = window.visualViewport;
+      const layoutWidth = Math.max(
+        280,
+        document.documentElement.clientWidth || 0,
+        window.innerWidth || 0
+      );
+      const layoutHeight = Math.max(
+        260,
+        page?.clientHeight || 0,
+        document.documentElement.clientHeight || 0,
+        window.innerHeight || 0
+      );
+
+      return {
+        width:Math.max(280,Math.min(layoutWidth,Number(visualViewport?.width) || layoutWidth)),
+        height:Math.max(260,Math.min(layoutHeight,Number(visualViewport?.height) || layoutHeight)),
+        offsetLeft:Math.max(0,Number(visualViewport?.offsetLeft) || 0)
+      };
+    }
+
+    function syncVisualViewportFrame(){
+      if (!playfield) return;
+      const metrics = getVisualViewportMetrics();
+      playfield.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
+      playfield.style.right = "auto";
+      playfield.style.top = "0px";
+      playfield.style.bottom = "auto";
+      playfield.style.width = `${metrics.width.toFixed(2)}px`;
+      playfield.style.height = `${metrics.height.toFixed(2)}px`;
+      page.style.setProperty("--visual-viewport-width",`${metrics.width}px`);
+      page.style.setProperty("--visual-viewport-height",`${metrics.height}px`);
+    }
+
+    function scheduleResponsiveLayout(delay = 0){
+      if (viewportLayoutFrame) {
+        cancelAnimationFrame(viewportLayoutFrame);
+        viewportLayoutFrame = null;
+      }
+      if (viewportLayoutTimer) {
+        clearTimeout(viewportLayoutTimer);
+        viewportLayoutTimer = null;
+      }
+
+      const run = ()=>{
+        viewportLayoutFrame = requestAnimationFrame(()=>{
+          viewportLayoutFrame = null;
+          syncVisualViewportFrame();
+        });
+      };
+
+      if (delay > 0) {
+        viewportLayoutTimer = setTimeout(()=>{
+          viewportLayoutTimer = null;
+          run();
+        },delay);
+      } else {
+        run();
+      }
+    }
+
+    function collapseSafariBars(){
+      safariTimers.forEach((timer)=>clearTimeout(timer));
+      safariTimers = [];
+      [0,80,220,520,900].forEach((delay)=>{
+        safariTimers.push(setTimeout(()=>{
+          try {
+            window.scrollTo({top:80,left:0,behavior:"auto"});
+          } catch (_) {
+            window.scrollTo(0,80);
+          }
+          scheduleResponsiveLayout();
+        },delay));
+      });
+    }
+
     function buildConfetti(){
       confetti.textContent = "";
       const colors = ["#1688d3","#f47a45","#e91e63","#43a047","#8e24aa","#efd553"];
@@ -1047,6 +1205,7 @@
 
     async function startGame(){
       audio.unlock();
+      collapseSafariBars();
       startGate.classList.remove("is-visible");
       startGate.setAttribute("aria-hidden","true");
       gameStarted = true;
@@ -1067,7 +1226,10 @@
       stopTimer();
       finishView.classList.remove("is-visible");
       finishView.setAttribute("aria-hidden","true");
-      questionStrip.getAnimations?.().forEach((animation)=>animation.cancel());
+      questionContent.getAnimations?.().forEach((animation)=>animation.cancel());
+      filmEdges.forEach((edge)=>edge.getAnimations?.().forEach((animation)=>animation.cancel()));
+      railOffset = 0;
+      filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
       await startGame();
     }
 
@@ -1096,7 +1258,30 @@
     homeBtn.addEventListener("click",goHome);
     backBtn.addEventListener("click",goBack);
     finishBtn.addEventListener("click",()=>showFinish(false));
-    window.addEventListener("pagehide",()=>{audio.stop();stopTimer()},{passive:true});
+    window.addEventListener("resize",()=>scheduleResponsiveLayout(40),{passive:true});
+    window.addEventListener("orientationchange",()=>{
+      window.setTimeout(()=>{
+        collapseSafariBars();
+        scheduleResponsiveLayout(80);
+      },160);
+    },{passive:true});
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize",()=>scheduleResponsiveLayout(34),{passive:true});
+      window.visualViewport.addEventListener("scroll",()=>scheduleResponsiveLayout(34),{passive:true});
+    }
+    document.addEventListener("touchend",collapseSafariBars,{passive:true});
+    window.addEventListener("pageshow",()=>{
+      collapseSafariBars();
+      scheduleResponsiveLayout(60);
+    },{passive:true});
+    window.addEventListener("pagehide",()=>{
+      audio.stop();
+      stopTimer();
+      safariTimers.forEach((timer)=>clearTimeout(timer));
+      safariTimers=[];
+      if (viewportLayoutFrame) cancelAnimationFrame(viewportLayoutFrame);
+      if (viewportLayoutTimer) clearTimeout(viewportLayoutTimer);
+    },{passive:true});
 
     (async()=>{
       payload = await hydratePayload();
@@ -1104,8 +1289,11 @@
       buildConfetti();
       renderAnswerBank();
       renderQuestion(0);
-      questionStrip.style.transform = "translate3d(-116%,0,0)";
-      questionStrip.style.opacity = "0";
+      questionContent.style.transform = "translate3d(-110%,0,0)";
+      questionContent.style.opacity = "0.16";
+      filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
+      syncVisualViewportFrame();
+      collapseSafariBars();
     })();
   })();
   </script>
