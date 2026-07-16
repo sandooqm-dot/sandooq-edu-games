@@ -12882,6 +12882,10 @@
             <button class="quiz-sound-toggle is-on" id="movingSoundToggleBtn" type="button" aria-pressed="true" aria-label="تشغيل أصوات اللعبة"><span>×</span><span>✓</span></button>
           </div>
           <div class="choices-advanced-row">
+            <div class="choices-advanced-label"><strong>إزالة الإجابة الصحيحة</strong></div>
+            <button class="quiz-sound-toggle is-on" id="movingDeleteCorrectToggleBtn" type="button" aria-pressed="true" aria-label="إزالة الإجابة الصحيحة بعد اختيارها"><span>×</span><span>✓</span></button>
+          </div>
+          <div class="choices-advanced-row">
             <label class="choices-advanced-label" for="movingFontSelect"><strong>نوع الخط</strong></label>
             <select class="quiz-font-select" id="movingFontSelect">
               <option value="cairo">كايرو</option>
@@ -21209,6 +21213,7 @@
 
   const INDEXED_DRAFT_KEYS = {
     match:["draft:match"],
+    "moving-question":["draft:moving-question"],
     "classify-words":["draft:classify-words"]
   };
 
@@ -21416,6 +21421,7 @@
   const GAME_TYPE="moving-question";
   const PAYLOAD_KEY="sandooq_moving_question_payload_v1";
   const DRAFT_KEY="sandooq_moving_question_draft_v1";
+  const DRAFT_DB_KEY="draft:moving-question";
   const PAGE_URL="moving-question/move.html";
   const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
   const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
@@ -21432,6 +21438,7 @@
   const advancedAction=document.getElementById("movingAdvancedActionText");
   const advancedPanel=document.getElementById("movingAdvancedPanel");
   const soundToggle=document.getElementById("movingSoundToggleBtn");
+  const deleteCorrectToggle=document.getElementById("movingDeleteCorrectToggleBtn");
   const fontSelect=document.getElementById("movingFontSelect");
   const unifiedToggle=document.getElementById("movingUnifiedAnswersToggleBtn");
   const unifiedColorRow=document.getElementById("movingUnifiedAnswerColorRow");
@@ -21442,9 +21449,12 @@
 
   let sequence=0;
   let entries=[];
+  let draftSaveTimer=0;
+  let draftSaveChain=Promise.resolve(true);
   let theme="classic";
   let contentLanguage="ar";
   let soundEnabled=true;
+  let deleteCorrectAnswer=true;
   let fontFamily="noto-naskh";
   let advancedOpen=false;
   let textColor="#161616";
@@ -21466,6 +21476,11 @@
     const draft=buildDraft();
     try{sessionStorage.setItem(DRAFT_KEY,JSON.stringify(draft))}catch(_){}
     try{localStorage.setItem(DRAFT_KEY,JSON.stringify(draft))}catch(_){}
+    clearTimeout(draftSaveTimer);
+    draftSaveTimer=window.setTimeout(()=>{
+      draftSaveTimer=0;
+      draftSaveChain=draftSaveChain.catch(()=>false).then(()=>writePayloadToDb(DRAFT_DB_KEY,draft));
+    },140);
   }
 
   function loadDraft(raw){
@@ -21477,6 +21492,8 @@
     theme=normalizeTheme(raw.theme||raw.selectedTheme);
     contentLanguage=(raw.contentLanguage||raw.language)==="en"?"en":"ar";
     soundEnabled=raw.soundEnabled!==false&&raw?.sounds?.enabled!==false;
+    const settings=raw.settings||{};
+    deleteCorrectAnswer=settings.deleteCorrectAnswer!==false&&raw.deleteCorrectAnswer!==false;
     fontFamily=normalizeFont(raw.fontFamily);
     const appearance=raw.appearance||{};
     textColor=normalizeHex(appearance.textColor||raw.textColor,"#161616");
@@ -21488,7 +21505,7 @@
 
   function buildDraft(){
     const name=String(nameInput?.value||"").trim();
-    return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:2,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},fontFamily,appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},entries,contents:entries,updatedAt:Date.now()};
+    return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:3,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},deleteCorrectAnswer,settings:{deleteCorrectAnswer},fontFamily,appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},entries,contents:entries,updatedAt:Date.now()};
   }
 
   function mediaComplete(media){
@@ -21505,7 +21522,7 @@
     const answers=completed.map((entry,index)=>({id:`answer-${entry.id}`,text:String(entry.answer.text||"").trim(),imageData:String(entry.answer.imageData||""),color:PALETTE[index%PALETTE.length]}));
     const questions=completed.map(entry=>{const prompt={text:String(entry.question.text||"").trim(),imageData:String(entry.question.imageData||"")};return {id:`question-${entry.id}`,prompt,text:prompt.text,imageData:prompt.imageData,answerId:`answer-${entry.id}`}});
     const name=String(nameInput?.value||"").trim();
-    return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:2,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},fontFamily,settings:{deleteCorrectAnswer:true,attemptsEnabled:false,attempts:10,timerEnabled:false,timerSeconds:90},appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},answers,answerBank:answers,questions,entries:completed,contents:completed,updatedAt:Date.now()};
+    return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:3,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},deleteCorrectAnswer,fontFamily,settings:{deleteCorrectAnswer,attemptsEnabled:false,attempts:10,timerEnabled:false,timerSeconds:90},appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},answers,answerBank:answers,questions,entries:completed,contents:completed,updatedAt:Date.now()};
   }
 
   function validate(requireName){
@@ -21522,6 +21539,7 @@
     themePreview.className=`choices-theme-preview theme-art ${theme}`;
     themeList?.querySelectorAll("[data-moving-theme]").forEach(card=>card.classList.toggle("active",card.dataset.movingTheme===theme));
     soundToggle?.classList.toggle("is-on",soundEnabled);soundToggle?.setAttribute("aria-pressed",soundEnabled?"true":"false");
+    deleteCorrectToggle?.classList.toggle("is-on",deleteCorrectAnswer);deleteCorrectToggle?.setAttribute("aria-pressed",deleteCorrectAnswer?"true":"false");
     if(fontSelect)fontSelect.value=fontFamily;
     advancedPanel?.classList.toggle("is-open",advancedOpen);advancedPanel?.setAttribute("aria-hidden",advancedOpen?"false":"true");
     advancedToggle?.classList.toggle("is-open",advancedOpen);advancedToggle?.setAttribute("aria-expanded",advancedOpen?"true":"false");
@@ -21628,35 +21646,54 @@
     return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(false);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("payloads"))request.result.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readwrite");tx.objectStore("payloads").put({key,payload,updatedAt:Date.now()});tx.oncomplete=()=>{db.close();resolve(true)};tx.onerror=()=>{db.close();resolve(false)}}catch(_){db.close();resolve(false)}}});
   }
 
+  function readPayloadFromDb(key){
+    if(!("indexedDB" in window))return Promise.resolve(null);
+    return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(null);request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("payloads"))request.result.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readonly");const get=tx.objectStore("payloads").get(key);get.onsuccess=()=>resolve(get.result?.payload||null);get.onerror=()=>resolve(null);tx.oncomplete=tx.onerror=tx.onabort=()=>db.close()}catch(_){db.close();resolve(null)}}});
+  }
+
+  function deletePayloadFromDb(key){
+    if(!("indexedDB" in window))return Promise.resolve();
+    return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve();request.onupgradeneeded=()=>{if(!request.result.objectStoreNames.contains("payloads"))request.result.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readwrite");tx.objectStore("payloads").delete(key);tx.oncomplete=tx.onerror=tx.onabort=()=>{db.close();resolve()}}catch(_){db.close();resolve()}}});
+  }
+
   async function testGame(){
     if(!validate(false))return;
     const payload=runtimePayload();const payloadId=`moving_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;payload.payloadId=payloadId;
-    try{sessionStorage.setItem(`${PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));sessionStorage.setItem(PAYLOAD_KEY,JSON.stringify(payload));sessionStorage.setItem(DRAFT_KEY,JSON.stringify(buildDraft()))}catch(_){}
+    const latestDraft=buildDraft();
+    clearTimeout(draftSaveTimer);draftSaveTimer=0;
+    await draftSaveChain.catch(()=>false);
+    try{sessionStorage.setItem(`${PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));sessionStorage.setItem(PAYLOAD_KEY,JSON.stringify(payload));sessionStorage.setItem(DRAFT_KEY,JSON.stringify(latestDraft))}catch(_){}
+    try{localStorage.setItem(DRAFT_KEY,JSON.stringify(latestDraft))}catch(_){}
     try{localStorage.setItem(`${PAYLOAD_KEY}_${payloadId}`,JSON.stringify(payload));localStorage.setItem(PAYLOAD_KEY,JSON.stringify(payload))}catch(_){}
+    await writePayloadToDb(DRAFT_DB_KEY,latestDraft);
     await writePayloadToDb(`moving-question:${payloadId}`,payload);
     const url=new URL(PAGE_URL,location.href);url.searchParams.set("payloadId",payloadId);url.searchParams.set("theme",theme);url.searchParams.set("launch","test");url.searchParams.set("returnTo","../index.html#movingQuestionSetup");url.searchParams.set("v",String(Date.now()));location.href=`${url.pathname}${url.search}`;
   }
 
   async function saveGame(){
     if(!validate(true))return;
+    clearTimeout(draftSaveTimer);draftSaveTimer=0;
+    await draftSaveChain.catch(()=>false);
     const payload=runtimePayload();
     const task=()=>window.SandooqSavedGames?.saveGame({gameType:GAME_TYPE,name:payload.name,payload});
     const saved=window.SandooqSaveFlow?.run?await window.SandooqSaveFlow.run({gameType:GAME_TYPE,saveTask:task}):Boolean(await task());
     if(!saved)return;
     try{sessionStorage.removeItem(DRAFT_KEY);localStorage.removeItem(DRAFT_KEY)}catch(_){}
+    await deletePayloadFromDb(DRAFT_DB_KEY);
     reset();render();
   }
 
-  function reset(){entries=[newEntry()];theme="classic";contentLanguage="ar";soundEnabled=true;fontFamily="noto-naskh";advancedOpen=false;textColor="#161616";stripBorderColor="#354052";unifyAnswerColors=false;answerColor="#1688d3";if(nameInput)nameInput.value=""}
+  function reset(){entries=[newEntry()];theme="classic";contentLanguage="ar";soundEnabled=true;deleteCorrectAnswer=true;fontFamily="noto-naskh";advancedOpen=false;textColor="#161616";stripBorderColor="#354052";unifyAnswerColors=false;answerColor="#1688d3";if(nameInput)nameInput.value=""}
   function open(){if(!entries.length)entries=[newEntry()];window.openEduScreen?.("movingQuestionSetupScreen");render();saveDraft()}
 
-  document.querySelectorAll('[data-template="moving-question"]').forEach(button=>button.addEventListener("click",()=>{reset();open()}));
+  document.querySelectorAll('[data-template="moving-question"]').forEach(button=>button.addEventListener("click",()=>{void initialRestorePromise.then(open)}));
   addButton?.addEventListener("click",()=>{if(entries.length>=40){alert("الحد الأقصى هو 40 سؤالًا.");return}entries.push(newEntry());render();saveDraft();setTimeout(()=>editor.lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"}),0)});
   themeToggle?.addEventListener("click",()=>{if(themeList)themeList.hidden=!themeList.hidden});
   themeList?.querySelectorAll(".choices-theme-activate").forEach(button=>button.addEventListener("click",()=>{theme=normalizeTheme(button.closest("[data-moving-theme]")?.dataset.movingTheme);themeList.hidden=true;syncSettings();saveDraft()}));
   setup.querySelectorAll("[data-moving-language]").forEach(button=>button.addEventListener("click",()=>{contentLanguage=button.dataset.movingLanguage==="en"?"en":"ar";syncSettings();saveDraft()}));
   advancedToggle?.addEventListener("click",()=>{advancedOpen=!advancedOpen;syncSettings()});
   soundToggle?.addEventListener("click",()=>{soundEnabled=!soundEnabled;syncSettings();saveDraft()});
+  deleteCorrectToggle?.addEventListener("click",()=>{deleteCorrectAnswer=!deleteCorrectAnswer;syncSettings();saveDraft()});
   fontSelect?.addEventListener("change",()=>{fontFamily=normalizeFont(fontSelect.value);syncSettings();saveDraft()});
   unifiedToggle?.addEventListener("click",()=>{unifyAnswerColors=!unifyAnswerColors;syncSettings();saveDraft()});
   setup.querySelectorAll("[data-moving-color]").forEach(button=>button.addEventListener("click",()=>openColor(button.dataset.movingColor)));
@@ -21667,8 +21704,13 @@
   let restored=false;
   try{const draft=JSON.parse(sessionStorage.getItem(DRAFT_KEY)||localStorage.getItem(DRAFT_KEY)||"null");if(draft){restored=loadDraft(draft)}}catch(_){}
   if(!entries.length)entries=[newEntry()];render();window.openMovingQuestionSetup=open;
-  if(location.hash==="#movingQuestionSetup")open();
-  (async()=>{const pending=await window.SandooqSavedGames?.consumePendingEdit(GAME_TYPE);if(!pending?.payload)return;loadDraft(pending.payload);open()})();
+  const initialRestorePromise=(async()=>{
+    const pending=await window.SandooqSavedGames?.consumePendingEdit(GAME_TYPE);
+    if(pending?.payload){loadDraft(pending.payload);render();saveDraft();open();return true}
+    if(!restored){const indexedDraft=await readPayloadFromDb(DRAFT_DB_KEY);if(indexedDraft&&loadDraft(indexedDraft)){restored=true;render()}}
+    if(location.hash==="#movingQuestionSetup")open();
+    return restored;
+  })();
 })();
 </script>
 
