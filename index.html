@@ -21503,7 +21503,7 @@
   function runtimePayload(){
     const completed=validEntries();
     const answers=completed.map((entry,index)=>({id:`answer-${entry.id}`,text:String(entry.answer.text||"").trim(),imageData:String(entry.answer.imageData||""),color:PALETTE[index%PALETTE.length]}));
-    const questions=completed.map(entry=>({id:`question-${entry.id}`,text:String(entry.question.text||"").trim(),imageData:String(entry.question.imageData||""),answerId:`answer-${entry.id}`}));
+    const questions=completed.map(entry=>{const prompt={text:String(entry.question.text||"").trim(),imageData:String(entry.question.imageData||"")};return {id:`question-${entry.id}`,prompt,text:prompt.text,imageData:prompt.imageData,answerId:`answer-${entry.id}`}});
     const name=String(nameInput?.value||"").trim();
     return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:2,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},fontFamily,settings:{deleteCorrectAnswer:true,attemptsEnabled:false,attempts:10,timerEnabled:false,timerSeconds:90},appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},answers,answerBank:answers,questions,entries:completed,contents:completed,updatedAt:Date.now()};
   }
@@ -21546,8 +21546,8 @@
           try{
             const ratio=Math.min(1,1000/Math.max(image.naturalWidth||1,image.naturalHeight||1));
             const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round((image.naturalWidth||1)*ratio));canvas.height=Math.max(1,Math.round((image.naturalHeight||1)*ratio));
-            canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
-            resolve({imageName:String(file.name||"صورة"),imageData:canvas.toDataURL("image/jpeg",.86)});
+            const context=canvas.getContext("2d",{alpha:true});context.clearRect(0,0,canvas.width,canvas.height);context.drawImage(image,0,0,canvas.width,canvas.height);
+            resolve({imageName:String(file.name||"صورة"),imageData:canvas.toDataURL("image/png")});
           }catch(_){resolve({imageName:String(file.name||"صورة"),imageData:original})}
         };
         image.src=original;
