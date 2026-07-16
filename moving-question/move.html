@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v6-assets-audio-continuous-motion -->
+  <!-- version: moving-question-v7-settle-audio-aligned-film-controls -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
@@ -112,8 +112,8 @@
     .game-logo{
       position:absolute;
       z-index:80;
-      top:calc(var(--safe-top) + 4px);
-      left:calc(var(--safe-left) + 4px);
+      top:var(--safe-top);
+      left:var(--safe-left);
       width:clamp(62px,6.4vw,98px);
       height:auto;
       max-height:clamp(52px,6.2vw,80px);
@@ -205,6 +205,9 @@
     }
 
     .question-strip{
+      --film-mark-start:clamp(21px,2.3vw,38px);
+      --film-mark-end:clamp(31px,3.15vw,50px);
+      --film-period:clamp(60px,6.1vw,94px);
       position:absolute;
       inset:0 -2px;
       display:grid;
@@ -220,13 +223,14 @@
       position:relative;
       background:
         repeating-linear-gradient(90deg,
-          transparent 0 clamp(21px,2.3vw,38px),
-          rgba(102,107,114,.55) clamp(21px,2.3vw,38px) clamp(31px,3.15vw,50px),
-          transparent clamp(31px,3.15vw,50px) clamp(60px,6.1vw,94px)
+          transparent 0 var(--film-mark-start),
+          rgba(102,107,114,.55) var(--film-mark-start) var(--film-mark-end),
+          transparent var(--film-mark-end) var(--film-period)
         ),
         linear-gradient(180deg,rgba(250,250,250,.98),rgba(231,233,236,.98));
       background-position:0 50%,0 0;
       background-repeat:repeat-x,no-repeat;
+      background-size:var(--film-period) 100%,100% 100%;
       will-change:background-position;
     }
 
@@ -660,7 +664,7 @@
       .answer-card{flex-basis:calc(50% - 6px);height:clamp(62px,8.2vh,82px);padding:5px 9px}
       .answer-text{font-size:clamp(21px,6vw,32px)}
       .answer-image{width:52px}
-      .game-logo{width:66px;top:calc(var(--safe-top) + 4px);left:calc(var(--safe-left) + 4px)}
+      .game-logo{width:66px;top:var(--safe-top);left:var(--safe-left)}
       .control-btn{height:38px;border-width:2px;border-radius:10px;font-size:15px;padding:0 14px}
       .hud-pill{height:38px;min-width:70px;font-size:17px}
     }
@@ -673,12 +677,25 @@
       .question-text{font-size:clamp(25px,3.5vw,46px)}
       .answer-card{height:clamp(52px,10.5vh,76px);flex-basis:clamp(130px,18vw,230px)}
       .answer-text{font-size:clamp(22px,2.7vw,36px)}
-      .game-logo{width:clamp(58px,6vw,88px);top:calc(var(--safe-top) + 4px);left:calc(var(--safe-left) + 4px)}
+      .game-logo{width:clamp(58px,6vw,88px);top:var(--safe-top);left:var(--safe-left)}
       .control-btn{height:clamp(32px,8vh,42px);font-size:clamp(14px,3.3vh,20px);border-width:2px;border-radius:10px;box-shadow:0 3px 0 rgba(0,0,0,.18)}
       .celebration-card{min-height:260px;width:min(390px,76vw);padding:16px}
       .celebration-icon{width:78px;height:78px}
       .celebration-title{font-size:36px}
       .celebration-actions{margin-top:12px}
+    }
+
+    /* زر الرجوع أصغر ومثبت فعليًا في الزاوية السفلية اليسرى. */
+    .back-btn{
+      left:calc(var(--safe-left) + 2px);
+      bottom:calc(var(--safe-bottom) + 2px);
+      min-width:clamp(58px,6.2vw,76px);
+      height:clamp(29px,4vh,36px);
+      padding:0 clamp(9px,1.1vw,13px);
+      border-width:2px;
+      border-radius:9px;
+      font-size:clamp(12px,1.35vw,16px);
+      box-shadow:0 3px 0 rgba(0,0,0,.18);
     }
 
     @media(prefers-reduced-motion:reduce){
@@ -780,6 +797,7 @@
     const PALETTE = ["#9c4fd0","#1f94db","#f47730","#123fd0","#d90b3d","#23ad6b","#15933b","#e1a400","#7a55c6","#e65353"];
     const STRIP_MOTION_MS = 2600;
     const QUESTION_OVERLAP_DELAY_MS = 1100;
+    const WRONG_FEEDBACK_FALLBACK_MS = 1800;
 
     const page = document.getElementById("gamePage");
     const playfield = document.querySelector(".playfield");
@@ -994,11 +1012,12 @@
       const files = {
         correct:assetUrl("sounds/open-box-open.mp3?v=1"),
         wrong:assetUrl("sounds/choice-wrong.mp3?v=1"),
-        move:assetUrl("sounds/open-box-go.mp3?v=2"),
+        settle:assetUrl("sounds/match-shuffle-end.mp3?v=1"),
         finish:assetUrl("sounds/match-finish.mp3?v=1")
       };
-      const volumes = {correct:1,wrong:1,move:.55,finish:1};
+      const volumes = {correct:1,wrong:1,settle:1,finish:1};
       const cache = {};
+      const scheduledTimers = new Set();
       let enabled = true;
 
       function canPlay(){ return enabled && payload?.soundEnabled !== false; }
@@ -1017,7 +1036,13 @@
         return cache[name];
       }
 
+      function clearScheduled(){
+        scheduledTimers.forEach((timer)=>window.clearTimeout(timer));
+        scheduledTimers.clear();
+      }
+
       function stop(except=null){
+        clearScheduled();
         Object.values(cache).forEach((element)=>{
           if (element === except) return;
           try { element.pause(); element.currentTime = 0; } catch (_) {}
@@ -1037,6 +1062,49 @@
           element.play()?.catch(()=>{});
           return true;
         } catch (_) { return false; }
+      }
+
+      function playAndWait(name,fallbackMs=WRONG_FEEDBACK_FALLBACK_MS){
+        const fallback = Math.max(300,Number(fallbackMs) || WRONG_FEEDBACK_FALLBACK_MS);
+        if (!canPlay()) return new Promise((resolve)=>window.setTimeout(resolve,fallback));
+        const element = get(name);
+        if (!element) return new Promise((resolve)=>window.setTimeout(resolve,fallback));
+        return new Promise((resolve)=>{
+          let finished = false;
+          let timer = 0;
+          const complete = ()=>{
+            if (finished) return;
+            finished = true;
+            window.clearTimeout(timer);
+            element.removeEventListener("ended",complete);
+            element.removeEventListener("error",complete);
+            resolve();
+          };
+          element.addEventListener("ended",complete,{once:true});
+          element.addEventListener("error",complete,{once:true});
+          const durationMs = Number.isFinite(element.duration) && element.duration > 0
+            ? Math.ceil(element.duration * 1000) + 80
+            : fallback;
+          timer = window.setTimeout(complete,durationMs);
+          if (!play(name)) complete();
+        });
+      }
+
+      /* يبدأ المقطع قبل نهاية الحركة بمدته الفعلية لينتهي لحظة ثبات السؤال. */
+      function playEndingAt(name,endInMs,fallbackLeadMs=850){
+        if (!canPlay()) return 0;
+        const element = get(name);
+        if (!element) return 0;
+        const durationMs = Number.isFinite(element.duration) && element.duration > 0
+          ? Math.ceil(element.duration * 1000)
+          : Math.max(250,Number(fallbackLeadMs) || 850);
+        const delay = Math.max(0,Math.round(Number(endInMs) || 0) - durationMs);
+        const timer = window.setTimeout(()=>{
+          scheduledTimers.delete(timer);
+          play(name);
+        },delay);
+        scheduledTimers.add(timer);
+        return timer;
       }
 
       function unlock(){
@@ -1072,7 +1140,7 @@
         });
       }
 
-      return {play,unlock,stop,stopNamed,ready,setEnabled};
+      return {play,playAndWait,playEndingAt,unlock,stop,stopNamed,ready,setEnabled};
     })();
 
     /* نفس نغمة الثيم المستخدمة في بداية لعبة افتح الصندوق. */
@@ -1293,7 +1361,8 @@
       interactionLocked = true;
       questionContent.style.transform = "translate3d(-120%,0,0)";
       questionContent.style.opacity = "1";
-      audio.play("move");
+      if (reducedMotion()) audio.play("settle");
+      else audio.playEndingAt("settle",STRIP_MOTION_MS);
       await animateStrip([
         {transform:"translate3d(-120%,0,0)",opacity:1},
         {transform:"translate3d(0,0,0)",opacity:1}
@@ -1322,10 +1391,11 @@
       incoming.style.transform = "translate3d(-120%,0,0)";
       incoming.style.opacity = "1";
       questionWindow.appendChild(incoming);
-      audio.play("move");
 
       const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
       const totalDuration = QUESTION_OVERLAP_DELAY_MS + STRIP_MOTION_MS;
+      if (reducedMotion()) audio.play("settle");
+      else audio.playEndingAt("settle",totalDuration);
       const edgeStart = railOffset;
       const edgeDistance = viewportWidth * 1.1 * (totalDuration / STRIP_MOTION_MS);
       const edgeEnd = edgeStart + edgeDistance;
@@ -1403,17 +1473,17 @@
         void button.offsetWidth;
         button.classList.add("is-wrong");
         showMark(button,"wrong");
-        audio.play("wrong");
+        const wrongSoundFinished = audio.playAndWait("wrong");
         if (payload.settings.attemptsEnabled) {
           attemptsLeft = Math.max(0,attemptsLeft - 1);
           updateAttempts();
           if (attemptsLeft === 0) {
-            await wait(720);
+            await wrongSoundFinished;
             await showFinish(false);
             return;
           }
         }
-        await wait(720);
+        await wrongSoundFinished;
         resetAnswerMark(button);
         interactionLocked = false;
         return;
