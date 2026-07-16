@@ -1,1 +1,1113 @@
-.
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- version: moving-question-v1 -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#eef5fb">
+  <title>السؤال المتحرك - صندوق الألعاب التعليمية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --safe-top:env(safe-area-inset-top,0px);
+      --safe-bottom:env(safe-area-inset-bottom,0px);
+      --safe-left:env(safe-area-inset-left,0px);
+      --safe-right:env(safe-area-inset-right,0px);
+      --ink:#111;
+      --yellow:#efd553;
+      --blue:#1688d3;
+      --red:#ef4f52;
+      --green:#27ad69;
+      --question-frame:#354052;
+      --question-text:#161616;
+      --answer-unified:#1688d3;
+      --page-font:"Cairo",Arial,sans-serif;
+    }
+
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{width:100%;height:100%;margin:0;overflow:hidden;overscroll-behavior:none}
+    body{font-family:var(--page-font);background:#eef5fb;color:var(--ink);touch-action:manipulation}
+    button{font:inherit}
+    [hidden]{display:none !important}
+
+    .game-page{
+      position:fixed;
+      inset:0;
+      min-width:280px;
+      min-height:280px;
+      overflow:hidden;
+      isolation:isolate;
+      background:#f7fbff;
+    }
+
+    .theme-background{
+      position:absolute;
+      inset:-2px;
+      z-index:-3;
+      background:
+        radial-gradient(circle at 15% 16%,rgba(255,255,255,.96) 0 9%,transparent 32%),
+        radial-gradient(circle at 86% 10%,rgba(150,213,244,.38),transparent 30%),
+        linear-gradient(150deg,#f9fcff 0%,#e8f4fb 54%,#f7f2df 100%);
+      background-size:cover;
+      background-position:center;
+    }
+
+    .game-page.theme-classroom .theme-background{
+      background-image:
+        linear-gradient(rgba(255,255,255,.34),rgba(255,255,255,.34)),
+        url("theme-classroom-bg-v2.webp?v=2"),
+        linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df);
+    }
+
+    .game-page.theme-sky-clouds .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
+    }
+
+    .game-page.theme-forest .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
+    }
+
+    .game-page.theme-math .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
+    }
+
+    .game-page.theme-english .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+    }
+
+    .game-logo{
+      position:absolute;
+      z-index:20;
+      top:calc(var(--safe-top) + clamp(10px,1.8vh,20px));
+      left:calc(var(--safe-left) + clamp(12px,2.2vw,28px));
+      width:clamp(76px,8.2vw,126px);
+      height:auto;
+      object-fit:contain;
+      pointer-events:none;
+      user-select:none;
+    }
+
+    .hud{
+      position:absolute;
+      top:calc(var(--safe-top) + 12px);
+      right:calc(var(--safe-right) + clamp(14px,2vw,28px));
+      z-index:22;
+      display:flex;
+      gap:10px;
+      direction:ltr;
+    }
+
+    .hud-pill{
+      min-width:86px;
+      height:44px;
+      padding:0 15px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:3px solid #111;
+      border-radius:15px;
+      background:rgba(255,255,255,.86);
+      box-shadow:0 5px 0 rgba(17,17,17,.18);
+      font-weight:900;
+      font-size:20px;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+    }
+
+    .timer-track{
+      position:absolute;
+      z-index:22;
+      top:calc(var(--safe-top) + 64px);
+      left:50%;
+      width:min(56vw,650px);
+      height:14px;
+      transform:translateX(-50%);
+      overflow:hidden;
+      border:3px solid #111;
+      border-radius:999px;
+      background:rgba(255,255,255,.88);
+    }
+
+    .timer-fill{height:100%;width:100%;transform-origin:left center;background:linear-gradient(90deg,#28ad6d,#efd553,#ef4f52)}
+
+    .playfield{
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-rows:minmax(260px,55vh) minmax(150px,1fr);
+      padding:
+        calc(var(--safe-top) + clamp(54px,7vh,82px))
+        calc(var(--safe-right) + clamp(18px,3vw,52px))
+        calc(var(--safe-bottom) + clamp(66px,9vh,94px))
+        calc(var(--safe-left) + clamp(18px,3vw,52px));
+      gap:clamp(16px,2.8vh,32px);
+    }
+
+    .strip-zone{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:0;
+    }
+
+    .glass-panel{
+      position:absolute;
+      inset:clamp(4px,1vh,12px) 0;
+      border:2px solid rgba(255,255,255,.82);
+      border-radius:clamp(24px,3vw,42px);
+      background:linear-gradient(135deg,rgba(255,255,255,.66),rgba(226,239,249,.40));
+      box-shadow:0 18px 46px rgba(45,72,99,.16),inset 0 0 0 1px rgba(77,105,132,.13);
+      backdrop-filter:blur(13px) saturate(1.15);
+      -webkit-backdrop-filter:blur(13px) saturate(1.15);
+    }
+
+    .strip-viewport{
+      position:relative;
+      width:min(94%,1500px);
+      height:clamp(210px,38vh,390px);
+      overflow:hidden;
+      z-index:2;
+      border-radius:clamp(18px,2vw,30px);
+      contain:layout paint;
+    }
+
+    .question-strip{
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-rows:clamp(24px,4.4vh,42px) minmax(0,1fr) clamp(24px,4.4vh,42px);
+      border:clamp(4px,.42vw,7px) solid var(--question-frame);
+      border-radius:clamp(18px,2vw,30px);
+      background:#f8fafc;
+      box-shadow:0 12px 0 rgba(47,55,68,.18),0 20px 40px rgba(33,50,70,.17);
+      will-change:transform,opacity;
+      overflow:hidden;
+    }
+
+    .film-edge{
+      position:relative;
+      background:
+        repeating-linear-gradient(90deg,
+          transparent 0 clamp(22px,2.6vw,42px),
+          color-mix(in srgb,var(--question-frame) 68%,transparent) clamp(22px,2.6vw,42px) clamp(34px,3.5vw,56px),
+          transparent clamp(34px,3.5vw,56px) clamp(58px,6.3vw,100px)
+        ),
+        linear-gradient(180deg,rgba(255,255,255,.92),rgba(224,230,238,.96));
+      border-color:var(--question-frame);
+    }
+
+    .film-edge.top{border-bottom:clamp(3px,.35vw,6px) solid var(--question-frame)}
+    .film-edge.bottom{border-top:clamp(3px,.35vw,6px) solid var(--question-frame)}
+
+    .question-content{
+      min-width:0;
+      min-height:0;
+      display:grid;
+      grid-template-columns:minmax(220px,42%) minmax(0,58%);
+      grid-template-areas:"image text";
+      align-items:center;
+      gap:clamp(18px,3vw,52px);
+      padding:clamp(12px,2.2vw,32px) clamp(22px,4vw,68px);
+      background:linear-gradient(100deg,rgba(245,248,252,.96),rgba(255,255,255,.98));
+      color:var(--question-text);
+    }
+
+    .question-content.text-only{grid-template-columns:1fr;grid-template-areas:"text"}
+    .question-content.image-only{grid-template-columns:1fr;grid-template-areas:"image"}
+
+    .question-text{
+      grid-area:text;
+      min-width:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      height:100%;
+      text-align:center;
+      font-size:clamp(29px,4vw,66px);
+      line-height:1.35;
+      font-weight:900;
+      overflow-wrap:anywhere;
+      unicode-bidi:plaintext;
+    }
+
+    .question-image-wrap{
+      grid-area:image;
+      min-width:0;
+      height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      border-radius:clamp(14px,1.5vw,24px);
+    }
+
+    .question-image{
+      display:block;
+      max-width:100%;
+      max-height:100%;
+      width:auto;
+      height:auto;
+      object-fit:contain;
+      user-select:none;
+      -webkit-user-drag:none;
+    }
+
+    .answers-zone{
+      min-height:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 clamp(12px,2vw,32px);
+    }
+
+    .answer-bank{
+      width:min(96%,1420px);
+      max-height:100%;
+      display:flex;
+      flex-wrap:wrap;
+      align-content:center;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(10px,1.4vw,22px);
+      direction:rtl;
+    }
+
+    .game-page[data-language="en"] .answer-bank{direction:ltr}
+
+    .answer-card{
+      position:relative;
+      flex:0 1 clamp(150px,18vw,280px);
+      min-width:120px;
+      height:clamp(66px,10vh,112px);
+      border:clamp(3px,.28vw,5px) solid rgba(15,32,63,.82);
+      border-radius:clamp(13px,1.25vw,20px);
+      background:var(--answer-color,#1688d3);
+      color:#fff;
+      box-shadow:0 8px 0 rgba(33,39,69,.28),0 12px 24px rgba(39,52,90,.16);
+      padding:clamp(6px,.7vw,11px) clamp(12px,1.3vw,22px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(10px,1.3vw,20px);
+      cursor:pointer;
+      overflow:hidden;
+      transition:filter .16s ease,transform .16s ease;
+      touch-action:manipulation;
+      will-change:transform,opacity;
+    }
+
+    .answer-card:hover{filter:brightness(1.07);transform:translateY(-2px)}
+    .answer-card:active{transform:translateY(4px);box-shadow:0 4px 0 rgba(33,39,69,.28)}
+    .answer-card:disabled{cursor:default}
+
+    .answer-card.has-both{
+      direction:ltr;
+      justify-content:space-between;
+    }
+
+    .answer-card.has-image:not(.has-text){padding:6px}
+
+    .answer-text{
+      min-width:0;
+      flex:1 1 auto;
+      text-align:center;
+      font-size:clamp(25px,3.1vw,48px);
+      line-height:1.15;
+      font-weight:900;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      unicode-bidi:plaintext;
+    }
+
+    .answer-card.has-both .answer-text{direction:rtl;text-align:center}
+    .game-page[data-language="en"] .answer-card.has-both .answer-text{direction:ltr}
+
+    .answer-image{
+      flex:0 0 auto;
+      width:clamp(50px,6.8vw,88px);
+      height:calc(100% - 2px);
+      object-fit:contain;
+      border-radius:10px;
+      background:rgba(255,255,255,.92);
+    }
+
+    .answer-card.has-image:not(.has-text) .answer-image{width:100%;height:100%;background:transparent}
+
+    .answer-mark{
+      position:absolute;
+      inset:50% auto auto 50%;
+      z-index:4;
+      width:clamp(42px,5vw,72px);
+      height:clamp(42px,5vw,72px);
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      transform:translate(-50%,-50%) scale(.2);
+      opacity:0;
+      color:#fff;
+      font-size:clamp(27px,3.3vw,48px);
+      font-weight:1000;
+      pointer-events:none;
+    }
+
+    .answer-card.is-correct .answer-mark{background:#27ad69;animation:markPop .54s cubic-bezier(.2,1.24,.22,1) both}
+    .answer-card.is-wrong{animation:wrongShake .46s ease both}
+    .answer-card.is-wrong .answer-mark{background:#ef4f52;animation:markPop .54s cubic-bezier(.2,1.24,.22,1) both}
+
+    @keyframes markPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.2)}55%{opacity:1;transform:translate(-50%,-50%) scale(1.16)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+    @keyframes wrongShake{0%,100%{transform:translateX(0)}18%{transform:translateX(-11px) rotate(-1deg)}38%{transform:translateX(9px) rotate(1deg)}58%{transform:translateX(-7px)}78%{transform:translateX(4px)}}
+
+    .fixed-controls{
+      position:absolute;
+      z-index:24;
+      left:calc(var(--safe-left) + clamp(16px,2.6vw,42px));
+      right:calc(var(--safe-right) + clamp(16px,2.6vw,42px));
+      bottom:calc(var(--safe-bottom) + clamp(12px,2.3vh,24px));
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      pointer-events:none;
+    }
+
+    .control-btn{
+      min-width:clamp(94px,10vw,146px);
+      height:clamp(48px,6.8vh,68px);
+      border:4px solid #111;
+      border-radius:clamp(13px,1.2vw,19px);
+      box-shadow:0 6px 0 rgba(17,17,17,.23);
+      color:#111;
+      font-size:clamp(18px,2vw,29px);
+      font-weight:900;
+      cursor:pointer;
+      pointer-events:auto;
+    }
+
+    .back-btn{background:var(--yellow)}
+    .finish-btn{background:var(--red);color:#fff}
+    .control-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(17,17,17,.23)}
+
+    .activity-overlay{
+      position:absolute;
+      inset:0;
+      z-index:80;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      background:rgba(17,25,38,.20);
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transition:opacity .3s ease,visibility .3s ease;
+    }
+
+    .activity-overlay.is-visible{opacity:1;visibility:visible;pointer-events:auto}
+
+    .celebration-card{
+      position:relative;
+      width:min(430px,88vw);
+      min-height:340px;
+      padding:clamp(24px,4vw,44px);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      border:5px solid #111;
+      border-radius:32px;
+      background:rgba(255,255,255,.96);
+      box-shadow:0 14px 0 rgba(17,17,17,.16),0 28px 60px rgba(20,36,56,.24);
+      text-align:center;
+      overflow:hidden;
+      animation:cardPop .62s cubic-bezier(.2,1.12,.22,1) both;
+    }
+
+    .celebration-icon{width:112px;height:112px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.15))}
+    .celebration-title{margin:12px 0 0;font-size:clamp(36px,5vw,58px);font-weight:1000}
+    .celebration-subtitle{margin:5px 0 0;font-size:clamp(17px,2.2vw,24px);font-weight:800;color:#58606d}
+    .celebration-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;justify-content:center}
+    .celebration-actions button{min-width:135px;height:54px;border:4px solid #111;border-radius:16px;box-shadow:0 5px 0 rgba(17,17,17,.2);font-size:21px;font-weight:900;cursor:pointer}
+    .start-btn,.restart-btn{background:var(--blue);color:#fff}
+    .home-btn{background:var(--yellow);color:#111}
+
+    @keyframes cardPop{0%{opacity:0;transform:scale(.72) translateY(25px)}62%{opacity:1;transform:scale(1.05) translateY(-3px)}100%{opacity:1;transform:scale(1)}}
+
+    .confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+    .confetti i{position:absolute;top:-10%;width:12px;height:22px;border-radius:4px;background:var(--c);animation:confettiFall 2.7s linear infinite;animation-delay:var(--d)}
+    @keyframes confettiFall{0%{transform:translate3d(0,-12vh,0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translate3d(var(--x),115vh,0) rotate(620deg);opacity:0}}
+
+    @media(max-width:760px) and (orientation:portrait){
+      .playfield{grid-template-rows:minmax(260px,48vh) minmax(230px,1fr);padding-top:calc(var(--safe-top) + 62px);padding-bottom:calc(var(--safe-bottom) + 72px);gap:12px}
+      .strip-viewport{width:100%;height:min(42vh,360px)}
+      .question-content{grid-template-columns:minmax(105px,39%) minmax(0,61%);gap:10px;padding:10px 14px}
+      .question-text{font-size:clamp(22px,6.2vw,38px)}
+      .answer-bank{gap:10px}
+      .answer-card{flex-basis:calc(50% - 6px);height:clamp(62px,8.2vh,82px);padding:5px 9px}
+      .answer-text{font-size:clamp(21px,6vw,32px)}
+      .answer-image{width:52px}
+      .game-logo{width:70px}
+      .control-btn{min-width:88px;height:48px;font-size:18px}
+      .hud-pill{height:38px;min-width:70px;font-size:17px}
+    }
+
+    @media(max-height:560px) and (orientation:landscape){
+      .playfield{grid-template-rows:minmax(190px,58vh) minmax(105px,1fr);padding-top:calc(var(--safe-top) + 38px);padding-bottom:calc(var(--safe-bottom) + 58px);gap:8px}
+      .strip-viewport{height:min(48vh,270px)}
+      .question-content{padding:8px 32px}
+      .question-text{font-size:clamp(25px,3.5vw,46px)}
+      .answer-card{height:clamp(52px,10.5vh,76px);flex-basis:clamp(130px,18vw,230px)}
+      .answer-text{font-size:clamp(22px,2.7vw,36px)}
+      .game-logo{width:70px;top:calc(var(--safe-top) + 7px)}
+      .fixed-controls{bottom:calc(var(--safe-bottom) + 7px)}
+      .control-btn{height:44px;min-width:88px;font-size:17px;border-width:3px}
+      .celebration-card{min-height:260px;width:min(390px,76vw);padding:16px}
+      .celebration-icon{width:78px;height:78px}
+      .celebration-title{font-size:36px}
+      .celebration-actions{margin-top:12px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;scroll-behavior:auto !important}
+    }
+  </style>
+</head>
+<body>
+  <main class="game-page theme-classroom" id="gamePage" data-language="ar">
+    <div class="theme-background" aria-hidden="true"></div>
+    <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
+
+    <div class="hud" id="attemptsHud" hidden>
+      <div class="hud-pill" id="attemptsText">❤️ 10/10</div>
+    </div>
+    <div class="timer-track" id="timerTrack" hidden><div class="timer-fill" id="timerFill"></div></div>
+
+    <section class="playfield" aria-label="السؤال المتحرك">
+      <section class="strip-zone">
+        <div class="glass-panel" aria-hidden="true"></div>
+        <div class="strip-viewport" id="stripViewport">
+          <article class="question-strip" id="questionStrip" aria-live="polite">
+            <div class="film-edge top" aria-hidden="true"></div>
+            <div class="question-content" id="questionContent"></div>
+            <div class="film-edge bottom" aria-hidden="true"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="answers-zone" aria-label="بنك الإجابات">
+        <div class="answer-bank" id="answerBank"></div>
+      </section>
+    </section>
+
+    <nav class="fixed-controls" aria-label="أدوات اللعبة">
+      <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
+      <button class="control-btn finish-btn" id="finishBtn" type="button">إنهاء</button>
+    </nav>
+
+    <section class="activity-overlay is-visible" id="startGate" aria-hidden="false">
+      <div class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="startBlue" x1="0" x2="1"><stop stop-color="#2fa7f2"/><stop offset="1" stop-color="#0d6fb4"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="54" fill="#fff7cd" stroke="#fff" stroke-width="5"/>
+          <circle cx="60" cy="60" r="36" fill="url(#startBlue)"/>
+          <path d="M52 41l29 19-29 19z" fill="#fff"/>
+        </svg>
+        <h1 class="celebration-title" id="startTitle">السؤال المتحرك</h1>
+        <p class="celebration-subtitle">اختر الإجابة الصحيحة من بنك الإجابات</p>
+        <div class="celebration-actions"><button class="start-btn" id="startBtn" type="button">تشغيل</button></div>
+      </div>
+    </section>
+
+    <section class="activity-overlay" id="finishView" aria-hidden="true">
+      <div class="confetti" aria-hidden="true" id="confetti"></div>
+      <div class="celebration-card" role="status" aria-live="polite">
+        <svg class="celebration-icon" viewBox="0 0 120 120" aria-hidden="true">
+          <defs><linearGradient id="gold" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff08a"/><stop offset=".48" stop-color="#efd553"/><stop offset="1" stop-color="#f4a51f"/></linearGradient></defs>
+          <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,.78)" stroke="#fff" stroke-width="5"/>
+          <path d="M38 25h44v15c0 22-8 34-22 38C46 74 38 62 38 40z" fill="url(#gold)" stroke="#111" stroke-opacity=".16" stroke-width="2"/>
+          <path d="M38 36H23c1 17 9 28 22 30M82 36h15c-1 17-9 28-22 30" fill="none" stroke="url(#gold)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M55 77h10v13H55zM42 89h36v10H42z" fill="#e7a51d"/>
+          <path d="M35 99h50v8H35z" fill="#102b57"/>
+        </svg>
+        <h1 class="celebration-title">أحسنتم!</h1>
+        <p class="celebration-subtitle">انتهى النشاط بنجاح</p>
+        <div class="celebration-actions">
+          <button class="restart-btn" id="restartBtn" type="button">إعادة</button>
+          <button class="home-btn" id="homeBtn" type="button">الصفحة الرئيسية</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  (()=>{
+    "use strict";
+
+    const PAYLOAD_KEY = "sandooq_moving_question_payload_v1";
+    const DRAFT_KEY = "sandooq_moving_question_draft_v1";
+    const DB_NAME = "sandooq_edu_games_v1";
+    const DB_PREFIX = "moving-question";
+    const PALETTE = ["#9c4fd0","#1f94db","#f47730","#123fd0","#d90b3d","#23ad6b","#15933b","#e1a400","#7a55c6","#e65353"];
+
+    const page = document.getElementById("gamePage");
+    const questionStrip = document.getElementById("questionStrip");
+    const questionContent = document.getElementById("questionContent");
+    const answerBank = document.getElementById("answerBank");
+    const startGate = document.getElementById("startGate");
+    const finishView = document.getElementById("finishView");
+    const startBtn = document.getElementById("startBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    const backBtn = document.getElementById("backBtn");
+    const finishBtn = document.getElementById("finishBtn");
+    const attemptsHud = document.getElementById("attemptsHud");
+    const attemptsText = document.getElementById("attemptsText");
+    const timerTrack = document.getElementById("timerTrack");
+    const timerFill = document.getElementById("timerFill");
+    const confetti = document.getElementById("confetti");
+
+    const bikeImage = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="720" height="470" viewBox="0 0 720 470">
+        <rect width="720" height="470" rx="30" fill="#eef9ff"/>
+        <ellipse cx="360" cy="405" rx="280" ry="25" fill="#cfe6ef"/>
+        <circle cx="210" cy="355" r="82" fill="#fff" stroke="#18344b" stroke-width="13"/>
+        <circle cx="510" cy="355" r="82" fill="#fff" stroke="#18344b" stroke-width="13"/>
+        <path d="M210 355l100-145 82 145H210zm182 0l70-125 48 125m-200-145h86" fill="none" stroke="#e91e63" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="372" cy="118" r="47" fill="#ffc9a5"/>
+        <path d="M328 105c5-55 90-60 94 0-20-19-70-21-94 0" fill="#d92857"/>
+        <path d="M354 162l-57 90 91 30 45-110z" fill="#53b949"/>
+        <path d="M365 180l-38 88m59 13l72 15" stroke="#ffc9a5" stroke-width="24" stroke-linecap="round"/>
+        <path d="M357 274l-19 74m50-63l77 56" stroke="#25314b" stroke-width="24" stroke-linecap="round"/>
+        <path d="M423 188l70 20" stroke="#ffc9a5" stroke-width="20" stroke-linecap="round"/>
+      </svg>`);
+
+    const DEMO_PAYLOAD = {
+      gameName:"السؤال المتحرك",
+      theme:"classroom",
+      contentLanguage:"en",
+      soundEnabled:true,
+      settings:{
+        deleteCorrectAnswer:true,
+        attemptsEnabled:false,
+        attempts:10,
+        timerEnabled:false,
+        timerSeconds:90
+      },
+      appearance:{
+        textColor:"#161616",
+        stripBorderColor:"#354052",
+        unifyAnswerColors:false,
+        answerColor:"#1688d3"
+      },
+      answers:[
+        {id:"us",text:"us"},
+        {id:"her",text:"her"},
+        {id:"him",text:"him"},
+        {id:"them",text:"them"},
+        {id:"me",text:"me"},
+        {id:"you",text:"you"},
+        {id:"it",text:"it"}
+      ],
+      questions:[
+        {id:"q1",text:"Look at ______. I can ride a bike.",imageData:bikeImage,answerId:"me"},
+        {id:"q2",text:"Sara is my sister. I love ______.",answerId:"her"},
+        {id:"q3",text:"Ali is my friend. I can see ______.",answerId:"him"},
+        {id:"q4",text:"The books are new. Read ______.",answerId:"them"},
+        {id:"q5",text:"This is my bicycle. I ride ______ every day.",answerId:"it"}
+      ]
+    };
+
+    let payload = null;
+    let answers = [];
+    let questions = [];
+    let currentIndex = 0;
+    let hiddenAnswers = new Set();
+    let interactionLocked = true;
+    let gameStarted = false;
+    let gameEnded = false;
+    let attemptsLeft = 10;
+    let timerId = null;
+    let timerDeadline = 0;
+
+    const wait = (ms)=>new Promise((resolve)=>setTimeout(resolve,ms));
+    const reducedMotion = ()=>window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const safeText = (value)=>String(value ?? "").trim();
+    const normalizeHex = (value,fallback)=>/^#[0-9a-f]{6}$/i.test(String(value || "")) ? String(value).toUpperCase() : fallback;
+    const getParam = (name)=>new URLSearchParams(location.search).get(name) || "";
+
+    function normalizeTheme(value){
+      const theme = safeText(value).toLowerCase().replace(/^theme-/,"");
+      return ["classroom","white","sky-clouds","forest","math","english"].includes(theme) ? theme : "classroom";
+    }
+
+    function normalizeAnswer(item,index){
+      const imageData = item?.imageData || item?.image || item?.src || "";
+      const text = safeText(item?.text || item?.label || item?.value);
+      return {
+        id:safeText(item?.id || item?.answerId || `answer-${index + 1}`),
+        text,
+        imageData,
+        color:normalizeHex(item?.color,PALETTE[index % PALETTE.length])
+      };
+    }
+
+    function normalizeQuestion(item,index){
+      return {
+        id:safeText(item?.id || `question-${index + 1}`),
+        text:safeText(item?.text || item?.questionText || item?.question),
+        imageData:item?.imageData || item?.questionImageData || item?.image || "",
+        answerId:safeText(item?.answerId || item?.correctAnswerId || item?.correctId)
+      };
+    }
+
+    function normalizePayload(source){
+      const rawAnswers = Array.isArray(source?.answers)
+        ? source.answers
+        : (Array.isArray(source?.answerBank) ? source.answerBank : []);
+      const cleanAnswers = rawAnswers.map(normalizeAnswer).filter((item)=>item.id && (item.text || item.imageData));
+      const answerIds = new Set(cleanAnswers.map((item)=>item.id));
+      const cleanQuestions = (Array.isArray(source?.questions) ? source.questions : [])
+        .map(normalizeQuestion)
+        .filter((item)=>item.answerId && answerIds.has(item.answerId) && (item.text || item.imageData));
+      if (!cleanAnswers.length || !cleanQuestions.length) return null;
+
+      const settings = source?.settings || {};
+      const appearance = source?.appearance || {};
+      return {
+        gameName:safeText(source?.gameName || "السؤال المتحرك"),
+        theme:normalizeTheme(source?.theme),
+        contentLanguage:(source?.contentLanguage || source?.language) === "ar" ? "ar" : "en",
+        soundEnabled:source?.soundEnabled !== false && source?.soundsEnabled !== false,
+        settings:{
+          deleteCorrectAnswer:settings.deleteCorrectAnswer !== false,
+          attemptsEnabled:Boolean(settings.attemptsEnabled),
+          attempts:Math.max(1,Math.min(30,Number(settings.attempts) || 10)),
+          timerEnabled:Boolean(settings.timerEnabled),
+          timerSeconds:Math.max(10,Math.min(3600,Number(settings.timerSeconds) || 90))
+        },
+        appearance:{
+          textColor:normalizeHex(appearance.textColor || source?.textColor,"#161616"),
+          stripBorderColor:normalizeHex(appearance.stripBorderColor || source?.stripBorderColor,"#354052"),
+          unifyAnswerColors:Boolean(appearance.unifyAnswerColors || source?.unifyAnswerColors),
+          answerColor:normalizeHex(appearance.answerColor || source?.answerColor,"#1688d3")
+        },
+        answers:cleanAnswers,
+        questions:cleanQuestions
+      };
+    }
+
+    function openDb(){
+      return new Promise((resolve,reject)=>{
+        const request = indexedDB.open(DB_NAME,1);
+        request.onupgradeneeded = ()=>{
+          if (!request.result.objectStoreNames.contains("payloads")) {
+            request.result.createObjectStore("payloads",{keyPath:"key"});
+          }
+        };
+        request.onsuccess = ()=>resolve(request.result);
+        request.onerror = ()=>reject(request.error);
+      });
+    }
+
+    async function readDbPayload(key){
+      const db = await openDb();
+      return new Promise((resolve,reject)=>{
+        const request = db.transaction("payloads","readonly").objectStore("payloads").get(key);
+        request.onsuccess = ()=>resolve(request.result?.payload || null);
+        request.onerror = ()=>reject(request.error);
+      });
+    }
+
+    async function hydratePayload(){
+      const payloadId = getParam("payloadId");
+      if (payloadId) {
+        try {
+          const dbPayload = await readDbPayload(`${DB_PREFIX}:${payloadId}`);
+          const clean = normalizePayload(dbPayload);
+          if (clean) return clean;
+        } catch (_) {}
+        try {
+          const raw = sessionStorage.getItem(`${PAYLOAD_KEY}_${payloadId}`);
+          const clean = normalizePayload(raw ? JSON.parse(raw) : null);
+          if (clean) return clean;
+        } catch (_) {}
+      }
+      for (const key of [PAYLOAD_KEY,DRAFT_KEY]) {
+        try {
+          const raw = sessionStorage.getItem(key) || localStorage.getItem(key);
+          const clean = normalizePayload(raw ? JSON.parse(raw) : null);
+          if (clean) return clean;
+        } catch (_) {}
+      }
+      return normalizePayload(DEMO_PAYLOAD);
+    }
+
+    const audio = (()=>{
+      const files = {
+        correct:"sounds/open-box-open.mp3?v=1",
+        wrong:"sounds/choice-wrong.mp3?v=1",
+        move:"sounds/open-box-go.mp3?v=2",
+        finish:"sounds/match-finish.mp3?v=1"
+      };
+      const volumes = {correct:.84,wrong:.9,move:.55,finish:1};
+      const cache = {};
+      let context = null;
+
+      function get(name){
+        if (!cache[name]) {
+          const element = new Audio(files[name]);
+          element.preload = "auto";
+          element.volume = volumes[name] ?? 1;
+          cache[name] = element;
+        }
+        return cache[name];
+      }
+
+      function fallback(name){
+        if (!payload?.soundEnabled) return;
+        try {
+          context ||= new (window.AudioContext || window.webkitAudioContext)();
+          const now = context.currentTime;
+          const gain = context.createGain();
+          const osc = context.createOscillator();
+          osc.type = name === "wrong" ? "sawtooth" : "sine";
+          osc.frequency.setValueAtTime(name === "wrong" ? 165 : name === "move" ? 330 : 520,now);
+          if (name === "correct" || name === "finish") osc.frequency.exponentialRampToValueAtTime(name === "finish" ? 980 : 760,now + .2);
+          gain.gain.setValueAtTime(.0001,now);
+          gain.gain.exponentialRampToValueAtTime(.13,now + .015);
+          gain.gain.exponentialRampToValueAtTime(.0001,now + (name === "finish" ? .6 : .25));
+          osc.connect(gain).connect(context.destination);
+          osc.start(now);
+          osc.stop(now + (name === "finish" ? .62 : .27));
+        } catch (_) {}
+      }
+
+      function play(name){
+        if (!payload?.soundEnabled) return;
+        const element = get(name);
+        try {
+          element.currentTime = 0;
+          const promise = element.play();
+          promise?.catch(()=>fallback(name));
+        } catch (_) { fallback(name); }
+      }
+
+      function unlock(){
+        Object.keys(files).forEach((name)=>{ try { get(name).load(); } catch (_) {} });
+        try {
+          context ||= new (window.AudioContext || window.webkitAudioContext)();
+          context.resume?.();
+        } catch (_) {}
+      }
+
+      function stop(){
+        Object.values(cache).forEach((element)=>{try{element.pause();element.currentTime=0}catch(_){}});
+      }
+      return {play,unlock,stop};
+    })();
+
+    function applyPayload(){
+      answers = payload.answers.map((item)=>({...item}));
+      questions = payload.questions.map((item)=>({...item}));
+      page.className = `game-page theme-${payload.theme}`;
+      page.dataset.language = payload.contentLanguage;
+      document.documentElement.lang = payload.contentLanguage;
+      document.documentElement.dir = "rtl";
+      document.title = `${payload.gameName} - صندوق الألعاب التعليمية`;
+      document.documentElement.style.setProperty("--question-frame",payload.appearance.stripBorderColor);
+      document.documentElement.style.setProperty("--question-text",payload.appearance.textColor);
+      document.documentElement.style.setProperty("--answer-unified",payload.appearance.answerColor);
+      attemptsLeft = payload.settings.attempts;
+      attemptsHud.hidden = !payload.settings.attemptsEnabled;
+      timerTrack.hidden = !payload.settings.timerEnabled;
+      updateAttempts();
+    }
+
+    function updateAttempts(){
+      attemptsText.textContent = `❤️ ${attemptsLeft}/${payload.settings.attempts}`;
+    }
+
+    function createAnswerCard(answer,index){
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "answer-card";
+      button.dataset.answerId = answer.id;
+      button.style.setProperty("--answer-color",payload.appearance.unifyAnswerColors ? payload.appearance.answerColor : answer.color);
+      const hasText = Boolean(answer.text);
+      const hasImage = Boolean(answer.imageData);
+      button.classList.toggle("has-text",hasText);
+      button.classList.toggle("has-image",hasImage);
+      button.classList.toggle("has-both",hasText && hasImage);
+      button.setAttribute("aria-label",answer.text || `الإجابة ${index + 1}`);
+
+      if (hasImage) {
+        const image = document.createElement("img");
+        image.className = "answer-image";
+        image.src = answer.imageData;
+        image.alt = "";
+        image.draggable = false;
+        button.appendChild(image);
+      }
+      if (hasText) {
+        const text = document.createElement("span");
+        text.className = "answer-text";
+        text.textContent = answer.text;
+        text.dir = payload.contentLanguage === "en" ? "ltr" : "rtl";
+        button.appendChild(text);
+      }
+      const mark = document.createElement("span");
+      mark.className = "answer-mark";
+      mark.textContent = "";
+      button.appendChild(mark);
+      button.addEventListener("click",()=>chooseAnswer(button,answer));
+      return button;
+    }
+
+    function renderAnswerBank(){
+      answerBank.textContent = "";
+      const visible = answers.filter((answer)=>!hiddenAnswers.has(answer.id));
+      visible.forEach((answer,index)=>answerBank.appendChild(createAnswerCard(answer,index)));
+      answerBank.dataset.answerCount = String(visible.length);
+    }
+
+    function renderQuestion(index){
+      const question = questions[index];
+      questionContent.textContent = "";
+      const hasText = Boolean(question?.text);
+      const hasImage = Boolean(question?.imageData);
+      questionContent.className = "question-content";
+      questionContent.classList.toggle("text-only",hasText && !hasImage);
+      questionContent.classList.toggle("image-only",hasImage && !hasText);
+
+      if (hasImage) {
+        const wrap = document.createElement("div");
+        wrap.className = "question-image-wrap";
+        const image = document.createElement("img");
+        image.className = "question-image";
+        image.src = question.imageData;
+        image.alt = "";
+        image.draggable = false;
+        wrap.appendChild(image);
+        questionContent.appendChild(wrap);
+      }
+      if (hasText) {
+        const text = document.createElement("div");
+        text.className = "question-text";
+        text.textContent = question.text;
+        text.dir = payload.contentLanguage === "en" ? "ltr" : "rtl";
+        questionContent.appendChild(text);
+      }
+    }
+
+    function animateStrip(keyframes,duration){
+      if (reducedMotion() || typeof questionStrip.animate !== "function") {
+        const last = keyframes[keyframes.length - 1];
+        Object.assign(questionStrip.style,last);
+        return Promise.resolve();
+      }
+      const animation = questionStrip.animate(keyframes,{duration,easing:"cubic-bezier(.22,.76,.2,1)",fill:"forwards"});
+      return animation.finished.catch(()=>{}).then(()=>{
+        const last = keyframes[keyframes.length - 1];
+        Object.assign(questionStrip.style,last);
+        animation.cancel();
+      });
+    }
+
+    async function enterQuestion(index){
+      renderQuestion(index);
+      interactionLocked = true;
+      questionStrip.style.transform = "translate3d(-116%,0,0)";
+      questionStrip.style.opacity = "0";
+      audio.play("move");
+      await animateStrip([
+        {transform:"translate3d(-116%,0,0)",opacity:0},
+        {transform:"translate3d(3%,0,0)",opacity:1,offset:.84},
+        {transform:"translate3d(0,0,0)",opacity:1}
+      ],1050);
+      questionStrip.style.transform = "translate3d(0,0,0)";
+      questionStrip.style.opacity = "1";
+      interactionLocked = false;
+      answerBank.querySelectorAll(".answer-card").forEach((card)=>{card.disabled=false;card.classList.remove("is-correct","is-wrong");card.querySelector(".answer-mark").textContent=""});
+    }
+
+    async function exitQuestion(){
+      interactionLocked = true;
+      await animateStrip([
+        {transform:"translate3d(0,0,0)",opacity:1},
+        {transform:"translate3d(112%,0,0)",opacity:.2}
+      ],760);
+    }
+
+    async function chooseAnswer(button,answer){
+      if (!gameStarted || gameEnded || interactionLocked) return;
+      const question = questions[currentIndex];
+      if (!question) return;
+      if (answer.id !== question.answerId) {
+        interactionLocked = true;
+        button.classList.remove("is-wrong");
+        const mark = button.querySelector(".answer-mark");
+        mark.textContent = "×";
+        void button.offsetWidth;
+        button.classList.add("is-wrong");
+        audio.play("wrong");
+        if (payload.settings.attemptsEnabled) {
+          attemptsLeft = Math.max(0,attemptsLeft - 1);
+          updateAttempts();
+          if (attemptsLeft === 0) {
+            await wait(540);
+            showFinish(false);
+            return;
+          }
+        }
+        await wait(520);
+        button.classList.remove("is-wrong");
+        mark.textContent = "";
+        interactionLocked = false;
+        return;
+      }
+
+      interactionLocked = true;
+      answerBank.querySelectorAll(".answer-card").forEach((card)=>card.disabled=true);
+      const mark = button.querySelector(".answer-mark");
+      mark.textContent = "✓";
+      button.classList.add("is-correct");
+      audio.play("correct");
+      await wait(560);
+
+      if (payload.settings.deleteCorrectAnswer) {
+        if (typeof button.animate === "function" && !reducedMotion()) {
+          await button.animate([
+            {transform:"scale(1)",opacity:1},
+            {transform:"scale(1.1)",opacity:1,offset:.28},
+            {transform:"scale(.15)",opacity:0}
+          ],{duration:520,easing:"cubic-bezier(.3,.02,.2,1)",fill:"forwards"}).finished.catch(()=>{});
+        }
+        hiddenAnswers.add(answer.id);
+        button.remove();
+      }
+
+      await exitQuestion();
+      currentIndex += 1;
+      if (currentIndex >= questions.length) {
+        showFinish(true);
+        return;
+      }
+      await wait(120);
+      await enterQuestion(currentIndex);
+    }
+
+    function startTimer(){
+      stopTimer();
+      if (!payload.settings.timerEnabled) return;
+      const total = payload.settings.timerSeconds * 1000;
+      timerDeadline = Date.now() + total;
+      const tick = ()=>{
+        const remaining = Math.max(0,timerDeadline - Date.now());
+        timerFill.style.transform = `scaleX(${remaining / total})`;
+        if (remaining <= 0) showFinish(false);
+      };
+      tick();
+      timerId = setInterval(tick,120);
+    }
+
+    function stopTimer(){
+      if (timerId) clearInterval(timerId);
+      timerId = null;
+    }
+
+    function buildConfetti(){
+      confetti.textContent = "";
+      const colors = ["#1688d3","#f47a45","#e91e63","#43a047","#8e24aa","#efd553"];
+      for (let index=0;index<30;index+=1) {
+        const piece = document.createElement("i");
+        piece.style.left = `${3 + (index * 3.2) % 94}%`;
+        piece.style.setProperty("--c",colors[index % colors.length]);
+        piece.style.setProperty("--d",`${-(index % 11) * .17}s`);
+        piece.style.setProperty("--x",`${(index % 2 ? 1 : -1) * (18 + index % 5 * 12)}px`);
+        confetti.appendChild(piece);
+      }
+    }
+
+    function showFinish(success=true){
+      if (gameEnded) return;
+      gameEnded = true;
+      interactionLocked = true;
+      stopTimer();
+      answerBank.querySelectorAll("button").forEach((button)=>button.disabled=true);
+      if (success) audio.play("finish"); else audio.play("wrong");
+      finishView.querySelector(".celebration-title").textContent = success ? "أحسنتم!" : "انتهى النشاط";
+      finishView.querySelector(".celebration-subtitle").textContent = success ? "انتهى النشاط بنجاح" : "يمكنكم المحاولة مرة أخرى";
+      finishView.classList.add("is-visible");
+      finishView.setAttribute("aria-hidden","false");
+    }
+
+    async function startGame(){
+      audio.unlock();
+      startGate.classList.remove("is-visible");
+      startGate.setAttribute("aria-hidden","true");
+      gameStarted = true;
+      gameEnded = false;
+      interactionLocked = true;
+      currentIndex = 0;
+      hiddenAnswers = new Set();
+      attemptsLeft = payload.settings.attempts;
+      updateAttempts();
+      renderAnswerBank();
+      startTimer();
+      await wait(180);
+      await enterQuestion(0);
+    }
+
+    async function restartGame(){
+      audio.stop();
+      stopTimer();
+      finishView.classList.remove("is-visible");
+      finishView.setAttribute("aria-hidden","true");
+      questionStrip.getAnimations?.().forEach((animation)=>animation.cancel());
+      await startGame();
+    }
+
+    function goHome(){
+      const explicit = getParam("returnTo");
+      if (explicit && !/^https?:/i.test(explicit)) {
+        location.href = explicit;
+        return;
+      }
+      location.href = "../index.html";
+    }
+
+    function goBack(){
+      const explicit = getParam("returnTo");
+      if (explicit && !/^https?:/i.test(explicit)) {
+        location.href = explicit;
+      } else if (history.length > 1) {
+        history.back();
+      } else {
+        goHome();
+      }
+    }
+
+    startBtn.addEventListener("click",startGame);
+    restartBtn.addEventListener("click",restartGame);
+    homeBtn.addEventListener("click",goHome);
+    backBtn.addEventListener("click",goBack);
+    finishBtn.addEventListener("click",()=>showFinish(false));
+    window.addEventListener("pagehide",()=>{audio.stop();stopTimer()},{passive:true});
+
+    (async()=>{
+      payload = await hydratePayload();
+      applyPayload();
+      buildConfetti();
+      renderAnswerBank();
+      renderQuestion(0);
+      questionStrip.style.transform = "translate3d(-116%,0,0)";
+      questionStrip.style.opacity = "0";
+    })();
+  })();
+  </script>
+</body>
+</html>
