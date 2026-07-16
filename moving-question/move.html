@@ -387,6 +387,7 @@
 
     .answer-text{
       min-width:0;
+      max-width:100%;
       flex:1 1 auto;
       text-align:center;
       font-size:clamp(25px,3.1vw,48px);
@@ -1368,11 +1369,42 @@
       return button;
     }
 
+    function fitAnswerLabel(label){
+      if (!label) return;
+      label.style.removeProperty("font-size");
+
+      const availableWidth = label.clientWidth;
+      if (!availableWidth || label.scrollWidth <= availableWidth) return;
+
+      const originalSize = Number.parseFloat(getComputedStyle(label).fontSize) || 48;
+      let minimumSize = 8;
+      let maximumSize = originalSize;
+
+      label.style.fontSize = `${minimumSize}px`;
+      if (label.scrollWidth > label.clientWidth) return;
+
+      for (let step = 0;step < 12;step += 1) {
+        const testSize = (minimumSize + maximumSize) / 2;
+        label.style.fontSize = `${testSize}px`;
+        if (label.scrollWidth <= label.clientWidth) minimumSize = testSize;
+        else maximumSize = testSize;
+      }
+
+      label.style.fontSize = `${minimumSize.toFixed(2)}px`;
+    }
+
+    function fitAllAnswerLabels(){
+      requestAnimationFrame(()=>{
+        answerBank.querySelectorAll(".answer-text").forEach(fitAnswerLabel);
+      });
+    }
+
     function renderAnswerBank(){
       answerBank.textContent = "";
       const visible = answers.filter((answer)=>!hiddenAnswers.has(answer.id));
       visible.forEach((answer,index)=>answerBank.appendChild(createAnswerCard(answer,index)));
       answerBank.dataset.answerCount = String(visible.length);
+      fitAllAnswerLabels();
     }
 
     function renderQuestion(index,target = questionContent){
@@ -1678,6 +1710,7 @@
         viewportLayoutFrame = requestAnimationFrame(()=>{
           viewportLayoutFrame = null;
           syncVisualViewportFrame();
+          fitAllAnswerLabels();
         });
       };
 
