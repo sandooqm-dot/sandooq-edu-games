@@ -21517,12 +21517,26 @@
 
   function validEntries(){return entries.filter(entry=>mediaComplete(entry.question)&&mediaComplete(entry.answer))}
 
+  function runtimeMedia(raw={}){
+    const media=normalizeMedia(raw);
+    const mode=normalizeMode(media.contentType);
+    const includeText=mode!=="images";
+    const includeImage=mode!=="text";
+    return {
+      contentType:mode,
+      text:includeText?String(media.text||"").trim():"",
+      imageName:includeImage?String(media.imageName||""):"",
+      imageData:includeImage?String(media.imageData||""):""
+    };
+  }
+
   function runtimePayload(){
     const completed=validEntries();
-    const answers=completed.map((entry,index)=>({id:`answer-${entry.id}`,text:String(entry.answer.text||"").trim(),imageData:String(entry.answer.imageData||""),color:PALETTE[index%PALETTE.length]}));
-    const questions=completed.map(entry=>{const prompt={text:String(entry.question.text||"").trim(),imageData:String(entry.question.imageData||"")};return {id:`question-${entry.id}`,prompt,text:prompt.text,imageData:prompt.imageData,answerId:`answer-${entry.id}`}});
+    const runtimeEntries=completed.map(entry=>({id:entry.id,question:runtimeMedia(entry.question),answer:runtimeMedia(entry.answer)}));
+    const answers=runtimeEntries.map((entry,index)=>({id:`answer-${entry.id}`,...entry.answer,color:PALETTE[index%PALETTE.length]}));
+    const questions=runtimeEntries.map(entry=>{const prompt={...entry.question};return {id:`question-${entry.id}`,contentType:prompt.contentType,prompt,text:prompt.text,imageName:prompt.imageName,imageData:prompt.imageData,answerId:`answer-${entry.id}`}});
     const name=String(nameInput?.value||"").trim();
-    return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:3,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},deleteCorrectAnswer,fontFamily,settings:{deleteCorrectAnswer,attemptsEnabled:false,attempts:10,timerEnabled:false,timerSeconds:90},appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},answers,answerBank:answers,questions,entries:completed,contents:completed,updatedAt:Date.now()};
+    return {gameType:GAME_TYPE,gameTemplate:GAME_TYPE,payloadVersion:3,name,gameName:name,theme,selectedTheme:theme,contentLanguage,language:contentLanguage,soundEnabled,sounds:{enabled:soundEnabled},deleteCorrectAnswer,fontFamily,settings:{deleteCorrectAnswer,attemptsEnabled:false,attempts:10,timerEnabled:false,timerSeconds:90},appearance:{textColor,stripBorderColor,unifyAnswerColors,answerColor},answers,answerBank:answers,questions,entries:runtimeEntries,contents:runtimeEntries,updatedAt:Date.now()};
   }
 
   function validate(requireName){
@@ -21701,13 +21715,24 @@
   document.getElementById("testMovingQuestionBtn")?.addEventListener("click",testGame);
   document.getElementById("saveMovingQuestionBtn")?.addEventListener("click",saveGame);
 
-  let restored=false;
-  try{const draft=JSON.parse(sessionStorage.getItem(DRAFT_KEY)||localStorage.getItem(DRAFT_KEY)||"null");if(draft){restored=loadDraft(draft)}}catch(_){}
   if(!entries.length)entries=[newEntry()];render();window.openMovingQuestionSetup=open;
+  function storedDraft(storage){
+    try{
+      const raw=storage?.getItem(DRAFT_KEY);
+      const parsed=raw?JSON.parse(raw):null;
+      return parsed&&typeof parsed==="object"?parsed:null;
+    }catch(_){return null}
+  }
+  function draftUpdatedAt(draft){const value=Number(draft?.updatedAt);return Number.isFinite(value)?value:0}
   const initialRestorePromise=(async()=>{
     const pending=await window.SandooqSavedGames?.consumePendingEdit(GAME_TYPE);
     if(pending?.payload){loadDraft(pending.payload);render();saveDraft();open();return true}
-    if(!restored){const indexedDraft=await readPayloadFromDb(DRAFT_DB_KEY);if(indexedDraft&&loadDraft(indexedDraft)){restored=true;render()}}
+    const candidates=[storedDraft(sessionStorage),storedDraft(localStorage)];
+    const indexedDraft=await readPayloadFromDb(DRAFT_DB_KEY);
+    if(indexedDraft)candidates.push(indexedDraft);
+    const newest=candidates.filter(Boolean).reduce((selected,candidate)=>draftUpdatedAt(candidate)>=draftUpdatedAt(selected)?candidate:selected,null);
+    const restored=Boolean(newest&&loadDraft(newest));
+    if(restored)render();
     if(location.hash==="#movingQuestionSetup")open();
     return restored;
   })();
