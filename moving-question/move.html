@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v7-settle-audio-aligned-film-controls -->
+  <!-- version: moving-question-v13-content-modes-draft-restore-zoom -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
   <title>السؤال المتحرك - صندوق الألعاب التعليمية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@600;700;800;900&family=Noto+Kufi+Arabic:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -24,6 +24,7 @@
       --question-text:#161616;
       --answer-unified:#1688d3;
       --page-font:"Cairo",Arial,sans-serif;
+      --intro-bg-final-scale:1.12;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -89,24 +90,44 @@
     .game-page.theme-classroom .theme-background{
       background-image:
         linear-gradient(rgba(255,255,255,.34),rgba(255,255,255,.34)),
-        url("theme-classroom-bg-v2.webp?v=2"),
+        url("../theme-classroom-bg-v2.webp?v=2"),
         linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df);
     }
 
+    .game-page.theme-classic .theme-background,
+    .game-page.theme-white .theme-background{
+      background:
+        radial-gradient(circle at 15% 16%,rgba(255,255,255,.96) 0 9%,transparent 32%),
+        radial-gradient(circle at 86% 10%,rgba(150,213,244,.38),transparent 30%),
+        linear-gradient(150deg,#f9fcff 0%,#e8f4fb 54%,#f7f2df 100%);
+    }
+
     .game-page.theme-sky-clouds .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
+      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("../theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
     }
 
     .game-page.theme-forest .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
+      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("../theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
     }
 
     .game-page.theme-math .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("../theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
     }
 
     .game-page.theme-english .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("../theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+    }
+
+    .game-page.theme-flowers .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)),url("../theme-flowers-bg.webp?v=48"),linear-gradient(#fff7fb,#f7fff4);
+    }
+
+    .game-page.theme-national-day .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("../theme-national-day-v2-bg.webp?v=53"),linear-gradient(#effff8,#e9fff5);
+    }
+
+    .game-page.theme-founding-day .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("../theme-founding-day-bg.webp?v=1"),linear-gradient(#f8efe1,#fffaf3);
     }
 
     .game-logo{
@@ -224,11 +245,11 @@
       background:
         repeating-linear-gradient(90deg,
           transparent 0 var(--film-mark-start),
-          rgba(102,107,114,.55) var(--film-mark-start) var(--film-mark-end),
+          var(--question-frame) var(--film-mark-start) var(--film-mark-end),
           transparent var(--film-mark-end) var(--film-period)
         ),
         linear-gradient(180deg,rgba(250,250,250,.98),rgba(231,233,236,.98));
-      background-position:0 50%,0 0;
+      background-position:var(--rail-offset,0px) 50%,0 0;
       background-repeat:repeat-x,no-repeat;
       background-size:var(--film-period) 100%,100% 100%;
       will-change:background-position;
@@ -242,9 +263,9 @@
       min-width:0;
       min-height:0;
       overflow:hidden;
-      background:linear-gradient(115deg,rgba(255,255,255,.66),rgba(232,241,248,.48));
-      backdrop-filter:blur(12px) saturate(1.08);
-      -webkit-backdrop-filter:blur(12px) saturate(1.08);
+      background:linear-gradient(115deg,rgba(255,255,255,.46),rgba(232,241,248,.3));
+      backdrop-filter:blur(4px) saturate(1.03);
+      -webkit-backdrop-filter:blur(4px) saturate(1.03);
       isolation:isolate;
     }
 
@@ -386,7 +407,7 @@
       height:calc(100% - 2px);
       object-fit:contain;
       border-radius:10px;
-      background:rgba(255,255,255,.92);
+      background:transparent;
     }
 
     .answer-card.has-image:not(.has-text) .answer-image{width:100%;height:100%;background:transparent}
@@ -734,7 +755,6 @@
 
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
-      <button class="control-btn finish-btn" id="finishBtn" type="button">إنهاء</button>
     </nav>
 
     <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
@@ -795,8 +815,9 @@
     const DB_NAME = "sandooq_edu_games_v1";
     const DB_PREFIX = "moving-question";
     const PALETTE = ["#9c4fd0","#1f94db","#f47730","#123fd0","#d90b3d","#23ad6b","#15933b","#e1a400","#7a55c6","#e65353"];
-    const STRIP_MOTION_MS = 2600;
-    const QUESTION_OVERLAP_DELAY_MS = 1100;
+    const STRIP_MOTION_MS = 5200;
+    const QUESTION_SPACING_MS = 950;
+    const STRIP_TRAVEL_PERCENT = 120;
     const WRONG_FEEDBACK_FALLBACK_MS = 1800;
 
     const page = document.getElementById("gamePage");
@@ -815,7 +836,6 @@
     const restartBtn = document.getElementById("restartBtn");
     const homeBtn = document.getElementById("homeBtn");
     const backBtn = document.getElementById("backBtn");
-    const finishBtn = document.getElementById("finishBtn");
     const attemptsHud = document.getElementById("attemptsHud");
     const attemptsText = document.getElementById("attemptsText");
     const timerTrack = document.getElementById("timerTrack");
@@ -885,6 +905,9 @@
     let timerId = null;
     let timerDeadline = 0;
     let railOffset = 0;
+    let stripMotionFrame = null;
+    let stripMotionResolve = null;
+    let stripMotionToken = 0;
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
     let safariTimers = [];
@@ -902,14 +925,31 @@
 
     function normalizeTheme(value){
       const theme = safeText(value).toLowerCase().replace(/^theme-/,"");
-      return ["classroom","white","sky-clouds","forest","math","english"].includes(theme) ? theme : "classroom";
+      return ["classic","classroom","white","sky-clouds","forest","math","english","flowers","national-day","founding-day"].includes(theme) ? theme : "classic";
+    }
+
+    function normalizeFont(value){
+      const font = safeText(value).toLowerCase();
+      return ["cairo","tajawal","noto-kufi","noto-naskh"].includes(font) ? font : "noto-naskh";
+    }
+
+    function normalizeContentMode(value,item={}){
+      const mode=safeText(value).toLowerCase();
+      if (["images","image","picture"].includes(mode)) return "images";
+      if (["mixed","text-image","text+image"].includes(mode)) return "mixed";
+      if (["text","texts"].includes(mode)) return "text";
+      const text=safeText(item?.text || item?.label || item?.value);
+      const image=item?.imageData || item?.image || item?.src || "";
+      return text&&image?"mixed":image?"images":"text";
     }
 
     function normalizeAnswer(item,index){
-      const imageData = item?.imageData || item?.image || item?.src || "";
-      const text = safeText(item?.text || item?.label || item?.value);
+      const contentType=normalizeContentMode(item?.contentType || item?.type,item);
+      const imageData = contentType==="text" ? "" : (item?.imageData || item?.image || item?.src || "");
+      const text = contentType==="images" ? "" : safeText(item?.text || item?.label || item?.value);
       return {
         id:safeText(item?.id || item?.answerId || `answer-${index + 1}`),
+        contentType,
         text,
         imageData,
         color:normalizeHex(item?.color,PALETTE[index % PALETTE.length])
@@ -917,10 +957,17 @@
     }
 
     function normalizeQuestion(item,index){
+      const prompt = item?.prompt && typeof item.prompt === "object"
+        ? item.prompt
+        : (item?.questionContent && typeof item.questionContent === "object" ? item.questionContent : null);
+      const legacyQuestionText = typeof item?.question === "string" ? item.question : "";
+      const source=prompt || item || {};
+      const contentType=normalizeContentMode(prompt?.contentType || item?.contentType || item?.type,source);
       return {
         id:safeText(item?.id || `question-${index + 1}`),
-        text:safeText(item?.text || item?.questionText || item?.question),
-        imageData:item?.imageData || item?.questionImageData || item?.image || "",
+        contentType,
+        text:contentType==="images" ? "" : safeText(prompt?.text ?? item?.questionText ?? item?.text ?? legacyQuestionText),
+        imageData:contentType==="text" ? "" : (prompt?.imageData || prompt?.image || item?.questionImageData || item?.imageData || item?.image || ""),
         answerId:safeText(item?.answerId || item?.correctAnswerId || item?.correctId)
       };
     }
@@ -943,6 +990,7 @@
         theme:normalizeTheme(source?.theme),
         contentLanguage:(source?.contentLanguage || source?.language) === "ar" ? "ar" : "en",
         soundEnabled:source?.soundEnabled !== false && source?.soundsEnabled !== false,
+        fontFamily:normalizeFont(source?.fontFamily || source?.font),
         settings:{
           deleteCorrectAnswer:settings.deleteCorrectAnswer !== false,
           attemptsEnabled:Boolean(settings.attemptsEnabled),
@@ -1204,14 +1252,71 @@
       return {preload,play,stop,setEnabled};
     })();
 
+    function cssAsset(path){
+      return `url("${assetUrl(path).replace(/"/g,"%22")}")`;
+    }
+
+    function applyTheme(themeId){
+      const currentTheme = normalizeTheme(themeId);
+      page.className = `game-page theme-${currentTheme}`;
+      page.style.backgroundColor = currentTheme === "classic" || currentTheme === "white" ? "#fff" : "#f7fbff";
+      if (!themeBackground) return;
+
+      themeBackground.style.opacity = currentTheme === "classic" || currentTheme === "white" ? "0" : "1";
+      themeBackground.style.backgroundColor = "#fff";
+      themeBackground.style.backgroundImage = "none";
+      themeBackground.style.backgroundSize = "cover";
+      themeBackground.style.backgroundPosition = "center";
+      themeBackground.style.backgroundRepeat = "no-repeat";
+
+      const themes = {
+        classroom:{
+          color:"#fff",
+          layers:[
+            cssAsset("theme-classroom-bg-v2.webp?v=2"),
+            cssAsset("theme-original-bg.webp?v=45"),
+            cssAsset("theme-original-bg.png?v=45"),
+            "linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df)"
+          ]
+        },
+        "sky-clouds":{
+          color:"#58c7f3",
+          layers:[
+            cssAsset("theme-sky-clouds-bg.webp?v=45"),
+            cssAsset("theme-sky-clouds-bg.png?v=45"),
+            cssAsset("theme-sky-clouds.webp?v=45"),
+            cssAsset("theme-sky-clouds.png?v=45"),
+            "linear-gradient(180deg,#58c7f3 0%,#eaf9ff 100%)"
+          ]
+        },
+        forest:{color:"#6ec9ee",layers:[cssAsset("theme-forest-bg.webp?v=45"),"linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%)"]},
+        math:{color:"#f5f4e7",layers:[cssAsset("theme-math-bg.webp?v=45"),"linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%)"]},
+        english:{color:"#72d0d2",layers:[cssAsset("theme-english-bg.webp?v=46"),"linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%)"]},
+        flowers:{color:"#f8edf3",layers:[cssAsset("theme-flowers-bg.webp?v=48"),"linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%)"]},
+        "national-day":{color:"#165f55",layers:[cssAsset("theme-national-day-v2-bg.webp?v=53"),"linear-gradient(180deg,#165f55 0%,#0f4f46 100%)"]},
+        "founding-day":{color:"#d7c9b1",layers:[cssAsset("theme-founding-day-bg.webp?v=1"),"linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%)"]}
+      };
+      const selected = themes[currentTheme];
+      if (!selected) return;
+      themeBackground.style.backgroundColor = selected.color;
+      themeBackground.style.backgroundImage = selected.layers.join(", ");
+    }
+
     function applyPayload(){
       answers = payload.answers.map((item)=>({...item}));
       questions = payload.questions.map((item)=>({...item}));
-      page.className = `game-page theme-${payload.theme}`;
+      applyTheme(payload.theme);
       page.dataset.language = payload.contentLanguage;
       document.documentElement.lang = payload.contentLanguage;
       document.documentElement.dir = "rtl";
       document.title = `${payload.gameName} - صندوق الألعاب التعليمية`;
+      const fontMap = {
+        cairo:'"Cairo",Arial,sans-serif',
+        tajawal:'"Tajawal",Arial,sans-serif',
+        "noto-kufi":'"Noto Kufi Arabic",Arial,sans-serif',
+        "noto-naskh":'"Noto Naskh Arabic","Traditional Arabic",serif'
+      };
+      document.documentElement.style.setProperty("--page-font",fontMap[payload.fontFamily] || fontMap["noto-naskh"]);
       document.documentElement.style.setProperty("--question-frame",payload.appearance.stripBorderColor);
       document.documentElement.style.setProperty("--question-text",payload.appearance.textColor);
       document.documentElement.style.setProperty("--answer-unified",payload.appearance.answerColor);
@@ -1317,56 +1422,88 @@
       requestAnimationFrame(()=>mark.classList.add("is-visible"));
     }
 
-    function animateStrip(keyframes,duration = STRIP_MOTION_MS){
-      const last = keyframes[keyframes.length - 1];
-      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
-      const edgeStart = railOffset;
-      const edgeEnd = edgeStart + viewportWidth * 1.1;
-      railOffset = edgeEnd;
-      const edgeStartPosition = `${edgeStart.toFixed(2)}px 50%,0 0`;
-      const edgeEndPosition = `${edgeEnd.toFixed(2)}px 50%,0 0`;
+    function clampMotionProgress(value){
+      return Math.max(0,Math.min(1,Number(value) || 0));
+    }
 
-      if (reducedMotion() || typeof questionContent.animate !== "function") {
-        Object.assign(questionContent.style,last);
-        filmEdges.forEach((edge)=>{edge.style.backgroundPosition=edgeEndPosition});
+    function setQuestionTravel(element,fromPercent,toPercent,progress){
+      if (!element) return;
+      const value = fromPercent + (toPercent - fromPercent) * clampMotionProgress(progress);
+      element.style.transform = `translate3d(${value.toFixed(4)}%,0,0)`;
+      element.style.opacity = "1";
+    }
+
+    function setRailPosition(value){
+      questionStrip.style.setProperty("--rail-offset",`${Number(value || 0).toFixed(2)}px`);
+    }
+
+    function cancelStripMotion(){
+      stripMotionToken += 1;
+      if (stripMotionFrame !== null) cancelAnimationFrame(stripMotionFrame);
+      stripMotionFrame = null;
+      if (stripMotionResolve) {
+        const resolve = stripMotionResolve;
+        stripMotionResolve = null;
+        resolve();
+      }
+    }
+
+    function runSynchronizedStripMotion(duration,railDistance,updateQuestion){
+      cancelStripMotion();
+      const token = stripMotionToken;
+      const motionDuration = Math.max(1,Number(duration) || 1);
+      const edgeStart = railOffset;
+      const edgeEnd = edgeStart + railDistance;
+      railOffset = edgeEnd;
+
+      if (reducedMotion()) {
+        updateQuestion(1,motionDuration);
+        setRailPosition(edgeEnd);
         return Promise.resolve();
       }
 
-      const timing = {
-        duration,
-        easing:"linear",
-        fill:"forwards"
-      };
-      const contentAnimation = questionContent.animate(keyframes,timing);
-      const edgeAnimations = filmEdges.map((edge)=>edge.animate([
-        {backgroundPosition:edgeStartPosition},
-        {backgroundPosition:edgeEndPosition}
-      ],timing));
+      return new Promise((resolve)=>{
+        stripMotionResolve = resolve;
+        const startedAt = performance.now();
+        const draw = (now)=>{
+          if (token !== stripMotionToken) return;
+          const elapsed = Math.min(motionDuration,Math.max(0,now - startedAt));
+          const progress = elapsed / motionDuration;
 
-      return Promise.all([
-        contentAnimation.finished.catch(()=>{}),
-        ...edgeAnimations.map((animation)=>animation.finished.catch(()=>{}))
-      ]).then(()=>{
-        Object.assign(questionContent.style,last);
-        filmEdges.forEach((edge,index)=>{
-          edge.style.backgroundPosition=edgeEndPosition;
-          edgeAnimations[index]?.cancel();
-        });
-        contentAnimation.cancel();
+          updateQuestion(progress,elapsed);
+          setRailPosition(edgeStart + (edgeEnd - edgeStart) * progress);
+
+          if (progress < 1) {
+            stripMotionFrame = requestAnimationFrame(draw);
+            return;
+          }
+
+          stripMotionFrame = null;
+          stripMotionResolve = null;
+          resolve();
+        };
+        stripMotionFrame = requestAnimationFrame(draw);
       });
+    }
+
+    function railDistanceFor(duration){
+      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
+      const oneQuestionDistance = viewportWidth * (STRIP_TRAVEL_PERCENT / 100);
+      return oneQuestionDistance * (duration / STRIP_MOTION_MS);
     }
 
     async function enterQuestion(index){
       renderQuestion(index);
       interactionLocked = true;
-      questionContent.style.transform = "translate3d(-120%,0,0)";
+      questionContent.style.transform = `translate3d(-${STRIP_TRAVEL_PERCENT}%,0,0)`;
       questionContent.style.opacity = "1";
       if (reducedMotion()) audio.play("settle");
       else audio.playEndingAt("settle",STRIP_MOTION_MS);
-      await animateStrip([
-        {transform:"translate3d(-120%,0,0)",opacity:1},
-        {transform:"translate3d(0,0,0)",opacity:1}
-      ],STRIP_MOTION_MS);
+      await runSynchronizedStripMotion(
+        STRIP_MOTION_MS,
+        railDistanceFor(STRIP_MOTION_MS),
+        (progress)=>setQuestionTravel(questionContent,-STRIP_TRAVEL_PERCENT,0,progress)
+      );
       questionContent.style.transform = "translate3d(0,0,0)";
       questionContent.style.opacity = "1";
       interactionLocked = false;
@@ -1375,86 +1512,43 @@
 
     async function exitQuestion(){
       interactionLocked = true;
-      await animateStrip([
-        {transform:"translate3d(0,0,0)",opacity:1},
-        {transform:"translate3d(120%,0,0)",opacity:1}
-      ],STRIP_MOTION_MS);
+      await runSynchronizedStripMotion(
+        STRIP_MOTION_MS,
+        railDistanceFor(STRIP_MOTION_MS),
+        (progress)=>setQuestionTravel(questionContent,0,STRIP_TRAVEL_PERCENT,progress)
+      );
     }
 
     async function transitionToQuestion(index){
       interactionLocked = true;
       const outgoing = questionContent;
+      const totalDuration = QUESTION_SPACING_MS + STRIP_MOTION_MS;
+      const incomingStartPercent = -STRIP_TRAVEL_PERCENT * (totalDuration / STRIP_MOTION_MS);
       const incoming = document.createElement("div");
       incoming.id = "questionContentNext";
       incoming.className = "question-content";
       renderQuestion(index,incoming);
-      incoming.style.transform = "translate3d(-120%,0,0)";
+      incoming.style.transform = `translate3d(${incomingStartPercent.toFixed(4)}%,0,0)`;
       incoming.style.opacity = "1";
       questionWindow.appendChild(incoming);
 
-      const viewportWidth = Math.max(320,stripViewport?.clientWidth || window.innerWidth || 0);
-      const totalDuration = QUESTION_OVERLAP_DELAY_MS + STRIP_MOTION_MS;
       if (reducedMotion()) audio.play("settle");
       else audio.playEndingAt("settle",totalDuration);
-      const edgeStart = railOffset;
-      const edgeDistance = viewportWidth * 1.1 * (totalDuration / STRIP_MOTION_MS);
-      const edgeEnd = edgeStart + edgeDistance;
-      railOffset = edgeEnd;
-      const edgeStartPosition = `${edgeStart.toFixed(2)}px 50%,0 0`;
-      const edgeEndPosition = `${edgeEnd.toFixed(2)}px 50%,0 0`;
+      await runSynchronizedStripMotion(
+        totalDuration,
+        railDistanceFor(totalDuration),
+        (progress,elapsed)=>{
+          const outgoingProgress = clampMotionProgress(elapsed / STRIP_MOTION_MS);
+          setQuestionTravel(outgoing,0,STRIP_TRAVEL_PERCENT,outgoingProgress);
+          setQuestionTravel(incoming,incomingStartPercent,0,progress);
+        }
+      );
 
-      if (reducedMotion() || typeof outgoing.animate !== "function") {
-        outgoing.remove();
-        incoming.id = "questionContent";
-        incoming.style.transform = "translate3d(0,0,0)";
-        incoming.style.opacity = "1";
-        questionContent = incoming;
-        filmEdges.forEach((edge)=>{edge.style.backgroundPosition=edgeEndPosition});
-      } else {
-        const outgoingAnimation = outgoing.animate([
-          {transform:"translate3d(0,0,0)",opacity:1},
-          {transform:"translate3d(120%,0,0)",opacity:1}
-        ],{
-          duration:STRIP_MOTION_MS,
-          easing:"linear",
-          fill:"forwards"
-        });
-        const incomingAnimation = incoming.animate([
-          {transform:"translate3d(-120%,0,0)",opacity:1},
-          {transform:"translate3d(0,0,0)",opacity:1}
-        ],{
-          duration:STRIP_MOTION_MS,
-          delay:QUESTION_OVERLAP_DELAY_MS,
-          easing:"linear",
-          fill:"forwards"
-        });
-        const edgeAnimations = filmEdges.map((edge)=>edge.animate([
-          {backgroundPosition:edgeStartPosition},
-          {backgroundPosition:edgeEndPosition}
-        ],{
-          duration:totalDuration,
-          easing:"linear",
-          fill:"forwards"
-        }));
-
-        await Promise.all([
-          outgoingAnimation.finished.catch(()=>{}),
-          incomingAnimation.finished.catch(()=>{}),
-          ...edgeAnimations.map((animation)=>animation.finished.catch(()=>{}))
-        ]);
-
-        incoming.style.transform = "translate3d(0,0,0)";
-        incoming.style.opacity = "1";
-        filmEdges.forEach((edge,index)=>{
-          edge.style.backgroundPosition=edgeEndPosition;
-          edgeAnimations[index]?.cancel();
-        });
-        outgoingAnimation.cancel();
-        incomingAnimation.cancel();
-        outgoing.remove();
-        incoming.id = "questionContent";
-        questionContent = incoming;
-      }
+      incoming.style.transform = "translate3d(0,0,0)";
+      incoming.style.opacity = "1";
+      outgoing.remove();
+      incoming.id = "questionContent";
+      questionContent = incoming;
 
       interactionLocked = false;
       answerBank.querySelectorAll(".answer-card").forEach((card)=>{
@@ -1691,7 +1785,7 @@
       const zoomMs = 7600;
       const settlePauseMs = 280;
       const startScale = 1;
-      const endScale = 1.18;
+      const endScale = Number(getComputedStyle(page).getPropertyValue("--intro-bg-final-scale")) || 1.12;
       let startTime = null;
 
       const setFrame = (scale)=>{
@@ -1778,10 +1872,9 @@
       themeIntroAudio.stop();
       stopTimer();
       hideFinish();
-      questionContent.getAnimations?.().forEach((animation)=>animation.cancel());
-      filmEdges.forEach((edge)=>edge.getAnimations?.().forEach((animation)=>animation.cancel()));
+      cancelStripMotion();
       railOffset = 0;
-      filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
+      setRailPosition(0);
       gameEnded = false;
       await startGame({playIntro:false});
     }
@@ -1810,7 +1903,6 @@
     restartBtn.addEventListener("click",restartGame);
     homeBtn.addEventListener("click",goHome);
     backBtn.addEventListener("click",goBack);
-    finishBtn.addEventListener("click",()=>showFinish(false));
     window.addEventListener("resize",()=>scheduleResponsiveLayout(40),{passive:true});
     window.addEventListener("orientationchange",()=>{
       window.setTimeout(()=>{
@@ -1831,6 +1923,7 @@
       audio.stop();
       themeIntroAudio.stop();
       stopTimer();
+      cancelStripMotion();
       finishSequenceToken += 1;
       clearFinishSequenceTimers();
       if (introFrameId) cancelAnimationFrame(introFrameId);
@@ -1848,9 +1941,9 @@
       buildConfetti();
       renderAnswerBank();
       renderQuestion(0);
-      questionContent.style.transform = "translate3d(-120%,0,0)";
+      questionContent.style.transform = `translate3d(-${STRIP_TRAVEL_PERCENT}%,0,0)`;
       questionContent.style.opacity = "1";
-      filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
+      setRailPosition(0);
       syncVisualViewportFrame();
       collapseSafariBars();
     })();
