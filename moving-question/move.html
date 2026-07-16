@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v10-index-settings-linked -->
+  <!-- version: moving-question-v11-theme-alpha-strip-question-only -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
@@ -89,7 +89,7 @@
     .game-page.theme-classroom .theme-background{
       background-image:
         linear-gradient(rgba(255,255,255,.34),rgba(255,255,255,.34)),
-        url("theme-classroom-bg-v2.webp?v=2"),
+        url("../theme-classroom-bg-v2.webp?v=2"),
         linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df);
     }
 
@@ -102,31 +102,31 @@
     }
 
     .game-page.theme-sky-clouds .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
+      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("../theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
     }
 
     .game-page.theme-forest .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
+      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("../theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
     }
 
     .game-page.theme-math .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("../theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
     }
 
     .game-page.theme-english .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("../theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
     }
 
     .game-page.theme-flowers .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)),url("theme-flowers-bg.webp?v=48"),linear-gradient(#fff7fb,#f7fff4);
+      background-image:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)),url("../theme-flowers-bg.webp?v=48"),linear-gradient(#fff7fb,#f7fff4);
     }
 
     .game-page.theme-national-day .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("theme-national-day-v2-bg.webp?v=53"),linear-gradient(#effff8,#e9fff5);
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("../theme-national-day-v2-bg.webp?v=53"),linear-gradient(#effff8,#e9fff5);
     }
 
     .game-page.theme-founding-day .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("theme-founding-day-bg.webp?v=1"),linear-gradient(#f8efe1,#fffaf3);
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("../theme-founding-day-bg.webp?v=1"),linear-gradient(#f8efe1,#fffaf3);
     }
 
     .game-logo{
@@ -244,7 +244,7 @@
       background:
         repeating-linear-gradient(90deg,
           transparent 0 var(--film-mark-start),
-          rgba(102,107,114,.55) var(--film-mark-start) var(--film-mark-end),
+          var(--question-frame) var(--film-mark-start) var(--film-mark-end),
           transparent var(--film-mark-end) var(--film-period)
         ),
         linear-gradient(180deg,rgba(250,250,250,.98),rgba(231,233,236,.98));
@@ -406,7 +406,7 @@
       height:calc(100% - 2px);
       object-fit:contain;
       border-radius:10px;
-      background:rgba(255,255,255,.92);
+      background:transparent;
     }
 
     .answer-card.has-image:not(.has-text) .answer-image{width:100%;height:100%;background:transparent}
@@ -946,10 +946,14 @@
     }
 
     function normalizeQuestion(item,index){
+      const prompt = item?.prompt && typeof item.prompt === "object"
+        ? item.prompt
+        : (item?.questionContent && typeof item.questionContent === "object" ? item.questionContent : null);
+      const legacyQuestionText = typeof item?.question === "string" ? item.question : "";
       return {
         id:safeText(item?.id || `question-${index + 1}`),
-        text:safeText(item?.text || item?.questionText || item?.question),
-        imageData:item?.imageData || item?.questionImageData || item?.image || "",
+        text:safeText(prompt?.text ?? item?.questionText ?? item?.text ?? legacyQuestionText),
+        imageData:prompt?.imageData || prompt?.image || item?.questionImageData || item?.imageData || item?.image || "",
         answerId:safeText(item?.answerId || item?.correctAnswerId || item?.correctId)
       };
     }
@@ -1234,10 +1238,60 @@
       return {preload,play,stop,setEnabled};
     })();
 
+    function cssAsset(path){
+      return `url("${assetUrl(path).replace(/"/g,"%22")}")`;
+    }
+
+    function applyTheme(themeId){
+      const currentTheme = normalizeTheme(themeId);
+      page.className = `game-page theme-${currentTheme}`;
+      page.style.backgroundColor = currentTheme === "classic" || currentTheme === "white" ? "#fff" : "#f7fbff";
+      if (!themeBackground) return;
+
+      themeBackground.style.opacity = currentTheme === "classic" || currentTheme === "white" ? "0" : "1";
+      themeBackground.style.backgroundColor = "#fff";
+      themeBackground.style.backgroundImage = "none";
+      themeBackground.style.backgroundSize = "cover";
+      themeBackground.style.backgroundPosition = "center";
+      themeBackground.style.backgroundRepeat = "no-repeat";
+
+      const themes = {
+        classroom:{
+          color:"#fff",
+          layers:[
+            cssAsset("theme-classroom-bg-v2.webp?v=2"),
+            cssAsset("theme-original-bg.webp?v=45"),
+            cssAsset("theme-original-bg.png?v=45"),
+            "linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df)"
+          ]
+        },
+        "sky-clouds":{
+          color:"#58c7f3",
+          layers:[
+            cssAsset("theme-sky-clouds-bg.webp?v=45"),
+            cssAsset("theme-sky-clouds-bg.png?v=45"),
+            cssAsset("theme-sky-clouds.webp?v=45"),
+            cssAsset("theme-sky-clouds.png?v=45"),
+            "linear-gradient(180deg,#58c7f3 0%,#eaf9ff 100%)"
+          ]
+        },
+        forest:{color:"#6ec9ee",layers:[cssAsset("theme-forest-bg.webp?v=45"),"linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%)"]},
+        math:{color:"#f5f4e7",layers:[cssAsset("theme-math-bg.webp?v=45"),"linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%)"]},
+        english:{color:"#72d0d2",layers:[cssAsset("theme-english-bg.webp?v=46"),"linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%)"]},
+        flowers:{color:"#f8edf3",layers:[cssAsset("theme-flowers-bg.webp?v=48"),"linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%)"]},
+        "national-day":{color:"#165f55",layers:[cssAsset("theme-national-day-v2-bg.webp?v=53"),"linear-gradient(180deg,#165f55 0%,#0f4f46 100%)"]},
+        "founding-day":{color:"#d7c9b1",layers:[cssAsset("theme-founding-day-bg.webp?v=1"),"linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%)"]}
+      };
+      const selected = themes[currentTheme];
+      if (!selected) return;
+      themeBackground.style.backgroundColor = selected.color;
+      themeBackground.style.backgroundImage = selected.layers.join(", ");
+    }
+
     function applyPayload(){
       answers = payload.answers.map((item)=>({...item}));
       questions = payload.questions.map((item)=>({...item}));
-      page.className = `game-page theme-${payload.theme}`;
+      applyTheme(payload.theme);
       page.dataset.language = payload.contentLanguage;
       document.documentElement.lang = payload.contentLanguage;
       document.documentElement.dir = "rtl";
