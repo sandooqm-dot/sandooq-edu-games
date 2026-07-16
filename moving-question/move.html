@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v5-open-box-intro-finish-sound-mark -->
+  <!-- version: moving-question-v6-assets-audio-continuous-motion -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
@@ -689,7 +689,7 @@
 <body>
   <main class="game-page theme-classroom" id="gamePage" data-language="ar">
     <div class="theme-background" id="themeBackground" aria-hidden="true"></div>
-    <img class="game-logo" src="logo.PNG" alt="" onerror="this.style.display='none'">
+    <img class="game-logo" src="../logo.PNG" alt="شعار صندوق المسابقات">
 
     <div class="hud" id="attemptsHud" hidden>
       <div class="hud-pill" id="attemptsText">❤️ 10/10</div>
@@ -880,6 +880,7 @@
     const safeText = (value)=>String(value ?? "").trim();
     const normalizeHex = (value,fallback)=>/^#[0-9a-f]{6}$/i.test(String(value || "")) ? String(value).toUpperCase() : fallback;
     const getParam = (name)=>new URLSearchParams(location.search).get(name) || "";
+    const assetUrl = (path)=>new URL(`../${String(path || "").replace(/^\/+/,"")}`,document.baseURI).href;
 
     function normalizeTheme(value){
       const theme = safeText(value).toLowerCase().replace(/^theme-/,"");
@@ -988,67 +989,61 @@
       return normalizePayload(DEMO_PAYLOAD);
     }
 
+    /* نفس إدارة الصوت الفعلية المستخدمة في افتح الصندوق والاختيارات. */
     const audio = (()=>{
       const files = {
-        correct:"sounds/open-box-open.mp3?v=1",
-        wrong:"sounds/choice-wrong.mp3?v=1",
-        move:"sounds/open-box-go.mp3?v=2",
-        finish:"sounds/match-finish.mp3?v=1"
+        correct:assetUrl("sounds/open-box-open.mp3?v=1"),
+        wrong:assetUrl("sounds/choice-wrong.mp3?v=1"),
+        move:assetUrl("sounds/open-box-go.mp3?v=2"),
+        finish:assetUrl("sounds/match-finish.mp3?v=1")
       };
       const volumes = {correct:1,wrong:1,move:.55,finish:1};
       const cache = {};
-      let context = null;
+      let enabled = true;
+
+      function canPlay(){ return enabled && payload?.soundEnabled !== false; }
 
       function get(name){
+        if (!files[name]) return null;
         if (!cache[name]) {
           const element = new Audio(files[name]);
           element.preload = "auto";
+          element.loop = false;
           element.volume = volumes[name] ?? 1;
+          element.setAttribute("playsinline","");
+          element.setAttribute("webkit-playsinline","");
           cache[name] = element;
         }
         return cache[name];
       }
 
-      function fallback(name){
-        if (!payload?.soundEnabled) return;
-        try {
-          context ||= new (window.AudioContext || window.webkitAudioContext)();
-          const now = context.currentTime;
-          const gain = context.createGain();
-          const osc = context.createOscillator();
-          osc.type = name === "wrong" ? "sawtooth" : "sine";
-          osc.frequency.setValueAtTime(name === "wrong" ? 165 : name === "move" ? 330 : 520,now);
-          if (name === "correct" || name === "finish") osc.frequency.exponentialRampToValueAtTime(name === "finish" ? 980 : 760,now + .2);
-          gain.gain.setValueAtTime(.0001,now);
-          gain.gain.exponentialRampToValueAtTime(.13,now + .015);
-          gain.gain.exponentialRampToValueAtTime(.0001,now + (name === "finish" ? .6 : .25));
-          osc.connect(gain).connect(context.destination);
-          osc.start(now);
-          osc.stop(now + (name === "finish" ? .62 : .27));
-        } catch (_) {}
+      function stop(except=null){
+        Object.values(cache).forEach((element)=>{
+          if (element === except) return;
+          try { element.pause(); element.currentTime = 0; } catch (_) {}
+        });
       }
 
       function play(name){
-        if (!payload?.soundEnabled) return;
+        if (!canPlay()) return false;
         const element = get(name);
+        if (!element) return false;
+        stop(element);
         try {
+          element.pause();
           element.currentTime = 0;
-          const promise = element.play();
-          promise?.catch(()=>fallback(name));
-        } catch (_) { fallback(name); }
+          element.volume = volumes[name] ?? 1;
+          element.playbackRate = 1;
+          element.play()?.catch(()=>{});
+          return true;
+        } catch (_) { return false; }
       }
 
       function unlock(){
-        Object.keys(files).forEach((name)=>{ try { get(name).load(); } catch (_) {} });
-        try {
-          context ||= new (window.AudioContext || window.webkitAudioContext)();
-          context.resume?.();
-        } catch (_) {}
+        Object.keys(files).forEach((name)=>{ try { get(name)?.load(); } catch (_) {} });
       }
 
-      function stop(){
-        Object.values(cache).forEach((element)=>{try{element.pause();element.currentTime=0}catch(_){}});
-      }
+      function setEnabled(value){ enabled = value !== false; if (!enabled) stop(); }
 
       function stopNamed(name){
         const element = cache[name];
@@ -1077,16 +1072,16 @@
         });
       }
 
-      return {play,unlock,stop,stopNamed,ready};
+      return {play,unlock,stop,stopNamed,ready,setEnabled};
     })();
 
     /* نفس نغمة الثيم المستخدمة في بداية لعبة افتح الصندوق. */
     const themeIntroAudio = (()=>{
       const files = {
-        default:"sounds/theme-default.mp3?v=1",
-        "sky-clouds":"sounds/theme-sky-clouds.mp3?v=1",
-        "national-day":"sounds/theme-national-day.mp3?v=1",
-        "founding-day":"sounds/theme-founding-day.mp3?v=1"
+        default:assetUrl("sounds/theme-default.mp3?v=1"),
+        "sky-clouds":assetUrl("sounds/theme-sky-clouds.mp3?v=1"),
+        "national-day":assetUrl("sounds/theme-national-day.mp3?v=1"),
+        "founding-day":assetUrl("sounds/theme-founding-day.mp3?v=1")
       };
       let element = null;
       let currentSrc = "";
@@ -1155,6 +1150,7 @@
       attemptsLeft = payload.settings.attempts;
       attemptsHud.hidden = !payload.settings.attemptsEnabled;
       timerTrack.hidden = !payload.settings.timerEnabled;
+      audio.setEnabled(payload.soundEnabled);
       themeIntroAudio.setEnabled(payload.soundEnabled);
       updateAttempts();
     }
@@ -1295,11 +1291,11 @@
     async function enterQuestion(index){
       renderQuestion(index);
       interactionLocked = true;
-      questionContent.style.transform = "translate3d(-110%,0,0)";
-      questionContent.style.opacity = "0.16";
+      questionContent.style.transform = "translate3d(-120%,0,0)";
+      questionContent.style.opacity = "1";
       audio.play("move");
       await animateStrip([
-        {transform:"translate3d(-110%,0,0)",opacity:.16},
+        {transform:"translate3d(-120%,0,0)",opacity:1},
         {transform:"translate3d(0,0,0)",opacity:1}
       ],STRIP_MOTION_MS);
       questionContent.style.transform = "translate3d(0,0,0)";
@@ -1312,7 +1308,7 @@
       interactionLocked = true;
       await animateStrip([
         {transform:"translate3d(0,0,0)",opacity:1},
-        {transform:"translate3d(110%,0,0)",opacity:.16}
+        {transform:"translate3d(120%,0,0)",opacity:1}
       ],STRIP_MOTION_MS);
     }
 
@@ -1323,8 +1319,8 @@
       incoming.id = "questionContentNext";
       incoming.className = "question-content";
       renderQuestion(index,incoming);
-      incoming.style.transform = "translate3d(-110%,0,0)";
-      incoming.style.opacity = "0.16";
+      incoming.style.transform = "translate3d(-120%,0,0)";
+      incoming.style.opacity = "1";
       questionWindow.appendChild(incoming);
       audio.play("move");
 
@@ -1347,14 +1343,14 @@
       } else {
         const outgoingAnimation = outgoing.animate([
           {transform:"translate3d(0,0,0)",opacity:1},
-          {transform:"translate3d(110%,0,0)",opacity:.16}
+          {transform:"translate3d(120%,0,0)",opacity:1}
         ],{
           duration:STRIP_MOTION_MS,
           easing:"linear",
           fill:"forwards"
         });
         const incomingAnimation = incoming.animate([
-          {transform:"translate3d(-110%,0,0)",opacity:.16},
+          {transform:"translate3d(-120%,0,0)",opacity:1},
           {transform:"translate3d(0,0,0)",opacity:1}
         ],{
           duration:STRIP_MOTION_MS,
@@ -1782,8 +1778,8 @@
       buildConfetti();
       renderAnswerBank();
       renderQuestion(0);
-      questionContent.style.transform = "translate3d(-110%,0,0)";
-      questionContent.style.opacity = "0.16";
+      questionContent.style.transform = "translate3d(-120%,0,0)";
+      questionContent.style.opacity = "1";
       filmEdges.forEach((edge)=>{edge.style.backgroundPosition="0 50%,0 0"});
       syncVisualViewportFrame();
       collapseSafariBars();
