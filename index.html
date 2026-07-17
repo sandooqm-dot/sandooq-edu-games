@@ -10664,6 +10664,7 @@
     }
 
     #movingQuestionSetupScreen .moving-unified-color-row[hidden]{display:none !important}
+    #addMovingQuestionBtn[hidden]{display:none !important}
 
     /* إظهار جميع صفوف الإعدادات المتقدمة، ومنها لون الإجابات الموحّد. */
     #movingQuestionSetupScreen .choices-advanced-panel.is-open{
@@ -21413,6 +21414,7 @@
   const DRAFT_KEY="sandooq_moving_question_draft_v1";
   const DRAFT_DB_KEY="draft:moving-question";
   const PAGE_URL="moving-question/move.html";
+  const MAX_ENTRIES=32;
   const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
   const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
   const PALETTE=["#9d4edd","#1688d3","#f47745","#1644d7","#e3003d","#24b86b","#14933e"];
@@ -21460,7 +21462,7 @@
   function newMedia(){return {contentType:"text",text:"",imageName:"",imageData:""}}
   function newEntry(){return {id:uid(),question:newMedia(),answer:newMedia()}}
   function normalizeMedia(raw={}){return {contentType:normalizeMode(raw.contentType||raw.type),text:String(raw.text??raw.label??raw.value??""),imageName:String(raw.imageName||raw.name||""),imageData:String(raw.imageData||raw.image||raw.src||raw.data||"")}}
-  function normalizeEntries(source){return (Array.isArray(source)?source:[]).map((raw,index)=>({id:String(raw?.id||`moving-entry-${index+1}`),question:normalizeMedia(raw?.question||raw?.prompt||{}),answer:normalizeMedia(raw?.answer||raw?.response||{})})).slice(0,40)}
+  function normalizeEntries(source){return (Array.isArray(source)?source:[]).map((raw,index)=>({id:String(raw?.id||`moving-entry-${index+1}`),question:normalizeMedia(raw?.question||raw?.prompt||{}),answer:normalizeMedia(raw?.answer||raw?.response||{})})).slice(0,MAX_ENTRIES)}
 
   function saveDraft(){
     const draft=buildDraft();
@@ -21635,6 +21637,7 @@
       const fields=document.createElement("div");fields.className="match-pair-cards train-content-fields";fields.append(createSide(entry,"question","السؤال"),createSide(entry,"answer","الجواب"));
       card.append(head,fields);editor.appendChild(card);
     });
+    if(addButton)addButton.hidden=entries.length>=MAX_ENTRIES;
     syncSettings();
   }
 
@@ -21691,7 +21694,7 @@
   function open(){if(!entries.length)entries=[newEntry()];window.openEduScreen?.("movingQuestionSetupScreen");render();saveDraft()}
 
   document.querySelectorAll('[data-template="moving-question"]').forEach(button=>button.addEventListener("click",()=>{void initialRestorePromise.then(open)}));
-  addButton?.addEventListener("click",()=>{if(entries.length>=40){alert("الحد الأقصى هو 40 سؤالًا.");return}entries.push(newEntry());render();saveDraft();setTimeout(()=>editor.lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"}),0)});
+  addButton?.addEventListener("click",()=>{if(entries.length>=MAX_ENTRIES){addButton.hidden=true;return}entries.push(newEntry());render();saveDraft();setTimeout(()=>editor.lastElementChild?.scrollIntoView({behavior:"smooth",block:"center"}),0)});
   themeToggle?.addEventListener("click",()=>{if(themeList)themeList.hidden=!themeList.hidden});
   themeList?.querySelectorAll(".choices-theme-activate").forEach(button=>button.addEventListener("click",()=>{theme=normalizeTheme(button.closest("[data-moving-theme]")?.dataset.movingTheme);themeList.hidden=true;syncSettings();saveDraft()}));
   setup.querySelectorAll("[data-moving-language]").forEach(button=>button.addEventListener("click",()=>{contentLanguage=button.dataset.movingLanguage==="en"?"en":"ar";syncSettings();saveDraft()}));
