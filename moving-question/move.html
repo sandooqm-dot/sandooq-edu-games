@@ -1,14 +1,14 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: moving-question-v9-continuous-conveyor-motion -->
+  <!-- version: moving-question-v13-content-modes-draft-restore-zoom -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#eef5fb">
   <title>السؤال المتحرك - صندوق الألعاب التعليمية</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800;900&family=Tajawal:wght@600;700;800;900&family=Noto+Kufi+Arabic:wght@600;700;800;900&family=Noto+Naskh+Arabic:wght@700;800&display=swap" rel="stylesheet">
   <style>
     :root{
       --safe-top:env(safe-area-inset-top,0px);
@@ -24,6 +24,7 @@
       --question-text:#161616;
       --answer-unified:#1688d3;
       --page-font:"Cairo",Arial,sans-serif;
+      --intro-bg-final-scale:1.12;
     }
 
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -89,24 +90,44 @@
     .game-page.theme-classroom .theme-background{
       background-image:
         linear-gradient(rgba(255,255,255,.34),rgba(255,255,255,.34)),
-        url("theme-classroom-bg-v2.webp?v=2"),
+        url("../theme-classroom-bg-v2.webp?v=2"),
         linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df);
     }
 
+    .game-page.theme-classic .theme-background,
+    .game-page.theme-white .theme-background{
+      background:
+        radial-gradient(circle at 15% 16%,rgba(255,255,255,.96) 0 9%,transparent 32%),
+        radial-gradient(circle at 86% 10%,rgba(150,213,244,.38),transparent 30%),
+        linear-gradient(150deg,#f9fcff 0%,#e8f4fb 54%,#f7f2df 100%);
+    }
+
     .game-page.theme-sky-clouds .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
+      background-image:linear-gradient(rgba(255,255,255,.18),rgba(255,255,255,.18)),url("../theme-sky-clouds-bg.webp?v=45"),linear-gradient(#58c7f3,#eaf9ff);
     }
 
     .game-page.theme-forest .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
+      background-image:linear-gradient(rgba(255,255,255,.15),rgba(255,255,255,.15)),url("../theme-forest-bg.webp?v=45"),linear-gradient(#83d4f2,#b9e5b1);
     }
 
     .game-page.theme-math .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("../theme-math-bg.webp?v=45"),linear-gradient(#f5f4e7,#fff);
     }
 
     .game-page.theme-english .theme-background{
-      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+      background-image:linear-gradient(rgba(255,255,255,.12),rgba(255,255,255,.12)),url("../theme-english-bg.webp?v=46"),linear-gradient(#72d0d2,#f6ffff);
+    }
+
+    .game-page.theme-flowers .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.14),rgba(255,255,255,.14)),url("../theme-flowers-bg.webp?v=48"),linear-gradient(#fff7fb,#f7fff4);
+    }
+
+    .game-page.theme-national-day .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("../theme-national-day-v2-bg.webp?v=53"),linear-gradient(#effff8,#e9fff5);
+    }
+
+    .game-page.theme-founding-day .theme-background{
+      background-image:linear-gradient(rgba(255,255,255,.1),rgba(255,255,255,.1)),url("../theme-founding-day-bg.webp?v=1"),linear-gradient(#f8efe1,#fffaf3);
     }
 
     .game-logo{
@@ -224,7 +245,7 @@
       background:
         repeating-linear-gradient(90deg,
           transparent 0 var(--film-mark-start),
-          rgba(102,107,114,.55) var(--film-mark-start) var(--film-mark-end),
+          var(--question-frame) var(--film-mark-start) var(--film-mark-end),
           transparent var(--film-mark-end) var(--film-period)
         ),
         linear-gradient(180deg,rgba(250,250,250,.98),rgba(231,233,236,.98));
@@ -242,9 +263,9 @@
       min-width:0;
       min-height:0;
       overflow:hidden;
-      background:linear-gradient(115deg,rgba(255,255,255,.66),rgba(232,241,248,.48));
-      backdrop-filter:blur(12px) saturate(1.08);
-      -webkit-backdrop-filter:blur(12px) saturate(1.08);
+      background:linear-gradient(115deg,rgba(255,255,255,.46),rgba(232,241,248,.3));
+      backdrop-filter:blur(4px) saturate(1.03);
+      -webkit-backdrop-filter:blur(4px) saturate(1.03);
       isolation:isolate;
     }
 
@@ -366,6 +387,7 @@
 
     .answer-text{
       min-width:0;
+      max-width:100%;
       flex:1 1 auto;
       text-align:center;
       font-size:clamp(25px,3.1vw,48px);
@@ -386,7 +408,7 @@
       height:calc(100% - 2px);
       object-fit:contain;
       border-radius:10px;
-      background:rgba(255,255,255,.92);
+      background:transparent;
     }
 
     .answer-card.has-image:not(.has-text) .answer-image{width:100%;height:100%;background:transparent}
@@ -734,7 +756,6 @@
 
     <nav class="fixed-controls" aria-label="أدوات اللعبة">
       <button class="control-btn back-btn" id="backBtn" type="button">رجوع</button>
-      <button class="control-btn finish-btn" id="finishBtn" type="button">إنهاء</button>
     </nav>
 
     <section class="activity-overlay start-gate is-visible" id="startGate" aria-hidden="false">
@@ -816,7 +837,6 @@
     const restartBtn = document.getElementById("restartBtn");
     const homeBtn = document.getElementById("homeBtn");
     const backBtn = document.getElementById("backBtn");
-    const finishBtn = document.getElementById("finishBtn");
     const attemptsHud = document.getElementById("attemptsHud");
     const attemptsText = document.getElementById("attemptsText");
     const timerTrack = document.getElementById("timerTrack");
@@ -895,6 +915,8 @@
     let introFrameId = null;
     let finishSequenceToken = 0;
     let finishSequenceTimers = [];
+    let answerTextFitFrame = null;
+    let answerFontsReadyHandled = false;
 
     const wait = (ms)=>new Promise((resolve)=>setTimeout(resolve,ms));
     const reducedMotion = ()=>window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
@@ -906,14 +928,31 @@
 
     function normalizeTheme(value){
       const theme = safeText(value).toLowerCase().replace(/^theme-/,"");
-      return ["classroom","white","sky-clouds","forest","math","english"].includes(theme) ? theme : "classroom";
+      return ["classic","classroom","white","sky-clouds","forest","math","english","flowers","national-day","founding-day"].includes(theme) ? theme : "classic";
+    }
+
+    function normalizeFont(value){
+      const font = safeText(value).toLowerCase();
+      return ["cairo","tajawal","noto-kufi","noto-naskh"].includes(font) ? font : "noto-naskh";
+    }
+
+    function normalizeContentMode(value,item={}){
+      const mode=safeText(value).toLowerCase();
+      if (["images","image","picture"].includes(mode)) return "images";
+      if (["mixed","text-image","text+image"].includes(mode)) return "mixed";
+      if (["text","texts"].includes(mode)) return "text";
+      const text=safeText(item?.text || item?.label || item?.value);
+      const image=item?.imageData || item?.image || item?.src || "";
+      return text&&image?"mixed":image?"images":"text";
     }
 
     function normalizeAnswer(item,index){
-      const imageData = item?.imageData || item?.image || item?.src || "";
-      const text = safeText(item?.text || item?.label || item?.value);
+      const contentType=normalizeContentMode(item?.contentType || item?.type,item);
+      const imageData = contentType==="text" ? "" : (item?.imageData || item?.image || item?.src || "");
+      const text = contentType==="images" ? "" : safeText(item?.text || item?.label || item?.value);
       return {
         id:safeText(item?.id || item?.answerId || `answer-${index + 1}`),
+        contentType,
         text,
         imageData,
         color:normalizeHex(item?.color,PALETTE[index % PALETTE.length])
@@ -921,10 +960,17 @@
     }
 
     function normalizeQuestion(item,index){
+      const prompt = item?.prompt && typeof item.prompt === "object"
+        ? item.prompt
+        : (item?.questionContent && typeof item.questionContent === "object" ? item.questionContent : null);
+      const legacyQuestionText = typeof item?.question === "string" ? item.question : "";
+      const source=prompt || item || {};
+      const contentType=normalizeContentMode(prompt?.contentType || item?.contentType || item?.type,source);
       return {
         id:safeText(item?.id || `question-${index + 1}`),
-        text:safeText(item?.text || item?.questionText || item?.question),
-        imageData:item?.imageData || item?.questionImageData || item?.image || "",
+        contentType,
+        text:contentType==="images" ? "" : safeText(prompt?.text ?? item?.questionText ?? item?.text ?? legacyQuestionText),
+        imageData:contentType==="text" ? "" : (prompt?.imageData || prompt?.image || item?.questionImageData || item?.imageData || item?.image || ""),
         answerId:safeText(item?.answerId || item?.correctAnswerId || item?.correctId)
       };
     }
@@ -947,6 +993,7 @@
         theme:normalizeTheme(source?.theme),
         contentLanguage:(source?.contentLanguage || source?.language) === "ar" ? "ar" : "en",
         soundEnabled:source?.soundEnabled !== false && source?.soundsEnabled !== false,
+        fontFamily:normalizeFont(source?.fontFamily || source?.font),
         settings:{
           deleteCorrectAnswer:settings.deleteCorrectAnswer !== false,
           attemptsEnabled:Boolean(settings.attemptsEnabled),
@@ -1208,14 +1255,71 @@
       return {preload,play,stop,setEnabled};
     })();
 
+    function cssAsset(path){
+      return `url("${assetUrl(path).replace(/"/g,"%22")}")`;
+    }
+
+    function applyTheme(themeId){
+      const currentTheme = normalizeTheme(themeId);
+      page.className = `game-page theme-${currentTheme}`;
+      page.style.backgroundColor = currentTheme === "classic" || currentTheme === "white" ? "#fff" : "#f7fbff";
+      if (!themeBackground) return;
+
+      themeBackground.style.opacity = currentTheme === "classic" || currentTheme === "white" ? "0" : "1";
+      themeBackground.style.backgroundColor = "#fff";
+      themeBackground.style.backgroundImage = "none";
+      themeBackground.style.backgroundSize = "cover";
+      themeBackground.style.backgroundPosition = "center";
+      themeBackground.style.backgroundRepeat = "no-repeat";
+
+      const themes = {
+        classroom:{
+          color:"#fff",
+          layers:[
+            cssAsset("theme-classroom-bg-v2.webp?v=2"),
+            cssAsset("theme-original-bg.webp?v=45"),
+            cssAsset("theme-original-bg.png?v=45"),
+            "linear-gradient(150deg,#f9fcff,#e8f4fb 60%,#f7f2df)"
+          ]
+        },
+        "sky-clouds":{
+          color:"#58c7f3",
+          layers:[
+            cssAsset("theme-sky-clouds-bg.webp?v=45"),
+            cssAsset("theme-sky-clouds-bg.png?v=45"),
+            cssAsset("theme-sky-clouds.webp?v=45"),
+            cssAsset("theme-sky-clouds.png?v=45"),
+            "linear-gradient(180deg,#58c7f3 0%,#eaf9ff 100%)"
+          ]
+        },
+        forest:{color:"#6ec9ee",layers:[cssAsset("theme-forest-bg.webp?v=45"),"linear-gradient(180deg,#7bd2f3 0%,#7eb64b 100%)"]},
+        math:{color:"#f5f4e7",layers:[cssAsset("theme-math-bg.webp?v=45"),"linear-gradient(180deg,#f5f4e7 0%,#dfe7ef 100%)"]},
+        english:{color:"#72d0d2",layers:[cssAsset("theme-english-bg.webp?v=46"),"linear-gradient(180deg,#72d0d2 0%,#72d0d2 100%)"]},
+        flowers:{color:"#f8edf3",layers:[cssAsset("theme-flowers-bg.webp?v=48"),"linear-gradient(180deg,#f8edf3 0%,#f3dce7 100%)"]},
+        "national-day":{color:"#165f55",layers:[cssAsset("theme-national-day-v2-bg.webp?v=53"),"linear-gradient(180deg,#165f55 0%,#0f4f46 100%)"]},
+        "founding-day":{color:"#d7c9b1",layers:[cssAsset("theme-founding-day-bg.webp?v=1"),"linear-gradient(180deg,#d9ccb5 0%,#c9baa2 100%)"]}
+      };
+      const selected = themes[currentTheme];
+      if (!selected) return;
+      themeBackground.style.backgroundColor = selected.color;
+      themeBackground.style.backgroundImage = selected.layers.join(", ");
+    }
+
     function applyPayload(){
       answers = payload.answers.map((item)=>({...item}));
       questions = payload.questions.map((item)=>({...item}));
-      page.className = `game-page theme-${payload.theme}`;
+      applyTheme(payload.theme);
       page.dataset.language = payload.contentLanguage;
       document.documentElement.lang = payload.contentLanguage;
       document.documentElement.dir = "rtl";
       document.title = `${payload.gameName} - صندوق الألعاب التعليمية`;
+      const fontMap = {
+        cairo:'"Cairo",Arial,sans-serif',
+        tajawal:'"Tajawal",Arial,sans-serif',
+        "noto-kufi":'"Noto Kufi Arabic",Arial,sans-serif',
+        "noto-naskh":'"Noto Naskh Arabic","Traditional Arabic",serif'
+      };
+      document.documentElement.style.setProperty("--page-font",fontMap[payload.fontFamily] || fontMap["noto-naskh"]);
       document.documentElement.style.setProperty("--question-frame",payload.appearance.stripBorderColor);
       document.documentElement.style.setProperty("--question-text",payload.appearance.textColor);
       document.documentElement.style.setProperty("--answer-unified",payload.appearance.answerColor);
@@ -1267,11 +1371,92 @@
       return button;
     }
 
+    function measureAnswerLabel(label,fontSize){
+      const computed = getComputedStyle(label);
+      const probe = document.createElement("span");
+      probe.textContent = label.textContent || "";
+      probe.dir = label.dir || "auto";
+      probe.style.position = "fixed";
+      probe.style.insetInlineStart = "-100000px";
+      probe.style.top = "-100000px";
+      probe.style.display = "inline-block";
+      probe.style.width = "max-content";
+      probe.style.maxWidth = "none";
+      probe.style.minWidth = "0";
+      probe.style.padding = "0";
+      probe.style.margin = "0";
+      probe.style.border = "0";
+      probe.style.whiteSpace = "nowrap";
+      probe.style.visibility = "hidden";
+      probe.style.pointerEvents = "none";
+      probe.style.fontFamily = computed.fontFamily;
+      probe.style.fontWeight = computed.fontWeight;
+      probe.style.fontStyle = computed.fontStyle;
+      probe.style.fontVariant = computed.fontVariant;
+      probe.style.fontStretch = computed.fontStretch;
+      probe.style.letterSpacing = computed.letterSpacing;
+      probe.style.textTransform = computed.textTransform;
+      probe.style.fontSize = `${fontSize}px`;
+      probe.style.lineHeight = computed.lineHeight;
+      document.body.appendChild(probe);
+      const width = probe.getBoundingClientRect().width;
+      probe.remove();
+      return width;
+    }
+
+    function fitAnswerLabel(label){
+      if (!label?.isConnected) return;
+      label.style.removeProperty("font-size");
+
+      const availableWidth = label.getBoundingClientRect().width;
+      if (availableWidth <= 1) return;
+
+      const computed = getComputedStyle(label);
+      const originalSize = Number.parseFloat(computed.fontSize) || 48;
+      const requiredWidth = measureAnswerLabel(label,originalSize);
+      if (!requiredWidth || requiredWidth <= availableWidth - 2) return;
+
+      const minimumSize = 6;
+      let fittedSize = Math.max(
+        minimumSize,
+        Math.min(originalSize,originalSize * ((availableWidth - 2) / requiredWidth))
+      );
+
+      /* هامش صغير يمنع Safari من قص آخر حرف بسبب فروقات الكسور. */
+      fittedSize = Math.max(minimumSize,fittedSize - 0.35);
+      label.style.fontSize = `${fittedSize.toFixed(2)}px`;
+
+      let fittedWidth = measureAnswerLabel(label,fittedSize);
+      while (fittedWidth > availableWidth - 2 && fittedSize > minimumSize) {
+        fittedSize = Math.max(minimumSize,fittedSize - 0.4);
+        label.style.fontSize = `${fittedSize.toFixed(2)}px`;
+        fittedWidth = measureAnswerLabel(label,fittedSize);
+      }
+    }
+
+    function fitAllAnswerLabels(){
+      if (answerTextFitFrame) cancelAnimationFrame(answerTextFitFrame);
+      answerTextFitFrame = requestAnimationFrame(()=>{
+        answerTextFitFrame = requestAnimationFrame(()=>{
+          answerTextFitFrame = null;
+          answerBank.querySelectorAll(".answer-text").forEach(fitAnswerLabel);
+        });
+      });
+
+      if (!answerFontsReadyHandled && document.fonts?.ready) {
+        answerFontsReadyHandled = true;
+        document.fonts.ready.then(()=>{
+          fitAllAnswerLabels();
+        }).catch(()=>{});
+      }
+    }
+
     function renderAnswerBank(){
       answerBank.textContent = "";
       const visible = answers.filter((answer)=>!hiddenAnswers.has(answer.id));
       visible.forEach((answer,index)=>answerBank.appendChild(createAnswerCard(answer,index)));
       answerBank.dataset.answerCount = String(visible.length);
+      fitAllAnswerLabels();
     }
 
     function renderQuestion(index,target = questionContent){
@@ -1577,6 +1762,7 @@
         viewportLayoutFrame = requestAnimationFrame(()=>{
           viewportLayoutFrame = null;
           syncVisualViewportFrame();
+          fitAllAnswerLabels();
         });
       };
 
@@ -1684,7 +1870,7 @@
       const zoomMs = 7600;
       const settlePauseMs = 280;
       const startScale = 1;
-      const endScale = 1.18;
+      const endScale = Number(getComputedStyle(page).getPropertyValue("--intro-bg-final-scale")) || 1.12;
       let startTime = null;
 
       const setFrame = (scale)=>{
@@ -1802,7 +1988,6 @@
     restartBtn.addEventListener("click",restartGame);
     homeBtn.addEventListener("click",goHome);
     backBtn.addEventListener("click",goBack);
-    finishBtn.addEventListener("click",()=>showFinish(false));
     window.addEventListener("resize",()=>scheduleResponsiveLayout(40),{passive:true});
     window.addEventListener("orientationchange",()=>{
       window.setTimeout(()=>{
