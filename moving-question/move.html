@@ -350,6 +350,23 @@
       direction:rtl;
     }
 
+    /*
+      عند زيادة بنك الإجابات تُحسب أبعاد الشبكة من المساحة الحقيقية أسفل
+      الشريط. هذه القيم يضبطها JavaScript بعد استقرار أبعاد الشاشة، وبذلك
+      لا يتمدد أي صف إلى داخل الشريط المتحرك أو أسفل مساحة اللعب.
+    */
+    .answer-bank.is-adaptive-layout{
+      width:var(--answer-bank-width,min(96%,1420px));
+      height:100%;
+      display:grid;
+      grid-template-columns:repeat(var(--answer-columns,1),var(--answer-card-width,240px));
+      grid-auto-rows:var(--answer-card-height,80px);
+      align-content:center;
+      align-items:stretch;
+      justify-content:center;
+      gap:var(--answer-gap,12px);
+    }
+
     .game-page[data-language="en"] .answer-bank{direction:ltr}
 
     .answer-card{
@@ -372,6 +389,21 @@
       transition:filter .16s ease,transform .16s ease;
       touch-action:manipulation;
       will-change:transform,opacity;
+    }
+
+    .answer-bank.is-adaptive-layout .answer-card{
+      width:100%;
+      min-width:0;
+      max-width:100%;
+      height:100%;
+      min-height:0;
+      flex:none;
+      padding:
+        clamp(3px,calc(var(--answer-card-height,80px) * .075),11px)
+        clamp(6px,calc(var(--answer-card-width,240px) * .055),22px);
+      gap:clamp(4px,calc(var(--answer-card-width,240px) * .045),20px);
+      border-width:clamp(2px,calc(var(--answer-card-height,80px) * .045),5px);
+      border-radius:clamp(9px,calc(var(--answer-card-height,80px) * .18),20px);
     }
 
     .answer-card:hover{filter:brightness(1.07);transform:translateY(-2px)}
@@ -412,6 +444,11 @@
     }
 
     .answer-card.has-image:not(.has-text) .answer-image{width:100%;height:100%;background:transparent}
+
+    .answer-bank.is-adaptive-layout .answer-image{
+      width:min(38%,calc(var(--answer-card-height,80px) * .78));
+      max-height:100%;
+    }
 
     .answer-card.has-visible-mark{
       z-index:24;
@@ -1434,11 +1471,89 @@
       }
     }
 
+    function calculateAnswerLayout(count,availableWidth,availableHeight){
+      const maxColumns = Math.min(
+        count,
+        10,
+        Math.max(1,Math.floor((availableWidth + 6) / 82))
+      );
+      const gap = Math.max(
+        5,
+        Math.min(18,Math.min(availableWidth,availableHeight) * .04)
+      );
+      let best = null;
+
+      for (let columns = 1; columns <= maxColumns; columns += 1) {
+        const rows = Math.ceil(count / columns);
+        const cellWidth = (availableWidth - gap * (columns - 1)) / columns;
+        const cellHeight = (availableHeight - gap * (rows - 1)) / rows;
+        if (cellWidth < 52 || cellHeight < 28) continue;
+
+        const cardWidth = Math.min(280,cellWidth);
+        const cardHeight = Math.min(112,cellHeight);
+        const fillRatio = count / (columns * rows);
+        const readability = Math.min(cardWidth / 190,cardHeight / 58);
+        const aspectRatio = cardWidth / Math.max(1,cardHeight);
+        const aspectPenalty = Math.min(.22,Math.abs(Math.log(aspectRatio / 2.8)) * .10);
+        const score = readability * (.82 + .18 * fillRatio) * (1 - aspectPenalty);
+
+        if (!best || score > best.score) {
+          best = {columns,rows,gap,cardWidth,cardHeight,score};
+        }
+      }
+
+      if (best) return best;
+
+      /* حالة نادرة جدًا عند شاشة صغيرة وعدد ضخم: نضمن البقاء داخل المساحة. */
+      const columns = Math.max(1,maxColumns);
+      const rows = Math.ceil(count / columns);
+      return {
+        columns,
+        rows,
+        gap:4,
+        cardWidth:Math.max(36,(availableWidth - 4 * (columns - 1)) / columns),
+        cardHeight:Math.max(22,(availableHeight - 4 * (rows - 1)) / rows),
+        score:0
+      };
+    }
+
+    function fitAnswerBankLayout(){
+      if (!answerBank?.isConnected) return;
+      const cards = Array.from(answerBank.querySelectorAll(".answer-card"));
+      if (!cards.length) {
+        answerBank.classList.remove("is-adaptive-layout");
+        return;
+      }
+
+      const zone = answerBank.closest(".answers-zone");
+      if (!zone) return;
+      const zoneStyle = getComputedStyle(zone);
+      const horizontalPadding =
+        (Number.parseFloat(zoneStyle.paddingLeft) || 0) +
+        (Number.parseFloat(zoneStyle.paddingRight) || 0);
+      const availableWidth = Math.max(
+        120,
+        Math.min(1420,zone.clientWidth - horizontalPadding - 2)
+      );
+      const availableHeight = Math.max(28,zone.clientHeight - 2);
+      const layout = calculateAnswerLayout(cards.length,availableWidth,availableHeight);
+
+      answerBank.classList.add("is-adaptive-layout");
+      answerBank.style.setProperty("--answer-bank-width",`${availableWidth.toFixed(2)}px`);
+      answerBank.style.setProperty("--answer-columns",String(layout.columns));
+      answerBank.style.setProperty("--answer-card-width",`${layout.cardWidth.toFixed(2)}px`);
+      answerBank.style.setProperty("--answer-card-height",`${layout.cardHeight.toFixed(2)}px`);
+      answerBank.style.setProperty("--answer-gap",`${layout.gap.toFixed(2)}px`);
+      answerBank.dataset.answerRows = String(layout.rows);
+      answerBank.dataset.answerColumns = String(layout.columns);
+    }
+
     function fitAllAnswerLabels(){
       if (answerTextFitFrame) cancelAnimationFrame(answerTextFitFrame);
       answerTextFitFrame = requestAnimationFrame(()=>{
         answerTextFitFrame = requestAnimationFrame(()=>{
           answerTextFitFrame = null;
+          fitAnswerBankLayout();
           answerBank.querySelectorAll(".answer-text").forEach(fitAnswerLabel);
         });
       });
