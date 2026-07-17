@@ -1526,16 +1526,56 @@
       };
     }
 
+    function resetAdaptiveAnswerLayout(){
+      answerBank.classList.remove("is-adaptive-layout");
+      [
+        "--answer-bank-width",
+        "--answer-columns",
+        "--answer-card-width",
+        "--answer-card-height",
+        "--answer-gap"
+      ].forEach((property)=>answerBank.style.removeProperty(property));
+      delete answerBank.dataset.answerRows;
+      delete answerBank.dataset.answerColumns;
+      delete answerBank.dataset.answerLayout;
+    }
+
+    function naturalAnswerLayoutFits(cards,zone){
+      const zoneRect = zone.getBoundingClientRect();
+      const tolerance = 1;
+      return cards.every((card)=>{
+        const rect = card.getBoundingClientRect();
+        return (
+          rect.left >= zoneRect.left - tolerance &&
+          rect.right <= zoneRect.right + tolerance &&
+          rect.top >= zoneRect.top - tolerance &&
+          rect.bottom <= zoneRect.bottom + tolerance
+        );
+      });
+    }
+
     function fitAnswerBankLayout(){
       if (!answerBank?.isConnected) return;
       const cards = Array.from(answerBank.querySelectorAll(".answer-card"));
       if (!cards.length) {
-        answerBank.classList.remove("is-adaptive-layout");
+        resetAdaptiveAnswerLayout();
         return;
       }
 
       const zone = answerBank.closest(".answers-zone");
       if (!zone) return;
+
+      /*
+        المقاس الأساسي هو المقاس الأصلي للبطاقات ولا نسمح للتخطيط
+        التكيفي بتكبيره عند قلة الإجابات. لا ننتقل إلى الشبكة المحسوبة
+        إلا عندما تتجاوز البطاقات فعلًا المساحة المتاحة أسفل الشريط.
+      */
+      resetAdaptiveAnswerLayout();
+      if (naturalAnswerLayoutFits(cards,zone)) {
+        answerBank.dataset.answerLayout = "base";
+        return;
+      }
+
       const zoneStyle = getComputedStyle(zone);
       const horizontalPadding =
         (Number.parseFloat(zoneStyle.paddingLeft) || 0) +
@@ -1548,6 +1588,7 @@
       const layout = calculateAnswerLayout(cards.length,availableWidth,availableHeight);
 
       answerBank.classList.add("is-adaptive-layout");
+      answerBank.dataset.answerLayout = "adaptive";
       answerBank.style.setProperty("--answer-bank-width",`${availableWidth.toFixed(2)}px`);
       answerBank.style.setProperty("--answer-columns",String(layout.columns));
       answerBank.style.setProperty("--answer-card-width",`${layout.cardWidth.toFixed(2)}px`);
