@@ -963,6 +963,15 @@
     const getParam = (name)=>new URLSearchParams(location.search).get(name) || "";
     const assetUrl = (path)=>new URL(`../${String(path || "").replace(/^\/+/,"")}`,document.baseURI).href;
 
+    function shuffledCopy(items){
+      const shuffled = items.slice();
+      for (let index = shuffled.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffled[index],shuffled[randomIndex]] = [shuffled[randomIndex],shuffled[index]];
+      }
+      return shuffled;
+    }
+
     function normalizeTheme(value){
       const theme = safeText(value).toLowerCase().replace(/^theme-/,"");
       return ["classic","classroom","white","sky-clouds","forest","math","english","flowers","national-day","founding-day"].includes(theme) ? theme : "classic";
@@ -1343,7 +1352,7 @@
     }
 
     function applyPayload(){
-      answers = payload.answers.map((item)=>({...item}));
+      answers = shuffledCopy(payload.answers.map((item)=>({...item})));
       questions = payload.questions.map((item)=>({...item}));
       applyTheme(payload.theme);
       page.dataset.language = payload.contentLanguage;
