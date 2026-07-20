@@ -40,12 +40,16 @@ export async function onRequest(context) {
     return redirectToProductPage();
   }
 
+  if (isPremiumRoute(url.pathname) && access.plan !== "comprehensive") {
+    return redirectToUpgradePage(url, access.cookiesToSet);
+  }
+
   if (access.redirectCleanUrl) {
     return redirectToCleanUrl(url, access.cookiesToSet);
   }
 
   const response = await next();
-  return addProtectionHeaders(response, access.cookiesToSet);
+  return addProtectionHeaders(response, access.cookiesToSet, access.plan, request.method);
 }
 
 function shouldProtect(request, pathname) {
@@ -95,10 +99,12 @@ async function verifyEducationAccess(request, currentUrl) {
     return { allowed: false, cookiesToSet: [], redirectCleanUrl: false };
   }
 
-  const allowedByAccessEndpoint = await verifyViaGameAccessEndpoint(token);
-  const allowed = allowedByAccessEndpoint || await verifyViaAccountEndpoint(token);
+  const accessEndpointResult = await verifyViaGameAccessEndpoint(token);
+  const verifiedAccess = accessEndpointResult.allowed
+    ? accessEndpointResult
+    : await verifyViaAccountEndpoint(token);
 
-  if (!allowed) {
+  if (!verifiedAccess.allowed) {
     return { allowed: false, cookiesToSet: [], redirectCleanUrl: false };
   }
 
@@ -114,6 +120,7 @@ async function verifyEducationAccess(request, currentUrl) {
 
   return {
     allowed: true,
+    plan: normalizeEducationPlan(verifiedAccess.plan),
     cookiesToSet,
     redirectCleanUrl: hasAccessQuery(currentUrl)
   };
@@ -141,9 +148,12 @@ async function verifyViaGameAccessEndpoint(token) {
       data = await response.json();
     } catch (_) {}
 
-    return response.ok && isAllowedAccessResponse(data);
+    return {
+      allowed: response.ok && isAllowedAccessResponse(data),
+      plan: readEducationPlan(data)
+    };
   } catch (_) {
-    return false;
+    return { allowed: false, plan: "basic" };
   }
 }
 
@@ -163,11 +173,52 @@ async function verifyViaAccountEndpoint(token) {
       data = await response.json();
     } catch (_) {}
 
-    if (!response.ok || !data || data.ok === false) return false;
-    return extractOwnedGameIds(data).has(GAME_ID);
+    if (!response.ok || !data || data.ok === false) {
+      return { allowed: false, plan: "basic" };
+    }
+
+    const educationGame = findOwnedEducationGame(data);
+    return {
+      allowed: Boolean(educationGame),
+      plan: readEducationPlan(educationGame || data)
+    };
   } catch (_) {
-    return false;
+    return { allowed: false, plan: "basic" };
   }
+}
+
+function normalizeEducationPlan(value) {
+  const plan = String(value || "").trim().toLowerCase();
+  return ["comprehensive", "الشامل", "full", "premium"].includes(plan)
+    ? "comprehensive"
+    : "basic";
+}
+
+function readEducationPlan(data) {
+  if (!data || typeof data !== "object") return "basic";
+
+  const candidates = [
+    data.access_plan,
+    data.accessPlan,
+    data.education_plan,
+    data.educationPlan,
+    data.package,
+    data.plan,
+    data?.game?.access_plan,
+    data?.game?.accessPlan,
+    data?.game?.package,
+    data?.game?.plan,
+    data?.access?.access_plan,
+    data?.access?.package
+  ];
+
+  for (const candidate of candidates) {
+    if (normalizeEducationPlan(candidate) === "comprehensive") {
+      return "comprehensive";
+    }
+  }
+
+  return "basic";
 }
 
 function isAllowedAccessResponse(data) {
@@ -233,6 +284,45 @@ function extractOwnedGameIds(data) {
   }
 
   return ids;
+}
+
+function findOwnedEducationGame(data) {
+  const collections = [];
+
+  function addCollection(value) {
+    if (Array.isArray(value)) collections.push(value);
+  }
+
+  if (!data || typeof data !== "object") return null;
+
+  addCollection(data.games);
+  addCollection(data.owned_games);
+  addCollection(data.ownedGames);
+  addCollection(data.entitlements);
+  addCollection(data.products);
+  addCollection(data.library);
+
+  if (data.customer && typeof data.customer === "object") {
+    addCollection(data.customer.games);
+    addCollection(data.customer.owned_games);
+    addCollection(data.customer.ownedGames);
+    addCollection(data.customer.entitlements);
+    addCollection(data.customer.products);
+    addCollection(data.customer.library);
+  }
+
+  for (const list of collections) {
+    for (const item of list) {
+      if (typeof item === "string" && normalizeGameId(item) === GAME_ID) {
+        return { id: GAME_ID };
+      }
+      if (!item || typeof item !== "object") continue;
+      const ids = [item.id, item.slug, item.game_id, item.gameId, item.key];
+      if (ids.some(value => normalizeGameId(value) === GAME_ID)) return item;
+    }
+  }
+
+  return null;
 }
 
 function normalizeGameId(value) {
@@ -322,7 +412,42 @@ function redirectToProductPage() {
   });
 }
 
-function addProtectionHeaders(response, cookiesToSet = []) {
+function isPremiumRoute(pathname) {
+  const path = String(pathname || "/").toLowerCase().replace(/\/+$/, "") || "/";
+  return (
+    path === "/fill" ||
+    path === "/fill.html" ||
+    path === "/train" ||
+    path.startsWith("/train/") ||
+    path === "/moving-question" ||
+    path.startsWith("/moving-question/") ||
+    path === "/classify-words" ||
+    path.startsWith("/classify-words/") ||
+    path === "/image-pins" ||
+    path.startsWith("/image-pins/")
+  );
+}
+
+function redirectToUpgradePage(currentUrl, cookiesToSet = []) {
+  const target = new URL(currentUrl.origin);
+  target.pathname = "/";
+  target.searchParams.set("upgrade", "required");
+
+  const headers = createNoStoreHeaders();
+  headers.set("Location", target.toString());
+  headers.set("Referrer-Policy", "no-referrer");
+
+  for (const cookie of cookiesToSet) {
+    headers.append("Set-Cookie", cookie);
+  }
+
+  return new Response(null, {
+    status: 302,
+    headers
+  });
+}
+
+async function addProtectionHeaders(response, cookiesToSet = [], plan = "basic", requestMethod = "GET") {
   const headers = new Headers(response.headers);
 
   headers.set("Cache-Control", "private, no-store, no-cache, must-revalidate");
@@ -335,6 +460,28 @@ function addProtectionHeaders(response, cookiesToSet = []) {
 
   for (const cookie of cookiesToSet) {
     headers.append("Set-Cookie", cookie);
+  }
+
+  const contentType = String(headers.get("Content-Type") || "").toLowerCase();
+  const canInjectPlan =
+    String(requestMethod || "GET").toUpperCase() === "GET" &&
+    contentType.includes("text/html") &&
+    response.status >= 200 &&
+    response.status < 300;
+
+  if (canInjectPlan) {
+    const planScript = `<script>window.__SANDOOQ_EDUCATION_PLAN__=${JSON.stringify(normalizeEducationPlan(plan))};</script>`;
+    const html = await response.text();
+    const protectedHtml = /<\/head\s*>/i.test(html)
+      ? html.replace(/<\/head\s*>/i, `${planScript}</head>`)
+      : `${planScript}${html}`;
+    headers.delete("Content-Length");
+
+    return new Response(protectedHtml, {
+      status: response.status,
+      statusText: response.statusText,
+      headers
+    });
   }
 
   return new Response(response.body, {
