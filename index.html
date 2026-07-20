@@ -350,6 +350,139 @@
       font-weight:700;
     }
 
+    .education-upgrade-banner{
+      margin:0 0 clamp(18px,2.4vw,28px);
+      border:4px solid #17213b;
+      border-radius:24px;
+      background:linear-gradient(135deg,#102f80,#245ec9);
+      color:#fff;
+      padding:clamp(15px,2.2vw,24px);
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap:16px;
+      box-shadow:0 6px 0 rgba(17,17,17,.16),inset 0 0 0 2px rgba(255,215,92,.5);
+    }
+    .education-upgrade-banner[hidden]{display:none!important}
+    .education-upgrade-copy{display:grid;gap:5px;text-align:right}
+    .education-upgrade-copy strong{font-size:clamp(20px,2.5vw,31px);line-height:1.25}
+    .education-upgrade-copy span{font-size:clamp(14px,1.7vw,20px);font-weight:750;line-height:1.6;color:#edf4ff}
+    .education-upgrade-link{
+      min-width:max-content;
+      border:3px solid #111;
+      border-radius:16px;
+      background:#f4cf43;
+      color:#111;
+      padding:11px 16px;
+      text-decoration:none;
+      font-size:clamp(15px,1.7vw,20px);
+      font-weight:950;
+      box-shadow:0 4px 0 rgba(0,0,0,.2);
+    }
+
+    .template-card.is-plan-locked{
+      position:relative;
+      overflow:hidden;
+      cursor:pointer;
+      border-color:#1b3477;
+      box-shadow:0 6px 0 rgba(22,47,112,.2);
+    }
+    .template-card.is-plan-locked .template-cover,
+    .template-card.is-plan-locked .template-content{
+      filter:saturate(.72) brightness(.82);
+    }
+    .education-template-lock{
+      position:absolute;
+      inset:0;
+      z-index:5;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:9px;
+      padding:12px;
+      background:linear-gradient(135deg,rgba(13,35,91,.32),rgba(13,35,91,.12));
+      color:#fff;
+      font-size:clamp(15px,2vw,24px);
+      font-weight:950;
+      text-shadow:0 2px 5px rgba(0,0,0,.9);
+      pointer-events:none;
+    }
+    .education-template-lock-icon{
+      width:42px;
+      height:42px;
+      border:2px solid #111;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      background:#f4cf43;
+      color:#111;
+      text-shadow:none;
+      box-shadow:0 3px 0 rgba(0,0,0,.2);
+    }
+
+    .education-upgrade-modal{
+      position:fixed;
+      inset:0;
+      z-index:10050;
+      display:none;
+      place-items:center;
+      padding:18px;
+      background:rgba(5,12,28,.72);
+      backdrop-filter:blur(5px);
+    }
+    .education-upgrade-modal.is-open{display:grid}
+    .education-upgrade-dialog{
+      width:min(520px,100%);
+      border:5px solid #17213b;
+      border-radius:28px;
+      background:#fff;
+      padding:clamp(22px,4vw,34px);
+      text-align:center;
+      box-shadow:0 14px 0 rgba(0,0,0,.22);
+      display:grid;
+      gap:16px;
+    }
+    .education-upgrade-dialog-icon{
+      width:74px;
+      height:74px;
+      margin:auto;
+      border:4px solid #111;
+      border-radius:50%;
+      background:#f4cf43;
+      display:grid;
+      place-items:center;
+      font-size:36px;
+    }
+    .education-upgrade-dialog h3{margin:0;font-size:clamp(25px,4vw,36px);line-height:1.25}
+    .education-upgrade-dialog p{margin:0;color:#3f4656;font-size:clamp(16px,2.4vw,21px);font-weight:750;line-height:1.8}
+    .education-upgrade-actions{display:grid;gap:10px;margin-top:4px}
+    .education-upgrade-buy,
+    .education-upgrade-close{
+      min-height:52px;
+      border:3px solid #111;
+      border-radius:15px;
+      font-size:17px;
+      font-weight:950;
+      cursor:pointer;
+    }
+    .education-upgrade-buy{
+      display:grid;
+      place-items:center;
+      background:#f4cf43;
+      color:#111;
+      text-decoration:none;
+      box-shadow:0 4px 0 rgba(0,0,0,.18);
+    }
+    .education-upgrade-close{background:#eef2f8;color:#252b38}
+
+    @media (max-width:760px){
+      .education-upgrade-banner{grid-template-columns:1fr;text-align:center}
+      .education-upgrade-copy{text-align:center}
+      .education-upgrade-link{width:100%;min-width:0}
+      .education-template-lock{flex-direction:column;gap:5px}
+      .education-template-lock-icon{width:36px;height:36px}
+    }
+
     /* Tablet */
     @media (max-width: 1100px){
       .decor.flower{ top:255px; left:7%; width:56px; }
@@ -10030,6 +10163,14 @@
       align-items:center;
     }
 
+    .sg-saved-card.is-plan-locked{
+      border-color:#d29b13;
+      background:linear-gradient(135deg,#fffaf0 0%,#fff 72%);
+    }
+    .sg-saved-card.is-plan-locked .sg-saved-meta::before{
+      content:"🔒 ";
+    }
+
     .sg-saved-info{min-width:0}
     .sg-saved-name{
       margin:0;
@@ -11921,6 +12062,13 @@
 </section>
 <section class="screen" id="createScreen">
 <h2 class="screen-title">إنشاء لعبة جديدة</h2>
+<aside class="education-upgrade-banner" id="educationUpgradeBanner" hidden>
+  <div class="education-upgrade-copy">
+    <strong>افتح الألعاب الخمس الإضافية</strong>
+    <span>انتقل من 5 إلى 10 ألعاب بترقية واحدة فقط وبدون اشتراك شهري.</span>
+  </div>
+  <a class="education-upgrade-link" href="https://sandooq-m.com/ترقية-صندوق-الالعاب-التعليمية-الى-الشامل/p2038898676" target="_blank" rel="noopener">الترقية إلى الشامل — 19.99 ر.س</a>
+</aside>
 <div class="template-list">
 <button class="template-card" data-template="wheel" type="button">
 <div aria-hidden="true" class="template-cover wheel-cover"></div>
@@ -13350,6 +13498,129 @@
 <button class="home-btn" id="homeButton" type="button">الرئيسية</button>
 </div>
 
+<script>
+(() => {
+  "use strict";
+
+  const UPGRADE_URL = "https://sandooq-m.com/ترقية-صندوق-الالعاب-التعليمية-الى-الشامل/p2038898676";
+  const PREMIUM_TEMPLATES = new Set([
+    "train",
+    "moving-question",
+    "fill",
+    "classify-words",
+    "image-pins"
+  ]);
+
+  const rawPlan = String(window.__SANDOOQ_EDUCATION_PLAN__ || "").trim().toLowerCase();
+  const plan = rawPlan === "comprehensive" ? "comprehensive" : "basic";
+
+  function normalizeTemplate(value){
+    const template = String(value || "").trim().toLowerCase();
+    if (["answer-train","train-game"].includes(template)) return "train";
+    if (["move","moving","moving-question-game"].includes(template)) return "moving-question";
+    return template;
+  }
+
+  function isPremiumTemplate(value){
+    return PREMIUM_TEMPLATES.has(normalizeTemplate(value));
+  }
+
+  function canUseTemplate(value){
+    return plan === "comprehensive" || !isPremiumTemplate(value);
+  }
+
+  function ensureUpgradeModal(){
+    let modal = document.getElementById("educationUpgradeModal");
+    if (modal) return modal;
+
+    modal = document.createElement("div");
+    modal.id = "educationUpgradeModal";
+    modal.className = "education-upgrade-modal";
+    modal.setAttribute("aria-hidden","true");
+    modal.innerHTML = `
+      <section class="education-upgrade-dialog" role="dialog" aria-modal="true" aria-labelledby="educationUpgradeTitle">
+        <div class="education-upgrade-dialog-icon" aria-hidden="true">🔒</div>
+        <h3 id="educationUpgradeTitle">هذه اللعبة ضمن الباقة الشاملة</h3>
+        <p>افتح الألعاب الخمس الإضافية وانتقل من 5 إلى 10 ألعاب بدفع 19.99 ريال مرة واحدة فقط، بدون اشتراك شهري.</p>
+        <div class="education-upgrade-actions">
+          <a class="education-upgrade-buy" href="${UPGRADE_URL}" target="_blank" rel="noopener">ترقية الباقة إلى الشامل</a>
+          <button class="education-upgrade-close" type="button">ليس الآن</button>
+        </div>
+      </section>`;
+    document.body.appendChild(modal);
+
+    const close = ()=>{
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden","true");
+    };
+
+    modal.querySelector(".education-upgrade-close")?.addEventListener("click",close);
+    modal.addEventListener("click",event=>{
+      if (event.target === modal) close();
+    });
+    modal.addEventListener("keydown",event=>{
+      if (event.key === "Escape") close();
+    });
+    return modal;
+  }
+
+  function openUpgrade(){
+    const modal = ensureUpgradeModal();
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden","false");
+    requestAnimationFrame(()=>modal.querySelector(".education-upgrade-buy")?.focus({preventScroll:true}));
+  }
+
+  function guardTemplate(value){
+    if (canUseTemplate(value)) return true;
+    openUpgrade();
+    return false;
+  }
+
+  function decorateLockedTemplates(){
+    const basicPlan = plan !== "comprehensive";
+    const banner = document.getElementById("educationUpgradeBanner");
+    if (banner) banner.hidden = !basicPlan;
+
+    document.querySelectorAll(".template-card[data-template]").forEach(card=>{
+      const locked = basicPlan && isPremiumTemplate(card.dataset.template);
+      card.classList.toggle("is-plan-locked",locked);
+      card.setAttribute("aria-disabled",locked ? "true" : "false");
+      card.querySelector(".education-template-lock")?.remove();
+      if (!locked) return;
+
+      const overlay = document.createElement("span");
+      overlay.className = "education-template-lock";
+      overlay.innerHTML = `<span class="education-template-lock-icon" aria-hidden="true">🔒</span><span>ضمن الباقة الشاملة</span>`;
+      card.appendChild(overlay);
+    });
+  }
+
+  document.addEventListener("click",event=>{
+    const card = event.target.closest?.(".template-card[data-template]");
+    if (!card || canUseTemplate(card.dataset.template)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openUpgrade();
+  },true);
+
+  window.SandooqEducationAccess = {
+    plan,
+    upgradeUrl:UPGRADE_URL,
+    isPremiumTemplate,
+    canUseTemplate,
+    guardTemplate,
+    openUpgrade
+  };
+
+  decorateLockedTemplates();
+
+  if (new URLSearchParams(window.location.search).get("upgrade") === "required" && plan !== "comprehensive") {
+    requestAnimationFrame(openUpgrade);
+  }
+})();
+</script>
+
 
 <script>
 (() => {
@@ -13547,6 +13818,7 @@
       alert("تعذر تحديد نوع اللعبة.");
       return false;
     }
+    if (!window.SandooqEducationAccess?.guardTemplate(gameType)) return false;
     if (!name) {
       alert("يرجى كتابة اسم اللعبة قبل الحفظ.");
       return false;
@@ -13618,6 +13890,7 @@
       const gameType = normalizeType(record?.gameType);
       const config = TYPE_CONFIG[gameType];
       if (!config) throw new Error("unsupported game type");
+      if (!window.SandooqEducationAccess?.guardTemplate(gameType)) return;
       const stored = await readPayload(record.storageKey);
       if (!stored) throw new Error("missing payload");
       const runtimeId = `play_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
@@ -13713,6 +13986,7 @@
     const gameType = normalizeType(record?.gameType);
     const config = TYPE_CONFIG[gameType];
     if (!config) return;
+    if (!window.SandooqEducationAccess?.guardTemplate(gameType)) return;
     try {
       const payload = await readPayload(record.storageKey);
       if (!payload) throw new Error("missing payload");
@@ -13787,7 +14061,8 @@
     records.forEach((record)=>{
       const option = document.createElement("option");
       option.value = record.storageKey;
-      option.textContent = `${record.name} — ${TYPE_LABELS[record.gameType]}`;
+      const locked = !window.SandooqEducationAccess?.canUseTemplate(record.gameType);
+      option.textContent = `${locked ? "🔒 " : ""}${record.name} — ${TYPE_LABELS[record.gameType]}${locked ? " (ضمن الشامل)" : ""}`;
       select.appendChild(option);
     });
     if (records.some((record)=>record.storageKey === previous)) select.value = previous;
@@ -13808,6 +14083,8 @@
     records.forEach((record)=>{
       const card = document.createElement("article");
       card.className = "sg-saved-card";
+      const locked = !window.SandooqEducationAccess?.canUseTemplate(record.gameType);
+      card.classList.toggle("is-plan-locked",locked);
       const info = document.createElement("div");
       info.className = "sg-saved-info";
       const title = document.createElement("h3");
@@ -13815,7 +14092,9 @@
       title.textContent = record.name;
       const meta = document.createElement("p");
       meta.className = "sg-saved-meta";
-      meta.textContent = `${TYPE_LABELS[record.gameType]} — آخر تعديل ${formatDate(record.updatedAt)}`;
+      meta.textContent = locked
+        ? `${TYPE_LABELS[record.gameType]} — تتطلب الباقة الشاملة`
+        : `${TYPE_LABELS[record.gameType]} — آخر تعديل ${formatDate(record.updatedAt)}`;
       info.append(title,meta);
 
       const actions = document.createElement("div");
@@ -13823,12 +14102,12 @@
       const play = document.createElement("button");
       play.type = "button";
       play.className = "sg-game-action sg-play-game";
-      play.textContent = "تشغيل";
+      play.textContent = locked ? "فتح بالترقية" : "تشغيل";
       play.addEventListener("click",()=>launchRecord(record,"saved"));
       const edit = document.createElement("button");
       edit.type = "button";
       edit.className = "sg-game-action sg-edit-game";
-      edit.textContent = "تعديل";
+      edit.textContent = locked ? "يتطلب الشامل" : "تعديل";
       edit.addEventListener("click",()=>beginEdit(record));
       const remove = document.createElement("button");
       remove.type = "button";
@@ -14280,6 +14559,15 @@
   let setupTextEditorSaveHandler = null;
 
   function openScreen(id){
+    const premiumScreens = {
+      fillSetupScreen:"fill",
+      trainSetupScreen:"train",
+      movingQuestionSetupScreen:"moving-question",
+      classifyWordsSetupScreen:"classify-words",
+      imagePinsSetupScreen:"image-pins"
+    };
+    const requestedTemplate = premiumScreens[id];
+    if (requestedTemplate && !window.SandooqEducationAccess?.guardTemplate(requestedTemplate)) return;
     const isSubpage = Boolean(id);
     const isGameSetup = gameSetupScreens.has(id);
     const isCreateTemplatePage = id === "createScreen";
