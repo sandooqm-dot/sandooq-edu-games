@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v89-image-pins-settings-content -->
+<!-- version: index-v90-responsive-all-devices -->
 <meta charset="utf-8"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -12007,6 +12007,143 @@
     .pins-answer-preview{width:64px;height:52px;border:2px solid var(--ink);border-radius:10px;background:#f3f3f3;display:grid;place-items:center;overflow:hidden;color:#777;font-size:22px;font-weight:900}.pins-answer-preview img{width:100%;height:100%;object-fit:contain;display:block}.pins-answer-image input{display:none}.pins-answer-image-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;direction:rtl;color:#555;font-size:13px;font-weight:850}.pins-answer-image-pick{min-width:104px;min-height:40px;border:2px solid var(--ink);border-radius:12px;background:#5e88db;color:#fff;padding:5px 10px;font-size:13px;font-weight:950;cursor:pointer}.pins-answer-image-clear{width:34px;height:34px;border:2px solid var(--ink);border-radius:10px;background:#f05d5b;color:#fff;padding:0;font-size:19px;font-weight:950;line-height:1;cursor:pointer}
     #addImagePinAnswerBtn[hidden]{display:none!important}
     @media(max-width:720px){.pins-editor-stage.has-image{padding-top:38px}.pins-answer-card{padding:11px;border-radius:18px}.pins-answer-number{font-size:18px}.pins-answer-number::before{width:42px;height:42px;font-size:18px}.pins-answer-body{padding:11px 9px}.pins-answer-mode{gap:5px}.pins-answer-mode button{min-height:40px;font-size:12px;padding:5px 3px}.pins-answer-image{grid-template-columns:50px minmax(0,1fr) 84px 32px;gap:5px;padding:5px}.pins-answer-preview{width:50px;height:44px}.pins-answer-image-pick{min-width:84px;padding-inline:5px;font-size:11px}.pins-answer-image-clear{width:30px;height:30px}.pins-answer-image-name{font-size:11px}.pins-remove-answer{min-width:72px;font-size:12px}}
+
+    /* v90: عرض متجاوب فعليًا للجوال والآيباد واللابتوب. */
+    html{
+      -webkit-text-size-adjust:100%;
+      text-size-adjust:100%;
+    }
+
+    @media (min-width:761px){
+      :root{--footer-h:60px}
+
+      .page{
+        width:100%;
+        padding-inline:clamp(18px,2.6vw,42px);
+        padding-bottom:calc(var(--footer-h) + 24px + var(--safe-bottom));
+      }
+
+      #homeShell{
+        width:min(100%,1180px);
+      }
+
+      #homeShell .play-shell{
+        width:min(820px,88%) !important;
+      }
+
+      .home-actions-grid{
+        width:min(900px,88%) !important;
+      }
+
+      body.create-template-page #createScreen{
+        width:min(100%,1480px);
+        padding:clamp(20px,2.3vw,34px);
+        border-radius:28px;
+      }
+
+      body.create-template-page #createScreen .screen-title{
+        margin-bottom:clamp(16px,1.8vw,24px);
+        font-size:clamp(30px,3vw,42px);
+      }
+
+      body.create-template-page #createScreen .education-upgrade-banner{
+        margin-bottom:clamp(18px,2vw,26px);
+        padding:clamp(14px,1.7vw,22px);
+        border-radius:22px;
+      }
+
+      body.create-template-page #createScreen .education-upgrade-copy strong{
+        font-size:clamp(22px,2vw,29px);
+      }
+
+      body.create-template-page #createScreen .education-upgrade-copy span{
+        font-size:clamp(14px,1.35vw,18px);
+      }
+
+      body.create-template-page #createScreen .education-upgrade-link{
+        padding:10px 15px;
+        font-size:clamp(15px,1.3vw,18px);
+      }
+
+      body.create-template-page #createScreen .template-list{
+        width:100%;
+        gap:clamp(14px,1.6vw,22px);
+        margin-top:0;
+      }
+
+      body.create-template-page #createScreen .template-card{
+        min-width:0;
+        min-height:138px;
+        grid-template-columns:clamp(96px,12vw,132px) minmax(0,1fr);
+        gap:clamp(13px,1.5vw,20px);
+        padding:clamp(13px,1.5vw,19px);
+        border-width:4px;
+        border-radius:24px;
+      }
+
+      body.create-template-page #createScreen .template-cover{
+        border-radius:15px;
+      }
+
+      body.create-template-page #createScreen .template-title{
+        margin-bottom:7px;
+        font-size:clamp(24px,2.25vw,32px);
+        line-height:1.18;
+      }
+
+      body.create-template-page #createScreen .template-desc{
+        font-size:clamp(14px,1.35vw,18px);
+        line-height:1.55;
+      }
+
+      .bottom-bar{
+        height:calc(var(--footer-h) + var(--safe-bottom));
+      }
+
+      .home-btn{
+        left:clamp(16px,2.4vw,38px);
+        min-width:118px;
+        height:40px;
+        border-radius:15px;
+        font-size:17px;
+        padding-inline:18px;
+      }
+    }
+
+    /* الآيباد الأفقي واللابتوب: بطاقتان في كل صف. */
+    @media (min-width:820px){
+      body.create-template-page #createScreen .template-list{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+      }
+    }
+
+    @media (min-width:1180px){
+      body.create-template-page #createScreen .template-card{
+        min-height:152px;
+        grid-template-columns:clamp(118px,9.5vw,150px) minmax(0,1fr);
+        padding:18px 20px;
+      }
+
+      body.create-template-page #createScreen .template-title{
+        font-size:clamp(28px,2vw,34px);
+      }
+
+      body.create-template-page #createScreen .template-desc{
+        font-size:clamp(16px,1.15vw,19px);
+      }
+    }
+
+    /* الآيباد العمودي الضيق يبقى بعمود واحد ومريح للمس. */
+    @media (min-width:761px) and (max-width:819px){
+      body.create-template-page #createScreen{
+        width:min(96%,760px);
+      }
+
+      body.create-template-page #createScreen .template-card{
+        grid-template-columns:118px minmax(0,1fr);
+        min-height:144px;
+      }
+    }
 </style>
 </head>
 <body>
