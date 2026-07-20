@@ -2,8 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v92-landscape-setup-workspace -->
+<!-- version: index-v94-theme-picker-modal -->
 <meta charset="utf-8"/>
+<meta content="index-v94-theme-picker-modal" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -12823,6 +12824,204 @@
         grid-template-columns:repeat(3,minmax(0,1fr)) !important;
       }
     }
+
+    /* v93: معاينة ثيم كبيرة ونافذة اختيار منبثقة موحّدة لكل الألعاب. */
+    .choices-theme-current,
+    .wheel-setup .choices-theme-current{
+      display:grid !important;
+      grid-template-columns:auto minmax(0,1fr) !important;
+      grid-template-areas:
+        "change title"
+        "preview preview" !important;
+      align-items:center !important;
+      gap:14px 16px !important;
+      min-height:0 !important;
+      height:auto !important;
+    }
+
+    .choices-theme-current .choices-theme-title-wrap{
+      grid-area:title !important;
+      min-width:0;
+      text-align:right;
+    }
+
+    .choices-theme-current .choices-theme-change{
+      grid-area:change !important;
+      justify-self:start !important;
+      align-self:center !important;
+      min-width:104px !important;
+      min-height:48px !important;
+      padding:8px 18px !important;
+      border:3px solid var(--ink) !important;
+      border-radius:14px !important;
+      font-size:17px !important;
+      font-weight:950 !important;
+      box-shadow:0 5px 0 rgba(0,0,0,.18) !important;
+    }
+
+    .choices-theme-current .choices-theme-preview,
+    .wheel-setup .choices-theme-current .choices-theme-preview{
+      grid-area:preview !important;
+      display:block !important;
+      width:100% !important;
+      max-width:none !important;
+      height:auto !important;
+      min-height:clamp(180px,20vw,300px) !important;
+      aspect-ratio:16 / 7 !important;
+      border:3px solid var(--ink) !important;
+      border-radius:18px !important;
+      background-size:cover !important;
+      background-position:center !important;
+      box-shadow:0 5px 0 rgba(0,0,0,.14) !important;
+    }
+
+    body.theme-picker-open{
+      overflow:hidden !important;
+    }
+
+    body.theme-picker-open::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:19990;
+      background:rgba(20,25,35,.68);
+      backdrop-filter:blur(2px);
+      -webkit-backdrop-filter:blur(2px);
+    }
+
+    .choices-theme-list.theme-picker-modal,
+    .wheel-setup .choices-theme-list.theme-picker-modal{
+      position:fixed !important;
+      top:50% !important;
+      left:50% !important;
+      right:auto !important;
+      bottom:auto !important;
+      transform:translate(-50%,-50%) !important;
+      z-index:20000 !important;
+      width:min(1240px,calc(100vw - 40px)) !important;
+      max-width:none !important;
+      max-height:min(86vh,860px) !important;
+      overflow:auto !important;
+      overscroll-behavior:contain;
+      display:grid !important;
+      grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+      align-items:start !important;
+      gap:18px !important;
+      margin:0 !important;
+      padding:72px 24px 26px !important;
+      border:4px solid var(--ink) !important;
+      border-radius:28px !important;
+      background:#fffdf5 !important;
+      box-shadow:0 18px 60px rgba(0,0,0,.38) !important;
+    }
+
+    .choices-theme-list.theme-picker-modal[hidden],
+    .wheel-setup .choices-theme-list.theme-picker-modal[hidden]{
+      display:none !important;
+    }
+
+    .theme-picker-close{
+      position:absolute;
+      top:16px;
+      left:18px;
+      z-index:2;
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      padding:0;
+      border:3px solid var(--ink);
+      border-radius:50%;
+      background:#ed4d52;
+      color:#fff;
+      font:950 30px/1 Arial,sans-serif;
+      cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.22);
+    }
+
+    .theme-picker-close:hover{
+      background:#d9363c;
+      transform:translateY(-1px);
+    }
+
+    .theme-picker-close:focus-visible{
+      outline:4px solid #f4cf43;
+      outline-offset:3px;
+    }
+
+    .theme-picker-modal .choices-theme-card{
+      min-width:0 !important;
+      height:auto !important;
+      padding:12px !important;
+      border-radius:21px !important;
+    }
+
+    .theme-picker-modal .choices-theme-card .theme-art{
+      width:100% !important;
+      max-width:none !important;
+      min-height:180px !important;
+      aspect-ratio:16 / 8 !important;
+      border-radius:15px !important;
+      background-size:cover !important;
+      background-position:center !important;
+    }
+
+    .theme-picker-modal .choices-theme-name{
+      font-size:clamp(18px,1.7vw,25px) !important;
+    }
+
+    .theme-picker-modal .choices-theme-activate{
+      min-height:52px !important;
+      font-size:clamp(17px,1.45vw,22px) !important;
+      border-radius:15px !important;
+    }
+
+    @media (max-width:900px){
+      .choices-theme-list.theme-picker-modal,
+      .wheel-setup .choices-theme-list.theme-picker-modal{
+        width:calc(100vw - 24px) !important;
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:13px !important;
+        padding:66px 16px 20px !important;
+      }
+
+      .theme-picker-modal .choices-theme-card .theme-art{
+        min-height:140px !important;
+      }
+    }
+
+    @media (max-width:560px){
+      .choices-theme-current,
+      .wheel-setup .choices-theme-current{
+        gap:10px !important;
+      }
+
+      .choices-theme-current .choices-theme-change{
+        min-width:82px !important;
+        min-height:42px !important;
+        padding-inline:12px !important;
+        font-size:15px !important;
+      }
+
+      .choices-theme-current .choices-theme-preview,
+      .wheel-setup .choices-theme-current .choices-theme-preview{
+        min-height:150px !important;
+        aspect-ratio:16 / 8 !important;
+      }
+
+      .choices-theme-list.theme-picker-modal,
+      .wheel-setup .choices-theme-list.theme-picker-modal{
+        width:calc(100vw - 18px) !important;
+        max-height:90vh !important;
+        grid-template-columns:1fr !important;
+        padding:62px 12px 16px !important;
+        border-radius:22px !important;
+      }
+
+      .theme-picker-modal .choices-theme-card .theme-art{
+        min-height:155px !important;
+      }
+    }
 </style>
 </head>
 <body>
@@ -23267,6 +23466,112 @@
   document.getElementById("testImagePinsBtn").addEventListener("click",openGame);document.getElementById("saveImagePinsBtn").addEventListener("click",saveGame);nameInput.addEventListener("input",saveDraft);document.querySelectorAll('[data-template="image-pins"]').forEach(button=>button.addEventListener("click",()=>{reset();open()}));
   let restored=false;try{const draft=JSON.parse(sessionStorage.getItem(DRAFT)||"null");if(draft){applyPayload(draft);restored=true}}catch(_){}renderAll();window.openImagePinsSetup=open;
   (async()=>{const pending=await window.SandooqSavedGames?.consumePendingEdit(GAME_TYPE);if(pending?.payload){applyPayload(pending.payload);open();return}if(!restored){const draft=await readDb("draft:image-pins");if(draft){applyPayload(draft);renderAll()}}})();
+})();
+</script>
+<script>
+(() => {
+  "use strict";
+
+  const panels = Array.from(document.querySelectorAll(".choices-theme-list"));
+  if (!panels.length) return;
+  const togglePanelMap = new Map();
+
+  const closePanel = (panel, { restoreFocus = false } = {}) => {
+    if (!panel || panel.hidden) return;
+    panel.hidden = true;
+    panel.setAttribute("aria-hidden", "true");
+    if (restoreFocus) {
+      panel._themeToggle?.focus({ preventScroll: true });
+    }
+    syncOpenState();
+  };
+
+  const closeAll = (except = null) => {
+    panels.forEach(panel => {
+      if (panel !== except) closePanel(panel);
+    });
+  };
+
+  const syncOpenState = () => {
+    const openPanel = panels.find(panel => !panel.hidden);
+    document.body.classList.toggle("theme-picker-open", Boolean(openPanel));
+    panels.forEach(panel => {
+      panel.setAttribute("aria-hidden", panel.hidden ? "true" : "false");
+      panel.setAttribute("aria-modal", panel.hidden ? "false" : "true");
+    });
+    if (openPanel) {
+      requestAnimationFrame(() => {
+        openPanel.querySelector(".theme-picker-close")?.focus({ preventScroll: true });
+      });
+    }
+  };
+
+  panels.forEach((panel, index) => {
+    const section = panel.closest(".choices-theme-section");
+    const toggle = section?.querySelector(".choices-theme-change");
+    if (toggle) {
+      panel._themeToggle = toggle;
+      togglePanelMap.set(toggle, panel);
+      if (!panel.id) panel.id = `themePickerPanel${index + 1}`;
+      toggle.setAttribute("aria-controls", panel.id);
+      toggle.setAttribute("aria-haspopup", "dialog");
+    }
+
+    panel.classList.add("theme-picker-modal");
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "اختر ثيم اللعبة");
+    panel.setAttribute("aria-hidden", panel.hidden ? "true" : "false");
+
+    if (!panel.querySelector(".theme-picker-close")) {
+      const closeButton = document.createElement("button");
+      closeButton.type = "button";
+      closeButton.className = "theme-picker-close";
+      closeButton.setAttribute("aria-label", "إغلاق نافذة الثيمات");
+      closeButton.textContent = "×";
+      closeButton.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        closePanel(panel, { restoreFocus: true });
+      });
+      panel.prepend(closeButton);
+    }
+
+    /* إخراج النافذة إلى body يمنع حاوية الإعداد من قصّها أو خفض z-index الخاص بها. */
+    document.body.appendChild(panel);
+
+    const observer = new MutationObserver(syncOpenState);
+    observer.observe(panel, { attributes: true, attributeFilter: ["hidden"] });
+
+    panel.querySelectorAll(".choices-theme-activate").forEach(button => {
+      button.addEventListener("click", () => closePanel(panel), { capture: false });
+    });
+  });
+
+  document.addEventListener("click", event => {
+    const toggle = event.target.closest(".choices-theme-change");
+    if (toggle) {
+      const current = togglePanelMap.get(toggle);
+      closeAll(current || null);
+      setTimeout(syncOpenState, 0);
+      return;
+    }
+
+    const openPanel = panels.find(panel => !panel.hidden);
+    if (openPanel && !openPanel.contains(event.target)) {
+      closePanel(openPanel);
+    }
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    const openPanel = panels.find(panel => !panel.hidden);
+    if (openPanel) {
+      event.preventDefault();
+      closePanel(openPanel, { restoreFocus: true });
+    }
+  });
+
+  syncOpenState();
 })();
 </script>
 </body>
