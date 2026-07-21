@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: match-v21-open-box-mixed-start-end-size -->
+  <!-- version: match-v22-per-item-content -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
   <title>المطابقة - صندوق الألعاب التعليمية</title>
@@ -1313,8 +1313,15 @@
     }
 
 
-    function normalizeCard(card){
+    function normalizeCardContentType(value,fallback = "text"){
+      return ["text","images","mixed"].includes(value)
+        ? value
+        : (["text","images","mixed"].includes(fallback) ? fallback : "text");
+    }
+
+    function normalizeCard(card,fallbackContentType = "text"){
       return {
+        contentType:normalizeCardContentType(card?.contentType || card?.contentMode,fallbackContentType),
         text:String(card?.text || "").trim(),
         image:String(card?.imageData || card?.image || ""),
         imageName:String(card?.imageName || ""),
@@ -1325,11 +1332,12 @@
     }
 
     function normalizePayload(payload){
+      const fallbackContentType = normalizeCardContentType(payload?.contentMode,"text");
       const rawPairs = Array.isArray(payload?.pairs) ? payload.pairs : [];
       const normalizedPairs = rawPairs.slice(0,20).map((pair,index)=>({
         id:String(pair?.pairId || pair?.id || `pair-${index + 1}`),
-        first:normalizeCard(pair?.first || pair?.a || {}),
-        second:normalizeCard(pair?.second || pair?.b || {})
+        first:normalizeCard(pair?.first || pair?.a || {},fallbackContentType),
+        second:normalizeCard(pair?.second || pair?.b || {},fallbackContentType)
       })).filter((pair)=>{
         const first = pair.first;
         return Boolean(first.text || first.image);
@@ -1338,7 +1346,7 @@
       return {
         gameName:String(payload?.name || payload?.gameName || "المطابقة").trim() || "المطابقة",
         theme:normalizeTheme(payload?.theme || payload?.selectedTheme || getParam("theme")),
-        contentMode:["text","images","mixed"].includes(payload?.contentMode) ? payload.contentMode : "text",
+        contentMode:fallbackContentType,
         matchingMode:payload?.matchingMode === "different" ? "different" : "identical",
         coverMode:["arabic-numbers","english-numbers","images","text"].includes(payload?.coverMode) ? payload.coverMode : "english-numbers",
         soundEnabled:payload?.soundEnabled !== false && (!payload?.sounds || payload.sounds.enabled !== false),
@@ -1842,8 +1850,8 @@
       const built = [];
       pairs.forEach((pair,pairIndex)=>{
         const pairId = String(pair.id || `pair-${pairIndex + 1}`);
-        const first = normalizeCard(pair.first);
-        const second = matchingMode === "identical" ? {...first} : normalizeCard(pair.second);
+        const first = normalizeCard(pair.first,contentMode);
+        const second = matchingMode === "identical" ? {...first} : normalizeCard(pair.second,contentMode);
         built.push({id:`${pairId}-a`,pairId,side:"first",content:first,matched:false});
         built.push({id:`${pairId}-b`,pairId,side:"second",content:second,matched:false});
       });
@@ -1946,9 +1954,10 @@
         "mixed-short","mixed-medium","mixed-long","mixed-xlong","mixed-force-text",
         "text-short","text-medium","text-long"
       );
+      const cardContentType = normalizeCardContentType(card.content.contentType,contentMode);
       const cleanText = String(card.content.text || "").trim();
-      const hasText = Boolean(cleanText);
-      const hasImage = Boolean(card.content.image);
+      const hasText = cardContentType !== "images" && Boolean(cleanText);
+      const hasImage = cardContentType !== "text" && Boolean(card.content.image);
 
       const createImageZone = ()=>{
         const zone = document.createElement("span");

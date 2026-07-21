@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v104-remove-global-content-selector -->
+<!-- version: index-v105-match-per-item-content -->
 <meta charset="utf-8"/>
-<meta content="index-v104-remove-global-content-selector" name="sandooq-build"/>
+<meta content="index-v105-match-per-item-content" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -14253,15 +14253,6 @@
 
       <div class="choices-config-grid">
         <div class="choices-config-group">
-          <h4 class="choices-config-group-title">نوع المحتوى</h4>
-          <div class="choices-mode-grid match-content-mode-grid" aria-label="نوع محتوى بطاقات المطابقة">
-            <button class="choices-mode-btn active" data-match-content-mode="text" type="button"><strong>نصوص فقط</strong></button>
-            <button class="choices-mode-btn" data-match-content-mode="images" type="button"><strong>صور فقط</strong></button>
-            <button class="choices-mode-btn" data-match-content-mode="mixed" type="button"><strong>نصوص وصور</strong></button>
-          </div>
-        </div>
-
-        <div class="choices-config-group">
           <h4 class="choices-config-group-title">نوع المطابقة</h4>
           <div class="choices-mode-grid" aria-label="نوع المطابقة">
             <button class="choices-mode-btn active" data-matching-mode="identical" type="button"><strong>عنصران متطابقان</strong></button>
@@ -20733,6 +20724,7 @@
 
   function blankMatchCard(){
     return {
+      contentType:"text",
       text:"",
       image:"",
       imageData:"",
@@ -20744,8 +20736,9 @@
     };
   }
 
-  function cleanMatchCard(card){
+  function cleanMatchCard(card,fallbackContentType = matchContentMode){
     return {
+      contentType:normalizeMatchContentMode(card?.contentType || card?.contentMode || fallbackContentType),
       text:String(card?.text || ""),
       image:String(card?.image || card?.imageData || ""),
       imageData:String(card?.imageData || card?.image || ""),
@@ -20757,12 +20750,12 @@
     };
   }
 
-  function createMatchPair(source = null){
+  function createMatchPair(source = null,fallbackContentType = matchContentMode){
     matchPairSequence += 1;
     return {
       id:String(source?.id || `pair-${Date.now()}-${matchPairSequence}`),
-      first:cleanMatchCard(source?.first || {}),
-      second:cleanMatchCard(source?.second || {})
+      first:cleanMatchCard(source?.first || {},fallbackContentType),
+      second:cleanMatchCard(source?.second || {},fallbackContentType)
     };
   }
 
@@ -20814,10 +20807,6 @@
   function updateMatchModeUI(){
     enforceMatchCoverModeForMatching();
     const identical = matchingMode === "identical";
-
-    document.querySelectorAll("[data-match-content-mode]").forEach((button)=>{
-      button.classList.toggle("active",button.dataset.matchContentMode === matchContentMode);
-    });
     document.querySelectorAll("[data-matching-mode]").forEach((button)=>{
       button.classList.toggle("active",button.dataset.matchingMode === matchingMode);
     });
@@ -20827,6 +20816,18 @@
       button.setAttribute("aria-hidden",button.hidden ? "true" : "false");
       button.classList.toggle("active",button.dataset.matchCoverMode === matchCoverMode);
     });
+  }
+
+  function deriveMatchContentMode(){
+    const contentTypes = [];
+    matchPairs.forEach((pair)=>{
+      contentTypes.push(normalizeMatchContentMode(pair?.first?.contentType));
+      if (matchingMode === "different") {
+        contentTypes.push(normalizeMatchContentMode(pair?.second?.contentType));
+      }
+    });
+    const unique = new Set(contentTypes);
+    return unique.size === 1 ? contentTypes[0] : "mixed";
   }
 
   function updateMatchAdvancedUI(){
@@ -20863,7 +20864,7 @@
       gameName:String(matchGameNameInput?.value || "").trim(),
       theme:matchTheme,
       selectedTheme:matchTheme,
-      contentMode:matchContentMode,
+      contentMode:deriveMatchContentMode(),
       matchingMode,
       coverMode:matchCoverMode,
       soundEnabled:matchSoundEnabled,
@@ -20910,7 +20911,7 @@
     matchCardColor = normalizeMatchHex(draft.cardColor,"#e82f70");
     matchTextColor = normalizeMatchHex(draft.textColor,"#ffffff");
     matchPairs = Array.isArray(draft.pairs)
-      ? draft.pairs.slice(0,MATCH_MAX_PAIRS).map((pair)=>createMatchPair(pair))
+      ? draft.pairs.slice(0,MATCH_MAX_PAIRS).map((pair)=>createMatchPair(pair,matchContentMode))
       : [];
     ensureMinimumPairs();
     return true;
@@ -21130,8 +21131,43 @@
     return group;
   }
 
+  function createMatchCardContentTypeEditor(card,title){
+    const group = document.createElement("div");
+    group.className = "train-side-content-mode wheel-entry-content-mode match-card-content-mode";
+
+    const label = document.createElement("div");
+    label.className = "train-side-content-mode-label";
+    label.textContent = "نوع المحتوى";
+
+    const buttons = document.createElement("div");
+    buttons.className = "train-side-content-mode-buttons";
+
+    [
+      ["text","نصوص"],
+      ["images","صور"],
+      ["mixed","نصوص وصور"]
+    ].forEach(([value,text])=>{
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "train-side-content-mode-btn";
+      button.classList.toggle("is-active",normalizeMatchContentMode(card.contentType) === value);
+      button.textContent = text;
+      button.setAttribute("aria-label",`${title || "البطاقة"}: ${text}`);
+      button.addEventListener("click",()=>{
+        card.contentType = value;
+        renderMatchPairs();
+        saveMatchDraft();
+      });
+      buttons.appendChild(button);
+    });
+
+    group.append(label,buttons);
+    return group;
+  }
+
   function createMatchCardEditor(pair,side,title){
     const card = pair[side];
+    card.contentType = normalizeMatchContentMode(card.contentType || matchContentMode);
     const editor = document.createElement("div");
     editor.className = "match-card-editor";
 
@@ -21142,18 +21178,20 @@
       editor.appendChild(heading);
     }
 
-    if (matchContentMode === "text" || matchContentMode === "mixed") {
+    editor.appendChild(createMatchCardContentTypeEditor(card,title));
+
+    if (card.contentType === "text" || card.contentType === "mixed") {
       editor.appendChild(createMatchTextField({
         label:"نص البطاقة",
         value:card.text,
-        placeholder:matchContentMode === "mixed" ? "اكتب النص المرافق للصورة.." : "اكتب محتوى البطاقة..",
+        placeholder:card.contentType === "mixed" ? "اكتب النص المرافق للصورة.." : "اكتب محتوى البطاقة..",
         maxLength:80,
         onInput:(value)=>{ card.text = value; },
         showLabel:false
       }));
     }
 
-    if (matchContentMode === "images" || matchContentMode === "mixed") {
+    if (card.contentType === "images" || card.contentType === "mixed") {
       editor.appendChild(createMatchImagePicker({
         label:"صورة البطاقة",
         card,
@@ -21243,11 +21281,12 @@
   }
 
   function validateMatchCard(card,pairNumber,cardLabel){
-    if ((matchContentMode === "text" || matchContentMode === "mixed") && !String(card.text || "").trim()) {
+    const contentType = normalizeMatchContentMode(card?.contentType || matchContentMode);
+    if ((contentType === "text" || contentType === "mixed") && !String(card.text || "").trim()) {
       alert(`يرجى كتابة نص ${cardLabel} في الزوج ${pairNumber}.`);
       return false;
     }
-    if ((matchContentMode === "images" || matchContentMode === "mixed") && !activeImage(card)) {
+    if ((contentType === "images" || contentType === "mixed") && !activeImage(card)) {
       alert(`يرجى اختيار صورة ${cardLabel} في الزوج ${pairNumber}.`);
       return false;
     }
@@ -21280,11 +21319,11 @@
 
   function cleanCardForPayload(card){
     const clean = cleanMatchCard(card);
-    if (matchContentMode === "text") {
+    if (clean.contentType === "text") {
       clean.image = "";
       clean.imageData = "";
       clean.imageName = "";
-    } else if (matchContentMode === "images") {
+    } else if (clean.contentType === "images") {
       clean.text = "";
     }
 
@@ -21308,7 +21347,7 @@
       gameName:String(matchGameNameInput?.value || "").trim(),
       theme:matchTheme,
       selectedTheme:matchTheme,
-      contentMode:matchContentMode,
+      contentMode:deriveMatchContentMode(),
       matchingMode,
       coverMode:matchCoverMode,
       pairs:matchPairs.map((pair,index)=>(
@@ -21410,15 +21449,6 @@
 
   /* v54: تُستدعى من ربط القوالب الأساسي أعلاه لتعمل البطاقة بثبات على Safari. */
   window.openMatchSetupScreen = openMatchSetup;
-
-  document.querySelectorAll("[data-match-content-mode]").forEach((button)=>{
-    button.addEventListener("click",()=>{
-      matchContentMode = normalizeMatchContentMode(button.dataset.matchContentMode);
-      updateMatchModeUI();
-      renderMatchPairs();
-      saveMatchDraft();
-    });
-  });
 
   document.querySelectorAll("[data-matching-mode]").forEach((button)=>{
     button.addEventListener("click",()=>{
@@ -24192,6 +24222,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v104-remove-global-content-selector -->
+<!-- VERSION: index-v105-match-per-item-content -->
 </body>
 </html>
