@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v98-responsive-layout-rebuild -->
+<!-- version: index-v99-train-stacked-layout -->
 <meta charset="utf-8"/>
-<meta content="index-v98-responsive-layout-rebuild" name="sandooq-build"/>
+<meta content="index-v99-train-stacked-layout" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13028,7 +13028,8 @@
     }
 
     /*
-      v98: إعادة بناء الاستجابة دون فرض min-width:0 على جميع العناصر.
+      v99: إعادة بناء الاستجابة دون فرض min-width:0 على جميع العناصر،
+      وترتيب صفحة القطار عموديًا حتى تستفيد محتويات اللعبة من العرض الكامل.
       القواعد موجهة للحاويات المرنة فقط حتى لا تنهار البطاقات والأزرار عند التكبير.
     */
     html,
@@ -13208,7 +13209,24 @@
       font-size:clamp(13px,.6vw + .35rem,17px) !important;
     }
 
-    /* إعدادات القطار: بطاقات مرنة بلا عروض دنيا ثابتة. */
+    /* صفحة القطار: الإعدادات أولًا ثم المحتويات بعرض كامل. */
+    #trainSetupScreen .train-setup-body{
+      display:grid !important;
+      grid-template-columns:minmax(0,1fr) !important;
+      gap:clamp(14px,1.8vw,22px) !important;
+      align-items:start !important;
+    }
+
+    #trainSetupScreen .train-setup-body > .choices-section,
+    #trainSetupScreen .train-setup-body > .choices-actions{
+      grid-column:1 / -1 !important;
+      grid-row:auto !important;
+      width:100% !important;
+      min-width:0 !important;
+      max-width:100% !important;
+      height:auto !important;
+    }
+
     #trainSetupScreen .choices-section{
       container-type:inline-size;
     }
@@ -13216,7 +13234,7 @@
     #trainSetupScreen .train-settings-grid{
       width:100% !important;
       display:grid !important;
-      grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)) !important;
+      grid-template-columns:repeat(2,minmax(0,1fr)) !important;
       gap:clamp(12px,1.2vw,18px) !important;
       align-items:stretch !important;
     }
