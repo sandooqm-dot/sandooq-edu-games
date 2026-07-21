@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v82-auto-open-full-question -->
+  <!-- version: open-box-v83-answer-feedback-marks -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -479,8 +479,70 @@
       box-shadow:none;
       cursor:pointer;
       display:block;
+      position:relative;
+      overflow:visible;
+      isolation:isolate;
       perspective:900px;
       transition:transform .18s ease, filter .18s ease, opacity .18s ease;
+    }
+
+    .answer-feedback-mark{
+      --feedback-corner-left:7%;
+      --feedback-corner-top:7%;
+      position:absolute;
+      left:50%;
+      top:50%;
+      z-index:20;
+      display:grid;
+      place-items:center;
+      width:clamp(40px,4.3vw,66px);
+      aspect-ratio:1;
+      border:clamp(3px,.32vw,5px) solid #fff;
+      border-radius:50%;
+      color:#fff;
+      font:1000 clamp(27px,3vw,48px)/1 "Cairo",sans-serif;
+      box-shadow:0 5px 13px rgba(0,0,0,.34);
+      opacity:0;
+      pointer-events:none;
+      transform:translate(-50%,-50%) scale(.1) rotate(-14deg);
+      transform-origin:center;
+      will-change:left,top,opacity,transform;
+    }
+
+    .answer-feedback-mark.is-correct{background:#20aa61}
+    .answer-feedback-mark.is-wrong{background:#e5484d}
+
+    .answer-feedback-mark.is-correct.is-visible{
+      animation:answerBoxCorrectMark 1.18s linear both;
+    }
+
+    .answer-feedback-mark.is-wrong.is-visible{
+      animation:answerBoxWrongMark 1.42s linear both;
+    }
+
+    .answer-feedback-mark.is-correct.is-settled{
+      left:var(--feedback-corner-left);
+      top:var(--feedback-corner-top);
+      opacity:1;
+      transform:translate(-50%,-50%) scale(.62);
+    }
+
+    @keyframes answerBoxCorrectMark{
+      0%{left:50%;top:50%;opacity:0;transform:translate(-50%,-50%) scale(.08) rotate(-16deg)}
+      18%{left:50%;top:50%;opacity:1;transform:translate(-50%,-50%) scale(.6) rotate(-7deg)}
+      38%{left:50%;top:50%;opacity:1;transform:translate(-50%,-50%) scale(1.18) rotate(4deg)}
+      58%{left:50%;top:50%;opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+      100%{left:var(--feedback-corner-left);top:var(--feedback-corner-top);opacity:1;transform:translate(-50%,-50%) scale(.62) rotate(0)}
+    }
+
+    @keyframes answerBoxWrongMark{
+      0%{left:50%;top:50%;opacity:0;transform:translate(-50%,-50%) scale(.08) rotate(-16deg)}
+      18%{left:50%;top:50%;opacity:1;transform:translate(-50%,-50%) scale(.6) rotate(-7deg)}
+      38%{left:50%;top:50%;opacity:1;transform:translate(-50%,-50%) scale(1.18) rotate(4deg)}
+      56%{left:50%;top:50%;opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}
+      76%{left:var(--feedback-corner-left);top:var(--feedback-corner-top);opacity:1;transform:translate(-50%,-50%) scale(.62) rotate(0)}
+      88%{left:var(--feedback-corner-left);top:var(--feedback-corner-top);opacity:1;transform:translate(-50%,-50%) scale(.62) rotate(0)}
+      100%{left:var(--feedback-corner-left);top:var(--feedback-corner-top);opacity:0;transform:translate(-50%,-50%) scale(.38) rotate(0)}
     }
 
     .answer-box-shell{
@@ -572,6 +634,7 @@
       .multi-answer-layer{bottom:calc(68px + var(--safe-bottom));width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
       .multi-answer-grid{grid-template-columns:repeat(2,minmax(110px,160px));gap:8px}
       .answer-box-text{font-size:clamp(17px,4.6vw,24px)}
+      .answer-feedback-mark{width:clamp(42px,12vw,58px);font-size:clamp(29px,8.5vw,41px)}
       .box-card.multi-answer-active .box-wrap{
         --multi-box-shift-y:-78px;
         --multi-box-scale:.62;
@@ -582,6 +645,7 @@
       .multi-answer-layer{bottom:calc(50px + var(--safe-bottom));width:min(1100px,calc(100vw - 30px))}
       .multi-answer-grid{grid-template-columns:repeat(var(--answer-columns,4),minmax(104px,150px));gap:8px}
       .answer-box-text{font-size:clamp(17px,1.75vw,26px);-webkit-line-clamp:4}
+      .answer-feedback-mark{width:clamp(38px,4.5vw,54px);font-size:clamp(26px,3vw,38px)}
       .box-card.multi-answer-active .box-wrap{
         --multi-box-shift-y:-10px;
         --multi-box-scale:.58;
@@ -4267,6 +4331,11 @@
 
       shell.appendChild(content);
       button.appendChild(shell);
+
+      const feedbackMark = document.createElement("span");
+      feedbackMark.className = "answer-feedback-mark";
+      feedbackMark.setAttribute("aria-hidden","true");
+      button.appendChild(feedbackMark);
       button.setAttribute(
         "aria-label",
         entry.answersType === "images"
@@ -4276,25 +4345,44 @@
 
       if (answeredBoxes.has(boxIndex)) {
         button.disabled = true;
-        if (choiceIndex === entry.correctChoiceIndex) button.classList.add("is-correct");
+        if (choiceIndex === entry.correctChoiceIndex) {
+          button.classList.add("is-correct");
+          feedbackMark.className = "answer-feedback-mark is-correct is-settled";
+          feedbackMark.textContent = "✓";
+        }
       }
 
       button.addEventListener("click",(event)=>{
         event.preventDefault();
         event.stopPropagation();
-        if (answeredBoxes.has(boxIndex) || button.disabled) return;
+        if (
+          answeredBoxes.has(boxIndex) ||
+          button.disabled ||
+          button.classList.contains("is-feedback-active")
+        ) return;
 
         if (choiceIndex === entry.correctChoiceIndex) {
           answeredBoxes.add(boxIndex);
           button.classList.add("is-correct");
+          feedbackMark.className = "answer-feedback-mark is-correct";
+          feedbackMark.textContent = "✓";
+          requestAnimationFrame(()=> feedbackMark.classList.add("is-visible"));
           multiAnswerGrid?.querySelectorAll(".multi-answer-choice").forEach((item)=>{
             item.disabled = true;
           });
           return;
         }
 
-        button.classList.add("is-wrong");
-        button.disabled = true;
+        button.classList.add("is-wrong","is-feedback-active");
+        feedbackMark.className = "answer-feedback-mark is-wrong";
+        feedbackMark.textContent = "×";
+        requestAnimationFrame(()=> feedbackMark.classList.add("is-visible"));
+
+        window.setTimeout(()=>{
+          button.classList.remove("is-wrong","is-feedback-active");
+          feedbackMark.className = "answer-feedback-mark";
+          feedbackMark.textContent = "";
+        },1460);
       });
 
       return button;
@@ -4920,6 +5008,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v82-auto-open-full-question -->
+  <!-- VERSION: open-box-v83-answer-feedback-marks -->
 </body>
 </html>
