@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v97-fluid-responsive-layout -->
+<!-- version: index-v98-responsive-layout-rebuild -->
 <meta charset="utf-8"/>
-<meta content="index-v97-fluid-responsive-layout" name="sandooq-build"/>
+<meta content="index-v98-responsive-layout-rebuild" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13028,9 +13028,8 @@
     }
 
     /*
-      v97: طبقة استجابة نهائية تعتمد على عرض نافذة المتصفح الحقيقي.
-      عند تكبير المتصفح ينخفض عرض CSS تلقائيًا، فتتحول الشبكات إلى عمود واحد
-      بدل إبقائها أفقية وحشر النصوص والأزرار.
+      v98: إعادة بناء الاستجابة دون فرض min-width:0 على جميع العناصر.
+      القواعد موجهة للحاويات المرنة فقط حتى لا تنهار البطاقات والأزرار عند التكبير.
     */
     html,
     body{
@@ -13054,7 +13053,11 @@
       #movingQuestionSetupScreen,
       #classifyWordsSetupScreen,
       #imagePinsSetupScreen
-    ),
+    ){
+      min-width:0;
+      box-sizing:border-box;
+    }
+
     :is(
       #wheelSetupScreen,
       #choicesSetupScreen,
@@ -13065,9 +13068,50 @@
       #movingQuestionSetupScreen,
       #classifyWordsSetupScreen,
       #imagePinsSetupScreen
-    ) *{
-      min-width:0;
+    ) *,
+    :is(
+      #wheelSetupScreen,
+      #choicesSetupScreen,
+      #fillSetupScreen,
+      #matchSetupScreen,
+      #orderSetupScreen,
+      #trainSetupScreen,
+      #movingQuestionSetupScreen,
+      #classifyWordsSetupScreen,
+      #imagePinsSetupScreen
+    ) *::before,
+    :is(
+      #wheelSetupScreen,
+      #choicesSetupScreen,
+      #fillSetupScreen,
+      #matchSetupScreen,
+      #orderSetupScreen,
+      #trainSetupScreen,
+      #movingQuestionSetupScreen,
+      #classifyWordsSetupScreen,
+      #imagePinsSetupScreen
+    ) *::after{
       box-sizing:border-box;
+    }
+
+    :is(
+      .wheel-setup-body,
+      .choices-setup-body,
+      .match-setup-body,
+      .order-setup-body,
+      .train-setup-body,
+      .choices-section,
+      .choices-config-grid,
+      .choices-config-group,
+      .choices-theme-current,
+      .choices-actions,
+      .train-settings-grid,
+      .train-contents-editor,
+      .train-content-fields,
+      .train-match-card-editor
+    ){
+      min-width:0;
+      max-width:100%;
     }
 
     :is(
@@ -13221,8 +13265,36 @@
       font-size:11px !important;
     }
 
+    #trainSetupScreen .train-contents-editor{
+      width:100% !important;
+      min-width:0 !important;
+      max-width:100% !important;
+      justify-items:stretch !important;
+    }
+
+    #trainSetupScreen .train-content-card.match-pair-entry{
+      width:100% !important;
+      min-width:100% !important;
+      max-width:100% !important;
+      justify-self:stretch !important;
+    }
+
+    #trainSetupScreen .train-content-card .match-pair-head,
+    #trainSetupScreen .train-content-card .train-content-fields,
+    #trainSetupScreen .train-content-card .train-match-card-editor{
+      width:100% !important;
+      min-width:0 !important;
+      max-width:100% !important;
+    }
+
+    #trainSetupScreen .train-content-card .match-remove-pair{
+      min-width:88px !important;
+      width:auto !important;
+      flex:0 0 auto !important;
+    }
+
     #trainSetupScreen .train-content-fields.match-pair-cards{
-      grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)) !important;
+      grid-template-columns:repeat(2,minmax(240px,1fr)) !important;
     }
 
     #trainSetupScreen .train-side-content-mode-buttons{
@@ -13237,7 +13309,7 @@
     }
 
     /* عند تقلص النافذة أو تكبير المتصفح: إلغاء الأعمدة القسرية القديمة. */
-    @media (max-width:1099px){
+    @media (max-width:1199px){
       .page{
         padding-inline:8px !important;
       }
@@ -13294,6 +13366,10 @@
 
       #trainSetupScreen .train-settings-grid{
         grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+      }
+
+      #trainSetupScreen .train-content-fields.match-pair-cards{
+        grid-template-columns:minmax(0,1fr) !important;
       }
     }
 
@@ -13362,6 +13438,10 @@
 
       #trainSetupScreen .train-content-fields.match-pair-cards{
         grid-template-columns:minmax(0,1fr) !important;
+      }
+
+      #trainSetupScreen .train-content-card .match-remove-pair{
+        min-width:76px !important;
       }
 
       :is(
