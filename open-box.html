@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v77-manual-finish-national-text -->
+  <!-- version: open-box-v78-per-item-content -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -2671,6 +2671,11 @@
       return "text";
     }
 
+    function normalizeEntryContentType(value, fallback = "text"){
+      const type = String(value || fallback || "text").trim().toLowerCase();
+      return ["text", "images", "mixed"].includes(type) ? type : "text";
+    }
+
     function normalizePayloadCoverMode(payload, source){
       const explicit = String(
         (!Array.isArray(payload) && payload.coverMode) || ""
@@ -2702,7 +2707,12 @@
 
       return source
         .map((entry)=> {
+          const contentType = normalizeEntryContentType(
+            entry?.contentType || entry?.type,
+            currentContentType
+          );
           const clean = {
+            contentType,
             text:String(entry.text || entry.title || entry.answer || "").trim(),
             imageData:entry.imageData || entry.image || "",
             imageName:entry.imageName || "",
@@ -2711,10 +2721,10 @@
             coverImageName:entry.coverImageName || ""
           };
 
-          if (currentContentType === "text") {
+          if (contentType === "text") {
             clean.imageData = "";
             clean.imageName = "";
-          } else if (currentContentType === "images") {
+          } else if (contentType === "images") {
             clean.text = "";
           }
 
@@ -3272,22 +3282,24 @@
     }
 
     function getEntryKind(entry){
-      const hasImage = currentContentType !== "text" && Boolean(entry.imageData || entry.imageName);
-      const hasText = currentContentType !== "images" && Boolean(String(entry.text || "").trim());
+      const contentType = normalizeEntryContentType(entry?.contentType, currentContentType);
+      const hasImage = contentType !== "text" && Boolean(entry.imageData || entry.imageName);
+      const hasText = contentType !== "images" && Boolean(String(entry.text || "").trim());
 
-      if (currentContentType === "mixed") {
+      if (contentType === "mixed") {
         if (hasImage && hasText) return "mixed";
         if (hasImage) return "image";
         return "text";
       }
 
-      if (currentContentType === "images" && hasImage) return "image";
+      if (contentType === "images" && hasImage) return "image";
       return "text";
     }
 
     function createResultContent(entry, kind){
-      const hasImage = currentContentType !== "text" && Boolean(entry.imageData || entry.imageName);
-      const cleanText = currentContentType === "images" ? "" : String(entry.text || "").trim();
+      const contentType = normalizeEntryContentType(entry?.contentType, currentContentType);
+      const hasImage = contentType !== "text" && Boolean(entry.imageData || entry.imageName);
+      const cleanText = contentType === "images" ? "" : String(entry.text || "").trim();
       const hasText = Boolean(cleanText);
 
       const frame = document.createElement("span");
@@ -4489,5 +4501,6 @@
 
     initializeOpenBoxGame();
   </script>
+  <!-- VERSION: open-box-v78-per-item-content -->
 </body>
 </html>

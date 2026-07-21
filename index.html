@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v102-wheel-per-item-content -->
+<!-- version: index-v103-wheel-openbox-per-item-content -->
 <meta charset="utf-8"/>
-<meta content="index-v100-train-flex-layout" name="sandooq-build"/>
+<meta content="index-v103-wheel-openbox-per-item-content" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13778,7 +13778,7 @@
       </div>
 
       <div class="choices-config-grid wheel-modern-config-grid">
-        <div class="choices-config-group" id="wheelGlobalContentTypeGroup">
+        <div class="choices-config-group" id="wheelGlobalContentTypeGroup" hidden>
           <h4 class="choices-config-group-title" id="contentTypeGroupTitle">نوع المحتوى</h4>
           <div aria-label="نوع المحتوى" class="choices-mode-grid wheel-options wheel-content-mode-grid">
             <button class="choices-mode-btn wheel-type active" data-wheel-type="text" type="button"><strong>نصوص</strong></button>
@@ -16191,11 +16191,9 @@
   window.addEventListener("pageshow",applyRequestedScreen);
 
   function entryHint(){
-    const target = currentGameTemplate === "open-box" ? "الصناديق" : "أقسام العجلة";
-    if (currentGameTemplate === "wheel") return "اختر نوع المحتوى داخل كل عنصر، ثم أضف نصًا أو صورة أو كليهما.";
-    if (wheelContentType === "images") return `أضف الصور التي تظهر داخل ${target}.`;
-    if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
-    return currentGameTemplate === "open-box" ? "أضف الكلمات أو الأسئلة التي تظهر بعد فتح الصندوق." : "أضف كلمات أو أسئلة قصيرة.";
+    return currentGameTemplate === "open-box"
+      ? "اختر نوع المحتوى داخل كل صندوق، ثم أضف نصًا أو صورة أو كليهما."
+      : "اختر نوع المحتوى داخل كل عنصر، ثم أضف نصًا أو صورة أو كليهما.";
   }
 
   function updateWheelAdvancedUi(){
@@ -16350,8 +16348,8 @@
   }
 
   function createEntry(){
-    const base = {
-      contentType: currentGameTemplate === "wheel" ? "text" : normalizeOpenBoxContentType(wheelContentType),
+    return {
+      contentType:"text",
       text:"",
       imageName:"",
       imageData:"",
@@ -16359,12 +16357,6 @@
       coverImageName:"",
       coverImageData:""
     };
-    if (wheelContentType === "images") base.text = "";
-    if (wheelContentType === "text") {
-      base.imageName = "";
-      base.imageData = "";
-    }
-    return base;
   }
 
 
@@ -16378,7 +16370,6 @@
   }
 
   function getWheelPayloadType(entries = wheelEntries){
-    if (currentGameTemplate !== "wheel") return normalizeOpenBoxContentType(wheelContentType);
     const types = (Array.isArray(entries) ? entries : [])
       .map((entry)=>normalizeWheelEntryContentType(entry?.contentType,"text"));
     if (!types.length || types.every((type)=>type === "text")) return "text";
@@ -16393,8 +16384,10 @@
       : "disabled";
   }
 
-  function cleanOpenBoxEntryForModes(entry, contentType = wheelContentType, coverMode = boxCoverMode){
+  function cleanOpenBoxEntryForModes(entry, contentType = entry?.contentType || wheelContentType, coverMode = boxCoverMode){
+    const activeContentType = normalizeOpenBoxContentType(contentType);
     const clean = {
+      contentType:activeContentType,
       text:String(entry?.text || ""),
       imageName:entry?.imageName || "",
       imageData:entry?.imageData || "",
@@ -16403,7 +16396,6 @@
       coverImageData:entry?.coverImageData || ""
     };
 
-    const activeContentType = normalizeOpenBoxContentType(contentType);
     const activeCoverMode = normalizeOpenBoxCoverMode(coverMode);
 
     if (activeContentType === "text") {
@@ -16430,18 +16422,18 @@
   function cleanOpenBoxEntriesInPlace(){
     if (currentGameTemplate !== "open-box") return;
 
-    wheelContentType = normalizeOpenBoxContentType(wheelContentType);
     boxCoverMode = normalizeOpenBoxCoverMode(boxCoverMode);
-    wheelEntries = wheelEntries.map((entry)=>
-      cleanOpenBoxEntryForModes(entry, wheelContentType, boxCoverMode)
-    );
+    wheelEntries = wheelEntries.map((entry)=>({
+      ...entry,
+      contentType:normalizeWheelEntryContentType(entry?.contentType, wheelContentType || "text")
+    }));
   }
 
   function isEntryFilled(entry){
     if (currentGameTemplate === "open-box") {
       const clean = cleanOpenBoxEntryForModes(
         entry,
-        wheelContentType,
+        entry?.contentType,
         boxCoverMode
       );
 
@@ -16465,15 +16457,13 @@
     const source = currentGameTemplate === "open-box"
       ? wheelEntries.map((entry)=> cleanOpenBoxEntryForModes(
           entry,
-          wheelContentType,
+          entry?.contentType,
           boxCoverMode
         ))
       : wheelEntries;
 
     return source.filter(isEntryFilled).map((entry)=> ({
-      contentType: currentGameTemplate === "wheel"
-        ? normalizeWheelEntryContentType(entry.contentType,"text")
-        : normalizeOpenBoxContentType(wheelContentType),
+      contentType:normalizeWheelEntryContentType(entry.contentType,"text"),
       text:String(entry.text || "").trim(),
       imageName:entry.imageName || "",
       imageData:entry.imageData || "",
@@ -16489,7 +16479,8 @@
 
     const payload = {
       gameTemplate: currentGameTemplate,
-      type: currentGameTemplate === "wheel" ? getWheelPayloadType(wheelEntries) : wheelContentType,
+      type:getWheelPayloadType(wheelEntries),
+      contentType:getWheelPayloadType(wheelEntries),
       theme: normalizeGameTheme(wheelTheme),
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries: wheelEntries,
@@ -16534,9 +16525,10 @@
         wheelEntries = wheelEntries.slice(0, OPEN_BOX_MAX_ITEMS);
       }
       wheelEntries = wheelEntries.map((entry)=> ({
-        contentType: currentGameTemplate === "wheel"
-          ? normalizeWheelEntryContentType(entry.contentType || entry.type, draft.contentType || draft.type || "text")
-          : normalizeOpenBoxContentType(draft.contentType || draft.type || "text"),
+        contentType:normalizeWheelEntryContentType(
+          entry.contentType || entry.type,
+          draft.contentType || draft.type || "text"
+        ),
         text: entry.text || "",
         imageName: entry.imageName || "",
         imageData: entry.imageData || "",
@@ -16685,9 +16677,7 @@
     document.body.dataset.setupTemplate = currentGameTemplate;
     const isBox = currentGameTemplate === "open-box";
 
-    if (wheelGlobalContentTypeGroup) {
-      wheelGlobalContentTypeGroup.hidden = !isBox;
-    }
+    if (wheelGlobalContentTypeGroup) wheelGlobalContentTypeGroup.hidden = true;
 
     if (setupContentTitle) setupContentTitle.textContent = "إعدادات طريقة اللعب";
     if (contentTypeGroupTitle) {
@@ -16814,8 +16804,6 @@
 
       if (fieldPrefix === "cover") {
         wheelEntries[index].coverText = "";
-      } else if (currentGameTemplate === "open-box" && wheelContentType === "images") {
-        wheelEntries[index].text = "";
       }
 
       readFileAsDataURL(selectedFile,(dataUrl)=>{
@@ -16841,7 +16829,10 @@
 
     const buttons = document.createElement("div");
     buttons.className = "train-side-content-mode-buttons";
-    buttons.setAttribute("aria-label",`نوع محتوى العنصر ${index + 1}`);
+    buttons.setAttribute(
+      "aria-label",
+      `نوع محتوى ${currentGameTemplate === "open-box" ? "الصندوق" : "العنصر"} ${index + 1}`
+    );
 
     const activeType = normalizeWheelEntryContentType(entry.contentType,"text");
     [
@@ -17010,14 +17001,10 @@
 
       addCoverFields(box,entry,index);
 
-      if (currentGameTemplate === "wheel") {
-        entry.contentType = normalizeWheelEntryContentType(entry.contentType,"text");
-        box.appendChild(createWheelEntryContentModeControl(entry,index));
-      }
+      entry.contentType = normalizeWheelEntryContentType(entry.contentType,"text");
+      box.appendChild(createWheelEntryContentModeControl(entry,index));
 
-      const activeContentType = currentGameTemplate === "wheel"
-        ? normalizeWheelEntryContentType(entry.contentType,"text")
-        : normalizeOpenBoxContentType(wheelContentType);
+      const activeContentType = normalizeWheelEntryContentType(entry.contentType,"text");
 
       if (activeContentType === "text" || activeContentType === "mixed") {
         const row = document.createElement("div");
@@ -17037,11 +17024,6 @@
         input.addEventListener("input",()=>{
           wheelEntries[index].text = input.value;
 
-          if (currentGameTemplate === "open-box" && activeContentType === "text") {
-            wheelEntries[index].imageName = "";
-            wheelEntries[index].imageData = "";
-          }
-
           saveDraft();
         });
 
@@ -17055,11 +17037,6 @@
           onSave:(value)=>{
             input.value = value;
             wheelEntries[index].text = value;
-
-            if (currentGameTemplate === "open-box" && activeContentType === "text") {
-              wheelEntries[index].imageName = "";
-              wheelEntries[index].imageData = "";
-            }
 
             saveDraft();
           }
@@ -17181,8 +17158,8 @@
       gameTemplate: "open-box",
       payloadVersion:2,
       strictModes:true,
-      type:normalizeOpenBoxContentType(wheelContentType),
-      contentType:normalizeOpenBoxContentType(wheelContentType),
+      type:getWheelPayloadType(entries),
+      contentType:getWheelPayloadType(entries),
       theme: selectedTheme,
       wheelTheme: selectedTheme,
       selectedTheme,
@@ -17440,8 +17417,8 @@
           gameTemplate:"open-box",
           payloadVersion:2,
           strictModes:true,
-          type:normalizeOpenBoxContentType(wheelContentType),
-          contentType:normalizeOpenBoxContentType(wheelContentType),
+          type:getWheelPayloadType(entries),
+          contentType:getWheelPayloadType(entries),
           theme:selectedTheme,
           wheelTheme:selectedTheme,
           selectedTheme,
@@ -24214,6 +24191,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v102-wheel-per-item-content -->
+<!-- VERSION: index-v103-wheel-openbox-per-item-content -->
 </body>
 </html>
