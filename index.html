@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v108-help-responsive-layout -->
+<!-- version: index-v109-multi-answer-box -->
 <meta charset="utf-8"/>
-<meta content="index-v108-help-responsive-layout" name="sandooq-build"/>
+<meta content="index-v109-multi-answer-box" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13641,6 +13641,53 @@
       max-width:none !important;
     }
   </style>
+  <style id="open-box-multi-answer-v109">
+    #openBoxMultiAnswerPanel[hidden]{display:none !important}
+    #openBoxMultiAnswerPanel .choices-config-group-title{margin:0;text-align:center}
+    #openBoxMultiAnswerPanel .setup-toggle-grid{width:100%}
+    .open-box-answers-editor{
+      display:grid;
+      gap:12px;
+      margin-top:14px;
+      padding-top:14px;
+      border-top:2px solid rgba(17,17,17,.12);
+    }
+    .open-box-answers-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .open-box-answers-title{font-size:clamp(18px,1.55vw,25px);font-weight:900}
+    .open-box-answer-type{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+    .open-box-answer-row{
+      display:grid;
+      grid-template-columns:auto minmax(0,1fr) auto;
+      align-items:center;
+      gap:9px;
+    }
+    .open-box-answer-row .quiz-choice-content{min-width:0}
+    .open-box-answer-row .quiz-image-picker-wrap{width:100%;min-width:0}
+    .open-box-answer-row .quiz-image-picker-button{width:100%}
+    .open-box-answer-actions{display:flex;align-items:center;gap:7px}
+    .open-box-answer-add{width:100%;margin-top:2px}
+    .open-box-answer-row .quiz-choice-left-actions{
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .open-box-answer-row .quiz-text-input{width:100%;min-width:0}
+    .open-box-answer-row.is-image-choice .quiz-choice-content{min-width:0}
+    @media (max-width:700px){
+      .open-box-answer-row{grid-template-columns:auto minmax(0,1fr) auto;gap:6px}
+      .open-box-answer-type{gap:6px}
+      .open-box-answers-editor{gap:10px;padding-top:11px}
+    }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -13858,6 +13905,14 @@
             <button class="choices-mode-btn" data-cover-type="english-numbers" type="button"><strong>أرقام إنجليزية</strong></button>
             <button class="choices-mode-btn" data-cover-type="image" type="button"><strong>صورة</strong></button>
             <button class="choices-mode-btn active" data-cover-type="text" type="button"><strong>نص</strong></button>
+          </div>
+        </div>
+
+        <div class="choices-config-group" id="openBoxMultiAnswerPanel" hidden>
+          <h4 class="choices-config-group-title">صندوق متعدد الإجابات</h4>
+          <div aria-label="صندوق متعدد الإجابات" class="choices-mode-grid setup-toggle-grid">
+            <button class="choices-mode-btn active" data-open-box-multi-answer="off" type="button"><strong>تعطيل</strong></button>
+            <button class="choices-mode-btn" data-open-box-multi-answer="on" type="button"><strong>تشغيل</strong></button>
           </div>
         </div>
       </div>
@@ -16105,6 +16160,7 @@
   const setupContentTitle = document.getElementById("setupContentTitle");
   const specialPanelTitle = document.getElementById("specialPanelTitle");
   const coverTypePanel = document.getElementById("coverTypePanel");
+  const openBoxMultiAnswerPanel = document.getElementById("openBoxMultiAnswerPanel");
   const itemsTitle = document.getElementById("itemsTitle");
   const contentTypeGroupTitle = document.getElementById("contentTypeGroupTitle");
   const wheelGlobalContentTypeGroup = document.getElementById("wheelGlobalContentTypeGroup");
@@ -16169,6 +16225,7 @@
   let wheelFont = "cairo";
   let wheelArrowColor = "#111111";
   let boxCoverMode = "disabled";
+  let openBoxMultiAnswerEnabled = false;
   let wheelAdvancedOpen = false;
   let setupTextEditorOverlay = null;
   let setupTextEditorTextarea = null;
@@ -16391,8 +16448,49 @@
       imageData:"",
       coverText:"",
       coverImageName:"",
-      coverImageData:""
+      coverImageData:"",
+      answersType:"text",
+      choices:[createOpenBoxChoice(),createOpenBoxChoice()],
+      correctChoiceIndex:-1
     };
+  }
+
+  function createOpenBoxChoice(){
+    return {
+      text:"",
+      imageData:"",
+      imageName:"",
+      isCorrect:false
+    };
+  }
+
+  function normalizeOpenBoxAnswersType(value){
+    return String(value || "").trim().toLowerCase() === "images" ? "images" : "text";
+  }
+
+  function normalizeOpenBoxChoices(entry){
+    const answersType = normalizeOpenBoxAnswersType(entry?.answersType || entry?.choicesType);
+    const choices = (Array.isArray(entry?.choices) ? entry.choices : Array.isArray(entry?.answers) ? entry.answers : [])
+      .slice(0,6)
+      .map((choice)=>({
+        text:String(choice?.text || choice?.answer || ""),
+        imageData:choice?.imageData || choice?.image || "",
+        imageName:choice?.imageName || "",
+        isCorrect:Boolean(choice?.isCorrect)
+      }));
+
+    while (choices.length < 2) choices.push(createOpenBoxChoice());
+
+    let correctChoiceIndex = Number.isInteger(entry?.correctChoiceIndex)
+      ? entry.correctChoiceIndex
+      : Number.isInteger(entry?.correctIndex)
+        ? entry.correctIndex
+        : choices.findIndex((choice)=>choice.isCorrect);
+
+    if (correctChoiceIndex < 0 || correctChoiceIndex >= choices.length) correctChoiceIndex = -1;
+    choices.forEach((choice,index)=>{ choice.isCorrect = index === correctChoiceIndex; });
+
+    return {answersType,choices,correctChoiceIndex};
   }
 
 
@@ -16422,6 +16520,7 @@
 
   function cleanOpenBoxEntryForModes(entry, contentType = entry?.contentType || wheelContentType, coverMode = boxCoverMode){
     const activeContentType = normalizeOpenBoxContentType(contentType);
+    const answerData = normalizeOpenBoxChoices(entry);
     const clean = {
       contentType:activeContentType,
       text:String(entry?.text || ""),
@@ -16429,7 +16528,10 @@
       imageData:entry?.imageData || "",
       coverText:String(entry?.coverText || ""),
       coverImageName:entry?.coverImageName || "",
-      coverImageData:entry?.coverImageData || ""
+      coverImageData:entry?.coverImageData || "",
+      answersType:answerData.answersType,
+      choices:answerData.choices,
+      correctChoiceIndex:answerData.correctChoiceIndex
     };
 
     const activeCoverMode = normalizeOpenBoxCoverMode(coverMode);
@@ -16461,7 +16563,8 @@
     boxCoverMode = normalizeOpenBoxCoverMode(boxCoverMode);
     wheelEntries = wheelEntries.map((entry)=>({
       ...entry,
-      contentType:normalizeWheelEntryContentType(entry?.contentType, wheelContentType || "text")
+      contentType:normalizeWheelEntryContentType(entry?.contentType, wheelContentType || "text"),
+      ...normalizeOpenBoxChoices(entry)
     }));
   }
 
@@ -16505,7 +16608,10 @@
       imageData:entry.imageData || "",
       coverText:String(entry.coverText || "").trim(),
       coverImageName:entry.coverImageName || "",
-      coverImageData:entry.coverImageData || ""
+      coverImageData:entry.coverImageData || "",
+      answersType:normalizeOpenBoxAnswersType(entry.answersType),
+      choices:normalizeOpenBoxChoices(entry).choices,
+      correctChoiceIndex:normalizeOpenBoxChoices(entry).correctChoiceIndex
     }));
   }
 
@@ -16523,6 +16629,7 @@
       centerQuestionEnabled: currentGameTemplate === "wheel" ? Boolean(questionPanel?.classList.contains("enabled")) : false,
       centerQuestion: currentGameTemplate === "wheel" ? String(centerQuestionInput?.value || "").trim() : "",
       coverMode: currentGameTemplate === "open-box" ? boxCoverMode : "disabled",
+      multiAnswerEnabled: currentGameTemplate === "open-box" ? openBoxMultiAnswerEnabled : false,
       soundEnabled: wheelSoundEnabled,
       fontFamily: wheelFont,
       arrowColor: normalizeWheelHex(wheelArrowColor,"#111111"),
@@ -16570,12 +16677,16 @@
         imageData: entry.imageData || "",
         coverText: entry.coverText || "",
         coverImageName: entry.coverImageName || "",
-        coverImageData: entry.coverImageData || ""
+        coverImageData: entry.coverImageData || "",
+        ...normalizeOpenBoxChoices(entry)
       }));
       wheelSoundEnabled = draft.soundEnabled !== false && (!draft.sounds || draft.sounds.enabled !== false);
       wheelFont = normalizeWheelFont(draft.fontFamily);
       wheelArrowColor = normalizeWheelHex(draft.arrowColor,"#111111");
       boxCoverMode = normalizeOpenBoxCoverMode(draft.coverMode || "disabled");
+      openBoxMultiAnswerEnabled = currentGameTemplate === "open-box" && Boolean(
+        draft.multiAnswerEnabled || draft.multipleAnswersEnabled || draft.boxAnswerMode === "multiple"
+      );
       cleanOpenBoxEntriesInPlace();
       syncSoundUi();
 
@@ -16755,6 +16866,17 @@
       coverTypePanel.hidden = !isBox || !enabled;
     }
 
+    if (openBoxMultiAnswerPanel) {
+      openBoxMultiAnswerPanel.hidden = !isBox;
+    }
+
+    document.querySelectorAll("[data-open-box-multi-answer]").forEach((btn)=>{
+      const shouldEnable = btn.getAttribute("data-open-box-multi-answer") === "on";
+      const active = isBox && shouldEnable === openBoxMultiAnswerEnabled;
+      btn.classList.toggle("active",active);
+      btn.setAttribute("aria-pressed",String(active));
+    });
+
     document.querySelectorAll("[data-question-toggle]").forEach((btn)=>{
       btn.classList.toggle(
         "active",
@@ -16894,6 +17016,212 @@
 
     group.append(modeLabel,buttons);
     return group;
+  }
+
+  function preserveOpenBoxEditorScroll(renderTask){
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    renderTask();
+    requestAnimationFrame(()=>window.scrollTo(scrollX,scrollY));
+  }
+
+  function createOpenBoxAnswerImagePicker(entryIndex,choiceIndex){
+    const entry = wheelEntries[entryIndex];
+    const choice = entry?.choices?.[choiceIndex] || createOpenBoxChoice();
+    const wrap = document.createElement("div");
+    wrap.className = "quiz-image-picker-wrap";
+
+    const file = document.createElement("input");
+    file.className = "quiz-file-input";
+    file.type = "file";
+    file.accept = "image/*";
+    file.setAttribute("aria-label",`صورة الاختيار ${choiceIndex + 1}`);
+
+    const pickerButton = document.createElement("button");
+    pickerButton.type = "button";
+    pickerButton.className = "quiz-image-picker-button";
+
+    const actionText = document.createElement("span");
+    actionText.className = "quiz-image-picker-action";
+    actionText.textContent = choice.imageData ? "تغيير" : "وضع صورة";
+
+    const info = document.createElement("span");
+    info.className = "quiz-image-picker-info";
+
+    if (choice.imageData) {
+      pickerButton.classList.add("has-image");
+      const thumb = document.createElement("img");
+      thumb.className = "quiz-image-picker-thumb";
+      thumb.alt = "";
+      thumb.src = choice.imageData;
+      const fileName = document.createElement("span");
+      fileName.className = "quiz-image-picker-name";
+      fileName.textContent = choice.imageName || "صورة";
+      info.append(thumb,fileName);
+    } else {
+      const state = document.createElement("span");
+      state.className = "quiz-image-picker-state";
+      state.textContent = "لم تضع صورة";
+      info.appendChild(state);
+    }
+
+    pickerButton.addEventListener("click",()=>file.click());
+    file.addEventListener("change",()=>{
+      const selectedFile = file.files?.[0];
+      if (!selectedFile || !wheelEntries[entryIndex]?.choices?.[choiceIndex]) return;
+      readFileAsDataURL(selectedFile,(imageData)=>{
+        const target = wheelEntries[entryIndex]?.choices?.[choiceIndex];
+        if (!target || !imageData) return;
+        target.imageData = imageData;
+        target.imageName = selectedFile.name || "صورة";
+        saveDraft();
+        preserveOpenBoxEditorScroll(renderWheelEntries);
+      });
+    });
+
+    pickerButton.append(actionText,info);
+    wrap.append(file,pickerButton);
+    return wrap;
+  }
+
+  function setOpenBoxCorrectChoice(entryIndex,choiceIndex){
+    const entry = wheelEntries[entryIndex];
+    if (!entry) return;
+    const normalized = normalizeOpenBoxChoices(entry);
+    entry.answersType = normalized.answersType;
+    entry.choices = normalized.choices;
+    entry.correctChoiceIndex = choiceIndex;
+    entry.choices.forEach((choice,index)=>{ choice.isCorrect = index === choiceIndex; });
+    saveDraft();
+    preserveOpenBoxEditorScroll(renderWheelEntries);
+  }
+
+  function createOpenBoxAnswersEditor(entry,index){
+    const normalized = normalizeOpenBoxChoices(entry);
+    entry.answersType = normalized.answersType;
+    entry.choices = normalized.choices;
+    entry.correctChoiceIndex = normalized.correctChoiceIndex;
+
+    const editor = document.createElement("section");
+    editor.className = "open-box-answers-editor";
+
+    const head = document.createElement("div");
+    head.className = "open-box-answers-head";
+    const title = document.createElement("div");
+    title.className = "open-box-answers-title";
+    title.textContent = "الاختيارات";
+    head.appendChild(title);
+    editor.appendChild(head);
+
+    const typeButtons = document.createElement("div");
+    typeButtons.className = "open-box-answer-type train-side-content-mode-buttons";
+    typeButtons.setAttribute("aria-label",`نوع اختيارات الصندوق ${index + 1}`);
+    [["text","نصوص"],["images","صور"]].forEach(([value,label])=>{
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "train-side-content-mode-btn";
+      button.textContent = label;
+      button.classList.toggle("is-active",entry.answersType === value);
+      button.setAttribute("aria-pressed",String(entry.answersType === value));
+      button.addEventListener("click",()=>{
+        if (!wheelEntries[index] || wheelEntries[index].answersType === value) return;
+        wheelEntries[index].answersType = value;
+        saveDraft();
+        preserveOpenBoxEditorScroll(renderWheelEntries);
+      });
+      typeButtons.appendChild(button);
+    });
+    editor.appendChild(typeButtons);
+
+    const list = document.createElement("div");
+    list.className = "quiz-choices-list";
+
+    entry.choices.forEach((choice,choiceIndex)=>{
+      const row = document.createElement("div");
+      row.className = "quiz-choice-row open-box-answer-row";
+      if (entry.answersType === "images") row.classList.add("is-image-choice");
+
+      const leftActions = document.createElement("div");
+      leftActions.className = "quiz-choice-left-actions";
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "quiz-remove-choice";
+      remove.textContent = "×";
+      remove.disabled = entry.choices.length <= 2;
+      remove.setAttribute("aria-label",`حذف الاختيار ${choiceIndex + 1}`);
+      remove.addEventListener("click",()=>{
+        const target = wheelEntries[index];
+        if (!target || target.choices.length <= 2) return;
+        target.choices.splice(choiceIndex,1);
+        if (target.correctChoiceIndex === choiceIndex) target.correctChoiceIndex = -1;
+        else if (target.correctChoiceIndex > choiceIndex) target.correctChoiceIndex -= 1;
+        target.choices.forEach((item,itemIndex)=>{ item.isCorrect = itemIndex === target.correctChoiceIndex; });
+        saveDraft();
+        preserveOpenBoxEditorScroll(renderWheelEntries);
+      });
+      leftActions.appendChild(remove);
+
+      const content = document.createElement("div");
+      content.className = "quiz-choice-content";
+
+      if (entry.answersType === "images") {
+        content.appendChild(createOpenBoxAnswerImagePicker(index,choiceIndex));
+      } else {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "quiz-text-input";
+        input.maxLength = 100;
+        input.placeholder = `الخيار ${choiceIndex + 1}`;
+        input.value = choice.text || "";
+        input.addEventListener("input",()=>{
+          const target = wheelEntries[index]?.choices?.[choiceIndex];
+          if (!target) return;
+          target.text = input.value;
+          saveDraft();
+        });
+        const review = createSetupReviewButton({
+          label:`مراجعة نص الاختيار ${choiceIndex + 1}`,
+          getValue:()=>input.value,
+          maxLength:100,
+          placeholder:"اكتب الاختيار هنا..",
+          onSave:(value)=>{
+            input.value = value;
+            const target = wheelEntries[index]?.choices?.[choiceIndex];
+            if (target) target.text = value;
+            saveDraft();
+          }
+        });
+        leftActions.appendChild(review);
+        content.appendChild(input);
+      }
+
+      const correct = document.createElement("button");
+      correct.type = "button";
+      correct.className = "quiz-correct-switch";
+      correct.classList.toggle("is-correct",entry.correctChoiceIndex === choiceIndex);
+      correct.setAttribute("aria-label",entry.correctChoiceIndex === choiceIndex ? "هذا هو الاختيار الصحيح" : "تعيين هذا الاختيار كإجابة صحيحة");
+      correct.innerHTML = '<span class="quiz-switch-x">×</span><span class="quiz-switch-check">✓</span>';
+      correct.addEventListener("click",()=>setOpenBoxCorrectChoice(index,choiceIndex));
+
+      row.append(leftActions,content,correct);
+      list.appendChild(row);
+    });
+    editor.appendChild(list);
+
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "quiz-add-choice open-box-answer-add";
+    add.innerHTML = "<span>＋</span><span>إضافة اختيار</span>";
+    add.hidden = entry.choices.length >= 6;
+    add.addEventListener("click",()=>{
+      const target = wheelEntries[index];
+      if (!target || target.choices.length >= 6) return;
+      target.choices.push(createOpenBoxChoice());
+      saveDraft();
+      preserveOpenBoxEditorScroll(renderWheelEntries);
+    });
+    editor.appendChild(add);
+    return editor;
   }
 
 
@@ -17086,6 +17414,10 @@
         box.appendChild(createImagePicker(entry,index,"content"));
       }
 
+      if (currentGameTemplate === "open-box" && openBoxMultiAnswerEnabled) {
+        box.appendChild(createOpenBoxAnswersEditor(entry,index));
+      }
+
       wheelItemsEditor.appendChild(box);
     });
   }
@@ -17174,6 +17506,36 @@
     window.location.href = `${url.pathname}${url.search}`;
   }
 
+  function validateOpenBoxMultiAnswers(entries){
+    if (!openBoxMultiAnswerEnabled) return true;
+
+    for (let index = 0; index < entries.length; index += 1) {
+      const entry = entries[index];
+      const answerData = normalizeOpenBoxChoices(entry);
+      const hasCompleteChoices = answerData.choices.length >= 2 && answerData.choices.every((choice)=>{
+        if (answerData.answersType === "images") {
+          return Boolean(choice.imageData || choice.imageName);
+        }
+        return Boolean(String(choice.text || "").trim());
+      });
+
+      if (!hasCompleteChoices) {
+        alert(`يرجى إكمال اختيارات الصندوق رقم ${index + 1}.`);
+        return false;
+      }
+
+      if (
+        answerData.correctChoiceIndex < 0 ||
+        answerData.correctChoiceIndex >= answerData.choices.length
+      ) {
+        alert(`يرجى تحديد الإجابة الصحيحة للصندوق رقم ${index + 1}.`);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
 
   async function openOpenBoxPage(){
     syncWheelEntriesFromDom();
@@ -17184,6 +17546,7 @@
       alert("يرجى ادخال عناصر الصندوق اولاً");
       return;
     }
+    if (!validateOpenBoxMultiAnswers(entries)) return;
 
     saveDraft();
 
@@ -17210,6 +17573,8 @@
       },
       entries,
       coverMode:normalizeOpenBoxCoverMode(boxCoverMode),
+      multiAnswerEnabled:Boolean(openBoxMultiAnswerEnabled),
+      boxAnswerMode:openBoxMultiAnswerEnabled ? "multiple" : "standard",
       updatedAt: Date.now(),
       payloadId
     };
@@ -17372,6 +17737,18 @@
     });
   });
 
+  document.querySelectorAll("[data-open-box-multi-answer]").forEach((btn)=>{
+    btn.addEventListener("click",()=>{
+      if (currentGameTemplate !== "open-box") return;
+      syncWheelEntriesFromDom();
+      openBoxMultiAnswerEnabled = btn.getAttribute("data-open-box-multi-answer") === "on";
+      cleanOpenBoxEntriesInPlace();
+      applySetupMode();
+      renderWheelEntries();
+      saveDraft();
+    });
+  });
+
   wheelAdvancedToggleBtn?.addEventListener("click",()=>{
     wheelAdvancedOpen = !wheelAdvancedOpen;
     updateWheelAdvancedUi();
@@ -17442,6 +17819,7 @@
         : "يرجى ادخال محتويات العجلة اولاً");
       return;
     }
+    if (currentGameTemplate === "open-box" && !validateOpenBoxMultiAnswers(entries)) return;
 
     saveDraft();
     const selectedTheme = normalizeGameTheme(wheelTheme);
@@ -17467,6 +17845,8 @@
           sounds:{enabled:wheelSoundEnabled,mode:"files"},
           entries,
           coverMode:normalizeOpenBoxCoverMode(boxCoverMode),
+          multiAnswerEnabled:Boolean(openBoxMultiAnswerEnabled),
+          boxAnswerMode:openBoxMultiAnswerEnabled ? "multiple" : "standard",
           payloadId:savedId,
           updatedAt:Date.now()
         }
@@ -24299,6 +24679,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v108-help-responsive-layout -->
+<!-- VERSION: index-v109-multi-answer-box -->
 </body>
 </html>
