@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v83-answer-feedback-marks -->
+  <!-- version: open-box-v84-answer-feedback-sounds -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -2315,13 +2315,17 @@
         open: "sounds/open-box-open.mp3?v=1",
         go: "sounds/open-box-go.mp3?v=2",
         return: "sounds/open-box-return.mp3?v=2",
-        finish: "sounds/match-finish.mp3?v=1"
+        finish: "sounds/match-finish.mp3?v=1",
+        correct: "sounds/match-shuffle-end.mp3?v=1",
+        wrong: "sounds/order-letter-wrong.mp3?v=1"
       };
 
       const VOLUMES = {
         open: 1,
         go: 1,
-        return: 1
+        return: 1,
+        correct: 1,
+        wrong: 1
       };
 
       /*
@@ -2457,7 +2461,9 @@
         playOpen: ()=> playNamed("open"),
         playGo: ()=> playNamed("go"),
         playReturn: ()=> playNamed("return"),
-        playFinish: ()=> playNamed("finish")
+        playFinish: ()=> playNamed("finish"),
+        playCorrect: ()=> playNamed("correct"),
+        playWrong: ()=> playNamed("wrong")
       };
     })();
 
@@ -4363,6 +4369,7 @@
 
         if (choiceIndex === entry.correctChoiceIndex) {
           answeredBoxes.add(boxIndex);
+          openBoxAudio.playCorrect();
           button.classList.add("is-correct");
           feedbackMark.className = "answer-feedback-mark is-correct";
           feedbackMark.textContent = "✓";
@@ -4374,6 +4381,7 @@
         }
 
         button.classList.add("is-wrong","is-feedback-active");
+        openBoxAudio.playWrong();
         feedbackMark.className = "answer-feedback-mark is-wrong";
         feedbackMark.textContent = "×";
         requestAnimationFrame(()=> feedbackMark.classList.add("is-visible"));
@@ -5008,6 +5016,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v83-answer-feedback-marks -->
+  <!-- VERSION: open-box-v84-answer-feedback-sounds -->
 </body>
 </html>
