@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v78-per-item-content -->
+  <!-- version: open-box-v80-multi-answer-fix -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -406,6 +406,90 @@
       overflow:visible;
       filter:drop-shadow(0 6px 10px var(--shadow));
       transform:translateZ(0);
+      transition:transform .48s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .box-card.multi-answer-active .box-wrap{
+      transform:translate3d(0, clamp(-76px, -8vh, -42px), 0);
+    }
+
+    .multi-answer-layer{
+      position:absolute;
+      left:50%;
+      bottom:calc(72px + var(--safe-bottom));
+      width:min(920px, calc(100vw - 2 * var(--edge-guard) - var(--safe-left) - var(--safe-right)));
+      z-index:190;
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform:translate3d(-50%, 22px, 0) scale(.98);
+      transition:opacity .28s ease, transform .36s cubic-bezier(.2,.8,.2,1), visibility 0s linear .36s;
+      direction:rtl;
+    }
+
+    .multi-answer-layer.is-visible{
+      opacity:1;
+      visibility:visible;
+      pointer-events:auto;
+      transform:translate3d(-50%, 0, 0) scale(1);
+      transition-delay:0s;
+    }
+
+    .multi-answer-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:clamp(9px,1.4vw,16px);
+      width:100%;
+    }
+
+    .multi-answer-choice{
+      --answer-color:#1c8fd0;
+      min-width:0;
+      min-height:clamp(56px,8vh,82px);
+      border:clamp(3px,.35vw,5px) solid #111;
+      border-radius:clamp(15px,1.7vw,24px);
+      background:var(--answer-color);
+      color:#fff;
+      padding:clamp(8px,1.2vw,14px) clamp(10px,1.6vw,20px);
+      box-shadow:0 clamp(4px,.7vw,8px) 0 rgba(0,0,0,.2);
+      font:900 clamp(17px,2.2vw,30px)/1.35 "Cairo",sans-serif;
+      overflow-wrap:anywhere;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      transition:transform .18s ease, filter .18s ease, background .18s ease;
+    }
+
+    .multi-answer-choice:nth-child(4n + 2){--answer-color:#f0783f}
+    .multi-answer-choice:nth-child(4n + 3){--answer-color:#6d50c7}
+    .multi-answer-choice:nth-child(4n + 4){--answer-color:#26a86d}
+    .multi-answer-choice:hover{filter:brightness(1.06);transform:translateY(-2px)}
+    .multi-answer-choice:disabled{cursor:default;opacity:.78}
+    .multi-answer-choice.is-correct{--answer-color:#20aa61;opacity:1;filter:none}
+    .multi-answer-choice.is-wrong{--answer-color:#e5484d;opacity:1;filter:none}
+    .multi-answer-choice img{
+      display:block;
+      width:100%;
+      height:clamp(54px,11vh,105px);
+      object-fit:contain;
+      border-radius:12px;
+      background:rgba(255,255,255,.94);
+    }
+
+    @media(max-width:680px){
+      .multi-answer-layer{bottom:calc(68px + var(--safe-bottom));width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
+      .multi-answer-grid{gap:8px}
+      .multi-answer-choice{min-height:54px;font-size:clamp(15px,4.2vw,21px);border-width:3px;border-radius:15px;padding:7px 8px}
+      .multi-answer-choice img{height:clamp(46px,10vh,78px)}
+      .box-card.multi-answer-active .box-wrap{transform:translate3d(0,-44px,0)}
+    }
+
+    @media(max-height:560px) and (orientation:landscape){
+      .multi-answer-layer{bottom:calc(54px + var(--safe-bottom));width:min(840px,calc(100vw - 30px))}
+      .multi-answer-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+      .multi-answer-choice{min-height:42px;font-size:clamp(14px,1.7vw,20px);padding:5px 8px}
+      .multi-answer-choice img{height:44px}
+      .box-card.multi-answer-active .box-wrap{transform:translate3d(0,-32px,0)}
     }
 
     .cavity-box,
@@ -1908,6 +1992,11 @@
       <div class="box-grid" id="boxGrid" aria-label="صناديق اللعبة"></div>
     </section>
 
+    <!-- خارج stage عمدًا حتى لا تقصّها خاصية overflow أثناء حركة الصندوق. -->
+    <section class="multi-answer-layer" id="multiAnswerLayer" aria-hidden="true">
+      <div class="multi-answer-grid" id="multiAnswerGrid" aria-label="اختيارات الصندوق"></div>
+    </section>
+
     <footer class="fixed-controls">
       <button class="back-btn" id="backBtn" type="button">رجوع</button>
       <div class="right-controls">
@@ -2042,6 +2131,8 @@
     const themeBackground = document.getElementById("themeBackground");
     const stage = document.getElementById("stage");
     const grid = document.getElementById("boxGrid");
+    const multiAnswerLayer = document.getElementById("multiAnswerLayer");
+    const multiAnswerGrid = document.getElementById("multiAnswerGrid");
     const resetBtn = document.getElementById("resetBtn");
     const finishBtn = document.getElementById("finishBtn");
     const backBtn = document.getElementById("backBtn");
@@ -2360,12 +2451,15 @@
 
     let currentContentType = "text";
     let currentCoverMode = "disabled";
+    let multiAnswerEnabled = false;
     let finishSequenceToken = 0;
     let finishSequenceTimers = [];
     let currentTheme = normalizeTheme(getUrlParam("theme") || getSavedTheme() || "white");
     let items = loadItems();
     openBoxAudio.setEnabled(boxSoundEnabled);
     let opened = new Set();
+    let answeredBoxes = new Set();
+    let answerPanelBoxIndex = -1;
     let focusedIndex = -1;
     let boxZoomAnimationId = null;
     let boxZoomWebAnimation = null;
@@ -2676,6 +2770,40 @@
       return ["text", "images", "mixed"].includes(type) ? type : "text";
     }
 
+    function normalizeAnswersType(value){
+      return String(value || "").trim().toLowerCase() === "images" ? "images" : "text";
+    }
+
+    function normalizeAnswerChoices(entry){
+      const answersType = normalizeAnswersType(entry?.answersType || entry?.choicesType);
+      const choices = (Array.isArray(entry?.choices)
+        ? entry.choices
+        : Array.isArray(entry?.answers)
+          ? entry.answers
+          : [])
+        .slice(0,6)
+        .map((choice)=>(
+          {
+            text:String(choice?.text || choice?.answer || "").trim(),
+            imageData:choice?.imageData || choice?.image || "",
+            imageName:choice?.imageName || "",
+            isCorrect:Boolean(choice?.isCorrect)
+          }
+        ));
+
+      let correctChoiceIndex = Number.isInteger(entry?.correctChoiceIndex)
+        ? entry.correctChoiceIndex
+        : Number.isInteger(entry?.correctIndex)
+          ? entry.correctIndex
+          : choices.findIndex((choice)=>choice.isCorrect);
+
+      if (correctChoiceIndex < 0 || correctChoiceIndex >= choices.length) {
+        correctChoiceIndex = -1;
+      }
+      choices.forEach((choice,index)=>{ choice.isCorrect = index === correctChoiceIndex; });
+      return {answersType,choices,correctChoiceIndex};
+    }
+
     function normalizePayloadCoverMode(payload, source){
       const explicit = String(
         (!Array.isArray(payload) && payload.coverMode) || ""
@@ -2704,6 +2832,20 @@
 
       currentContentType = normalizePayloadContentType(payload, source);
       currentCoverMode = normalizePayloadCoverMode(payload, source);
+      const explicitlyEnabled = Boolean(
+        !Array.isArray(payload) &&
+        (payload.multiAnswerEnabled || payload.multipleAnswersEnabled || payload.boxAnswerMode === "multiple")
+      );
+      const enabledByUrl = ["1", "true", "multiple"].includes(
+        String(getUrlParam("multiAnswer") || "").trim().toLowerCase()
+      );
+      const hasConfiguredAnswers = source.some((entry)=>{
+        const answerData = normalizeAnswerChoices(entry);
+        return answerData.choices.length >= 2 && answerData.correctChoiceIndex >= 0;
+      });
+
+      // لا نعتمد على علم واحد فقط؛ وجود اختيارات مكتملة يعني أن هذا صندوق متعدد الإجابات.
+      multiAnswerEnabled = explicitlyEnabled || enabledByUrl || hasConfiguredAnswers;
 
       return source
         .map((entry)=> {
@@ -2711,6 +2853,7 @@
             entry?.contentType || entry?.type,
             currentContentType
           );
+          const answerData = normalizeAnswerChoices(entry);
           const clean = {
             contentType,
             text:String(entry.text || entry.title || entry.answer || "").trim(),
@@ -2718,7 +2861,10 @@
             imageName:entry.imageName || "",
             coverText:String(entry.coverText || "").trim(),
             coverImageData:entry.coverImageData || entry.coverImage || "",
-            coverImageName:entry.coverImageName || ""
+            coverImageName:entry.coverImageName || "",
+            answersType:answerData.answersType,
+            choices:answerData.choices,
+            correctChoiceIndex:answerData.correctChoiceIndex
           };
 
           if (contentType === "text") {
@@ -2838,6 +2984,9 @@
           (payloadId ? sessionStorage.getItem(`sandooq_open_box_payload_v1_${payloadId}`) : "") ||
           sessionStorage.getItem("sandooq_open_box_payload_v1") ||
           sessionStorage.getItem("sandooq_open_box_draft_v1") ||
+          (payloadId ? localStorage.getItem(`sandooq_open_box_payload_v1_${payloadId}`) : "") ||
+          localStorage.getItem("sandooq_open_box_payload_v1") ||
+          localStorage.getItem("sandooq_open_box_draft_v1") ||
           "";
         if (!raw) return DEMO_ITEMS;
 
@@ -3191,6 +3340,7 @@
     }
 
     function renderBoxes(){
+      hideMultiAnswerPanel();
       applyLayout();
       grid.innerHTML = "";
 
@@ -3927,8 +4077,12 @@
         grid.classList.remove("motion-active");
 
         requestAnimationFrame(()=> {
-          if (opened.has(index)) fitOpenedBoxContent(button);
-          else fitClosedCoverText(button);
+          if (opened.has(index)) {
+            fitOpenedBoxContent(button);
+            showMultiAnswerPanel(items[index],index,button);
+          } else {
+            fitClosedCoverText(button);
+          }
         });
 
         collapseSafariBars();
@@ -3938,6 +4092,81 @@
           scheduleResponsiveLayout(40);
         }
       }
+    }
+
+    function hideMultiAnswerPanel(){
+      multiAnswerLayer?.classList.remove("is-visible");
+      multiAnswerLayer?.setAttribute("aria-hidden","true");
+      if (multiAnswerGrid) multiAnswerGrid.innerHTML = "";
+      grid?.querySelectorAll(".box-card.multi-answer-active").forEach((card)=>{
+        card.classList.remove("multi-answer-active");
+      });
+      answerPanelBoxIndex = -1;
+    }
+
+    function createMultiAnswerChoice(choice, choiceIndex, entry, boxIndex){
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "multi-answer-choice";
+      button.dataset.choiceIndex = String(choiceIndex);
+
+      if (entry.answersType === "images") {
+        const image = document.createElement("img");
+        image.alt = `الاختيار ${choiceIndex + 1}`;
+        image.src = choice.imageData || choice.imageName || "";
+        button.appendChild(image);
+      } else {
+        button.textContent = choice.text || `الاختيار ${choiceIndex + 1}`;
+      }
+
+      if (answeredBoxes.has(boxIndex)) {
+        button.disabled = true;
+        if (choiceIndex === entry.correctChoiceIndex) button.classList.add("is-correct");
+      }
+
+      button.addEventListener("click",(event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+        if (answeredBoxes.has(boxIndex) || button.disabled) return;
+
+        if (choiceIndex === entry.correctChoiceIndex) {
+          answeredBoxes.add(boxIndex);
+          button.classList.add("is-correct");
+          multiAnswerGrid?.querySelectorAll(".multi-answer-choice").forEach((item)=>{
+            item.disabled = true;
+          });
+          return;
+        }
+
+        button.classList.add("is-wrong");
+        button.disabled = true;
+      });
+
+      return button;
+    }
+
+    function showMultiAnswerPanel(entry, boxIndex, card){
+      if (!multiAnswerEnabled || !multiAnswerLayer || !multiAnswerGrid) return false;
+
+      const answerData = normalizeAnswerChoices(entry);
+      if (answerData.choices.length < 2 || answerData.correctChoiceIndex < 0) return false;
+
+      entry.answersType = answerData.answersType;
+      entry.choices = answerData.choices;
+      entry.correctChoiceIndex = answerData.correctChoiceIndex;
+
+      multiAnswerGrid.innerHTML = "";
+      answerData.choices.forEach((choice,choiceIndex)=>{
+        multiAnswerGrid.appendChild(
+          createMultiAnswerChoice(choice,choiceIndex,entry,boxIndex)
+        );
+      });
+
+      answerPanelBoxIndex = boxIndex;
+      card?.classList.add("multi-answer-active");
+      multiAnswerLayer.classList.add("is-visible");
+      multiAnswerLayer.setAttribute("aria-hidden","false");
+      return true;
     }
 
     async function openSelectedBox(event){
@@ -3972,6 +4201,7 @@
 
         // نمنع رجوع المشهد أثناء اكتمال حركة الغطاء.
         await wait(1320);
+        showMultiAnswerPanel(items[selectedBoxIndex],selectedBoxIndex,activeFocusButton);
       } finally {
         boxInteractionLocked = false;
         if (pendingViewportLayout && !introLayoutFrozen) {
@@ -3982,6 +4212,8 @@
 
     async function returnFocusScene(){
       if (boxInteractionLocked) return;
+
+      hideMultiAnswerPanel();
 
       openBoxAudio.unlock();
       openBoxAudio.playReturn();
@@ -4015,7 +4247,16 @@
       if (!hasFocusedScene()) return;
       if (boxInteractionLocked) return;
       if (event?.target?.closest?.(".fixed-controls")) return;
+      if (event?.target?.closest?.(".multi-answer-layer")) return;
       if (selectedBoxIndex < 0 || !activeFocusButton) return;
+
+      if (
+        multiAnswerEnabled &&
+        answerPanelBoxIndex === selectedBoxIndex &&
+        !answeredBoxes.has(selectedBoxIndex)
+      ) {
+        return;
+      }
 
       if (event) {
         event.preventDefault();
@@ -4081,6 +4322,7 @@
     }
 
     async function showEndCelebration(){
+      hideMultiAnswerPanel();
       const token = ++finishSequenceToken;
       clearFinishSequenceTimers();
       resetFinishSequenceClasses();
@@ -4141,6 +4383,8 @@
       }
 
       opened.clear();
+      answeredBoxes.clear();
+      hideMultiAnswerPanel();
 
       document.querySelectorAll(".box-card.opened").forEach((card)=>{
         card.classList.remove("opened");
@@ -4205,12 +4449,18 @@
     function goBack(){
       try {
         sessionStorage.setItem("sandooq_open_box_return_v1", String(Date.now()));
-        if (history.length > 1) {
-          history.back();
+      } catch (_) {}
+
+      const requestedReturn = getUrlParam("return") || "index.html#wheelSetup";
+      try {
+        const destination = new URL(requestedReturn, window.location.href);
+        if (destination.origin === window.location.origin) {
+          window.location.replace(`${destination.pathname}${destination.search}${destination.hash}`);
           return;
         }
       } catch (_) {}
-      window.location.href = "index.html";
+
+      window.location.replace("index.html#wheelSetup");
     }
 
     let openBoxGameStarted = false;
@@ -4501,6 +4751,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v78-per-item-content -->
+  <!-- VERSION: open-box-v80-multi-answer-fix -->
 </body>
 </html>

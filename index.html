@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v109-multi-answer-box -->
+<!-- version: index-v110-multi-answer-box-fix -->
 <meta charset="utf-8"/>
-<meta content="index-v109-multi-answer-box" name="sandooq-build"/>
+<meta content="index-v110-multi-answer-box-fix" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -17592,6 +17592,13 @@
       sessionStorage.setItem("sandooq_edu_box_theme_v1", selectedTheme);
     } catch (_) {}
 
+    // نسخة احتياطية خفيفة للمسار نفسه؛ تُستخدم فقط إذا أعاد المتصفح إنشاء التبويب.
+    try {
+      const serializedPayload = JSON.stringify(payload);
+      localStorage.setItem(OPEN_BOX_PAYLOAD_KEY, serializedPayload);
+      localStorage.setItem(OPEN_BOX_DRAFT_KEY, serializedPayload);
+    } catch (_) {}
+
     try {
       await savePayloadToIndexedDB(`open-box:${payloadId}`, payload);
     } catch (_) {}
@@ -17600,6 +17607,9 @@
     url.searchParams.set("payloadId", payloadId);
     url.searchParams.set("theme", selectedTheme);
     url.searchParams.set("intro", "1");
+    url.searchParams.set("launch", "test");
+    url.searchParams.set("return", "index.html#wheelSetup");
+    url.searchParams.set("multiAnswer", openBoxMultiAnswerEnabled ? "1" : "0");
     url.searchParams.set("v", String(Date.now()));
 
     window.location.href = `${url.pathname}${url.search}`;
