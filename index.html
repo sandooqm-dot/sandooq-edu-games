@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v99-train-stacked-layout -->
+<!-- version: index-v100-train-flex-layout -->
 <meta charset="utf-8"/>
-<meta content="index-v99-train-stacked-layout" name="sandooq-build"/>
+<meta content="index-v100-train-flex-layout" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -13524,6 +13524,50 @@
       ) .choices-actions{
         grid-template-columns:minmax(0,1fr) !important;
       }
+    }
+
+    /*
+      v100 — حسم تخطيط صفحة القطار:
+      إخراج جسم الصفحة من Grid القديم نهائيًا حتى لا تؤثر قواعد الأعمدة
+      السابقة في قسم المحتويات عند أي عرض أو مستوى تكبير.
+    */
+    #trainSetupScreen .train-setup-body{
+      display:flex !important;
+      flex-direction:column !important;
+      flex-wrap:nowrap !important;
+      align-items:stretch !important;
+      gap:clamp(14px,1.8vw,22px) !important;
+      width:100% !important;
+      max-width:100% !important;
+      min-width:0 !important;
+    }
+
+    #trainSetupScreen .train-setup-body > .choices-section:first-of-type{
+      order:1 !important;
+    }
+
+    #trainSetupScreen .train-setup-body > .choices-section:nth-of-type(2){
+      order:2 !important;
+    }
+
+    #trainSetupScreen .train-setup-body > .choices-actions{
+      order:3 !important;
+    }
+
+    #trainSetupScreen .train-setup-body > .choices-section:first-of-type,
+    #trainSetupScreen .train-setup-body > .choices-section:nth-of-type(2),
+    #trainSetupScreen .train-setup-body > .choices-actions{
+      position:relative !important;
+      inset:auto !important;
+      flex:0 0 auto !important;
+      align-self:stretch !important;
+      grid-column:auto !important;
+      grid-row:auto !important;
+      width:100% !important;
+      min-width:0 !important;
+      max-width:100% !important;
+      height:auto !important;
+      margin-inline:0 !important;
     }
 </style>
 </head>
