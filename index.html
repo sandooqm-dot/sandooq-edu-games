@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v107-train-content-scroll-stable -->
+<!-- version: index-v108-help-responsive-layout -->
 <meta charset="utf-8"/>
-<meta content="index-v107-train-content-scroll-stable" name="sandooq-build"/>
+<meta content="index-v108-help-responsive-layout" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -10479,11 +10479,15 @@
     @keyframes eduDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(-10px)}}
     @keyframes eduSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 
-    .help-screen{max-width:980px !important}
+    .help-screen{
+      width:min(1480px,calc(100% - 24px)) !important;
+      max-width:1480px !important;
+      padding:clamp(18px,2vw,30px) !important;
+    }
     .help-intro{margin-bottom:15px !important}
     .help-search-wrap{
       position:relative;
-      width:min(720px,100%);
+      width:min(940px,100%);
       margin:0 auto 18px;
     }
     .help-search-input{
@@ -10512,7 +10516,7 @@
     }
     .help-empty{
       margin:12px auto 0;
-      max-width:720px;
+      max-width:940px;
       text-align:center;
       color:#8b2a2a;
       background:#fff0f0;
@@ -10522,10 +10526,11 @@
       font-weight:700;
     }
     .help-list{
-      width:min(820px,100%);
+      width:100%;
       margin:0 auto;
       display:grid;
       gap:11px;
+      align-items:start;
     }
     .help-item{
       border:3px solid var(--ink);
@@ -10562,6 +10567,35 @@
       line-height:1.85;
     }
     .help-item li{margin-top:8px}
+
+    /* الآيباد والكمبيوتر: استغلال عرض الشاشة بدل إبقاء الصفحة كعمود جوال. */
+    @media(min-width:700px){
+      .help-list{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:14px 16px;
+      }
+
+      .help-item{
+        min-width:0;
+        align-self:start;
+      }
+
+      .help-item:first-child{
+        grid-column:1 / -1;
+      }
+
+      .help-item summary{
+        min-height:58px;
+        padding:11px clamp(14px,1.5vw,22px);
+        font-size:clamp(16px,1.35vw,21px);
+      }
+
+      .help-item ul{
+        padding:4px clamp(30px,3vw,46px) 18px clamp(18px,2vw,28px);
+        font-size:clamp(14px,1.15vw,18px);
+        line-height:1.8;
+      }
+    }
 
     @media(max-width:760px){
       .title-pill{
@@ -24265,6 +24299,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v107-train-content-scroll-stable -->
+<!-- VERSION: index-v108-help-responsive-layout -->
 </body>
 </html>
