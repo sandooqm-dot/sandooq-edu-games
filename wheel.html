@@ -563,17 +563,18 @@
     }
 
     .wheel-center.has-question{
-      width:26%;
-      height:26%;
+      width:34%;
+      height:34%;
       min-width:0;
       min-height:0;
       flex:none;
       aspect-ratio:auto;
-      font-size:clamp(15px, 3.10vmin, 34px);
-      line-height:1.16;
-      padding:clamp(10px, 1.85vmin, 20px);
+      font-size:clamp(14px, 2.9vmin, 32px);
+      line-height:1.28;
+      padding:clamp(8px, 1.35vmin, 15px);
       border-width:5px;
       box-shadow:0 0 0 4px rgba(255,255,255,.92), 0 3px 10px rgba(0,0,0,.14);
+      white-space:pre-wrap;
       overflow-wrap:anywhere;
       word-break:normal;
     }
@@ -926,10 +927,10 @@
       }
 
       .wheel-center.has-question{
-        width:25.5%;
-        height:25.5%;
-        font-size:clamp(13px, 3.25vmin, 30px);
-        padding:clamp(8px, 1.8vmin, 18px);
+        width:33%;
+        height:33%;
+        font-size:clamp(12px, 2.8vmin, 28px);
+        padding:clamp(7px, 1.2vmin, 14px);
       }
 
       .selected-result{
@@ -2837,7 +2838,7 @@
         Use a stable geometric center radius for layout math.
         getBoundingClientRect() is affected by zoom transforms, which made mixed text/image shrink after focus.
       */
-      const centerRadius = size * (payload.centerQuestionEnabled ? 0.130 : 0.0925);
+      const centerRadius = size * (payload.centerQuestionEnabled ? 0.170 : 0.0925);
 
       const rimRadius = size * 0.448;
       const innerEdge = centerRadius + size * (count <= 5 ? 0.064 : count <= 8 ? 0.058 : count <= 12 ? 0.052 : 0.046);
@@ -3422,7 +3423,7 @@
       /* تثبيت دائرة المنتصف كمربع حقيقي؛ الخط لا يستطيع تمديدها إلى شكل بيضاوي. */
       if (wheelCenter) {
         const centerRatio = payload?.centerQuestionEnabled
-          ? ((geometry.viewportW || 0) > (geometry.viewportH || 0) ? 0.255 : 0.26)
+          ? ((geometry.viewportW || 0) > (geometry.viewportH || 0) ? 0.33 : 0.34)
           : 0.185;
         const centerSize = Math.max(44, Math.round(geometry.size * centerRatio));
         wheelCenter.style.width = `${centerSize}px`;
@@ -3756,14 +3757,22 @@
       if (!question) return;
 
       wheelCenter.style.fontSize = "";
-      wheelCenter.style.whiteSpace = "normal";
+      wheelCenter.style.whiteSpace = "pre-wrap";
       wheelCenter.style.wordBreak = "normal";
-      wheelCenter.style.overflowWrap = "break-word";
+      wheelCenter.style.overflowWrap = "anywhere";
       wheelCenter.style.overflow = "hidden";
 
       const computed = getComputedStyle(wheelCenter);
       const maxSize = Math.max(12, parseFloat(computed.fontSize || "20"));
-      const minSize = question.length > 60 ? 8.5 : question.length > 38 ? 9.5 : 10.5;
+      const minSize = question.length > 160
+        ? 7
+        : question.length > 100
+          ? 7.75
+          : question.length > 60
+            ? 8.5
+            : question.length > 38
+              ? 9.5
+              : 10.5;
 
       let low = minSize;
       let high = maxSize;
@@ -3782,7 +3791,8 @@
         }
       }
 
-      wheelCenter.style.fontSize = `${Math.max(minSize, best * 0.985).toFixed(2)}px`;
+      wheelCenter.style.fontSize = `${Math.max(minSize, best * 0.97).toFixed(2)}px`;
+      wheelCenter.setAttribute("aria-label", question);
     }
 
     function clearSelected(){
@@ -4344,5 +4354,6 @@
     themeIntroAudio.preload(payload.theme);
     wheelAudio.ready("finish");
   </script>
+<!-- VERSION: wheel-v41-long-center-question -->
 </body>
 </html>
