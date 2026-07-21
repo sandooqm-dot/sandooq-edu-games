@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v106-train-content-buttons-row -->
+<!-- version: index-v107-train-content-scroll-stable -->
 <meta charset="utf-8"/>
-<meta content="index-v106-train-content-buttons-row" name="sandooq-build"/>
+<meta content="index-v107-train-content-scroll-stable" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -22910,7 +22910,7 @@
     return group;
   }
 
-  function createTrainContentModeControl(media,onChange,label){
+  function createTrainContentModeControl(media,onChange,label,contentIndex){
     const group = document.createElement("div");
     group.className = "train-side-content-mode";
 
@@ -22936,10 +22936,11 @@
       button.setAttribute("aria-label",`${label}: ${text}`);
       button.setAttribute("aria-pressed",String(media.contentType === value));
       button.classList.toggle("is-active",media.contentType === value);
-      button.addEventListener("click",()=>{
+      button.addEventListener("click",(event)=>{
+        event.preventDefault();
         if (media.contentType === value) return;
         media.contentType = value;
-        renderContents();
+        renderTrainContentsKeepingPosition(contentIndex);
         saveDraft();
       });
       buttons.appendChild(button);
@@ -22949,7 +22950,7 @@
     return group;
   }
 
-  function createSideEditor(entry,key,title){
+  function createSideEditor(entry,key,title,contentIndex){
     const media = entry[key];
     const side = document.createElement("section");
     side.className = "match-card-editor train-match-card-editor";
@@ -22957,7 +22958,7 @@
     const heading = document.createElement("h4");
     heading.className = "match-card-editor-title";
     heading.textContent = title;
-    side.append(heading,createTrainContentModeControl(media,saveDraft,title));
+    side.append(heading,createTrainContentModeControl(media,saveDraft,title,contentIndex));
 
     if (media.contentType === "text" || media.contentType === "mixed") {
       side.appendChild(createTextControl(
@@ -22988,6 +22989,7 @@
     contents.forEach((entry,index)=>{
       const card = document.createElement("article");
       card.className = "match-pair-entry train-content-card";
+      card.dataset.trainContentIndex = String(index);
 
       const head = document.createElement("div");
       head.className = "match-pair-head";
@@ -23013,12 +23015,43 @@
       const fields = document.createElement("div");
       fields.className = "match-pair-cards train-content-fields";
       fields.append(
-        createSideEditor(entry,"wagon","محتوى العربة"),
-        createSideEditor(entry,"balloon","محتوى البالون")
+        createSideEditor(entry,"wagon","محتوى العربة",index),
+        createSideEditor(entry,"balloon","محتوى البالون",index)
       );
 
       card.append(head,fields);
       contentsEditor.appendChild(card);
+    });
+  }
+
+  function renderTrainContentsKeepingPosition(contentIndex){
+    const scrollingElement = document.scrollingElement || document.documentElement;
+    const selector = `.train-content-card[data-train-content-index="${contentIndex}"]`;
+    const previousCard = contentsEditor?.querySelector(selector);
+    const previousTop = previousCard?.getBoundingClientRect().top;
+    const previousScrollTop = scrollingElement.scrollTop;
+    const previousScrollLeft = scrollingElement.scrollLeft;
+
+    renderContents();
+
+    const restorePosition = ()=>{
+      const currentCard = contentsEditor?.querySelector(selector);
+      let nextScrollTop = previousScrollTop;
+
+      if (currentCard && Number.isFinite(previousTop)) {
+        nextScrollTop = scrollingElement.scrollTop
+          + currentCard.getBoundingClientRect().top
+          - previousTop;
+      }
+
+      scrollingElement.scrollTop = nextScrollTop;
+      scrollingElement.scrollLeft = previousScrollLeft;
+    };
+
+    restorePosition();
+    requestAnimationFrame(()=>{
+      restorePosition();
+      requestAnimationFrame(restorePosition);
     });
   }
 
@@ -24232,6 +24265,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v106-train-content-buttons-row -->
+<!-- VERSION: index-v107-train-content-scroll-stable -->
 </body>
 </html>
