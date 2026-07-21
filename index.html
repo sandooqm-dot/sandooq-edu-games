@@ -16462,9 +16462,12 @@
     };
 
     try {
-      sessionStorage.setItem(WHEEL_DRAFT_KEY, JSON.stringify(payload));
+      const serializedDraft = JSON.stringify(payload);
+      sessionStorage.setItem(WHEEL_DRAFT_KEY, serializedDraft);
+      localStorage.setItem(WHEEL_DRAFT_KEY, serializedDraft);
       if (currentGameTemplate === "open-box") {
-        sessionStorage.setItem(OPEN_BOX_DRAFT_KEY, JSON.stringify(payload));
+        sessionStorage.setItem(OPEN_BOX_DRAFT_KEY, serializedDraft);
+        localStorage.setItem(OPEN_BOX_DRAFT_KEY, serializedDraft);
       }
     } catch (_) {}
   }
@@ -16473,7 +16476,7 @@
     try {
       let draft = providedDraft;
       if (!draft) {
-        const raw = sessionStorage.getItem(WHEEL_DRAFT_KEY);
+        const raw = sessionStorage.getItem(WHEEL_DRAFT_KEY) || localStorage.getItem(WHEEL_DRAFT_KEY);
         if (!raw) return false;
         draft = JSON.parse(raw);
       }
@@ -17052,6 +17055,8 @@
     const url = new URL("wheel.html", window.location.href);
     url.searchParams.set("payloadId", payloadId);
     url.searchParams.set("theme", selectedTheme);
+    url.searchParams.set("launch", "test");
+    url.searchParams.set("return", "index.html#wheelSetup");
     url.searchParams.set("v", String(Date.now()));
 
     window.location.href = `${url.pathname}${url.search}`;
@@ -24121,6 +24126,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v100-long-wheel-center-question -->
+<!-- VERSION: index-v101-wheel-test-draft-preserved -->
 </body>
 </html>

@@ -2561,17 +2561,38 @@
     function clearWheelRuntimeStorage(){
       try {
         sessionStorage.removeItem(PAYLOAD_KEY);
-        sessionStorage.removeItem(DRAFT_KEY);
         localStorage.removeItem(PAYLOAD_KEY);
-        localStorage.removeItem(DRAFT_KEY);
       } catch (_) {}
     }
 
     function persistPayload(){
-      // Permanent saved games are disabled for now.
-      // We clear the temporary wheel session only when leaving the wheel/home navigation.
-      // Browser refresh does not call this function, so the activity stays visible after refresh.
-      clearWheelRuntimeStorage();
+      // بيانات التشغيل تخص نسخة الاختبار الحالية فقط.
+      // لا نلمس DRAFT_KEY هنا مطلقًا حتى تبقى محتويات صفحة الإنشاء بعد الاختبار والرجوع.
+      try {
+        const serializedPayload = JSON.stringify(payload);
+        sessionStorage.setItem(PAYLOAD_KEY, serializedPayload);
+        localStorage.setItem(PAYLOAD_KEY, serializedPayload);
+
+        const params = new URLSearchParams(window.location.search || "");
+        const payloadId = params.get("payloadId") || payload?.payloadId || "";
+        if (payloadId) {
+          sessionStorage.setItem(`${PAYLOAD_KEY}_${payloadId}`, serializedPayload);
+          localStorage.setItem(`${PAYLOAD_KEY}_${payloadId}`, serializedPayload);
+        }
+      } catch (_) {}
+    }
+
+    function getEditorReturnUrl(){
+      const fallback = new URL("index.html#wheelSetup", window.location.href);
+      try {
+        const params = new URLSearchParams(window.location.search || "");
+        const requested = params.get("return") || params.get("returnTo") || "";
+        if (!requested) return fallback.href;
+        const resolved = new URL(requested, window.location.href);
+        return resolved.origin === window.location.origin ? resolved.href : fallback.href;
+      } catch (_) {
+        return fallback.href;
+      }
     }
 
     function clonePayload(source){
@@ -4196,12 +4217,7 @@
       wheelAudio.unlock();
       wheelAudio.playButton();
       persistPayload();
-
-      if (document.referrer && document.referrer !== location.href) {
-        history.back();
-      } else {
-        window.location.href = "index-6.html#wheelSetup";
-      }
+      window.location.assign(getEditorReturnUrl());
     });
 
     window.addEventListener("resize", ()=> {
@@ -4354,6 +4370,6 @@
     themeIntroAudio.preload(payload.theme);
     wheelAudio.ready("finish");
   </script>
-<!-- VERSION: wheel-v41-long-center-question -->
+<!-- VERSION: wheel-v42-preserve-editor-draft -->
 </body>
 </html>
