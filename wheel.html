@@ -2375,7 +2375,11 @@
       const type = normalizeWheelType(data.type);
       const theme = normalizeWheelTheme(data.theme || data.wheelTheme || data.selectedTheme);
       const sourceEntries = firstArray(data.entries, data.items, data.wheelEntries, data.images, data.cards);
-      const normalized = sourceEntries.map((entry, index)=> normalizeWheelEntry(entry, index));
+      const normalized = sourceEntries.map((entry, index)=> {
+        const normalizedEntry = normalizeWheelEntry(entry, index);
+        normalizedEntry.contentType = normalizeWheelType(normalizedEntry.contentType || type);
+        return normalizedEntry;
+      });
       const filled = normalized.filter((entry)=> isEntryFilledForType(entry, type));
       const entries = filled.length ? filled : [];
 
@@ -2528,6 +2532,7 @@
       const item = entry && typeof entry === "object" ? entry : { text: entry };
 
       return {
+        contentType: firstString(item.contentType, item.type),
         text: firstString(item.text, item.label, item.title, item.question, item.name),
         imageName: firstString(item.imageName, item.fileName, item.filename, item.name),
         imageData: firstString(item.imageData, item.dataUrl, item.dataURL, item.image, item.src, item.url, item.href),
@@ -2536,8 +2541,9 @@
     }
 
     function isEntryFilledForType(entry, type){
-      if (type === "images") return Boolean(entry.imageData || entry.imageName);
-      if (type === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
+      const entryType = normalizeWheelType(entry?.contentType || type);
+      if (entryType === "images") return Boolean(entry.imageData || entry.imageName);
+      if (entryType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
       return Boolean(entry.text);
     }
 
@@ -2603,6 +2609,7 @@
         theme: normalizeWheelTheme(data.theme || data.wheelTheme || data.selectedTheme),
         entries: Array.isArray(data.entries)
           ? data.entries.map((entry, index)=> ({
+              contentType: normalizeWheelType(entry?.contentType || data.type),
               text: String(entry?.text || ""),
               imageName: String(entry?.imageName || ""),
               imageData: String(entry?.imageData || ""),
@@ -2751,7 +2758,8 @@
     function textForEntry(entry, index){
       const text = String(entry.text || "").trim();
       if (text) return text;
-      if (payload.type !== "text") return "";
+      const entryType = normalizeWheelType(entry?.contentType || payload.type);
+      if (entryType !== "text") return "";
       const imageName = String(entry.imageName || "").trim();
       if (imageName) return imageName.replace(/\.[^.]+$/, "");
       return "";
@@ -2846,8 +2854,9 @@
       const size = Math.max(260, layoutGeometry.size || wheelShell.offsetWidth || wheelShell.clientWidth || 360);
       const sectorCount = Math.max(liveCount || count, 1);
       const step = 360 / sectorCount;
-      const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
-      const hasText = Boolean(payload.type !== "images" && textForEntry(entry, 0));
+      const entryType = normalizeWheelType(entry?.contentType || payload.type);
+      const hasImage = Boolean((entryType === "images" || entryType === "mixed") && entry.imageData);
+      const hasText = Boolean(entryType !== "images" && textForEntry(entry, 0));
       const imageOnly = hasImage && !hasText;
       const mixed = hasImage && hasText;
       const text = textForEntry(entry, 0);
@@ -3295,8 +3304,9 @@
 
         const isDark = colorBrightness(color) > 168;
         const toneClass = isDark ? "dark" : "light";
-        const hasImage = Boolean((payload.type === "images" || payload.type === "mixed") && entry.imageData);
-        const hasText = Boolean(payload.type !== "images" && textForEntry(entry, index));
+        const entryType = normalizeWheelType(entry?.contentType || payload.type);
+        const hasImage = Boolean((entryType === "images" || entryType === "mixed") && entry.imageData);
+        const hasText = Boolean(entryType !== "images" && textForEntry(entry, index));
         const node = { baseAngle: mid, entry, labels: [] };
 
         if (hasImage && hasText) {
@@ -4370,6 +4380,6 @@
     themeIntroAudio.preload(payload.theme);
     wheelAudio.ready("finish");
   </script>
-<!-- VERSION: wheel-v42-preserve-editor-draft -->
+<!-- VERSION: wheel-v43-per-item-content -->
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v100-train-flex-layout -->
+<!-- version: index-v102-wheel-per-item-content -->
 <meta charset="utf-8"/>
 <meta content="index-v100-train-flex-layout" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
@@ -11713,6 +11713,23 @@
       color:#fff;
     }
 
+    .wheel-entry-content-mode{
+      margin:4px 0 2px;
+      padding:12px;
+      border:2px solid rgba(17,17,17,.16);
+      border-radius:16px;
+      background:#f8f8f8;
+    }
+
+    .wheel-entry-content-mode .train-side-content-mode-label{
+      font-size:clamp(13px,1.25vw,16px);
+    }
+
+    .wheel-entry-content-mode .train-side-content-mode-btn{
+      min-height:42px;
+      font-size:clamp(12px,1.2vw,15px);
+    }
+
     .train-match-card-editor .match-text-row{
       display:grid;
       grid-template-columns:minmax(0,1fr) 46px;
@@ -13761,7 +13778,7 @@
       </div>
 
       <div class="choices-config-grid wheel-modern-config-grid">
-        <div class="choices-config-group">
+        <div class="choices-config-group" id="wheelGlobalContentTypeGroup">
           <h4 class="choices-config-group-title" id="contentTypeGroupTitle">نوع المحتوى</h4>
           <div aria-label="نوع المحتوى" class="choices-mode-grid wheel-options wheel-content-mode-grid">
             <button class="choices-mode-btn wheel-type active" data-wheel-type="text" type="button"><strong>نصوص</strong></button>
@@ -16054,6 +16071,7 @@
   const coverTypePanel = document.getElementById("coverTypePanel");
   const itemsTitle = document.getElementById("itemsTitle");
   const contentTypeGroupTitle = document.getElementById("contentTypeGroupTitle");
+  const wheelGlobalContentTypeGroup = document.getElementById("wheelGlobalContentTypeGroup");
   const addWheelItemText = document.getElementById("addWheelItemText");
   const setupCenterReviewBtn = document.getElementById("setupCenterReviewBtn");
   const wheelAdvancedToggleBtn = document.getElementById("wheelAdvancedToggleBtn");
@@ -16174,6 +16192,7 @@
 
   function entryHint(){
     const target = currentGameTemplate === "open-box" ? "الصناديق" : "أقسام العجلة";
+    if (currentGameTemplate === "wheel") return "اختر نوع المحتوى داخل كل عنصر، ثم أضف نصًا أو صورة أو كليهما.";
     if (wheelContentType === "images") return `أضف الصور التي تظهر داخل ${target}.`;
     if (wheelContentType === "mixed") return "أضف صورة ومعها نص مختصر لكل عنصر.";
     return currentGameTemplate === "open-box" ? "أضف الكلمات أو الأسئلة التي تظهر بعد فتح الصندوق." : "أضف كلمات أو أسئلة قصيرة.";
@@ -16331,7 +16350,15 @@
   }
 
   function createEntry(){
-    const base = { text:"", imageName:"", imageData:"", coverText:"", coverImageName:"", coverImageData:"" };
+    const base = {
+      contentType: currentGameTemplate === "wheel" ? "text" : normalizeOpenBoxContentType(wheelContentType),
+      text:"",
+      imageName:"",
+      imageData:"",
+      coverText:"",
+      coverImageName:"",
+      coverImageData:""
+    };
     if (wheelContentType === "images") base.text = "";
     if (wheelContentType === "text") {
       base.imageName = "";
@@ -16344,6 +16371,19 @@
   function normalizeOpenBoxContentType(value){
     const type = String(value || "").trim().toLowerCase();
     return ["text", "images", "mixed"].includes(type) ? type : "text";
+  }
+
+  function normalizeWheelEntryContentType(value, fallback = "text"){
+    return normalizeOpenBoxContentType(value || fallback);
+  }
+
+  function getWheelPayloadType(entries = wheelEntries){
+    if (currentGameTemplate !== "wheel") return normalizeOpenBoxContentType(wheelContentType);
+    const types = (Array.isArray(entries) ? entries : [])
+      .map((entry)=>normalizeWheelEntryContentType(entry?.contentType,"text"));
+    if (!types.length || types.every((type)=>type === "text")) return "text";
+    if (types.every((type)=>type === "images")) return "images";
+    return "mixed";
   }
 
   function normalizeOpenBoxCoverMode(value){
@@ -16415,8 +16455,9 @@
       );
     }
 
-    if (wheelContentType === "images") return Boolean(entry.imageData || entry.imageName);
-    if (wheelContentType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
+    const entryType = normalizeWheelEntryContentType(entry?.contentType,"text");
+    if (entryType === "images") return Boolean(entry.imageData || entry.imageName);
+    if (entryType === "mixed") return Boolean(entry.text || entry.imageData || entry.imageName);
     return Boolean(entry.text);
   }
 
@@ -16430,6 +16471,9 @@
       : wheelEntries;
 
     return source.filter(isEntryFilled).map((entry)=> ({
+      contentType: currentGameTemplate === "wheel"
+        ? normalizeWheelEntryContentType(entry.contentType,"text")
+        : normalizeOpenBoxContentType(wheelContentType),
       text:String(entry.text || "").trim(),
       imageName:entry.imageName || "",
       imageData:entry.imageData || "",
@@ -16445,7 +16489,7 @@
 
     const payload = {
       gameTemplate: currentGameTemplate,
-      type: wheelContentType,
+      type: currentGameTemplate === "wheel" ? getWheelPayloadType(wheelEntries) : wheelContentType,
       theme: normalizeGameTheme(wheelTheme),
       gameName: String(wheelGameNameInput?.value || "").trim(),
       entries: wheelEntries,
@@ -16490,6 +16534,9 @@
         wheelEntries = wheelEntries.slice(0, OPEN_BOX_MAX_ITEMS);
       }
       wheelEntries = wheelEntries.map((entry)=> ({
+        contentType: currentGameTemplate === "wheel"
+          ? normalizeWheelEntryContentType(entry.contentType || entry.type, draft.contentType || draft.type || "text")
+          : normalizeOpenBoxContentType(draft.contentType || draft.type || "text"),
         text: entry.text || "",
         imageName: entry.imageName || "",
         imageData: entry.imageData || "",
@@ -16638,6 +16685,10 @@
     document.body.dataset.setupTemplate = currentGameTemplate;
     const isBox = currentGameTemplate === "open-box";
 
+    if (wheelGlobalContentTypeGroup) {
+      wheelGlobalContentTypeGroup.hidden = !isBox;
+    }
+
     if (setupContentTitle) setupContentTitle.textContent = "إعدادات طريقة اللعب";
     if (contentTypeGroupTitle) {
       contentTypeGroupTitle.textContent = isBox ? "محتوى الصندوق" : "محتوى العجلة";
@@ -16763,7 +16814,7 @@
 
       if (fieldPrefix === "cover") {
         wheelEntries[index].coverText = "";
-      } else if (wheelContentType === "images") {
+      } else if (currentGameTemplate === "open-box" && wheelContentType === "images") {
         wheelEntries[index].text = "";
       }
 
@@ -16778,6 +16829,44 @@
     pickerButton.append(actionText,info);
     wrap.append(file,pickerButton);
     return wrap;
+  }
+
+  function createWheelEntryContentModeControl(entry,index){
+    const group = document.createElement("div");
+    group.className = "train-side-content-mode wheel-entry-content-mode";
+
+    const modeLabel = document.createElement("div");
+    modeLabel.className = "train-side-content-mode-label";
+    modeLabel.textContent = "نوع المحتوى";
+
+    const buttons = document.createElement("div");
+    buttons.className = "train-side-content-mode-buttons";
+    buttons.setAttribute("aria-label",`نوع محتوى العنصر ${index + 1}`);
+
+    const activeType = normalizeWheelEntryContentType(entry.contentType,"text");
+    [
+      ["text","نصوص"],
+      ["images","صور"],
+      ["mixed","نصوص وصور"]
+    ].forEach(([value,label])=>{
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "train-side-content-mode-btn";
+      button.textContent = label;
+      button.classList.toggle("is-active",activeType === value);
+      button.setAttribute("aria-pressed",String(activeType === value));
+      button.addEventListener("click",()=>{
+        if (!wheelEntries[index] || normalizeWheelEntryContentType(wheelEntries[index].contentType,"text") === value) return;
+        syncWheelEntriesFromDom();
+        wheelEntries[index].contentType = value;
+        renderWheelEntries();
+        saveDraft();
+      });
+      buttons.appendChild(button);
+    });
+
+    group.append(modeLabel,buttons);
+    return group;
   }
 
 
@@ -16921,7 +17010,16 @@
 
       addCoverFields(box,entry,index);
 
-      if (wheelContentType === "text" || wheelContentType === "mixed") {
+      if (currentGameTemplate === "wheel") {
+        entry.contentType = normalizeWheelEntryContentType(entry.contentType,"text");
+        box.appendChild(createWheelEntryContentModeControl(entry,index));
+      }
+
+      const activeContentType = currentGameTemplate === "wheel"
+        ? normalizeWheelEntryContentType(entry.contentType,"text")
+        : normalizeOpenBoxContentType(wheelContentType);
+
+      if (activeContentType === "text" || activeContentType === "mixed") {
         const row = document.createElement("div");
         row.className = "setup-text-field-with-review";
 
@@ -16929,7 +17027,7 @@
         input.className = "wheel-entry-input quiz-text-input";
         input.type = "text";
         input.maxLength = 80;
-        input.placeholder = wheelContentType === "mixed"
+        input.placeholder = activeContentType === "mixed"
           ? "اكتب النص المختصر هنا.."
           : "اكتب النص هنا..";
         input.value = entry.text || "";
@@ -16939,7 +17037,7 @@
         input.addEventListener("input",()=>{
           wheelEntries[index].text = input.value;
 
-          if (wheelContentType === "text") {
+          if (currentGameTemplate === "open-box" && activeContentType === "text") {
             wheelEntries[index].imageName = "";
             wheelEntries[index].imageData = "";
           }
@@ -16951,14 +17049,14 @@
           label:`مراجعة نص ${currentGameTemplate === "open-box" ? "الصندوق" : "العنصر"} ${index + 1}`,
           getValue:()=> input.value,
           maxLength:80,
-          placeholder:wheelContentType === "mixed"
+          placeholder:activeContentType === "mixed"
             ? "اكتب النص المختصر هنا.."
             : "اكتب النص هنا..",
           onSave:(value)=>{
             input.value = value;
             wheelEntries[index].text = value;
 
-            if (wheelContentType === "text") {
+            if (currentGameTemplate === "open-box" && activeContentType === "text") {
               wheelEntries[index].imageName = "";
               wheelEntries[index].imageData = "";
             }
@@ -16971,7 +17069,7 @@
         box.appendChild(row);
       }
 
-      if (wheelContentType === "images" || wheelContentType === "mixed") {
+      if (activeContentType === "images" || activeContentType === "mixed") {
         box.appendChild(createImagePicker(entry,index,"content"));
       }
 
@@ -17021,7 +17119,8 @@
     const selectedTheme = normalizeGameTheme(wheelTheme);
 
     const payload = {
-      type: wheelContentType,
+      type: getWheelPayloadType(entries),
+      contentType: getWheelPayloadType(entries),
       theme: selectedTheme,
       wheelTheme: selectedTheme,
       selectedTheme,
@@ -17181,18 +17280,7 @@
       syncWheelEntriesFromDom();
       setWheelType(btn.getAttribute("data-wheel-type") || "text");
 
-      if (currentGameTemplate === "open-box") {
-        cleanOpenBoxEntriesInPlace();
-      } else {
-        wheelEntries = wheelEntries.map((entry)=>({
-          text:wheelContentType === "images" ? "" : (entry.text || ""),
-          imageName:wheelContentType === "text" ? "" : (entry.imageName || ""),
-          imageData:wheelContentType === "text" ? "" : (entry.imageData || ""),
-          coverText:entry.coverText || "",
-          coverImageName:entry.coverImageName || "",
-          coverImageData:entry.coverImageData || ""
-        }));
-      }
+      if (currentGameTemplate === "open-box") cleanOpenBoxEntriesInPlace();
 
       renderWheelEntries();
       saveDraft();
@@ -17373,8 +17461,8 @@
           gameType:"wheel",
           gameTemplate:"wheel",
           payloadVersion:1,
-          type:wheelContentType,
-          contentType:wheelContentType,
+          type:getWheelPayloadType(entries),
+          contentType:getWheelPayloadType(entries),
           theme:selectedTheme,
           wheelTheme:selectedTheme,
           selectedTheme,
@@ -24126,6 +24214,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v101-wheel-test-draft-preserved -->
+<!-- VERSION: index-v102-wheel-per-item-content -->
 </body>
 </html>
