@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v86-adaptive-answer-layout -->
+  <!-- version: open-box-v87-stable-answer-layout -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -418,6 +418,7 @@
         0
       ) scale(var(--multi-box-scale));
       transform-origin:center center;
+      transition:none;
     }
 
     .box-card.multi-answer-active{
@@ -511,12 +512,12 @@
       z-index:20;
       display:grid;
       place-items:center;
-      width:clamp(40px,4.3vw,66px);
+      width:clamp(34px,calc(var(--answer-size,124px) * .34),66px);
       aspect-ratio:1;
       border:clamp(3px,.32vw,5px) solid #fff;
       border-radius:50%;
       color:#fff;
-      font:1000 clamp(27px,3vw,48px)/1 "Cairo",sans-serif;
+      font:1000 clamp(23px,calc(var(--answer-size,124px) * .25),48px)/1 "Cairo",sans-serif;
       box-shadow:0 5px 13px rgba(0,0,0,.34);
       opacity:0;
       pointer-events:none;
@@ -673,7 +674,9 @@
       background:rgba(255,255,255,.94);
     }
 
-    .multi-answer-choice:hover{filter:brightness(1.06);transform:translateY(-4px) scale(1.02)}
+    @media (hover:hover) and (pointer:fine){
+      .multi-answer-choice:hover{filter:brightness(1.06);transform:translateY(-4px) scale(1.02)}
+    }
     .multi-answer-choice:disabled{cursor:default;opacity:.78}
     .multi-answer-choice.is-correct{--asset-tint:#20aa61;opacity:1;filter:none}
     .multi-answer-choice.is-wrong{--asset-tint:#e5484d;opacity:1;filter:none}
@@ -682,7 +685,7 @@
       .multi-answer-layer{width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
       .multi-answer-grid,.multi-answer-row{gap:var(--answer-gap,8px)}
       .answer-box-text{font-size:var(--answer-font-size,clamp(15px,4.2vw,23px))}
-      .answer-feedback-mark{width:clamp(42px,12vw,58px);font-size:clamp(29px,8.5vw,41px)}
+      .answer-feedback-mark{width:clamp(34px,calc(var(--answer-size,124px) * .34),58px);font-size:clamp(23px,calc(var(--answer-size,124px) * .25),41px)}
       .box-card.multi-answer-active .box-wrap{
         --multi-box-shift-y:0px;
         --multi-box-scale:.88;
@@ -693,7 +696,7 @@
       .multi-answer-layer{width:min(900px,calc(100vw - 30px))}
       .multi-answer-grid,.multi-answer-row{gap:var(--answer-gap,8px)}
       .answer-box-text{font-size:var(--answer-font-size,clamp(15px,1.4vw,22px));-webkit-line-clamp:var(--answer-line-clamp,4)}
-      .answer-feedback-mark{width:clamp(38px,4.5vw,54px);font-size:clamp(26px,3vw,38px)}
+      .answer-feedback-mark{width:clamp(32px,calc(var(--answer-size,124px) * .34),54px);font-size:clamp(22px,calc(var(--answer-size,124px) * .25),38px)}
       .box-card.multi-answer-active .box-wrap{
         --multi-box-shift-y:0px;
         --multi-box-scale:.92;
@@ -2675,6 +2678,10 @@
     let answeredBoxes = new Set();
     let answerPanelBoxIndex = -1;
     let multiAnswerLayoutToken = 0;
+    let multiAnswerRowSignature = "";
+    let multiAnswerLastLayoutKey = "";
+    let multiAnswerLayoutSnapshot = null;
+    let multiAnswerFeedbackTimers = new Set();
     let focusedIndex = -1;
     let boxZoomAnimationId = null;
     let boxZoomWebAnimation = null;
@@ -2687,6 +2694,7 @@
     let safariTimers = [];
     let viewportLayoutFrame = null;
     let viewportLayoutTimer = null;
+    let lastAppliedViewportMetrics = null;
     let introFrameId = null;
     let introLayoutFrozen = false;
     let pendingViewportLayout = false;
@@ -3342,37 +3350,74 @@
         width,
         height,
         offsetLeft:Math.max(0, Number(vv?.offsetLeft) || 0),
-        scale:Math.max(1, Number(vv?.scale) || 1)
+        scale:Math.max(1, Number(vv?.scale) || 1),
+        orientation:width >= height ? "landscape" : "portrait"
       };
     }
 
-    function syncVisualViewportFrame(force = false){
+    function isMultiAnswerPanelVisible(){
+      return Boolean(
+        multiAnswerLayer?.classList.contains("is-visible") &&
+        activeFocusButton?.classList.contains("multi-answer-active")
+      );
+    }
+
+    function viewportMetricsChanged(next, previous, tolerance = 2){
+      if (!previous) return true;
+      return (
+        next.orientation !== previous.orientation ||
+        Math.abs(next.width - previous.width) >= tolerance ||
+        Math.abs(next.height - previous.height) >= tolerance ||
+        Math.abs(next.offsetLeft - previous.offsetLeft) >= tolerance
+      );
+    }
+
+    function viewportWidthOrOrientationChanged(next, previous){
+      if (!previous) return true;
+      return (
+        next.orientation !== previous.orientation ||
+        Math.abs(next.width - previous.width) >= 16
+      );
+    }
+
+    function setPixelStyleIfChanged(element, property, value){
+      if (!element) return;
+      const numericValue = Number(value);
+      const currentValue = parseFloat(element.style.getPropertyValue(property));
+      const nextValue = `${numericValue.toFixed(2)}px`;
+      if (!Number.isFinite(currentValue) || Math.abs(currentValue - numericValue) >= .05) {
+        element.style.setProperty(property,nextValue);
+      }
+    }
+
+    function syncVisualViewportFrame(force = false, suppliedMetrics = null){
       if (introLayoutFrozen && !force) {
         pendingViewportLayout = true;
         return false;
       }
 
-      const metrics = getVisualViewportMetrics();
+      const metrics = suppliedMetrics || getVisualViewportMetrics();
 
       /*
         عند تكبير صفحة Safari يصبح visualViewport أضيق من layout viewport.
         نضع منطقة الصناديق داخل المساحة المرئية الحقيقية بدل إبقائها
         متمركزة داخل مساحة أكبر تُقص أطرافها.
       */
-      stage.style.left = `${metrics.offsetLeft.toFixed(2)}px`;
+      setPixelStyleIfChanged(stage,"left",metrics.offsetLeft);
       stage.style.right = "auto";
       stage.style.top = "0px";
       stage.style.bottom = "auto";
-      stage.style.width = `${metrics.width.toFixed(2)}px`;
-      stage.style.height = `${metrics.height.toFixed(2)}px`;
+      setPixelStyleIfChanged(stage,"width",metrics.width);
+      setPixelStyleIfChanged(stage,"height",metrics.height);
 
       page.style.setProperty("--visual-viewport-width", `${metrics.width}px`);
       page.style.setProperty("--visual-viewport-height", `${metrics.height}px`);
+      lastAppliedViewportMetrics = { ...metrics };
       return true;
     }
 
-    function calculateLayout(count){
-      const metrics = getVisualViewportMetrics();
+    function calculateLayout(count, suppliedMetrics = null){
+      const metrics = suppliedMetrics || getVisualViewportMetrics();
       const styles = window.getComputedStyle(stage);
 
       const padX =
@@ -3483,7 +3528,7 @@
         return false;
       }
 
-      const layout = calculateLayout(items.length);
+      const layout = calculateLayout(items.length, options.metrics || null);
 
       grid.style.setProperty("--cols", String(layout.cols));
       grid.style.setProperty("--tile-gap", `${layout.gap}px`);
@@ -3498,14 +3543,26 @@
 
     function refreshResponsiveLayout(options = {}){
       const force = options.force === true;
+      const allowMultiAnswer = options.allowMultiAnswer === true;
 
       if ((introLayoutFrozen || boxInteractionLocked) && !force) {
         pendingViewportLayout = true;
         return;
       }
 
-      syncVisualViewportFrame(force);
-      applyLayout({ force });
+      if (isMultiAnswerPanelVisible() && !allowMultiAnswer && !force) {
+        pendingViewportLayout = true;
+        return;
+      }
+
+      const metrics = getVisualViewportMetrics();
+      if (!force && !viewportMetricsChanged(metrics,lastAppliedViewportMetrics)) {
+        pendingViewportLayout = false;
+        return;
+      }
+
+      syncVisualViewportFrame(force,metrics);
+      applyLayout({ force, metrics });
 
       requestAnimationFrame(()=>{
         if (focusedIndex >= 0 && activeFocusButton && !boxInteractionLocked) {
@@ -3521,16 +3578,35 @@
           multiAnswerLayer?.classList.contains("is-visible") &&
           activeFocusButton?.classList.contains("multi-answer-active")
         ) {
-          requestAnimationFrame(()=> fitMultiAnswerQuestionCard(activeFocusButton));
+          fitMultiAnswerQuestionCard(activeFocusButton,{ metrics });
         }
       });
 
       pendingViewportLayout = false;
     }
 
-    function scheduleResponsiveLayout(delay = 0){
-      if (introLayoutFrozen || boxInteractionLocked) {
+    function scheduleResponsiveLayout(delay = 0, options = {}){
+      const force = options.force === true;
+      const allowMultiAnswer = options.allowMultiAnswer === true;
+
+      if (
+        (introLayoutFrozen || boxInteractionLocked) &&
+        !force
+      ) {
         pendingViewportLayout = true;
+        return;
+      }
+
+      if (isMultiAnswerPanelVisible() && !allowMultiAnswer && !force) {
+        pendingViewportLayout = true;
+        if (viewportLayoutFrame) {
+          cancelAnimationFrame(viewportLayoutFrame);
+          viewportLayoutFrame = null;
+        }
+        if (viewportLayoutTimer) {
+          clearTimeout(viewportLayoutTimer);
+          viewportLayoutTimer = null;
+        }
         return;
       }
 
@@ -3547,7 +3623,7 @@
       const run = ()=>{
         viewportLayoutFrame = requestAnimationFrame(()=>{
           viewportLayoutFrame = null;
-          refreshResponsiveLayout();
+          refreshResponsiveLayout({ force, allowMultiAnswer });
         });
       };
 
@@ -3559,6 +3635,15 @@
       } else {
         run();
       }
+    }
+
+    function flushPendingResponsiveLayout(delay = 80){
+      if (!pendingViewportLayout || introLayoutFrozen) return;
+      const nextMetrics = getVisualViewportMetrics();
+      const allowMultiAnswer =
+        isMultiAnswerPanelVisible() &&
+        viewportWidthOrOrientationChanged(nextMetrics,lastAppliedViewportMetrics);
+      scheduleResponsiveLayout(delay,{ allowMultiAnswer });
     }
 
     function renderBoxes(){
@@ -4326,17 +4411,36 @@
         collapseSafariBars();
       } finally {
         boxInteractionLocked = false;
-        if (pendingViewportLayout && !introLayoutFrozen) {
-          scheduleResponsiveLayout(40);
-        }
+        flushPendingResponsiveLayout(80);
       }
+    }
+
+    function clearMultiAnswerFeedbackTimers(){
+      multiAnswerFeedbackTimers.forEach((timer)=>clearTimeout(timer));
+      multiAnswerFeedbackTimers.clear();
+    }
+
+    function setMultiAnswerFeedbackTimer(callback, delay){
+      const timer = window.setTimeout(()=>{
+        multiAnswerFeedbackTimers.delete(timer);
+        callback();
+      },delay);
+      multiAnswerFeedbackTimers.add(timer);
+      return timer;
     }
 
     function hideMultiAnswerPanel(){
       multiAnswerLayoutToken += 1;
+      clearMultiAnswerFeedbackTimers();
+      multiAnswerRowSignature = "";
+      multiAnswerLastLayoutKey = "";
+      multiAnswerLayoutSnapshot = null;
       multiAnswerLayer?.classList.remove("is-visible");
       multiAnswerLayer?.setAttribute("aria-hidden","true");
-      if (multiAnswerGrid) multiAnswerGrid.innerHTML = "";
+      if (multiAnswerGrid) {
+        multiAnswerGrid.innerHTML = "";
+        delete multiAnswerGrid.dataset.rowSignature;
+      }
       grid?.querySelectorAll(".box-card.multi-answer-active").forEach((card)=>{
         card.classList.remove("multi-answer-active");
         card.style.removeProperty("--multi-box-safe-nudge-y");
@@ -4357,9 +4461,12 @@
     function getMultiAnswerRowSizes(count, viewportWidth){
       if (count <= 0) return [];
 
-      const maxPerRow = viewportWidth < 520
+      // ست إجابات تبقى دائمًا 4 في الصف الأول و2 في الصف الثاني.
+      if (count === 6) return [4,2];
+
+      const maxPerRow = viewportWidth < 440
         ? 2
-        : viewportWidth < 820
+        : viewportWidth < 760
           ? 3
           : 4;
 
@@ -4367,7 +4474,6 @@
 
       if (maxPerRow === 4) {
         if (count === 5) return [3,2];
-        if (count === 6) return [4,2];
         if (count === 7) return [4,3];
       }
 
@@ -4382,14 +4488,26 @@
       return rows;
     }
 
-    function rebuildMultiAnswerRows(){
+    function rebuildMultiAnswerRows(requestedRowSizes = null){
       if (!multiAnswerGrid) return [];
 
       const buttons = Array.from(multiAnswerGrid.querySelectorAll(".multi-answer-choice"));
       if (!buttons.length) return [];
 
       const metrics = getVisualViewportMetrics();
-      const rowSizes = getMultiAnswerRowSizes(buttons.length, metrics.width);
+      const rowSizes = Array.isArray(requestedRowSizes) && requestedRowSizes.length
+        ? requestedRowSizes.slice()
+        : getMultiAnswerRowSizes(buttons.length, metrics.width);
+      const signature = `${buttons.length}:${rowSizes.join("-")}`;
+
+      if (
+        multiAnswerGrid.dataset.rowSignature === signature &&
+        multiAnswerGrid.querySelectorAll(":scope > .multi-answer-row").length === rowSizes.length
+      ) {
+        multiAnswerRowSignature = signature;
+        return rowSizes;
+      }
+
       multiAnswerGrid.replaceChildren();
 
       let cursor = 0;
@@ -4403,34 +4521,46 @@
         multiAnswerGrid.appendChild(row);
       });
 
+      multiAnswerGrid.dataset.rowSignature = signature;
+      multiAnswerRowSignature = signature;
       return rowSizes;
     }
 
-    function fitMultiAnswerQuestionCard(card){
+    function getCurrentMultiAnswerRowSizes(){
+      if (!multiAnswerGrid) return [];
+      const rows = Array.from(
+        multiAnswerGrid.querySelectorAll(":scope > .multi-answer-row")
+      );
+      return rows
+        .map((row)=>row.querySelectorAll(":scope > .multi-answer-choice").length)
+        .filter((size)=>size > 0);
+    }
+
+    function fitMultiAnswerQuestionCard(card, options = {}){
       if (!card || !multiAnswerLayer?.classList.contains("is-visible")) return;
 
       const wrap = card.querySelector(".box-wrap");
       if (!wrap) return;
 
-      const token = ++multiAnswerLayoutToken;
-      const metrics = getVisualViewportMetrics();
+      const metrics = options.metrics || multiAnswerLayoutSnapshot || getVisualViewportMetrics();
       const pageRect = page.getBoundingClientRect();
-      const viewportTop = Math.max(0, Number(window.visualViewport?.offsetTop) || 0);
-      const viewportBottom = viewportTop + metrics.height;
       const controlsRect = fixedControls?.getBoundingClientRect();
-      const safeTop = viewportTop + clamp(metrics.height * .022, 9, 20);
+      const cardRect = card.getBoundingClientRect();
+      const safeTop = clamp(metrics.height * .022, 9, 20);
       const safeBottom = Math.min(
-        viewportBottom - 8,
-        Number.isFinite(controlsRect?.top) ? controlsRect.top - 10 : viewportBottom - 60
+        metrics.height - 8,
+        Number.isFinite(controlsRect?.top)
+          ? controlsRect.top - pageRect.top - 18
+          : metrics.height - 60
       );
       const sideMargin = clamp(metrics.width * .025, 10, 28);
       const layerWidth = Math.max(220, metrics.width - sideMargin * 2);
-      const rowSizes = rebuildMultiAnswerRows();
+      const rowSizes = getCurrentMultiAnswerRowSizes();
       const rowCount = Math.max(1, rowSizes.length);
       const maxColumns = Math.max(1, ...rowSizes);
       const choiceCount = rowSizes.reduce((sum,size)=> sum + size, 0);
       const totalSafeHeight = Math.max(1, safeBottom - safeTop);
-      const gap = clamp(Math.min(metrics.width, totalSafeHeight) * .014, 5, 14);
+      const gap = clamp(Math.min(metrics.width, totalSafeHeight) * .018, 8, 16);
       const questionGap = clamp(metrics.height * .018, 8, 16);
       const rowGapsHeight = Math.max(0,rowCount - 1) * gap;
       const widthPerChoice = Math.max(
@@ -4438,113 +4568,91 @@
         (layerWidth - gap * Math.max(0,maxColumns - 1)) / maxColumns
       );
       const minimumQuestionHeight = clamp(
-        totalSafeHeight * (rowCount >= 3 ? .19 : rowCount === 2 ? .23 : .28),
-        48,
-        118
+        totalSafeHeight * (rowCount >= 3 ? .22 : rowCount === 2 ? .34 : .42),
+        rowCount >= 3 ? 54 : 76,
+        rowCount === 1 ? 280 : 260
       );
       const heightAvailableToAnswers = Math.max(
         24,
         totalSafeHeight - minimumQuestionHeight - questionGap - rowGapsHeight
       );
-      const heightPerChoiceBeforeQuestionFit = heightAvailableToAnswers / rowCount;
+      const heightPerChoice = heightAvailableToAnswers / rowCount;
       const countSizeCap = choiceCount <= 2
-        ? 190
+        ? 220
+        : choiceCount <= 3
+          ? 200
         : choiceCount <= 4
-          ? 160
-          : choiceCount <= 6
-            ? 132
-            : 112;
-      const plannedAnswerSize = Math.max(
-        22,
-        Math.min(widthPerChoice, heightPerChoiceBeforeQuestionFit, countSizeCap)
+          ? 190
+        : choiceCount <= 6
+            ? 176
+            : choiceCount <= 8
+              ? 158
+              : 140;
+      const answerSize = Math.max(
+        24,
+        Math.min(widthPerChoice, heightPerChoice, countSizeCap)
       );
-      const plannedAnswerBlockHeight =
-        rowCount * plannedAnswerSize + rowGapsHeight;
+      const answerBlockHeight = rowCount * answerSize + rowGapsHeight;
       const questionHeightLimit = Math.max(
-        42,
-        totalSafeHeight - plannedAnswerBlockHeight - questionGap
+        36,
+        totalSafeHeight - answerBlockHeight - questionGap
       );
-      const questionWidthLimit = metrics.width * (metrics.width > metrics.height ? .43 : .72);
-      const baseQuestionScale = rowCount >= 3 ? .74 : rowCount === 2 ? .82 : .90;
+      const questionWidthLimit = metrics.width * (metrics.width > metrics.height ? .46 : .74);
+      const preferredQuestionScale = rowCount >= 3 ? .82 : rowCount === 2 ? .92 : .96;
+      const baseQuestionSize = Math.max(1,Math.min(cardRect.width,cardRect.height));
+      const questionSize = Math.max(
+        36,
+        Math.min(
+          baseQuestionSize * preferredQuestionScale,
+          questionHeightLimit,
+          questionWidthLimit
+        )
+      );
+      const usedHeight = questionSize + questionGap + answerBlockHeight;
+      const groupTop = safeTop + Math.max(0,totalSafeHeight - usedHeight) * .30;
+      const answerTop = groupTop + questionSize + questionGap;
+      const parentScale = Math.max(.01,boxFocusState.scale || 1);
+      const desiredQuestionCenter = groupTop + questionSize / 2;
+      const currentQuestionCenter = cardRect.top - pageRect.top + cardRect.height / 2;
+      const screenNudge = desiredQuestionCenter - currentQuestionCenter;
+      const fittedQuestionScale = clamp(questionSize / baseQuestionSize,.24,1);
+      const answerFontSize = clamp(answerSize * .19,11,32);
+      const classroomFontSize = clamp(answerSize * .175,10,29);
+      const layoutKey = [
+        Math.round(metrics.width),
+        Math.round(metrics.height),
+        Math.round(safeBottom),
+        multiAnswerRowSignature,
+        Math.round(baseQuestionSize * 10) / 10,
+        Math.round(parentScale * 1000) / 1000
+      ].join("|");
 
-      wrap.style.setProperty("--multi-box-scale", String(baseQuestionScale));
-      wrap.style.setProperty("--multi-box-safe-nudge-y", "0px");
+      if (layoutKey === multiAnswerLastLayoutKey && options.force !== true) return;
 
-      requestAnimationFrame(()=> requestAnimationFrame(()=> {
-        if (
-          token !== multiAnswerLayoutToken ||
-          !card.classList.contains("multi-answer-active") ||
-          !multiAnswerLayer.classList.contains("is-visible")
-        ) return;
+      // جميع القياسات أُخذت أعلاه؛ هذه هي مرحلة الكتابة الوحيدة للتخطيط.
+      wrap.style.setProperty("--multi-box-scale", fittedQuestionScale.toFixed(4));
+      wrap.style.setProperty(
+        "--multi-box-safe-nudge-y",
+        `${(screenNudge / parentScale).toFixed(2)}px`
+      );
 
-        let questionRect = wrap.getBoundingClientRect();
-        const fitRatio = Math.min(
-          1,
-          questionHeightLimit / Math.max(1,questionRect.height),
-          questionWidthLimit / Math.max(1,questionRect.width)
-        );
-        const fittedQuestionScale = clamp(baseQuestionScale * fitRatio, .30, .92);
-        wrap.style.setProperty("--multi-box-scale", fittedQuestionScale.toFixed(4));
+      multiAnswerLayer.style.left = `${metrics.offsetLeft + metrics.width / 2 - pageRect.left}px`;
+      multiAnswerLayer.style.top = `${answerTop}px`;
+      multiAnswerLayer.style.bottom = "auto";
+      multiAnswerLayer.style.width = `${layerWidth}px`;
+      multiAnswerLayer.style.height = `${answerBlockHeight}px`;
 
-        requestAnimationFrame(()=> requestAnimationFrame(()=> {
-          if (token !== multiAnswerLayoutToken || !card.classList.contains("multi-answer-active")) return;
+      multiAnswerGrid.style.setProperty("--answer-gap", `${gap}px`);
+      multiAnswerGrid.style.setProperty("--answer-size", `${answerSize.toFixed(2)}px`);
+      multiAnswerGrid.style.setProperty("--answer-font-size", `${answerFontSize.toFixed(2)}px`);
+      multiAnswerGrid.style.setProperty("--answer-classroom-font-size", `${classroomFontSize.toFixed(2)}px`);
+      multiAnswerGrid.style.setProperty(
+        "--answer-line-clamp",
+        answerSize < 64 ? "3" : answerSize < 96 ? "4" : "6"
+      );
 
-          questionRect = wrap.getBoundingClientRect();
-          const desiredQuestionTop = safeTop;
-          const maximumQuestionBottom = safeBottom - plannedAnswerBlockHeight - questionGap;
-          let screenNudge = desiredQuestionTop - questionRect.top;
-
-          if (questionRect.bottom + screenNudge > maximumQuestionBottom) {
-            screenNudge -= (questionRect.bottom + screenNudge) - maximumQuestionBottom;
-          }
-          if (questionRect.top + screenNudge < safeTop) {
-            screenNudge += safeTop - (questionRect.top + screenNudge);
-          }
-
-          const parentScale = Math.max(.01, boxFocusState.scale || 1);
-          wrap.style.setProperty(
-            "--multi-box-safe-nudge-y",
-            `${(screenNudge / parentScale).toFixed(2)}px`
-          );
-
-          requestAnimationFrame(()=> requestAnimationFrame(()=> {
-            if (token !== multiAnswerLayoutToken || !card.classList.contains("multi-answer-active")) return;
-
-            const finalQuestionRect = wrap.getBoundingClientRect();
-            const answerTop = Math.max(safeTop, finalQuestionRect.bottom + questionGap);
-            const availableAnswerHeight = Math.max(20, safeBottom - answerTop);
-            const heightPerChoice = Math.max(
-              18,
-              (availableAnswerHeight - rowGapsHeight) / rowCount
-            );
-            const questionReference = Math.min(finalQuestionRect.width, finalQuestionRect.height);
-            const sizeRatio = choiceCount <= 2 ? .74 : choiceCount <= 4 ? .68 : .61;
-            const questionSizeCap = Math.max(24, questionReference * sizeRatio);
-            const answerSize = Math.max(
-              18,
-              Math.min(widthPerChoice, heightPerChoice, questionSizeCap, countSizeCap)
-            );
-            const answerBlockHeight = rowCount * answerSize + rowGapsHeight;
-            const answerFontSize = clamp(answerSize * .18, 10, 30);
-            const classroomFontSize = clamp(answerSize * .165, 9, 27);
-
-            multiAnswerLayer.style.left = `${metrics.offsetLeft + metrics.width / 2 - pageRect.left}px`;
-            multiAnswerLayer.style.top = `${answerTop - pageRect.top}px`;
-            multiAnswerLayer.style.bottom = "auto";
-            multiAnswerLayer.style.width = `${layerWidth}px`;
-            multiAnswerLayer.style.height = `${Math.min(availableAnswerHeight,answerBlockHeight)}px`;
-
-            multiAnswerGrid.style.setProperty("--answer-gap", `${gap}px`);
-            multiAnswerGrid.style.setProperty("--answer-size", `${answerSize.toFixed(2)}px`);
-            multiAnswerGrid.style.setProperty("--answer-font-size", `${answerFontSize.toFixed(2)}px`);
-            multiAnswerGrid.style.setProperty("--answer-classroom-font-size", `${classroomFontSize.toFixed(2)}px`);
-            multiAnswerGrid.style.setProperty(
-              "--answer-line-clamp",
-              answerSize < 64 ? "3" : answerSize < 92 ? "4" : "6"
-            );
-          }));
-        }));
-      }));
+      multiAnswerLayoutSnapshot = { ...metrics };
+      multiAnswerLastLayoutKey = layoutKey;
     }
 
     function createMultiAnswerChoice(choice, choiceIndex, entry, boxIndex){
@@ -4615,7 +4723,30 @@
           button.classList.add("is-correct");
           feedbackMark.className = "answer-feedback-mark is-correct";
           feedbackMark.textContent = "✓";
-          requestAnimationFrame(()=> feedbackMark.classList.add("is-visible"));
+          const feedbackGeneration = multiAnswerLayoutToken;
+          let settled = false;
+          let settleTimer = null;
+          const settleCorrectMark = ()=>{
+            if (settled) return;
+            settled = true;
+            if (settleTimer) {
+              clearTimeout(settleTimer);
+              multiAnswerFeedbackTimers.delete(settleTimer);
+            }
+            if (
+              feedbackGeneration !== multiAnswerLayoutToken ||
+              !button.isConnected ||
+              !answeredBoxes.has(boxIndex)
+            ) return;
+            feedbackMark.className = "answer-feedback-mark is-correct is-settled";
+          };
+          feedbackMark.addEventListener("animationend",settleCorrectMark,{once:true});
+          requestAnimationFrame(()=>{
+            if (feedbackGeneration === multiAnswerLayoutToken) {
+              feedbackMark.classList.add("is-visible");
+            }
+          });
+          settleTimer = setMultiAnswerFeedbackTimer(settleCorrectMark,1280);
           multiAnswerGrid?.querySelectorAll(".multi-answer-choice").forEach((item)=>{
             item.disabled = true;
           });
@@ -4626,13 +4757,31 @@
         openBoxAudio.playWrong();
         feedbackMark.className = "answer-feedback-mark is-wrong";
         feedbackMark.textContent = "×";
-        requestAnimationFrame(()=> feedbackMark.classList.add("is-visible"));
-
-        window.setTimeout(()=>{
+        const feedbackGeneration = multiAnswerLayoutToken;
+        let cleared = false;
+        let clearTimer = null;
+        const clearWrongMark = ()=>{
+          if (cleared) return;
+          cleared = true;
+          if (clearTimer) {
+            clearTimeout(clearTimer);
+            multiAnswerFeedbackTimers.delete(clearTimer);
+          }
+          if (
+            feedbackGeneration !== multiAnswerLayoutToken ||
+            !button.isConnected
+          ) return;
           button.classList.remove("is-wrong","is-feedback-active");
           feedbackMark.className = "answer-feedback-mark";
           feedbackMark.textContent = "";
-        },1460);
+        };
+        feedbackMark.addEventListener("animationend",clearWrongMark,{once:true});
+        requestAnimationFrame(()=>{
+          if (feedbackGeneration === multiAnswerLayoutToken) {
+            feedbackMark.classList.add("is-visible");
+          }
+        });
+        clearTimer = setMultiAnswerFeedbackTimer(clearWrongMark,1580);
       });
 
       return button;
@@ -4648,19 +4797,27 @@
       entry.choices = answerData.choices;
       entry.correctChoiceIndex = answerData.correctChoiceIndex;
 
+      multiAnswerLayoutToken += 1;
+      clearMultiAnswerFeedbackTimers();
+      multiAnswerLastLayoutKey = "";
+      multiAnswerLayoutSnapshot = null;
       multiAnswerGrid.innerHTML = "";
+      delete multiAnswerGrid.dataset.rowSignature;
       answerData.choices.forEach((choice,choiceIndex)=>{
         multiAnswerGrid.appendChild(
           createMultiAnswerChoice(choice,choiceIndex,entry,boxIndex)
         );
       });
+      rebuildMultiAnswerRows(
+        getMultiAnswerRowSizes(answerData.choices.length,getVisualViewportMetrics().width)
+      );
 
       answerPanelBoxIndex = boxIndex;
       card?.classList.add("multi-answer-active");
       page?.classList.add("multi-answer-mode-active");
       multiAnswerLayer.classList.add("is-visible");
       multiAnswerLayer.setAttribute("aria-hidden","false");
-      fitMultiAnswerQuestionCard(card);
+      fitMultiAnswerQuestionCard(card,{ force:true });
       return true;
     }
 
@@ -4712,9 +4869,7 @@
         await performOpenSelectedBox();
       } finally {
         boxInteractionLocked = false;
-        if (pendingViewportLayout && !introLayoutFrozen) {
-          scheduleResponsiveLayout(40);
-        }
+        flushPendingResponsiveLayout(80);
       }
     }
 
@@ -4740,6 +4895,7 @@
         collapseSafariBars();
       } finally {
         boxInteractionLocked = false;
+        flushPendingResponsiveLayout(80);
       }
     }
 
@@ -4910,9 +5066,7 @@
         activeFocusButton = null;
       } finally {
         boxInteractionLocked = false;
-        if (pendingViewportLayout && !introLayoutFrozen) {
-          scheduleResponsiveLayout(40);
-        }
+        flushPendingResponsiveLayout(80);
       }
 
       window.setTimeout(()=> {
@@ -4928,7 +5082,8 @@
       safariTimers.forEach((timer)=> clearTimeout(timer));
       safariTimers = [];
 
-      [0, 80, 220, 520, 900].forEach((delay)=>{
+      const collapseDelays = [0, 80, 220, 520, 900];
+      collapseDelays.forEach((delay,index)=>{
         safariTimers.push(setTimeout(()=>{
           try {
             window.scrollTo({ top:80, left:0, behavior:"auto" });
@@ -4936,15 +5091,16 @@
             window.scrollTo(0, 80);
           }
 
-          /*
-            أثناء حركة البداية نطوي شريط Safari فقط، ولا نعيد حساب
-            أحجام الصناديق تحت حركة الكاميرا.
-          */
-          if (refresh && !introLayoutFrozen) {
-            scheduleResponsiveLayout();
-          } else if (refresh) {
+          // نعيد التخطيط مرة واحدة فقط بعد انتهاء سلسلة طي شريط Safari.
+          const isFinalStep = index === collapseDelays.length - 1;
+          if (!refresh || !isFinalStep) return;
+
+          if (introLayoutFrozen || isMultiAnswerPanelVisible()) {
             pendingViewportLayout = true;
+            return;
           }
+
+          scheduleResponsiveLayout(120);
         }, delay));
       });
     }
@@ -5006,34 +5162,57 @@
     page.addEventListener("click", handleSceneTap);
 
     window.addEventListener("resize", ()=>{
-      scheduleResponsiveLayout(40);
+      const nextMetrics = getVisualViewportMetrics();
+      if (isMultiAnswerPanelVisible()) {
+        if (viewportWidthOrOrientationChanged(nextMetrics,lastAppliedViewportMetrics)) {
+          scheduleResponsiveLayout(180,{ allowMultiAnswer:true });
+        } else {
+          pendingViewportLayout = true;
+        }
+        return;
+      }
+      scheduleResponsiveLayout(140);
     }, { passive:true });
 
     window.addEventListener("orientationchange", ()=>{
       pendingViewportLayout = true;
       window.setTimeout(()=>{
-        collapseSafariBars();
-        scheduleResponsiveLayout(80);
-      }, 160);
+        collapseSafariBars({ refresh:false });
+        scheduleResponsiveLayout(180,{ allowMultiAnswer:true });
+      }, 240);
     }, { passive:true });
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", ()=>{
-        scheduleResponsiveLayout(34);
+        const nextMetrics = getVisualViewportMetrics();
+        if (isMultiAnswerPanelVisible()) {
+          if (viewportWidthOrOrientationChanged(nextMetrics,lastAppliedViewportMetrics)) {
+            scheduleResponsiveLayout(180,{ allowMultiAnswer:true });
+          } else {
+            pendingViewportLayout = true;
+          }
+          return;
+        }
+        scheduleResponsiveLayout(160);
       }, { passive:true });
 
       window.visualViewport.addEventListener("scroll", ()=>{
-        scheduleResponsiveLayout(34);
+        if (isMultiAnswerPanelVisible()) return;
+        scheduleResponsiveLayout(220);
       }, { passive:true });
     }
 
     document.addEventListener("touchend", ()=>{
-      collapseSafariBars();
+      collapseSafariBars({ refresh:!isMultiAnswerPanelVisible() });
     }, { passive:true });
 
     window.addEventListener("pageshow", ()=>{
-      collapseSafariBars();
-      scheduleResponsiveLayout(60);
+      const nextMetrics = getVisualViewportMetrics();
+      const allowMultiAnswer =
+        isMultiAnswerPanelVisible() &&
+        viewportWidthOrOrientationChanged(nextMetrics,lastAppliedViewportMetrics);
+      collapseSafariBars({ refresh:false });
+      scheduleResponsiveLayout(160,{ allowMultiAnswer });
     }, { passive:true });
 
     async function playOpeningIntro(){
@@ -5254,6 +5433,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v86-adaptive-answer-layout -->
+  <!-- VERSION: open-box-v87-stable-answer-layout -->
 </body>
 </html>
