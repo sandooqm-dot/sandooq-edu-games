@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v87-stable-answer-layout -->
+  <!-- version: open-box-v88-sequenced-answer-entry -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -419,6 +419,16 @@
       ) scale(var(--multi-box-scale));
       transform-origin:center center;
       transition:none;
+    }
+
+    /* حركة دخول وحيدة: يرتفع السؤال أولًا، وبعد ثباته تظهر الإجابات. */
+    .box-card.multi-answer-entering .box-wrap{
+      transition:transform .56s cubic-bezier(.20,.82,.18,1) !important;
+      will-change:transform;
+    }
+
+    .box-card.multi-answer-question-settled .box-wrap{
+      will-change:auto;
     }
 
     .box-card.multi-answer-active{
@@ -2682,6 +2692,7 @@
     let multiAnswerLastLayoutKey = "";
     let multiAnswerLayoutSnapshot = null;
     let multiAnswerFeedbackTimers = new Set();
+    let multiAnswerEntryState = null;
     let focusedIndex = -1;
     let boxZoomAnimationId = null;
     let boxZoomWebAnimation = null;
@@ -3357,8 +3368,13 @@
 
     function isMultiAnswerPanelVisible(){
       return Boolean(
-        multiAnswerLayer?.classList.contains("is-visible") &&
-        activeFocusButton?.classList.contains("multi-answer-active")
+        answerPanelBoxIndex >= 0 &&
+        page?.classList.contains("multi-answer-mode-active") &&
+        activeFocusButton &&
+        (
+          activeFocusButton.classList.contains("multi-answer-entering") ||
+          activeFocusButton.classList.contains("multi-answer-active")
+        )
       );
     }
 
@@ -3575,7 +3591,7 @@
         fitAllBoxText();
 
         if (
-          multiAnswerLayer?.classList.contains("is-visible") &&
+          isMultiAnswerPanelVisible() &&
           activeFocusButton?.classList.contains("multi-answer-active")
         ) {
           fitMultiAnswerQuestionCard(activeFocusButton,{ metrics });
@@ -4429,8 +4445,70 @@
       return timer;
     }
 
+    function clearMultiAnswerEntryState(){
+      const state = multiAnswerEntryState;
+      if (!state) return;
+
+      if (state.frame) cancelAnimationFrame(state.frame);
+      if (state.timer) clearTimeout(state.timer);
+      if (state.wrap && state.onTransitionEnd) {
+        state.wrap.removeEventListener("transitionend",state.onTransitionEnd);
+      }
+
+      multiAnswerEntryState = null;
+    }
+
+    function isMultiAnswerEntryActive(){
+      return Boolean(multiAnswerEntryState);
+    }
+
+    function revealMultiAnswerChoices(card, token){
+      const state = multiAnswerEntryState;
+      if (
+        !state ||
+        state.card !== card ||
+        state.token !== token ||
+        token !== multiAnswerLayoutToken ||
+        answerPanelBoxIndex < 0 ||
+        !card?.isConnected
+      ) {
+        return;
+      }
+
+      /*
+        إذا تغيّر الاتجاه فعليًا أثناء صعود السؤال، نطبّق قياسًا واحدًا
+        للاتجاه الجديد ونؤجل الإجابات حتى تنتهي الحركة الجديدة.
+      */
+      const nextMetrics = getVisualViewportMetrics();
+      if (viewportWidthOrOrientationChanged(nextMetrics,multiAnswerLayoutSnapshot)) {
+        multiAnswerLastLayoutKey = "";
+        refreshResponsiveLayout({ force:true, allowMultiAnswer:true });
+        armMultiAnswerEntryReveal(card,token,760);
+        return;
+      }
+
+      clearMultiAnswerEntryState();
+      card.classList.remove("multi-answer-entering");
+      card.classList.add("multi-answer-question-settled");
+      multiAnswerLayer.classList.add("is-visible");
+      multiAnswerLayer.setAttribute("aria-hidden","false");
+      pendingViewportLayout = false;
+    }
+
+    function armMultiAnswerEntryReveal(card, token, delay = 760){
+      const state = multiAnswerEntryState;
+      if (!state || state.card !== card || state.token !== token) return;
+
+      if (state.timer) clearTimeout(state.timer);
+      state.timer = window.setTimeout(()=>{
+        if (multiAnswerEntryState === state) state.timer = null;
+        revealMultiAnswerChoices(card,token);
+      },delay);
+    }
+
     function hideMultiAnswerPanel(){
       multiAnswerLayoutToken += 1;
+      clearMultiAnswerEntryState();
       clearMultiAnswerFeedbackTimers();
       multiAnswerRowSignature = "";
       multiAnswerLastLayoutKey = "";
@@ -4441,8 +4519,14 @@
         multiAnswerGrid.innerHTML = "";
         delete multiAnswerGrid.dataset.rowSignature;
       }
-      grid?.querySelectorAll(".box-card.multi-answer-active").forEach((card)=>{
-        card.classList.remove("multi-answer-active");
+      grid?.querySelectorAll(
+        ".box-card.multi-answer-active, .box-card.multi-answer-entering, .box-card.multi-answer-question-settled"
+      ).forEach((card)=>{
+        card.classList.remove(
+          "multi-answer-active",
+          "multi-answer-entering",
+          "multi-answer-question-settled"
+        );
         card.style.removeProperty("--multi-box-safe-nudge-y");
         const wrap = card.querySelector(".box-wrap");
         wrap?.style.removeProperty("--multi-box-scale");
@@ -4537,7 +4621,11 @@
     }
 
     function fitMultiAnswerQuestionCard(card, options = {}){
-      if (!card || !multiAnswerLayer?.classList.contains("is-visible")) return;
+      if (
+        !card ||
+        !multiAnswerLayer ||
+        !card.classList.contains("multi-answer-active")
+      ) return;
 
       const wrap = card.querySelector(".box-wrap");
       if (!wrap) return;
@@ -4546,11 +4634,12 @@
       const pageRect = page.getBoundingClientRect();
       const controlsRect = fixedControls?.getBoundingClientRect();
       const cardRect = card.getBoundingClientRect();
-      const safeTop = clamp(metrics.height * .022, 9, 20);
+      /* ننزل المجموعة قليلًا، مع إبقاء مسافة آمنة واضحة من أعلى الشاشة. */
+      const safeTop = clamp(metrics.height * .03, 12, 24);
       const safeBottom = Math.min(
         metrics.height - 8,
         Number.isFinite(controlsRect?.top)
-          ? controlsRect.top - pageRect.top - 18
+          ? controlsRect.top - pageRect.top - 4
           : metrics.height - 60
       );
       const sideMargin = clamp(metrics.width * .025, 10, 28);
@@ -4584,7 +4673,7 @@
         : choiceCount <= 4
           ? 190
         : choiceCount <= 6
-            ? 176
+            ? 180
             : choiceCount <= 8
               ? 158
               : 140;
@@ -4653,6 +4742,14 @@
 
       multiAnswerLayoutSnapshot = { ...metrics };
       multiAnswerLastLayoutKey = layoutKey;
+
+      /* أي قياس حقيقي جديد أثناء الدخول يعيد مهلة الاستقرار فقط. */
+      if (
+        multiAnswerEntryState?.card === card &&
+        multiAnswerEntryState.token === multiAnswerLayoutToken
+      ) {
+        armMultiAnswerEntryReveal(card,multiAnswerLayoutToken,760);
+      }
     }
 
     function createMultiAnswerChoice(choice, choiceIndex, entry, boxIndex){
@@ -4790,6 +4887,9 @@
     function showMultiAnswerPanel(entry, boxIndex, card){
       if (!multiAnswerEnabled || !multiAnswerLayer || !multiAnswerGrid) return false;
 
+      const wrap = card?.querySelector(".box-wrap");
+      if (!card || !wrap) return false;
+
       const answerData = normalizeAnswerChoices(entry);
       if (answerData.choices.length < 2 || answerData.correctChoiceIndex < 0) return false;
 
@@ -4797,10 +4897,14 @@
       entry.choices = answerData.choices;
       entry.correctChoiceIndex = answerData.correctChoiceIndex;
 
+      clearMultiAnswerEntryState();
       multiAnswerLayoutToken += 1;
+      const entryToken = multiAnswerLayoutToken;
       clearMultiAnswerFeedbackTimers();
       multiAnswerLastLayoutKey = "";
       multiAnswerLayoutSnapshot = null;
+      multiAnswerLayer.classList.remove("is-visible");
+      multiAnswerLayer.setAttribute("aria-hidden","true");
       multiAnswerGrid.innerHTML = "";
       delete multiAnswerGrid.dataset.rowSignature;
       answerData.choices.forEach((choice,choiceIndex)=>{
@@ -4808,16 +4912,52 @@
           createMultiAnswerChoice(choice,choiceIndex,entry,boxIndex)
         );
       });
+      const entryMetrics = getVisualViewportMetrics();
       rebuildMultiAnswerRows(
-        getMultiAnswerRowSizes(answerData.choices.length,getVisualViewportMetrics().width)
+        getMultiAnswerRowSizes(answerData.choices.length,entryMetrics.width)
       );
 
       answerPanelBoxIndex = boxIndex;
-      card?.classList.add("multi-answer-active");
       page?.classList.add("multi-answer-mode-active");
-      multiAnswerLayer.classList.add("is-visible");
-      multiAnswerLayer.setAttribute("aria-hidden","false");
-      fitMultiAnswerQuestionCard(card,{ force:true });
+
+      card.classList.remove(
+        "multi-answer-active",
+        "multi-answer-question-settled"
+      );
+      card.classList.add("multi-answer-entering");
+      wrap.style.removeProperty("--multi-box-scale");
+      wrap.style.removeProperty("--multi-box-safe-nudge-y");
+
+      const state = {
+        token:entryToken,
+        card,
+        wrap,
+        frame:null,
+        timer:null,
+        onTransitionEnd:null
+      };
+
+      state.onTransitionEnd = (event)=>{
+        if (event.target !== wrap || event.propertyName !== "transform") return;
+        armMultiAnswerEntryReveal(card,entryToken,110);
+      };
+      wrap.addEventListener("transitionend",state.onTransitionEnd);
+      multiAnswerEntryState = state;
+
+      /* نثبت الحالة الابتدائية قبل كتابة موضع السؤال النهائي. */
+      void wrap.offsetWidth;
+
+      state.frame = requestAnimationFrame(()=>{
+        if (
+          multiAnswerEntryState !== state ||
+          entryToken !== multiAnswerLayoutToken ||
+          answerPanelBoxIndex !== boxIndex
+        ) return;
+
+        state.frame = null;
+        card.classList.add("multi-answer-active");
+        fitMultiAnswerQuestionCard(card,{ force:true, metrics:entryMetrics });
+      });
       return true;
     }
 
@@ -4913,6 +5053,12 @@
       if (event?.target?.closest?.(".fixed-controls")) return;
       if (event?.target?.closest?.(".multi-answer-layer")) return;
       if (selectedBoxIndex < 0 || !activeFocusButton) return;
+
+      /* لا نغادر المشهد بين صعود السؤال وظهور الإجابات. */
+      if (
+        isMultiAnswerEntryActive() &&
+        answerPanelBoxIndex === selectedBoxIndex
+      ) return;
 
       if (
         multiAnswerEnabled &&
@@ -5433,6 +5579,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v87-stable-answer-layout -->
+  <!-- VERSION: open-box-v88-sequenced-answer-entry -->
 </body>
 </html>
