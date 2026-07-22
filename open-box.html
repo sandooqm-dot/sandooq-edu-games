@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v84-answer-feedback-sounds -->
+  <!-- version: open-box-v86-adaptive-answer-layout -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -433,8 +433,10 @@
     .multi-answer-layer{
       position:absolute;
       left:50%;
+      top:auto;
       bottom:calc(clamp(44px,6vh,66px) + var(--safe-bottom));
       width:min(960px, calc(100vw - 2 * var(--edge-guard) - var(--safe-left) - var(--safe-right)));
+      height:auto;
       z-index:190;
       opacity:0;
       visibility:hidden;
@@ -453,12 +455,24 @@
     }
 
     .multi-answer-grid{
-      display:grid;
-      grid-template-columns:repeat(var(--answer-columns,4),minmax(82px,124px));
+      display:flex;
+      flex-direction:column;
       justify-content:center;
       align-items:center;
-      gap:clamp(8px,1vw,14px);
+      gap:var(--answer-gap,clamp(8px,1vw,14px));
       width:100%;
+      height:100%;
+      min-height:0;
+    }
+
+    .multi-answer-row{
+      display:flex;
+      flex:0 0 auto;
+      justify-content:center;
+      align-items:center;
+      gap:var(--answer-gap,clamp(8px,1vw,14px));
+      width:100%;
+      min-width:0;
     }
 
     .multi-answer-choice{
@@ -469,7 +483,9 @@
       --box-result-text:#fff;
       --box-result-text-shadow:0 3px 8px rgba(0,0,0,.34);
       min-width:0;
-      width:min(100%,124px);
+      width:var(--answer-size,124px);
+      height:var(--answer-size,124px);
+      flex:0 0 var(--answer-size,124px);
       aspect-ratio:1 / 1;
       border:0;
       border-radius:0;
@@ -610,10 +626,10 @@
       max-height:100%;
       overflow:hidden;
       -webkit-box-orient:vertical;
-      -webkit-line-clamp:5;
+      -webkit-line-clamp:var(--answer-line-clamp,5);
       overflow-wrap:anywhere;
       text-align:center;
-      font:900 clamp(18px,1.4vw,25px)/1.15 "Cairo",sans-serif;
+      font:900 var(--answer-font-size,clamp(18px,1.4vw,25px))/1.15 "Cairo",sans-serif;
     }
 
     /* في ثيم الفصل تستخدم الإجابات نفس دفتر صندوق السؤال، بمقاس أصغر. */
@@ -645,7 +661,7 @@
     .game-page.theme-classroom .answer-box-text{
       color:#27231f !important;
       text-shadow:0 1px 0 rgba(255,255,255,.9) !important;
-      font-size:clamp(16px,1.2vw,22px);
+      font-size:var(--answer-classroom-font-size,var(--answer-font-size,clamp(16px,1.2vw,22px)));
     }
 
     .answer-box-image{
@@ -663,10 +679,9 @@
     .multi-answer-choice.is-wrong{--asset-tint:#e5484d;opacity:1;filter:none}
 
     @media(max-width:680px){
-      .multi-answer-layer{bottom:calc(60px + var(--safe-bottom));width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
-      .multi-answer-grid{grid-template-columns:repeat(2,minmax(82px,120px));gap:8px}
-      .multi-answer-choice{width:min(100%,120px)}
-      .answer-box-text{font-size:clamp(17px,4.6vw,24px)}
+      .multi-answer-layer{width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
+      .multi-answer-grid,.multi-answer-row{gap:var(--answer-gap,8px)}
+      .answer-box-text{font-size:var(--answer-font-size,clamp(15px,4.2vw,23px))}
       .answer-feedback-mark{width:clamp(42px,12vw,58px);font-size:clamp(29px,8.5vw,41px)}
       .box-card.multi-answer-active .box-wrap{
         --multi-box-shift-y:0px;
@@ -675,10 +690,9 @@
     }
 
     @media(max-height:760px) and (orientation:landscape){
-      .multi-answer-layer{bottom:calc(44px + var(--safe-bottom));width:min(900px,calc(100vw - 30px))}
-      .multi-answer-grid{grid-template-columns:repeat(var(--answer-columns,4),minmax(78px,112px));gap:8px}
-      .multi-answer-choice{width:min(100%,112px)}
-      .answer-box-text{font-size:clamp(16px,1.45vw,23px);-webkit-line-clamp:4}
+      .multi-answer-layer{width:min(900px,calc(100vw - 30px))}
+      .multi-answer-grid,.multi-answer-row{gap:var(--answer-gap,8px)}
+      .answer-box-text{font-size:var(--answer-font-size,clamp(15px,1.4vw,22px));-webkit-line-clamp:var(--answer-line-clamp,4)}
       .answer-feedback-mark{width:clamp(38px,4.5vw,54px);font-size:clamp(26px,3vw,38px)}
       .box-card.multi-answer-active .box-wrap{
         --multi-box-shift-y:0px;
@@ -2660,6 +2674,7 @@
     let opened = new Set();
     let answeredBoxes = new Set();
     let answerPanelBoxIndex = -1;
+    let multiAnswerLayoutToken = 0;
     let focusedIndex = -1;
     let boxZoomAnimationId = null;
     let boxZoomWebAnimation = null;
@@ -3501,6 +3516,13 @@
         }
 
         fitAllBoxText();
+
+        if (
+          multiAnswerLayer?.classList.contains("is-visible") &&
+          activeFocusButton?.classList.contains("multi-answer-active")
+        ) {
+          requestAnimationFrame(()=> fitMultiAnswerQuestionCard(activeFocusButton));
+        }
       });
 
       pendingViewportLayout = false;
@@ -4311,15 +4333,77 @@
     }
 
     function hideMultiAnswerPanel(){
+      multiAnswerLayoutToken += 1;
       multiAnswerLayer?.classList.remove("is-visible");
       multiAnswerLayer?.setAttribute("aria-hidden","true");
       if (multiAnswerGrid) multiAnswerGrid.innerHTML = "";
       grid?.querySelectorAll(".box-card.multi-answer-active").forEach((card)=>{
         card.classList.remove("multi-answer-active");
         card.style.removeProperty("--multi-box-safe-nudge-y");
+        const wrap = card.querySelector(".box-wrap");
+        wrap?.style.removeProperty("--multi-box-scale");
+        wrap?.style.removeProperty("--multi-box-safe-nudge-y");
+      });
+      ["top","bottom","left","width","height"].forEach((property)=>{
+        multiAnswerLayer?.style.removeProperty(property);
+      });
+      ["--answer-gap","--answer-size","--answer-font-size","--answer-classroom-font-size","--answer-line-clamp"].forEach((property)=>{
+        multiAnswerGrid?.style.removeProperty(property);
       });
       page?.classList.remove("multi-answer-mode-active");
       answerPanelBoxIndex = -1;
+    }
+
+    function getMultiAnswerRowSizes(count, viewportWidth){
+      if (count <= 0) return [];
+
+      const maxPerRow = viewportWidth < 520
+        ? 2
+        : viewportWidth < 820
+          ? 3
+          : 4;
+
+      if (count <= maxPerRow) return [count];
+
+      if (maxPerRow === 4) {
+        if (count === 5) return [3,2];
+        if (count === 6) return [4,2];
+        if (count === 7) return [4,3];
+      }
+
+      const rows = [];
+      let remaining = count;
+      while (remaining > 0) {
+        const rowsLeft = Math.ceil(remaining / maxPerRow);
+        const rowSize = Math.min(maxPerRow, Math.ceil(remaining / rowsLeft));
+        rows.push(rowSize);
+        remaining -= rowSize;
+      }
+      return rows;
+    }
+
+    function rebuildMultiAnswerRows(){
+      if (!multiAnswerGrid) return [];
+
+      const buttons = Array.from(multiAnswerGrid.querySelectorAll(".multi-answer-choice"));
+      if (!buttons.length) return [];
+
+      const metrics = getVisualViewportMetrics();
+      const rowSizes = getMultiAnswerRowSizes(buttons.length, metrics.width);
+      multiAnswerGrid.replaceChildren();
+
+      let cursor = 0;
+      rowSizes.forEach((rowSize)=>{
+        const row = document.createElement("div");
+        row.className = "multi-answer-row";
+        for (let index = 0; index < rowSize; index += 1) {
+          row.appendChild(buttons[cursor]);
+          cursor += 1;
+        }
+        multiAnswerGrid.appendChild(row);
+      });
+
+      return rowSizes;
     }
 
     function fitMultiAnswerQuestionCard(card){
@@ -4328,30 +4412,138 @@
       const wrap = card.querySelector(".box-wrap");
       if (!wrap) return;
 
-      card.style.setProperty("--multi-box-safe-nudge-y","0px");
+      const token = ++multiAnswerLayoutToken;
+      const metrics = getVisualViewportMetrics();
+      const pageRect = page.getBoundingClientRect();
+      const viewportTop = Math.max(0, Number(window.visualViewport?.offsetTop) || 0);
+      const viewportBottom = viewportTop + metrics.height;
+      const controlsRect = fixedControls?.getBoundingClientRect();
+      const safeTop = viewportTop + clamp(metrics.height * .022, 9, 20);
+      const safeBottom = Math.min(
+        viewportBottom - 8,
+        Number.isFinite(controlsRect?.top) ? controlsRect.top - 10 : viewportBottom - 60
+      );
+      const sideMargin = clamp(metrics.width * .025, 10, 28);
+      const layerWidth = Math.max(220, metrics.width - sideMargin * 2);
+      const rowSizes = rebuildMultiAnswerRows();
+      const rowCount = Math.max(1, rowSizes.length);
+      const maxColumns = Math.max(1, ...rowSizes);
+      const choiceCount = rowSizes.reduce((sum,size)=> sum + size, 0);
+      const totalSafeHeight = Math.max(1, safeBottom - safeTop);
+      const gap = clamp(Math.min(metrics.width, totalSafeHeight) * .014, 5, 14);
+      const questionGap = clamp(metrics.height * .018, 8, 16);
+      const rowGapsHeight = Math.max(0,rowCount - 1) * gap;
+      const widthPerChoice = Math.max(
+        20,
+        (layerWidth - gap * Math.max(0,maxColumns - 1)) / maxColumns
+      );
+      const minimumQuestionHeight = clamp(
+        totalSafeHeight * (rowCount >= 3 ? .19 : rowCount === 2 ? .23 : .28),
+        48,
+        118
+      );
+      const heightAvailableToAnswers = Math.max(
+        24,
+        totalSafeHeight - minimumQuestionHeight - questionGap - rowGapsHeight
+      );
+      const heightPerChoiceBeforeQuestionFit = heightAvailableToAnswers / rowCount;
+      const countSizeCap = choiceCount <= 2
+        ? 190
+        : choiceCount <= 4
+          ? 160
+          : choiceCount <= 6
+            ? 132
+            : 112;
+      const plannedAnswerSize = Math.max(
+        22,
+        Math.min(widthPerChoice, heightPerChoiceBeforeQuestionFit, countSizeCap)
+      );
+      const plannedAnswerBlockHeight =
+        rowCount * plannedAnswerSize + rowGapsHeight;
+      const questionHeightLimit = Math.max(
+        42,
+        totalSafeHeight - plannedAnswerBlockHeight - questionGap
+      );
+      const questionWidthLimit = metrics.width * (metrics.width > metrics.height ? .43 : .72);
+      const baseQuestionScale = rowCount >= 3 ? .74 : rowCount === 2 ? .82 : .90;
+
+      wrap.style.setProperty("--multi-box-scale", String(baseQuestionScale));
+      wrap.style.setProperty("--multi-box-safe-nudge-y", "0px");
 
       requestAnimationFrame(()=> requestAnimationFrame(()=> {
-        if (!card.classList.contains("multi-answer-active")) return;
+        if (
+          token !== multiAnswerLayoutToken ||
+          !card.classList.contains("multi-answer-active") ||
+          !multiAnswerLayer.classList.contains("is-visible")
+        ) return;
 
-        const wrapRect = wrap.getBoundingClientRect();
-        const answersRect = multiAnswerLayer.getBoundingClientRect();
-        const viewportTop = window.visualViewport?.offsetTop || 0;
-        const safeTop = viewportTop + 14;
-        const safeBottom = Math.max(safeTop + 80, answersRect.top - 12);
-        let screenNudge = 0;
-
-        if (wrapRect.bottom > safeBottom) {
-          screenNudge -= wrapRect.bottom - safeBottom;
-        }
-        if (wrapRect.top + screenNudge < safeTop) {
-          screenNudge += safeTop - (wrapRect.top + screenNudge);
-        }
-
-        const parentScale = Math.max(1,boxFocusState.scale || 1);
-        card.style.setProperty(
-          "--multi-box-safe-nudge-y",
-          `${(screenNudge / parentScale).toFixed(2)}px`
+        let questionRect = wrap.getBoundingClientRect();
+        const fitRatio = Math.min(
+          1,
+          questionHeightLimit / Math.max(1,questionRect.height),
+          questionWidthLimit / Math.max(1,questionRect.width)
         );
+        const fittedQuestionScale = clamp(baseQuestionScale * fitRatio, .30, .92);
+        wrap.style.setProperty("--multi-box-scale", fittedQuestionScale.toFixed(4));
+
+        requestAnimationFrame(()=> requestAnimationFrame(()=> {
+          if (token !== multiAnswerLayoutToken || !card.classList.contains("multi-answer-active")) return;
+
+          questionRect = wrap.getBoundingClientRect();
+          const desiredQuestionTop = safeTop;
+          const maximumQuestionBottom = safeBottom - plannedAnswerBlockHeight - questionGap;
+          let screenNudge = desiredQuestionTop - questionRect.top;
+
+          if (questionRect.bottom + screenNudge > maximumQuestionBottom) {
+            screenNudge -= (questionRect.bottom + screenNudge) - maximumQuestionBottom;
+          }
+          if (questionRect.top + screenNudge < safeTop) {
+            screenNudge += safeTop - (questionRect.top + screenNudge);
+          }
+
+          const parentScale = Math.max(.01, boxFocusState.scale || 1);
+          wrap.style.setProperty(
+            "--multi-box-safe-nudge-y",
+            `${(screenNudge / parentScale).toFixed(2)}px`
+          );
+
+          requestAnimationFrame(()=> requestAnimationFrame(()=> {
+            if (token !== multiAnswerLayoutToken || !card.classList.contains("multi-answer-active")) return;
+
+            const finalQuestionRect = wrap.getBoundingClientRect();
+            const answerTop = Math.max(safeTop, finalQuestionRect.bottom + questionGap);
+            const availableAnswerHeight = Math.max(20, safeBottom - answerTop);
+            const heightPerChoice = Math.max(
+              18,
+              (availableAnswerHeight - rowGapsHeight) / rowCount
+            );
+            const questionReference = Math.min(finalQuestionRect.width, finalQuestionRect.height);
+            const sizeRatio = choiceCount <= 2 ? .74 : choiceCount <= 4 ? .68 : .61;
+            const questionSizeCap = Math.max(24, questionReference * sizeRatio);
+            const answerSize = Math.max(
+              18,
+              Math.min(widthPerChoice, heightPerChoice, questionSizeCap, countSizeCap)
+            );
+            const answerBlockHeight = rowCount * answerSize + rowGapsHeight;
+            const answerFontSize = clamp(answerSize * .18, 10, 30);
+            const classroomFontSize = clamp(answerSize * .165, 9, 27);
+
+            multiAnswerLayer.style.left = `${metrics.offsetLeft + metrics.width / 2 - pageRect.left}px`;
+            multiAnswerLayer.style.top = `${answerTop - pageRect.top}px`;
+            multiAnswerLayer.style.bottom = "auto";
+            multiAnswerLayer.style.width = `${layerWidth}px`;
+            multiAnswerLayer.style.height = `${Math.min(availableAnswerHeight,answerBlockHeight)}px`;
+
+            multiAnswerGrid.style.setProperty("--answer-gap", `${gap}px`);
+            multiAnswerGrid.style.setProperty("--answer-size", `${answerSize.toFixed(2)}px`);
+            multiAnswerGrid.style.setProperty("--answer-font-size", `${answerFontSize.toFixed(2)}px`);
+            multiAnswerGrid.style.setProperty("--answer-classroom-font-size", `${classroomFontSize.toFixed(2)}px`);
+            multiAnswerGrid.style.setProperty(
+              "--answer-line-clamp",
+              answerSize < 64 ? "3" : answerSize < 92 ? "4" : "6"
+            );
+          }));
+        }));
       }));
     }
 
@@ -4457,10 +4649,6 @@
       entry.correctChoiceIndex = answerData.correctChoiceIndex;
 
       multiAnswerGrid.innerHTML = "";
-      multiAnswerGrid.style.setProperty(
-        "--answer-columns",
-        String(Math.min(4,Math.max(1,answerData.choices.length)))
-      );
       answerData.choices.forEach((choice,choiceIndex)=>{
         multiAnswerGrid.appendChild(
           createMultiAnswerChoice(choice,choiceIndex,entry,boxIndex)
@@ -5066,6 +5254,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v85-multi-answer-layout-polish -->
+  <!-- VERSION: open-box-v86-adaptive-answer-layout -->
 </body>
 </html>
