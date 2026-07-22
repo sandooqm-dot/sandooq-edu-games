@@ -410,8 +410,8 @@
     }
 
     .box-card.multi-answer-active .box-wrap{
-      --multi-box-shift-y:clamp(-56px,-6vh,-34px);
-      --multi-box-scale:.64;
+      --multi-box-shift-y:0px;
+      --multi-box-scale:.90;
       transform:translate3d(
         0,
         calc(var(--multi-box-shift-y) + var(--multi-box-safe-nudge-y,0px)),
@@ -433,8 +433,8 @@
     .multi-answer-layer{
       position:absolute;
       left:50%;
-      bottom:calc(72px + var(--safe-bottom));
-      width:min(1180px, calc(100vw - 2 * var(--edge-guard) - var(--safe-left) - var(--safe-right)));
+      bottom:calc(clamp(44px,6vh,66px) + var(--safe-bottom));
+      width:min(960px, calc(100vw - 2 * var(--edge-guard) - var(--safe-left) - var(--safe-right)));
       z-index:190;
       opacity:0;
       visibility:hidden;
@@ -454,10 +454,10 @@
 
     .multi-answer-grid{
       display:grid;
-      grid-template-columns:repeat(var(--answer-columns,4),minmax(120px,190px));
+      grid-template-columns:repeat(var(--answer-columns,4),minmax(82px,124px));
       justify-content:center;
       align-items:center;
-      gap:clamp(10px,1.25vw,18px);
+      gap:clamp(8px,1vw,14px);
       width:100%;
     }
 
@@ -469,7 +469,7 @@
       --box-result-text:#fff;
       --box-result-text-shadow:0 3px 8px rgba(0,0,0,.34);
       min-width:0;
-      width:100%;
+      width:min(100%,124px);
       aspect-ratio:1 / 1;
       border:0;
       border-radius:0;
@@ -613,7 +613,39 @@
       -webkit-line-clamp:5;
       overflow-wrap:anywhere;
       text-align:center;
-      font:900 clamp(18px,1.85vw,30px)/1.15 "Cairo",sans-serif;
+      font:900 clamp(18px,1.4vw,25px)/1.15 "Cairo",sans-serif;
+    }
+
+    /* في ثيم الفصل تستخدم الإجابات نفس دفتر صندوق السؤال، بمقاس أصغر. */
+    .game-page.theme-classroom .answer-box-shell{
+      filter:drop-shadow(0 6px 7px rgba(0,0,0,.24));
+    }
+
+    .game-page.theme-classroom .answer-box-shell::before{
+      inset:0;
+      background-image:var(--asset-notebook-open) !important;
+      background-repeat:no-repeat !important;
+      background-position:center !important;
+      background-size:contain !important;
+      background-blend-mode:normal !important;
+      filter:hue-rotate(var(--answer-notebook-hue,0deg)) saturate(1.16) brightness(1.02) !important;
+    }
+
+    .game-page.theme-classroom .answer-box-shell::after{
+      content:none !important;
+      display:none !important;
+    }
+
+    .game-page.theme-classroom .answer-box-content{
+      inset:24% 17% 15% !important;
+      color:#27231f !important;
+      text-shadow:0 1px 0 rgba(255,255,255,.9) !important;
+    }
+
+    .game-page.theme-classroom .answer-box-text{
+      color:#27231f !important;
+      text-shadow:0 1px 0 rgba(255,255,255,.9) !important;
+      font-size:clamp(16px,1.2vw,22px);
     }
 
     .answer-box-image{
@@ -631,24 +663,26 @@
     .multi-answer-choice.is-wrong{--asset-tint:#e5484d;opacity:1;filter:none}
 
     @media(max-width:680px){
-      .multi-answer-layer{bottom:calc(68px + var(--safe-bottom));width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
-      .multi-answer-grid{grid-template-columns:repeat(2,minmax(110px,160px));gap:8px}
+      .multi-answer-layer{bottom:calc(60px + var(--safe-bottom));width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
+      .multi-answer-grid{grid-template-columns:repeat(2,minmax(82px,120px));gap:8px}
+      .multi-answer-choice{width:min(100%,120px)}
       .answer-box-text{font-size:clamp(17px,4.6vw,24px)}
       .answer-feedback-mark{width:clamp(42px,12vw,58px);font-size:clamp(29px,8.5vw,41px)}
       .box-card.multi-answer-active .box-wrap{
-        --multi-box-shift-y:-78px;
-        --multi-box-scale:.62;
+        --multi-box-shift-y:0px;
+        --multi-box-scale:.88;
       }
     }
 
     @media(max-height:760px) and (orientation:landscape){
-      .multi-answer-layer{bottom:calc(50px + var(--safe-bottom));width:min(1100px,calc(100vw - 30px))}
-      .multi-answer-grid{grid-template-columns:repeat(var(--answer-columns,4),minmax(104px,150px));gap:8px}
-      .answer-box-text{font-size:clamp(17px,1.75vw,26px);-webkit-line-clamp:4}
+      .multi-answer-layer{bottom:calc(44px + var(--safe-bottom));width:min(900px,calc(100vw - 30px))}
+      .multi-answer-grid{grid-template-columns:repeat(var(--answer-columns,4),minmax(78px,112px));gap:8px}
+      .multi-answer-choice{width:min(100%,112px)}
+      .answer-box-text{font-size:clamp(16px,1.45vw,23px);-webkit-line-clamp:4}
       .answer-feedback-mark{width:clamp(38px,4.5vw,54px);font-size:clamp(26px,3vw,38px)}
       .box-card.multi-answer-active .box-wrap{
-        --multi-box-shift-y:-10px;
-        --multi-box-scale:.58;
+        --multi-box-shift-y:0px;
+        --multi-box-scale:.92;
       }
     }
 
@@ -3919,12 +3953,20 @@
         150
       );
 
-      const desiredTile = isLandscape
-        ? Math.min(stageW * .34, stageH * .58, tile * 2.18)
-        : Math.min(stageW * .72, stageH * .42, tile * 2.24);
+      const multiAnswerFocus = Boolean(multiAnswerEnabled);
+      const desiredTile = multiAnswerFocus
+        ? (isLandscape
+          ? Math.min(stageW * .28, stageH * .43, tile * 1.94)
+          : Math.min(stageW * .66, stageH * .35, tile * 1.98))
+        : (isLandscape
+          ? Math.min(stageW * .34, stageH * .58, tile * 2.18)
+          : Math.min(stageW * .72, stageH * .42, tile * 2.24));
 
-      const maxScale = isLandscape ? 2.18 : 2.24;
-      const scale = clamp(desiredTile / tile, 1.38, maxScale);
+      const maxScale = multiAnswerFocus
+        ? (isLandscape ? 1.94 : 1.98)
+        : (isLandscape ? 2.18 : 2.24);
+      const minScale = multiAnswerFocus ? 1.24 : 1.38;
+      const scale = clamp(desiredTile / tile, minScale, maxScale);
 
       /*
         transform على grid نفسه:
@@ -3937,7 +3979,11 @@
       const localCenterY = button.offsetTop + button.offsetHeight / 2;
 
       const focusX = stageW * .50;
-      const focusY = stageH * (isLandscape ? .50 : .53);
+      const focusY = stageH * (
+        multiAnswerFocus
+          ? (isLandscape ? .27 : .29)
+          : (isLandscape ? .50 : .53)
+      );
 
       return {
         scale,
@@ -4315,6 +4361,10 @@
       button.className = "multi-answer-choice";
       button.dataset.choiceIndex = String(choiceIndex);
       applyBoxPalette(button,choiceIndex + 2);
+      button.style.setProperty(
+        "--answer-notebook-hue",
+        `${(choiceIndex * 67) % 360}deg`
+      );
 
       const shell = document.createElement("span");
       shell.className = "answer-box-shell";
@@ -5016,6 +5066,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v84-answer-feedback-sounds -->
+  <!-- VERSION: open-box-v85-multi-answer-layout-polish -->
 </body>
 </html>

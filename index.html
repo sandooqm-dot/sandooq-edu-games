@@ -13674,7 +13674,24 @@
     .open-box-answer-row .quiz-image-picker-wrap{width:100%;min-width:0}
     .open-box-answer-row .quiz-image-picker-button{width:100%}
     .open-box-answer-actions{display:flex;align-items:center;gap:7px}
-    .open-box-answer-add{width:100%;margin-top:2px}
+    .open-box-answer-add{
+      width:auto !important;
+      min-width:clamp(180px,24vw,250px);
+      max-width:100%;
+      justify-self:center;
+      margin:8px auto 2px !important;
+      padding-inline:clamp(18px,3vw,32px) !important;
+    }
+    body[data-setup-template="open-box"] #addWheelItemBtn{
+      width:auto !important;
+      min-width:clamp(180px,24vw,250px);
+      max-width:100%;
+      justify-self:center !important;
+      margin:14px auto 0 !important;
+      padding-inline:clamp(18px,3vw,32px) !important;
+      background:var(--title-yellow,#f5d84b) !important;
+      color:#111 !important;
+    }
     .open-box-answer-row .quiz-choice-left-actions{
       display:flex;
       align-items:center;
@@ -16983,7 +17000,9 @@
 
     const modeLabel = document.createElement("div");
     modeLabel.className = "train-side-content-mode-label";
-    modeLabel.textContent = "نوع المحتوى";
+    modeLabel.textContent = currentGameTemplate === "open-box"
+      ? "محتوى الصندوق"
+      : "نوع المحتوى";
 
     const buttons = document.createElement("div");
     buttons.className = "train-side-content-mode-buttons";
@@ -24689,6 +24708,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v109-multi-answer-box -->
+<!-- VERSION: index-v111-open-box-ui-polish -->
 </body>
 </html>
