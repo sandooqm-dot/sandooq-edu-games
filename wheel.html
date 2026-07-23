@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- version: wheel-v44-whole-word-sector-labels -->
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
@@ -507,9 +508,30 @@
       white-space:normal;
       overflow-wrap:normal;
       word-break:keep-all;
+      hyphens:none;
+      -webkit-hyphens:none;
       text-shadow:0 1px 2px rgba(0,0,0,.25);
       flex:0 1 var(--text-max, auto);
       min-width:0;
+    }
+
+    /*
+      نصوص قطاعات العجلة فقط:
+      كل سطر يحتوي كلمات كاملة ولا يسمح للمتصفح بشطر الكلمة العربية.
+      سؤال المنتصف لا يستخدم هذه العناصر ولا يتأثر بهذه القواعد.
+    */
+    .wheel-text-line{
+      display:block;
+      flex:0 0 auto;
+      max-width:100%;
+      white-space:nowrap;
+      overflow-wrap:normal;
+      word-break:normal;
+      hyphens:none;
+      -webkit-hyphens:none;
+      text-align:center;
+      direction:inherit;
+      unicode-bidi:plaintext;
     }
 
     .wheel-label.dark .wheel-text{
@@ -1311,6 +1333,8 @@
       white-space:normal;
       word-break:keep-all;
       overflow-wrap:normal;
+      hyphens:none;
+      -webkit-hyphens:none;
       overflow:hidden;
     }
     .wheel-label.dark .wheel-text{
@@ -3247,6 +3271,7 @@
         const textEl = document.createElement("div");
         const value = textForEntry(entry,index);
         textEl.className = "wheel-text";
+        textEl.dataset.fullText = value;
         const isArabic = /[\u0600-\u06FF]/.test(value);
         textEl.setAttribute("dir",isArabic ? "rtl" : "auto");
         if (isArabic) textEl.setAttribute("lang","ar");
@@ -3661,18 +3686,126 @@
       });
     }
 
-    function wheelTextFits(textEl, boxWidth, boxHeight, maxLines, fontSize){
-      textEl.style.fontSize = `${fontSize}px`;
-      const lineHeight = fontSize * 1.16;
-      const measuredLines = Math.max(1, Math.ceil((textEl.scrollHeight - 0.5) / Math.max(1, lineHeight)));
-      return textEl.scrollWidth <= boxWidth + 0.75 &&
-             textEl.scrollHeight <= boxHeight + 0.75 &&
-             measuredLines <= maxLines;
+    const wheelTextMeasureCanvas = document.createElement("canvas");
+    const wheelTextMeasureContext = wheelTextMeasureCanvas.getContext("2d");
+
+    function normalizeWheelTextWords(value){
+      return String(value || "")
+        .replace(/\s+/gu," ")
+        .trim()
+        .split(" ")
+        .filter(Boolean);
+    }
+
+    function setWheelMeasureFont(textEl,fontSize){
+      if (!wheelTextMeasureContext) return;
+      const style = getComputedStyle(textEl);
+      const fontStyle = style.fontStyle && style.fontStyle !== "normal"
+        ? style.fontStyle
+        : "";
+      const fontWeight = style.fontWeight || "700";
+      const fontFamily = style.fontFamily || '"Noto Naskh Arabic",serif';
+      wheelTextMeasureContext.font = [
+        fontStyle,
+        fontWeight,
+        `${fontSize}px`,
+        fontFamily
+      ].filter(Boolean).join(" ");
+    }
+
+    /*
+      تعيد أفضل توزيع متوازن للكلمات الكاملة عند حجم خط محدد.
+      لا تُنشأ نقطة فصل داخل أي كلمة مهما كان اتجاه النص أو نوع الخط.
+    */
+    function findWholeWordLineLayout(textEl,words,boxWidth,boxHeight,maxLines,fontSize,lineHeightRatio){
+      if (!words.length || !wheelTextMeasureContext) return null;
+
+      const heightLineLimit = Math.floor(
+        (boxHeight + .35) / Math.max(1,fontSize * lineHeightRatio)
+      );
+      const allowedLines = Math.max(
+        0,
+        Math.min(maxLines,words.length,heightLineLimit)
+      );
+      if (!allowedLines) return null;
+
+      setWheelMeasureFont(textEl,fontSize);
+
+      const wordCount = words.length;
+      const spaceWidth = wheelTextMeasureContext.measureText(" ").width;
+      const widthPrefix = [0];
+      words.forEach((word)=>{
+        widthPrefix.push(
+          widthPrefix[widthPrefix.length - 1] +
+          wheelTextMeasureContext.measureText(word).width
+        );
+      });
+      const measuredWidth = (start,end)=>
+        (widthPrefix[end] - widthPrefix[start]) +
+        Math.max(0,end - start - 1) * spaceWidth;
+
+      for (let lineCount = 1; lineCount <= allowedLines; lineCount += 1) {
+        let states = Array(wordCount + 1).fill(null);
+        states[0] = { cost:0, lines:[] };
+
+        for (let lineIndex = 0; lineIndex < lineCount; lineIndex += 1) {
+          const nextStates = Array(wordCount + 1).fill(null);
+          const linesRemaining = lineCount - lineIndex - 1;
+
+          for (let start = 0; start < wordCount; start += 1) {
+            const state = states[start];
+            if (!state) continue;
+
+            const lastEnd = wordCount - linesRemaining;
+            for (let end = start + 1; end <= lastEnd; end += 1) {
+              const remainingWords = wordCount - end;
+              if (remainingWords < linesRemaining) continue;
+
+              const width = measuredWidth(start,end);
+              if (width > boxWidth + .35) break;
+
+              const slack = Math.max(0,boxWidth - width);
+              const cost = state.cost + slack * slack;
+              const current = nextStates[end];
+
+              if (!current || cost < current.cost) {
+                nextStates[end] = {
+                  cost,
+                  lines:[
+                    ...state.lines,
+                    words.slice(start,end).join(" ")
+                  ]
+                };
+              }
+            }
+          }
+
+          states = nextStates;
+        }
+
+        if (states[wordCount]) return states[wordCount].lines;
+      }
+
+      return null;
+    }
+
+    function renderWholeWordLines(textEl,lines,fullText){
+      const fragment = document.createDocumentFragment();
+      lines.forEach((line)=>{
+        const lineElement = document.createElement("span");
+        lineElement.className = "wheel-text-line";
+        lineElement.textContent = line;
+        fragment.appendChild(lineElement);
+      });
+      textEl.replaceChildren(fragment);
+      textEl.setAttribute("aria-label",fullText);
     }
 
     function fitWheelTextElement(textEl){
       if (!textEl) return;
-      const value = String(textEl.textContent || "").trim();
+      const value = String(
+        textEl.dataset.fullText || textEl.textContent || ""
+      ).replace(/\s+/gu," ").trim();
       if (!value) return;
 
       const label = textEl.closest(".wheel-label");
@@ -3693,46 +3826,160 @@
       const boxHeight = Math.max(10, content.clientHeight - verticalPadding - 4);
       const declaredFont = parseFloat(labelStyle.getPropertyValue("--font-size")) || parseFloat(getComputedStyle(textEl).fontSize) || 18;
       const maxLines = Math.max(1, parseInt(labelStyle.getPropertyValue("--line-clamp"),10) || 3);
-      const minFont = Math.max(6.5, Math.min(10, declaredFont * .45));
-      const hasSpaces = /\s/.test(value);
+      const lineHeightRatio = 1.16;
+      const words = normalizeWheelTextWords(value);
 
-      textEl.style.display = "block";
+      textEl.style.display = "flex";
+      textEl.style.flexDirection = "column";
+      textEl.style.alignItems = "center";
+      textEl.style.justifyContent = "center";
       textEl.style.webkitLineClamp = "unset";
       textEl.style.lineClamp = "unset";
-      textEl.style.lineHeight = "1.16";
+      textEl.style.lineHeight = String(lineHeightRatio);
       textEl.style.overflow = "visible";
       textEl.style.maxHeight = "none";
       textEl.style.width = isMixed ? `${boxWidth}px` : "100%";
       textEl.style.maxWidth = `${boxWidth}px`;
-      textEl.style.whiteSpace = hasSpaces ? "normal" : "nowrap";
-      textEl.style.wordBreak = hasSpaces ? "keep-all" : "normal";
+      textEl.style.whiteSpace = "normal";
+      textEl.style.wordBreak = "normal";
       textEl.style.overflowWrap = "normal";
+      textEl.style.hyphens = "none";
+      textEl.style.webkitHyphens = "none";
 
-      let low = minFont;
-      let high = Math.max(minFont, declaredFont);
-      let best = minFont;
+      const textStyle = getComputedStyle(textEl);
+      const textHorizontalPadding =
+        (parseFloat(textStyle.paddingLeft) || 0) +
+        (parseFloat(textStyle.paddingRight) || 0);
+      const textVerticalPadding =
+        (parseFloat(textStyle.paddingTop) || 0) +
+        (parseFloat(textStyle.paddingBottom) || 0);
+      const wordBoxWidth = Math.max(
+        4,
+        boxWidth - textHorizontalPadding - 1
+      );
+      const wordBoxHeight = Math.max(
+        4,
+        boxHeight - textVerticalPadding - 1
+      );
 
-      for (let step = 0; step < 14; step += 1) {
+      /*
+        نبحث عن أكبر خط يسمح بتوزيع الكلمات كاملة.
+        الحد الأدنى المنخفض ليس حجمًا مستهدفًا؛ بل حماية لحالات كلمة واحدة
+        طويلة جدًا حتى لا نعود أبدًا إلى تقسيمها من المنتصف.
+      */
+      let low = .75;
+      let high = Math.max(.75,declaredFont);
+      let best = low;
+      let bestLines = findWholeWordLineLayout(
+        textEl,
+        words,
+        wordBoxWidth,
+        wordBoxHeight,
+        maxLines,
+        low,
+        lineHeightRatio
+      );
+
+      if (!bestLines) {
+        low = .25;
+        best = low;
+        bestLines = findWholeWordLineLayout(
+          textEl,
+          words,
+          wordBoxWidth,
+          wordBoxHeight,
+          maxLines,
+          low,
+          lineHeightRatio
+        );
+      }
+
+      for (let step = 0; step < 16; step += 1) {
         const mid = (low + high) / 2;
-        if (wheelTextFits(textEl, boxWidth, boxHeight, maxLines, mid)) {
+        const lines = findWholeWordLineLayout(
+          textEl,
+          words,
+          wordBoxWidth,
+          wordBoxHeight,
+          maxLines,
+          mid,
+          lineHeightRatio
+        );
+        if (lines) {
           best = mid;
+          bestLines = lines;
           low = mid;
         } else {
           high = mid;
         }
       }
 
-      if (!wheelTextFits(textEl, boxWidth, boxHeight, maxLines, best)) {
-        textEl.style.whiteSpace = "normal";
-        textEl.style.wordBreak = "break-word";
-        textEl.style.overflowWrap = "anywhere";
-        best = minFont;
+      let safeSize = Math.max(.25,best * .975);
+      let safeLines = findWholeWordLineLayout(
+        textEl,
+        words,
+        wordBoxWidth,
+        wordBoxHeight,
+        maxLines,
+        safeSize,
+        lineHeightRatio
+      ) || bestLines || [value];
+
+      /*
+        Canvas يحدد التقسيم، ثم نتحقق مرة بقياس الخط الحقيقي في المتصفح.
+        هذا يعالج الفروق الطفيفة بين خطوط النسخ والكوفية وتاجوال.
+      */
+      for (let attempt = 0; attempt < 5; attempt += 1) {
+        renderWholeWordLines(textEl,safeLines,value);
+        textEl.style.fontSize = `${safeSize.toFixed(2)}px`;
+
+        const renderedLines = Array.from(
+          textEl.querySelectorAll(".wheel-text-line")
+        );
+        const renderedWidth = Math.max(
+          0,
+          ...renderedLines.map((lineElement)=>lineElement.scrollWidth)
+        );
+        const innerWidth = Math.max(
+          1,
+          textEl.clientWidth - textHorizontalPadding
+        );
+
+        if (renderedWidth <= innerWidth + .35) break;
+
+        safeSize = Math.max(
+          .25,
+          safeSize * (innerWidth / Math.max(1,renderedWidth)) * .97
+        );
+        safeLines = findWholeWordLineLayout(
+          textEl,
+          words,
+          wordBoxWidth,
+          wordBoxHeight,
+          maxLines,
+          safeSize,
+          lineHeightRatio
+        ) || safeLines;
       }
 
-      const safeSize = Math.max(minFont, best * .985);
+      renderWholeWordLines(textEl,safeLines,value);
       textEl.style.fontSize = `${safeSize.toFixed(2)}px`;
       textEl.style.maxHeight = `${boxHeight}px`;
       textEl.style.overflow = "hidden";
+
+      /*
+        فحص نهائي وقائي: كل سطر nowrap، لذلك لا يستطيع المتصفح تقسيم
+        الكلمة حتى بعد تحميل الخط أو تغيير الاتجاه.
+      */
+      textEl.querySelectorAll(".wheel-text-line").forEach((lineElement)=>{
+        lineElement.style.whiteSpace = "nowrap";
+        lineElement.style.wordBreak = "normal";
+        lineElement.style.overflowWrap = "normal";
+      });
+
+      if (!textEl.dataset.fullText) {
+        textEl.dataset.fullText = value;
+      }
     }
 
     function fitAllWheelText(){
@@ -4380,6 +4627,6 @@
     themeIntroAudio.preload(payload.theme);
     wheelAudio.ready("finish");
   </script>
-<!-- VERSION: wheel-v43-per-item-content -->
+<!-- VERSION: wheel-v44-whole-word-sector-labels -->
 </body>
 </html>
