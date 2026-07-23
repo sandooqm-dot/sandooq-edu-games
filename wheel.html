@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: wheel-v44-whole-word-sector-labels -->
+<!-- version: wheel-v45-larger-sector-labels -->
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
@@ -457,7 +457,7 @@
 
     .wheel-label.mixed-text-label .wheel-label-content{
       overflow:visible;
-      padding:2px 3px;
+      padding:1px;
     }
 
     .wheel-label.mixed-text-label .wheel-text{
@@ -469,7 +469,7 @@
       max-width:var(--text-max, 116px);
       overflow:visible;
       line-height:1.16;
-      padding:2px 3px;
+      padding:0;
     }
 
     .wheel-label.mixed-image-label .wheel-image{
@@ -3819,11 +3819,19 @@
       const verticalPadding = (parseFloat(contentStyle.paddingTop) || 0) + (parseFloat(contentStyle.paddingBottom) || 0);
       const declaredTextMax = parseFloat(labelStyle.getPropertyValue("--text-max")) || 0;
 
+      /*
+        wheel-60:
+        clientWidth يشمل الحشو لأن عناصر الصفحة border-box.
+        في الإصدار السابق خُصمت هوامش أمان إضافية من الحاوية ثم من النص،
+        فصارت مساحة القياس أصغر من المساحة الحقيقية ونتج خط صغير بلا حاجة.
+        هنا نستخدم المساحة الداخلية الفعلية فقط، ويظل فحص DOM النهائي مسؤولًا
+        عن أي فروق طفيفة بين الخطوط.
+      */
       const boxWidth = Math.max(10, Math.min(
-        Math.max(10, content.clientWidth - horizontalPadding - 4),
+        Math.max(10, content.clientWidth - horizontalPadding),
         isMixed && declaredTextMax > 0 ? declaredTextMax : Number.POSITIVE_INFINITY
       ));
-      const boxHeight = Math.max(10, content.clientHeight - verticalPadding - 4);
+      const boxHeight = Math.max(10, content.clientHeight - verticalPadding);
       const declaredFont = parseFloat(labelStyle.getPropertyValue("--font-size")) || parseFloat(getComputedStyle(textEl).fontSize) || 18;
       const maxLines = Math.max(1, parseInt(labelStyle.getPropertyValue("--line-clamp"),10) || 3);
       const lineHeightRatio = 1.16;
@@ -3855,11 +3863,11 @@
         (parseFloat(textStyle.paddingBottom) || 0);
       const wordBoxWidth = Math.max(
         4,
-        boxWidth - textHorizontalPadding - 1
+        boxWidth - textHorizontalPadding
       );
       const wordBoxHeight = Math.max(
         4,
-        boxHeight - textVerticalPadding - 1
+        boxHeight - textVerticalPadding
       );
 
       /*
@@ -3914,7 +3922,7 @@
         }
       }
 
-      let safeSize = Math.max(.25,best * .975);
+      let safeSize = Math.max(.25,best * .995);
       let safeLines = findWholeWordLineLayout(
         textEl,
         words,
@@ -3940,16 +3948,29 @@
           0,
           ...renderedLines.map((lineElement)=>lineElement.scrollWidth)
         );
+        const renderedHeight = renderedLines.reduce(
+          (total,lineElement)=>total + lineElement.offsetHeight,
+          0
+        );
         const innerWidth = Math.max(
           1,
           textEl.clientWidth - textHorizontalPadding
         );
+        const innerHeight = Math.max(
+          1,
+          boxHeight - textVerticalPadding
+        );
 
-        if (renderedWidth <= innerWidth + .35) break;
+        if (
+          renderedWidth <= innerWidth + .35 &&
+          renderedHeight <= innerHeight + .35
+        ) break;
 
+        const widthRatio = innerWidth / Math.max(1,renderedWidth);
+        const heightRatio = innerHeight / Math.max(1,renderedHeight);
         safeSize = Math.max(
           .25,
-          safeSize * (innerWidth / Math.max(1,renderedWidth)) * .97
+          safeSize * Math.min(widthRatio,heightRatio,1) * .992
         );
         safeLines = findWholeWordLineLayout(
           textEl,
@@ -4627,6 +4648,6 @@
     themeIntroAudio.preload(payload.theme);
     wheelAudio.ready("finish");
   </script>
-<!-- VERSION: wheel-v44-whole-word-sector-labels -->
+<!-- VERSION: wheel-v45-larger-sector-labels -->
 </body>
 </html>
