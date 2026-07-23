@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <!-- version: open-box-v88-sequenced-answer-entry -->
+  <!-- version: open-box-v89-unified-visual-scale -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>افتح الصندوق - صندوق الألعاب التعليمية</title>
@@ -465,15 +465,24 @@
       transition-delay:0s;
     }
 
+    /*
+      قد يمتد الصف السفلي داخل شريط التحكم في الشاشات القصيرة، لكنه يبقى
+      في الممر الأوسط. رفع الأزرار وحدها يحافظ على نقرها وعلى حاجز المشهد.
+    */
+    .game-page.multi-answer-mode-active .fixed-controls{
+      z-index:210;
+    }
+
     .multi-answer-grid{
       display:flex;
       flex-direction:column;
       justify-content:center;
       align-items:center;
-      gap:var(--answer-gap,clamp(8px,1vw,14px));
+      gap:var(--answer-row-gap,clamp(6px,.8vw,10px));
       width:100%;
       height:100%;
       min-height:0;
+      pointer-events:none;
     }
 
     .multi-answer-row{
@@ -481,9 +490,10 @@
       flex:0 0 auto;
       justify-content:center;
       align-items:center;
-      gap:var(--answer-gap,clamp(8px,1vw,14px));
+      gap:var(--answer-column-gap,clamp(6px,.9vw,12px));
       width:100%;
       min-width:0;
+      pointer-events:none;
     }
 
     .multi-answer-choice{
@@ -507,6 +517,7 @@
       cursor:pointer;
       display:block;
       position:relative;
+      pointer-events:auto;
       overflow:visible;
       isolation:isolate;
       perspective:900px;
@@ -653,7 +664,11 @@
       background-image:var(--asset-notebook-open) !important;
       background-repeat:no-repeat !important;
       background-position:center !important;
-      background-size:contain !important;
+      /*
+        ملف المفكرة مربع لكنه يحتوي هوامش شفافة كبيرة. 118% تزيل هذه
+        الهوامش بصريًا من دون قص الحلقات أو الحافة السفلية.
+      */
+      background-size:118% 118% !important;
       background-blend-mode:normal !important;
       filter:hue-rotate(var(--answer-notebook-hue,0deg)) saturate(1.16) brightness(1.02) !important;
     }
@@ -664,7 +679,7 @@
     }
 
     .game-page.theme-classroom .answer-box-content{
-      inset:24% 17% 15% !important;
+      inset:20% 11% 9% !important;
       color:#27231f !important;
       text-shadow:0 1px 0 rgba(255,255,255,.9) !important;
     }
@@ -685,7 +700,7 @@
     }
 
     @media (hover:hover) and (pointer:fine){
-      .multi-answer-choice:hover{filter:brightness(1.06);transform:translateY(-4px) scale(1.02)}
+      .multi-answer-choice:not(:disabled):hover{filter:brightness(1.06);transform:translateY(-4px) scale(1.02)}
     }
     .multi-answer-choice:disabled{cursor:default;opacity:.78}
     .multi-answer-choice.is-correct{--asset-tint:#20aa61;opacity:1;filter:none}
@@ -693,7 +708,8 @@
 
     @media(max-width:680px){
       .multi-answer-layer{width:calc(100vw - 24px - var(--safe-left) - var(--safe-right))}
-      .multi-answer-grid,.multi-answer-row{gap:var(--answer-gap,8px)}
+      .multi-answer-grid{gap:var(--answer-row-gap,6px)}
+      .multi-answer-row{gap:var(--answer-column-gap,6px)}
       .answer-box-text{font-size:var(--answer-font-size,clamp(15px,4.2vw,23px))}
       .answer-feedback-mark{width:clamp(34px,calc(var(--answer-size,124px) * .34),58px);font-size:clamp(23px,calc(var(--answer-size,124px) * .25),41px)}
       .box-card.multi-answer-active .box-wrap{
@@ -704,7 +720,8 @@
 
     @media(max-height:760px) and (orientation:landscape){
       .multi-answer-layer{width:min(900px,calc(100vw - 30px))}
-      .multi-answer-grid,.multi-answer-row{gap:var(--answer-gap,8px)}
+      .multi-answer-grid{gap:var(--answer-row-gap,6px)}
+      .multi-answer-row{gap:var(--answer-column-gap,8px)}
       .answer-box-text{font-size:var(--answer-font-size,clamp(15px,1.4vw,22px));-webkit-line-clamp:var(--answer-line-clamp,4)}
       .answer-feedback-mark{width:clamp(32px,calc(var(--answer-size,124px) * .34),54px);font-size:clamp(22px,calc(var(--answer-size,124px) * .25),38px)}
       .box-card.multi-answer-active .box-wrap{
@@ -1582,10 +1599,20 @@
       background-position:center !important;
       background-size:contain !important;
       background-blend-mode:normal !important;
+      transition:background-size .56s cubic-bezier(.20,.82,.18,1);
       filter:
         hue-rotate(var(--notebook-hue, 0deg))
         saturate(1.22)
         brightness(var(--notebook-brightness, 1)) !important;
+    }
+
+    /*
+      يستخدم السؤال والإجابات البصمة المرئية نفسها في نمط الإجابات؛
+      وبذلك تكون نسبة الحجم بينهما حقيقية وليست متأثرة بهوامش الصورة.
+    */
+    .game-page.theme-classroom .box-card.multi-answer-entering .cavity-box::before,
+    .game-page.theme-classroom .box-card.multi-answer-active .cavity-box::before{
+      background-size:118% 118% !important;
     }
 
     .game-page.theme-classroom .cavity-box::after,
@@ -4535,7 +4562,15 @@
       ["top","bottom","left","width","height"].forEach((property)=>{
         multiAnswerLayer?.style.removeProperty(property);
       });
-      ["--answer-gap","--answer-size","--answer-font-size","--answer-classroom-font-size","--answer-line-clamp"].forEach((property)=>{
+      [
+        "--answer-gap",
+        "--answer-column-gap",
+        "--answer-row-gap",
+        "--answer-size",
+        "--answer-font-size",
+        "--answer-classroom-font-size",
+        "--answer-line-clamp"
+      ].forEach((property)=>{
         multiAnswerGrid?.style.removeProperty(property);
       });
       page?.classList.remove("multi-answer-mode-active");
@@ -4545,7 +4580,8 @@
     function getMultiAnswerRowSizes(count, viewportWidth){
       if (count <= 0) return [];
 
-      // ست إجابات تبقى دائمًا 4 في الصف الأول و2 في الصف الثاني.
+      // التوزيع التعليمي الثابت: خمس = 3+2، وست = 4+2.
+      if (count === 5) return [3,2];
       if (count === 6) return [4,2];
 
       const maxPerRow = viewportWidth < 440
@@ -4557,7 +4593,6 @@
       if (count <= maxPerRow) return [count];
 
       if (maxPerRow === 4) {
-        if (count === 5) return [3,2];
         if (count === 7) return [4,3];
       }
 
@@ -4632,15 +4667,25 @@
 
       const metrics = options.metrics || multiAnswerLayoutSnapshot || getVisualViewportMetrics();
       const pageRect = page.getBoundingClientRect();
-      const controlsRect = fixedControls?.getBoundingClientRect();
       const cardRect = card.getBoundingClientRect();
-      /* ننزل المجموعة قليلًا، مع إبقاء مسافة آمنة واضحة من أعلى الشاشة. */
-      const safeTop = clamp(metrics.height * .03, 12, 24);
-      const safeBottom = Math.min(
-        metrics.height - 8,
-        Number.isFinite(controlsRect?.top)
-          ? controlsRect.top - pageRect.top - 4
-          : metrics.height - 60
+      const controlElements = [backBtn,resetBtn,finishBtn].filter(Boolean);
+      const controlRects = controlElements
+        .filter((element)=>getComputedStyle(element).display !== "none")
+        .map((element)=>element.getBoundingClientRect());
+      const rightControlsRect = fixedControls
+        ?.querySelector(".right-controls")
+        ?.getBoundingClientRect();
+
+      /* يبقى السؤال قريبًا من أعلى اللوحة، وتبدأ الإجابات بعد ثباته. */
+      const safeTop = clamp(metrics.height * .032, 12, 26);
+      const viewportBottomInset = clamp(metrics.height * .018, 8, 14);
+      const viewportSafeBottom = metrics.height - viewportBottomInset;
+      const firstControlTop = controlRects.length
+        ? Math.min(...controlRects.map((rect)=>rect.top - pageRect.top))
+        : metrics.height - 56;
+      const standardSafeBottom = Math.min(
+        viewportSafeBottom,
+        firstControlTop - 4
       );
       const sideMargin = clamp(metrics.width * .025, 10, 28);
       const layerWidth = Math.max(220, metrics.width - sideMargin * 2);
@@ -4648,69 +4693,122 @@
       const rowCount = Math.max(1, rowSizes.length);
       const maxColumns = Math.max(1, ...rowSizes);
       const choiceCount = rowSizes.reduce((sum,size)=> sum + size, 0);
-      const totalSafeHeight = Math.max(1, safeBottom - safeTop);
-      const gap = clamp(Math.min(metrics.width, totalSafeHeight) * .018, 8, 16);
-      const questionGap = clamp(metrics.height * .018, 8, 16);
-      const rowGapsHeight = Math.max(0,rowCount - 1) * gap;
-      const widthPerChoice = Math.max(
-        20,
-        (layerWidth - gap * Math.max(0,maxColumns - 1)) / maxColumns
-      );
-      const minimumQuestionHeight = clamp(
-        totalSafeHeight * (rowCount >= 3 ? .22 : rowCount === 2 ? .34 : .42),
-        rowCount >= 3 ? 54 : 76,
-        rowCount === 1 ? 280 : 260
-      );
-      const heightAvailableToAnswers = Math.max(
-        24,
-        totalSafeHeight - minimumQuestionHeight - questionGap - rowGapsHeight
-      );
-      const heightPerChoice = heightAvailableToAnswers / rowCount;
-      const countSizeCap = choiceCount <= 2
-        ? 220
-        : choiceCount <= 3
-          ? 200
-        : choiceCount <= 4
-          ? 190
-        : choiceCount <= 6
-            ? 180
-            : choiceCount <= 8
-              ? 158
-              : 140;
-      const answerSize = Math.max(
-        24,
-        Math.min(widthPerChoice, heightPerChoice, countSizeCap)
-      );
-      const answerBlockHeight = rowCount * answerSize + rowGapsHeight;
-      const questionHeightLimit = Math.max(
-        36,
-        totalSafeHeight - answerBlockHeight - questionGap
-      );
-      const questionWidthLimit = metrics.width * (metrics.width > metrics.height ? .46 : .74);
-      const preferredQuestionScale = rowCount >= 3 ? .82 : rowCount === 2 ? .92 : .96;
-      const baseQuestionSize = Math.max(1,Math.min(cardRect.width,cardRect.height));
-      const questionSize = Math.max(
-        36,
-        Math.min(
-          baseQuestionSize * preferredQuestionScale,
-          questionHeightLimit,
-          questionWidthLimit
+      const questionToAnswerRatio = 1.08;
+      const columnGap = clamp(metrics.width * .009, 6, 12);
+      const rowGap = clamp(metrics.height * .012, 5, 10);
+      const questionGap = clamp(metrics.height * .015, 6, 12);
+
+      /*
+        عندما يكون الصف الأخير مكوّنًا من صندوقين، يمكنه النزول بأمان بين
+        زر الرجوع ومجموعة الأزرار اليمنى. نحسب هذا الممر من مواقع الأزرار
+        الفعلية، بدل حجز شريط التحكم كاملًا وتصغير الصناديق بلا داعٍ.
+      */
+      const centerX = metrics.offsetLeft + metrics.width / 2 - pageRect.left;
+      const controlSideMargin = clamp(metrics.width * .015, 12, 22);
+      const leftCorridorEdge = Number.isFinite(controlRects[0]?.right)
+        ? controlRects[0].right - pageRect.left + controlSideMargin
+        : sideMargin;
+      const rightCorridorEdge = Number.isFinite(rightControlsRect?.left)
+        ? rightControlsRect.left - pageRect.left - controlSideMargin
+        : metrics.width - sideMargin;
+      const centeredCorridorWidth = Math.max(
+        0,
+        2 * Math.min(
+          centerX - leftCorridorEdge,
+          rightCorridorEdge - centerX
         )
       );
+      const corridorAnswerLimit = Math.max(
+        0,
+        (centeredCorridorWidth - columnGap) / 2
+      );
+      const lastRowHasTwo = rowSizes[rowSizes.length - 1] === 2;
+      const canUseControlCorridor =
+        choiceCount >= 5 &&
+        lastRowHasTwo &&
+        corridorAnswerLimit >= 44;
+      const denseSafeBottom = canUseControlCorridor
+        ? viewportSafeBottom
+        : standardSafeBottom;
+
+      /*
+        مرجع مشترك لجميع الأعداد مبني على الحالة الأكثر كثافة (4 ثم 2).
+        لذلك لا تقفز المقاسات فجأة عند الانتقال من أربع إلى خمس إجابات.
+      */
+      const denseSafeHeight = Math.max(1,denseSafeBottom - safeTop);
+      const denseWidthPerChoice = Math.max(
+        24,
+        (layerWidth - columnGap * 3) / 4
+      );
+      const denseHeightPerChoice = Math.max(
+        24,
+        (denseSafeHeight - questionGap - rowGap) /
+          (2 + questionToAnswerRatio)
+      );
+      const sharedAnswerSize = Math.max(
+        24,
+        Math.min(
+          denseWidthPerChoice,
+          denseHeightPerChoice,
+          canUseControlCorridor ? corridorAnswerLimit : Infinity,
+          190
+        )
+      );
+      const answerSizeCap = choiceCount <= 2
+        ? 205
+        : choiceCount <= 3
+          ? 202
+          : choiceCount <= 4
+            ? 198
+            : 190;
+      const preferredAnswerSize = Math.min(
+        answerSizeCap,
+        sharedAnswerSize * (choiceCount <= 4 ? 1.08 : 1)
+      );
+      const safeBottom = canUseControlCorridor
+        ? viewportSafeBottom
+        : standardSafeBottom;
+      const totalSafeHeight = Math.max(1, safeBottom - safeTop);
+      const rowGapsHeight = Math.max(0,rowCount - 1) * rowGap;
+      const widthPerChoice = Math.max(
+        20,
+        (layerWidth - columnGap * Math.max(0,maxColumns - 1)) / maxColumns
+      );
+      const heightPerChoice = Math.max(
+        24,
+        (totalSafeHeight - questionGap - rowGapsHeight) /
+          (rowCount + questionToAnswerRatio)
+      );
+      const questionWidthLimit =
+        metrics.width * (metrics.width > metrics.height ? .48 : .78);
+      const answerSize = Math.max(
+        24,
+        Math.min(
+          preferredAnswerSize,
+          widthPerChoice,
+          heightPerChoice,
+          questionWidthLimit / questionToAnswerRatio
+        )
+      );
+      const answerBlockHeight = rowCount * answerSize + rowGapsHeight;
+      const baseQuestionSize = Math.max(1,Math.min(cardRect.width,cardRect.height));
+      const questionSize = answerSize * questionToAnswerRatio;
       const usedHeight = questionSize + questionGap + answerBlockHeight;
-      const groupTop = safeTop + Math.max(0,totalSafeHeight - usedHeight) * .30;
+      const groupTop = safeTop + Math.max(0,totalSafeHeight - usedHeight) *
+        (rowCount === 1 ? .44 : .20);
       const answerTop = groupTop + questionSize + questionGap;
       const parentScale = Math.max(.01,boxFocusState.scale || 1);
       const desiredQuestionCenter = groupTop + questionSize / 2;
       const currentQuestionCenter = cardRect.top - pageRect.top + cardRect.height / 2;
       const screenNudge = desiredQuestionCenter - currentQuestionCenter;
-      const fittedQuestionScale = clamp(questionSize / baseQuestionSize,.24,1);
+      const fittedQuestionScale = clamp(questionSize / baseQuestionSize,.24,1.65);
       const answerFontSize = clamp(answerSize * .19,11,32);
       const classroomFontSize = clamp(answerSize * .175,10,29);
       const layoutKey = [
         Math.round(metrics.width),
         Math.round(metrics.height),
         Math.round(safeBottom),
+        Math.round(centeredCorridorWidth),
         multiAnswerRowSignature,
         Math.round(baseQuestionSize * 10) / 10,
         Math.round(parentScale * 1000) / 1000
@@ -4731,7 +4829,8 @@
       multiAnswerLayer.style.width = `${layerWidth}px`;
       multiAnswerLayer.style.height = `${answerBlockHeight}px`;
 
-      multiAnswerGrid.style.setProperty("--answer-gap", `${gap}px`);
+      multiAnswerGrid.style.setProperty("--answer-column-gap", `${columnGap.toFixed(2)}px`);
+      multiAnswerGrid.style.setProperty("--answer-row-gap", `${rowGap.toFixed(2)}px`);
       multiAnswerGrid.style.setProperty("--answer-size", `${answerSize.toFixed(2)}px`);
       multiAnswerGrid.style.setProperty("--answer-font-size", `${answerFontSize.toFixed(2)}px`);
       multiAnswerGrid.style.setProperty("--answer-classroom-font-size", `${classroomFontSize.toFixed(2)}px`);
@@ -5579,6 +5678,6 @@
 
     initializeOpenBoxGame();
   </script>
-  <!-- VERSION: open-box-v88-sequenced-answer-entry -->
+  <!-- VERSION: open-box-v89-unified-visual-scale -->
 </body>
 </html>
