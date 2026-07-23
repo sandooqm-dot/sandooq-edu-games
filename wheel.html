@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- version: wheel-v45-larger-sector-labels -->
+<!-- version: wheel-v46-clear-sector-glyphs -->
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
@@ -436,10 +436,16 @@
     .wheel-label.text-only .wheel-label-content{
       padding:0 6px;
       justify-content:flex-end;
+      overflow:visible;
     }
 
     .wheel-label.text-only .wheel-text{
       line-height:1.08;
+      overflow:visible;
+    }
+
+    .wheel-label.text-only{
+      overflow:visible;
     }
 
     /* Split layout for text + image: separate elements, same sector angle, different radii. */
@@ -3985,8 +3991,14 @@
 
       renderWholeWordLines(textEl,safeLines,value);
       textEl.style.fontSize = `${safeSize.toFixed(2)}px`;
-      textEl.style.maxHeight = `${boxHeight}px`;
-      textEl.style.overflow = "hidden";
+      /*
+        wheel-61:
+        قياس السطر يضمن بقاء النص داخل صندوقه، لكن بعض الخطوط العربية
+        ترسم أطراف الحروف أسفل صندوق السطر بجزء صغير. إخفاء overflow كان
+        يقص هذا الامتداد البصري رغم أن النص نفسه مناسب للمساحة.
+      */
+      textEl.style.maxHeight = "none";
+      textEl.style.overflow = "visible";
 
       /*
         فحص نهائي وقائي: كل سطر nowrap، لذلك لا يستطيع المتصفح تقسيم
@@ -4648,6 +4660,6 @@
     themeIntroAudio.preload(payload.theme);
     wheelAudio.ready("finish");
   </script>
-<!-- VERSION: wheel-v45-larger-sector-labels -->
+<!-- VERSION: wheel-v46-clear-sector-glyphs -->
 </body>
 </html>
