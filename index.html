@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v122-suggestions-responsive -->
+<!-- version: index-v123-suggestions-device-layout -->
 <meta charset="utf-8"/>
-<meta content="index-v122-suggestions-responsive" name="sandooq-build"/>
+<meta content="index-v123-suggestions-device-layout" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -15692,7 +15692,7 @@
       }
     }
   </style>
-  <style id="suggestions-page-v122">
+  <style id="suggestions-page-v123">
     #appSuggestionsScreen{
       width:min(100%,980px);
       padding:clamp(18px,2.8vw,34px);
@@ -16049,58 +16049,131 @@
       line-height:1.7;
     }
 
-    @media (min-width:900px){
+    /*
+      اللابتوب والشاشات الواسعة:
+      بطاقة التعريف بعرض كامل حتى يبقى النص مريحًا، ثم النموذج
+      ومجتمع الأفكار في عمودين مستقلين ومتوازنين.
+    */
+    @media (min-width:1024px){
       #appSuggestionsScreen{
-        width:min(calc(100% - 34px),1120px);
+        width:min(calc(100% - 40px),1180px);
       }
 
       #appSuggestionsScreen.active{
         display:grid;
         grid-template-columns:repeat(2,minmax(0,1fr));
-        align-items:stretch;
-        column-gap:clamp(18px,2.5vw,30px);
+        align-items:start;
+        gap:clamp(18px,2vw,24px);
       }
 
       #appSuggestionsScreen .screen-title,
+      #appSuggestionsScreen .suggestions-hero,
       #appSuggestionsScreen .suggestions-community{
+        margin-top:0;
+      }
+
+      #appSuggestionsScreen .screen-title,
+      #appSuggestionsScreen .suggestions-hero{
         grid-column:1 / -1;
+      }
+
+      #appSuggestionsScreen .screen-title{
+        margin-bottom:0;
       }
 
       #appSuggestionsScreen .suggestions-hero{
         width:100%;
-        height:100%;
+        max-width:none;
         margin:0;
+        padding:clamp(15px,1.65vw,21px) clamp(20px,2.2vw,30px);
+        gap:clamp(20px,3vw,38px);
       }
 
       #appSuggestionsScreen .suggestions-form-card{
         width:100%;
-        height:100%;
+        max-width:none;
         margin:0;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
       }
 
       #appSuggestionsScreen .suggestions-community{
         width:100%;
+        max-width:none;
+        margin:0;
       }
 
       .suggestions-community-list{
-        grid-template-columns:repeat(2,minmax(0,1fr));
-        align-items:start;
+        grid-template-columns:1fr;
       }
     }
 
-    @media (min-width:561px) and (max-width:899px){
+    /*
+      الآيباد واللابتوب الصغير: عرض مكدّس بعرض مريح يمنع
+      ازدحام النص ويحافظ على مساحات لمس مناسبة.
+    */
+    @media (min-width:561px) and (max-width:1023px){
       #appSuggestionsScreen{
-        width:min(calc(100% - 28px),860px);
+        width:min(calc(100% - 28px),900px);
         padding:clamp(18px,3vw,28px);
       }
 
       .suggestions-hero,
       .suggestions-form-card,
       .suggestions-community{
-        width:100%;
+        width:min(100%,820px);
+      }
+
+      .suggestions-mascot{
+        flex-basis:clamp(132px,20vw,180px);
+        width:clamp(132px,20vw,180px);
+      }
+    }
+
+    /*
+      الوضع الأفقي القصير (جوال أو جهاز صغير): تقليل الارتفاعات
+      مع إبقاء الصفحة قابلة للتمرير ومن دون قص المحتوى.
+    */
+    @media (orientation:landscape) and (max-height:650px){
+      #appSuggestionsScreen{
+        padding:14px clamp(14px,2.2vw,24px);
+      }
+
+      #appSuggestionsScreen .screen-title{
+        margin-bottom:12px;
+        font-size:clamp(25px,4.8vh,36px);
+      }
+
+      #appSuggestionsScreen.active{
+        row-gap:14px;
+      }
+
+      .suggestions-hero{
+        padding:12px 18px;
+        gap:18px;
+      }
+
+      .suggestions-copy{
+        font-size:clamp(13px,2.6vh,17px);
+        line-height:1.7;
+      }
+
+      .suggestions-copy strong{
+        font-size:clamp(18px,3.7vh,24px);
+      }
+
+      .suggestions-mascot{
+        flex-basis:clamp(96px,15vw,140px);
+        width:clamp(96px,15vw,140px);
+        max-height:145px;
+      }
+
+      .suggestions-form-card,
+      .suggestions-community{
+        padding:14px 16px;
+      }
+
+      .suggestions-textarea{
+        min-height:108px;
+        height:108px;
       }
     }
 
@@ -27784,6 +27857,6 @@
   });
 })();
 </script>
-<!-- VERSION: index-v122-suggestions-responsive -->
+<!-- VERSION: index-v123-suggestions-device-layout -->
 </body>
 </html>
