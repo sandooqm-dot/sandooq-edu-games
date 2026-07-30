@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v110-multi-answer-box-fix -->
+<!-- version: index-v114-home-dashboard -->
 <meta charset="utf-8"/>
-<meta content="index-v110-multi-answer-box-fix" name="sandooq-build"/>
+<meta content="index-v114-home-dashboard" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -14078,6 +14078,727 @@
     }
 
   </style>
+  <style id="home-dashboard-v99">
+    :root{
+      --home-cream:#fbf6e9;
+      --home-orange:#ff6b18;
+      --home-orange-dark:#f35d0d;
+      --home-blue:#2f62da;
+      --home-blue-dark:#214fc1;
+      --home-yellow:#ffd447;
+      --home-line:#111318;
+      --home-shadow:0 8px 0 rgba(17,19,24,.14),0 12px 24px rgba(45,39,27,.08);
+      --home-footer-height:104px;
+      --footer-h:var(--home-footer-height);
+    }
+
+    body:not(.subpage) .page{
+      background-color:var(--home-cream);
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='430' height='430' viewBox='0 0 430 430'%3E%3Cg fill='none' stroke='%23d9d3c4' stroke-width='4' stroke-linecap='round' stroke-linejoin='round' opacity='.56'%3E%3Cpath d='M52 45l8 17 19 3-14 14 4 19-17-9-17 9 4-19-14-14 19-3z'/%3E%3Cpath d='M349 32l18 33h-36z'/%3E%3Ccircle cx='384' cy='198' r='16'/%3E%3Crect x='27' y='292' width='27' height='27' rx='4' transform='rotate(10 40 305)'/%3E%3Cpath d='M61 151c-32 12-32 49-4 59 27 9 17 43-8 50' stroke-dasharray='9 12'/%3E%3Cpath d='M344 327l7 14 15 3-11 11 3 15-14-7-14 7 3-15-11-11 15-3z'/%3E%3Cpath d='M376 105l9 18 20 3-15 15 4 20-18-10-18 10 4-20-15-15 20-3z'/%3E%3C/g%3E%3C/svg%3E");
+      background-size:430px 430px;
+      background-position:center top;
+    }
+
+    body:not(.subpage) .page{
+      padding-top:max(24px,var(--safe-top));
+      padding-bottom:calc(var(--home-footer-height) + 22px + var(--safe-bottom));
+    }
+
+    body:not(.subpage) .edu-decor{
+      display:none !important;
+    }
+
+    #homeShell.home-dashboard{
+      width:min(100%,1360px) !important;
+      min-height:calc(100dvh - var(--home-footer-height) - var(--safe-top) - var(--safe-bottom) - 48px);
+      margin:0 auto;
+      display:flex !important;
+      flex-direction:column;
+      justify-content:flex-start !important;
+      align-items:center;
+      gap:clamp(24px,3.2vh,46px) !important;
+      position:relative;
+      z-index:2;
+    }
+
+    .home-brand-card{
+      width:min(760px,82vw);
+      min-height:116px;
+      display:flex;
+      direction:ltr;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(18px,3vw,38px);
+      padding:14px clamp(20px,3vw,34px);
+      border:3px solid var(--home-line);
+      border-radius:24px;
+      background:rgba(255,255,255,.94);
+      box-shadow:var(--home-shadow);
+    }
+
+    .home-brand-logo{
+      flex:0 0 auto;
+      width:clamp(112px,16vw,176px);
+      max-height:90px;
+      object-fit:contain;
+      display:block;
+    }
+
+    .home-brand-title{
+      min-width:0;
+      margin:0;
+      color:#050505;
+      direction:rtl;
+      text-align:center;
+      font-family:var(--interface-font) !important;
+      font-size:clamp(27px,3.25vw,42px);
+      font-weight:900;
+      line-height:1.22;
+      text-wrap:balance;
+    }
+
+    .home-dashboard-grid{
+      width:min(1180px,90vw);
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:clamp(30px,4.4vh,60px);
+    }
+
+    #homeShell .home-play-panel{
+      width:100% !important;
+      margin:0 !important;
+      padding:clamp(18px,3vw,27px) !important;
+      border:3px solid var(--home-orange) !important;
+      border-radius:28px !important;
+      background:rgba(255,252,246,.94) !important;
+      box-shadow:var(--home-shadow);
+    }
+
+    #homeShell .home-play-panel .play-card{
+      width:100%;
+      min-height:0 !important;
+      padding:0 !important;
+      border:0 !important;
+      border-radius:0 !important;
+      background:transparent !important;
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:18px !important;
+    }
+
+    .home-play-heading{
+      margin:0;
+      text-align:center;
+      font-size:clamp(24px,4.9vw,36px);
+      font-weight:900;
+      line-height:1.25;
+    }
+
+    #homeShell .home-play-panel .select-wrap{
+      width:100% !important;
+      height:clamp(58px,8.5vw,72px) !important;
+    }
+
+    #homeShell .home-play-panel .select-wrap select{
+      width:100%;
+      height:100%;
+      padding:0 58px 0 54px !important;
+      border:2px solid #6d7179 !important;
+      border-radius:19px !important;
+      background:#fff !important;
+      color:#282828 !important;
+      text-align:right !important;
+      text-align-last:right !important;
+      font-size:clamp(18px,4vw,27px) !important;
+      font-weight:850 !important;
+      box-shadow:inset 0 1px 3px rgba(0,0,0,.06);
+    }
+
+    #homeShell .home-play-panel .select-wrap::after{
+      left:24px !important;
+      border-left-width:10px !important;
+      border-right-width:10px !important;
+      border-top-width:14px !important;
+      border-top-color:#090909 !important;
+    }
+
+    #homeShell .home-play-panel .start-btn{
+      width:100%;
+      min-width:0 !important;
+      height:clamp(64px,9vw,82px) !important;
+      padding:0 20px !important;
+      border:3px solid var(--home-line) !important;
+      border-radius:19px !important;
+      background:linear-gradient(135deg,var(--home-blue),var(--home-blue-dark)) !important;
+      color:#fff !important;
+      font-size:clamp(23px,4.7vw,35px) !important;
+      font-weight:900 !important;
+      box-shadow:0 5px 0 rgba(17,19,24,.17) !important;
+    }
+
+    #homeShell .home-play-panel .start-btn:disabled{
+      opacity:.64;
+      cursor:not-allowed;
+    }
+
+    .home-actions-panel{
+      width:100%;
+      display:grid;
+      grid-template-columns:minmax(0,1fr);
+      gap:clamp(18px,2.8vh,28px);
+    }
+
+    .home-actions-pair{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:clamp(14px,2.5vw,24px);
+    }
+
+    #homeShell .home-action-btn{
+      width:100%;
+      min-height:clamp(76px,11vw,104px);
+      margin:0;
+      padding:13px clamp(12px,2vw,24px);
+      border:3px solid var(--home-line);
+      border-radius:22px;
+      color:#070707;
+      font-family:var(--interface-font) !important;
+      font-size:clamp(20px,4.2vw,33px);
+      font-weight:900;
+      line-height:1.18;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(10px,2vw,20px);
+      text-align:center;
+      cursor:pointer;
+      box-shadow:var(--home-shadow);
+      transition:transform .16s ease,filter .16s ease;
+    }
+
+    #homeShell .home-action-btn:active{
+      transform:translateY(3px);
+      box-shadow:0 4px 0 rgba(17,19,24,.13);
+    }
+
+    #homeShell .home-create-action{
+      min-height:clamp(88px,13vw,116px);
+      background:linear-gradient(135deg,#ff7a1e,var(--home-orange-dark));
+      color:#fff;
+      font-size:clamp(26px,5vw,40px);
+    }
+
+    #homeShell .home-saved-action{
+      background:linear-gradient(135deg,#ffdc55,#ffc72e);
+    }
+
+    #homeShell .home-backup-action{
+      background:linear-gradient(135deg,#4775df,#2d5bd0);
+      color:#fff;
+    }
+
+    #homeShell .home-help-action{
+      background:rgba(255,255,255,.96);
+    }
+
+    .home-action-icon{
+      flex:0 0 auto;
+      width:clamp(32px,6vw,54px);
+      height:clamp(32px,6vw,54px);
+      display:block;
+    }
+
+    .home-action-label{
+      min-width:0;
+      direction:rtl;
+    }
+
+    .bottom-bar{
+      height:calc(var(--home-footer-height) + var(--safe-bottom)) !important;
+      padding:10px clamp(12px,2.3vw,34px) calc(10px + var(--safe-bottom)) !important;
+      border-top:3px solid var(--home-line) !important;
+      background:linear-gradient(180deg,#3268db 0%,#2455c6 100%) !important;
+      display:flex;
+      direction:ltr;
+      align-items:center;
+      gap:clamp(10px,2vw,28px);
+      box-shadow:0 -4px 16px rgba(31,61,131,.15);
+    }
+
+    .bottom-bar .home-btn{
+      position:static !important;
+      inset:auto !important;
+      transform:none !important;
+      flex:0 0 clamp(62px,8vw,78px);
+      width:clamp(62px,8vw,78px) !important;
+      min-width:0 !important;
+      height:clamp(62px,8vw,78px) !important;
+      padding:8px !important;
+      border:3px solid #fff !important;
+      border-radius:50% !important;
+      background:linear-gradient(145deg,#f2232d,#c90818) !important;
+      color:#fff !important;
+      display:grid !important;
+      place-items:center;
+      box-shadow:0 5px 0 rgba(11,25,66,.32),0 7px 16px rgba(4,20,64,.22);
+    }
+
+    .home-btn svg{
+      width:100%;
+      height:100%;
+      display:block;
+    }
+
+    .home-btn-label,
+    .home-visually-hidden{
+      position:absolute !important;
+      width:1px !important;
+      height:1px !important;
+      padding:0 !important;
+      margin:-1px !important;
+      overflow:hidden !important;
+      clip:rect(0,0,0,0) !important;
+      white-space:nowrap !important;
+      border:0 !important;
+    }
+
+    .home-utility-nav{
+      min-width:0;
+      flex:1 1 auto;
+      height:100%;
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      direction:ltr;
+      align-items:stretch;
+    }
+
+    .home-utility-item{
+      min-width:0;
+      border:0;
+      border-left:1px solid rgba(255,255,255,.22);
+      border-radius:0;
+      background:transparent;
+      color:#fff;
+      padding:2px 5px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:3px;
+      text-decoration:none;
+      cursor:pointer;
+    }
+
+    .home-utility-item:first-child{
+      border-left:0;
+    }
+
+    .home-utility-item svg{
+      width:clamp(33px,5vw,48px);
+      height:clamp(33px,5vw,48px);
+      display:block;
+      overflow:visible;
+    }
+
+    .home-utility-item span{
+      max-width:100%;
+      direction:rtl;
+      color:#fff;
+      font-size:clamp(11px,1.65vw,17px);
+      font-weight:850;
+      line-height:1.1;
+      white-space:nowrap;
+    }
+
+    .home-utility-item:focus-visible,
+    #homeShell button:focus-visible{
+      outline:4px solid rgba(255,212,71,.86);
+      outline-offset:3px;
+    }
+
+    .home-utility-overlay[hidden]{
+      display:none !important;
+    }
+
+    .home-utility-overlay{
+      position:fixed;
+      inset:0;
+      z-index:30000;
+      display:grid;
+      place-items:center;
+      padding:20px;
+      background:rgba(12,18,35,.52);
+      backdrop-filter:blur(4px);
+    }
+
+    .home-utility-dialog{
+      width:min(520px,94vw);
+      max-height:min(620px,82dvh);
+      overflow:auto;
+      position:relative;
+      padding:28px 22px 24px;
+      border:3px solid var(--home-line);
+      border-radius:25px;
+      background:var(--home-cream);
+      box-shadow:0 18px 42px rgba(0,0,0,.28);
+      text-align:center;
+      direction:rtl;
+    }
+
+    .home-utility-close{
+      position:absolute;
+      top:10px;
+      left:10px;
+      width:40px;
+      height:40px;
+      border:2px solid var(--home-line);
+      border-radius:50%;
+      background:#fff;
+      color:#111;
+      font-size:26px;
+      font-weight:900;
+      line-height:1;
+      cursor:pointer;
+    }
+
+    .home-utility-title{
+      margin:0 34px 16px;
+      font-size:clamp(23px,5vw,31px);
+      font-weight:900;
+    }
+
+    .home-utility-copy{
+      margin:0;
+      color:#414141;
+      font-size:clamp(15px,3.7vw,19px);
+      font-weight:700;
+      line-height:1.85;
+    }
+
+    .home-setting-row{
+      margin-top:18px;
+      padding:15px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      border:2px solid #b6bbc3;
+      border-radius:17px;
+      background:#fff;
+      text-align:right;
+      font-size:17px;
+      font-weight:850;
+    }
+
+    .home-setting-row input{
+      width:24px;
+      height:24px;
+      accent-color:var(--home-blue);
+    }
+
+    .home-update-list{
+      margin:10px 0 0;
+      padding-right:24px;
+      text-align:right;
+      color:#333;
+      font-size:16px;
+      font-weight:750;
+      line-height:1.9;
+    }
+
+    html.home-reduce-motion *,
+    html.home-reduce-motion *::before,
+    html.home-reduce-motion *::after{
+      animation-duration:.001ms !important;
+      animation-iteration-count:1 !important;
+      scroll-behavior:auto !important;
+      transition-duration:.001ms !important;
+    }
+
+    @media (max-width:760px){
+      :root{
+        --home-footer-height:92px;
+      }
+
+      body:not(.subpage) .page{
+        padding-inline:12px;
+        padding-top:max(22px,var(--safe-top));
+      }
+
+      #homeShell.home-dashboard{
+        width:100% !important;
+        gap:clamp(24px,3.1vh,42px) !important;
+      }
+
+      .home-brand-card{
+        width:min(540px,82vw);
+        min-height:112px;
+        gap:clamp(14px,3vw,24px);
+        padding:12px 16px;
+        border-radius:23px;
+      }
+
+      .home-brand-logo{
+        width:clamp(105px,24vw,150px);
+      }
+
+      .home-brand-title{
+        max-width:250px;
+        font-size:clamp(25px,6.8vw,36px);
+      }
+
+      .home-dashboard-grid{
+        width:min(610px,88vw);
+      }
+
+      .home-actions-pair{
+        gap:clamp(12px,3vw,20px);
+      }
+
+      #homeShell .home-actions-pair .home-action-btn{
+        min-height:clamp(76px,17vw,100px);
+        padding-inline:clamp(8px,2vw,16px);
+        font-size:clamp(15px,3.7vw,24px);
+      }
+
+      .home-actions-pair .home-action-icon{
+        width:clamp(29px,6.4vw,44px);
+        height:clamp(29px,6.4vw,44px);
+      }
+
+      .bottom-bar{
+        gap:7px;
+        padding-inline:10px !important;
+      }
+
+      .bottom-bar .home-btn{
+        flex-basis:58px;
+        width:58px !important;
+        height:58px !important;
+      }
+
+      .home-utility-item{
+        padding-inline:2px;
+      }
+
+      .home-utility-item svg{
+        width:clamp(29px,7vw,38px);
+        height:clamp(29px,7vw,38px);
+      }
+
+      .home-utility-item span{
+        font-size:clamp(10px,2.65vw,13px);
+      }
+    }
+
+    @media (max-width:420px){
+      .home-brand-card{
+        width:90vw;
+      }
+
+      .home-brand-logo{
+        width:100px;
+      }
+
+      .home-brand-title{
+        font-size:clamp(22px,6.4vw,29px);
+      }
+
+      .home-dashboard-grid{
+        width:94vw;
+      }
+
+      #homeShell .home-play-panel{
+        padding:16px !important;
+      }
+
+      #homeShell .home-action-btn{
+        border-radius:18px;
+      }
+
+      #homeShell .home-actions-pair .home-action-btn{
+        flex-direction:column;
+        gap:5px;
+        padding:9px 4px;
+        font-size:clamp(14px,3.8vw,17px);
+      }
+
+      .bottom-bar{
+        gap:4px;
+        padding-inline:7px !important;
+      }
+
+      .bottom-bar .home-btn{
+        flex-basis:52px;
+        width:52px !important;
+        height:52px !important;
+        padding:6px !important;
+      }
+
+      .home-utility-item span{
+        font-size:10px;
+      }
+    }
+
+    @media (orientation:landscape) and (min-width:761px){
+      :root{
+        --home-footer-height:100px;
+      }
+
+      body:not(.subpage) .page{
+        padding-top:max(22px,var(--safe-top));
+      }
+
+      #homeShell.home-dashboard{
+        min-height:calc(100dvh - var(--home-footer-height) - var(--safe-top) - var(--safe-bottom) - 44px);
+        gap:clamp(20px,3vh,34px) !important;
+      }
+
+      .home-brand-card{
+        width:min(760px,56vw);
+        min-height:100px;
+        padding-block:10px;
+      }
+
+      .home-brand-logo{
+        width:clamp(125px,11vw,172px);
+        max-height:80px;
+      }
+
+      .home-brand-title{
+        font-size:clamp(28px,2.7vw,42px);
+        white-space:nowrap;
+      }
+
+      .home-dashboard-grid{
+        width:min(1320px,88vw);
+        display:grid;
+        grid-template-columns:minmax(0,1.14fr) minmax(0,.92fr);
+        grid-template-areas:"actions play";
+        align-items:stretch;
+        direction:ltr;
+        gap:clamp(34px,4.8vw,74px);
+      }
+
+      .home-actions-panel{
+        grid-area:actions;
+        direction:rtl;
+        align-content:start;
+        gap:clamp(16px,2.2vh,24px);
+      }
+
+      #homeShell .home-play-panel{
+        grid-area:play;
+        direction:rtl;
+        display:flex;
+        align-items:center;
+        padding:clamp(22px,2.5vw,34px) !important;
+      }
+
+      #homeShell .home-play-panel .play-card{
+        gap:clamp(20px,2.6vh,30px) !important;
+      }
+
+      .home-play-heading{
+        font-size:clamp(28px,2.6vw,40px);
+      }
+
+      #homeShell .home-play-panel .select-wrap{
+        height:clamp(64px,7vh,76px) !important;
+      }
+
+      #homeShell .home-play-panel .select-wrap select{
+        font-size:clamp(20px,1.8vw,28px) !important;
+      }
+
+      #homeShell .home-play-panel .start-btn{
+        height:clamp(72px,8.6vh,90px) !important;
+        font-size:clamp(27px,2.6vw,39px) !important;
+      }
+
+      #homeShell .home-action-btn{
+        min-height:clamp(78px,9.5vh,104px);
+        font-size:clamp(20px,2.15vw,33px);
+      }
+
+      #homeShell .home-create-action{
+        min-height:clamp(94px,11.5vh,122px);
+        font-size:clamp(30px,3vw,43px);
+      }
+
+      #homeShell .home-actions-pair .home-action-btn{
+        font-size:clamp(18px,1.85vw,29px);
+      }
+
+      #homeShell .home-help-action{
+        min-height:clamp(80px,9.5vh,102px);
+      }
+    }
+
+    @media (orientation:landscape) and (max-height:650px) and (min-width:761px){
+      :root{
+        --home-footer-height:82px;
+      }
+
+      #homeShell.home-dashboard{
+        gap:14px !important;
+      }
+
+      .home-brand-card{
+        min-height:72px;
+        max-height:76px;
+      }
+
+      .home-brand-logo{
+        max-height:56px;
+      }
+
+      .home-brand-title{
+        font-size:clamp(24px,2.3vw,34px);
+      }
+
+      .home-dashboard-grid{
+        gap:32px;
+      }
+
+      #homeShell .home-play-panel{
+        padding:18px !important;
+      }
+
+      #homeShell .home-play-panel .play-card{
+        gap:12px !important;
+      }
+
+      #homeShell .home-play-panel .select-wrap,
+      #homeShell .home-play-panel .start-btn{
+        height:56px !important;
+      }
+
+      #homeShell .home-action-btn,
+      #homeShell .home-create-action,
+      #homeShell .home-help-action{
+        min-height:64px;
+      }
+
+      .home-actions-panel{
+        gap:11px;
+      }
+
+      .bottom-bar .home-btn{
+        width:60px !important;
+        height:60px !important;
+        flex-basis:60px;
+      }
+    }
+
+    @supports not (height:100dvh){
+      #homeShell.home-dashboard{
+        min-height:calc(100vh - var(--home-footer-height) - 48px);
+      }
+    }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -14111,23 +14832,54 @@
   <path d="M72 22 L94 61 L50 61 Z" fill="#f47a45" stroke="#111" stroke-width="3"></path>
   <circle cx="113" cy="83" r="18" fill="#4dbc72" stroke="#111" stroke-width="3"></circle>
 </svg>
-<section class="shell" id="homeShell">
-<div class="title-pill">صندوق الالعاب التعليمية</div>
-<div class="play-shell">
+<section class="shell home-dashboard" id="homeShell">
+<header class="home-brand-card">
+<img class="home-brand-logo" src="https://sandooq-games.com/logo.PNG" alt="شعار صندوق المسابقات">
+<h1 class="home-brand-title">صندوق الألعاب التعليمية</h1>
+</header>
+<div class="home-dashboard-grid">
+<section class="play-shell home-play-panel" aria-labelledby="homePlayHeading">
 <div class="play-card">
+<h2 class="home-play-heading" id="homePlayHeading">تشغيل لعبة محفوظة</h2>
 <div class="select-wrap">
 <select id="savedGameSelect" aria-label="اختر لعبة محفوظة">
-<option value="">لا توجد ألعاب محفوظة</option>
+<option value="">اختر لعبة محفوظة</option>
 </select>
 </div>
-<button class="start-btn" id="startSavedGameBtn" type="button" disabled>إبدأ اللعبة</button>
+<button class="start-btn" id="startSavedGameBtn" type="button" disabled>ابدأ اللعبة</button>
 </div>
+</section>
+<div class="home-actions-panel">
+<button class="home-action-btn home-create-action" data-open-screen="createScreen" type="button">
+<span class="home-action-label">إنشاء لعبة جديدة</span>
+</button>
+<div class="home-actions-pair">
+<button class="home-action-btn home-saved-action" data-open-screen="savedScreen" type="button">
+<svg class="home-action-icon" aria-hidden="true" viewBox="0 0 64 64">
+<path d="M8 18h18l6 7h24v27H8z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+<path d="M8 25h48" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+</svg>
+<span class="home-action-label">ألعابي المحفوظة</span>
+</button>
+<button class="home-action-btn home-backup-action" data-open-screen="backupScreen" type="button">
+<svg class="home-action-icon" aria-hidden="true" viewBox="0 0 64 64">
+<path d="M12 20h33" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+<path d="M37 11l10 9-10 9" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M52 44H19" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+<path d="M27 35l-10 9 10 9" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+<span class="home-action-label">التصدير والاستيراد</span>
+</button>
 </div>
-<div class="cards-grid home-actions-grid">
-<button class="menu-btn" data-open-screen="createScreen">إنشاء لعبة جديدة</button>
-<button class="menu-btn" data-open-screen="savedScreen">العابي المحفوظة</button>
-<button class="menu-btn" data-open-screen="backupScreen">التصدير والاستيراد</button>
-<button class="menu-btn" data-open-screen="settingsScreen">الشرح والتعليمات</button>
+<button class="home-action-btn home-help-action" data-open-screen="settingsScreen" type="button">
+<svg class="home-action-icon" aria-hidden="true" viewBox="0 0 72 64">
+<path d="M35 16C29 10 18 8 8 12v39c10-4 21-2 27 4z" fill="none" stroke="#2f62da" stroke-width="4" stroke-linejoin="round"/>
+<path d="M37 16c6-6 17-8 27-4v39c-10-4-21-2-27 4z" fill="none" stroke="#2f62da" stroke-width="4" stroke-linejoin="round"/>
+<path d="M36 16v39" fill="none" stroke="#2f62da" stroke-width="4" stroke-linecap="round"/>
+</svg>
+<span class="home-action-label">الشرح والتعليمات</span>
+</button>
+</div>
 </div>
 </section>
 <section class="screen" id="createScreen">
@@ -15597,8 +16349,53 @@
     </div>
   </section>
 </div>
-<div class="bottom-bar">
-<button class="home-btn" id="homeButton" type="button">الرئيسية</button>
+<nav class="bottom-bar" aria-label="شريط خدمات المنصة">
+<button class="home-btn" id="homeButton" type="button" aria-label="الرئيسية" title="الرئيسية">
+<svg aria-hidden="true" viewBox="0 0 72 72">
+<path d="M42 13h17v46H42" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M36 24L22 36l14 12" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M23 36h27" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/>
+</svg>
+<span class="home-btn-label">الرئيسية</span>
+</button>
+<div class="home-utility-nav">
+<button class="home-utility-item" id="appSettingsButton" type="button" aria-label="الإعدادات">
+<svg aria-hidden="true" viewBox="0 0 64 64">
+<path d="M27 7h10l2 8 7 4 8-2 5 9-6 6v8l6 6-5 9-8-2-7 4-2 8H27l-2-8-7-4-8 2-5-9 6-6v-8l-6-6 5-9 8 2 7-4z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+<circle cx="32" cy="36" r="9" fill="#ffd447" stroke="#fff" stroke-width="3"/>
+</svg>
+<span>الإعدادات</span>
+</button>
+<button class="home-utility-item" id="appUpdatesButton" type="button" aria-label="التحديثات">
+<svg aria-hidden="true" viewBox="0 0 64 64">
+<path d="M20 44h27c-5-5-6-10-6-19 0-7-4-12-10-12s-10 5-10 12c0 9-1 14-6 19z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+<path d="M26 49c1 5 9 5 11 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+<path d="M49 7l2 5 5 2-5 2-2 5-2-5-5-2 5-2zM55 27l1 3 4 1-4 2-1 3-2-3-3-2 3-1z" fill="#ffd447"/>
+</svg>
+<span>التحديثات</span>
+</button>
+<a class="home-utility-item" href="https://sandooq-games.com/support.html" aria-label="الدعم">
+<svg aria-hidden="true" viewBox="0 0 64 64">
+<path d="M13 35v-5c0-12 8-21 19-21s19 9 19 21v5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+<path d="M12 31h8v19h-5c-4 0-7-3-7-7v-5c0-4 2-7 4-7zM52 31h-8v19h5c4 0 7-3 7-7v-5c0-4-2-7-4-7z" fill="#ffd447" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+<path d="M44 51c-2 4-5 5-10 5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+</svg>
+<span>الدعم</span>
+</a>
+<a class="home-utility-item" href="https://sandooq-m.com/-/p1673910296" target="_blank" rel="noopener" aria-label="التقييم">
+<svg aria-hidden="true" viewBox="0 0 64 64">
+<path d="M32 7l7 15 17 2-12 12 3 17-15-8-15 8 3-17L8 24l17-2z" fill="#ffd447" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+</svg>
+<span>التقييم</span>
+</a>
+</div>
+</nav>
+<div class="home-utility-overlay" id="homeUtilityOverlay" hidden aria-hidden="true">
+<section class="home-utility-dialog" role="dialog" aria-modal="true" aria-labelledby="homeUtilityTitle">
+<button class="home-utility-close" id="homeUtilityClose" type="button" aria-label="إغلاق">×</button>
+<h2 class="home-utility-title" id="homeUtilityTitle">الخدمات</h2>
+<div id="homeUtilityContent"></div>
+</section>
 </div>
 
 <script>
@@ -16152,7 +16949,7 @@
     if (!records.length) {
       const option = document.createElement("option");
       option.value = "";
-      option.textContent = "لا توجد ألعاب محفوظة";
+      option.textContent = "اختر لعبة محفوظة";
       select.appendChild(option);
       start.disabled = true;
       return;
@@ -16587,6 +17384,15 @@
   const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen"]);
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
+  function setHomeButtonLabel(label){
+    if (!homeButton) return;
+    const value = String(label || "الرئيسية");
+    homeButton.setAttribute("aria-label",value);
+    homeButton.setAttribute("title",value);
+    const text = homeButton.querySelector(".home-btn-label");
+    if (text) text.textContent = value;
+  }
+  window.setSandooqHomeButtonLabel = setHomeButtonLabel;
   const wheelItemsEditor = document.getElementById("wheelItemsEditor");
   const addWheelItemBtn = document.getElementById("addWheelItemBtn");
   const itemsHint = document.getElementById("itemsHint");
@@ -16693,7 +17499,7 @@
     });
 
     if (homeShell) homeShell.style.display = isSubpage ? "none" : "flex";
-    if (homeButton) homeButton.textContent = isGameSetup ? "العودة للالعاب" : "الرئيسية";
+    setHomeButtonLabel(isGameSetup ? "العودة للألعاب" : "الرئيسية");
     try { window.scrollTo({ top:0, behavior:"auto" }); } catch (_) { window.scrollTo(0, 0); }
   }
 
@@ -24414,8 +25220,7 @@
     const homeShell = document.getElementById("homeShell");
     if (homeShell) homeShell.style.display = "none";
 
-    const homeButton = document.getElementById("homeButton");
-    if (homeButton) homeButton.textContent = "العودة للالعاب";
+    window.setSandooqHomeButtonLabel?.("العودة للألعاب");
 
     try {
       window.scrollTo({top:0, behavior:"auto"});
@@ -25130,6 +25935,94 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v113-responsive-backup-guide -->
+<script>
+(() => {
+  "use strict";
+
+  const overlay = document.getElementById("homeUtilityOverlay");
+  const title = document.getElementById("homeUtilityTitle");
+  const content = document.getElementById("homeUtilityContent");
+  const closeButton = document.getElementById("homeUtilityClose");
+  const settingsButton = document.getElementById("appSettingsButton");
+  const updatesButton = document.getElementById("appUpdatesButton");
+  const REDUCE_MOTION_KEY = "sandooq_edu_reduce_motion_v1";
+  let returnFocus = null;
+
+  function motionReduced(){
+    try {
+      return localStorage.getItem(REDUCE_MOTION_KEY) === "1";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function applyMotionSetting(value){
+    document.documentElement.classList.toggle("home-reduce-motion",Boolean(value));
+    try {
+      localStorage.setItem(REDUCE_MOTION_KEY,value ? "1" : "0");
+    } catch (_) {}
+  }
+
+  function closeUtility(){
+    if (!overlay || overlay.hidden) return;
+    overlay.hidden = true;
+    overlay.setAttribute("aria-hidden","true");
+    document.body.style.removeProperty("overflow");
+    returnFocus?.focus?.({preventScroll:true});
+    returnFocus = null;
+  }
+
+  function openUtility(kind,trigger){
+    if (!overlay || !title || !content) return;
+    returnFocus = trigger || document.activeElement;
+
+    if (kind === "settings") {
+      title.textContent = "الإعدادات";
+      content.innerHTML = `
+        <p class="home-utility-copy">خصص حركة الواجهة بما يناسبك. هذا الخيار لا يغيّر ألعابك المحفوظة أو محتواها.</p>
+        <label class="home-setting-row">
+          <span>تقليل الحركة والمؤثرات</span>
+          <input id="homeReduceMotionToggle" type="checkbox" aria-label="تقليل الحركة والمؤثرات">
+        </label>
+      `;
+      const toggle = document.getElementById("homeReduceMotionToggle");
+      if (toggle) {
+        toggle.checked = motionReduced();
+        toggle.addEventListener("change",()=>applyMotionSetting(toggle.checked));
+      }
+    } else {
+      title.textContent = "آخر التحديثات";
+      content.innerHTML = `
+        <p class="home-utility-copy">نطوّر صندوق الألعاب التعليمية باستمرار لتصبح صناعة الأنشطة وتشغيلها أسهل وأوضح.</p>
+        <ul class="home-update-list">
+          <li>واجهة رئيسية جديدة ومتجاوبة مع الجوال والتابلت والكمبيوتر.</li>
+          <li>تحسين تصميم قائمة الألعاب وصور المعاينة.</li>
+          <li>تطوير أدوات حفظ الألعاب ونقلها بين الأجهزة.</li>
+        </ul>
+      `;
+    }
+
+    overlay.hidden = false;
+    overlay.setAttribute("aria-hidden","false");
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(()=>closeButton?.focus({preventScroll:true}));
+  }
+
+  applyMotionSetting(motionReduced());
+  settingsButton?.addEventListener("click",()=>openUtility("settings",settingsButton));
+  updatesButton?.addEventListener("click",()=>openUtility("updates",updatesButton));
+  closeButton?.addEventListener("click",closeUtility);
+  overlay?.addEventListener("click",(event)=>{
+    if (event.target === overlay) closeUtility();
+  });
+  document.addEventListener("keydown",(event)=>{
+    if (event.key === "Escape" && overlay && !overlay.hidden) {
+      event.preventDefault();
+      closeUtility();
+    }
+  });
+})();
+</script>
+<!-- VERSION: index-v114-home-dashboard -->
 </body>
 </html>
