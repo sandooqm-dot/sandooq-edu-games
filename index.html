@@ -10143,7 +10143,7 @@
     .sg-empty-state{
       margin:0;
       padding:clamp(24px,5vw,46px) 16px;
-      border:3px dashed #aaa;
+      border:3px solid #aaa;
       border-radius:22px;
       background:#fafafa;
       color:#555;
@@ -10151,6 +10151,20 @@
       font-size:clamp(17px,2vw,24px);
       font-weight:800;
       line-height:1.7;
+      display:grid;
+      gap:clamp(12px,1.8vw,18px);
+    }
+
+    .sg-empty-message,
+    .sg-empty-browser-note{
+      margin:0;
+    }
+
+    .sg-empty-browser-note{
+      color:#c62828;
+      font-size:clamp(13px,1.55vw,18px);
+      font-weight:800;
+      line-height:1.8;
     }
 
     .sg-saved-card{
@@ -16131,9 +16145,15 @@
     if (!list) return;
     list.textContent = "";
     if (!records.length) {
-      const empty = document.createElement("p");
+      const empty = document.createElement("div");
       empty.className = "sg-empty-state";
-      empty.textContent = "لا توجد ألعاب محفوظة حتى الآن. أنشئ لعبة ثم اضغط حفظ اللعبة.";
+      const message = document.createElement("p");
+      message.className = "sg-empty-message";
+      message.textContent = "لا توجد ألعاب محفوظة حتى الآن. أنشئ لعبة ثم اضغط حفظ اللعبة.";
+      const browserNote = document.createElement("p");
+      browserNote.className = "sg-empty-browser-note";
+      browserNote.textContent = "🚫 إذا لم تجد ألعابك المحفوظة، تأكد بأنك دخلت من المتصفح العادي؛ لأن الدخول إلى اللعبة من المتصفح الخفي لا يُظهر ألعابك المحفوظة.";
+      empty.append(message,browserNote);
       list.appendChild(empty);
       return;
     }
