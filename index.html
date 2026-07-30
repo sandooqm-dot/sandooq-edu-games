@@ -10543,6 +10543,14 @@
     #backupScreen *,
     #settingsScreen,
     #settingsScreen *,
+    #appSettingsScreen,
+    #appSettingsScreen *,
+    #appUpdatesScreen,
+    #appUpdatesScreen *,
+    #appSupportScreen,
+    #appSupportScreen *,
+    #appRatingScreen,
+    #appRatingScreen *,
     .bottom-bar,
     .bottom-bar *,
     .match-color-modal,
@@ -15429,6 +15437,261 @@
       }
     }
   </style>
+  <style id="home-dashboard-v119-services">
+    /*
+      ضبط الصفحة الرئيسية وإضافة صفحات الخدمات الداخلية.
+      لا يؤثر هذا القسم في صفحات إنشاء الألعاب أو إعداداتها.
+    */
+    body:not(.subpage) .home-brand-card{
+      gap:0 !important;
+      transform:translateX(clamp(10px,1.1vw,20px));
+    }
+
+    body:not(.subpage) .home-brand-logo{
+      margin-inline:clamp(20px,1.2vw,24px) !important;
+    }
+
+    body:not(.subpage) #homeShell .home-play-panel{
+      background:linear-gradient(135deg,var(--home-blue),var(--home-blue-dark)) !important;
+    }
+
+    .service-screen{
+      width:min(100%,980px);
+      padding:clamp(18px,2.8vw,34px);
+      direction:rtl;
+    }
+
+    .service-screen .screen-title{
+      margin-bottom:clamp(8px,1.4vw,14px);
+      font-size:clamp(28px,3.4vw,46px);
+    }
+
+    .service-intro{
+      max-width:760px;
+      margin:0 auto;
+      color:#444;
+      text-align:center;
+      font-size:clamp(15px,1.6vw,21px);
+      font-weight:700;
+      line-height:1.85;
+    }
+
+    .service-grid{
+      width:min(100%,820px);
+      margin:clamp(18px,2.8vw,28px) auto 0;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:clamp(12px,1.8vw,18px);
+    }
+
+    .service-card{
+      min-width:0;
+      padding:clamp(16px,2.2vw,23px);
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#fff;
+      box-shadow:0 5px 0 rgba(17,17,17,.11);
+      text-align:right;
+    }
+
+    .service-card--wide{
+      grid-column:1 / -1;
+    }
+
+    .service-card--blue{
+      background:#f1f6ff;
+      border-color:#2f62da;
+    }
+
+    .service-card--yellow{
+      background:#fff9df;
+      border-color:#e4b51f;
+    }
+
+    .service-card--orange{
+      background:#fff3e9;
+      border-color:#f06a1d;
+    }
+
+    .service-card-head{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .service-card-icon{
+      flex:0 0 auto;
+      width:clamp(42px,5vw,58px);
+      height:clamp(42px,5vw,58px);
+      display:grid;
+      place-items:center;
+      border:2px solid var(--ink);
+      border-radius:16px;
+      background:#fff;
+      font-size:clamp(22px,2.8vw,32px);
+      line-height:1;
+    }
+
+    .service-card-title{
+      min-width:0;
+      margin:0;
+      color:#111;
+      font-size:clamp(18px,2vw,25px);
+      font-weight:900;
+      line-height:1.4;
+    }
+
+    .service-card-copy{
+      margin:0;
+      color:#414141;
+      font-size:clamp(14px,1.4vw,17px);
+      font-weight:700;
+      line-height:1.85;
+    }
+
+    .service-setting-row{
+      margin-top:14px;
+      padding:13px 15px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      border:2px solid #aeb5c0;
+      border-radius:16px;
+      background:#fff;
+      color:#222;
+      font-size:clamp(14px,1.5vw,18px);
+      font-weight:850;
+    }
+
+    .service-setting-row input{
+      flex:0 0 auto;
+      width:27px;
+      height:27px;
+      accent-color:var(--home-blue);
+      cursor:pointer;
+    }
+
+    .service-setting-status{
+      display:block;
+      margin-top:9px;
+      color:#52606f;
+      font-size:13px;
+      font-weight:750;
+    }
+
+    .service-update-list{
+      margin:10px 0 0;
+      padding:0 22px 0 0;
+      color:#333;
+      font-size:clamp(14px,1.4vw,17px);
+      font-weight:750;
+      line-height:1.9;
+    }
+
+    .service-update-list li + li{
+      margin-top:5px;
+    }
+
+    .service-stars{
+      margin:6px 0 12px;
+      color:#ffc928;
+      font-size:clamp(28px,5vw,46px);
+      letter-spacing:4px;
+      text-align:center;
+      text-shadow:0 2px 0 #8c6b00;
+      direction:ltr;
+    }
+
+    .service-actions{
+      width:min(100%,820px);
+      margin:clamp(16px,2.5vw,24px) auto 0;
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
+      gap:11px;
+    }
+
+    .service-action{
+      min-height:48px;
+      padding:9px clamp(18px,2.6vw,30px);
+      border:3px solid var(--ink);
+      border-radius:15px;
+      color:#111;
+      background:var(--title-yellow);
+      font-family:var(--interface-font);
+      font-size:clamp(15px,1.55vw,19px);
+      font-weight:900;
+      line-height:1.35;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      cursor:pointer;
+      box-shadow:0 4px 0 rgba(0,0,0,.15);
+    }
+
+    .service-action--blue{
+      background:var(--blue-bar);
+      color:#fff;
+    }
+
+    .service-action--orange{
+      background:#f47a45;
+      color:#fff;
+    }
+
+    .service-action:active{
+      transform:translateY(2px);
+      box-shadow:0 2px 0 rgba(0,0,0,.15);
+    }
+
+    .service-action:focus-visible,
+    .service-setting-row input:focus-visible{
+      outline:4px solid rgba(94,136,219,.34);
+      outline-offset:3px;
+    }
+
+    @media (orientation:portrait){
+      body:not(.subpage) .home-brand-card{
+        transform:translateX(clamp(5px,1.8vw,9px));
+      }
+
+      body:not(.subpage) .home-brand-logo{
+        margin-inline:clamp(18px,4.8vw,22px) !important;
+      }
+    }
+
+    @media (max-width:680px){
+      .service-screen{
+        width:94%;
+        padding:17px 12px;
+      }
+
+      .service-grid{
+        grid-template-columns:1fr;
+      }
+
+      .service-card--wide{
+        grid-column:auto;
+      }
+
+      .service-card{
+        border-radius:18px;
+      }
+
+      .service-actions{
+        display:grid;
+        grid-template-columns:1fr;
+      }
+
+      .service-action{
+        width:100%;
+      }
+    }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -16957,6 +17220,141 @@
   </details>
 </div>
 </section>
+
+<section class="screen service-screen" id="appSettingsScreen">
+  <h2 class="screen-title">الإعدادات</h2>
+  <p class="service-intro">خيارات بسيطة لتحسين تجربة استخدام الواجهة، من دون تغيير ألعابك المحفوظة أو محتواها.</p>
+  <div class="service-grid">
+    <article class="service-card service-card--blue service-card--wide">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">⚙️</span>
+        <h3 class="service-card-title">حركة الواجهة الرئيسية</h3>
+      </div>
+      <p class="service-card-copy">يمكنك تقليل الحركة والمؤثرات في الصفحة الرئيسية إذا كنت تفضّل واجهة أكثر هدوءًا.</p>
+      <label class="service-setting-row" for="homeReduceMotionToggle">
+        <span>تقليل الحركة والمؤثرات</span>
+        <input id="homeReduceMotionToggle" type="checkbox" aria-describedby="homeReduceMotionStatus">
+      </label>
+      <span class="service-setting-status" id="homeReduceMotionStatus" aria-live="polite"></span>
+    </article>
+    <article class="service-card service-card--yellow">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">💾</span>
+        <h3 class="service-card-title">حماية ألعابك</h3>
+      </div>
+      <p class="service-card-copy">الألعاب محفوظة داخل متصفحك. أنشئ نسخة احتياطية قبل تغيير الجهاز أو مسح بيانات المتصفح.</p>
+    </article>
+    <article class="service-card service-card--orange">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">🔒</span>
+        <h3 class="service-card-title">خصوصية المحتوى</h3>
+      </div>
+      <p class="service-card-copy">إعدادات الواجهة لا تحذف الألعاب ولا تعدّل الأسئلة أو الصور التي أضفتها.</p>
+    </article>
+  </div>
+  <div class="service-actions">
+    <button class="service-action service-action--blue" data-open-screen="backupScreen" type="button">فتح التصدير والاستيراد</button>
+  </div>
+</section>
+
+<section class="screen service-screen" id="appUpdatesScreen">
+  <h2 class="screen-title">آخر التحديثات</h2>
+  <p class="service-intro">نطوّر صندوق الألعاب التعليمية باستمرار لتصبح صناعة الأنشطة وتشغيلها أسهل وأوضح.</p>
+  <div class="service-grid">
+    <article class="service-card service-card--blue service-card--wide">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">✨</span>
+        <h3 class="service-card-title">أحدث التحسينات</h3>
+      </div>
+      <ul class="service-update-list">
+        <li>واجهة رئيسية جديدة ومتجاوبة مع الجوال والتابلت والكمبيوتر.</li>
+        <li>تحسين تصميم قائمة الألعاب وصور المعاينة لتصبح أوضح وأكثر تناسقًا.</li>
+        <li>تطوير أدوات حفظ الألعاب ونقلها بين الأجهزة.</li>
+        <li>تحسين عرض النصوص والصور داخل الألعاب التعليمية.</li>
+      </ul>
+    </article>
+    <article class="service-card service-card--yellow">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">🎯</span>
+        <h3 class="service-card-title">هدفنا</h3>
+      </div>
+      <p class="service-card-copy">تحديثات عملية تركز على وضوح الواجهة وثبات الألعاب وسهولة استخدامها داخل الحصة.</p>
+    </article>
+    <article class="service-card service-card--orange">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">🧰</span>
+        <h3 class="service-card-title">تطوير مستمر</h3>
+      </div>
+      <p class="service-card-copy">نراجع تجربة المعلم على مختلف الأجهزة ونحسّن الأدوات مع المحافظة على الألعاب المحفوظة.</p>
+    </article>
+  </div>
+</section>
+
+<section class="screen service-screen" id="appSupportScreen">
+  <h2 class="screen-title">الدعم</h2>
+  <p class="service-intro">اختر الطريق الأنسب لمشكلتك، وستصل إلى الشرح أو أداة النقل أو صفحة التواصل مباشرة.</p>
+  <div class="service-grid">
+    <article class="service-card service-card--blue">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">📖</span>
+        <h3 class="service-card-title">الشرح والتعليمات</h3>
+      </div>
+      <p class="service-card-copy">إجابات مرتبة عن الحفظ والتشغيل والصور ونقل الألعاب واستخدام البروجكتر.</p>
+    </article>
+    <article class="service-card service-card--yellow">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">🔁</span>
+        <h3 class="service-card-title">نقل الألعاب</h3>
+      </div>
+      <p class="service-card-copy">صدّر ألعابك من الجهاز الحالي ثم استوردها في الجهاز أو المتصفح الآخر.</p>
+    </article>
+    <article class="service-card service-card--orange service-card--wide">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">🎧</span>
+        <h3 class="service-card-title">تحتاج مساعدة إضافية؟</h3>
+      </div>
+      <p class="service-card-copy">افتح صفحة الدعم الرسمية للتواصل بخصوص التفعيل أو الحساب أو أي مشكلة لم تجد حلها في التعليمات.</p>
+    </article>
+  </div>
+  <div class="service-actions">
+    <button class="service-action" data-open-screen="settingsScreen" type="button">فتح الشرح والتعليمات</button>
+    <button class="service-action service-action--blue" data-open-screen="backupScreen" type="button">فتح التصدير والاستيراد</button>
+    <a class="service-action service-action--orange" href="https://sandooq-games.com/support.html">الانتقال إلى صفحة الدعم</a>
+  </div>
+</section>
+
+<section class="screen service-screen" id="appRatingScreen">
+  <h2 class="screen-title">تقييم اللعبة</h2>
+  <p class="service-intro">رأيك يساعدنا على تطوير الألعاب وتحسين التجربة للمعلمين والطلاب.</p>
+  <div class="service-grid">
+    <article class="service-card service-card--yellow service-card--wide">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">⭐</span>
+        <h3 class="service-card-title">شاركنا تجربتك</h3>
+      </div>
+      <div class="service-stars" aria-hidden="true">★★★★★</div>
+      <p class="service-card-copy">إذا أعجبتك اللعبة، اكتب تقييمك في المتجر. تقييمك يعرّف معلمين آخرين بالتجربة ويساعد فريقنا على معرفة ما يستحق مزيدًا من التطوير.</p>
+    </article>
+    <article class="service-card service-card--blue">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">💡</span>
+        <h3 class="service-card-title">اقتراحاتك مهمة</h3>
+      </div>
+      <p class="service-card-copy">إذا كان لديك اقتراح أو ملاحظة تفصيلية، أرسلها من صفحة الدعم حتى تصل بصورة أوضح.</p>
+    </article>
+    <article class="service-card service-card--orange">
+      <div class="service-card-head">
+        <span class="service-card-icon" aria-hidden="true">🤝</span>
+        <h3 class="service-card-title">شكرًا لدعمك</h3>
+      </div>
+      <p class="service-card-copy">مشاركتك للتجربة تدعم استمرار تطوير أدوات تعليمية أجمل وأكثر فائدة.</p>
+    </article>
+  </div>
+  <div class="service-actions">
+    <a class="service-action service-action--orange" href="https://sandooq-m.com/-/p1673910296" target="_blank" rel="noopener">الانتقال إلى صفحة التقييم</a>
+    <button class="service-action service-action--blue" data-open-screen="appSupportScreen" type="button">إرسال ملاحظة للدعم</button>
+  </div>
+</section>
 </main>
 <div class="save-warning-overlay" id="saveWarningOverlay" aria-hidden="true">
   <section class="save-warning-dialog" role="dialog" aria-modal="true" aria-labelledby="saveWarningTitle">
@@ -16990,14 +17388,14 @@
 <span class="home-btn-label">الرئيسية</span>
 </button>
 <div class="home-utility-nav">
-<button class="home-utility-item" id="appSettingsButton" type="button" aria-label="الإعدادات">
+<button class="home-utility-item" id="appSettingsButton" data-open-screen="appSettingsScreen" type="button" aria-label="الإعدادات">
 <svg aria-hidden="true" viewBox="0 0 64 64">
 <path d="M27 7h10l2 8 7 4 8-2 5 9-6 6v8l6 6-5 9-8-2-7 4-2 8H27l-2-8-7-4-8 2-5-9 6-6v-8l-6-6 5-9 8 2 7-4z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
 <circle cx="32" cy="36" r="9" fill="#ffd447" stroke="#fff" stroke-width="3"/>
 </svg>
 <span>الإعدادات</span>
 </button>
-<button class="home-utility-item" id="appUpdatesButton" type="button" aria-label="التحديثات">
+<button class="home-utility-item" id="appUpdatesButton" data-open-screen="appUpdatesScreen" type="button" aria-label="التحديثات">
 <svg aria-hidden="true" viewBox="0 0 64 64">
 <path d="M20 44h27c-5-5-6-10-6-19 0-7-4-12-10-12s-10 5-10 12c0 9-1 14-6 19z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
 <path d="M26 49c1 5 9 5 11 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
@@ -17005,29 +17403,22 @@
 </svg>
 <span>التحديثات</span>
 </button>
-<a class="home-utility-item" href="https://sandooq-games.com/support.html" aria-label="الدعم">
+<button class="home-utility-item" data-open-screen="appSupportScreen" type="button" aria-label="الدعم">
 <svg aria-hidden="true" viewBox="0 0 64 64">
 <path d="M13 35v-5c0-12 8-21 19-21s19 9 19 21v5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
 <path d="M12 31h8v19h-5c-4 0-7-3-7-7v-5c0-4 2-7 4-7zM52 31h-8v19h5c4 0 7-3 7-7v-5c0-4-2-7-4-7z" fill="#ffd447" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
 <path d="M44 51c-2 4-5 5-10 5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
 </svg>
 <span>الدعم</span>
-</a>
-<a class="home-utility-item" href="https://sandooq-m.com/-/p1673910296" target="_blank" rel="noopener" aria-label="التقييم">
+</button>
+<button class="home-utility-item" data-open-screen="appRatingScreen" type="button" aria-label="التقييم">
 <svg aria-hidden="true" viewBox="0 0 64 64">
 <path d="M32 7l7 15 17 2-12 12 3 17-15-8-15 8 3-17L8 24l17-2z" fill="#ffd447" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
 </svg>
 <span>التقييم</span>
-</a>
+</button>
 </div>
 </nav>
-<div class="home-utility-overlay" id="homeUtilityOverlay" hidden aria-hidden="true">
-<section class="home-utility-dialog" role="dialog" aria-modal="true" aria-labelledby="homeUtilityTitle">
-<button class="home-utility-close" id="homeUtilityClose" type="button" aria-label="إغلاق">×</button>
-<h2 class="home-utility-title" id="homeUtilityTitle">الخدمات</h2>
-<div id="homeUtilityContent"></div>
-</section>
-</div>
 
 <script>
 (() => {
@@ -18011,7 +18402,7 @@
   const OPEN_BOX_PAGE_URL = "open-box.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
-  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen", "savedScreen", "backupScreen", "settingsScreen"];
+  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen", "savedScreen", "backupScreen", "settingsScreen", "appSettingsScreen", "appUpdatesScreen", "appSupportScreen", "appRatingScreen"];
   const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen"]);
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
@@ -25891,7 +26282,11 @@
       "trainSetupScreen",
       "savedScreen",
       "backupScreen",
-      "settingsScreen"
+      "settingsScreen",
+      "appSettingsScreen",
+      "appUpdatesScreen",
+      "appSupportScreen",
+      "appRatingScreen"
     ].forEach((id) => {
       const node = document.getElementById(id);
       if (node) node.classList.toggle("active", id === "trainSetupScreen");
@@ -26619,14 +27014,9 @@
 (() => {
   "use strict";
 
-  const overlay = document.getElementById("homeUtilityOverlay");
-  const title = document.getElementById("homeUtilityTitle");
-  const content = document.getElementById("homeUtilityContent");
-  const closeButton = document.getElementById("homeUtilityClose");
-  const settingsButton = document.getElementById("appSettingsButton");
-  const updatesButton = document.getElementById("appUpdatesButton");
   const REDUCE_MOTION_KEY = "sandooq_edu_reduce_motion_v1";
-  let returnFocus = null;
+  const toggle = document.getElementById("homeReduceMotionToggle");
+  const status = document.getElementById("homeReduceMotionStatus");
 
   function motionReduced(){
     try {
@@ -26643,66 +27033,25 @@
     } catch (_) {}
   }
 
-  function closeUtility(){
-    if (!overlay || overlay.hidden) return;
-    overlay.hidden = true;
-    overlay.setAttribute("aria-hidden","true");
-    document.body.style.removeProperty("overflow");
-    returnFocus?.focus?.({preventScroll:true});
-    returnFocus = null;
+  function updateStatus(value){
+    if (!status) return;
+    status.textContent = value
+      ? "تقليل الحركة مفعّل الآن."
+      : "الحركة والمؤثرات تعمل بالشكل المعتاد.";
   }
 
-  function openUtility(kind,trigger){
-    if (!overlay || !title || !content) return;
-    returnFocus = trigger || document.activeElement;
-
-    if (kind === "settings") {
-      title.textContent = "الإعدادات";
-      content.innerHTML = `
-        <p class="home-utility-copy">خصص حركة الواجهة بما يناسبك. هذا الخيار لا يغيّر ألعابك المحفوظة أو محتواها.</p>
-        <label class="home-setting-row">
-          <span>تقليل الحركة والمؤثرات</span>
-          <input id="homeReduceMotionToggle" type="checkbox" aria-label="تقليل الحركة والمؤثرات">
-        </label>
-      `;
-      const toggle = document.getElementById("homeReduceMotionToggle");
-      if (toggle) {
-        toggle.checked = motionReduced();
-        toggle.addEventListener("change",()=>applyMotionSetting(toggle.checked));
-      }
-    } else {
-      title.textContent = "آخر التحديثات";
-      content.innerHTML = `
-        <p class="home-utility-copy">نطوّر صندوق الألعاب التعليمية باستمرار لتصبح صناعة الأنشطة وتشغيلها أسهل وأوضح.</p>
-        <ul class="home-update-list">
-          <li>واجهة رئيسية جديدة ومتجاوبة مع الجوال والتابلت والكمبيوتر.</li>
-          <li>تحسين تصميم قائمة الألعاب وصور المعاينة.</li>
-          <li>تطوير أدوات حفظ الألعاب ونقلها بين الأجهزة.</li>
-        </ul>
-      `;
-    }
-
-    overlay.hidden = false;
-    overlay.setAttribute("aria-hidden","false");
-    document.body.style.overflow = "hidden";
-    requestAnimationFrame(()=>closeButton?.focus({preventScroll:true}));
+  const initialValue = motionReduced();
+  applyMotionSetting(initialValue);
+  if (toggle) {
+    toggle.checked = initialValue;
+    updateStatus(initialValue);
+    toggle.addEventListener("change",()=>{
+      applyMotionSetting(toggle.checked);
+      updateStatus(toggle.checked);
+    });
   }
-
-  applyMotionSetting(motionReduced());
-  settingsButton?.addEventListener("click",()=>openUtility("settings",settingsButton));
-  updatesButton?.addEventListener("click",()=>openUtility("updates",updatesButton));
-  closeButton?.addEventListener("click",closeUtility);
-  overlay?.addEventListener("click",(event)=>{
-    if (event.target === overlay) closeUtility();
-  });
-  document.addEventListener("keydown",(event)=>{
-    if (event.key === "Escape" && overlay && !overlay.hidden) {
-      event.preventDefault();
-      closeUtility();
-    }
-  });
 })();
 </script>
-<!-- VERSION: index-v118-home-landscape-title-select -->
+<!-- VERSION: index-v119-service-pages -->
 </body>
 </html>
