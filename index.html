@@ -10232,6 +10232,93 @@
       font-size:15px;
       font-weight:800;
     }
+    .sg-backup-guide{
+      width:min(690px,100%);
+      margin:12px auto 0;
+      padding:clamp(15px,2vw,22px);
+      border:3px solid var(--ink);
+      border-radius:22px;
+      background:#f4f8ff;
+      text-align:right;
+      box-shadow:0 5px 0 rgba(0,0,0,.12);
+    }
+    .sg-backup-guide-title{
+      margin:0;
+      text-align:center;
+      color:#111;
+      font-size:clamp(18px,2vw,24px);
+      font-weight:900;
+      line-height:1.45;
+    }
+    .sg-backup-steps{
+      margin:clamp(13px,1.8vw,18px) 0 0;
+      padding:0;
+      list-style:none;
+      counter-reset:sg-backup-step;
+      display:grid;
+      gap:12px;
+    }
+    .sg-backup-steps li{
+      position:relative;
+      min-height:32px;
+      padding-right:43px;
+      color:#333;
+      font-size:clamp(14px,1.45vw,17px);
+      font-weight:750;
+      line-height:1.9;
+      counter-increment:sg-backup-step;
+    }
+    .sg-backup-steps li::before{
+      content:counter(sg-backup-step);
+      position:absolute;
+      top:0;
+      right:0;
+      width:31px;
+      height:31px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:2px solid var(--ink);
+      border-radius:50%;
+      background:var(--title-yellow);
+      color:#111;
+      font-size:15px;
+      font-weight:900;
+      line-height:1;
+    }
+    .sg-backup-mini-btn{
+      display:inline-flex;
+      min-height:25px;
+      align-items:center;
+      justify-content:center;
+      margin-inline:3px;
+      padding:2px 8px;
+      border:2px solid var(--ink);
+      border-radius:8px;
+      color:#111;
+      font-size:.82em;
+      font-weight:900;
+      line-height:1.25;
+      vertical-align:middle;
+      white-space:nowrap;
+      box-shadow:0 2px 0 rgba(0,0,0,.16);
+      pointer-events:none;
+      user-select:none;
+    }
+    .sg-backup-mini-export{background:var(--title-yellow)}
+    .sg-backup-mini-import{background:var(--blue-bar);color:#fff}
+    .sg-backup-guide-note{
+      margin:15px 0 0;
+      padding:10px 12px;
+      border:2px solid #25895f;
+      border-radius:13px;
+      background:#eafaf2;
+      color:#166745;
+      text-align:center;
+      font-size:clamp(13px,1.35vw,16px);
+      font-weight:900;
+      line-height:1.7;
+    }
 
     .sg-choice-modal{
       position:fixed;
@@ -10358,6 +10445,10 @@
       .sg-saved-actions{justify-content:stretch;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
       .sg-game-action{padding-inline:7px;font-size:14px;min-width:0}
       .sg-backup-actions{display:grid;grid-template-columns:1fr;max-width:310px;margin-inline:auto}
+      .sg-backup-guide{padding:14px 13px;border-radius:18px}
+      .sg-backup-steps{gap:10px}
+      .sg-backup-steps li{padding-right:38px;line-height:1.85}
+      .sg-backup-steps li::before{width:28px;height:28px;font-size:14px}
     }
 
 
@@ -15050,6 +15141,15 @@
   <input id="importSavedGamesInput" type="file" accept="application/json,.json" hidden>
 </div>
 <p class="sg-backup-status" id="backupStatus" role="status" aria-live="polite"></p>
+<section class="sg-backup-guide" aria-labelledby="backupGuideTitle">
+  <h3 class="sg-backup-guide-title" id="backupGuideTitle">طريقة نقل ألعابك إلى جهاز آخر</h3>
+  <ol class="sg-backup-steps">
+    <li>في جهازك الحالي اضغط <span class="sg-backup-mini-btn sg-backup-mini-export">تصدير الألعاب</span> وسيتم حفظ ملف يحتوي على ألعابك.</li>
+    <li>أرسل الملف إلى جهازك الآخر، ثم افتح فيه صندوق الألعاب من المتصفح.</li>
+    <li>في الجهاز الآخر اضغط <span class="sg-backup-mini-btn sg-backup-mini-import">استيراد الألعاب</span> واختر الملف الذي نقلته.</li>
+  </ol>
+  <p class="sg-backup-guide-note">الاستيراد يضيف الألعاب إلى ألعابك الحالية ولا يحذف أي لعبة محفوظة.</p>
+</section>
 </section>
 <section class="screen help-screen" id="settingsScreen">
 <h2 class="screen-title">الشرح والتعليمات</h2>
@@ -24708,6 +24808,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v111-open-box-ui-polish -->
+<!-- VERSION: index-v112-backup-transfer-guide -->
 </body>
 </html>
