@@ -10549,8 +10549,8 @@
     #appUpdatesScreen *,
     #appSupportScreen,
     #appSupportScreen *,
-    #appRatingScreen,
-    #appRatingScreen *,
+    #appSuggestionsScreen,
+    #appSuggestionsScreen *,
     .bottom-bar,
     .bottom-bar *,
     .match-color-modal,
@@ -15692,6 +15692,233 @@
       }
     }
   </style>
+  <style id="suggestions-page-v120">
+    #appSuggestionsScreen{
+      width:min(100%,980px);
+      padding:clamp(18px,2.8vw,34px);
+      direction:rtl;
+    }
+
+    #appSuggestionsScreen .screen-title{
+      margin-bottom:clamp(15px,2.2vw,24px);
+    }
+
+    .suggestions-hero{
+      width:min(100%,850px);
+      margin:0 auto;
+      padding:clamp(15px,2vw,23px) clamp(16px,2.4vw,26px);
+      display:flex;
+      direction:rtl;
+      align-items:center;
+      gap:clamp(13px,2.5vw,28px);
+      border:1.5px solid rgba(47,98,218,.2);
+      border-radius:24px;
+      background:
+        radial-gradient(circle at 13% 18%,rgba(255,212,71,.25),transparent 26%),
+        linear-gradient(135deg,#fffdf7 0%,#f5f8ff 100%);
+      box-shadow:0 8px 22px rgba(31,61,131,.1);
+      overflow:hidden;
+    }
+
+    .suggestions-copy{
+      min-width:0;
+      flex:1 1 auto;
+      color:#242424;
+      text-align:right;
+      font-size:clamp(15px,1.65vw,21px);
+      font-weight:750;
+      line-height:1.9;
+    }
+
+    .suggestions-copy strong{
+      display:block;
+      margin-bottom:4px;
+      color:#194cad;
+      font-size:clamp(19px,2.2vw,28px);
+      font-weight:950;
+      line-height:1.55;
+    }
+
+    .suggestions-copy p{
+      margin:0;
+    }
+
+    .suggestions-mascot{
+      flex:0 0 clamp(118px,20vw,210px);
+      width:clamp(118px,20vw,210px);
+      height:auto;
+      max-height:230px;
+      object-fit:contain;
+      display:block;
+      filter:drop-shadow(0 8px 10px rgba(23,55,125,.13));
+    }
+
+    .suggestions-form-card{
+      width:min(100%,850px);
+      margin:clamp(17px,2.5vw,25px) auto 0;
+      padding:clamp(16px,2.2vw,23px);
+      border:2px solid #d6dfef;
+      border-radius:22px;
+      background:#fbfcff;
+      box-shadow:0 6px 18px rgba(26,52,105,.07);
+    }
+
+    .suggestions-role-group{
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      flex-wrap:wrap;
+      gap:clamp(20px,4vw,42px);
+      margin-bottom:15px;
+      padding-inline:3px;
+    }
+
+    .suggestions-role-option{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
+      color:#1d1d1d;
+      font-size:clamp(16px,1.8vw,21px);
+      font-weight:900;
+      line-height:1.2;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .suggestions-role-option input{
+      position:absolute;
+      width:1px;
+      height:1px;
+      overflow:hidden;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .suggestions-role-check{
+      width:23px;
+      height:23px;
+      display:grid;
+      place-items:center;
+      border:2px solid #798597;
+      border-radius:6px;
+      background:#fff;
+      color:#fff;
+      font-size:17px;
+      font-weight:950;
+      line-height:1;
+      transition:background .15s ease,border-color .15s ease,transform .15s ease;
+    }
+
+    .suggestions-role-option input:checked + .suggestions-role-check{
+      border-color:#2459c8;
+      background:#2459c8;
+      transform:scale(1.05);
+    }
+
+    .suggestions-role-option input:checked + .suggestions-role-check::after{
+      content:"✓";
+    }
+
+    .suggestions-role-option input:focus-visible + .suggestions-role-check{
+      outline:4px solid rgba(94,136,219,.3);
+      outline-offset:3px;
+    }
+
+    .suggestions-textarea{
+      width:100%;
+      min-height:142px;
+      height:142px;
+      padding:15px 17px;
+      border:2px solid #aeb8c9;
+      border-radius:17px;
+      outline:none;
+      background:#fff;
+      color:#1c1c1c;
+      font-family:var(--interface-font);
+      font-size:clamp(15px,1.55vw,19px);
+      font-weight:700;
+      line-height:1.85;
+      text-align:right;
+      direction:rtl;
+      resize:none;
+      overflow:hidden;
+      box-shadow:inset 0 2px 4px rgba(21,43,89,.04);
+      transition:border-color .16s ease,box-shadow .16s ease;
+    }
+
+    .suggestions-textarea::placeholder{
+      color:#9a9fa8;
+      opacity:1;
+    }
+
+    .suggestions-textarea:focus{
+      border-color:#2f62da;
+      box-shadow:0 0 0 4px rgba(47,98,218,.13);
+    }
+
+    @media (max-width:560px){
+      #appSuggestionsScreen{
+        width:94%;
+        padding:17px 12px;
+      }
+
+      .suggestions-hero{
+        gap:10px;
+        padding:14px 13px;
+        border-radius:20px;
+      }
+
+      .suggestions-copy{
+        font-size:clamp(12px,3.45vw,15px);
+        line-height:1.75;
+      }
+
+      .suggestions-copy strong{
+        font-size:clamp(16px,4.45vw,20px);
+        line-height:1.45;
+      }
+
+      .suggestions-mascot{
+        flex-basis:clamp(94px,29vw,132px);
+        width:clamp(94px,29vw,132px);
+        max-height:160px;
+      }
+
+      .suggestions-form-card{
+        padding:14px 12px;
+        border-radius:18px;
+      }
+
+      .suggestions-role-group{
+        gap:25px;
+        margin-bottom:13px;
+      }
+
+      .suggestions-role-check{
+        width:21px;
+        height:21px;
+      }
+
+      .suggestions-textarea{
+        min-height:132px;
+        height:132px;
+        padding:13px 14px;
+        font-size:14px;
+      }
+    }
+
+    @media (max-width:370px){
+      .suggestions-mascot{
+        flex-basis:84px;
+        width:84px;
+      }
+
+      .suggestions-copy{
+        font-size:12px;
+      }
+    }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -17323,36 +17550,33 @@
   </div>
 </section>
 
-<section class="screen service-screen" id="appRatingScreen">
-  <h2 class="screen-title">تقييم اللعبة</h2>
-  <p class="service-intro">رأيك يساعدنا على تطوير الألعاب وتحسين التجربة للمعلمين والطلاب.</p>
-  <div class="service-grid">
-    <article class="service-card service-card--yellow service-card--wide">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">⭐</span>
-        <h3 class="service-card-title">شاركنا تجربتك</h3>
-      </div>
-      <div class="service-stars" aria-hidden="true">★★★★★</div>
-      <p class="service-card-copy">إذا أعجبتك اللعبة، اكتب تقييمك في المتجر. تقييمك يعرّف معلمين آخرين بالتجربة ويساعد فريقنا على معرفة ما يستحق مزيدًا من التطوير.</p>
-    </article>
-    <article class="service-card service-card--blue">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">💡</span>
-        <h3 class="service-card-title">اقتراحاتك مهمة</h3>
-      </div>
-      <p class="service-card-copy">إذا كان لديك اقتراح أو ملاحظة تفصيلية، أرسلها من صفحة الدعم حتى تصل بصورة أوضح.</p>
-    </article>
-    <article class="service-card service-card--orange">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">🤝</span>
-        <h3 class="service-card-title">شكرًا لدعمك</h3>
-      </div>
-      <p class="service-card-copy">مشاركتك للتجربة تدعم استمرار تطوير أدوات تعليمية أجمل وأكثر فائدة.</p>
-    </article>
+<section class="screen service-screen" id="appSuggestionsScreen">
+  <h2 class="screen-title">اقتراحاتكم💡</h2>
+  <div class="suggestions-hero">
+    <div class="suggestions-copy">
+      <strong>صندوقنا سعودي ومنكم وفيكم🇸🇦</strong>
+      <p>
+        كل تفصيله صغيرة فيه بدأت من احتياج و اقتراح منكم<br>
+        اقتراحك اليوم ممكن يكون الإضافة الجاية اللي تخدم مجتمع التعليم كله<br>
+        شاركنا فكرتك، وحنا نسمع لك🫡
+      </p>
+    </div>
+    <img class="suggestions-mascot" src="guide-mascot.webp" alt="شخصية صندوق المسابقات">
   </div>
-  <div class="service-actions">
-    <a class="service-action service-action--orange" href="https://sandooq-m.com/-/p1673910296" target="_blank" rel="noopener">الانتقال إلى صفحة التقييم</a>
-    <button class="service-action service-action--blue" data-open-screen="appSupportScreen" type="button">إرسال ملاحظة للدعم</button>
+  <div class="suggestions-form-card">
+    <div class="suggestions-role-group" role="radiogroup" aria-label="صفة صاحب الاقتراح">
+      <label class="suggestions-role-option">
+        <input type="radio" name="suggestionRole" value="teacher">
+        <span class="suggestions-role-check" aria-hidden="true"></span>
+        <span>معلم</span>
+      </label>
+      <label class="suggestions-role-option">
+        <input type="radio" name="suggestionRole" value="female-teacher">
+        <span class="suggestions-role-check" aria-hidden="true"></span>
+        <span>معلمة</span>
+      </label>
+    </div>
+    <textarea class="suggestions-textarea" id="suggestionsText" rows="4" placeholder="اكتب تقييمك او اقتراحك هنا👉🏻" aria-label="اكتب تقييمك أو اقتراحك"></textarea>
   </div>
 </section>
 </main>
@@ -17411,11 +17635,13 @@
 </svg>
 <span>الدعم</span>
 </button>
-<button class="home-utility-item" data-open-screen="appRatingScreen" type="button" aria-label="التقييم">
+<button class="home-utility-item" data-open-screen="appSuggestionsScreen" type="button" aria-label="اقتراحاتكم">
 <svg aria-hidden="true" viewBox="0 0 64 64">
-<path d="M32 7l7 15 17 2-12 12 3 17-15-8-15 8 3-17L8 24l17-2z" fill="#ffd447" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+<path d="M20 28c0-8 5-15 12-15s12 7 12 15c0 6-3 9-7 13-2 2-2 4-2 6h-6c0-2 0-4-2-6-4-4-7-7-7-13z" fill="#ffd447" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+<path d="M27 52h10M29 57h6" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+<path d="M32 5v4M11 27H7M57 27h-4M16 12l3 3M48 12l-3 3" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
 </svg>
-<span>التقييم</span>
+<span>اقتراحاتكم</span>
 </button>
 </div>
 </nav>
@@ -18402,7 +18628,7 @@
   const OPEN_BOX_PAGE_URL = "open-box.html";
   const OPEN_BOX_MAX_ITEMS = 30;
 
-  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen", "savedScreen", "backupScreen", "settingsScreen", "appSettingsScreen", "appUpdatesScreen", "appSupportScreen", "appRatingScreen"];
+  const screens = ["createScreen", "wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen", "savedScreen", "backupScreen", "settingsScreen", "appSettingsScreen", "appUpdatesScreen", "appSupportScreen", "appSuggestionsScreen"];
   const gameSetupScreens = new Set(["wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen", "matchSetupScreen", "orderSetupScreen", "trainSetupScreen", "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen"]);
   const homeShell = document.getElementById("homeShell");
   const homeButton = document.getElementById("homeButton");
@@ -26286,7 +26512,7 @@
       "appSettingsScreen",
       "appUpdatesScreen",
       "appSupportScreen",
-      "appRatingScreen"
+      "appSuggestionsScreen"
     ].forEach((id) => {
       const node = document.getElementById(id);
       if (node) node.classList.toggle("active", id === "trainSetupScreen");
@@ -27052,6 +27278,25 @@
   }
 })();
 </script>
-<!-- VERSION: index-v119-service-pages -->
+<script>
+(() => {
+  "use strict";
+  const field = document.getElementById("suggestionsText");
+  if (!field) return;
+
+  const resizeSuggestionsField = () => {
+    field.style.height = "auto";
+    const minHeight = Number.parseFloat(getComputedStyle(field).minHeight) || 132;
+    field.style.height = `${Math.max(field.scrollHeight, minHeight)}px`;
+  };
+
+  field.addEventListener("input", resizeSuggestionsField);
+  window.addEventListener("resize", resizeSuggestionsField, { passive: true });
+  document.querySelectorAll('[data-open-screen="appSuggestionsScreen"]').forEach((button) => {
+    button.addEventListener("click", () => requestAnimationFrame(resizeSuggestionsField));
+  });
+})();
+</script>
+<!-- VERSION: index-v120-suggestions-page -->
 </body>
 </html>
