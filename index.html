@@ -10215,29 +10215,52 @@
     .sg-edit-game{background:var(--title-yellow)}
     .sg-delete-game{background:#f05d5b;color:#fff}
 
+    #backupScreen{
+      width:min(100%,980px);
+      padding:clamp(18px,2.8vw,34px);
+    }
+    #backupScreen .screen-title{
+      margin-bottom:clamp(10px,1.6vw,17px);
+      font-size:clamp(27px,3.4vw,46px);
+    }
+    #backupScreen .screen-note{
+      max-width:760px;
+      margin-inline:auto;
+      font-size:clamp(16px,1.7vw,22px);
+      line-height:1.8;
+    }
     .sg-backup-actions{
-      margin-top:22px;
-      display:flex;
-      justify-content:center;
-      gap:12px;
-      flex-wrap:wrap;
+      width:min(100%,720px);
+      margin:clamp(18px,2.8vw,28px) auto 0;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:clamp(10px,1.5vw,14px);
+    }
+    #backupScreen .sg-backup-btn{
+      width:100%;
+      min-width:0;
+      min-height:clamp(48px,5vw,60px);
+      padding:9px clamp(12px,2vw,20px);
+      font-size:clamp(16px,1.7vw,21px);
     }
     .sg-export-btn{background:var(--title-yellow)}
     .sg-import-btn{background:var(--blue-bar);color:#fff}
     .sg-backup-status{
-      min-height:24px;
-      margin:16px 0 0;
+      width:min(100%,720px);
+      min-height:22px;
+      margin:14px auto 0;
       text-align:center;
       color:#333;
-      font-size:15px;
+      font-size:clamp(13px,1.3vw,15px);
       font-weight:800;
     }
+    .sg-backup-status:empty{display:none}
     .sg-backup-guide{
-      width:min(690px,100%);
-      margin:12px auto 0;
-      padding:clamp(15px,2vw,22px);
+      width:min(100%,760px);
+      margin:clamp(20px,3vw,30px) auto 0;
+      padding:clamp(16px,2.2vw,24px);
       border:3px solid var(--ink);
-      border-radius:22px;
+      border-radius:clamp(18px,2vw,24px);
       background:#f4f8ff;
       text-align:right;
       box-shadow:0 5px 0 rgba(0,0,0,.12);
@@ -10307,18 +10330,6 @@
     }
     .sg-backup-mini-export{background:var(--title-yellow)}
     .sg-backup-mini-import{background:var(--blue-bar);color:#fff}
-    .sg-backup-guide-note{
-      margin:15px 0 0;
-      padding:10px 12px;
-      border:2px solid #25895f;
-      border-radius:13px;
-      background:#eafaf2;
-      color:#166745;
-      text-align:center;
-      font-size:clamp(13px,1.35vw,16px);
-      font-weight:900;
-      line-height:1.7;
-    }
 
     .sg-choice-modal{
       position:fixed;
@@ -10444,11 +10455,53 @@
       .sg-saved-card{grid-template-columns:1fr;padding:13px;border-radius:19px}
       .sg-saved-actions{justify-content:stretch;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
       .sg-game-action{padding-inline:7px;font-size:14px;min-width:0}
-      .sg-backup-actions{display:grid;grid-template-columns:1fr;max-width:310px;margin-inline:auto}
       .sg-backup-guide{padding:14px 13px;border-radius:18px}
       .sg-backup-steps{gap:10px}
       .sg-backup-steps li{padding-right:38px;line-height:1.85}
       .sg-backup-steps li::before{width:28px;height:28px;font-size:14px}
+    }
+    @media(max-width:560px){
+      #backupScreen{
+        width:100%;
+        padding:17px 13px 19px;
+      }
+      #backupScreen .screen-title{
+        margin-bottom:9px;
+        font-size:clamp(24px,7.8vw,30px);
+      }
+      #backupScreen .screen-note{
+        font-size:clamp(15px,4.5vw,18px);
+        line-height:1.75;
+      }
+      .sg-backup-actions{
+        grid-template-columns:1fr;
+        gap:11px;
+        margin-top:17px;
+      }
+      #backupScreen .sg-backup-btn{
+        min-height:48px;
+        font-size:clamp(16px,5vw,19px);
+      }
+      .sg-backup-guide{
+        margin-top:18px;
+        padding:14px 12px;
+      }
+      .sg-backup-guide-title{
+        font-size:clamp(18px,5.7vw,21px);
+      }
+      .sg-backup-steps{
+        margin-top:12px;
+      }
+      .sg-backup-steps li{
+        padding-right:37px;
+        font-size:clamp(13px,4.2vw,15px);
+        line-height:1.8;
+      }
+      .sg-backup-mini-btn{
+        min-height:23px;
+        padding:2px 7px;
+        border-radius:7px;
+      }
     }
 
 
@@ -15148,7 +15201,6 @@
     <li>أرسل الملف إلى جهازك الآخر، ثم افتح فيه صندوق الألعاب من المتصفح.</li>
     <li>في الجهاز الآخر اضغط <span class="sg-backup-mini-btn sg-backup-mini-import">استيراد الألعاب</span> واختر الملف الذي نقلته.</li>
   </ol>
-  <p class="sg-backup-guide-note">الاستيراد يضيف الألعاب إلى ألعابك الحالية ولا يحذف أي لعبة محفوظة.</p>
 </section>
 </section>
 <section class="screen help-screen" id="settingsScreen">
@@ -24808,6 +24860,6 @@
   syncOpenState();
 })();
 </script>
-<!-- VERSION: index-v112-backup-transfer-guide -->
+<!-- VERSION: index-v113-responsive-backup-guide -->
 </body>
 </html>
