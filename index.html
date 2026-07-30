@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v116-home-visual-refinement -->
+<!-- version: index-v117-home-portrait-tuning -->
 <meta charset="utf-8"/>
-<meta content="index-v116-home-visual-refinement" name="sandooq-build"/>
+<meta content="index-v117-home-portrait-tuning" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -15183,6 +15183,124 @@
       }
     }
   </style>
+  <style id="home-dashboard-v117-portrait-tuning">
+    /*
+      ضبط الواجهة الرئيسية فقط:
+      استعادة خط العنوان، تحسين توزيع الوضع العمودي، وضمان وضوح قائمة الألعاب.
+    */
+    body:not(.subpage) .home-brand-logo{
+      transform:scale(1.15) !important;
+      transform-origin:center !important;
+      margin-inline:clamp(6px,.7vw,9px) !important;
+    }
+
+    body:not(.subpage) .home-brand-title{
+      font-family:var(--interface-font) !important;
+      color:#050505 !important;
+      background:none !important;
+      -webkit-background-clip:border-box !important;
+      background-clip:border-box !important;
+      -webkit-text-fill-color:#050505 !important;
+      text-shadow:none !important;
+      letter-spacing:normal !important;
+      white-space:nowrap !important;
+      text-wrap:nowrap !important;
+    }
+
+    /* الأيقونة يسار النص، والنص يبقى عربيًا ومحاذيًا لليمين. */
+    body:not(.subpage) #homeShell .home-actions-pair .home-action-btn,
+    body:not(.subpage) #homeShell .home-help-action{
+      direction:ltr !important;
+      flex-direction:row !important;
+    }
+
+    body:not(.subpage) #homeShell .home-actions-pair .home-action-label,
+    body:not(.subpage) #homeShell .home-help-action .home-action-label{
+      direction:rtl !important;
+      text-align:right !important;
+    }
+
+    /* تصغير زر الرئيسية بصريًا ليطابق بقية أيقونات الشريط. */
+    body:not(.subpage) .bottom-bar .home-btn{
+      flex:0 0 clamp(33px,5vw,48px) !important;
+      width:clamp(33px,5vw,48px) !important;
+      height:clamp(33px,5vw,48px) !important;
+      padding:4px !important;
+      border-width:2px !important;
+      box-shadow:0 3px 0 rgba(11,25,66,.28),0 5px 11px rgba(4,20,64,.18) !important;
+    }
+
+    /* مساحة نص أكبر، مع درجات تكيفية لأسماء الألعاب الطويلة. */
+    body:not(.subpage) #homeShell .home-play-panel .select-wrap select{
+      padding-right:22px !important;
+      padding-left:48px !important;
+      direction:rtl !important;
+      font-family:var(--interface-font) !important;
+      font-size:var(--home-select-fit-size,clamp(15px,2vw,20px)) !important;
+      line-height:1.25 !important;
+      white-space:nowrap !important;
+    }
+
+    body:not(.subpage) #homeShell .home-play-panel .select-wrap select.is-long-label{
+      font-size:var(--home-select-fit-size,clamp(13px,1.7vw,17px)) !important;
+    }
+
+    body:not(.subpage) #homeShell .home-play-panel .select-wrap select.is-very-long-label{
+      font-size:var(--home-select-fit-size,clamp(11px,1.35vw,14px)) !important;
+    }
+
+    @media (orientation:portrait){
+      body:not(.subpage) .home-brand-card{
+        max-width:98vw !important;
+        gap:5px !important;
+      }
+
+      body:not(.subpage) .home-brand-title{
+        max-width:none !important;
+        font-size:clamp(18px,5.4vw,29px) !important;
+        line-height:1.2 !important;
+      }
+
+      /* إنزال زر الإنشاء قليلًا عن مربع التشغيل. */
+      body:not(.subpage) .home-actions-panel{
+        margin-top:14px !important;
+      }
+
+      /* مسافة أوضح بين زر الإنشاء وبقية أزرار الإدارة. */
+      body:not(.subpage) .home-actions-pair{
+        margin-top:clamp(27px,4.2vh,38px) !important;
+      }
+
+      body:not(.subpage) #homeShell .home-play-panel .select-wrap select{
+        padding-right:18px !important;
+        padding-left:43px !important;
+        font-size:var(--home-select-fit-size,clamp(14px,3.8vw,17px)) !important;
+      }
+
+      body:not(.subpage) #homeShell .home-play-panel .select-wrap select.is-long-label{
+        font-size:var(--home-select-fit-size,clamp(12px,3.2vw,14px)) !important;
+      }
+
+      body:not(.subpage) #homeShell .home-play-panel .select-wrap select.is-very-long-label{
+        font-size:var(--home-select-fit-size,clamp(10px,2.7vw,12px)) !important;
+      }
+
+      body:not(.subpage) .bottom-bar .home-btn{
+        flex-basis:clamp(29px,7vw,38px) !important;
+        width:clamp(29px,7vw,38px) !important;
+        height:clamp(29px,7vw,38px) !important;
+        padding:3px !important;
+      }
+    }
+
+    @media (orientation:portrait) and (max-width:420px){
+      body:not(.subpage) .home-brand-title{
+        font-size:clamp(18px,5.4vw,23px) !important;
+      }
+
+    }
+
+  </style>
 </head>
 <body>
 <main class="page">
@@ -24471,6 +24589,8 @@
 (() => {
   "use strict";
 
+  const savedSelectMeasureContext = document.createElement("canvas").getContext("2d");
+
   function normalizeArabic(value){
     return String(value || "")
       .toLowerCase()
@@ -24489,7 +24609,39 @@
   function syncSavedGameSelectState(){
     const select = document.getElementById("savedGameSelect");
     if (!select) return;
+    const selectedOption = select.options[select.selectedIndex] || select.options[0];
+    const label = String(selectedOption?.textContent || "").trim();
     select.classList.toggle("has-selection", Boolean(select.value));
+    select.classList.toggle("is-long-label", label.length > 24);
+    select.classList.toggle("is-very-long-label", label.length > 38);
+    select.title = label;
+    fitSavedGameSelectText(select,label);
+  }
+
+  function fitSavedGameSelectText(select,label){
+    if (!savedSelectMeasureContext || !label) {
+      select.style.removeProperty("--home-select-fit-size");
+      return;
+    }
+
+    const width = select.getBoundingClientRect().width;
+    if (width < 80) return;
+
+    const portrait = window.matchMedia("(orientation:portrait)").matches;
+    const maximumSize = portrait ? 17 : 20;
+    const minimumSize = portrait ? 9 : 10;
+    const availableWidth = Math.max(80,width - (portrait ? 68 : 82));
+    const computed = getComputedStyle(select);
+    const fontFamily = computed.fontFamily || "Cairo, sans-serif";
+    const fontWeight = computed.fontWeight || "800";
+
+    savedSelectMeasureContext.font = `${fontWeight} ${maximumSize}px ${fontFamily}`;
+    const measuredWidth = savedSelectMeasureContext.measureText(label).width;
+    const fittedSize = measuredWidth > availableWidth
+      ? Math.max(minimumSize,Math.floor((maximumSize * availableWidth / measuredWidth) * .96))
+      : maximumSize;
+
+    select.style.setProperty("--home-select-fit-size",`${fittedSize}px`);
   }
 
   function initSavedGameSelectState(){
@@ -24497,6 +24649,12 @@
     if (!select) return;
     select.addEventListener("change", syncSavedGameSelectState);
     new MutationObserver(syncSavedGameSelectState).observe(select, {childList:true,subtree:true});
+    let resizeFrame = 0;
+    window.addEventListener("resize", () => {
+      cancelAnimationFrame(resizeFrame);
+      resizeFrame = requestAnimationFrame(syncSavedGameSelectState);
+    }, {passive:true});
+    document.fonts?.ready.then(syncSavedGameSelectState).catch(()=>{});
     syncSavedGameSelectState();
   }
 
@@ -26407,6 +26565,6 @@
   });
 })();
 </script>
-<!-- VERSION: index-v116-home-visual-refinement -->
+<!-- VERSION: index-v117-home-portrait-tuning -->
 </body>
 </html>
