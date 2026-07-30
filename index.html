@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v121-community-feedback -->
+<!-- version: index-v122-suggestions-responsive -->
 <meta charset="utf-8"/>
-<meta content="index-v121-community-feedback" name="sandooq-build"/>
+<meta content="index-v122-suggestions-responsive" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -15692,7 +15692,7 @@
       }
     }
   </style>
-  <style id="suggestions-page-v121">
+  <style id="suggestions-page-v122">
     #appSuggestionsScreen{
       width:min(100%,980px);
       padding:clamp(18px,2.8vw,34px);
@@ -15934,14 +15934,6 @@
       line-height:1.35;
     }
 
-    .suggestions-community-note{
-      margin:4px 0 0;
-      color:#727985;
-      font-size:clamp(12px,1.35vw,15px);
-      font-weight:750;
-      line-height:1.5;
-    }
-
     .suggestions-refresh{
       flex:0 0 auto;
       min-height:39px;
@@ -16030,6 +16022,14 @@
       cursor:pointer;
     }
 
+    .suggestions-like b{
+      min-width:1.2em;
+      direction:ltr;
+      unicode-bidi:isolate;
+      font-variant-numeric:tabular-nums;
+      text-align:center;
+    }
+
     .suggestions-like.is-liked,
     .suggestions-like:disabled{
       border-color:#ffd16a;
@@ -16047,6 +16047,61 @@
       font-size:14px;
       font-weight:800;
       line-height:1.7;
+    }
+
+    @media (min-width:900px){
+      #appSuggestionsScreen{
+        width:min(calc(100% - 34px),1120px);
+      }
+
+      #appSuggestionsScreen.active{
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        align-items:stretch;
+        column-gap:clamp(18px,2.5vw,30px);
+      }
+
+      #appSuggestionsScreen .screen-title,
+      #appSuggestionsScreen .suggestions-community{
+        grid-column:1 / -1;
+      }
+
+      #appSuggestionsScreen .suggestions-hero{
+        width:100%;
+        height:100%;
+        margin:0;
+      }
+
+      #appSuggestionsScreen .suggestions-form-card{
+        width:100%;
+        height:100%;
+        margin:0;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+      }
+
+      #appSuggestionsScreen .suggestions-community{
+        width:100%;
+      }
+
+      .suggestions-community-list{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        align-items:start;
+      }
+    }
+
+    @media (min-width:561px) and (max-width:899px){
+      #appSuggestionsScreen{
+        width:min(calc(100% - 28px),860px);
+        padding:clamp(18px,3vw,28px);
+      }
+
+      .suggestions-hero,
+      .suggestions-form-card,
+      .suggestions-community{
+        width:100%;
+      }
     }
 
     @media (max-width:560px){
@@ -17798,7 +17853,6 @@
     <div class="suggestions-community-head">
       <div>
         <h3 class="suggestions-community-title" id="suggestionsCommunityTitle">أفكار مجتمع التعليم</h3>
-        <p class="suggestions-community-note">المشاركات المعروضة بعد المراجعة، والأكثر إعجابًا تظهر أولًا.</p>
       </div>
       <button class="suggestions-refresh" id="suggestionsRefreshBtn" type="button">تحديث</button>
     </div>
@@ -27638,7 +27692,7 @@
       likeButton.className = `suggestions-like${alreadyLiked ? " is-liked" : ""}`;
       likeButton.disabled = alreadyLiked;
       likeButton.setAttribute("aria-pressed", alreadyLiked ? "true" : "false");
-      likeButton.innerHTML = `<span aria-hidden="true">👍🏻</span><span>${alreadyLiked ? "أعجبني" : "إعجاب"}</span><b>${Number(item.likes_count || 0).toLocaleString("ar-SA")}</b>`;
+      likeButton.innerHTML = `<b>${Number(item.likes_count || 0).toLocaleString("en-US")}</b><span>${alreadyLiked ? "أعجبني" : "إعجاب"}</span><span aria-hidden="true">❤️</span>`;
       likeButton.addEventListener("click", async () => {
         if (!itemId || likeButton.disabled) return;
         likeButton.disabled = true;
@@ -27650,7 +27704,7 @@
           rememberLikedId(itemId);
           likeButton.classList.add("is-liked");
           likeButton.setAttribute("aria-pressed", "true");
-          likeButton.innerHTML = `<span aria-hidden="true">👍🏻</span><span>أعجبني</span><b>${Number(result.likes_count || 0).toLocaleString("ar-SA")}</b>`;
+          likeButton.innerHTML = `<b>${Number(result.likes_count || 0).toLocaleString("en-US")}</b><span>أعجبني</span><span aria-hidden="true">❤️</span>`;
           await loadFeedback();
         } catch (error) {
           likeButton.disabled = false;
@@ -27709,7 +27763,7 @@
       });
       field.value = "";
       resizeSuggestionsField();
-      setStatus(data.message || "وصلتنا مشاركتك، وبتظهر بعد مراجعتها.", "success");
+      setStatus("مشاركتك وصلت لفريق الصندوق وبنراجعها بكل اهتمام👌🏻", "success");
     } catch (error) {
       setStatus(error.message || "تعذر إرسال المشاركة حاليًا.", "error");
     } finally {
@@ -27730,6 +27784,6 @@
   });
 })();
 </script>
-<!-- VERSION: index-v121-community-feedback -->
+<!-- VERSION: index-v122-suggestions-responsive -->
 </body>
 </html>
