@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v125-interactive-help-center -->
+<!-- version: index-v126-precise-interactive-help -->
 <meta charset="utf-8"/>
-<meta content="index-v125-interactive-help-center" name="sandooq-build"/>
+<meta content="index-v126-precise-interactive-help" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -16261,7 +16261,7 @@
       }
     }
   </style>
-  <style id="interactive-help-center-v125">
+  <style id="interactive-help-center-v126">
     /* مركز المساعدة التفاعلي: معزول بالكامل عن صفحة الشرح والتعليمات القديمة. */
     #appSupportScreen.interactive-help-screen{
       width:min(1180px,94%);
@@ -16496,11 +16496,11 @@
     .ihc-spotlight{
       position:fixed;
       z-index:50001;
-      border:5px solid #ffd000;
+      border:5px solid var(--home-yellow);
       border-radius:18px;
       background:transparent;
       box-shadow:0 0 0 9999px rgba(23,8,31,.78),0 0 0 3px rgba(255,255,255,.94),0 10px 28px rgba(0,0,0,.28);
-      transition:top .22s ease,left .22s ease,width .22s ease,height .22s ease;
+      transition:none;
       pointer-events:none;
     }
 
@@ -16515,7 +16515,7 @@
       padding:clamp(16px,2.4vw,24px);
       border:4px solid #302016;
       border-radius:27px;
-      background:#fff7da;
+      background:var(--bg);
       color:#131313;
       text-align:center;
       pointer-events:auto;
@@ -16538,7 +16538,7 @@
 
     .ihc-guide-title{
       margin:0;
-      color:#801b6d;
+      color:#2f63d4;
       font-size:clamp(21px,3vw,31px);
       font-weight:950;
       line-height:1.25;
@@ -16554,7 +16554,7 @@
 
     .ihc-guide-progress{
       margin:0 0 12px;
-      color:#801b6d;
+      color:#2f63d4;
       direction:ltr;
       font-size:15px;
       font-weight:950;
@@ -16579,12 +16579,21 @@
       cursor:pointer;
     }
 
-    .ihc-guide-action--next{background:#ffd000;color:#111}
+    .ihc-guide-action--next{background:var(--home-yellow);color:#111}
     .ihc-guide-action--close{background:#fff0f0;color:#9b2424}
     .ihc-guide-action:disabled{opacity:.38;cursor:default}
     .ihc-guide-action:focus-visible{outline:4px solid rgba(47,99,212,.45);outline-offset:2px}
 
     body.ihc-guide-running{overscroll-behavior:none}
+
+    /* أثناء الشرح تُفتح اللوحة فورًا حتى يُقاس الخيار الحقيقي بعد اكتمال التخطيط. */
+    body.ihc-guide-running .choices-advanced-panel.ihc-guide-force-open{
+      max-height:none!important;
+      opacity:1!important;
+      margin-top:12px!important;
+      overflow:visible!important;
+      transition:none!important;
+    }
 
     @media (max-width:760px){
       #appSupportScreen.interactive-help-screen{
@@ -20048,9 +20057,10 @@
     });
   }
 
-  function applySetupMode(){
-    document.body.dataset.setupTemplate = currentGameTemplate;
-    const isBox = currentGameTemplate === "open-box";
+  function applySetupMode(previewTemplate = currentGameTemplate){
+    const effectiveTemplate = previewTemplate === "open-box" ? "open-box" : "wheel";
+    document.body.dataset.setupTemplate = effectiveTemplate;
+    const isBox = effectiveTemplate === "open-box";
 
     if (wheelGlobalContentTypeGroup) wheelGlobalContentTypeGroup.hidden = true;
 
@@ -20125,6 +20135,24 @@
 
     syncSoundUi();
   }
+
+  /*
+    جسر عرض بصري لمركز المساعدة فقط. لا يغيّر currentGameTemplate ولا المسودة
+    ولا يعيد بناء العناصر، ويعيد حالة سؤال العجلة الأصلية بعد كل خطوة.
+  */
+  window.SandooqGuideSetupMode = {
+    preview(template){
+      const questionWasEnabled = Boolean(questionPanel?.classList.contains("enabled"));
+      applySetupMode(template);
+      return () => {
+        questionPanel?.classList.toggle("enabled", questionWasEnabled);
+        applySetupMode();
+      };
+    },
+    restore(){
+      applySetupMode();
+    }
+  };
 
   function createImagePicker(entry, index, fieldPrefix){
     const imageDataKey = fieldPrefix === "cover" ? "coverImageData" : "imageData";
@@ -28238,7 +28266,7 @@
 })();
 </script>
 
-<script id="interactive-help-center-script-v125">
+<script id="interactive-help-center-script-v126">
 (() => {
   "use strict";
 
@@ -28270,8 +28298,8 @@
           step("wheelSetupScreen", "#addWheelItemBtn", "إضافة عنصر جديد", "اضغط «إضافة عنصر» كلما احتجت قسمًا جديدًا داخل العجلة.")
         ]),
         topic("wheel-question", "سؤال داخل منتصف العجلة", "شغّل سؤال المنتصف ثم اكتب سؤالك.", [
-          step("wheelSetupScreen", "#questionPanel", "سؤال منتصف العجلة", "اختر «تشغيل»، ثم اكتب السؤال في الحقل الظاهر. سيبقى السؤال في منتصف العجلة."),
-          step("wheelSetupScreen", "#centerQuestionInput", "كتابة السؤال", "اكتب هنا سؤالًا مختصرًا وواضحًا، ثم راجع ظهوره قبل حفظ اللعبة.")
+          step("wheelSetupScreen", '[data-question-toggle="on"]', "سؤال منتصف العجلة", "اضغط «تشغيل» ليظهر حقل سؤال منتصف العجلة.", { template: "wheel", questionState: "off" }),
+          step("wheelSetupScreen", "#centerQuestionInput", "كتابة السؤال", "اكتب هنا سؤالًا مختصرًا وواضحًا، ثم راجع ظهوره قبل حفظ اللعبة.", { template: "wheel", questionState: "on" })
         ]),
         topic("wheel-theme", "تغيير الثيم", "اختر خلفية تناسب الدرس أو المناسبة.", [
           step("wheelSetupScreen", "#toggleThemeListBtn", "اختيار الثيم", "اضغط «تغيير» لعرض الثيمات، ثم اختر الخلفية المناسبة لمحتواك.")
@@ -28290,18 +28318,18 @@
       preview: "game-previews/open-box.webp",
       topics: [
         topic("box-items", "إضافة الصناديق", "كل عنصر تضيفه يصبح صندوقًا داخل اللعبة.", [
-          step("wheelSetupScreen", "#wheelItemsEditor", "محتوى الصناديق", "اكتب السؤال أو أضف الصورة داخل كل عنصر؛ وسيظهر كل عنصر على هيئة صندوق.", { template: "open-box", unhide: ["#coverTypePanel"] }),
-          step("wheelSetupScreen", "#addWheelItemBtn", "إضافة صندوق جديد", "اضغط هنا لإضافة صندوق آخر حتى تصل إلى العدد الذي تحتاجه.", { template: "open-box", unhide: ["#coverTypePanel"] })
+          step("wheelSetupScreen", "#wheelItemsEditor", "محتوى الصناديق", "اكتب السؤال أو أضف الصورة داخل كل عنصر؛ وسيظهر كل عنصر على هيئة صندوق.", { template: "open-box" }),
+          step("wheelSetupScreen", "#addWheelItemBtn", "إضافة صندوق جديد", "اضغط هنا لإضافة صندوق آخر حتى تصل إلى العدد الذي تحتاجه.", { template: "open-box" })
         ]),
         topic("box-cover", "تغيير واجهة الصندوق", "نص أو صورة أو أرقام عربية أو إنجليزية.", [
-          step("wheelSetupScreen", "#coverTypePanel", "نوع غلاف الصندوق", "اختر الشكل الذي سيشاهده الطالب قبل فتح الصندوق: نص، صورة، أو أرقام.", { template: "open-box", unhide: ["#coverTypePanel"] })
+          step("wheelSetupScreen", "[data-cover-type]", "نوع غلاف الصندوق", "اختر الشكل الذي سيشاهده الطالب قبل فتح الصندوق: نص، صورة، أو أرقام.", { template: "open-box", questionState: "on", unhide: ["#coverTypePanel"] })
         ]),
         topic("box-multiple", "صندوق متعدد الإجابات", "للسؤال الذي يحتوي عدة خيارات.", [
-          step("wheelSetupScreen", "#openBoxMultiAnswerPanel", "صندوق متعدد الإجابات", "فعّل هذا الخيار ليظهر السؤال مع صناديق إجابات، وحدد الإجابة الصحيحة أثناء إعداد المحتوى.", { template: "open-box", unhide: ["#coverTypePanel", "#openBoxMultiAnswerPanel"] })
+          step("wheelSetupScreen", "[data-open-box-multi-answer]", "صندوق متعدد الإجابات", "فعّل هذا الخيار ليظهر السؤال مع صناديق إجابات، وحدد الإجابة الصحيحة أثناء إعداد المحتوى.", { template: "open-box", unhide: ["#openBoxMultiAnswerPanel"] })
         ]),
         topic("box-style", "الثيم والخط", "غيّر شكل اللعبة من الإعدادات نفسها.", [
-          step("wheelSetupScreen", "#toggleThemeListBtn", "تغيير الثيم", "اضغط «تغيير» واختر خلفية الصناديق المناسبة.", { template: "open-box", unhide: ["#coverTypePanel"] }),
-          step("wheelSetupScreen", "#wheelFontSelect", "تغيير الخط", "افتح الإعدادات المتقدمة واختر الخط المناسب.", { template: "open-box", unhide: ["#coverTypePanel"], openPanel: "#wheelAdvancedPanel" })
+          step("wheelSetupScreen", "#toggleThemeListBtn", "تغيير الثيم", "اضغط «تغيير» واختر خلفية الصناديق المناسبة.", { template: "open-box" }),
+          step("wheelSetupScreen", "#wheelFontSelect", "تغيير الخط", "افتح الإعدادات المتقدمة واختر الخط المناسب.", { template: "open-box", openPanel: "#wheelAdvancedPanel" })
         ])
       ]
     },
@@ -28490,7 +28518,7 @@
   const generalTopics = [
     topic("general-create", "إنشاء لعبة جديدة", "ابدأ من الرئيسية ثم اختر قالب اللعبة.", [
       step("home", ".home-create-action", "إنشاء لعبة جديدة", "من الصفحة الرئيسية اضغط هذا الزر لفتح قائمة الألعاب."),
-      step("createScreen", ".templates-grid", "اختيار اللعبة", "اختر نوع اللعبة المناسب، وستنتقل مباشرة إلى صفحة إعدادها.")
+      step("createScreen", ".template-list", "اختيار اللعبة", "اختر نوع اللعبة المناسب، وستنتقل مباشرة إلى صفحة إعدادها.")
     ]),
     topic("general-name", "تسمية اللعبة", "الاسم يساعدك على العثور عليها لاحقًا.", [
       step("wheelSetupScreen", "#wheelGameNameInput", "اسم اللعبة", "اكتب اسمًا واضحًا يميز النشاط، مثل اسم الدرس أو الصف.")
@@ -28538,10 +28566,11 @@
     layer: null,
     spotlight: null,
     card: null,
-    target: null,
+    targets: [],
     stepRestores: [],
     initial: null,
-    token: 0
+    token: 0,
+    positionFrame: 0
   };
 
   const normalizeText = (value) => String(value || "")
@@ -28663,9 +28692,9 @@
         <p class="ihc-guide-text" id="ihcGuideText"></p>
         <p class="ihc-guide-progress" id="ihcGuideProgress"></p>
         <div class="ihc-guide-actions">
-          <button class="ihc-guide-action ihc-guide-action--close" data-guide-action="close" type="button">إنهاء الشرح</button>
-          <button class="ihc-guide-action" data-guide-action="previous" type="button">السابق</button>
           <button class="ihc-guide-action ihc-guide-action--next" data-guide-action="next" type="button">التالي</button>
+          <button class="ihc-guide-action" data-guide-action="previous" type="button">السابق</button>
+          <button class="ihc-guide-action ihc-guide-action--close" data-guide-action="close" type="button">إنهاء الشرح</button>
         </div>
       </section>`;
     document.body.appendChild(layer);
@@ -28697,7 +28726,9 @@
       hidden: node.hidden,
       className: node.className,
       ariaHidden: node.getAttribute("aria-hidden"),
-      ariaExpanded: node.getAttribute("aria-expanded")
+      ariaExpanded: node.getAttribute("aria-expanded"),
+      ariaPressed: node.getAttribute("aria-pressed"),
+      style: node.getAttribute("style")
     };
     state.stepRestores.push(() => {
       node.hidden = snapshot.hidden;
@@ -28706,6 +28737,10 @@
       else node.setAttribute("aria-hidden", snapshot.ariaHidden);
       if (snapshot.ariaExpanded === null) node.removeAttribute("aria-expanded");
       else node.setAttribute("aria-expanded", snapshot.ariaExpanded);
+      if (snapshot.ariaPressed === null) node.removeAttribute("aria-pressed");
+      else node.setAttribute("aria-pressed", snapshot.ariaPressed);
+      if (snapshot.style === null) node.removeAttribute("style");
+      else node.setAttribute("style", snapshot.style);
     });
   }
 
@@ -28713,7 +28748,8 @@
     while (state.stepRestores.length) {
       try { state.stepRestores.pop()(); } catch (_) {}
     }
-    state.target = null;
+    state.targets = [];
+    if (state.spotlight) state.spotlight.style.visibility = "hidden";
   }
 
   function showVisualScreen(screenId){
@@ -28729,47 +28765,208 @@
   }
 
   function prepareStep(current){
-    if (current.template) document.body.dataset.setupTemplate = current.template;
-    (current.unhide || []).forEach((selector) => {
-      const node = document.querySelector(selector);
-      if (!node) return;
-      rememberStepState(node);
-      node.hidden = false;
-    });
-    if (current.openPanel) {
-      const panel = document.querySelector(current.openPanel);
+    const previewTemplate = current.template || (current.screen === "wheelSetupScreen" ? "wheel" : "");
+    if (previewTemplate) {
+      const restorePreview = window.SandooqGuideSetupMode?.preview?.(previewTemplate);
+      if (typeof restorePreview === "function") {
+        state.stepRestores.push(restorePreview);
+      } else {
+        const previousTemplate = document.body.getAttribute("data-setup-template");
+        state.stepRestores.push(() => {
+          if (previousTemplate === null) document.body.removeAttribute("data-setup-template");
+          else document.body.setAttribute("data-setup-template", previousTemplate);
+        });
+        document.body.dataset.setupTemplate = previewTemplate;
+      }
+    }
+
+    /* لا نُظهر إعدادات القالب الآخر إلا إذا كانت خطوة الشرح تحتاجها. */
+    if (current.screen === "wheelSetupScreen") {
+      ["#coverTypePanel", "#openBoxMultiAnswerPanel"].forEach((selector) => {
+        const node = document.querySelector(selector);
+        if (!node) return;
+        rememberStepState(node);
+        node.hidden = true;
+      });
+    }
+
+    if (current.questionState === "on" || current.questionState === "off") {
+      const enabled = current.questionState === "on";
+      const panel = document.getElementById("questionPanel");
       if (panel) {
         rememberStepState(panel);
+        panel.classList.toggle("enabled", enabled);
+      }
+      document.querySelectorAll("[data-question-toggle]").forEach((button) => {
+        rememberStepState(button);
+        const active = button.getAttribute("data-question-toggle") === (enabled ? "on" : "off");
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+    }
+
+    (current.unhide || []).forEach((selector) => {
+      document.querySelectorAll(selector).forEach((node) => {
+        rememberStepState(node);
+        node.hidden = false;
+      });
+    });
+    if (current.openPanel) {
+      document.querySelectorAll(current.openPanel).forEach((panel) => {
+        rememberStepState(panel);
         panel.hidden = false;
-        panel.classList.add("is-open");
+        panel.classList.add("is-open", "ihc-guide-force-open");
         panel.setAttribute("aria-hidden", "false");
         const toggle = panel.previousElementSibling;
         if (toggle?.matches?.(".choices-advanced-toggle")) {
           rememberStepState(toggle);
           toggle.setAttribute("aria-expanded", "true");
         }
-      }
+      });
     }
   }
 
+  const oneFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
   const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
+  function intersectRects(first, second){
+    const result = {
+      left: Math.max(first.left, second.left),
+      top: Math.max(first.top, second.top),
+      right: Math.min(first.right, second.right),
+      bottom: Math.min(first.bottom, second.bottom)
+    };
+    result.width = result.right - result.left;
+    result.height = result.bottom - result.top;
+    return result.width > 1 && result.height > 1 ? result : null;
+  }
+
+  function getElementLayoutRect(node){
+    if (!(node instanceof Element) || node.closest("[hidden]")) return null;
+    const ownStyle = getComputedStyle(node);
+    if (ownStyle.display === "none" || ownStyle.visibility === "hidden" || Number(ownStyle.opacity) === 0) return null;
+
+    let rect = node.getBoundingClientRect();
+    if (rect.width <= 1 || rect.height <= 1) return null;
+    rect = { left:rect.left, top:rect.top, right:rect.right, bottom:rect.bottom, width:rect.width, height:rect.height };
+
+    for (let parent = node.parentElement; parent && parent !== document.documentElement; parent = parent.parentElement) {
+      const style = getComputedStyle(parent);
+      if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return null;
+      const clipsX = /(hidden|clip|auto|scroll)/.test(style.overflowX);
+      const clipsY = /(hidden|clip|auto|scroll)/.test(style.overflowY);
+      if (!clipsX && !clipsY) continue;
+      const parentRect = parent.getBoundingClientRect();
+      const clip = {
+        left: clipsX ? parentRect.left : Number.NEGATIVE_INFINITY,
+        right: clipsX ? parentRect.right : Number.POSITIVE_INFINITY,
+        top: clipsY ? parentRect.top : Number.NEGATIVE_INFINITY,
+        bottom: clipsY ? parentRect.bottom : Number.POSITIVE_INFINITY
+      };
+      rect = intersectRects(rect, clip);
+      if (!rect) return null;
+    }
+    return rect;
+  }
+
+  function getScreenRoot(screenId){
+    return screenId === "home"
+      ? document.getElementById("homeShell")
+      : document.getElementById(screenId);
+  }
+
+  function resolveGuideTargets(current){
+    const root = getScreenRoot(current.screen);
+    if (!root) return [];
+    let nodes = [];
+    try { nodes = Array.from(root.querySelectorAll(current.target)); } catch (_) { nodes = []; }
+    if (current.closest) {
+      nodes = nodes.map((node) => node.closest(current.closest)).filter(Boolean);
+    }
+    return Array.from(new Set(nodes)).filter((node) => Boolean(getElementLayoutRect(node)));
+  }
+
+  function unionTargetRects(targets){
+    const rects = targets.map(getElementLayoutRect).filter(Boolean);
+    if (!rects.length) return null;
+    const left = Math.min(...rects.map((rect) => rect.left));
+    const top = Math.min(...rects.map((rect) => rect.top));
+    const right = Math.max(...rects.map((rect) => rect.right));
+    const bottom = Math.max(...rects.map((rect) => rect.bottom));
+    return { left, top, right, bottom, width:right - left, height:bottom - top };
+  }
+
+  async function waitForStableTargets(renderToken, maxFrames = 36){
+    let lastSignature = "";
+    let stableFrames = 0;
+    for (let index = 0; index < maxFrames; index += 1) {
+      await oneFrame();
+      if (!state.topic || renderToken !== state.token) return false;
+      const rect = unionTargetRects(state.targets);
+      if (!rect) {
+        stableFrames = 0;
+        lastSignature = "";
+        continue;
+      }
+      const signature = [rect.left, rect.top, rect.right, rect.bottom, window.scrollX, window.scrollY]
+        .map((value) => Math.round(value * 2) / 2)
+        .join("|");
+      if (signature === lastSignature) stableFrames += 1;
+      else {
+        stableFrames = 0;
+        lastSignature = signature;
+      }
+      if (stableFrames >= 2) return true;
+    }
+    return Boolean(unionTargetRects(state.targets));
+  }
+
+  async function scrollTargetsIntoView(renderToken){
+    if (!state.targets.length) return false;
+    const anchor = state.targets[Math.floor((state.targets.length - 1) / 2)];
+    const html = document.documentElement;
+    const body = document.body;
+    const htmlScrollBehavior = html.style.scrollBehavior;
+    const bodyScrollBehavior = body.style.scrollBehavior;
+    html.style.scrollBehavior = "auto";
+    body.style.scrollBehavior = "auto";
+    try {
+      anchor.scrollIntoView({ block:"center", inline:"center", behavior:"instant" });
+    } catch (_) {
+      try { anchor.scrollIntoView({ block:"center", inline:"center", behavior:"auto" }); } catch (_) {}
+    }
+    const stable = await waitForStableTargets(renderToken);
+    html.style.scrollBehavior = htmlScrollBehavior;
+    body.style.scrollBehavior = bodyScrollBehavior;
+    return stable;
+  }
+
   function positionGuide(){
-    if (!state.topic || !state.target || state.layer.hidden) return;
+    if (!state.topic || !state.targets.length || state.layer.hidden) return false;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const raw = state.target.getBoundingClientRect();
+    const raw = unionTargetRects(state.targets);
+    if (!raw) {
+      state.spotlight.style.visibility = "hidden";
+      return false;
+    }
     const pad = viewportWidth < 620 ? 7 : 11;
     const left = Math.max(8, raw.left - pad);
     const top = Math.max(8, raw.top - pad);
     const right = Math.min(viewportWidth - 8, raw.right + pad);
     const bottom = Math.min(viewportHeight - 8, raw.bottom + pad);
+    if (right <= left + 1 || bottom <= top + 1) {
+      state.spotlight.style.visibility = "hidden";
+      return false;
+    }
+    state.spotlight.style.visibility = "visible";
     state.spotlight.style.left = `${left}px`;
     state.spotlight.style.top = `${top}px`;
-    state.spotlight.style.width = `${Math.max(34, right - left)}px`;
-    state.spotlight.style.height = `${Math.max(34, bottom - top)}px`;
+    state.spotlight.style.width = `${right - left}px`;
+    state.spotlight.style.height = `${bottom - top}px`;
 
-    const cardHeight = Math.min(state.card.scrollHeight, state.card.getBoundingClientRect().height || 360);
+    const measuredCardHeight = state.card.getBoundingClientRect().height || state.card.scrollHeight || 360;
+    const cardHeight = Math.min(measuredCardHeight, viewportHeight - 20);
     const spaceBelow = viewportHeight - bottom;
     const spaceAbove = top;
     let cardTop;
@@ -28777,6 +28974,15 @@
     else if (spaceAbove >= cardHeight + 22) cardTop = top - cardHeight - 12;
     else cardTop = Math.max(10, viewportHeight - cardHeight - 12);
     state.card.style.top = `${Math.max(10, Math.min(cardTop, viewportHeight - cardHeight - 10))}px`;
+    return true;
+  }
+
+  function scheduleGuidePosition(){
+    if (state.positionFrame) return;
+    state.positionFrame = requestAnimationFrame(() => {
+      state.positionFrame = 0;
+      positionGuide();
+    });
   }
 
   async function showGuideStep(){
@@ -28788,6 +28994,7 @@
     prepareStep(current);
     state.layer.hidden = false;
     state.card.style.visibility = "hidden";
+    state.spotlight.style.visibility = "hidden";
     document.body.classList.add("ihc-guide-running");
 
     const title = state.card.querySelector("#ihcGuideTitle");
@@ -28803,12 +29010,16 @@
 
     await nextFrame();
     if (!state.topic || renderToken !== state.token) return;
-    let target = document.querySelector(current.target);
-    const screen = current.screen === "home" ? document.getElementById("homeShell") : document.getElementById(current.screen);
-    if (!target || target.getClientRects().length === 0) target = screen;
-    state.target = target;
-    try { target?.scrollIntoView({ block: "center", inline: "center", behavior: "auto" }); } catch (_) {}
-    await nextFrame();
+    state.targets = resolveGuideTargets(current);
+    if (!state.targets.length) {
+      const screen = getScreenRoot(current.screen);
+      if (screen && getElementLayoutRect(screen)) state.targets = [screen];
+    }
+    await scrollTargetsIntoView(renderToken);
+    if (!state.topic || renderToken !== state.token) return;
+    const refreshedTargets = resolveGuideTargets(current);
+    if (refreshedTargets.length) state.targets = refreshedTargets;
+    await waitForStableTargets(renderToken, 8);
     if (!state.topic || renderToken !== state.token) return;
     positionGuide();
     state.card.style.visibility = "visible";
@@ -28861,8 +29072,8 @@
   }
 
   searchField.addEventListener("input", () => renderHelp(searchField.value));
-  window.addEventListener("resize", positionGuide, { passive: true });
-  window.addEventListener("scroll", positionGuide, { passive: true });
+  window.addEventListener("resize", scheduleGuidePosition, { passive: true });
+  window.addEventListener("scroll", scheduleGuidePosition, { passive: true });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && state.topic) finishGuide();
   });
@@ -28871,6 +29082,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v125-interactive-help-center -->
+<!-- VERSION: index-v126-precise-interactive-help -->
 </body>
 </html>
