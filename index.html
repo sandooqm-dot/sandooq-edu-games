@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v127-help-return-position -->
+<!-- version: index-v128-classify-draft-desktop-footer -->
 <meta charset="utf-8"/>
-<meta content="index-v127-help-return-position" name="sandooq-build"/>
+<meta content="index-v128-classify-draft-desktop-footer" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -9684,17 +9684,19 @@
 
 
 
-    /* Safari iPhone: لا نسمح للشريط السفلي بالقفز فوق لوحة المفاتيح. */
-    body.keyboard-open .bottom-bar{
-      display:none !important;
-    }
-    body.keyboard-open .page{
-      padding-bottom:max(18px,var(--safe-bottom)) !important;
-    }
-    body.keyboard-open input,
-    body.keyboard-open textarea,
-    body.keyboard-open [contenteditable="true"]{
-      scroll-margin-bottom:24px;
+    /* إخفاء الشريط عند ظهور لوحة المفاتيح الافتراضية فقط، وليس عند الكتابة من اللابتوب. */
+    @media (hover:none) and (pointer:coarse){
+      body.keyboard-open .bottom-bar{
+        display:none !important;
+      }
+      body.keyboard-open .page{
+        padding-bottom:max(18px,var(--safe-bottom)) !important;
+      }
+      body.keyboard-open input,
+      body.keyboard-open textarea,
+      body.keyboard-open [contenteditable="true"]{
+        scroll-margin-bottom:24px;
+      }
     }
 
     /* open-box-v50: صورة المعاينة وخيارات الغلاف الكبيرة وإخفاء لون السهم. */
@@ -26061,6 +26063,7 @@
 <script>
 (() => {
   const editableSelector = 'input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]';
+  const virtualKeyboardQuery = window.matchMedia('(hover: none) and (pointer: coarse)');
   let closeTimer = 0;
 
   function isEditable(element){
@@ -26068,12 +26071,16 @@
   }
 
   function syncKeyboardState(){
-    const focused = isEditable(document.activeElement);
+    const focused = virtualKeyboardQuery.matches && isEditable(document.activeElement);
     document.body.classList.toggle('keyboard-open', focused);
   }
 
   document.addEventListener('focusin', (event) => {
     if (!isEditable(event.target)) return;
+    if (!virtualKeyboardQuery.matches) {
+      document.body.classList.remove('keyboard-open');
+      return;
+    }
     clearTimeout(closeTimer);
     document.body.classList.add('keyboard-open');
     requestAnimationFrame(() => {
@@ -26088,6 +26095,7 @@
 
   window.visualViewport?.addEventListener('resize', syncKeyboardState, { passive:true });
   window.visualViewport?.addEventListener('scroll', syncKeyboardState, { passive:true });
+  virtualKeyboardQuery.addEventListener?.('change', syncKeyboardState);
   window.addEventListener('pageshow', syncKeyboardState, { passive:true });
   window.addEventListener('pagehide', () => document.body.classList.remove('keyboard-open'), { passive:true });
 })();
@@ -27663,7 +27671,8 @@
   const runtimePayload=()=>buildPayload({runtime:true});
   function writePayloadToDb(key,payload){if(!("indexedDB" in window))return Promise.resolve(false);return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(false);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readwrite");tx.objectStore("payloads").put({key,payload,updatedAt:Date.now()});tx.oncomplete=()=>{db.close();resolve(true)};tx.onerror=tx.onabort=()=>{db.close();resolve(false)}}catch(_){db.close();resolve(false)}}})}
   function readPayloadFromDb(key){if(!("indexedDB" in window))return Promise.resolve(null);return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve(null);request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readonly"),get=tx.objectStore("payloads").get(key);get.onsuccess=()=>resolve(get.result?.payload||null);get.onerror=()=>resolve(null);tx.oncomplete=tx.onerror=tx.onabort=()=>db.close()}catch(_){db.close();resolve(null)}}})}
-  function saveDraft(){const draft=draftPayload();try{sessionStorage.setItem(DRAFT,JSON.stringify(draft))}catch(_){}clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(()=>{draftSaveChain=draftSaveChain.catch(()=>false).then(()=>writePayloadToDb("draft:classify-words",draft))},180)}
+  function deletePayloadFromDb(key){if(!("indexedDB" in window))return Promise.resolve();return new Promise(resolve=>{const request=indexedDB.open("sandooq_edu_games_v1",1);request.onerror=()=>resolve();request.onupgradeneeded=()=>{const db=request.result;if(!db.objectStoreNames.contains("payloads"))db.createObjectStore("payloads",{keyPath:"key"})};request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("payloads","readwrite");tx.objectStore("payloads").delete(key);tx.oncomplete=tx.onerror=tx.onabort=()=>{db.close();resolve()}}catch(_){db.close();resolve()}}})}
+  function saveDraft(){const draft=draftPayload(),serialized=JSON.stringify(draft);try{sessionStorage.setItem(DRAFT,serialized)}catch(_){}try{localStorage.setItem(DRAFT,serialized)}catch(_){}clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(()=>{draftSaveChain=draftSaveChain.catch(()=>false).then(()=>writePayloadToDb("draft:classify-words",draft))},180)}
   function syncToggle(button,enabled,onLabel,offLabel){button?.classList.toggle("is-on",enabled);button?.setAttribute("aria-pressed",enabled?"true":"false");button?.setAttribute("aria-label",enabled?onLabel:offLabel)}
   function syncSettings(){if(themePreview){themePreview.className=`choices-theme-preview theme-art ${theme}`;themePreview.setAttribute("aria-label",theme)}themeList?.querySelectorAll("[data-classify-theme]").forEach(card=>card.classList.toggle("active",card.dataset.classifyTheme===theme));syncToggle(soundToggle,soundEnabled,"إيقاف أصوات اللعبة","تشغيل أصوات اللعبة");syncToggle(groupColorsToggle,groupColorsEnabled,"إيقاف تغيير ألوان المجموعات","تشغيل تغيير ألوان المجموعات");syncToggle(unifiedItemsToggle,unifiedItemsEnabled,"إيقاف توحيد ألوان مربعات الكلمات والصور","تشغيل توحيد ألوان مربعات الكلمات والصور");if(fontSelect)fontSelect.value=fontFamily;if(textColorSwatch)textColorSwatch.style.background=normalizeHex(textColor,DEFAULT_TEXT_COLOR);groupColorRows.forEach(row=>{if(row)row.hidden=!groupColorsEnabled});groupColorSwatches.forEach((swatch,index)=>{if(swatch)swatch.style.background=normalizeHex(groupColors[index],DEFAULT_GROUP_COLORS[index])});if(unifiedItemColorRow)unifiedItemColorRow.hidden=!unifiedItemsEnabled;if(unifiedItemColorSwatch)unifiedItemColorSwatch.style.background=normalizeHex(unifiedItemColor,DEFAULT_ITEM_COLOR);advancedToggle?.setAttribute("aria-expanded",advancedOpen?"true":"false");advancedPanel?.classList.toggle("is-open",advancedOpen);advancedPanel?.setAttribute("aria-hidden",advancedOpen?"false":"true");if(advancedAction)advancedAction.textContent=advancedOpen?"إخفاء":"عرض"}
   function setClassifyColor(target,value){const fallback=target==="text"?DEFAULT_TEXT_COLOR:target==="item"?DEFAULT_ITEM_COLOR:DEFAULT_GROUP_COLORS[Math.max(0,Number(target.split("-")[1])||0)];const color=normalizeHex(value,fallback);if(target==="text")textColor=color;else if(target==="item")unifiedItemColor=color;else if(target.startsWith("group-")){const index=Math.max(0,Math.min(3,Number(target.split("-")[1])||0));groupColors[index]=color}syncSettings();saveDraft()}
@@ -27817,13 +27826,16 @@
     if(!saved){saveDraft();return;}
     try{sessionStorage.removeItem(DRAFT)}catch(_){}
     try{localStorage.removeItem(DRAFT)}catch(_){}
+    await deletePayloadFromDb("draft:classify-words");
     reset();
     render();
   }
   function applySavedSettings(raw={}){const appearance=raw.appearance||{};theme=normalizeTheme(raw.theme||raw.selectedTheme);contentLanguage=raw.contentLanguage==="en"||raw.language==="en"?"en":"ar";soundEnabled=raw.soundEnabled!==false&&raw?.sounds?.enabled!==false;fontFamily=normalizeFont(raw.fontFamily);textColor=normalizeHex(raw.textColor||appearance.textColor,DEFAULT_TEXT_COLOR);groupColorsEnabled=Boolean(raw.groupColorsEnabled??raw.customGroupColorsEnabled??appearance.groupColorsEnabled??false);const savedColors=Array.isArray(raw.groupColors)?raw.groupColors:Array.isArray(appearance.groupColors)?appearance.groupColors:[];groupColors=DEFAULT_GROUP_COLORS.map((fallback,index)=>normalizeHex(savedColors[index],fallback));unifiedItemsEnabled=Boolean(raw.unifiedItemsEnabled??raw.unifyItemColors??appearance.unifiedItemsEnabled??false);unifiedItemColor=normalizeHex(raw.unifiedItemColor||raw.wordCardColor||appearance.unifiedItemColor,DEFAULT_ITEM_COLOR)}
   function reset(){groups=[newGroup()];theme="classic";contentLanguage="ar";soundEnabled=true;fontFamily="noto-naskh";advancedOpen=false;textColor=DEFAULT_TEXT_COLOR;groupColorsEnabled=false;groupColors=DEFAULT_GROUP_COLORS.slice();unifiedItemsEnabled=false;unifiedItemColor=DEFAULT_ITEM_COLOR;if(nameInput)nameInput.value=""}
+  function loadDraft(raw){if(!raw||typeof raw!=="object"||!Array.isArray(raw.groups)||!raw.groups.length)return false;const restoredGroups=normalizeGroups(raw.groups);if(!restoredGroups.length)return false;groups=restoredGroups;nameInput.value=raw.name||raw.gameName||"";applySavedSettings(raw);return true}
+  function storedDraft(storage){try{const raw=storage?.getItem(DRAFT),parsed=raw?JSON.parse(raw):null;return parsed&&typeof parsed==="object"?parsed:null}catch(_){return null}}
+  function draftUpdatedAt(draft){const value=Number(draft?.updatedAt);return Number.isFinite(value)?value:0}
   function open(){if(!groups.length)groups=[newGroup()];window.openEduScreen?.("classifyWordsSetupScreen");render();saveDraft()}
-  document.querySelectorAll('[data-template="classify-words"]').forEach(b=>b.addEventListener("click",()=>{reset();open()}));
   addGroupBtn?.addEventListener("click",()=>{if(groups.length>=MAX_GROUPS){alert("الحد الأقصى للمجموعات هو 4 مجموعات.");return}if(wordSlotCount()>=MAX_WORDS){alert("الحد الأقصى هو 36 محتوى.");return}groups.push(newGroup());render();saveDraft()});
   themeToggle?.addEventListener("click",()=>{if(themeList)themeList.hidden=!themeList.hidden});
   themeList?.querySelectorAll(".choices-theme-activate").forEach(button=>button.addEventListener("click",()=>{const card=button.closest("[data-classify-theme]");theme=normalizeTheme(card?.dataset.classifyTheme);themeList.hidden=true;syncSettings();saveDraft()}));
@@ -27834,8 +27846,20 @@
   setup.querySelectorAll("[data-classify-color-target]").forEach(button=>button.addEventListener("click",()=>openClassifyColorPicker(button.dataset.classifyColorTarget||"text")));
   fontSelect?.addEventListener("change",()=>{fontFamily=normalizeFont(fontSelect.value);syncSettings();saveDraft()});
   document.getElementById("testClassifyWordsBtn")?.addEventListener("click",openGame);document.getElementById("saveClassifyWordsBtn")?.addEventListener("click",saveGame);nameInput?.addEventListener("input",saveDraft);
-  let restoredSessionDraft=false;try{const old=JSON.parse(sessionStorage.getItem(DRAFT)||"null");if(old?.groups?.length){groups=normalizeGroups(old.groups);nameInput.value=old.name||old.gameName||"";applySavedSettings(old);restoredSessionDraft=true}}catch(_){};if(!groups.length)groups=[newGroup()];render();window.openClassifyWordsSetup=open;
-  (async()=>{const pending=await window.SandooqSavedGames?.consumePendingEdit("classify-words");if(pending?.payload?.groups){groups=normalizeGroups(pending.payload.groups);nameInput.value=pending.payload.name||pending.payload.gameName||"";applySavedSettings(pending.payload);open();return}if(!restoredSessionDraft){const storedDraft=await readPayloadFromDb("draft:classify-words");if(storedDraft?.groups?.length){groups=normalizeGroups(storedDraft.groups);nameInput.value=storedDraft.name||storedDraft.gameName||"";applySavedSettings(storedDraft);render()}}})();
+  if(!groups.length)groups=[newGroup()];render();window.openClassifyWordsSetup=open;
+  const initialRestorePromise=(async()=>{
+    const pending=await window.SandooqSavedGames?.consumePendingEdit("classify-words");
+    if(pending?.payload?.groups){loadDraft(pending.payload);render();saveDraft();open();return true}
+    const candidates=[storedDraft(sessionStorage),storedDraft(localStorage)];
+    const indexedDraft=await readPayloadFromDb("draft:classify-words");
+    if(indexedDraft)candidates.push(indexedDraft);
+    const newest=candidates.filter(Boolean).reduce((selected,candidate)=>draftUpdatedAt(candidate)>=draftUpdatedAt(selected)?candidate:selected,null);
+    const restored=Boolean(newest&&loadDraft(newest));
+    if(restored)render();
+    if(location.hash==="#classifyWordsSetup")open();
+    return restored;
+  })();
+  document.querySelectorAll('[data-template="classify-words"]').forEach(button=>button.addEventListener("click",()=>{void initialRestorePromise.then(open)}));
 })();
 </script>
 <script>
@@ -28266,7 +28290,7 @@
 })();
 </script>
 
-<script id="interactive-help-center-script-v127">
+<script id="interactive-help-center-script-v128">
 (() => {
   "use strict";
 
@@ -29139,6 +29163,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v127-help-return-position -->
+<!-- VERSION: index-v128-classify-draft-desktop-footer -->
 </body>
 </html>
