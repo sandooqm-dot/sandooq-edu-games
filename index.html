@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v132-platform-settings -->
+<!-- version: index-v133-settings-clean-style -->
 <meta charset="utf-8"/>
-<meta content="index-v132-platform-settings" name="sandooq-build"/>
+<meta content="index-v133-settings-clean-style" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -16000,10 +16000,10 @@
     .settings-panel{
       min-width:0;
       padding:clamp(15px,2vw,21px);
-      border:2px solid rgba(47,98,218,.24);
-      border-radius:22px;
-      background:rgba(255,255,255,.96);
-      box-shadow:0 7px 20px rgba(31,67,151,.08);
+      border:2px solid #c7d6f6;
+      border-radius:24px;
+      background:#fff;
+      box-shadow:0 7px 18px rgba(31,67,151,.07);
     }
 
     .settings-panel--wide{
@@ -16011,24 +16011,24 @@
     }
 
     .settings-panel--blue{
-      background:linear-gradient(145deg,#f2f6ff,#fff);
+      border-color:#c7d6f6;
+      background:#fff;
     }
 
     .settings-panel--yellow{
-      border-color:rgba(228,181,31,.4);
-      background:linear-gradient(145deg,#fff9e1,#fff);
+      border-color:#c7d6f6;
+      background:#fff;
     }
 
     .settings-panel--orange{
-      border-color:rgba(240,106,29,.33);
-      background:linear-gradient(145deg,#fff3e9,#fff);
+      border-color:#c7d6f6;
+      background:#fff;
     }
 
     .settings-panel-head{
       display:flex;
       align-items:center;
-      gap:11px;
-      margin-bottom:12px;
+      margin-bottom:10px;
     }
 
     .settings-panel-icon{
@@ -16048,7 +16048,7 @@
     .settings-panel-title{
       min-width:0;
       margin:0;
-      color:#15171c;
+      color:#173f9f;
       font-size:clamp(18px,1.9vw,24px);
       font-weight:900;
       line-height:1.35;
@@ -16061,14 +16061,18 @@
 
     .settings-option-row{
       min-width:0;
-      padding:12px 13px;
+      padding:12px 2px;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:15px;
-      border:1.5px solid #d6dbe5;
-      border-radius:16px;
-      background:rgba(255,255,255,.92);
+      border:0;
+      border-radius:0;
+      background:transparent;
+    }
+
+    .settings-option-row + .settings-option-row{
+      border-top:1px solid #e2e7f1;
     }
 
     .settings-option-copy{
@@ -16168,13 +16172,14 @@
 
     .settings-device-item{
       min-width:0;
-      padding:11px 12px;
+      padding:11px 2px;
       display:flex;
       align-items:center;
       gap:9px;
-      border:1.5px solid #d8dde5;
-      border-radius:14px;
-      background:#fff;
+      border:0;
+      border-bottom:1px solid #e2e7f1;
+      border-radius:0;
+      background:transparent;
       color:#343842;
       font-size:clamp(12px,1.25vw,14px);
       font-weight:800;
@@ -18799,13 +18804,11 @@
 <section class="screen service-screen settings-screen" id="appSettingsScreen">
   <header class="settings-heading">
     <h2 class="screen-title">الإعدادات</h2>
-    <p>تحكّم في طريقة عمل المنصة على هذا الجهاز. جميع الخيارات التالية محفوظة محليًا ولا تغيّر محتوى ألعابك.</p>
   </header>
 
   <div class="settings-layout">
     <section class="settings-panel settings-panel--blue settings-panel--wide" aria-labelledby="settingsUseTitle">
       <header class="settings-panel-head">
-        <span class="settings-panel-icon" aria-hidden="true">⚙️</span>
         <h3 class="settings-panel-title" id="settingsUseTitle">تجربة الاستخدام</h3>
       </header>
       <div class="settings-option-list">
@@ -18842,7 +18845,6 @@
 
     <section class="settings-panel settings-panel--yellow" aria-labelledby="settingsUpdatesTitle">
       <header class="settings-panel-head">
-        <span class="settings-panel-icon" aria-hidden="true">🔔</span>
         <h3 class="settings-panel-title" id="settingsUpdatesTitle">تنبيهات التحديثات</h3>
       </header>
       <div class="settings-option-list">
@@ -18864,7 +18866,6 @@
 
     <section class="settings-panel settings-panel--orange" aria-labelledby="settingsSafetyTitle">
       <header class="settings-panel-head">
-        <span class="settings-panel-icon" aria-hidden="true">💾</span>
         <h3 class="settings-panel-title" id="settingsSafetyTitle">حماية ألعابك</h3>
       </header>
       <p class="service-card-copy">ألعابك محفوظة داخل المتصفح الحالي. أنشئ نسخة احتياطية قبل تغيير الجهاز أو حذف بيانات المتصفح.</p>
@@ -18875,7 +18876,6 @@
 
     <section class="settings-panel settings-panel--wide" aria-labelledby="settingsDeviceTitle">
       <header class="settings-panel-head">
-        <span class="settings-panel-icon" aria-hidden="true">🛠️</span>
         <h3 class="settings-panel-title" id="settingsDeviceTitle">جاهزية هذا الجهاز</h3>
       </header>
       <div class="settings-device-grid" id="settingsDeviceGrid">
@@ -18893,7 +18893,6 @@
 
     <section class="settings-panel settings-panel--wide" aria-labelledby="settingsResetTitle">
       <header class="settings-panel-head">
-        <span class="settings-panel-icon" aria-hidden="true">↺</span>
         <h3 class="settings-panel-title" id="settingsResetTitle">إعادة إعدادات المنصة</h3>
       </header>
       <p class="service-card-copy">يعيد خيارات هذه الصفحة إلى وضعها الافتراضي فقط، ولن يحذف ألعابك المحفوظة أو صورها.</p>
@@ -18905,7 +18904,7 @@
   </div>
 
   <footer class="settings-brand-plate" aria-label="هوية المنصة ورقم الإصدار">
-    <span class="settings-saudi-badge">🇸🇦 منصة تعليمية سعودية</span>
+    <span class="settings-saudi-badge">لأننا منكم.. صنعناها لكم 🇸🇦</span>
     <div class="settings-brand-name">
       <strong>صندوق الألعاب التعليمية</strong>
       <span class="settings-brand-version">الإصدار 1.5.0</span>
@@ -30210,6 +30209,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v132-platform-settings -->
+<!-- VERSION: index-v133-settings-clean-style -->
 </body>
 </html>
