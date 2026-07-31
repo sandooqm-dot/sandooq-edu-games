@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v126-precise-interactive-help -->
+<!-- version: index-v127-help-return-position -->
 <meta charset="utf-8"/>
-<meta content="index-v126-precise-interactive-help" name="sandooq-build"/>
+<meta content="index-v127-help-return-position" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -18264,8 +18264,8 @@
 </section>
 
 <section class="screen interactive-help-screen" id="appSupportScreen">
-  <h2 class="ihc-heading">مركز المساعدة التفاعلي 🎧</h2>
-  <p class="ihc-lead">اختر اللعبة أو الموضوع، وسنريك مكان كل أداة على الشاشة خطوة بخطوة بدون تغيير محتواك أو حفظ أي شيء.</p>
+  <h2 class="ihc-heading">مركز المساعدة التفاعلي</h2>
+  <p class="ihc-lead">اختر اللعبة أو الموضوع، وسنريك مكان كل أداة على الشاشة خطوة بخطوة</p>
   <label class="ihc-search-wrap">
     <span class="home-visually-hidden">ابحث في شروحات مركز المساعدة</span>
     <span class="ihc-search-icon" aria-hidden="true">⌕</span>
@@ -18276,7 +18276,7 @@
     <div class="ihc-games" id="interactiveHelpGames"></div>
   </section>
   <section class="ihc-general" aria-labelledby="interactiveHelpGeneralTitle">
-    <h3 class="ihc-section-title" id="interactiveHelpGeneralTitle">أمور عامة ومهمة</h3>
+    <h3 class="ihc-section-title" id="interactiveHelpGeneralTitle">شروحات عامة</h3>
     <div class="ihc-general-grid" id="interactiveHelpGeneral"></div>
   </section>
 </section>
@@ -28266,7 +28266,7 @@
 })();
 </script>
 
-<script id="interactive-help-center-script-v126">
+<script id="interactive-help-center-script-v127">
 (() => {
   "use strict";
 
@@ -28546,9 +28546,6 @@
     ]),
     topic("general-browser", "لماذا لا تظهر ألعابي؟", "تأكد من المتصفح والجهاز اللذين حفظت فيهما.", [
       step("savedScreen", "#savedGamesList", "الألعاب محفوظة في جهازك", "ادخل من المتصفح العادي نفسه. المتصفح الخفي أو جهاز آخر لا يعرض الألعاب إلا بعد نقلها بالتصدير والاستيراد.")
-    ]),
-    topic("general-projector", "العرض على الشاشة أو البروجكتر", "اختبر اللعبة ثم اعرض المتصفح بملء الشاشة.", [
-      step("wheelSetupScreen", "#testWheelBtn", "المعاينة قبل العرض", "اختبر اللعبة أولًا، ثم صِل الجهاز بالشاشة أو البروجكتر واستخدم وضع ملء الشاشة في المتصفح.")
     ])
   ];
 
@@ -28602,7 +28599,7 @@
     button.className = "ihc-start";
     button.textContent = "شرح الطريقة";
     button.setAttribute("aria-label", `شرح: ${item.title}`);
-    button.addEventListener("click", () => startGuide(item));
+    button.addEventListener("click", () => startGuide(item, button));
     row.append(copy, button);
     return row;
   }
@@ -29026,9 +29023,62 @@
     next.focus({ preventScroll: true });
   }
 
-  function startGuide(selectedTopic){
+  function getGuideScrollHost(node){
+    for (let parent = node?.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+      const style = getComputedStyle(parent);
+      if (/(auto|scroll)/.test(style.overflowY) && parent.scrollHeight > parent.clientHeight + 1) {
+        return parent;
+      }
+    }
+    return document.scrollingElement || document.documentElement;
+  }
+
+  function readGuideScroll(host){
+    const documentScroll = host === document.scrollingElement || host === document.documentElement || host === document.body;
+    return {
+      left: documentScroll ? window.scrollX : host?.scrollLeft || 0,
+      top: documentScroll ? window.scrollY : host?.scrollTop || 0
+    };
+  }
+
+  function writeGuideScroll(host, left, top){
+    const documentScroll = host === document.scrollingElement || host === document.documentElement || host === document.body;
+    if (documentScroll) {
+      try { window.scrollTo({ left, top, behavior:"instant" }); }
+      catch (_) { window.scrollTo(left, top); }
+      return;
+    }
+    if (!host) return;
+    try { host.scrollTo({ left, top, behavior:"instant" }); }
+    catch (_) {
+      host.scrollLeft = left;
+      host.scrollTop = top;
+    }
+  }
+
+  function restoreGuideReturnPosition(initial){
+    if (!initial) return;
+    const returnTarget = initial.returnTarget?.isConnected ? initial.returnTarget : null;
+    const scrollHost = initial.scrollHost?.isConnected
+      ? initial.scrollHost
+      : getGuideScrollHost(returnTarget || helpScreen);
+
+    writeGuideScroll(scrollHost, initial.scrollLeft || 0, initial.scrollTop || 0);
+
+    if (returnTarget && Number.isFinite(initial.returnTargetTop)) {
+      const delta = returnTarget.getBoundingClientRect().top - initial.returnTargetTop;
+      if (Math.abs(delta) > 0.5) {
+        const position = readGuideScroll(scrollHost);
+        writeGuideScroll(scrollHost, position.left, position.top + delta);
+      }
+    }
+  }
+
+  function startGuide(selectedTopic, returnTarget = null){
     if (!selectedTopic?.steps?.length) return;
     ensureGuideLayer();
+    const scrollHost = getGuideScrollHost(returnTarget || helpScreen);
+    const scrollPosition = readGuideScroll(scrollHost);
     state.initial = {
       activeIds: allScreenIds.filter((id) => document.getElementById(id)?.classList.contains("active")),
       homeDisplay: document.getElementById("homeShell")?.style.display || "",
@@ -29036,8 +29086,11 @@
       createPage: document.body.classList.contains("create-template-page"),
       htmlCreatePage: document.documentElement.classList.contains("create-template-page"),
       setupTemplate: document.body.getAttribute("data-setup-template"),
-      scrollX: window.scrollX,
-      scrollY: window.scrollY
+      scrollHost,
+      scrollLeft: scrollPosition.left,
+      scrollTop: scrollPosition.top,
+      returnTarget,
+      returnTargetTop: returnTarget?.getBoundingClientRect().top ?? null
     };
     state.topic = selectedTopic;
     state.index = 0;
@@ -29065,10 +29118,14 @@
 
     state.topic = null;
     state.initial = null;
-    requestAnimationFrame(() => {
-      try { window.scrollTo({ left: initial?.scrollX || 0, top: initial?.scrollY || 0, behavior: "auto" }); } catch (_) {}
-      searchField.focus({ preventScroll: true });
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      restoreGuideReturnPosition(initial);
+      if (initial?.returnTarget?.isConnected) {
+        try { initial.returnTarget.focus({ preventScroll:true }); }
+        catch (_) { try { initial.returnTarget.focus(); } catch (_) {} }
+      }
+      requestAnimationFrame(() => restoreGuideReturnPosition(initial));
+    }));
   }
 
   searchField.addEventListener("input", () => renderHelp(searchField.value));
@@ -29082,6 +29139,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v126-precise-interactive-help -->
+<!-- VERSION: index-v127-help-return-position -->
 </body>
 </html>
