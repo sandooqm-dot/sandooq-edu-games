@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v131-update-notice-position -->
+<!-- version: index-v132-platform-settings -->
 <meta charset="utf-8"/>
-<meta content="index-v131-update-notice-position" name="sandooq-build"/>
+<meta content="index-v132-platform-settings" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -15961,6 +15961,339 @@
       }
     }
   </style>
+  <style id="app-settings-v132">
+    /* صفحة إعدادات المنصة فقط؛ مفاتيحها تستخدم نفس سويتشات إعدادات الألعاب. */
+    #appSettingsScreen.settings-screen{
+      width:min(100%,960px);
+      padding:clamp(18px,2.8vw,34px);
+      direction:rtl;
+    }
+
+    .settings-heading{
+      width:min(100%,760px);
+      margin:0 auto;
+      text-align:center;
+    }
+
+    .settings-heading .screen-title{
+      margin-bottom:5px;
+      color:#173f9f;
+    }
+
+    .settings-heading p{
+      max-width:680px;
+      margin:0 auto;
+      color:#596170;
+      font-size:clamp(13px,1.45vw,17px);
+      font-weight:750;
+      line-height:1.75;
+    }
+
+    .settings-layout{
+      width:min(100%,820px);
+      margin:clamp(18px,2.7vw,28px) auto 0;
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:clamp(12px,1.7vw,17px);
+    }
+
+    .settings-panel{
+      min-width:0;
+      padding:clamp(15px,2vw,21px);
+      border:2px solid rgba(47,98,218,.24);
+      border-radius:22px;
+      background:rgba(255,255,255,.96);
+      box-shadow:0 7px 20px rgba(31,67,151,.08);
+    }
+
+    .settings-panel--wide{
+      grid-column:1 / -1;
+    }
+
+    .settings-panel--blue{
+      background:linear-gradient(145deg,#f2f6ff,#fff);
+    }
+
+    .settings-panel--yellow{
+      border-color:rgba(228,181,31,.4);
+      background:linear-gradient(145deg,#fff9e1,#fff);
+    }
+
+    .settings-panel--orange{
+      border-color:rgba(240,106,29,.33);
+      background:linear-gradient(145deg,#fff3e9,#fff);
+    }
+
+    .settings-panel-head{
+      display:flex;
+      align-items:center;
+      gap:11px;
+      margin-bottom:12px;
+    }
+
+    .settings-panel-icon{
+      flex:0 0 auto;
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      border-radius:14px;
+      color:#173f9f;
+      background:#fff;
+      box-shadow:inset 0 0 0 2px rgba(47,98,218,.18);
+      font-size:24px;
+      line-height:1;
+    }
+
+    .settings-panel-title{
+      min-width:0;
+      margin:0;
+      color:#15171c;
+      font-size:clamp(18px,1.9vw,24px);
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .settings-option-list{
+      display:grid;
+      gap:10px;
+    }
+
+    .settings-option-row{
+      min-width:0;
+      padding:12px 13px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      border:1.5px solid #d6dbe5;
+      border-radius:16px;
+      background:rgba(255,255,255,.92);
+    }
+
+    .settings-option-copy{
+      min-width:0;
+    }
+
+    .settings-option-copy strong{
+      display:block;
+      color:#202229;
+      font-size:clamp(14px,1.45vw,17px);
+      font-weight:900;
+      line-height:1.45;
+    }
+
+    .settings-option-copy small{
+      display:block;
+      margin-top:3px;
+      color:#69717e;
+      font-size:clamp(11px,1.15vw,13px);
+      font-weight:700;
+      line-height:1.55;
+    }
+
+    #appSettingsScreen .settings-switch.quiz-sound-toggle{
+      flex:0 0 auto;
+      margin:0;
+    }
+
+    #appSettingsScreen .settings-switch:focus-visible{
+      outline:4px solid rgba(47,98,218,.28);
+      outline-offset:3px;
+    }
+
+    #appSettingsScreen .settings-switch:disabled{
+      cursor:not-allowed;
+      filter:grayscale(.65);
+      opacity:.55;
+    }
+
+    .settings-inline-status{
+      margin:9px 3px 0;
+      min-height:20px;
+      color:#536071;
+      font-size:12px;
+      font-weight:750;
+      line-height:1.55;
+    }
+
+    .settings-panel-actions{
+      margin-top:13px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:9px;
+    }
+
+    .settings-compact-action{
+      min-height:43px;
+      padding:8px 16px;
+      border:2px solid #111;
+      border-radius:13px;
+      background:#fff;
+      color:#173f9f;
+      font-family:var(--interface-font);
+      font-size:clamp(13px,1.3vw,15px);
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(17,17,17,.1);
+    }
+
+    .settings-compact-action--blue{
+      border-color:#173f9f;
+      background:#2f62da;
+      color:#fff;
+    }
+
+    .settings-compact-action--danger{
+      border-color:#b63131;
+      background:#fff6f3;
+      color:#a92323;
+    }
+
+    .settings-compact-action:active{
+      transform:translateY(2px);
+      box-shadow:none;
+    }
+
+    .settings-compact-action:focus-visible{
+      outline:4px solid rgba(47,98,218,.25);
+      outline-offset:2px;
+    }
+
+    .settings-device-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:9px;
+    }
+
+    .settings-device-item{
+      min-width:0;
+      padding:11px 12px;
+      display:flex;
+      align-items:center;
+      gap:9px;
+      border:1.5px solid #d8dde5;
+      border-radius:14px;
+      background:#fff;
+      color:#343842;
+      font-size:clamp(12px,1.25vw,14px);
+      font-weight:800;
+      line-height:1.45;
+    }
+
+    .settings-device-dot{
+      flex:0 0 auto;
+      width:12px;
+      height:12px;
+      border-radius:50%;
+      background:#aeb5c0;
+      box-shadow:0 0 0 4px rgba(174,181,192,.18);
+    }
+
+    .settings-device-item[data-state="ok"] .settings-device-dot{
+      background:#20a66a;
+      box-shadow:0 0 0 4px rgba(32,166,106,.14);
+    }
+
+    .settings-device-item[data-state="warn"] .settings-device-dot{
+      background:#e3a51c;
+      box-shadow:0 0 0 4px rgba(227,165,28,.14);
+    }
+
+    .settings-device-item[data-state="error"] .settings-device-dot{
+      background:#df4d52;
+      box-shadow:0 0 0 4px rgba(223,77,82,.14);
+    }
+
+    .settings-brand-plate{
+      width:min(100%,820px);
+      margin:clamp(14px,2.2vw,20px) auto 0;
+      padding:clamp(13px,1.8vw,17px) clamp(15px,2.4vw,22px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      border:1.5px solid rgba(12,118,78,.28);
+      border-radius:20px;
+      background:linear-gradient(135deg,#f4fff9,#fffbea);
+      box-shadow:0 6px 18px rgba(18,92,67,.08);
+    }
+
+    .settings-saudi-badge{
+      flex:0 0 auto;
+      padding:7px 12px;
+      border-radius:999px;
+      color:#fff;
+      background:linear-gradient(135deg,#148357,#087246);
+      font-size:clamp(12px,1.3vw,15px);
+      font-weight:900;
+      white-space:nowrap;
+    }
+
+    .settings-brand-name{
+      min-width:0;
+      display:flex;
+      align-items:baseline;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      gap:5px 9px;
+      color:#173f9f;
+    }
+
+    .settings-brand-name strong{
+      font-size:clamp(15px,1.7vw,20px);
+      font-weight:900;
+    }
+
+    .settings-brand-version{
+      color:#8a6800;
+      font-size:clamp(12px,1.2vw,14px);
+      font-weight:850;
+      white-space:nowrap;
+    }
+
+    @media (max-width:700px){
+      #appSettingsScreen.settings-screen{
+        width:94%;
+        padding:17px 12px;
+      }
+
+      .settings-layout,
+      .settings-device-grid{
+        grid-template-columns:1fr;
+      }
+
+      .settings-panel--wide{
+        grid-column:auto;
+      }
+
+      .settings-option-row{
+        padding:11px;
+      }
+
+      .settings-brand-plate{
+        align-items:stretch;
+        flex-direction:column;
+      }
+
+      .settings-saudi-badge{
+        align-self:flex-start;
+      }
+
+      .settings-brand-name{
+        justify-content:flex-start;
+      }
+
+      .settings-panel-actions{
+        display:grid;
+        grid-template-columns:1fr;
+      }
+
+      .settings-compact-action{
+        width:100%;
+      }
+    }
+  </style>
   <style id="suggestions-page-v124">
     #appSuggestionsScreen{
       width:min(100%,980px);
@@ -18463,40 +18796,121 @@
 </div>
 </section>
 
-<section class="screen service-screen" id="appSettingsScreen">
-  <h2 class="screen-title">الإعدادات</h2>
-  <p class="service-intro">خيارات بسيطة لتحسين تجربة استخدام الواجهة، من دون تغيير ألعابك المحفوظة أو محتواها.</p>
-  <div class="service-grid">
-    <article class="service-card service-card--blue service-card--wide">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">⚙️</span>
-        <h3 class="service-card-title">حركة الواجهة الرئيسية</h3>
+<section class="screen service-screen settings-screen" id="appSettingsScreen">
+  <header class="settings-heading">
+    <h2 class="screen-title">الإعدادات</h2>
+    <p>تحكّم في طريقة عمل المنصة على هذا الجهاز. جميع الخيارات التالية محفوظة محليًا ولا تغيّر محتوى ألعابك.</p>
+  </header>
+
+  <div class="settings-layout">
+    <section class="settings-panel settings-panel--blue settings-panel--wide" aria-labelledby="settingsUseTitle">
+      <header class="settings-panel-head">
+        <span class="settings-panel-icon" aria-hidden="true">⚙️</span>
+        <h3 class="settings-panel-title" id="settingsUseTitle">تجربة الاستخدام</h3>
+      </header>
+      <div class="settings-option-list">
+        <div class="settings-option-row">
+          <div class="settings-option-copy">
+            <strong>إبقاء الشاشة مضاءة</strong>
+            <small>يحاول منع الجهاز من إطفاء الشاشة ما دامت المنصة مفتوحة.</small>
+          </div>
+          <button class="quiz-sound-toggle settings-switch" id="keepScreenAwakeToggle" type="button" aria-pressed="false" aria-label="تشغيل إبقاء الشاشة مضاءة">
+            <span>×</span><span>✓</span>
+          </button>
+        </div>
+        <div class="settings-option-row">
+          <div class="settings-option-copy">
+            <strong>التأكيد قبل حذف لعبة</strong>
+            <small>يظهر تنبيه قبل حذف أي لعبة محفوظة لتجنّب الحذف بالخطأ.</small>
+          </div>
+          <button class="quiz-sound-toggle settings-switch is-on" id="confirmGameDeleteToggle" type="button" aria-pressed="true" aria-label="إيقاف التأكيد قبل حذف لعبة">
+            <span>×</span><span>✓</span>
+          </button>
+        </div>
+        <div class="settings-option-row">
+          <div class="settings-option-copy">
+            <strong>تقليل الحركة والمؤثرات</strong>
+            <small>واجهة أكثر هدوءًا مع تقليل الحركات البصرية غير الضرورية.</small>
+          </div>
+          <button class="quiz-sound-toggle settings-switch" id="homeReduceMotionToggle" type="button" aria-pressed="false" aria-label="تشغيل تقليل الحركة والمؤثرات">
+            <span>×</span><span>✓</span>
+          </button>
+        </div>
       </div>
-      <p class="service-card-copy">يمكنك تقليل الحركة والمؤثرات في الصفحة الرئيسية إذا كنت تفضّل واجهة أكثر هدوءًا.</p>
-      <label class="service-setting-row" for="homeReduceMotionToggle">
-        <span>تقليل الحركة والمؤثرات</span>
-        <input id="homeReduceMotionToggle" type="checkbox" aria-describedby="homeReduceMotionStatus">
-      </label>
-      <span class="service-setting-status" id="homeReduceMotionStatus" aria-live="polite"></span>
-    </article>
-    <article class="service-card service-card--yellow">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">💾</span>
-        <h3 class="service-card-title">حماية ألعابك</h3>
+      <p class="settings-inline-status" id="settingsUseStatus" aria-live="polite"></p>
+    </section>
+
+    <section class="settings-panel settings-panel--yellow" aria-labelledby="settingsUpdatesTitle">
+      <header class="settings-panel-head">
+        <span class="settings-panel-icon" aria-hidden="true">🔔</span>
+        <h3 class="settings-panel-title" id="settingsUpdatesTitle">تنبيهات التحديثات</h3>
+      </header>
+      <div class="settings-option-list">
+        <div class="settings-option-row">
+          <div class="settings-option-copy">
+            <strong>إظهار تنبيه الإصدار الجديد</strong>
+            <small>يظهر التنبيه الصغير أعلى أيقونة التحديثات في الصفحة الرئيسية.</small>
+          </div>
+          <button class="quiz-sound-toggle settings-switch is-on" id="updatesNoticeToggle" type="button" aria-pressed="true" aria-label="إيقاف تنبيه الإصدار الجديد">
+            <span>×</span><span>✓</span>
+          </button>
+        </div>
       </div>
-      <p class="service-card-copy">الألعاب محفوظة داخل متصفحك. أنشئ نسخة احتياطية قبل تغيير الجهاز أو مسح بيانات المتصفح.</p>
-    </article>
-    <article class="service-card service-card--orange">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">🔒</span>
-        <h3 class="service-card-title">خصوصية المحتوى</h3>
+      <div class="settings-panel-actions">
+        <button class="settings-compact-action" id="showLatestUpdateNoticeBtn" type="button">إعادة عرض آخر تنبيه</button>
       </div>
-      <p class="service-card-copy">إعدادات الواجهة لا تحذف الألعاب ولا تعدّل الأسئلة أو الصور التي أضفتها.</p>
-    </article>
+      <p class="settings-inline-status" id="updatesNoticeStatus" aria-live="polite"></p>
+    </section>
+
+    <section class="settings-panel settings-panel--orange" aria-labelledby="settingsSafetyTitle">
+      <header class="settings-panel-head">
+        <span class="settings-panel-icon" aria-hidden="true">💾</span>
+        <h3 class="settings-panel-title" id="settingsSafetyTitle">حماية ألعابك</h3>
+      </header>
+      <p class="service-card-copy">ألعابك محفوظة داخل المتصفح الحالي. أنشئ نسخة احتياطية قبل تغيير الجهاز أو حذف بيانات المتصفح.</p>
+      <div class="settings-panel-actions">
+        <button class="settings-compact-action settings-compact-action--blue" data-open-screen="backupScreen" type="button">فتح التصدير والاستيراد</button>
+      </div>
+    </section>
+
+    <section class="settings-panel settings-panel--wide" aria-labelledby="settingsDeviceTitle">
+      <header class="settings-panel-head">
+        <span class="settings-panel-icon" aria-hidden="true">🛠️</span>
+        <h3 class="settings-panel-title" id="settingsDeviceTitle">جاهزية هذا الجهاز</h3>
+      </header>
+      <div class="settings-device-grid" id="settingsDeviceGrid">
+        <div class="settings-device-item" id="settingsStorageCheck" data-state="pending"><span class="settings-device-dot" aria-hidden="true"></span><span>الحفظ المحلي: جاري الفحص</span></div>
+        <div class="settings-device-item" id="settingsBrowserCheck" data-state="pending"><span class="settings-device-dot" aria-hidden="true"></span><span>توافق المتصفح: جاري الفحص</span></div>
+        <div class="settings-device-item" id="settingsAudioCheck" data-state="pending"><span class="settings-device-dot" aria-hidden="true"></span><span>تشغيل الأصوات: جاري الفحص</span></div>
+        <div class="settings-device-item" id="settingsWakeCheck" data-state="pending"><span class="settings-device-dot" aria-hidden="true"></span><span>إبقاء الشاشة مضاءة: جاري الفحص</span></div>
+      </div>
+      <div class="settings-panel-actions">
+        <button class="settings-compact-action settings-compact-action--blue" id="runDeviceCheckBtn" type="button">فحص الآن</button>
+        <button class="settings-compact-action" id="copyDeviceReportBtn" type="button">نسخ تقرير الجهاز</button>
+      </div>
+      <p class="settings-inline-status" id="settingsDiagnosticsStatus" aria-live="polite"></p>
+    </section>
+
+    <section class="settings-panel settings-panel--wide" aria-labelledby="settingsResetTitle">
+      <header class="settings-panel-head">
+        <span class="settings-panel-icon" aria-hidden="true">↺</span>
+        <h3 class="settings-panel-title" id="settingsResetTitle">إعادة إعدادات المنصة</h3>
+      </header>
+      <p class="service-card-copy">يعيد خيارات هذه الصفحة إلى وضعها الافتراضي فقط، ولن يحذف ألعابك المحفوظة أو صورها.</p>
+      <div class="settings-panel-actions">
+        <button class="settings-compact-action settings-compact-action--danger" id="resetPlatformSettingsBtn" type="button">إعادة الإعدادات الافتراضية</button>
+      </div>
+      <p class="settings-inline-status" id="settingsResetStatus" aria-live="polite"></p>
+    </section>
   </div>
-  <div class="service-actions">
-    <button class="service-action service-action--blue" data-open-screen="backupScreen" type="button">فتح التصدير والاستيراد</button>
-  </div>
+
+  <footer class="settings-brand-plate" aria-label="هوية المنصة ورقم الإصدار">
+    <span class="settings-saudi-badge">🇸🇦 منصة تعليمية سعودية</span>
+    <div class="settings-brand-name">
+      <strong>صندوق الألعاب التعليمية</strong>
+      <span class="settings-brand-version">الإصدار 1.5.0</span>
+    </div>
+  </footer>
 </section>
 
 <section class="screen updates-screen" id="appUpdatesScreen">
@@ -18526,7 +18940,6 @@
           <li>إضافة مركز المساعدة التفاعلي لشرح أدوات الألعاب خطوة بخطوة.</li>
           <li>إضافة صفحة اقتراحاتكم ومشاركة أفكار مجتمع التعليم.</li>
           <li>تحسين حفظ محتويات وإعدادات الألعاب عند التنقل بين الصفحات.</li>
-          <li>تحسين ثبات الشريط السفلي وعرض الواجهة على مختلف الأجهزة.</li>
         </ul>
       </div>
     </article>
@@ -19183,7 +19596,11 @@
 
   async function removeRecord(record){
     if (!record) return;
-    if (!window.confirm(`هل تريد حذف لعبة «${record.name}»؟`)) return;
+    let confirmBeforeDelete = true;
+    try {
+      confirmBeforeDelete = localStorage.getItem("sandooq_confirm_delete_v1") !== "0";
+    } catch (_) {}
+    if (confirmBeforeDelete && !window.confirm(`هل تريد حذف لعبة «${record.name}»؟`)) return;
     try {
       await deletePayload(record.storageKey);
       const records = readRegistry().filter((item)=>item.storageKey !== record.storageKey);
@@ -28301,41 +28718,309 @@
   "use strict";
 
   const REDUCE_MOTION_KEY = "sandooq_edu_reduce_motion_v1";
-  const toggle = document.getElementById("homeReduceMotionToggle");
-  const status = document.getElementById("homeReduceMotionStatus");
+  const KEEP_AWAKE_KEY = "sandooq_keep_screen_awake_v1";
+  const CONFIRM_DELETE_KEY = "sandooq_confirm_delete_v1";
+  const UPDATES_NOTICE_KEY = "sandooq_updates_notice_enabled_v1";
+  const UPDATE_ID = "1.5.0";
+  const UPDATE_DISMISSED_KEY = `sandooq_updates_notice_dismissed_v2_${UPDATE_ID}`;
 
-  function motionReduced(){
+  const motionToggle = document.getElementById("homeReduceMotionToggle");
+  const wakeToggle = document.getElementById("keepScreenAwakeToggle");
+  const confirmDeleteToggle = document.getElementById("confirmGameDeleteToggle");
+  const updatesToggle = document.getElementById("updatesNoticeToggle");
+  const useStatus = document.getElementById("settingsUseStatus");
+  const updatesStatus = document.getElementById("updatesNoticeStatus");
+  const diagnosticsStatus = document.getElementById("settingsDiagnosticsStatus");
+  const resetStatus = document.getElementById("settingsResetStatus");
+  const showLatestNoticeButton = document.getElementById("showLatestUpdateNoticeBtn");
+  const runDeviceCheckButton = document.getElementById("runDeviceCheckBtn");
+  const copyDeviceReportButton = document.getElementById("copyDeviceReportBtn");
+  const resetButton = document.getElementById("resetPlatformSettingsBtn");
+  let wakeLockSentinel = null;
+  let lastDeviceReport = "";
+
+  const readFlag = (key, fallback = false) => {
     try {
-      return localStorage.getItem(REDUCE_MOTION_KEY) === "1";
+      const value = localStorage.getItem(key);
+      return value === null ? fallback : value === "1";
+    } catch (_) {
+      return fallback;
+    }
+  };
+
+  const writeFlag = (key, value) => {
+    try { localStorage.setItem(key,value ? "1" : "0"); }
+    catch (_) {}
+  };
+
+  const setSwitchState = (button, value, labels = {}) => {
+    if (!button) return;
+    const isOn = Boolean(value);
+    button.classList.toggle("is-on",isOn);
+    button.setAttribute("aria-pressed",String(isOn));
+    const label = isOn ? labels.turnOff : labels.turnOn;
+    if (label) button.setAttribute("aria-label",label);
+  };
+
+  const applyMotionSetting = (value, persist = true) => {
+    document.documentElement.classList.toggle("home-reduce-motion",Boolean(value));
+    if (persist) writeFlag(REDUCE_MOTION_KEY,value);
+    setSwitchState(motionToggle,value,{
+      turnOn:"تشغيل تقليل الحركة والمؤثرات",
+      turnOff:"إيقاف تقليل الحركة والمؤثرات"
+    });
+  };
+
+  const applyConfirmDeleteSetting = (value, persist = true) => {
+    if (persist) writeFlag(CONFIRM_DELETE_KEY,value);
+    setSwitchState(confirmDeleteToggle,value,{
+      turnOn:"تشغيل التأكيد قبل حذف لعبة",
+      turnOff:"إيقاف التأكيد قبل حذف لعبة"
+    });
+  };
+
+  const updateUseStatus = (message) => {
+    if (useStatus) useStatus.textContent = message || "";
+  };
+
+  const releaseWakeLock = async () => {
+    const sentinel = wakeLockSentinel;
+    wakeLockSentinel = null;
+    if (!sentinel) return;
+    try { await sentinel.release(); } catch (_) {}
+  };
+
+  const requestWakeLock = async () => {
+    if (!("wakeLock" in navigator)) {
+      setSwitchState(wakeToggle,false,{
+        turnOn:"تشغيل إبقاء الشاشة مضاءة",
+        turnOff:"إيقاف إبقاء الشاشة مضاءة"
+      });
+      writeFlag(KEEP_AWAKE_KEY,false);
+      if (wakeToggle) wakeToggle.disabled = true;
+      updateUseStatus("هذا المتصفح لا يدعم إبقاء الشاشة مضاءة تلقائيًا.");
+      return false;
+    }
+    if (document.visibilityState !== "visible") return false;
+    try {
+      if (!wakeLockSentinel || wakeLockSentinel.released) {
+        wakeLockSentinel = await navigator.wakeLock.request("screen");
+        wakeLockSentinel.addEventListener("release",() => {
+          wakeLockSentinel = null;
+          if (readFlag(KEEP_AWAKE_KEY,false) && document.visibilityState === "visible") {
+            updateUseStatus("قد يوقف الجهاز هذه الميزة عند توفير الطاقة، وسنحاول تشغيلها مجددًا.");
+          }
+        },{ once:true });
+      }
+      updateUseStatus("إبقاء الشاشة مضاءة مفعّل على هذا الجهاز.");
+      return true;
+    } catch (_) {
+      updateUseStatus("تعذر تشغيل إبقاء الشاشة مضاءة؛ قد يمنعه وضع توفير الطاقة أو المتصفح.");
+      return false;
+    }
+  };
+
+  const applyWakeSetting = async (value, persist = true) => {
+    const enabled = Boolean(value) && ("wakeLock" in navigator);
+    if (persist) writeFlag(KEEP_AWAKE_KEY,enabled);
+    setSwitchState(wakeToggle,enabled,{
+      turnOn:"تشغيل إبقاء الشاشة مضاءة",
+      turnOff:"إيقاف إبقاء الشاشة مضاءة"
+    });
+    if (enabled) await requestWakeLock();
+    else {
+      await releaseWakeLock();
+      if ("wakeLock" in navigator) updateUseStatus("إبقاء الشاشة مضاءة متوقف.");
+    }
+  };
+
+  const applyUpdatesSetting = (value, persist = true) => {
+    const enabled = Boolean(value);
+    if (persist) writeFlag(UPDATES_NOTICE_KEY,enabled);
+    setSwitchState(updatesToggle,enabled,{
+      turnOn:"تشغيل تنبيه الإصدار الجديد",
+      turnOff:"إيقاف تنبيه الإصدار الجديد"
+    });
+    if (window.SandooqUpdateNotice?.setEnabled) {
+      window.SandooqUpdateNotice.setEnabled(enabled);
+    } else if (!enabled) {
+      const notice = document.getElementById("latestUpdateNotice");
+      if (notice) notice.hidden = true;
+    }
+    if (updatesStatus) {
+      updatesStatus.textContent = enabled
+        ? "تنبيه التحديثات مفعّل على هذا الجهاز."
+        : "لن يظهر تنبيه التحديثات في الصفحة الرئيسية.";
+    }
+  };
+
+  const setDeviceCheck = (id, state, text) => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.dataset.state = state;
+    const label = element.querySelector("span:last-child");
+    if (label) label.textContent = text;
+  };
+
+  const canUseLocalStorage = () => {
+    const key = `sandooq_settings_test_${Date.now()}`;
+    try {
+      localStorage.setItem(key,"1");
+      localStorage.removeItem(key);
+      return true;
     } catch (_) {
       return false;
     }
-  }
+  };
 
-  function applyMotionSetting(value){
-    document.documentElement.classList.toggle("home-reduce-motion",Boolean(value));
+  const formatBytes = (bytes) => {
+    if (!Number.isFinite(bytes) || bytes < 0) return "غير معروف";
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const runDeviceCheck = async () => {
+    if (diagnosticsStatus) diagnosticsStatus.textContent = "جاري فحص هذا الجهاز…";
+    const localStorageReady = canUseLocalStorage();
+    const indexedDbReady = "indexedDB" in window;
+    const browserReady = typeof Promise === "function" && typeof fetch === "function" && indexedDbReady && localStorageReady;
+    const audioReady = Boolean(window.AudioContext || window.webkitAudioContext);
+    const wakeReady = "wakeLock" in navigator;
+    let usage = null;
+    let quota = null;
     try {
-      localStorage.setItem(REDUCE_MOTION_KEY,value ? "1" : "0");
+      const estimate = await navigator.storage?.estimate?.();
+      usage = Number(estimate?.usage);
+      quota = Number(estimate?.quota);
     } catch (_) {}
-  }
 
-  function updateStatus(value){
-    if (!status) return;
-    status.textContent = value
-      ? "تقليل الحركة مفعّل الآن."
-      : "الحركة والمؤثرات تعمل بالشكل المعتاد.";
-  }
+    setDeviceCheck("settingsStorageCheck",localStorageReady && indexedDbReady ? "ok" : "error",
+      localStorageReady && indexedDbReady ? "الحفظ المحلي: جاهز" : "الحفظ المحلي: غير متاح بالكامل");
+    setDeviceCheck("settingsBrowserCheck",browserReady ? "ok" : "warn",
+      browserReady ? "توافق المتصفح: ممتاز" : "توافق المتصفح: بعض الميزات محدودة");
+    setDeviceCheck("settingsAudioCheck",audioReady ? "ok" : "warn",
+      audioReady ? "تشغيل الأصوات: مدعوم" : "تشغيل الأصوات: دعم محدود");
+    setDeviceCheck("settingsWakeCheck",wakeReady ? "ok" : "warn",
+      wakeReady ? "إبقاء الشاشة مضاءة: مدعوم" : "إبقاء الشاشة مضاءة: غير مدعوم");
 
-  const initialValue = motionReduced();
-  applyMotionSetting(initialValue);
-  if (toggle) {
-    toggle.checked = initialValue;
-    updateStatus(initialValue);
-    toggle.addEventListener("change",()=>{
-      applyMotionSetting(toggle.checked);
-      updateStatus(toggle.checked);
+    lastDeviceReport = [
+      "تقرير جهاز صندوق الألعاب التعليمية",
+      `الإصدار: ${UPDATE_ID}`,
+      `التاريخ: ${new Date().toISOString()}`,
+      `المتصفح: ${navigator.userAgent}`,
+      `اللغة: ${navigator.language || "غير معروفة"}`,
+      `حجم الشاشة: ${window.innerWidth}×${window.innerHeight}`,
+      `الاتصال: ${navigator.onLine ? "متصل" : "غير متصل"}`,
+      `الحفظ المحلي: ${localStorageReady ? "متاح" : "غير متاح"}`,
+      `IndexedDB: ${indexedDbReady ? "متاح" : "غير متاح"}`,
+      `الصوت: ${audioReady ? "مدعوم" : "دعم محدود"}`,
+      `إبقاء الشاشة مضاءة: ${wakeReady ? "مدعوم" : "غير مدعوم"}`,
+      `التخزين المستخدم: ${formatBytes(usage)}`,
+      `سعة التخزين المتاحة للمتصفح: ${formatBytes(quota)}`
+    ].join("\n");
+    if (diagnosticsStatus) diagnosticsStatus.textContent = "اكتمل الفحص. يمكنك نسخ التقرير عند الحاجة للدعم الفني.";
+    return lastDeviceReport;
+  };
+
+  const copyText = async (text) => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.setAttribute("readonly","");
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    const copied = document.execCommand("copy");
+    field.remove();
+    if (!copied) throw new Error("copy-failed");
+  };
+
+  const initialMotion = readFlag(REDUCE_MOTION_KEY,false);
+  const initialConfirmDelete = readFlag(CONFIRM_DELETE_KEY,true);
+  const initialUpdates = readFlag(UPDATES_NOTICE_KEY,true);
+  const initialWake = readFlag(KEEP_AWAKE_KEY,false) && ("wakeLock" in navigator);
+  applyMotionSetting(initialMotion,false);
+  applyConfirmDeleteSetting(initialConfirmDelete,false);
+  applyUpdatesSetting(initialUpdates,false);
+  setSwitchState(wakeToggle,initialWake,{
+    turnOn:"تشغيل إبقاء الشاشة مضاءة",
+    turnOff:"إيقاف إبقاء الشاشة مضاءة"
+  });
+  if (!("wakeLock" in navigator) && wakeToggle) wakeToggle.disabled = true;
+  if (initialWake) requestWakeLock();
+
+  motionToggle?.addEventListener("click",() => {
+    const next = motionToggle.getAttribute("aria-pressed") !== "true";
+    applyMotionSetting(next,true);
+    updateUseStatus(next ? "تم تقليل الحركة والمؤثرات." : "عادت الحركة والمؤثرات إلى وضعها المعتاد.");
+  });
+
+  confirmDeleteToggle?.addEventListener("click",() => {
+    const next = confirmDeleteToggle.getAttribute("aria-pressed") !== "true";
+    applyConfirmDeleteSetting(next,true);
+    updateUseStatus(next ? "سيظهر تأكيد قبل حذف أي لعبة." : "تم إيقاف تأكيد الحذف؛ استخدم زر الحذف بحذر.");
+  });
+
+  wakeToggle?.addEventListener("click",() => {
+    const next = wakeToggle.getAttribute("aria-pressed") !== "true";
+    applyWakeSetting(next,true);
+  });
+
+  updatesToggle?.addEventListener("click",() => {
+    const next = updatesToggle.getAttribute("aria-pressed") !== "true";
+    applyUpdatesSetting(next,true);
+  });
+
+  showLatestNoticeButton?.addEventListener("click",() => {
+    writeFlag(UPDATES_NOTICE_KEY,true);
+    try { localStorage.removeItem(UPDATE_DISMISSED_KEY); } catch (_) {}
+    setSwitchState(updatesToggle,true,{
+      turnOn:"تشغيل تنبيه الإصدار الجديد",
+      turnOff:"إيقاف تنبيه الإصدار الجديد"
     });
-  }
+    if (window.SandooqUpdateNotice?.showAgain) window.SandooqUpdateNotice.showAgain();
+    else {
+      const notice = document.getElementById("latestUpdateNotice");
+      if (notice) notice.hidden = false;
+    }
+    if (updatesStatus) updatesStatus.textContent = "سيظهر آخر تنبيه عند عودتك إلى الصفحة الرئيسية.";
+  });
+
+  runDeviceCheckButton?.addEventListener("click",runDeviceCheck);
+  copyDeviceReportButton?.addEventListener("click",async () => {
+    try {
+      const report = lastDeviceReport || await runDeviceCheck();
+      await copyText(report);
+      if (diagnosticsStatus) diagnosticsStatus.textContent = "تم نسخ تقرير الجهاز بنجاح.";
+    } catch (_) {
+      if (diagnosticsStatus) diagnosticsStatus.textContent = "تعذر نسخ التقرير تلقائيًا من هذا المتصفح.";
+    }
+  });
+
+  resetButton?.addEventListener("click",async () => {
+    const accepted = window.confirm("هل تريد إعادة إعدادات المنصة إلى وضعها الافتراضي؟ لن تُحذف ألعابك المحفوظة.");
+    if (!accepted) return;
+    try {
+      [REDUCE_MOTION_KEY,KEEP_AWAKE_KEY,CONFIRM_DELETE_KEY,UPDATES_NOTICE_KEY,UPDATE_DISMISSED_KEY]
+        .forEach(key => localStorage.removeItem(key));
+    } catch (_) {}
+    applyMotionSetting(false,true);
+    applyConfirmDeleteSetting(true,true);
+    await applyWakeSetting(false,true);
+    applyUpdatesSetting(true,true);
+    if (window.SandooqUpdateNotice?.showAgain) window.SandooqUpdateNotice.showAgain();
+    if (resetStatus) resetStatus.textContent = "تمت إعادة إعدادات المنصة. ألعابك المحفوظة لم تتغير.";
+  });
+
+  document.addEventListener("visibilitychange",() => {
+    if (document.visibilityState === "visible" && readFlag(KEEP_AWAKE_KEY,false)) requestWakeLock();
+  });
+
+  runDeviceCheck();
 })();
 </script>
 <script>
@@ -28563,7 +29248,7 @@
 })();
 </script>
 
-<script id="latest-update-notice-script-v131">
+<script id="latest-update-notice-script-v132">
 (() => {
   "use strict";
 
@@ -28574,6 +29259,12 @@
 
   const updateId = String(notice.dataset.updateId || "current").trim();
   const dismissedKey = `sandooq_updates_notice_dismissed_v2_${updateId}`;
+  const enabledKey = "sandooq_updates_notice_enabled_v1";
+
+  const isEnabled = () => {
+    try { return localStorage.getItem(enabledKey) !== "0"; }
+    catch (_) { return true; }
+  };
 
   const wasDismissed = () => {
     try { return localStorage.getItem(dismissedKey) === "1"; }
@@ -28605,7 +29296,29 @@
     notice.style.setProperty("--notice-arrow-left",`${Math.round(arrowLeft)}px`);
   };
 
-  if (!wasDismissed()) {
+  const showAgain = () => {
+    try {
+      localStorage.setItem(enabledKey,"1");
+      localStorage.removeItem(dismissedKey);
+    } catch (_) {}
+    notice.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(positionNotice));
+  };
+
+  const setEnabled = (value) => {
+    const enabled = Boolean(value);
+    try { localStorage.setItem(enabledKey,enabled ? "1" : "0"); } catch (_) {}
+    if (!enabled) {
+      notice.hidden = true;
+      return;
+    }
+    if (!wasDismissed()) {
+      notice.hidden = false;
+      requestAnimationFrame(() => requestAnimationFrame(positionNotice));
+    }
+  };
+
+  if (isEnabled() && !wasDismissed()) {
     notice.hidden = false;
     requestAnimationFrame(() => requestAnimationFrame(positionNotice));
   }
@@ -28619,6 +29332,8 @@
       requestAnimationFrame(positionNotice);
     }
   }).observe(document.body,{attributes:true,attributeFilter:["class"]});
+
+  window.SandooqUpdateNotice = { showAgain, setEnabled, isEnabled };
 })();
 </script>
 
@@ -29495,6 +30210,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v131-update-notice-position -->
+<!-- VERSION: index-v132-platform-settings -->
 </body>
 </html>
