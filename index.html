@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v130-updates-page-deployment -->
+<!-- version: index-v131-update-notice-position -->
 <meta charset="utf-8"/>
-<meta content="index-v130-updates-page-deployment" name="sandooq-build"/>
+<meta content="index-v131-update-notice-position" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -15840,10 +15840,11 @@
 
     .latest-update-notice{
       --notice-arrow-left:50%;
+      --notice-bottom:calc(var(--home-footer-height) + var(--safe-bottom) + 17px);
       position:fixed;
       z-index:19000;
       left:12px;
-      bottom:calc(var(--home-footer-height) + var(--safe-bottom) + 17px);
+      bottom:var(--notice-bottom);
       width:min(410px,calc(100vw - 24px));
       padding:18px 19px 17px;
       border:2px solid #2f62da;
@@ -18618,7 +18619,7 @@
 <aside class="latest-update-notice" id="latestUpdateNotice" data-update-id="1.5.0" aria-label="تنبيه عن تحديث جديد" hidden>
   <button class="latest-update-close" id="latestUpdateClose" type="button" aria-label="إغلاق تنبيه التحديث">×</button>
   <span class="latest-update-label">تحديث جديد</span>
-  <p class="latest-update-text">أضفنا مركز المساعدة التفاعلي؛ يشرح لك مكان كل أداة على الشاشة خطوة بخطوة.</p>
+  <p class="latest-update-text">تعرّف على أبرز الإضافات الجديدة في الإصدار 1.5.0 ✨</p>
 </aside>
 <nav class="bottom-bar" aria-label="شريط خدمات المنصة">
 <button class="home-btn" id="homeButton" type="button" aria-label="الرئيسية" title="الرئيسية">
@@ -28562,7 +28563,7 @@
 })();
 </script>
 
-<script id="latest-update-notice-script-v129">
+<script id="latest-update-notice-script-v131">
 (() => {
   "use strict";
 
@@ -28572,7 +28573,7 @@
   if (!notice || !closeButton || !updatesButton) return;
 
   const updateId = String(notice.dataset.updateId || "current").trim();
-  const dismissedKey = `sandooq_updates_notice_dismissed_${updateId}`;
+  const dismissedKey = `sandooq_updates_notice_dismissed_v2_${updateId}`;
 
   const wasDismissed = () => {
     try { return localStorage.getItem(dismissedKey) === "1"; }
@@ -28593,11 +28594,14 @@
     const buttonRect = updatesButton.getBoundingClientRect();
     const noticeWidth = notice.offsetWidth;
     const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
     const margin = 12;
     const buttonCenter = buttonRect.left + buttonRect.width / 2;
     const left = Math.max(margin,Math.min(viewportWidth - noticeWidth - margin,buttonCenter - noticeWidth / 2));
     const arrowLeft = Math.max(30,Math.min(noticeWidth - 30,buttonCenter - left));
+    const bottom = Math.max(8,viewportHeight - buttonRect.top + 17);
     notice.style.left = `${Math.round(left)}px`;
+    notice.style.setProperty("--notice-bottom",`${Math.round(bottom)}px`);
     notice.style.setProperty("--notice-arrow-left",`${Math.round(arrowLeft)}px`);
   };
 
@@ -29491,6 +29495,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v130-updates-page-deployment -->
+<!-- VERSION: index-v131-update-notice-position -->
 </body>
 </html>
