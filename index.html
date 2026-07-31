@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v124-suggestions-stacked-content -->
+<!-- version: index-v125-interactive-help-center -->
 <meta charset="utf-8"/>
-<meta content="index-v124-suggestions-stacked-content" name="sandooq-build"/>
+<meta content="index-v125-interactive-help-center" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -16261,6 +16261,401 @@
       }
     }
   </style>
+  <style id="interactive-help-center-v125">
+    /* مركز المساعدة التفاعلي: معزول بالكامل عن صفحة الشرح والتعليمات القديمة. */
+    #appSupportScreen.interactive-help-screen{
+      width:min(1180px,94%);
+      padding:clamp(18px,3vw,32px);
+      background:#fffdf8;
+      overflow:visible;
+    }
+
+    .ihc-heading{
+      margin:0;
+      text-align:center;
+      color:#111;
+      font-size:clamp(28px,4vw,48px);
+      font-weight:950;
+      line-height:1.25;
+    }
+
+    .ihc-lead{
+      max-width:780px;
+      margin:10px auto 20px;
+      color:#4c4f58;
+      text-align:center;
+      font-size:clamp(15px,1.8vw,20px);
+      font-weight:750;
+      line-height:1.8;
+    }
+
+    .ihc-search-wrap{
+      width:min(720px,100%);
+      margin:0 auto clamp(20px,3vw,32px);
+      position:relative;
+    }
+
+    .ihc-search{
+      width:100%;
+      min-height:56px;
+      padding:10px 52px 10px 18px;
+      border:2px solid #aeb8ca;
+      border-radius:18px;
+      background:#fff;
+      color:#15171d;
+      font-family:var(--interface-font);
+      font-size:clamp(15px,1.7vw,19px);
+      font-weight:750;
+      outline:none;
+      box-shadow:0 4px 0 rgba(35,61,113,.08);
+    }
+
+    .ihc-search:focus{
+      border-color:#2f63d4;
+      box-shadow:0 0 0 4px rgba(47,99,212,.14);
+    }
+
+    .ihc-search-icon{
+      position:absolute;
+      top:50%;
+      right:18px;
+      transform:translateY(-50%);
+      color:#2f63d4;
+      font-size:25px;
+      pointer-events:none;
+    }
+
+    .ihc-section-title{
+      margin:0 0 14px;
+      color:#173f9f;
+      font-size:clamp(22px,3vw,32px);
+      font-weight:950;
+    }
+
+    .ihc-games{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:14px;
+    }
+
+    .ihc-game{
+      min-width:0;
+      border:2px solid #b6bdc9;
+      border-radius:21px;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:0 5px 0 rgba(24,32,51,.08);
+    }
+
+    .ihc-game[open]{
+      border-color:#2f63d4;
+      box-shadow:0 5px 0 rgba(47,99,212,.13);
+    }
+
+    .ihc-game-summary{
+      min-height:112px;
+      padding:12px 14px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) clamp(122px,14vw,180px);
+      align-items:center;
+      gap:16px;
+      cursor:pointer;
+      list-style:none;
+      user-select:none;
+    }
+
+    .ihc-game-summary::-webkit-details-marker{display:none}
+
+    .ihc-game-copy{
+      min-width:0;
+      display:grid;
+      gap:5px;
+    }
+
+    .ihc-game-title{
+      color:#101216;
+      font-size:clamp(20px,2.25vw,29px);
+      font-weight:950;
+      line-height:1.2;
+    }
+
+    .ihc-game-desc{
+      color:#62666e;
+      font-size:clamp(13px,1.45vw,17px);
+      font-weight:700;
+      line-height:1.45;
+    }
+
+    .ihc-game-preview{
+      width:100%;
+      aspect-ratio:2 / 1;
+      border:2px solid #ded8ca;
+      border-radius:14px;
+      background-color:#fffaf0;
+      background-position:center;
+      background-repeat:no-repeat;
+      background-size:contain;
+    }
+
+    .ihc-game-arrow{
+      color:#2f63d4;
+      font-size:18px;
+      transition:transform .2s ease;
+    }
+
+    .ihc-game[open] .ihc-game-arrow{transform:rotate(180deg)}
+
+    .ihc-topics{
+      padding:0 14px 14px;
+      display:grid;
+      gap:9px;
+    }
+
+    .ihc-topic{
+      min-width:0;
+      padding:11px 12px;
+      border:1.5px solid #d7dbe3;
+      border-radius:14px;
+      background:#f8faff;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      gap:12px;
+    }
+
+    .ihc-topic-copy{min-width:0}
+
+    .ihc-topic-title{
+      display:block;
+      color:#16181d;
+      font-size:clamp(14px,1.55vw,18px);
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .ihc-topic-note{
+      display:block;
+      margin-top:3px;
+      color:#6a6e77;
+      font-size:clamp(12px,1.22vw,15px);
+      font-weight:650;
+      line-height:1.45;
+    }
+
+    .ihc-start{
+      min-width:118px;
+      min-height:42px;
+      padding:8px 14px;
+      border:2px solid #111318;
+      border-radius:13px;
+      background:linear-gradient(135deg,#ff7a1e,#f05b12);
+      color:#fff;
+      font-family:var(--interface-font);
+      font-size:14px;
+      font-weight:900;
+      cursor:pointer;
+      box-shadow:0 3px 0 rgba(17,19,24,.15);
+    }
+
+    .ihc-start:active{transform:translateY(2px);box-shadow:none}
+    .ihc-start:focus-visible{outline:4px solid rgba(255,212,71,.8);outline-offset:2px}
+
+    .ihc-general{
+      margin-top:clamp(26px,4vw,40px);
+      padding-top:clamp(20px,3vw,30px);
+      border-top:2px solid #d8dce5;
+    }
+
+    .ihc-general-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:11px;
+    }
+
+    .ihc-empty{
+      grid-column:1 / -1;
+      padding:28px;
+      border:2px solid #d8dce5;
+      border-radius:18px;
+      color:#666;
+      background:#fff;
+      text-align:center;
+      font-weight:800;
+    }
+
+    .ihc-guide-layer[hidden]{display:none!important}
+
+    .ihc-guide-layer{
+      position:fixed;
+      inset:0;
+      z-index:50000;
+      pointer-events:auto;
+      direction:rtl;
+    }
+
+    .ihc-spotlight{
+      position:fixed;
+      z-index:50001;
+      border:5px solid #ffd000;
+      border-radius:18px;
+      background:transparent;
+      box-shadow:0 0 0 9999px rgba(23,8,31,.78),0 0 0 3px rgba(255,255,255,.94),0 10px 28px rgba(0,0,0,.28);
+      transition:top .22s ease,left .22s ease,width .22s ease,height .22s ease;
+      pointer-events:none;
+    }
+
+    .ihc-guide-card{
+      position:fixed;
+      z-index:50002;
+      width:min(680px,calc(100vw - 28px));
+      max-height:min(46dvh,430px);
+      overflow:auto;
+      left:50%;
+      transform:translateX(-50%);
+      padding:clamp(16px,2.4vw,24px);
+      border:4px solid #302016;
+      border-radius:27px;
+      background:#fff7da;
+      color:#131313;
+      text-align:center;
+      pointer-events:auto;
+      box-shadow:0 8px 0 rgba(48,32,22,.26),0 18px 45px rgba(0,0,0,.3);
+    }
+
+    .ihc-guide-top{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+    }
+
+    .ihc-guide-mascot{
+      width:clamp(58px,8vw,82px);
+      height:clamp(58px,8vw,82px);
+      object-fit:contain;
+      flex:0 0 auto;
+    }
+
+    .ihc-guide-title{
+      margin:0;
+      color:#801b6d;
+      font-size:clamp(21px,3vw,31px);
+      font-weight:950;
+      line-height:1.25;
+    }
+
+    .ihc-guide-text{
+      margin:10px auto 8px;
+      max-width:570px;
+      font-size:clamp(15px,2vw,20px);
+      font-weight:800;
+      line-height:1.8;
+    }
+
+    .ihc-guide-progress{
+      margin:0 0 12px;
+      color:#801b6d;
+      direction:ltr;
+      font-size:15px;
+      font-weight:950;
+    }
+
+    .ihc-guide-actions{
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+    }
+
+    .ihc-guide-action{
+      min-height:48px;
+      padding:8px 12px;
+      border:2px solid #251b22;
+      border-radius:14px;
+      background:#fff;
+      color:#5f1759;
+      font-family:var(--interface-font);
+      font-size:clamp(14px,1.8vw,18px);
+      font-weight:900;
+      cursor:pointer;
+    }
+
+    .ihc-guide-action--next{background:#ffd000;color:#111}
+    .ihc-guide-action--close{background:#fff0f0;color:#9b2424}
+    .ihc-guide-action:disabled{opacity:.38;cursor:default}
+    .ihc-guide-action:focus-visible{outline:4px solid rgba(47,99,212,.45);outline-offset:2px}
+
+    body.ihc-guide-running{overscroll-behavior:none}
+
+    @media (max-width:760px){
+      #appSupportScreen.interactive-help-screen{
+        width:calc(100% - 20px);
+        padding:18px 12px 24px;
+        border-radius:22px;
+      }
+
+      .ihc-games,
+      .ihc-general-grid{grid-template-columns:1fr}
+
+      .ihc-game-summary{
+        min-height:94px;
+        grid-template-columns:minmax(0,1fr) 118px;
+        gap:10px;
+        padding:10px;
+      }
+
+      .ihc-topic{
+        grid-template-columns:minmax(0,1fr) 104px;
+        gap:8px;
+        padding:10px;
+      }
+
+      .ihc-start{
+        min-width:104px;
+        padding-inline:8px;
+        font-size:12px;
+      }
+
+      .ihc-guide-card{
+        max-height:44dvh;
+        padding:14px 12px;
+        border-width:3px;
+        border-radius:20px;
+      }
+
+      .ihc-guide-actions{gap:6px}
+      .ihc-guide-action{min-height:44px;padding:7px 5px;font-size:13px}
+      .ihc-spotlight{border-width:4px;border-radius:14px}
+    }
+
+    @media (max-width:390px){
+      .ihc-game-summary{grid-template-columns:minmax(0,1fr) 98px}
+      .ihc-game-title{font-size:18px}
+      .ihc-game-desc{font-size:12px}
+      .ihc-topic{grid-template-columns:1fr}
+      .ihc-start{width:100%}
+      .ihc-guide-mascot{display:none}
+    }
+
+    @media (orientation:landscape) and (min-width:761px){
+      #appSupportScreen.interactive-help-screen{
+        width:min(1380px,94%);
+        padding:20px clamp(22px,3vw,38px) 28px;
+      }
+
+      .ihc-games{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .ihc-general-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .ihc-guide-card{max-height:min(52dvh,410px)}
+    }
+
+    @media (min-width:1180px){
+      .ihc-games{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .ihc-general-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .ihc-spotlight,.ihc-game-arrow{transition:none!important}
+    }
+  </style>
 </head>
 <body>
 <main class="page">
@@ -17859,37 +18254,22 @@
   </div>
 </section>
 
-<section class="screen service-screen" id="appSupportScreen">
-  <h2 class="screen-title">الدعم</h2>
-  <p class="service-intro">اختر الطريق الأنسب لمشكلتك، وستصل إلى الشرح أو أداة النقل أو صفحة التواصل مباشرة.</p>
-  <div class="service-grid">
-    <article class="service-card service-card--blue">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">📖</span>
-        <h3 class="service-card-title">الشرح والتعليمات</h3>
-      </div>
-      <p class="service-card-copy">إجابات مرتبة عن الحفظ والتشغيل والصور ونقل الألعاب واستخدام البروجكتر.</p>
-    </article>
-    <article class="service-card service-card--yellow">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">🔁</span>
-        <h3 class="service-card-title">نقل الألعاب</h3>
-      </div>
-      <p class="service-card-copy">صدّر ألعابك من الجهاز الحالي ثم استوردها في الجهاز أو المتصفح الآخر.</p>
-    </article>
-    <article class="service-card service-card--orange service-card--wide">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">🎧</span>
-        <h3 class="service-card-title">تحتاج مساعدة إضافية؟</h3>
-      </div>
-      <p class="service-card-copy">افتح صفحة الدعم الرسمية للتواصل بخصوص التفعيل أو الحساب أو أي مشكلة لم تجد حلها في التعليمات.</p>
-    </article>
-  </div>
-  <div class="service-actions">
-    <button class="service-action" data-open-screen="settingsScreen" type="button">فتح الشرح والتعليمات</button>
-    <button class="service-action service-action--blue" data-open-screen="backupScreen" type="button">فتح التصدير والاستيراد</button>
-    <a class="service-action service-action--orange" href="https://sandooq-games.com/support.html">الانتقال إلى صفحة الدعم</a>
-  </div>
+<section class="screen interactive-help-screen" id="appSupportScreen">
+  <h2 class="ihc-heading">مركز المساعدة التفاعلي 🎧</h2>
+  <p class="ihc-lead">اختر اللعبة أو الموضوع، وسنريك مكان كل أداة على الشاشة خطوة بخطوة بدون تغيير محتواك أو حفظ أي شيء.</p>
+  <label class="ihc-search-wrap">
+    <span class="home-visually-hidden">ابحث في شروحات مركز المساعدة</span>
+    <span class="ihc-search-icon" aria-hidden="true">⌕</span>
+    <input class="ihc-search" id="interactiveHelpSearch" type="search" autocomplete="off" placeholder="ابحث: إضافة صورة، حفظ، ثيم، نقل الألعاب…">
+  </label>
+  <section aria-labelledby="interactiveHelpGamesTitle">
+    <h3 class="ihc-section-title" id="interactiveHelpGamesTitle">شروحات الألعاب</h3>
+    <div class="ihc-games" id="interactiveHelpGames"></div>
+  </section>
+  <section class="ihc-general" aria-labelledby="interactiveHelpGeneralTitle">
+    <h3 class="ihc-section-title" id="interactiveHelpGeneralTitle">أمور عامة ومهمة</h3>
+    <div class="ihc-general-grid" id="interactiveHelpGeneral"></div>
+  </section>
 </section>
 
 <section class="screen service-screen" id="appSuggestionsScreen">
@@ -17982,13 +18362,13 @@
 </svg>
 <span>التحديثات</span>
 </button>
-<button class="home-utility-item" data-open-screen="appSupportScreen" type="button" aria-label="الدعم">
+<button class="home-utility-item" data-open-screen="appSupportScreen" type="button" aria-label="مركز المساعدة التفاعلي">
 <svg aria-hidden="true" viewBox="0 0 64 64">
 <path d="M13 35v-5c0-12 8-21 19-21s19 9 19 21v5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
 <path d="M12 31h8v19h-5c-4 0-7-3-7-7v-5c0-4 2-7 4-7zM52 31h-8v19h5c4 0 7-3 7-7v-5c0-4-2-7-4-7z" fill="#ffd447" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
 <path d="M44 51c-2 4-5 5-10 5" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
 </svg>
-<span>الدعم</span>
+<span>المساعدة</span>
 </button>
 <button class="home-utility-item" data-open-screen="appSuggestionsScreen" type="button" aria-label="اقتراحاتكم">
 <svg aria-hidden="true" viewBox="0 0 64 64">
@@ -27857,6 +28237,640 @@
   });
 })();
 </script>
-<!-- VERSION: index-v124-suggestions-stacked-content -->
+
+<script id="interactive-help-center-script-v125">
+(() => {
+  "use strict";
+
+  const helpScreen = document.getElementById("appSupportScreen");
+  const gamesRoot = document.getElementById("interactiveHelpGames");
+  const generalRoot = document.getElementById("interactiveHelpGeneral");
+  const searchField = document.getElementById("interactiveHelpSearch");
+  if (!helpScreen || !gamesRoot || !generalRoot || !searchField) return;
+
+  const step = (screen, target, title, text, extra = {}) => ({
+    screen,
+    target,
+    title,
+    text,
+    ...extra
+  });
+
+  const topic = (id, title, note, steps) => ({ id, title, note, steps });
+
+  const games = [
+    {
+      id: "wheel",
+      title: "العجلة الدوارة",
+      desc: "إضافة العناصر وسؤال المنتصف والثيم والخط.",
+      preview: "game-previews/wheel.webp",
+      topics: [
+        topic("wheel-items", "إضافة عناصر العجلة", "أضف نصوصًا أو صورًا داخل أقسام العجلة.", [
+          step("wheelSetupScreen", "#wheelItemsEditor", "عناصر العجلة", "من هنا تكتب محتوى كل قسم، وتستطيع اختيار النص أو الصورة بحسب نوع المحتوى."),
+          step("wheelSetupScreen", "#addWheelItemBtn", "إضافة عنصر جديد", "اضغط «إضافة عنصر» كلما احتجت قسمًا جديدًا داخل العجلة.")
+        ]),
+        topic("wheel-question", "سؤال داخل منتصف العجلة", "شغّل سؤال المنتصف ثم اكتب سؤالك.", [
+          step("wheelSetupScreen", "#questionPanel", "سؤال منتصف العجلة", "اختر «تشغيل»، ثم اكتب السؤال في الحقل الظاهر. سيبقى السؤال في منتصف العجلة."),
+          step("wheelSetupScreen", "#centerQuestionInput", "كتابة السؤال", "اكتب هنا سؤالًا مختصرًا وواضحًا، ثم راجع ظهوره قبل حفظ اللعبة.")
+        ]),
+        topic("wheel-theme", "تغيير الثيم", "اختر خلفية تناسب الدرس أو المناسبة.", [
+          step("wheelSetupScreen", "#toggleThemeListBtn", "اختيار الثيم", "اضغط «تغيير» لعرض الثيمات، ثم اختر الخلفية المناسبة لمحتواك.")
+        ]),
+        topic("wheel-style", "الخط ولون السهم", "توجد داخل الإعدادات المتقدمة.", [
+          step("wheelSetupScreen", "#wheelAdvancedToggleBtn", "الإعدادات المتقدمة", "اضغط «عرض» لتظهر خيارات الخط والصوت ولون السهم."),
+          step("wheelSetupScreen", "#wheelFontSelect", "نوع الخط", "اختر الخط المناسب للنص العربي أو الإنجليزي.", { openPanel: "#wheelAdvancedPanel" }),
+          step("wheelSetupScreen", "#wheelArrowColorChangeBtn", "لون سهم العجلة", "اضغط «تغيير» واختر لون السهم الذي يظهر بجانب العجلة.", { openPanel: "#wheelAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "open-box",
+      title: "افتح الصندوق",
+      desc: "الصناديق والأغلفة ونمط الإجابات المتعددة.",
+      preview: "game-previews/open-box.webp",
+      topics: [
+        topic("box-items", "إضافة الصناديق", "كل عنصر تضيفه يصبح صندوقًا داخل اللعبة.", [
+          step("wheelSetupScreen", "#wheelItemsEditor", "محتوى الصناديق", "اكتب السؤال أو أضف الصورة داخل كل عنصر؛ وسيظهر كل عنصر على هيئة صندوق.", { template: "open-box", unhide: ["#coverTypePanel"] }),
+          step("wheelSetupScreen", "#addWheelItemBtn", "إضافة صندوق جديد", "اضغط هنا لإضافة صندوق آخر حتى تصل إلى العدد الذي تحتاجه.", { template: "open-box", unhide: ["#coverTypePanel"] })
+        ]),
+        topic("box-cover", "تغيير واجهة الصندوق", "نص أو صورة أو أرقام عربية أو إنجليزية.", [
+          step("wheelSetupScreen", "#coverTypePanel", "نوع غلاف الصندوق", "اختر الشكل الذي سيشاهده الطالب قبل فتح الصندوق: نص، صورة، أو أرقام.", { template: "open-box", unhide: ["#coverTypePanel"] })
+        ]),
+        topic("box-multiple", "صندوق متعدد الإجابات", "للسؤال الذي يحتوي عدة خيارات.", [
+          step("wheelSetupScreen", "#openBoxMultiAnswerPanel", "صندوق متعدد الإجابات", "فعّل هذا الخيار ليظهر السؤال مع صناديق إجابات، وحدد الإجابة الصحيحة أثناء إعداد المحتوى.", { template: "open-box", unhide: ["#coverTypePanel", "#openBoxMultiAnswerPanel"] })
+        ]),
+        topic("box-style", "الثيم والخط", "غيّر شكل اللعبة من الإعدادات نفسها.", [
+          step("wheelSetupScreen", "#toggleThemeListBtn", "تغيير الثيم", "اضغط «تغيير» واختر خلفية الصناديق المناسبة.", { template: "open-box", unhide: ["#coverTypePanel"] }),
+          step("wheelSetupScreen", "#wheelFontSelect", "تغيير الخط", "افتح الإعدادات المتقدمة واختر الخط المناسب.", { template: "open-box", unhide: ["#coverTypePanel"], openPanel: "#wheelAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "choices",
+      title: "اختيارات",
+      desc: "الأسئلة والخيارات والصور وطريقة العرض.",
+      preview: "game-previews/choices.webp",
+      topics: [
+        topic("choices-question", "إضافة سؤال واختيارات", "أنشئ سؤالًا وحدد جوابه الصحيح.", [
+          step("choicesSetupScreen", "#quizQuestionsEditor", "السؤال والاختيارات", "اكتب السؤال وأضف خياراته داخل هذه البطاقة، ثم علّم الإجابة الصحيحة."),
+          step("choicesSetupScreen", "#addQuizQuestionBtn", "إضافة سؤال جديد", "اضغط هنا بعد إكمال السؤال الحالي لإضافة سؤال آخر.")
+        ]),
+        topic("choices-content", "نصوص أو صور", "حدد نوع السؤال ونوع الإجابات.", [
+          step("choicesSetupScreen", "[data-quiz-question-type]", "نوع السؤال", "اختر هل سيكون السؤال نصًا أم صورة."),
+          step("choicesSetupScreen", "[data-quiz-choices-type]", "نوع الاختيارات", "اختر إجابات نصية أو صورًا بحسب نشاطك.")
+        ]),
+        topic("choices-display", "مباشر أو صناديق", "غيّر طريقة ظهور الخيارات للطالب.", [
+          step("choicesSetupScreen", "[data-quiz-display-mode]", "طريقة العرض", "«مباشر» يعرض الخيارات فورًا، و«صناديق» يخفيها خلف أغلفة تختار شكلها.")
+        ]),
+        topic("choices-style", "الثيم والخط", "خصص الخلفية والخط والأصوات.", [
+          step("choicesSetupScreen", "#toggleQuizThemeListBtn", "تغيير الثيم", "اضغط «تغيير» لاختيار خلفية اللعبة."),
+          step("choicesSetupScreen", "#quizFontSelect", "تغيير الخط", "افتح الإعدادات المتقدمة واختر الخط الأنسب.", { openPanel: "#quizAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "match",
+      title: "المطابقة",
+      desc: "بطاقات متطابقة أو مختلفة بالنص والصورة.",
+      preview: "game-previews/match.webp",
+      topics: [
+        topic("match-pair", "إضافة زوج من البطاقات", "أضف العنصرين اللذين يجب مطابقتهما.", [
+          step("matchSetupScreen", "#matchPairsEditor", "محتوى البطاقتين", "ضع محتوى البطاقة الأولى والثانية، ويمكن أن يكون نصًا أو صورة."),
+          step("matchSetupScreen", "#addMatchPairBtn", "إضافة زوج جديد", "اضغط هنا لإضافة زوج آخر إلى اللعبة.")
+        ]),
+        topic("match-mode", "متطابقان أو مختلفان", "اختر هل محتوى الزوج متشابه أم مترابط.", [
+          step("matchSetupScreen", "[data-matching-mode]", "طريقة المطابقة", "اختر «متطابقان» للعنصر نفسه، أو «مختلفان» لربط سؤال بجواب أو صورة بكلمة.")
+        ]),
+        topic("match-cover", "شكل ظهر البطاقات", "اختر أرقامًا أو نصوصًا أو صورًا.", [
+          step("matchSetupScreen", "[data-match-cover-mode]", "غلاف البطاقة", "حدد الشكل الذي يظهر قبل قلب البطاقة.")
+        ]),
+        topic("match-style", "الخط والألوان وإزالة الزوج", "خيارات إضافية لشكل وسلوك اللعبة.", [
+          step("matchSetupScreen", "#matchAdvancedToggleBtn", "الإعدادات المتقدمة", "افتحها لتخصيص الخط والألوان وما يحدث بعد المطابقة."),
+          step("matchSetupScreen", "#matchRemoveMatchedToggleBtn", "إزالة الزوج المطابق", "فعّل هذا الخيار لإخفاء البطاقتين بعد العثور على الزوج الصحيح.", { openPanel: "#matchAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "order",
+      title: "الترتيب",
+      desc: "ترتيب الحروف أو الكلمات أو الصور.",
+      preview: "game-previews/order.webp",
+      topics: [
+        topic("order-mode", "اختيار نوع المحتوى", "حروف أو كلمات أو صور.", [
+          step("orderSetupScreen", "[data-order-content-mode]", "نوع المحتوى", "حدد أولًا ما الذي سيرتبه الطالب: الحروف، الكلمات، أو الصور.")
+        ]),
+        topic("order-language", "تحديد لغة المحتوى", "مهم لاتجاه ترتيب العربية والإنجليزية.", [
+          step("orderSetupScreen", "[data-order-language]", "لغة الترتيب", "اختر العربية أو الإنجليزية حتى يكون اتجاه ترتيب الحروف والكلمات صحيحًا.")
+        ]),
+        topic("order-question", "إضافة سؤال ترتيب", "اكتب المحتوى بترتيبه الصحيح.", [
+          step("orderSetupScreen", "#orderQuestionsEditor", "محتوى السؤال", "أدخل الحروف أو الكلمات أو الصور بترتيبها الصحيح؛ وستقوم اللعبة بخلطها عند التشغيل."),
+          step("orderSetupScreen", "#addOrderQuestionBtn", "إضافة سؤال جديد", "اضغط هنا لإضافة تمرين ترتيب آخر.")
+        ]),
+        topic("order-style", "الثيم والخط والألوان", "خصص شكل بطاقات الترتيب.", [
+          step("orderSetupScreen", "#toggleOrderThemeListBtn", "تغيير الثيم", "اختر خلفية تناسب النشاط."),
+          step("orderSetupScreen", "#orderAdvancedPanel", "الخط وألوان البطاقات", "من الإعدادات المتقدمة غيّر الخط ولون النص والبطاقات قبل الترتيب وبعده.", { openPanel: "#orderAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "train",
+      title: "قطار الإجابات",
+      desc: "المراحل والسرعة ومحتوى البالونات والعربات.",
+      preview: "game-previews/train.webp",
+      topics: [
+        topic("train-levels", "عدد المراحل والسرعة", "اضبط طول اللعبة وسرعة البالونات.", [
+          step("trainSetupScreen", "#trainStagesSelect", "عدد المراحل", "اختر عدد المراحل المناسب لوقت الحصة وعدد الأسئلة."),
+          step("trainSetupScreen", "#trainSpeedSelect", "سرعة البالونات", "ابدأ بسرعة متوسطة، ثم ارفعها إذا كان النشاط مخصصًا للمراجعة السريعة.")
+        ]),
+        topic("train-content", "إضافة محتوى القطار", "اربط كل بالون بعربة الإجابة الصحيحة.", [
+          step("trainSetupScreen", "#trainContentsEditor", "محتوى البالونات والعربات", "أدخل السؤال أو الصورة وحدد الإجابة التي يجب إسقاطها داخل العربة الصحيحة."),
+          step("trainSetupScreen", "#addTrainContentBtn", "إضافة محتوى", "اضغط هنا لإضافة محتوى جديد للعبة.")
+        ]),
+        topic("train-timer", "المؤقت وعدد المحاولات", "تحكم بصعوبة النشاط من الإعدادات المتقدمة.", [
+          step("trainSetupScreen", "#trainAdvancedToggleBtn", "الإعدادات المتقدمة", "افتحها لإظهار المؤقت وعدد المحاولات."),
+          step("trainSetupScreen", "#trainCountdownToggleBtn", "المؤقت التنازلي", "فعّله وحدد المدة إذا أردت تحديًا زمنيًا.", { openPanel: "#trainAdvancedPanel" }),
+          step("trainSetupScreen", "#trainAttemptsToggleBtn", "عدد المحاولات", "فعّله لتحديد عدد الأخطاء المسموح بها.", { openPanel: "#trainAdvancedPanel" })
+        ]),
+        topic("train-test", "اختبار القطار وحفظه", "راجع السرعة والمحتوى قبل الحفظ.", [
+          step("trainSetupScreen", "#testTrainBtn", "اختبار اللعبة", "اختبر اللعبة أولًا وتأكد أن كل بالون مرتبط بالعربة الصحيحة."),
+          step("trainSetupScreen", "#saveTrainBtn", "حفظ اللعبة", "بعد المراجعة اضغط «حفظ اللعبة» لتجدها في ألعابك المحفوظة.")
+        ])
+      ]
+    },
+    {
+      id: "moving-question",
+      title: "السؤال المتحرك",
+      desc: "لغة السؤال والإجابات وسلوك الخيارات.",
+      preview: "game-previews/moving-question.webp",
+      topics: [
+        topic("moving-language", "اختيار اللغة", "يحدد اتجاه حركة السؤال وترتيب النص.", [
+          step("movingQuestionSetupScreen", "[data-moving-language]", "لغة المحتوى", "اختر العربية أو الإنجليزية حتى تتحرك الجملة وتظهر باتجاه مناسب.")
+        ]),
+        topic("moving-question", "إضافة سؤال وإجابات", "اكتب السؤال وحدد الجواب الصحيح.", [
+          step("movingQuestionSetupScreen", "#movingQuestionContentsEditor", "محتوى السؤال", "اكتب السؤال وأضف الإجابات، ثم حدد الإجابة الصحيحة."),
+          step("movingQuestionSetupScreen", "#addMovingQuestionBtn", "إضافة سؤال جديد", "اضغط هنا لإضافة سؤال متحرك آخر.")
+        ]),
+        topic("moving-correct", "إزالة الإجابة الصحيحة", "تحكم بما يحدث بعد اختيار الجواب.", [
+          step("movingQuestionSetupScreen", "#movingDeleteCorrectToggleBtn", "إزالة الإجابة الصحيحة", "عند تفعيله تختفي الإجابة الصحيحة بعد اختيارها لتستمر بقية الجولة.", { openPanel: "#movingAdvancedPanel" })
+        ]),
+        topic("moving-style", "الخط والألوان", "خصص النص والشريط وبطاقات الإجابة.", [
+          step("movingQuestionSetupScreen", "#movingAdvancedPanel", "الخط والألوان", "افتح الإعدادات المتقدمة لتغيير الخط ولون النص وإطار الشريط وألوان الإجابات.", { openPanel: "#movingAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "fill",
+      title: "أكمل الفراغ",
+      desc: "اختيارات أو ترتيب حروف مع لغة صحيحة.",
+      preview: "game-previews/fill-blank.webp",
+      topics: [
+        topic("fill-mode", "طريقة الإجابة", "اختيارات جاهزة أو ترتيب الحروف.", [
+          step("fillSetupScreen", "[data-fill-answer-mode]", "طريقة الإجابة", "اختر «اختيارات» ليحدد الطالب الإجابة، أو «ترتيب الحروف» ليبني الكلمة بنفسه.")
+        ]),
+        topic("fill-language", "لغة المحتوى", "تحدد اتجاه الحروف والجملة.", [
+          step("fillSetupScreen", "#fillContentLanguageGroup", "لغة السؤال", "اختر العربية أو الإنجليزية حتى يظهر ترتيب الحروف واتجاه الجملة بشكل صحيح.")
+        ]),
+        topic("fill-question", "كتابة الجملة والفراغ", "أدخل السؤال والإجابة الصحيحة والخيارات.", [
+          step("fillSetupScreen", "#fillQuestionsEditor", "سؤال أكمل الفراغ", "اكتب الجملة وحدد موضع الفراغ، ثم أدخل الإجابة الصحيحة والخيارات عند الحاجة."),
+          step("fillSetupScreen", "#addFillQuestionBtn", "إضافة سؤال", "اضغط هنا لإضافة جملة جديدة.")
+        ]),
+        topic("fill-style", "الثيم والخط والألوان", "خصص السؤال والإجابات والحروف.", [
+          step("fillSetupScreen", "#toggleFillThemeListBtn", "تغيير الثيم", "اختر خلفية مناسبة للنشاط."),
+          step("fillSetupScreen", "#fillAdvancedPanel", "تخصيص الشكل", "من الإعدادات المتقدمة غيّر الخط وألوان النص والسؤال والإجابات والحروف.", { openPanel: "#fillAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "classify-words",
+      title: "صنّف الكلمات",
+      desc: "المجموعات والمحتوى والألوان الموحدة.",
+      preview: "game-previews/classify-words.webp",
+      topics: [
+        topic("classify-group", "إضافة مجموعة", "أنشئ المجموعات التي سيسحب إليها الطالب.", [
+          step("classifyWordsSetupScreen", "#classifyWordsGroupsEditor", "مجموعات اللعبة", "اكتب اسم كل مجموعة وأضف الكلمات أو الصور التابعة لها."),
+          step("classifyWordsSetupScreen", "#addClassifyGroupBtn", "إضافة مجموعة", "اضغط هنا لإضافة مجموعة أخرى حتى أربع مجموعات.")
+        ]),
+        topic("classify-content", "إضافة الكلمات أو الصور", "كل محتوى يوضع داخل مجموعته الصحيحة.", [
+          step("classifyWordsSetupScreen", "#classifyWordsGroupsEditor", "محتوى المجموعة", "داخل كل مجموعة أضف الكلمات أو الصور التي يجب على الطالب تصنيفها.")
+        ]),
+        topic("classify-colors", "ألوان المجموعات والمربعات", "لوّن كل مجموعة أو وحّد ألوان المحتوى.", [
+          step("classifyWordsSetupScreen", "#classifyGroupColorsToggleBtn", "ألوان المجموعات", "فعّل الخيار لتخصيص لون مستقل لكل مجموعة.", { openPanel: "#classifyAdvancedPanel" }),
+          step("classifyWordsSetupScreen", "#classifyUnifiedItemsToggleBtn", "توحيد لون المحتوى", "فعّله إذا أردت أن تكون جميع مربعات الكلمات والصور بلون واحد.", { openPanel: "#classifyAdvancedPanel" })
+        ]),
+        topic("classify-style", "الثيم والخط", "غيّر الخلفية والخط من مكان واحد.", [
+          step("classifyWordsSetupScreen", "#toggleClassifyThemeListBtn", "تغيير الثيم", "اختر خلفية مناسبة."),
+          step("classifyWordsSetupScreen", "#classifyFontSelect", "تغيير الخط", "افتح الإعدادات المتقدمة واختر نوع الخط.", { openPanel: "#classifyAdvancedPanel" })
+        ])
+      ]
+    },
+    {
+      id: "image-pins",
+      title: "توصيل الأجزاء",
+      desc: "رفع الصورة ووضع الدبابيس وكتابة الإجابات.",
+      preview: "game-previews/image-pins.webp",
+      topics: [
+        topic("pins-image", "إضافة الصورة الأساسية", "اختر صورة واضحة من جهازك.", [
+          step("imagePinsSetupScreen", "#pickImagePinsMainImageBtn", "اختيار الصورة", "اضغط هنا واختر الصورة التي سيحدد الطالب أجزاءها."),
+          step("imagePinsSetupScreen", "#imagePinsEditorStage", "مساحة الصورة والدبابيس", "بعد اختيار الصورة ستظهر هنا، ويمكنك سحب كل دبوس إلى مكانه الصحيح.")
+        ]),
+        topic("pins-answers", "إضافة الإجابات", "اكتب اسم كل جزء ثم ضع دبوسه.", [
+          step("imagePinsSetupScreen", "#imagePinsAnswersEditor", "إجابات اللعبة", "اكتب أسماء الأجزاء أو الإجابات المرتبطة بالصورة."),
+          step("imagePinsSetupScreen", "#addImagePinAnswerBtn", "إضافة جواب", "اضغط هنا لإضافة دبوس وإجابة جديدة.")
+        ]),
+        topic("pins-language", "تحديد لغة المحتوى", "للاتجاه الصحيح للنصوص والدبابيس.", [
+          step("imagePinsSetupScreen", "#imagePinsLanguageButtons", "لغة المحتوى", "اختر العربية أو الإنجليزية بحسب الإجابات المكتوبة.")
+        ]),
+        topic("pins-style", "الخط وألوان الدبابيس", "خصص النص ومربعات الإجابة.", [
+          step("imagePinsSetupScreen", "#imagePinsAdvancedPanel", "خيارات الشكل", "افتح الإعدادات المتقدمة لتغيير الخط ولون النص وتوحيد لون مربعات الإجابات.", { openPanel: "#imagePinsAdvancedPanel" })
+        ])
+      ]
+    }
+  ];
+
+  const generalTopics = [
+    topic("general-create", "إنشاء لعبة جديدة", "ابدأ من الرئيسية ثم اختر قالب اللعبة.", [
+      step("home", ".home-create-action", "إنشاء لعبة جديدة", "من الصفحة الرئيسية اضغط هذا الزر لفتح قائمة الألعاب."),
+      step("createScreen", ".templates-grid", "اختيار اللعبة", "اختر نوع اللعبة المناسب، وستنتقل مباشرة إلى صفحة إعدادها.")
+    ]),
+    topic("general-name", "تسمية اللعبة", "الاسم يساعدك على العثور عليها لاحقًا.", [
+      step("wheelSetupScreen", "#wheelGameNameInput", "اسم اللعبة", "اكتب اسمًا واضحًا يميز النشاط، مثل اسم الدرس أو الصف.")
+    ]),
+    topic("general-test-save", "اختبار اللعبة ثم حفظها", "راجع النشاط قبل إضافته إلى ألعابك.", [
+      step("wheelSetupScreen", "#testWheelBtn", "اختبار اللعبة", "اضغط «اختبار اللعبة» لمراجعة الشكل والمحتوى قبل الحفظ."),
+      step("wheelSetupScreen", "#saveWheelBtn", "حفظ اللعبة", "بعد التأكد من كل شيء اضغط «حفظ اللعبة».")
+    ]),
+    topic("general-direct", "تشغيل لعبة محفوظة مباشرة", "شغّل نشاطك من الصفحة الرئيسية.", [
+      step("home", ".home-play-panel .select-wrap", "اختيار لعبة محفوظة", "افتح القائمة واختر اللعبة التي تريد تشغيلها."),
+      step("home", "#startSavedGameBtn", "ابدأ اللعبة", "بعد اختيار اللعبة اضغط «ابدأ اللعبة» لتشغيلها مباشرة.")
+    ]),
+    topic("general-manage", "تعديل لعبة أو حذفها", "أدر ألعابك من صفحة ألعابي المحفوظة.", [
+      step("savedScreen", "#savedGamesList", "ألعابي المحفوظة", "تظهر هنا جميع ألعابك. بجانب كل لعبة خيارات التشغيل والتعديل والحذف. إذا كانت القائمة فارغة فلن تتغير بياناتك أثناء هذا الشرح.")
+    ]),
+    topic("general-transfer", "نقل الألعاب إلى جهاز آخر", "صدّر الملف ثم استورده في الجهاز الجديد.", [
+      step("backupScreen", "#exportSavedGamesBtn", "تصدير الألعاب", "في الجهاز الحالي اضغط «تصدير الألعاب» واحفظ الملف الناتج."),
+      step("backupScreen", "#importSavedGamesBtn", "استيراد الألعاب", "أرسل الملف إلى الجهاز الآخر، ثم افتح الصفحة واضغط «استيراد الألعاب» واختر الملف.")
+    ]),
+    topic("general-image", "إضافة صورة من الجهاز", "اختر صورة واضحة وخفيفة قدر الإمكان.", [
+      step("imagePinsSetupScreen", "#pickImagePinsMainImageBtn", "اختيار صورة", "أي زر «اختيار صورة» يفتح صور جهازك. اختر الصورة وانتظر حتى يظهر اسمها أو معاينتها.")
+    ]),
+    topic("general-theme", "اختيار الثيم", "استخدم خلفية مناسبة للدرس والمناسبة.", [
+      step("wheelSetupScreen", "#toggleThemeListBtn", "تغيير الثيم", "اضغط «تغيير» ثم اختر الثيم. لا يؤثر ذلك في النصوص أو الصور التي أضفتها.")
+    ]),
+    topic("general-browser", "لماذا لا تظهر ألعابي؟", "تأكد من المتصفح والجهاز اللذين حفظت فيهما.", [
+      step("savedScreen", "#savedGamesList", "الألعاب محفوظة في جهازك", "ادخل من المتصفح العادي نفسه. المتصفح الخفي أو جهاز آخر لا يعرض الألعاب إلا بعد نقلها بالتصدير والاستيراد.")
+    ]),
+    topic("general-projector", "العرض على الشاشة أو البروجكتر", "اختبر اللعبة ثم اعرض المتصفح بملء الشاشة.", [
+      step("wheelSetupScreen", "#testWheelBtn", "المعاينة قبل العرض", "اختبر اللعبة أولًا، ثم صِل الجهاز بالشاشة أو البروجكتر واستخدم وضع ملء الشاشة في المتصفح.")
+    ])
+  ];
+
+  const allScreenIds = [
+    "createScreen", "wheelSetupScreen", "choicesSetupScreen", "fillSetupScreen",
+    "matchSetupScreen", "orderSetupScreen", "trainSetupScreen",
+    "movingQuestionSetupScreen", "classifyWordsSetupScreen", "imagePinsSetupScreen",
+    "savedScreen", "backupScreen", "settingsScreen", "appSettingsScreen",
+    "appUpdatesScreen", "appSupportScreen", "appSuggestionsScreen"
+  ];
+
+  const state = {
+    topic: null,
+    index: 0,
+    layer: null,
+    spotlight: null,
+    card: null,
+    target: null,
+    stepRestores: [],
+    initial: null,
+    token: 0
+  };
+
+  const normalizeText = (value) => String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u064B-\u065F\u0670]/g, "")
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .trim();
+
+  function createTopicRow(item){
+    const row = document.createElement("div");
+    row.className = "ihc-topic";
+    row.dataset.helpSearch = normalizeText(`${item.title} ${item.note}`);
+
+    const copy = document.createElement("div");
+    copy.className = "ihc-topic-copy";
+    const title = document.createElement("strong");
+    title.className = "ihc-topic-title";
+    title.textContent = item.title;
+    const note = document.createElement("span");
+    note.className = "ihc-topic-note";
+    note.textContent = item.note;
+    copy.append(title, note);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "ihc-start";
+    button.textContent = "شرح الطريقة";
+    button.setAttribute("aria-label", `شرح: ${item.title}`);
+    button.addEventListener("click", () => startGuide(item));
+    row.append(copy, button);
+    return row;
+  }
+
+  function renderHelp(query = ""){
+    const normalizedQuery = normalizeText(query);
+    gamesRoot.replaceChildren();
+    generalRoot.replaceChildren();
+    let visibleGames = 0;
+    let visibleGeneral = 0;
+
+    games.forEach((game) => {
+      const gameText = normalizeText(`${game.title} ${game.desc}`);
+      const matchingTopics = game.topics.filter((item) => {
+        if (!normalizedQuery) return true;
+        return gameText.includes(normalizedQuery) || normalizeText(`${item.title} ${item.note}`).includes(normalizedQuery);
+      });
+      if (!matchingTopics.length) return;
+      visibleGames += 1;
+
+      const details = document.createElement("details");
+      details.className = "ihc-game";
+      details.dataset.helpSearch = normalizeText(`${game.title} ${game.desc} ${game.topics.map((item) => `${item.title} ${item.note}`).join(" ")}`);
+      if (normalizedQuery) details.open = true;
+
+      const summary = document.createElement("summary");
+      summary.className = "ihc-game-summary";
+      const copy = document.createElement("span");
+      copy.className = "ihc-game-copy";
+      const title = document.createElement("strong");
+      title.className = "ihc-game-title";
+      title.textContent = game.title;
+      const desc = document.createElement("span");
+      desc.className = "ihc-game-desc";
+      desc.textContent = game.desc;
+      const arrow = document.createElement("span");
+      arrow.className = "ihc-game-arrow";
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.textContent = "▼";
+      copy.append(title, desc, arrow);
+
+      const preview = document.createElement("span");
+      preview.className = "ihc-game-preview";
+      preview.setAttribute("aria-hidden", "true");
+      preview.style.backgroundImage = `url("${game.preview}")`;
+      summary.append(copy, preview);
+
+      const topics = document.createElement("div");
+      topics.className = "ihc-topics";
+      matchingTopics.forEach((item) => topics.appendChild(createTopicRow(item)));
+      details.append(summary, topics);
+      gamesRoot.appendChild(details);
+    });
+
+    generalTopics.forEach((item) => {
+      if (normalizedQuery && !normalizeText(`${item.title} ${item.note}`).includes(normalizedQuery)) return;
+      visibleGeneral += 1;
+      generalRoot.appendChild(createTopicRow(item));
+    });
+
+    if (!visibleGames) {
+      const empty = document.createElement("div");
+      empty.className = "ihc-empty";
+      empty.textContent = "لم نجد شرحًا مطابقًا ضمن الألعاب.";
+      gamesRoot.appendChild(empty);
+    }
+    if (!visibleGeneral) {
+      const empty = document.createElement("div");
+      empty.className = "ihc-empty";
+      empty.textContent = "جرّب كلمة أقصر مثل: حفظ، صورة، ثيم، نقل.";
+      generalRoot.appendChild(empty);
+    }
+  }
+
+  function ensureGuideLayer(){
+    if (state.layer) return;
+    const layer = document.createElement("div");
+    layer.className = "ihc-guide-layer";
+    layer.hidden = true;
+    layer.innerHTML = `
+      <div class="ihc-spotlight" aria-hidden="true"></div>
+      <section class="ihc-guide-card" role="dialog" aria-modal="true" aria-labelledby="ihcGuideTitle" aria-describedby="ihcGuideText">
+        <div class="ihc-guide-top">
+          <img class="ihc-guide-mascot" src="guide-mascot.webp" alt="">
+          <h3 class="ihc-guide-title" id="ihcGuideTitle"></h3>
+        </div>
+        <p class="ihc-guide-text" id="ihcGuideText"></p>
+        <p class="ihc-guide-progress" id="ihcGuideProgress"></p>
+        <div class="ihc-guide-actions">
+          <button class="ihc-guide-action ihc-guide-action--close" data-guide-action="close" type="button">إنهاء الشرح</button>
+          <button class="ihc-guide-action" data-guide-action="previous" type="button">السابق</button>
+          <button class="ihc-guide-action ihc-guide-action--next" data-guide-action="next" type="button">التالي</button>
+        </div>
+      </section>`;
+    document.body.appendChild(layer);
+    state.layer = layer;
+    state.spotlight = layer.querySelector(".ihc-spotlight");
+    state.card = layer.querySelector(".ihc-guide-card");
+    layer.querySelector('[data-guide-action="close"]').addEventListener("click", finishGuide);
+    layer.querySelector('[data-guide-action="previous"]').addEventListener("click", () => {
+      if (state.index > 0) {
+        state.index -= 1;
+        showGuideStep();
+      }
+    });
+    layer.querySelector('[data-guide-action="next"]').addEventListener("click", () => {
+      if (!state.topic) return;
+      if (state.index >= state.topic.steps.length - 1) {
+        finishGuide();
+        return;
+      }
+      state.index += 1;
+      showGuideStep();
+    });
+  }
+
+  function rememberStepState(node){
+    if (!node) return;
+    const snapshot = {
+      node,
+      hidden: node.hidden,
+      className: node.className,
+      ariaHidden: node.getAttribute("aria-hidden"),
+      ariaExpanded: node.getAttribute("aria-expanded")
+    };
+    state.stepRestores.push(() => {
+      node.hidden = snapshot.hidden;
+      node.className = snapshot.className;
+      if (snapshot.ariaHidden === null) node.removeAttribute("aria-hidden");
+      else node.setAttribute("aria-hidden", snapshot.ariaHidden);
+      if (snapshot.ariaExpanded === null) node.removeAttribute("aria-expanded");
+      else node.setAttribute("aria-expanded", snapshot.ariaExpanded);
+    });
+  }
+
+  function clearStepChanges(){
+    while (state.stepRestores.length) {
+      try { state.stepRestores.pop()(); } catch (_) {}
+    }
+    state.target = null;
+  }
+
+  function showVisualScreen(screenId){
+    const isHome = screenId === "home";
+    allScreenIds.forEach((id) => document.getElementById(id)?.classList.remove("active"));
+    const home = document.getElementById("homeShell");
+    if (home) home.style.display = isHome ? "flex" : "none";
+    document.body.classList.toggle("subpage", !isHome);
+    document.body.classList.toggle("create-template-page", screenId === "createScreen");
+    document.documentElement.classList.toggle("create-template-page", screenId === "createScreen");
+    if (!isHome) document.getElementById(screenId)?.classList.add("active");
+    window.setSandooqHomeButtonLabel?.(screenId && screenId.endsWith("SetupScreen") ? "العودة للألعاب" : "الرئيسية");
+  }
+
+  function prepareStep(current){
+    if (current.template) document.body.dataset.setupTemplate = current.template;
+    (current.unhide || []).forEach((selector) => {
+      const node = document.querySelector(selector);
+      if (!node) return;
+      rememberStepState(node);
+      node.hidden = false;
+    });
+    if (current.openPanel) {
+      const panel = document.querySelector(current.openPanel);
+      if (panel) {
+        rememberStepState(panel);
+        panel.hidden = false;
+        panel.classList.add("is-open");
+        panel.setAttribute("aria-hidden", "false");
+        const toggle = panel.previousElementSibling;
+        if (toggle?.matches?.(".choices-advanced-toggle")) {
+          rememberStepState(toggle);
+          toggle.setAttribute("aria-expanded", "true");
+        }
+      }
+    }
+  }
+
+  const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+  function positionGuide(){
+    if (!state.topic || !state.target || state.layer.hidden) return;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const raw = state.target.getBoundingClientRect();
+    const pad = viewportWidth < 620 ? 7 : 11;
+    const left = Math.max(8, raw.left - pad);
+    const top = Math.max(8, raw.top - pad);
+    const right = Math.min(viewportWidth - 8, raw.right + pad);
+    const bottom = Math.min(viewportHeight - 8, raw.bottom + pad);
+    state.spotlight.style.left = `${left}px`;
+    state.spotlight.style.top = `${top}px`;
+    state.spotlight.style.width = `${Math.max(34, right - left)}px`;
+    state.spotlight.style.height = `${Math.max(34, bottom - top)}px`;
+
+    const cardHeight = Math.min(state.card.scrollHeight, state.card.getBoundingClientRect().height || 360);
+    const spaceBelow = viewportHeight - bottom;
+    const spaceAbove = top;
+    let cardTop;
+    if (spaceBelow >= cardHeight + 22) cardTop = bottom + 12;
+    else if (spaceAbove >= cardHeight + 22) cardTop = top - cardHeight - 12;
+    else cardTop = Math.max(10, viewportHeight - cardHeight - 12);
+    state.card.style.top = `${Math.max(10, Math.min(cardTop, viewportHeight - cardHeight - 10))}px`;
+  }
+
+  async function showGuideStep(){
+    if (!state.topic) return;
+    const renderToken = ++state.token;
+    clearStepChanges();
+    const current = state.topic.steps[state.index];
+    showVisualScreen(current.screen);
+    prepareStep(current);
+    state.layer.hidden = false;
+    state.card.style.visibility = "hidden";
+    document.body.classList.add("ihc-guide-running");
+
+    const title = state.card.querySelector("#ihcGuideTitle");
+    const text = state.card.querySelector("#ihcGuideText");
+    const progress = state.card.querySelector("#ihcGuideProgress");
+    const previous = state.card.querySelector('[data-guide-action="previous"]');
+    const next = state.card.querySelector('[data-guide-action="next"]');
+    title.textContent = current.title;
+    text.textContent = current.text;
+    progress.textContent = `${state.index + 1} / ${state.topic.steps.length}`;
+    previous.disabled = state.index === 0;
+    next.textContent = state.index === state.topic.steps.length - 1 ? "فهمت ✓" : "التالي";
+
+    await nextFrame();
+    if (!state.topic || renderToken !== state.token) return;
+    let target = document.querySelector(current.target);
+    const screen = current.screen === "home" ? document.getElementById("homeShell") : document.getElementById(current.screen);
+    if (!target || target.getClientRects().length === 0) target = screen;
+    state.target = target;
+    try { target?.scrollIntoView({ block: "center", inline: "center", behavior: "auto" }); } catch (_) {}
+    await nextFrame();
+    if (!state.topic || renderToken !== state.token) return;
+    positionGuide();
+    state.card.style.visibility = "visible";
+    next.focus({ preventScroll: true });
+  }
+
+  function startGuide(selectedTopic){
+    if (!selectedTopic?.steps?.length) return;
+    ensureGuideLayer();
+    state.initial = {
+      activeIds: allScreenIds.filter((id) => document.getElementById(id)?.classList.contains("active")),
+      homeDisplay: document.getElementById("homeShell")?.style.display || "",
+      subpage: document.body.classList.contains("subpage"),
+      createPage: document.body.classList.contains("create-template-page"),
+      htmlCreatePage: document.documentElement.classList.contains("create-template-page"),
+      setupTemplate: document.body.getAttribute("data-setup-template"),
+      scrollX: window.scrollX,
+      scrollY: window.scrollY
+    };
+    state.topic = selectedTopic;
+    state.index = 0;
+    showGuideStep();
+  }
+
+  function finishGuide(){
+    if (!state.topic) return;
+    state.token += 1;
+    clearStepChanges();
+    state.layer.hidden = true;
+    state.card.style.visibility = "hidden";
+    document.body.classList.remove("ihc-guide-running");
+
+    const initial = state.initial;
+    allScreenIds.forEach((id) => document.getElementById(id)?.classList.toggle("active", Boolean(initial?.activeIds.includes(id))));
+    const home = document.getElementById("homeShell");
+    if (home) home.style.display = initial?.homeDisplay ?? "none";
+    document.body.classList.toggle("subpage", Boolean(initial?.subpage));
+    document.body.classList.toggle("create-template-page", Boolean(initial?.createPage));
+    document.documentElement.classList.toggle("create-template-page", Boolean(initial?.htmlCreatePage));
+    if (initial?.setupTemplate === null || initial?.setupTemplate === undefined) document.body.removeAttribute("data-setup-template");
+    else document.body.setAttribute("data-setup-template", initial.setupTemplate);
+    window.setSandooqHomeButtonLabel?.("الرئيسية");
+
+    state.topic = null;
+    state.initial = null;
+    requestAnimationFrame(() => {
+      try { window.scrollTo({ left: initial?.scrollX || 0, top: initial?.scrollY || 0, behavior: "auto" }); } catch (_) {}
+      searchField.focus({ preventScroll: true });
+    });
+  }
+
+  searchField.addEventListener("input", () => renderHelp(searchField.value));
+  window.addEventListener("resize", positionGuide, { passive: true });
+  window.addEventListener("scroll", positionGuide, { passive: true });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && state.topic) finishGuide();
+  });
+
+  renderHelp();
+  window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
+})();
+</script>
+<!-- VERSION: index-v125-interactive-help-center -->
 </body>
 </html>
