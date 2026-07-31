@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v128-classify-draft-desktop-footer -->
+<!-- version: index-v129-updates-page-notice -->
 <meta charset="utf-8"/>
-<meta content="index-v128-classify-draft-desktop-footer" name="sandooq-build"/>
+<meta content="index-v129-updates-page-notice" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -15693,6 +15693,272 @@
         width:100%;
       }
     }
+
+    /* صفحة التحديثات: سجل إصدارات بسيط وواضح. */
+    #appUpdatesScreen.updates-screen{
+      width:min(100%,920px);
+      padding:clamp(19px,3vw,36px);
+      direction:rtl;
+    }
+
+    .updates-heading{
+      width:min(100%,720px);
+      margin:0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:clamp(10px,1.8vw,17px);
+      text-align:right;
+    }
+
+    .updates-heading-icon{
+      flex:0 0 auto;
+      width:clamp(50px,6vw,66px);
+      height:clamp(50px,6vw,66px);
+      display:grid;
+      place-items:center;
+      border-radius:19px;
+      color:#fff;
+      background:linear-gradient(145deg,#3d73e6,#2455c6);
+      box-shadow:0 5px 0 rgba(25,58,137,.2);
+    }
+
+    .updates-heading-icon svg{
+      width:68%;
+      height:68%;
+      display:block;
+    }
+
+    .updates-heading-copy h2{
+      margin:0;
+      color:#173f9f;
+      font-size:clamp(27px,3.4vw,43px);
+      font-weight:900;
+      line-height:1.25;
+    }
+
+    .updates-heading-copy p{
+      margin:4px 0 0;
+      color:#626875;
+      font-size:clamp(13px,1.45vw,17px);
+      font-weight:700;
+      line-height:1.65;
+    }
+
+    .updates-release-list{
+      width:min(100%,720px);
+      margin:clamp(22px,3.4vw,34px) auto 0;
+      display:grid;
+      gap:16px;
+    }
+
+    .updates-release-card{
+      overflow:hidden;
+      border:2px solid rgba(47,98,218,.28);
+      border-radius:clamp(20px,2.4vw,28px);
+      background:rgba(255,255,255,.96);
+      box-shadow:0 8px 24px rgba(31,67,151,.09);
+    }
+
+    .updates-release-meta{
+      padding:clamp(14px,2vw,19px) clamp(16px,2.5vw,24px);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      background:linear-gradient(135deg,#eef4ff,#fff9e5);
+      border-bottom:1px solid rgba(47,98,218,.18);
+    }
+
+    .updates-version{
+      color:#173f9f;
+      font-size:clamp(18px,2.15vw,25px);
+      font-weight:900;
+      line-height:1.35;
+    }
+
+    .updates-date{
+      flex:0 0 auto;
+      padding:6px 11px;
+      border-radius:999px;
+      color:#684c00;
+      background:#fff0ae;
+      font-size:clamp(12px,1.25vw,15px);
+      font-weight:850;
+      white-space:nowrap;
+    }
+
+    .updates-release-body{
+      padding:clamp(17px,2.5vw,25px) clamp(17px,2.8vw,27px) clamp(20px,2.8vw,28px);
+    }
+
+    .updates-release-title{
+      margin:0 0 13px;
+      color:#1c1d21;
+      font-size:clamp(18px,2vw,24px);
+      font-weight:900;
+    }
+
+    .updates-change-list{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:grid;
+      gap:11px;
+    }
+
+    .updates-change-list li{
+      position:relative;
+      padding-right:30px;
+      color:#3e4149;
+      font-size:clamp(14px,1.45vw,17px);
+      font-weight:750;
+      line-height:1.75;
+    }
+
+    .updates-change-list li::before{
+      content:"✓";
+      position:absolute;
+      top:.12em;
+      right:0;
+      width:21px;
+      height:21px;
+      display:grid;
+      place-items:center;
+      border-radius:50%;
+      color:#fff;
+      background:#2f62da;
+      font-size:13px;
+      font-weight:900;
+      line-height:1;
+    }
+
+    /* الفقاعة تظهر فوق الشريط وكأنها خارجة من أيقونة التحديثات. */
+    .latest-update-notice[hidden]{
+      display:none !important;
+    }
+
+    .latest-update-notice{
+      --notice-arrow-left:50%;
+      position:fixed;
+      z-index:19000;
+      left:12px;
+      bottom:calc(var(--home-footer-height) + var(--safe-bottom) + 17px);
+      width:min(410px,calc(100vw - 24px));
+      padding:18px 19px 17px;
+      border:2px solid #2f62da;
+      border-radius:24px;
+      background:linear-gradient(135deg,#fffdf6 0%,#f4f7ff 100%);
+      box-shadow:0 13px 32px rgba(21,50,116,.22);
+      color:#20242d;
+      direction:rtl;
+      text-align:right;
+      transform-origin:var(--notice-arrow-left) calc(100% + 18px);
+      animation:latest-update-pop .36s cubic-bezier(.2,.88,.3,1.14) both;
+    }
+
+    body.subpage .latest-update-notice{
+      display:none !important;
+    }
+
+    .latest-update-notice::before,
+    .latest-update-notice::after{
+      content:"";
+      position:absolute;
+      left:var(--notice-arrow-left);
+      width:22px;
+      height:22px;
+      transform:translateX(-50%) rotate(45deg);
+      pointer-events:none;
+    }
+
+    .latest-update-notice::before{
+      bottom:-12px;
+      background:#2f62da;
+    }
+
+    .latest-update-notice::after{
+      bottom:-9px;
+      background:#f4f7ff;
+    }
+
+    .latest-update-close{
+      position:absolute;
+      top:9px;
+      left:9px;
+      z-index:1;
+      width:29px;
+      height:29px;
+      padding:0;
+      border:2px solid #fff;
+      border-radius:50%;
+      background:#e52d38;
+      color:#fff;
+      display:grid;
+      place-items:center;
+      font:900 20px/1 Arial,sans-serif;
+      cursor:pointer;
+      box-shadow:0 2px 7px rgba(139,9,20,.25);
+    }
+
+    .latest-update-close:focus-visible{
+      outline:4px solid rgba(255,212,71,.75);
+      outline-offset:2px;
+    }
+
+    .latest-update-label{
+      display:inline-flex;
+      align-items:center;
+      min-height:26px;
+      margin:0 0 7px;
+      padding:3px 11px;
+      border-radius:999px;
+      color:#173f9f;
+      background:#e7efff;
+      font-size:13px;
+      font-weight:900;
+    }
+
+    .latest-update-text{
+      margin:0;
+      padding-left:27px;
+      color:#262a33;
+      font-size:clamp(14px,1.55vw,17px);
+      font-weight:800;
+      line-height:1.75;
+    }
+
+    @keyframes latest-update-pop{
+      from{opacity:0;transform:translateY(16px) scale(.9)}
+      to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    @media (max-width:520px){
+      .updates-heading{
+        align-items:flex-start;
+      }
+
+      .updates-heading-copy p{
+        max-width:260px;
+      }
+
+      .updates-release-meta{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:7px;
+      }
+
+      .latest-update-notice{
+        padding:16px 17px 15px;
+        border-radius:20px;
+      }
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .latest-update-notice{
+        animation:none;
+      }
+    }
   </style>
   <style id="suggestions-page-v124">
     #appSuggestionsScreen{
@@ -18232,35 +18498,36 @@
   </div>
 </section>
 
-<section class="screen service-screen" id="appUpdatesScreen">
-  <h2 class="screen-title">آخر التحديثات</h2>
-  <p class="service-intro">نطوّر صندوق الألعاب التعليمية باستمرار لتصبح صناعة الأنشطة وتشغيلها أسهل وأوضح.</p>
-  <div class="service-grid">
-    <article class="service-card service-card--blue service-card--wide">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">✨</span>
-        <h3 class="service-card-title">أحدث التحسينات</h3>
+<section class="screen updates-screen" id="appUpdatesScreen">
+  <header class="updates-heading">
+    <span class="updates-heading-icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64">
+        <path d="M20 44h27c-5-5-6-10-6-19 0-7-4-12-10-12s-10 5-10 12c0 9-1 14-6 19z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M26 49c1 5 9 5 11 0" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+        <path d="M49 7l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#ffd447"/>
+      </svg>
+    </span>
+    <div class="updates-heading-copy">
+      <h2>التحديثات</h2>
+      <p>كل جديد في صندوق الألعاب التعليمية تلقاه هنا.</p>
+    </div>
+  </header>
+  <div class="updates-release-list">
+    <!-- لتحديث الصفحة لاحقًا: غيّر رقم الإصدار والتاريخ والقائمة التالية فقط. -->
+    <article class="updates-release-card" data-update-id="1.5.0">
+      <header class="updates-release-meta">
+        <strong class="updates-version">الإصدار 1.5.0</strong>
+        <time class="updates-date" datetime="2026-07-31">31 يوليو 2026</time>
+      </header>
+      <div class="updates-release-body">
+        <h3 class="updates-release-title">الجديد في هذا الإصدار</h3>
+        <ul class="updates-change-list">
+          <li>إضافة مركز المساعدة التفاعلي لشرح أدوات الألعاب خطوة بخطوة.</li>
+          <li>إضافة صفحة اقتراحاتكم ومشاركة أفكار مجتمع التعليم.</li>
+          <li>تحسين حفظ محتويات وإعدادات الألعاب عند التنقل بين الصفحات.</li>
+          <li>تحسين ثبات الشريط السفلي وعرض الواجهة على مختلف الأجهزة.</li>
+        </ul>
       </div>
-      <ul class="service-update-list">
-        <li>واجهة رئيسية جديدة ومتجاوبة مع الجوال والتابلت والكمبيوتر.</li>
-        <li>تحسين تصميم قائمة الألعاب وصور المعاينة لتصبح أوضح وأكثر تناسقًا.</li>
-        <li>تطوير أدوات حفظ الألعاب ونقلها بين الأجهزة.</li>
-        <li>تحسين عرض النصوص والصور داخل الألعاب التعليمية.</li>
-      </ul>
-    </article>
-    <article class="service-card service-card--yellow">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">🎯</span>
-        <h3 class="service-card-title">هدفنا</h3>
-      </div>
-      <p class="service-card-copy">تحديثات عملية تركز على وضوح الواجهة وثبات الألعاب وسهولة استخدامها داخل الحصة.</p>
-    </article>
-    <article class="service-card service-card--orange">
-      <div class="service-card-head">
-        <span class="service-card-icon" aria-hidden="true">🧰</span>
-        <h3 class="service-card-title">تطوير مستمر</h3>
-      </div>
-      <p class="service-card-copy">نراجع تجربة المعلم على مختلف الأجهزة ونحسّن الأدوات مع المحافظة على الألعاب المحفوظة.</p>
     </article>
   </div>
 </section>
@@ -18348,6 +18615,11 @@
     </div>
   </section>
 </div>
+<aside class="latest-update-notice" id="latestUpdateNotice" data-update-id="1.5.0" aria-label="تنبيه عن تحديث جديد" hidden>
+  <button class="latest-update-close" id="latestUpdateClose" type="button" aria-label="إغلاق تنبيه التحديث">×</button>
+  <span class="latest-update-label">تحديث جديد</span>
+  <p class="latest-update-text">أضفنا مركز المساعدة التفاعلي؛ يشرح لك مكان كل أداة على الشاشة خطوة بخطوة.</p>
+</aside>
 <nav class="bottom-bar" aria-label="شريط خدمات المنصة">
 <button class="home-btn" id="homeButton" type="button" aria-label="الرئيسية" title="الرئيسية">
 <svg aria-hidden="true" viewBox="0 0 72 72">
@@ -28290,6 +28562,62 @@
 })();
 </script>
 
+<script id="latest-update-notice-script-v129">
+(() => {
+  "use strict";
+
+  const notice = document.getElementById("latestUpdateNotice");
+  const closeButton = document.getElementById("latestUpdateClose");
+  const updatesButton = document.getElementById("appUpdatesButton");
+  if (!notice || !closeButton || !updatesButton) return;
+
+  const updateId = String(notice.dataset.updateId || "current").trim();
+  const dismissedKey = `sandooq_updates_notice_dismissed_${updateId}`;
+
+  const wasDismissed = () => {
+    try { return localStorage.getItem(dismissedKey) === "1"; }
+    catch (_) { return false; }
+  };
+
+  const rememberDismissal = () => {
+    try { localStorage.setItem(dismissedKey,"1"); } catch (_) {}
+  };
+
+  const hideNotice = (remember = false) => {
+    if (remember) rememberDismissal();
+    notice.hidden = true;
+  };
+
+  const positionNotice = () => {
+    if (notice.hidden || document.body.classList.contains("subpage")) return;
+    const buttonRect = updatesButton.getBoundingClientRect();
+    const noticeWidth = notice.offsetWidth;
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const margin = 12;
+    const buttonCenter = buttonRect.left + buttonRect.width / 2;
+    const left = Math.max(margin,Math.min(viewportWidth - noticeWidth - margin,buttonCenter - noticeWidth / 2));
+    const arrowLeft = Math.max(30,Math.min(noticeWidth - 30,buttonCenter - left));
+    notice.style.left = `${Math.round(left)}px`;
+    notice.style.setProperty("--notice-arrow-left",`${Math.round(arrowLeft)}px`);
+  };
+
+  if (!wasDismissed()) {
+    notice.hidden = false;
+    requestAnimationFrame(() => requestAnimationFrame(positionNotice));
+  }
+
+  closeButton.addEventListener("click",() => hideNotice(true));
+  updatesButton.addEventListener("click",() => hideNotice(true));
+  window.addEventListener("resize",positionNotice,{passive:true});
+  window.addEventListener("orientationchange",() => setTimeout(positionNotice,80),{passive:true});
+  new MutationObserver(() => {
+    if (!notice.hidden && !document.body.classList.contains("subpage")) {
+      requestAnimationFrame(positionNotice);
+    }
+  }).observe(document.body,{attributes:true,attributeFilter:["class"]});
+})();
+</script>
+
 <script id="interactive-help-center-script-v128">
 (() => {
   "use strict";
@@ -29163,6 +29491,6 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v128-classify-draft-desktop-footer -->
+<!-- VERSION: index-v129-updates-page-notice -->
 </body>
 </html>
