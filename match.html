@@ -1124,6 +1124,16 @@
       #finishView .finish-title,#finishView .finish-subtitle,#finishView .finish-actions,#finishView .finish-confetti span{animation-duration:.01ms!important}
     }
   </style>
+  <script>
+    (() => {
+      const themeFiles = ["pixel-garden.webp","pink-floral.webp","school-doodle.webp","football-field.webp","islamic-garden.webp","vintage-paper.webp","underwater.webp","ai-robots.webp","islamic-pattern.webp","pastel-shapes.webp","watercolor-space.webp","floral-pattern.webp","pastel-daisies.webp","galaxy.webp","autumn-leaves.webp","brown-flowers.webp","purple-clouds.webp","moon-space.webp","blue-scrapbook.webp"];
+      const themePath = "assets/themes/";
+      const style = document.createElement("style");
+      style.id = "new-theme-backgrounds-v1";
+      style.textContent = themeFiles.map((file,index) => '.theme-theme-' + (index + 1) + ' .theme-background,.wheel-theme-theme-' + (index + 1) + ' .theme-background{opacity:1!important;background:#fff url("' + themePath + file + '") center/cover no-repeat!important}').join("");
+      document.head.appendChild(style);
+    })();
+  </script>
 </head>
 <body>
   <main class="match-page theme-classroom pre-start" id="matchPage" data-font="noto-naskh">
@@ -1199,7 +1209,7 @@
     "use strict";
 
     const MATCH_PAYLOAD_KEY = "sandooq_match_payload_v1";
-    const THEMES = ["white","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+    const THEMES = ["white","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day",...Array.from({length:19},(_,index)=>`theme-${index + 1}`)];
 
     const page = document.getElementById("matchPage");
     const stage = document.getElementById("matchStage");
@@ -1253,6 +1263,7 @@
 
     function normalizeTheme(value){
       const raw = String(value || "").trim().toLowerCase();
+      if (/^theme-(?:[1-9]|1[0-9])$/.test(raw)) return raw;
       if (["classic","white","original","default","خلفية بيضاء"].includes(raw)) return "white";
       if (["classroom","theme-classroom","original-classroom","فصل مدرسي"].includes(raw)) return "classroom";
       if (["sky","clouds","sky-clouds","theme-sky-clouds","سماء","سماء وغيوم"].includes(raw)) return "sky-clouds";

@@ -2230,6 +2230,16 @@
     }
 
 </style>
+  <script>
+    (() => {
+      const themeFiles = ["pixel-garden.webp","pink-floral.webp","school-doodle.webp","football-field.webp","islamic-garden.webp","vintage-paper.webp","underwater.webp","ai-robots.webp","islamic-pattern.webp","pastel-shapes.webp","watercolor-space.webp","floral-pattern.webp","pastel-daisies.webp","galaxy.webp","autumn-leaves.webp","brown-flowers.webp","purple-clouds.webp","moon-space.webp","blue-scrapbook.webp"];
+      const themePath = "assets/themes/";
+      const style = document.createElement("style");
+      style.id = "new-theme-backgrounds-v1";
+      style.textContent = themeFiles.map((file,index) => '.theme-theme-' + (index + 1) + ' .theme-background,.wheel-theme-theme-' + (index + 1) + ' .theme-background{opacity:1!important;background:#fff url("' + themePath + file + '") center/cover no-repeat!important}').join("");
+      document.head.appendChild(style);
+    })();
+  </script>
 </head>
 <body>
   <main class="game-page theme-white intro-playing intro-camera" id="gamePage">
@@ -3190,6 +3200,7 @@
 
     function normalizeTheme(value){
       const raw = String(value || "").trim().toLowerCase();
+      if (/^theme-(?:[1-9]|1[0-9])$/.test(raw)) return raw;
 
       if ([
         "classic","original","white","theme-white","theme-original",

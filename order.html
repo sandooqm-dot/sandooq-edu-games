@@ -1423,6 +1423,16 @@
       }
     }
 </style>
+  <script>
+    (() => {
+      const themeFiles = ["pixel-garden.webp","pink-floral.webp","school-doodle.webp","football-field.webp","islamic-garden.webp","vintage-paper.webp","underwater.webp","ai-robots.webp","islamic-pattern.webp","pastel-shapes.webp","watercolor-space.webp","floral-pattern.webp","pastel-daisies.webp","galaxy.webp","autumn-leaves.webp","brown-flowers.webp","purple-clouds.webp","moon-space.webp","blue-scrapbook.webp"];
+      const themePath = "assets/themes/";
+      const style = document.createElement("style");
+      style.id = "new-theme-backgrounds-v1";
+      style.textContent = themeFiles.map((file,index) => '.theme-theme-' + (index + 1) + ' .theme-background,.wheel-theme-theme-' + (index + 1) + ' .theme-background{opacity:1!important;background:#fff url("' + themePath + file + '") center/cover no-repeat!important}').join("");
+      document.head.appendChild(style);
+    })();
+  </script>
 </head>
 <body>
   <main class="order-page theme-classic pre-start" id="orderPage" data-font="noto-naskh">
@@ -1513,7 +1523,7 @@
     const PAYLOAD_KEY = "sandooq_order_payload_v1";
     const DRAFT_KEY = "sandooq_order_draft_v1";
     const ORDER_MAX_ITEMS = 8;
-    const THEMES = ["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+    const THEMES = ["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day",...Array.from({length:19},(_,index)=>`theme-${index + 1}`)];
 
     const page = document.getElementById("orderPage");
     const stage = document.getElementById("stage");
