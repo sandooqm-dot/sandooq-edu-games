@@ -69,6 +69,16 @@
     @media(max-width:760px){.stage{inset:66px 8px calc(54px + env(safe-area-inset-bottom))}.word-bank{margin-top:5px;margin-bottom:24px}.groups{gap:13px}.fixed-controls{left:max(6px,env(safe-area-inset-left));bottom:max(7px,env(safe-area-inset-bottom))}}
     @media(max-height:560px) and (orientation:landscape){.stage{inset:54px 10px calc(58px + env(safe-area-inset-bottom))}.word-bank{margin-top:4px;margin-bottom:22px}.group-title{min-height:46px;padding-block:8px}.group-items{padding:8px}}
   </style>
+  <script>
+    (() => {
+      const themeFiles = ["pixel-garden.webp","pink-floral.webp","school-doodle.webp","football-field.webp","islamic-garden.webp","vintage-paper.webp","underwater.webp","ai-robots.webp","islamic-pattern.webp","pastel-shapes.webp","watercolor-space.webp","floral-pattern.webp","pastel-daisies.webp","galaxy.webp","autumn-leaves.webp","brown-flowers.webp","purple-clouds.webp","moon-space.webp","blue-scrapbook.webp"];
+      const themePath = "../assets/themes/";
+      const style = document.createElement("style");
+      style.id = "new-theme-backgrounds-v1";
+      style.textContent = themeFiles.map((file,index) => '.theme-theme-' + (index + 1) + ' .theme-background,.wheel-theme-theme-' + (index + 1) + ' .theme-background{opacity:1!important;background:#fff url("' + themePath + file + '") center/cover no-repeat!important}').join("");
+      document.head.appendChild(style);
+    })();
+  </script>
 </head>
 <body>
   <main class="page pre-start theme-classic" id="page" data-font="noto-naskh">
@@ -106,7 +116,7 @@
     "use strict";
     const KEY="sandooq_classify_words_payload_v1",MAX_GROUPS=4,MAX_WORDS=36;
     const DEFAULT_GROUP_COLORS=["#283c78","#704093","#9a4b35","#256a59"],DEFAULT_WORD_COLORS=["#3788d8","#ee7b35","#28a66a","#9c55c7"],DEFAULT_TEXT_COLOR="#ffffff",DEFAULT_ITEM_COLOR="#3788d8";
-    const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+    const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day",...Array.from({length:19},(_,index)=>`theme-${index + 1}`)];
     const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
     const params=new URLSearchParams(location.search),payloadId=String(params.get("payloadId")||""),launchSource=String(params.get("launch")||"home").toLowerCase();
     const page=document.getElementById("page"),themeBackground=page.querySelector(".theme-background"),stage=document.getElementById("stage"),gameLayout=document.getElementById("gameLayout"),groupsNode=document.getElementById("groups"),wordsNode=document.getElementById("words"),startGate=document.getElementById("startGate"),startBtn=document.getElementById("startBtn"),finishView=document.getElementById("finishView"),finishTitle=document.getElementById("finishTitle"),finishSubtitle=document.getElementById("finishSubtitle"),fixedControls=page.querySelector(".fixed-controls"),backBtn=document.getElementById("backBtn"),restartBtn=document.getElementById("restartBtn"),homeBtn=document.getElementById("homeBtn");
