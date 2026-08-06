@@ -55,6 +55,16 @@
     @media(max-height:520px) and (orientation:landscape){.activity-overlay .celebration-card{width:min(360px,78vw);padding:12px 18px;border-radius:20px}.activity-overlay .celebration-icon{width:72px;height:72px;margin-bottom:5px}.activity-overlay .celebration-title{font-size:34px}.activity-overlay .celebration-subtitle{margin-top:5px;font-size:17px}.activity-overlay .celebration-actions{margin-top:10px}.activity-overlay .celebration-actions button{height:38px;min-height:38px;font-size:16px}}
     @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0ms!important;transition-duration:.01ms!important}}
   </style>
+  <script>
+    (() => {
+      const themeFiles = ["pixel-garden.webp","pink-floral.webp","school-doodle.webp","football-field.webp","islamic-garden.webp","vintage-paper.webp","underwater.webp","ai-robots.webp","islamic-pattern.webp","pastel-shapes.webp","watercolor-space.webp","floral-pattern.webp","pastel-daisies.webp","galaxy.webp","autumn-leaves.webp","brown-flowers.webp","purple-clouds.webp","moon-space.webp","blue-scrapbook.webp"];
+      const themePath = "../assets/themes/";
+      const style = document.createElement("style");
+      style.id = "new-theme-backgrounds-v1";
+      style.textContent = themeFiles.map((file,index) => '.theme-theme-' + (index + 1) + ' .theme-background,.wheel-theme-theme-' + (index + 1) + ' .theme-background{opacity:1!important;background:#fff url("' + themePath + file + '") center/cover no-repeat!important}').join("");
+      document.head.appendChild(style);
+    })();
+  </script>
 </head>
 <body>
   <main class="page" id="page">
