@@ -4570,6 +4570,25 @@
       --theme-flowers-img: url("theme-flowers-preview.webp?v=18");
       --theme-national-day-img: url("theme-national-day-v2-preview.webp?v=22");
       --theme-founding-day-img: url("theme-founding-day-preview.webp?v=1");
+      --theme-1-img: url("assets/themes/pixel-garden.webp");
+      --theme-2-img: url("assets/themes/pink-floral.webp");
+      --theme-3-img: url("assets/themes/school-doodle.webp");
+      --theme-4-img: url("assets/themes/football-field.webp");
+      --theme-5-img: url("assets/themes/islamic-garden.webp");
+      --theme-6-img: url("assets/themes/vintage-paper.webp");
+      --theme-7-img: url("assets/themes/underwater.webp");
+      --theme-8-img: url("assets/themes/ai-robots.webp");
+      --theme-9-img: url("assets/themes/islamic-pattern.webp");
+      --theme-10-img: url("assets/themes/pastel-shapes.webp");
+      --theme-11-img: url("assets/themes/watercolor-space.webp");
+      --theme-12-img: url("assets/themes/floral-pattern.webp");
+      --theme-13-img: url("assets/themes/pastel-daisies.webp");
+      --theme-14-img: url("assets/themes/galaxy.webp");
+      --theme-15-img: url("assets/themes/autumn-leaves.webp");
+      --theme-16-img: url("assets/themes/brown-flowers.webp");
+      --theme-17-img: url("assets/themes/purple-clouds.webp");
+      --theme-18-img: url("assets/themes/moon-space.webp");
+      --theme-19-img: url("assets/themes/blue-scrapbook.webp");
     }
 
     .theme-art{
@@ -4655,6 +4674,51 @@
         linear-gradient(180deg, #d9ccb5 0%, #c9baa2 100%);
       background-size:cover, cover;
       background-position:center, center;
+    }
+
+    .theme-art.theme-1{ --selected-theme-image:var(--theme-1-img); }
+    .theme-art.theme-2{ --selected-theme-image:var(--theme-2-img); }
+    .theme-art.theme-3{ --selected-theme-image:var(--theme-3-img); }
+    .theme-art.theme-4{ --selected-theme-image:var(--theme-4-img); }
+    .theme-art.theme-5{ --selected-theme-image:var(--theme-5-img); }
+    .theme-art.theme-6{ --selected-theme-image:var(--theme-6-img); }
+    .theme-art.theme-7{ --selected-theme-image:var(--theme-7-img); }
+    .theme-art.theme-8{ --selected-theme-image:var(--theme-8-img); }
+    .theme-art.theme-9{ --selected-theme-image:var(--theme-9-img); }
+    .theme-art.theme-10{ --selected-theme-image:var(--theme-10-img); }
+    .theme-art.theme-11{ --selected-theme-image:var(--theme-11-img); }
+    .theme-art.theme-12{ --selected-theme-image:var(--theme-12-img); }
+    .theme-art.theme-13{ --selected-theme-image:var(--theme-13-img); }
+    .theme-art.theme-14{ --selected-theme-image:var(--theme-14-img); }
+    .theme-art.theme-15{ --selected-theme-image:var(--theme-15-img); }
+    .theme-art.theme-16{ --selected-theme-image:var(--theme-16-img); }
+    .theme-art.theme-17{ --selected-theme-image:var(--theme-17-img); }
+    .theme-art.theme-18{ --selected-theme-image:var(--theme-18-img); }
+    .theme-art.theme-19{ --selected-theme-image:var(--theme-19-img); }
+
+    .theme-art.theme-1,
+    .theme-art.theme-2,
+    .theme-art.theme-3,
+    .theme-art.theme-4,
+    .theme-art.theme-5,
+    .theme-art.theme-6,
+    .theme-art.theme-7,
+    .theme-art.theme-8,
+    .theme-art.theme-9,
+    .theme-art.theme-10,
+    .theme-art.theme-11,
+    .theme-art.theme-12,
+    .theme-art.theme-13,
+    .theme-art.theme-14,
+    .theme-art.theme-15,
+    .theme-art.theme-16,
+    .theme-art.theme-17,
+    .theme-art.theme-18,
+    .theme-art.theme-19{
+      background-image:var(--selected-theme-image);
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
     }
 
     .add-item-btn{
@@ -18640,6 +18704,51 @@
   </div>
 </section>
 
+<script>
+(() => {
+  "use strict";
+
+  const additionalThemes = Array.from({length:19},(_,index)=>({
+    id:`theme-${index + 1}`,
+    label:String(index + 1)
+  }));
+
+  const themePickers = [
+    ["themeListPanel","data-wheel-theme"],
+    ["quizThemeListPanel","data-quiz-theme"],
+    ["fillThemeListPanel","data-fill-theme"],
+    ["matchThemeListPanel","data-match-theme"],
+    ["orderThemeListPanel","data-order-theme"],
+    ["movingThemeListPanel","data-moving-theme"],
+    ["classifyThemeListPanel","data-classify-theme"],
+    ["imagePinsThemeListPanel","data-image-pins-theme"]
+  ];
+
+  themePickers.forEach(([panelId,themeAttribute])=>{
+    const panel=document.getElementById(panelId);
+    if(!panel)return;
+    additionalThemes.forEach(({id,label})=>{
+      if(panel.querySelector(`[${themeAttribute}="${id}"]`))return;
+      const card=document.createElement("div");
+      const preview=document.createElement("span");
+      const name=document.createElement("span");
+      const activate=document.createElement("button");
+      card.className="choices-theme-card";
+      card.setAttribute(themeAttribute,id);
+      preview.className=`theme-art ${id}`;
+      preview.setAttribute("aria-label",`الثيم ${label}`);
+      name.className="choices-theme-name";
+      name.textContent=label;
+      activate.className="choices-theme-activate";
+      activate.type="button";
+      activate.textContent="تفعيل";
+      card.append(preview,name,activate);
+      panel.appendChild(card);
+    });
+  });
+})();
+</script>
+
 
 <div class="match-color-modal" id="matchColorModal" hidden aria-hidden="true">
   <div class="match-color-backdrop" data-match-color-close></div>
@@ -20110,7 +20219,26 @@
     english: "انجليزي",
     flowers: "ازهار وورود",
     "national-day": "اليوم الوطني",
-    "founding-day": "يوم التأسيس"
+    "founding-day": "يوم التأسيس",
+    "theme-1": "1",
+    "theme-2": "2",
+    "theme-3": "3",
+    "theme-4": "4",
+    "theme-5": "5",
+    "theme-6": "6",
+    "theme-7": "7",
+    "theme-8": "8",
+    "theme-9": "9",
+    "theme-10": "10",
+    "theme-11": "11",
+    "theme-12": "12",
+    "theme-13": "13",
+    "theme-14": "14",
+    "theme-15": "15",
+    "theme-16": "16",
+    "theme-17": "17",
+    "theme-18": "18",
+    "theme-19": "19"
   };
 
   const GAME_THEME_IDS = new Set([
@@ -20122,7 +20250,26 @@
     "english",
     "flowers",
     "national-day",
-    "founding-day"
+    "founding-day",
+    "theme-1",
+    "theme-2",
+    "theme-3",
+    "theme-4",
+    "theme-5",
+    "theme-6",
+    "theme-7",
+    "theme-8",
+    "theme-9",
+    "theme-10",
+    "theme-11",
+    "theme-12",
+    "theme-13",
+    "theme-14",
+    "theme-15",
+    "theme-16",
+    "theme-17",
+    "theme-18",
+    "theme-19"
   ]);
 
   function normalizeGameTheme(theme){
@@ -26032,7 +26179,26 @@
     english:"انجليزي",
     flowers:"ازهار وورود",
     "national-day":"اليوم الوطني",
-    "founding-day":"يوم التأسيس"
+    "founding-day":"يوم التأسيس",
+    "theme-1":"1",
+    "theme-2":"2",
+    "theme-3":"3",
+    "theme-4":"4",
+    "theme-5":"5",
+    "theme-6":"6",
+    "theme-7":"7",
+    "theme-8":"8",
+    "theme-9":"9",
+    "theme-10":"10",
+    "theme-11":"11",
+    "theme-12":"12",
+    "theme-13":"13",
+    "theme-14":"14",
+    "theme-15":"15",
+    "theme-16":"16",
+    "theme-17":"17",
+    "theme-18":"18",
+    "theme-19":"19"
   };
 
   function normalizeTheme(value){
@@ -28011,7 +28177,7 @@
   const DRAFT_DB_KEY="draft:moving-question";
   const PAGE_URL="moving-question/move.html";
   const MAX_ENTRIES=32;
-  const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+  const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day","theme-1","theme-2","theme-3","theme-4","theme-5","theme-6","theme-7","theme-8","theme-9","theme-10","theme-11","theme-12","theme-13","theme-14","theme-15","theme-16","theme-17","theme-18","theme-19"];
   const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
   const PALETTE=["#9d4edd","#1688d3","#f47745","#1644d7","#e3003d","#24b86b","#14933e"];
 
@@ -28332,7 +28498,7 @@
 (()=>{
   "use strict";
   const KEY="sandooq_classify_words_payload_v1",DRAFT="sandooq_classify_words_draft_v1",PAGE="classify-words/classify-words.html",MAX_GROUPS=4,MAX_WORDS=36;
-  const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"];
+  const THEMES=["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day","theme-1","theme-2","theme-3","theme-4","theme-5","theme-6","theme-7","theme-8","theme-9","theme-10","theme-11","theme-12","theme-13","theme-14","theme-15","theme-16","theme-17","theme-18","theme-19"];
   const FONTS=["cairo","tajawal","noto-kufi","noto-naskh"];
   const setup=document.getElementById("classifyWordsSetupScreen"),nameInput=document.getElementById("classifyWordsGameNameInput"),editor=document.getElementById("classifyWordsGroupsEditor"),addGroupBtn=document.getElementById("addClassifyGroupBtn"),limitsStatus=document.getElementById("classifyLimitsStatus"),themeList=document.getElementById("classifyThemeListPanel"),themeToggle=document.getElementById("toggleClassifyThemeListBtn"),themePreview=document.getElementById("classifyCurrentThemePreview"),advancedToggle=document.getElementById("classifyAdvancedToggleBtn"),advancedAction=document.getElementById("classifyAdvancedActionText"),advancedPanel=document.getElementById("classifyAdvancedPanel"),soundToggle=document.getElementById("classifySoundToggleBtn"),fontSelect=document.getElementById("classifyFontSelect"),textColorSwatch=document.getElementById("classifyTextColorSwatch"),groupColorsToggle=document.getElementById("classifyGroupColorsToggleBtn"),unifiedItemsToggle=document.getElementById("classifyUnifiedItemsToggleBtn"),unifiedItemColorRow=document.getElementById("classifyUnifiedItemColorRow"),unifiedItemColorSwatch=document.getElementById("classifyUnifiedItemColorSwatch");
   if(!setup||!editor)return;
@@ -28555,7 +28721,7 @@
 (() => {
   "use strict";
   const GAME_TYPE="image-pins",KEY="sandooq_image_pins_payload_v1",DRAFT="sandooq_image_pins_draft_v1",PAGE="image-pins/pins.html",MAX_ANSWERS=24;
-  const THEMES=new Set(["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"]);
+  const THEMES=new Set(["classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day","theme-1","theme-2","theme-3","theme-4","theme-5","theme-6","theme-7","theme-8","theme-9","theme-10","theme-11","theme-12","theme-13","theme-14","theme-15","theme-16","theme-17","theme-18","theme-19"]);
   const FONTS=new Set(["cairo","tajawal","noto-kufi","noto-naskh"]);
   const setup=document.getElementById("imagePinsSetupScreen");
   if(!setup)return;
