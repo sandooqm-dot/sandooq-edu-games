@@ -2,9 +2,9 @@
 
 <html dir="rtl" lang="ar">
 <head>
-<!-- version: index-v133-settings-clean-style -->
+<!-- version: EDU-HOME-v1.0-RC1 / index-v145 -->
 <meta charset="utf-8"/>
-<meta content="index-v133-settings-clean-style" name="sandooq-build"/>
+<meta content="EDU-HOME-v1.0-RC1-index-v145" name="sandooq-build"/>
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
@@ -12,7 +12,41 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@800&family=Noto+Kufi+Arabic:wght@800&family=Noto+Naskh+Arabic:wght@700&display=swap" rel="stylesheet">
-<title>صندوق الالعاب التعليمية</title>
+<meta name="description" content="منصة صندوق الألعاب التعليمية للمعلمين: أنشئ ألعابًا تفاعلية وشغّلها على الجوال أو اللابتوب أو شاشة الفصل. جرّب العجلة وافتح الصندوق مجانًا."/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<link rel="canonical" href="https://education.sandooq-games.com/"/>
+<meta property="og:locale" content="ar_SA"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="صندوق الألعاب التعليمية"/>
+<meta property="og:description" content="أنشئ ألعابًا تعليمية تفاعلية وجرّب لعبتين مجانًا، ثم شغّل ألعابك المحفوظة متى شئت."/>
+<meta property="og:url" content="https://education.sandooq-games.com/"/>
+<meta property="og:image" content="https://sandooq-games.com/logo.PNG"/>
+<meta name="twitter:card" content="summary"/>
+<meta name="theme-color" content="#2f63d4"/>
+<title>صندوق الألعاب التعليمية | أنشئ ألعابًا تفاعلية للطلاب</title>
+<script>
+(() => {
+  const keys = ["sg_token","sandooq_token","access_token","token"];
+  const params = new URLSearchParams(location.search);
+  if (!keys.some(key => String(params.get(key) || "").trim())) return;
+  const target = new URL("/auth/complete", location.origin);
+  target.search = location.search;
+  location.replace(target.toString());
+})();
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"SoftwareApplication",
+  "name":"صندوق الألعاب التعليمية",
+  "url":"https://education.sandooq-games.com/",
+  "applicationCategory":"EducationalApplication",
+  "operatingSystem":"Web",
+  "inLanguage":"ar",
+  "description":"منصة عربية لإنشاء وتشغيل ألعاب تعليمية تفاعلية للطلاب داخل الفصل.",
+  "offers":{"@type":"Offer","price":"0","priceCurrency":"SAR","description":"تجربة مجانية للعبة العجلة ولعبة افتح الصندوق"}
+}
+</script>
 <style>
     :root{
       --bg:#ece8cf;
@@ -475,6 +509,38 @@
       box-shadow:0 4px 0 rgba(0,0,0,.18);
     }
     .education-upgrade-close{background:#eef2f8;color:#252b38}
+
+    .choices-theme-card.is-trial-theme-locked{
+      position:relative;
+      opacity:.72;
+      filter:saturate(.7);
+    }
+    .choices-theme-card.is-trial-theme-locked::after{
+      content:"🔒 ضمن الباقة";
+      position:absolute;
+      inset:8px;
+      z-index:4;
+      display:grid;
+      place-items:center;
+      border:2px solid rgba(17,17,17,.72);
+      border-radius:14px;
+      background:rgba(255,255,255,.9);
+      color:#17213b;
+      font-size:13px;
+      font-weight:950;
+      pointer-events:none;
+    }
+    .education-trial-feature-note{
+      margin:12px 0 0;
+      padding:11px 14px;
+      border:2px solid #cdd8ef;
+      border-radius:14px;
+      background:#f4f7fd;
+      color:#48546d;
+      font-weight:850;
+      line-height:1.7;
+      text-align:center;
+    }
 
     @media (max-width:760px){
       .education-upgrade-banner{grid-template-columns:1fr;text-align:center}
@@ -17336,8 +17402,952 @@
       .ihc-spotlight,.ihc-game-arrow{transition:none!important}
     }
   </style>
+  <style>
+    body.entry-pending{overflow:hidden}
+    body.entry-pending>main,
+    body.entry-pending>nav{visibility:hidden}
+    .edu-entry-modal{
+      position:fixed;inset:0;z-index:100000;display:grid;place-items:center;
+      padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
+      background:rgba(14,24,42,.72);backdrop-filter:blur(9px)
+    }
+    .edu-entry-modal[hidden]{display:none!important}
+    .edu-entry-dialog{
+      width:min(100%,520px);max-height:min(92dvh,760px);overflow:auto;
+      background:#fff;border:3px solid #111;border-radius:30px;padding:clamp(22px,5vw,34px);
+      box-shadow:0 22px 70px rgba(0,0,0,.28);text-align:center
+    }
+    .edu-entry-logo{width:78px;height:78px;object-fit:contain;border-radius:22px;margin-bottom:10px}
+    .edu-entry-dialog h2{margin:0;font-size:clamp(25px,6vw,35px);line-height:1.35}
+    .edu-entry-lead{margin:10px 0 22px;color:#566078;font-size:clamp(15px,3.8vw,18px);font-weight:750;line-height:1.8}
+    .edu-entry-actions,.edu-entry-login{display:grid;gap:12px}
+    .edu-entry-btn{
+      width:100%;min-height:56px;border:2px solid #111;border-radius:18px;padding:10px 16px;
+      font-size:18px;font-weight:900;cursor:pointer
+    }
+    .edu-entry-btn.primary{background:#111;color:#fff}
+    .edu-entry-btn.trial{background:#2fbf71;color:#fff}
+    .edu-entry-btn.light{background:#f1f4f8;color:#1d2738}
+    .edu-entry-login[hidden],.edu-entry-actions[hidden]{display:none!important}
+    .edu-entry-login-title{margin:0;font-size:22px;font-weight:950}
+    .edu-entry-phone{
+      width:100%;height:56px;border:2px solid #d9dfeb;border-radius:17px;padding:0 16px;
+      direction:ltr;text-align:center;font-size:19px;font-weight:850;outline:none
+    }
+    .edu-entry-phone:focus{border-color:#1688d3;box-shadow:0 0 0 4px rgba(22,136,211,.12)}
+    .edu-entry-hint{margin:0;color:#69758b;font-size:13px;font-weight:750;line-height:1.7}
+    .edu-entry-error{margin:0;padding:10px 12px;border-radius:13px;background:#fff0f0;color:#b42318;font-weight:850;line-height:1.6}
+    .edu-entry-error[hidden]{display:none!important}
+    .edu-entry-store{display:inline-flex;justify-content:center;color:#087b47;font-weight:900;text-decoration:underline}
+    .education-account-btn{
+      flex:0 0 auto;min-height:40px;border:2px solid #111;border-radius:14px;background:#fff;
+      color:#111;padding:7px 13px;font-size:14px;font-weight:900;cursor:pointer
+    }
+    .education-public-intro{
+      width:min(100%,980px);margin:4px auto 0;padding:clamp(18px,3vw,28px);
+      border:3px solid #111;border-radius:26px;background:rgba(255,255,255,.94);
+      box-shadow:0 6px 0 rgba(17,17,17,.13);text-align:right
+    }
+    .education-public-intro h2{margin:0;text-align:center;font-size:clamp(22px,3.5vw,34px);line-height:1.35}
+    .education-public-intro>p{margin:9px auto 16px;max-width:800px;text-align:center;color:#556078;font-size:clamp(14px,2vw,18px);font-weight:750;line-height:1.8}
+    .education-public-benefits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .education-public-benefit{padding:12px 8px;border:2px solid #d7deeb;border-radius:16px;background:#f8faff;text-align:center;font-size:14px;font-weight:900;line-height:1.55}
+    .education-public-faq{margin-top:16px;display:grid;gap:8px}
+    .education-public-faq details{border:2px solid #d7deeb;border-radius:14px;background:#fff;padding:10px 13px}
+    .education-public-faq summary{cursor:pointer;font-weight:950}
+    .education-public-faq p{margin:8px 0 0;color:#566078;font-weight:750;line-height:1.75}
+    .education-public-store{
+      width:min(100%,430px);min-height:52px;margin:16px auto 0;border:2px solid #111;border-radius:16px;
+      display:grid;place-items:center;background:#2fbf71;color:#fff;text-decoration:none;font-size:17px;font-weight:950;
+      box-shadow:0 4px 0 rgba(17,17,17,.18)
+    }
+    body.education-customer .education-public-intro{display:none!important}
+    @media(max-width:560px){
+      .edu-entry-dialog{border-radius:24px;padding:22px 18px}
+      .edu-entry-logo{width:66px;height:66px;border-radius:18px}
+      .education-account-btn{width:100%;margin-top:4px}
+      .education-public-benefits{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .education-public-intro{border-radius:21px;padding:17px 13px}
+    }
+  </style>
+  <style id="edu-trial-v11-responsive">
+    /* EDU-TRIAL v1.1 RC1: responsive sizing, bottom clearance and reliable scrolling. */
+    body:not(.subpage){
+      min-height:100%;height:auto!important;max-height:none!important;overflow-y:auto!important;
+    }
+    body:not(.subpage) .page{
+      box-sizing:border-box;min-height:100dvh!important;height:auto!important;max-height:none!important;
+      overflow-x:hidden!important;overflow-y:visible!important;
+      padding-inline:clamp(10px,2.4vw,30px)!important;
+      padding-bottom:calc(var(--home-footer-height) + var(--safe-bottom) + clamp(48px,7vh,84px))!important;
+      scroll-padding-bottom:calc(var(--home-footer-height) + var(--safe-bottom) + 36px);
+    }
+    body:not(.subpage) #homeShell.home-dashboard{
+      width:min(100%,1360px)!important;min-height:0!important;height:auto!important;max-height:none!important;
+      padding-bottom:clamp(22px,3vh,42px)!important;
+    }
+    body:not(.subpage) .home-dashboard-grid{
+      width:min(100%,1180px)!important;min-height:0!important;height:auto!important;max-height:none!important;
+    }
+    body:not(.subpage) .education-public-intro{
+      width:min(100%,980px)!important;padding:clamp(16px,2.2vw,28px)!important;
+      border-radius:clamp(20px,2.2vw,28px)!important;
+    }
+    body:not(.subpage) .education-public-intro h2{
+      font-size:clamp(24px,3vw,38px)!important;line-height:1.25!important;
+    }
+    body:not(.subpage) .education-public-intro>p{
+      font-size:clamp(16px,1.7vw,21px)!important;line-height:1.65!important;
+    }
+    body:not(.subpage) .education-public-benefit{
+      min-height:clamp(58px,6vw,76px)!important;padding:clamp(9px,1.2vw,14px)!important;
+      font-size:clamp(14px,1.3vw,17px)!important;line-height:1.4!important;
+      display:flex;align-items:center;justify-content:center;
+    }
+    body:not(.subpage) .education-public-faq details{
+      min-height:clamp(52px,5vw,64px)!important;padding:0 clamp(13px,1.8vw,20px)!important;
+      display:flex;flex-direction:column;justify-content:center;
+    }
+    body:not(.subpage) .education-public-faq summary{
+      min-height:clamp(50px,4.8vw,62px)!important;font-size:clamp(15px,1.45vw,19px)!important;
+      line-height:1.45!important;display:flex;align-items:center;
+    }
+    body:not(.subpage) .education-public-store{
+      min-height:clamp(52px,5vw,62px)!important;padding:12px clamp(14px,2vw,24px)!important;
+      font-size:clamp(17px,1.6vw,21px)!important;line-height:1.3!important;
+    }
+    body:not(.subpage) #homeShell .home-action-btn{
+      min-height:clamp(60px,7vw,84px)!important;height:auto!important;
+      padding:11px clamp(9px,2vw,20px)!important;font-size:clamp(18px,1.9vw,26px)!important;
+      line-height:1.25!important;
+    }
+    body:not(.subpage) #homeShell .home-create-action{
+      min-height:clamp(70px,8vw,96px)!important;height:auto!important;
+      font-size:clamp(23px,2.35vw,34px)!important;
+    }
+    body:not(.subpage) #homeShell .home-actions-pair .home-action-btn{
+      min-height:clamp(60px,6.8vw,80px)!important;font-size:clamp(17px,1.65vw,23px)!important;
+    }
+    body:not(.subpage) #homeShell .home-play-panel .select-wrap,
+    body:not(.subpage) #homeShell .home-play-panel .start-btn{
+      min-height:clamp(54px,5.5vw,70px)!important;height:auto!important;
+      font-size:clamp(16px,1.45vw,20px)!important;
+    }
+
+    :is(#createScreen,#wheelSetupScreen,#choicesSetupScreen,#fillSetupScreen,#movingQuestionSetupScreen,#classifyWordsSetupScreen,#imagePinsSetupScreen,#matchSetupScreen,#orderSetupScreen,#trainSetupScreen).active{
+      box-sizing:border-box;width:min(100%,1180px)!important;max-width:1180px!important;
+      height:auto!important;max-height:none!important;overflow:visible!important;
+      margin-inline:auto!important;margin-bottom:calc(var(--footer-h) + var(--safe-bottom) + 34px)!important;
+      padding:clamp(14px,2.2vw,28px)!important;
+    }
+    :is(#wheelSetupScreen,#choicesSetupScreen,#fillSetupScreen,#movingQuestionSetupScreen,#classifyWordsSetupScreen,#imagePinsSetupScreen,#matchSetupScreen,#orderSetupScreen,#trainSetupScreen)
+    :is(.game-name-panel,.choices-section,.question-panel,.choices-theme-section,.wheel-modern-theme-section,.choices-config-group){
+      padding:clamp(13px,1.8vw,22px)!important;border-radius:clamp(16px,2vw,24px)!important;
+    }
+    :is(#wheelSetupScreen,#choicesSetupScreen,#fillSetupScreen,#movingQuestionSetupScreen,#classifyWordsSetupScreen,#imagePinsSetupScreen,#matchSetupScreen,#orderSetupScreen,#trainSetupScreen)
+    :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea){
+      min-height:48px!important;font-size:clamp(16px,1.25vw,18px)!important;line-height:1.4!important;
+    }
+    :is(#wheelSetupScreen,#choicesSetupScreen,#fillSetupScreen,#movingQuestionSetupScreen,#classifyWordsSetupScreen,#imagePinsSetupScreen,#matchSetupScreen,#orderSetupScreen,#trainSetupScreen)
+    :is(.theme-change-btn,.choices-theme-change,.theme-activate-btn,.choices-theme-activate,.choices-mode-btn,.setup-add-item-btn,.choices-advanced-action,.quiz-image-picker-button,.choices-test-btn,.choices-save-btn,.test-btn,.save-btn,.start-btn){
+      min-height:clamp(48px,5vw,60px)!important;height:auto!important;
+      padding:10px clamp(12px,1.8vw,20px)!important;font-size:clamp(15px,1.35vw,19px)!important;
+      line-height:1.3!important;
+    }
+    body.create-template-page #createScreen .template-card{
+      min-height:clamp(128px,14vw,190px)!important;padding:clamp(13px,1.8vw,22px)!important;
+      border-radius:clamp(18px,2vw,26px)!important;
+    }
+    body.create-template-page #createScreen .template-title{
+      font-size:clamp(18px,1.8vw,25px)!important;line-height:1.3!important;
+    }
+    body.create-template-page #createScreen .template-desc{
+      font-size:clamp(14px,1.2vw,17px)!important;line-height:1.5!important;
+    }
+
+    @media(max-width:560px){
+      body:not(.subpage) .page{
+        padding-inline:10px!important;
+        padding-bottom:calc(var(--home-footer-height) + var(--safe-bottom) + 38px)!important;
+      }
+      body:not(.subpage) #homeShell.home-dashboard{width:100%!important;padding-inline:0!important}
+      body:not(.subpage) .education-public-intro{padding:15px 11px!important;border-radius:21px!important}
+      body:not(.subpage) .education-public-benefits{
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;
+      }
+      body:not(.subpage) .education-public-benefit{
+        min-height:62px!important;padding:8px 6px!important;font-size:clamp(13px,3.7vw,15px)!important;
+      }
+      body:not(.subpage) .education-public-faq{gap:8px!important}
+      body:not(.subpage) .education-public-faq details{min-height:56px!important;padding-inline:12px!important}
+      body:not(.subpage) .education-public-faq summary{
+        min-height:54px!important;font-size:clamp(15px,4vw,17px)!important;
+      }
+      body:not(.subpage) #homeShell .home-actions-pair{
+        display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;
+      }
+      body:not(.subpage) #homeShell .home-actions-pair .home-action-btn{
+        min-height:62px!important;padding:9px 6px!important;font-size:clamp(15px,4.1vw,18px)!important;
+      }
+      :is(#createScreen,#wheelSetupScreen,#choicesSetupScreen,#fillSetupScreen,#movingQuestionSetupScreen,#classifyWordsSetupScreen,#imagePinsSetupScreen,#matchSetupScreen,#orderSetupScreen,#trainSetupScreen).active{
+        width:100%!important;padding:13px 10px!important;
+        margin-bottom:calc(var(--footer-h) + var(--safe-bottom) + 26px)!important;
+      }
+      body.create-template-page #createScreen .template-card{min-height:116px!important;padding:12px!important}
+    }
+    @media(min-width:561px) and (max-width:1023px){
+      body:not(.subpage) .education-public-benefits{
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      }
+      body:not(.subpage) .education-public-benefit{min-height:66px!important}
+    }
+    @media(min-width:900px){
+      body:not(.subpage) .education-public-benefits{
+        grid-template-columns:repeat(4,minmax(0,1fr))!important;
+      }
+    }
+  </style>
+  <style id="edu-home-v10">
+    [hidden]{display:none!important}
+    #legacyHomeShell{display:none!important}
+    body:not(.subpage){overflow-x:hidden!important;overflow-y:auto!important;background:#fffaf0!important}
+    body:not(.subpage) .page{display:block!important;width:100%!important;max-width:none!important;padding:0!important;margin:0!important;overflow:visible!important}
+    body:not(.subpage) .bottom-bar{display:none!important}
+    body:not(.subpage) .edu-decor{display:none!important}
+    body:not(.subpage) #homeShell{display:block;width:100%;max-width:none;margin:0;color:#172033;font-family:inherit;background:#fffaf0}
+    .edu-public-site *{box-sizing:border-box}
+    .edu-site-header{position:sticky;top:0;z-index:600;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;width:100%;min-height:76px;padding:10px max(22px,calc((100vw - 1180px)/2));background:rgba(255,255,255,.96);border-bottom:1px solid #e7eaf0;box-shadow:0 8px 28px rgba(30,47,81,.07);backdrop-filter:blur(12px)}
+    .edu-site-brand{display:inline-flex;align-items:center;gap:10px;color:#172033;text-decoration:none;font-weight:950;white-space:nowrap}
+    .edu-site-brand img{width:48px;height:48px;object-fit:contain;border-radius:14px}
+    .edu-site-brand span{font-size:clamp(17px,1.45vw,22px)}
+    .edu-site-nav{display:flex;justify-content:center;align-items:center;gap:clamp(12px,2vw,28px)}
+    .edu-site-nav a{color:#3f4960;text-decoration:none;font-size:15px;font-weight:850;white-space:nowrap}
+    .edu-site-nav a:hover{color:#2f63d4}
+    .edu-site-actions{display:flex;align-items:center;gap:9px}
+    .edu-site-actions button{min-height:44px;border-radius:13px;padding:8px 16px;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer}
+    .edu-header-saved{border:1px solid #dce2ed;background:#fff;color:#26334d}
+    .edu-site-actions .education-account-btn{border:2px solid #111;background:#111;color:#fff;box-shadow:none}
+    .edu-section{width:min(1160px,calc(100% - 32px));margin-inline:auto;padding-block:76px}
+    .edu-kicker{margin:0 0 10px;color:#2f63d4;font-size:14px;font-weight:950;letter-spacing:.01em}
+    .edu-hero{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(390px,.98fr);align-items:center;gap:clamp(34px,6vw,84px);min-height:650px;padding-top:62px;padding-bottom:64px}
+    .edu-hero h1,.edu-section-heading h2,.edu-final-cta h2{margin:0;color:#101828;font-weight:1000;letter-spacing:-.025em}
+    .edu-hero h1{max-width:680px;font-size:clamp(42px,5vw,69px);line-height:1.12}
+    .edu-hero-lead{max-width:660px;margin:22px 0 0;color:#536078;font-size:clamp(18px,1.65vw,23px);font-weight:750;line-height:1.75}
+    .edu-hero-points{display:grid;gap:10px;margin:24px 0 0;padding:0;list-style:none}
+    .edu-hero-points li{display:flex;align-items:flex-start;gap:9px;color:#27344e;font-size:16px;font-weight:800;line-height:1.55}
+    .edu-hero-points li::before{content:"✓";display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;margin-top:1px;border-radius:50%;background:#dff7e8;color:#087b47;font-weight:1000}
+    .edu-hero-actions,.edu-final-actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:30px}
+    .edu-btn{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:12px 24px;border:2px solid #111;border-radius:14px;font-family:inherit;font-size:17px;font-weight:950;line-height:1.25;text-align:center;text-decoration:none;cursor:pointer;box-shadow:0 5px 0 #111;transition:transform .15s ease,box-shadow .15s ease}
+    .edu-btn:hover{transform:translateY(2px);box-shadow:0 3px 0 #111}
+    .edu-btn-primary{background:#2f63d4;color:#fff}
+    .edu-btn-secondary{background:#fff;color:#111}
+    .edu-btn-store{background:#2fc477;color:#072f1c}
+    .edu-hero-visual{position:relative;min-height:510px;border:3px solid #111;border-radius:34px;background:linear-gradient(145deg,#e8f0ff 0 48%,#fff2bd 48% 100%);box-shadow:14px 16px 0 #111;overflow:hidden}
+    .edu-preview-card{position:absolute;width:58%;padding:12px;border:2px solid #111;border-radius:22px;background:#fff;box-shadow:8px 9px 0 rgba(17,17,17,.95);transform:rotate(-3deg)}
+    .edu-preview-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:contain;border-radius:14px;background:#f6f8fc}
+    .edu-preview-card span{display:block;padding-top:9px;font-size:18px;font-weight:950;text-align:center}
+    .edu-preview-wheel{top:36px;right:34px}
+    .edu-preview-box{bottom:42px;left:34px;transform:rotate(3deg)}
+    .edu-preview-note{position:absolute;right:50%;bottom:21px;transform:translateX(50%);width:max-content;max-width:82%;padding:9px 15px;border:2px solid #111;border-radius:999px;background:#fff;color:#172033;font-size:13px;font-weight:900;box-shadow:4px 4px 0 #111}
+    .edu-trust-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;width:min(1160px,calc(100% - 32px));margin:0 auto;padding:18px;border:2px solid #111;border-radius:24px;background:#fff;box-shadow:7px 8px 0 #111}
+    .edu-trust-strip div{display:flex;align-items:center;justify-content:center;gap:9px;min-height:58px;padding:8px;border-left:1px solid #e5e8ef;font-size:15px;font-weight:900;text-align:center}
+    .edu-trust-strip div:last-child{border-left:0}.edu-trust-strip strong{font-size:23px}
+    .edu-section-heading{max-width:760px;margin:0 auto 34px;text-align:center}
+    .edu-section-heading h2{font-size:clamp(31px,3.5vw,49px);line-height:1.2}
+    .edu-section-heading>p:last-child{margin:14px 0 0;color:#667085;font-size:17px;font-weight:750;line-height:1.65}
+    .edu-how{padding-top:96px}
+    .edu-step-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+    .edu-step-grid article{display:flex;align-items:flex-start;gap:16px;min-height:176px;padding:25px;border:2px solid #111;border-radius:22px;background:#fff;box-shadow:7px 8px 0 #111}
+    .edu-step-grid article>span{display:grid;place-items:center;flex:0 0 54px;width:54px;height:54px;border:2px solid #111;border-radius:16px;background:#ffd84f;color:#111;font-size:25px;font-weight:1000}
+    .edu-step-grid h3,.edu-benefit-grid h3{margin:3px 0 8px;color:#172033;font-size:21px;font-weight:1000}
+    .edu-step-grid p,.edu-benefit-grid p{margin:0;color:#667085;font-size:15px;font-weight:700;line-height:1.65}
+    .edu-benefits{width:100%;padding-inline:max(16px,calc((100vw - 1160px)/2));background:#edf3ff;border-block:1px solid #dfe7f5}
+    .edu-benefit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;max-width:1160px;margin:auto}
+    .edu-benefit-grid article{min-height:190px;padding:24px;border:1px solid #dce3ef;border-radius:22px;background:#fff;box-shadow:0 12px 28px rgba(32,51,84,.07)}
+    .edu-benefit-grid b{display:grid;place-items:center;width:50px;height:50px;margin-bottom:15px;border-radius:15px;background:#fff4bd;font-size:25px}
+    .edu-templates{padding-top:88px}
+    .edu-template-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;max-width:none;text-align:right}
+    .edu-template-heading>div:first-child{max-width:730px}
+    .edu-template-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+    .edu-template-tools button{min-height:46px;padding:9px 14px;border:1px solid #ced7e6;border-radius:12px;background:#fff;color:#26334d;font-family:inherit;font-size:14px;font-weight:900;cursor:pointer}
+    html{scroll-behavior:smooth}
+    #eduHow,#eduTemplates,#eduFaq{scroll-margin-top:110px}
+    #eduTemplateMount .template-list{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:18px!important;margin:0!important;padding:0!important}
+    #eduTemplateMount .template-card{position:relative!important;display:flex!important;flex-direction:column!important;min-width:0!important;min-height:300px!important;padding:0!important;border:2px solid #111!important;border-radius:22px!important;background:#fff!important;box-shadow:6px 7px 0 #111!important;overflow:hidden!important;cursor:pointer!important;transform:none!important;transition:transform .15s ease,box-shadow .15s ease!important}
+    .edu-template-badge{position:absolute;z-index:6;top:12px;right:12px;display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:6px 11px;border:2px solid #101828;border-radius:999px;background:#fff7c2;color:#101828;font-size:13px;font-weight:950;box-shadow:0 4px 0 rgba(16,24,40,.13)}
+    #eduTemplateMount .template-card:hover{transform:translateY(-3px)!important;box-shadow:8px 10px 0 #111!important}
+    #eduTemplateMount .template-cover{display:block!important;width:100%!important;height:158px!important;min-height:158px!important;margin:0!important;border:0!important;border-bottom:2px solid #111!important;border-radius:0!important;background-position:center!important;background-repeat:no-repeat!important;background-size:cover!important}
+    #eduTemplateMount .wheel-cover{background-image:url('game-previews/wheel.webp')!important}
+    #eduTemplateMount .open-box-cover{background-image:url('game-previews/open-box.webp')!important}
+    #eduTemplateMount .choices-cover,#eduTemplateMount .quiz-cover{background-image:url('game-previews/choices.webp')!important}
+    #eduTemplateMount .match-cover{background-image:url('game-previews/match.webp')!important}
+    #eduTemplateMount .order-cover{background-image:url('game-previews/order.webp')!important}
+    #eduTemplateMount .train-cover{background-image:url('game-previews/train.webp')!important}
+    #eduTemplateMount .moving-question-cover{background-image:url('game-previews/moving-question.webp')!important}
+    #eduTemplateMount .fill-cover{background-image:url('game-previews/fill-blank.webp')!important}
+    #eduTemplateMount .classify-words-cover{background-image:url('game-previews/classify-words.webp')!important}
+    #eduTemplateMount .image-pins-cover{background-image:url('game-previews/image-pins.webp')!important}
+    #eduTemplateMount .template-content{display:flex!important;flex:1!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:7px!important;width:100%!important;padding:18px!important;text-align:right!important}
+    #eduTemplateMount .template-title{margin:0!important;color:#172033!important;font-size:20px!important;font-weight:1000!important;line-height:1.3!important}
+    #eduTemplateMount .template-desc{margin:0!important;color:#667085!important;font-size:14px!important;font-weight:700!important;line-height:1.55!important}
+    #eduTemplateMount .coming-card{opacity:.68!important;box-shadow:none!important;border-color:#cbd3df!important;cursor:default!important}
+    #eduTemplateMount .education-template-lock{border-radius:20px!important}
+    .edu-faq{padding-top:82px}
+    .edu-faq-list{display:grid;gap:12px;max-width:900px;margin:auto}
+    .edu-faq-list details{border:2px solid #111;border-radius:18px;background:#fff;box-shadow:4px 5px 0 #111;overflow:hidden}
+    .edu-faq-list summary{min-height:66px;padding:18px 22px;color:#172033;font-size:18px;font-weight:950;cursor:pointer;list-style:none}
+    .edu-faq-list summary::-webkit-details-marker{display:none}
+    .edu-faq-list summary::before{content:"＋";float:left;color:#2f63d4;font-size:22px}
+    .edu-faq-list details[open] summary::before{content:"−"}
+    .edu-faq-list p{margin:0;padding:0 22px 20px;color:#5f6b82;font-size:16px;font-weight:700;line-height:1.7}
+    .edu-final-cta{display:flex;align-items:center;justify-content:space-between;gap:28px;margin-bottom:74px;padding:46px;border:3px solid #111;border-radius:28px;background:#fff2bd;box-shadow:10px 11px 0 #111}
+    .edu-final-cta h2{font-size:clamp(30px,3.5vw,48px)}
+    .edu-final-cta>div:first-child>p:last-child{max-width:660px;margin:12px 0 0;color:#536078;font-size:17px;font-weight:750;line-height:1.6}
+    .edu-final-actions{flex:0 0 auto;justify-content:flex-end;margin-top:0}
+    .edu-site-footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;min-height:120px;padding:26px max(22px,calc((100vw - 1160px)/2));background:#172033;color:#fff}
+    .edu-site-footer .edu-site-brand{color:#fff}.edu-site-footer p{margin:0;color:#cbd5e7;font-weight:700}.edu-site-footer a{color:#fff;font-weight:900}
+    @media(max-width:980px){
+      .edu-site-header{grid-template-columns:1fr auto;gap:10px}.edu-site-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;padding:2px 0 5px}.edu-site-nav a{font-size:13px}
+      .edu-hero{grid-template-columns:1fr;min-height:auto}.edu-hero-copy{text-align:center}.edu-hero h1,.edu-hero-lead{margin-inline:auto}.edu-hero-points{max-width:650px;margin-inline:auto;text-align:right}.edu-hero-actions{justify-content:center}.edu-hero-visual{width:min(620px,100%);margin:auto}
+      .edu-step-grid{grid-template-columns:1fr}.edu-step-grid article{min-height:130px}.edu-benefit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+      #eduTemplateMount .template-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}.edu-template-heading{align-items:flex-start;flex-direction:column}.edu-template-tools{justify-content:flex-start}
+      .edu-final-cta{align-items:flex-start;flex-direction:column}.edu-final-actions{justify-content:flex-start}.edu-site-footer{grid-template-columns:1fr;text-align:center}.edu-site-footer .edu-site-brand{justify-content:center}
+    }
+    @media(max-width:600px){
+      .edu-site-header{min-height:64px;padding:8px 12px}.edu-site-brand img{width:40px;height:40px}.edu-site-brand span{font-size:15px}.edu-header-saved{display:none}.edu-site-actions button{min-height:40px;padding:7px 11px;font-size:12px}
+      .edu-section{width:min(100% - 20px,1160px);padding-block:54px}.edu-hero{gap:34px;padding-top:42px}.edu-hero h1{font-size:clamp(35px,11vw,48px)}.edu-hero-lead{font-size:17px}.edu-hero-actions{display:grid;grid-template-columns:1fr;width:100%}.edu-btn{width:100%;min-height:54px}
+      .edu-hero-visual{min-height:390px;border-radius:25px;box-shadow:8px 9px 0 #111}.edu-preview-card{width:64%;padding:8px;border-radius:16px}.edu-preview-card img{border-radius:10px}.edu-preview-wheel{top:25px;right:20px}.edu-preview-box{bottom:38px;left:20px}.edu-preview-card span{font-size:15px}.edu-preview-note{font-size:11px}
+      .edu-trust-strip{grid-template-columns:repeat(2,minmax(0,1fr));width:calc(100% - 20px);padding:9px;box-shadow:5px 6px 0 #111}.edu-trust-strip div{min-height:54px;border:0;font-size:13px}.edu-trust-strip strong{font-size:19px}
+      .edu-section-heading{margin-bottom:24px}.edu-section-heading h2{font-size:31px}.edu-section-heading>p:last-child{font-size:15px}.edu-step-grid article{padding:18px}.edu-step-grid article>span{flex-basis:46px;width:46px;height:46px}.edu-step-grid h3,.edu-benefit-grid h3{font-size:18px}
+      .edu-benefits{width:100%;padding-inline:10px}.edu-benefit-grid{grid-template-columns:1fr}.edu-benefit-grid article{min-height:150px;padding:19px}
+      #eduTemplateMount .template-list{grid-template-columns:1fr!important;gap:14px!important}#eduTemplateMount .template-card{min-height:280px!important}#eduTemplateMount .template-cover{height:170px!important;min-height:170px!important}.edu-template-tools{display:grid;grid-template-columns:1fr;width:100%}.edu-template-tools button{width:100%}
+      .edu-faq-list summary{min-height:62px;padding:16px;font-size:16px}.edu-faq-list p{padding:0 16px 17px;font-size:14px}
+      .edu-final-cta{width:calc(100% - 20px);margin-bottom:48px;padding:27px 18px;box-shadow:7px 8px 0 #111}.edu-final-actions{display:grid;grid-template-columns:1fr;width:100%}.edu-site-footer{padding-inline:16px}
+    }
+
+    /* index-v140: ترتيب RTL صحيح وشريط تكيفي ممتد بلا هوامش جانبية كبيرة. */
+    .edu-site-header{
+      display:flex;
+      grid-template-columns:none;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:nowrap;
+      gap:clamp(8px,2vw,24px);
+      min-height:70px;
+      padding:9px clamp(10px,1.35vw,18px);
+      direction:rtl;
+      overflow:visible;
+    }
+    .edu-site-brand{
+      display:inline-flex;
+      align-items:center;
+      flex:0 1 auto;
+      min-width:0;
+      gap:9px;
+      direction:rtl;
+      cursor:default;
+    }
+    .edu-site-brand img{
+      flex:0 0 auto;
+      width:44px;
+      height:44px;
+    }
+    .edu-site-brand span{
+      min-width:0;
+      overflow:hidden;
+      color:#172033;
+      font-size:clamp(14px,1.4vw,21px);
+      font-weight:950;
+      line-height:1.25;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .edu-site-controls{
+      display:flex;
+      align-items:center;
+      flex:0 0 auto;
+      gap:7px;
+      min-width:max-content;
+      direction:rtl;
+    }
+    .edu-site-controls>.education-account-btn{
+      width:auto;
+      min-height:42px;
+      margin:0;
+      border:2px solid #111;
+      border-radius:11px;
+      background:#111;
+      color:#fff;
+      padding:7px 14px;
+      font-family:inherit;
+      font-size:14px;
+      font-weight:900;
+      line-height:1.2;
+      white-space:nowrap;
+      box-shadow:none;
+      cursor:pointer;
+    }
+    .edu-site-menu{
+      position:relative;
+      flex:0 0 auto;
+      direction:rtl;
+    }
+    .edu-site-menu>summary{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:42px;
+      min-height:42px;
+      margin:0;
+      border:0;
+      border-radius:10px;
+      background:transparent;
+      color:#3f4960;
+      padding:8px;
+      list-style:none;
+      cursor:pointer;
+    }
+    .edu-site-menu>summary:hover{
+      background:#f3f6fb;
+      color:#2f63d4;
+    }
+    .edu-site-menu>summary::-webkit-details-marker{display:none}
+    .edu-site-menu-icon{
+      display:grid;
+      gap:5px;
+      width:23px;
+    }
+    .edu-site-menu-icon span{
+      display:block;
+      width:100%;
+      height:2.5px;
+      border-radius:999px;
+      background:currentColor;
+    }
+    .edu-site-menu[open]>summary{
+      background:#edf3ff;
+      color:#2f63d4;
+    }
+    .edu-site-menu-panel{
+      position:absolute;
+      top:calc(100% + 10px);
+      right:auto;
+      left:0;
+      z-index:1000;
+      display:grid;
+      width:230px;
+      max-height:calc(100dvh - 92px);
+      overflow-y:auto;
+      padding:8px;
+      border:1px solid #dfe4ed;
+      border-radius:16px;
+      background:#fff;
+      box-shadow:0 16px 40px rgba(23,32,51,.16);
+      direction:rtl;
+    }
+    .edu-site-menu-panel button{
+      width:100%;
+      min-height:42px;
+      border:0;
+      border-radius:10px;
+      background:transparent;
+      color:#26334d;
+      padding:9px 12px;
+      font-family:inherit;
+      font-size:14px;
+      font-weight:800;
+      line-height:1.35;
+      text-align:right;
+      cursor:pointer;
+    }
+    .edu-site-menu-panel button:hover{
+      background:#f3f6fb;
+      color:#2f63d4;
+    }
+    @media(max-width:600px){
+      .edu-site-header{
+        min-height:60px;
+        gap:7px;
+        padding:7px 8px;
+      }
+      .edu-site-brand{gap:6px}
+      .edu-site-brand img{
+        width:34px;
+        height:34px;
+        border-radius:10px;
+      }
+      .edu-site-brand span{font-size:13px}
+      .edu-site-controls{gap:5px}
+      .edu-site-controls>.education-account-btn{
+        min-height:38px;
+        padding:6px 10px;
+        font-size:11.5px;
+      }
+      .edu-site-menu>summary{
+        width:38px;
+        min-height:38px;
+        padding:7px;
+      }
+      .edu-site-menu-icon{width:21px}
+      .edu-site-menu-panel{
+        position:fixed;
+        top:64px;
+        right:auto;
+        left:8px;
+        width:min(230px,calc(100vw - 20px));
+        max-height:calc(100dvh - 74px);
+      }
+    }
+    @media(max-width:360px){
+      .edu-site-header{
+        gap:5px;
+        padding-inline:6px;
+      }
+      .edu-site-brand{gap:5px}
+      .edu-site-brand img{
+        width:30px;
+        height:30px;
+      }
+      .edu-site-brand span{font-size:11.5px}
+      .edu-site-controls>.education-account-btn{
+        min-height:36px;
+        padding-inline:8px;
+        font-size:10.5px;
+      }
+      .edu-site-menu>summary{
+        width:36px;
+        min-height:36px;
+      }
+      .edu-site-menu-icon{width:20px}
+    }
+
+    /* index-v142: مقياس جوال أكثر كثافة؛ تعديل الأحجام فقط مع إبقاء التصميم والترتيب. */
+    @media(max-width:600px){
+      .edu-site-header{
+        min-height:56px;
+        gap:6px;
+        padding:6px 8px;
+      }
+      .edu-site-brand{gap:5px}
+      .edu-site-brand img{
+        width:30px;
+        height:30px;
+        border-radius:9px;
+      }
+      .edu-site-brand span{font-size:12px}
+      .edu-site-controls{gap:5px}
+      .edu-site-controls>.education-account-btn{
+        min-height:36px;
+        padding:5px 9px;
+        font-size:11px;
+      }
+      .edu-site-menu>summary{
+        width:36px;
+        min-height:36px;
+        padding:7px;
+      }
+      .edu-site-menu-icon{
+        width:20px;
+        gap:4px;
+      }
+      .edu-site-menu-panel{
+        top:60px;
+        width:min(210px,calc(100vw - 20px));
+        max-height:calc(100dvh - 70px);
+      }
+      .edu-site-menu-panel button{
+        min-height:36px;
+        padding:7px 9px;
+        font-size:12px;
+      }
+
+      .edu-section{
+        width:min(100% - 24px,1160px);
+        padding-block:36px;
+      }
+      .edu-kicker{
+        margin-bottom:6px;
+        font-size:11.5px;
+      }
+      .edu-hero{
+        gap:22px;
+        min-height:auto;
+        padding-top:34px;
+        padding-bottom:34px;
+      }
+      .edu-hero h1{
+        font-size:clamp(28px,8.2vw,32px);
+        line-height:1.18;
+        letter-spacing:-.015em;
+      }
+      .edu-hero-lead{
+        margin-top:14px;
+        font-size:14px;
+        line-height:1.65;
+      }
+      .edu-hero-points{
+        gap:7px;
+        margin-top:16px;
+      }
+      .edu-hero-points li{
+        gap:7px;
+        font-size:13px;
+        line-height:1.5;
+      }
+      .edu-hero-points li::before{
+        flex-basis:19px;
+        width:19px;
+        height:19px;
+        font-size:12px;
+      }
+      .edu-hero-actions,
+      .edu-final-actions{
+        gap:9px;
+        margin-top:20px;
+      }
+      .edu-btn{
+        min-height:44px;
+        padding:9px 14px;
+        border-radius:12px;
+        font-size:14px;
+        box-shadow:0 4px 0 #111;
+      }
+      .edu-hero-visual{
+        min-height:260px;
+        border-radius:22px;
+        box-shadow:7px 8px 0 #111;
+      }
+      .edu-preview-card{
+        width:62%;
+        padding:6px;
+        border-radius:14px;
+        box-shadow:6px 7px 0 rgba(17,17,17,.95);
+      }
+      .edu-preview-card img{border-radius:8px}
+      .edu-preview-card span{
+        padding-top:5px;
+        font-size:12px;
+      }
+      .edu-preview-wheel{
+        top:18px;
+        right:16px;
+      }
+      .edu-preview-box{
+        bottom:28px;
+        left:16px;
+      }
+      .edu-preview-note{
+        bottom:13px;
+        padding:6px 10px;
+        font-size:9.5px;
+        box-shadow:3px 3px 0 #111;
+      }
+
+      .edu-trust-strip{
+        gap:6px;
+        width:calc(100% - 24px);
+        padding:7px;
+        border-radius:18px;
+        box-shadow:4px 5px 0 #111;
+      }
+      .edu-trust-strip div{
+        gap:5px;
+        min-height:42px;
+        padding:5px;
+        font-size:11.5px;
+        line-height:1.35;
+      }
+      .edu-trust-strip strong{font-size:16px}
+
+      .edu-section-heading{margin-bottom:18px}
+      .edu-section-heading h2{
+        font-size:25px;
+        line-height:1.25;
+      }
+      .edu-section-heading>p:last-child{
+        margin-top:8px;
+        font-size:13px;
+        line-height:1.55;
+      }
+      .edu-how{padding-top:44px}
+      .edu-step-grid{gap:10px}
+      .edu-step-grid article{
+        gap:11px;
+        min-height:100px;
+        padding:13px;
+        border-radius:17px;
+        box-shadow:4px 5px 0 #111;
+      }
+      .edu-step-grid article>span{
+        flex-basis:38px;
+        width:38px;
+        height:38px;
+        border-radius:12px;
+        font-size:18px;
+      }
+      .edu-step-grid h3,
+      .edu-benefit-grid h3{
+        margin:2px 0 5px;
+        font-size:16px;
+      }
+      .edu-step-grid p,
+      .edu-benefit-grid p{
+        font-size:12.5px;
+        line-height:1.55;
+      }
+
+      .edu-benefits{padding-inline:12px}
+      .edu-benefit-grid{gap:10px}
+      .edu-benefit-grid article{
+        min-height:104px;
+        padding:13px 14px;
+        border-radius:17px;
+      }
+      .edu-benefit-grid b{
+        width:38px;
+        height:38px;
+        margin-bottom:8px;
+        border-radius:11px;
+        font-size:18px;
+      }
+
+      .edu-templates{padding-top:44px}
+      .edu-template-heading{gap:14px}
+      .edu-template-tools{gap:6px}
+      .edu-template-tools button{
+        min-height:40px;
+        padding:7px 10px;
+        font-size:12.5px;
+      }
+      #eduTemplateMount .template-list{gap:10px!important}
+      #eduTemplateMount .template-card{
+        min-height:198px!important;
+        border-radius:17px!important;
+        box-shadow:4px 5px 0 #111!important;
+      }
+      #eduTemplateMount .template-cover{
+        height:116px!important;
+        min-height:116px!important;
+      }
+      #eduTemplateMount .template-content{
+        gap:4px!important;
+        padding:12px!important;
+      }
+      #eduTemplateMount .template-title{
+        font-size:16px!important;
+        line-height:1.25!important;
+      }
+      #eduTemplateMount .template-desc{
+        font-size:12px!important;
+        line-height:1.45!important;
+      }
+      .edu-template-badge{
+        top:8px;
+        right:8px;
+        min-height:27px;
+        padding:4px 8px;
+        font-size:10.5px;
+        box-shadow:0 3px 0 rgba(16,24,40,.13);
+      }
+      #eduTemplateMount .education-template-lock{
+        gap:4px!important;
+        padding:8px!important;
+        border-radius:15px!important;
+        font-size:12px!important;
+      }
+      #eduTemplateMount .education-template-lock-icon{
+        width:30px;
+        height:30px;
+        font-size:14px;
+      }
+
+      .edu-faq{padding-top:42px}
+      .edu-faq-list{gap:8px}
+      .edu-faq-list details{
+        border-radius:14px;
+        box-shadow:3px 4px 0 #111;
+      }
+      .edu-faq-list summary{
+        min-height:48px;
+        padding:12px 14px;
+        font-size:14px;
+      }
+      .edu-faq-list summary::before{font-size:18px}
+      .edu-faq-list p{
+        padding:0 14px 13px;
+        font-size:12.5px;
+      }
+
+      .edu-final-cta{
+        gap:18px;
+        width:calc(100% - 24px);
+        margin-bottom:38px;
+        padding:20px 15px;
+        border-radius:20px;
+        box-shadow:6px 7px 0 #111;
+      }
+      .edu-final-cta h2{font-size:25px}
+      .edu-final-cta>div:first-child>p:last-child{
+        margin-top:8px;
+        font-size:13px;
+        line-height:1.55;
+      }
+      .edu-final-actions{margin-top:0}
+      .edu-site-footer{
+        min-height:auto;
+        gap:8px;
+        padding:14px 12px;
+      }
+      .edu-site-footer .edu-site-brand img{
+        width:28px;
+        height:28px;
+      }
+      .edu-site-footer .edu-site-brand span{font-size:11.5px}
+      .edu-site-footer p,
+      .edu-site-footer a{font-size:12px}
+    }
+    @media(max-width:360px){
+      .edu-site-header{
+        gap:5px;
+        padding-inline:6px;
+      }
+      .edu-site-brand span{font-size:11.5px}
+      .edu-site-controls>.education-account-btn{
+        min-height:35px;
+        padding-inline:8px;
+        font-size:10.5px;
+      }
+      .edu-site-menu>summary{
+        width:35px;
+        min-height:35px;
+      }
+    }
+
+    /* index-v145: توسيع معاينة القالب أفقيًا وتصغير شارة الباقة وخفضها قليلًا. */
+    @media(max-width:600px){
+      #eduTemplateMount .template-list{
+        width:calc(100% - 18px)!important;
+        max-width:420px!important;
+        margin-inline:auto!important;
+        gap:8px!important;
+      }
+      #eduTemplateMount .template-card{
+        --edu-template-thumb:clamp(138px,39vw,154px);
+        display:grid!important;
+        grid-template-columns:var(--edu-template-thumb) minmax(0,1fr)!important;
+        grid-template-rows:96px!important;
+        align-items:stretch!important;
+        width:100%!important;
+        height:96px!important;
+        min-height:96px!important;
+        max-height:96px!important;
+        border:1.5px solid #bcc8d4!important;
+        border-radius:12px!important;
+        background:#fff!important;
+        box-shadow:none!important;
+        direction:ltr!important;
+      }
+      #eduTemplateMount .template-card:hover{
+        transform:none!important;
+        box-shadow:none!important;
+      }
+      #eduTemplateMount .template-cover{
+        grid-column:1!important;
+        grid-row:1!important;
+        align-self:stretch!important;
+        width:100%!important;
+        height:96px!important;
+        min-height:96px!important;
+        padding:0!important;
+        border:0!important;
+        border-right:1.5px solid #bcc8d4!important;
+        background-color:#eef8ff!important;
+        background-position:center!important;
+        background-origin:border-box!important;
+        background-size:cover!important;
+      }
+      #eduTemplateMount .template-content{
+        grid-column:2!important;
+        grid-row:1!important;
+        align-self:stretch!important;
+        justify-content:center!important;
+        gap:4px!important;
+        padding:10px 12px!important;
+        direction:rtl!important;
+        text-align:right!important;
+      }
+      #eduTemplateMount .template-title{
+        width:100%!important;
+        font-size:15px!important;
+        line-height:1.3!important;
+      }
+      #eduTemplateMount .template-desc{
+        display:-webkit-box!important;
+        width:100%!important;
+        overflow:hidden!important;
+        font-size:11.5px!important;
+        line-height:1.45!important;
+        -webkit-box-orient:vertical!important;
+        -webkit-line-clamp:2!important;
+      }
+      #eduTemplateMount .edu-template-badge{
+        display:none!important;
+      }
+      #eduTemplateMount .template-card.is-plan-locked .template-cover,
+      #eduTemplateMount .template-card.is-plan-locked .template-content{
+        filter:none!important;
+      }
+      #eduTemplateMount .education-template-lock{
+        position:absolute!important;
+        inset:auto auto 2px 4px!important;
+        z-index:7!important;
+        flex-direction:row!important;
+        width:max-content!important;
+        max-width:calc(var(--edu-template-thumb) - 8px)!important;
+        min-height:17px!important;
+        margin:0!important;
+        gap:3px!important;
+        padding:1.5px 4px!important;
+        border:1px solid #172033!important;
+        border-radius:999px!important;
+        background:rgba(255,241,168,.96)!important;
+        color:#172033!important;
+        font-size:7.6px!important;
+        line-height:1!important;
+        text-shadow:none!important;
+        white-space:nowrap!important;
+      }
+      #eduTemplateMount .education-template-lock-icon{
+        width:13px;
+        height:13px;
+        border-width:1px;
+        font-size:6.5px;
+        box-shadow:none;
+      }
+    }
+  </style>
 </head>
 <body>
+<div class="edu-entry-modal" hidden id="educationEntryModal" role="presentation">
+  <section class="edu-entry-dialog" role="dialog" aria-modal="true" aria-labelledby="educationEntryTitle">
+    <img class="edu-entry-logo" src="https://sandooq-games.com/logo.PNG" alt="شعار صندوق المسابقات">
+    <h2 id="educationEntryTitle">مرحبًا بك في صندوق الألعاب التعليمية</h2>
+    <p class="edu-entry-lead">سجّل دخولك إذا سبق لك الشراء، أو ابدأ تجربة مجانية واستكشف المنصة بنفسك.</p>
+    <div class="edu-entry-actions" id="educationEntryActions">
+      <button class="edu-entry-btn primary" id="educationShowLoginBtn" type="button">تسجيل الدخول</button>
+      <button class="edu-entry-btn trial" id="educationStartTrialBtn" type="button">تجربة المنصة التعليمية</button>
+    </div>
+    <form class="edu-entry-login" id="educationLoginForm" hidden>
+      <p class="edu-entry-login-title">تسجيل دخول المشتري</p>
+      <input class="edu-entry-phone" id="educationLoginPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="05XXXXXXXX أو +9665XXXXXXXX" aria-label="رقم الجوال">
+      <p class="edu-entry-hint">اكتب رقم الجوال المستخدم عند الشراء. للرقم السعودي يمكنك كتابته بالطريقة المعتادة.</p>
+      <p class="edu-entry-error" id="educationLoginError" role="alert" hidden></p>
+      <button class="edu-entry-btn primary" id="educationLoginSubmit" type="submit">دخول المنصة</button>
+      <button class="edu-entry-btn light" id="educationLoginBack" type="button">رجوع</button>
+      <a class="edu-entry-store" href="https://sandooq-m.com/-/p2051543987" target="_blank" rel="noopener">شراء الآن من المتجر</a>
+    </form>
+  </section>
+</div>
 <main class="page">
 <!-- زخارف تعليمية متوازنة للصفحة الرئيسية فقط -->
 <svg aria-hidden="true" class="edu-decor edu-rings" viewBox="0 0 120 120">
@@ -17369,11 +18379,164 @@
   <path d="M72 22 L94 61 L50 61 Z" fill="#f47a45" stroke="#111" stroke-width="3"></path>
   <circle cx="113" cy="83" r="18" fill="#4dbc72" stroke="#111" stroke-width="3"></circle>
 </svg>
-<section class="shell home-dashboard" id="homeShell">
+<section class="edu-public-site" id="homeShell">
+  <header class="edu-site-header">
+    <div class="edu-site-brand" aria-label="صندوق الألعاب التعليمية">
+      <img src="https://sandooq-games.com/logo.PNG" alt="شعار صندوق المسابقات">
+      <span>صندوق الألعاب التعليمية</span>
+    </div>
+    <nav class="edu-site-controls" aria-label="خيارات الحساب والقائمة">
+      <button class="education-account-btn" id="educationAccountButton" type="button">تسجيل الدخول</button>
+      <details class="edu-site-menu">
+        <summary aria-label="فتح القائمة" title="القائمة">
+          <span class="edu-site-menu-icon" aria-hidden="true"><span></span><span></span><span></span></span>
+        </summary>
+        <div class="edu-site-menu-panel" role="menu" aria-label="خيارات القائمة">
+          <button type="button" role="menuitem" data-open-screen="">الرئيسية</button>
+          <button type="button" role="menuitem" data-open-screen="createScreen">إنشاء نشاط</button>
+          <button type="button" role="menuitem" data-open-screen="savedScreen">أنشطتي</button>
+          <button type="button" role="menuitem" data-open-screen="backupScreen">التصدير والاستيراد</button>
+          <button type="button" role="menuitem" data-open-screen="appSuggestionsScreen">الاقتراحات</button>
+          <button type="button" role="menuitem" data-open-screen="appSupportScreen">المساعدة</button>
+          <button type="button" role="menuitem" data-open-screen="appUpdatesScreen">التحديثات</button>
+          <button type="button" role="menuitem" data-open-screen="settingsScreen">الشرح والتعليمات</button>
+          <button type="button" role="menuitem" data-open-screen="appSettingsScreen">الإعدادات</button>
+        </div>
+      </details>
+    </nav>
+  </header>
+
+  <main id="eduTop">
+    <section class="edu-hero edu-section">
+      <div class="edu-hero-copy">
+        <p class="edu-kicker">منصة ألعاب تعليمية عربية</p>
+        <h1>أنشئ لعبة تعليمية وشغّلها في الفصل خلال دقائق</h1>
+        <p class="edu-hero-lead">اختر قالبًا، أضف محتوى درسك، ثم شغّله من الجوال أو اللابتوب أو شاشة الفصل.</p>
+        <ul class="edu-hero-points">
+          <li>اختر اللعبة المناسبة وأضف محتوى درسك بسهولة.</li>
+          <li>شغّلها من المتصفح دون تثبيت أي برنامج.</li>
+          <li>جرّب العجلة وافتح الصندوق واحفظ لعبتين مجانًا.</li>
+        </ul>
+        <div class="edu-hero-actions">
+          <a class="edu-btn edu-btn-primary" href="#eduTemplates">جرّب المنصة مجانًا</a>
+          <button class="edu-btn edu-btn-secondary education-login-trigger" type="button">لديك باقة؟ تسجيل الدخول</button>
+        </div>
+      </div>
+      <div class="edu-hero-visual" aria-label="نماذج من ألعاب المنصة">
+        <div class="edu-preview-card edu-preview-wheel">
+          <img src="game-previews/wheel.webp" alt="معاينة لعبة العجلة">
+          <span>العجلة</span>
+        </div>
+        <div class="edu-preview-card edu-preview-box">
+          <img src="game-previews/open-box.webp" alt="معاينة لعبة افتح الصندوق">
+          <span>افتح الصندوق</span>
+        </div>
+        <div class="edu-preview-note">جاهزة للجوال والبروجكتر وشاشة الفصل</div>
+      </div>
+    </section>
+
+    <section class="edu-trust-strip" aria-label="مميزات مختصرة">
+      <div><strong>🌐</strong><span>تعمل من المتصفح</span></div>
+      <div><strong>✍🏻</strong><span>لأي مادة ومرحلة</span></div>
+      <div><strong>💾</strong><span>حفظ محلي على جهازك</span></div>
+      <div><strong>🖥️</strong><span>مناسبة لشاشة الفصل</span></div>
+    </section>
+
+    <section class="edu-how edu-section" id="eduHow">
+      <div class="edu-section-heading">
+        <p class="edu-kicker">ثلاث خطوات فقط</p>
+        <h2>من فكرة الدرس إلى لعبة جاهزة</h2>
+        <p>لا تحتاج خبرة تقنية. اختر القالب واملأ المحتوى ثم ابدأ اللعب.</p>
+      </div>
+      <div class="edu-step-grid">
+        <article><span>1</span><div><h3>اختر اللعبة</h3><p>ابدأ من القالب الذي يناسب نشاطك وطلابك.</p></div></article>
+        <article><span>2</span><div><h3>أضف محتوى درسك</h3><p>اكتب الأسئلة والإجابات بالطريقة الواضحة أمامك.</p></div></article>
+        <article><span>3</span><div><h3>شغّلها في الفصل</h3><p>اختبر اللعبة ثم اعرضها من أي جهاز أو شاشة.</p></div></article>
+      </div>
+    </section>
+
+    <section class="edu-benefits edu-section">
+      <div class="edu-section-heading">
+        <p class="edu-kicker">مصممة للمعلم</p>
+        <h2>كل ما تحتاجه لنشاط تفاعلي واضح</h2>
+      </div>
+      <div class="edu-benefit-grid">
+        <article><b>⚡</b><h3>أنشئ نشاطًا في دقائق</h3><p>واجهة مباشرة تقلل الخطوات من الفكرة إلى التشغيل.</p></article>
+        <article><b>🎮</b><h3>ألعاب متعددة في منصة واحدة</h3><p>اختر الشكل الأنسب لهدف الدرس بدل البدء من الصفر.</p></article>
+        <article><b>📺</b><h3>شغّلها على أي شاشة</h3><p>الجوال واللابتوب والبروجكتر والشاشة التفاعلية.</p></article>
+        <article><b>📚</b><h3>لأي مادة ومرحلة</h3><p>أنت تضيف المحتوى، لذلك القالب يناسب احتياجك.</p></article>
+        <article><b>🎨</b><h3>خصص شكل لعبتك</h3><p>ثيمات وألوان وخيارات تجعل النشاط أقرب لطلابك.</p></article>
+        <article><b>🗂️</b><h3>ألعابك في جهازك</h3><p>احفظ ألعابك وافتحها لاحقًا دون تعقيد.</p></article>
+      </div>
+    </section>
+
+    <section class="edu-templates edu-section" id="eduTemplates">
+      <div class="edu-section-heading edu-template-heading">
+        <div>
+          <p class="edu-kicker">ابدأ من قالب</p>
+          <h2>اختر اللعبة التي تناسب درسك</h2>
+          <p>اضغط على أي قالب للانتقال مباشرةً إلى إعداداته. العجلة وافتح الصندوق متاحتان للتجربة المجانية.</p>
+        </div>
+        <div class="edu-template-tools">
+          <button data-open-screen="savedScreen" type="button">📁 ألعابي المحفوظة</button>
+          <button data-open-screen="backupScreen" type="button">⇄ التصدير والاستيراد</button>
+        </div>
+      </div>
+      <div id="eduTemplateMount"></div>
+    </section>
+
+    <section class="edu-faq edu-section" id="eduFaq">
+      <div class="edu-section-heading">
+        <p class="edu-kicker">أسئلة متكررة</p>
+        <h2>كل ما تحتاج معرفته قبل البدء</h2>
+      </div>
+      <div class="edu-faq-list">
+        <details open><summary>هل تحتاج المنصة إلى إنترنت؟</summary><p>تحتاج اتصالًا لفتح المنصة وتسجيل الدخول. الألعاب التي تنشئها تُحفظ محليًا في المتصفح على جهازك.</p></details>
+        <details><summary>هل توجد أسئلة جاهزة؟</summary><p>المنصة توفر قوالب الألعاب، وأنت تضيف محتوى الدرس والأسئلة المناسبة لطلابك.</p></details>
+        <details><summary>هل تناسب جميع المراحل والمواد؟</summary><p>نعم، لأنك تتحكم في المحتوى ويمكنك استخدام القالب نفسه لأي مادة أو مرحلة.</p></details>
+        <details><summary>كيف أشغّل اللعبة في الفصل؟</summary><p>أنشئ اللعبة واختبرها، ثم افتحها على اللابتوب واعرضها بالبروجكتر أو الشاشة التفاعلية.</p></details>
+        <details><summary>ماذا تتيح التجربة المجانية؟</summary><p>استكشاف المنصة وإنشاء لعبتين من العجلة وافتح الصندوق، مع إمكانية حذفهما واستبدالهما ضمن حدود التجربة.</p></details>
+      </div>
+    </section>
+
+    <section class="edu-final-cta edu-section">
+      <div><p class="edu-kicker">جاهز للبدء؟</p><h2>أنشئ لعبتك الأولى الآن</h2><p>جرّب المنصة بنفسك، وإذا أعجبتك انتقل إلى المتجر للحصول على الباقة المناسبة.</p></div>
+      <div class="edu-final-actions">
+        <a class="edu-btn edu-btn-primary" href="#eduTemplates">عرض القوالب</a>
+        <a class="edu-btn edu-btn-store" href="https://sandooq-m.com/-/p2051543987" target="_blank" rel="noopener">شراء الآن من المتجر</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="edu-site-footer">
+    <div class="edu-site-brand"><img src="https://sandooq-games.com/logo.PNG" alt=""><span>صندوق الألعاب التعليمية</span></div>
+    <p>ألعاب تعليمية تفاعلية مصممة للمعلم العربي.</p>
+    <a href="https://sandooq-games.com" target="_blank" rel="noopener">موقع صندوق المسابقات</a>
+  </footer>
+</section>
+
+<section class="shell home-dashboard" hidden id="legacyHomeShell">
 <header class="home-brand-card">
 <img class="home-brand-logo" src="https://sandooq-games.com/logo.PNG" alt="شعار صندوق المسابقات">
 <h1 class="home-brand-title">صندوق الألعاب التعليمية</h1>
+<button class="education-account-btn" id="legacyEducationAccountButton" type="button">تسجيل الدخول</button>
 </header>
+<section class="education-public-intro" aria-labelledby="educationPublicIntroTitle">
+  <h2 id="educationPublicIntroTitle">أنشئ نشاطك وشغّله على شاشة الفصل بسهولة</h2>
+  <p>استكشف المنصة كاملة، وجرّب العجلة وافتح الصندوق، واحفظ لعبتين على جهازك مجانًا قبل الشراء.</p>
+  <div class="education-public-benefits" aria-label="مميزات المنصة">
+    <div class="education-public-benefit">📱 تعمل من المتصفح</div>
+    <div class="education-public-benefit">🖥️ مناسبة للبروجكتر</div>
+    <div class="education-public-benefit">✍🏻 محتوى لأي مادة ومرحلة</div>
+    <div class="education-public-benefit">💾 حفظ محلي على جهازك</div>
+  </div>
+  <div class="education-public-faq">
+    <details><summary>هل تحتاج المنصة إلى إنترنت؟</summary><p>تحتاج اتصالًا لفتح المنصة وتسجيل الدخول. ألعابك تُحفظ محليًا في المتصفح الذي أنشأتها فيه.</p></details>
+    <details><summary>هل توجد أسئلة جاهزة؟</summary><p>المنصة مصممة لتكتب محتوى درسك بنفسك، لذلك تستطيع تكييف اللعبة لأي مادة أو مرحلة تعليمية.</p></details>
+    <details><summary>كيف أشغّل اللعبة في الفصل؟</summary><p>أنشئ اللعبة واحفظها، ثم اخترها من «تشغيل لعبة محفوظة» واعرضها من اللابتوب أو الشاشة التفاعلية.</p></details>
+  </div>
+  <a class="education-public-store" href="https://sandooq-m.com/-/p2051543987" target="_blank" rel="noopener">🛒 شراء الآن من المتجر</a>
+</section>
 <div class="home-dashboard-grid">
 <section class="play-shell home-play-panel" aria-labelledby="homePlayHeading">
 <div class="play-card">
@@ -19190,7 +20353,218 @@
 (() => {
   "use strict";
 
+  const API_BASE = "https://sandooq-games-api.sandooq-m.workers.dev";
+  const ENTRY_MODE_KEY = "sandooq_education_entry_mode_v1";
+  const PLAN_COOKIE = "education_site_plan_v1";
+  const EDUCATION_GAME_ID = "education";
+
+  function readCookie(name){
+    const prefix = `${name}=`;
+    return document.cookie.split(";").map(part=>part.trim()).find(part=>part.startsWith(prefix))?.slice(prefix.length) || "";
+  }
+
+  function normalizePlan(value){
+    const plan = String(value || "").trim().toLowerCase();
+    if (["comprehensive","الشامل","full","premium"].includes(plan)) return "comprehensive";
+    if (plan === "basic") return "basic";
+    return "";
+  }
+
+  function readPurchasedPlan(){
+    const raw = readCookie(PLAN_COOKIE);
+    if (!raw) return "";
+    try { return normalizePlan(decodeURIComponent(raw)); } catch (_) { return normalizePlan(raw); }
+  }
+
+  function ownsEducation(games){
+    return (Array.isArray(games) ? games : []).find(game=>{
+      if (typeof game === "string") return String(game).trim().toLowerCase() === EDUCATION_GAME_ID;
+      if (!game || typeof game !== "object") return false;
+      return [game.id,game.slug,game.game_id,game.gameId,game.key]
+        .some(value=>String(value || "").trim().toLowerCase() === EDUCATION_GAME_ID);
+    }) || null;
+  }
+
+  function normalizePhone(value){
+    const raw = String(value || "").trim().replace(/[٠-٩]/g,digit=>String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)));
+    let digits = raw.replace(/\D/g,"");
+    if (digits.startsWith("00")) return `+${digits.slice(2)}`;
+    if (raw.includes("+")) return `+${digits}`;
+    if (/^05\d{8}$/.test(digits)) return `+966${digits.slice(1)}`;
+    if (/^5\d{8}$/.test(digits)) return `+966${digits}`;
+    if (/^[1-9]\d{7,14}$/.test(digits)) return `+${digits}`;
+    return "";
+  }
+
+  function createDeviceToken(){
+    try { return `education_entry_${crypto.randomUUID()}`; } catch (_) {}
+    return `education_entry_${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  }
+
+  const purchasedPlan = readPurchasedPlan();
+  let rememberedTrial = false;
+  try { rememberedTrial = localStorage.getItem(ENTRY_MODE_KEY) === "trial"; } catch (_) {}
+  window.__SANDOOQ_EDUCATION_PLAN__ = purchasedPlan || (rememberedTrial ? "trial" : "trial");
+  window.__SANDOOQ_EDUCATION_ENTRY__ = purchasedPlan ? "customer" : "trial";
+
+  function showPlatform(){
+    document.body.classList.toggle("education-customer",Boolean(purchasedPlan));
+    document.body.classList.toggle("education-trial",!purchasedPlan);
+    document.body.classList.remove("entry-pending");
+  }
+
+  function setError(message){
+    const error = document.getElementById("educationLoginError");
+    if (!error) return;
+    error.textContent = String(message || "تعذر تسجيل الدخول. حاول مرة أخرى.");
+    error.hidden = false;
+  }
+
+  function clearError(){
+    const error = document.getElementById("educationLoginError");
+    if (!error) return;
+    error.textContent = "";
+    error.hidden = true;
+  }
+
+  function openEntry(loginVisible = false){
+    const modal = document.getElementById("educationEntryModal");
+    const actions = document.getElementById("educationEntryActions");
+    const form = document.getElementById("educationLoginForm");
+    if (!modal || !actions || !form) return;
+    modal.hidden = false;
+    actions.hidden = loginVisible;
+    form.hidden = !loginVisible;
+    clearError();
+    if (loginVisible) setTimeout(()=>document.getElementById("educationLoginPhone")?.focus(),0);
+  }
+
+  function closeEntry(){
+    const modal = document.getElementById("educationEntryModal");
+    if (modal) modal.hidden = true;
+    showPlatform();
+  }
+
+  window.openEducationLogin = ()=>openEntry(true);
+
+  function syncAccountButton(){
+    const button = document.getElementById("educationAccountButton");
+    if (!button) return;
+    button.textContent = purchasedPlan ? "تسجيل الخروج" : "تسجيل الدخول";
+  }
+
+  function signOutEducation(){
+    const expired = "=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; SameSite=Lax; Secure";
+    try {
+      document.cookie = `${PLAN_COOKIE}${expired}`;
+      if (location.hostname === "sandooq-games.com" || location.hostname.endsWith(".sandooq-games.com")) {
+        document.cookie = `${PLAN_COOKIE}${expired}; Domain=.sandooq-games.com`;
+      }
+      localStorage.removeItem(ENTRY_MODE_KEY);
+      sessionStorage.removeItem("sandooq_education_pending_plan_v1");
+    } catch (_) {}
+    location.replace(location.pathname || "/");
+  }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    const modal = document.getElementById("educationEntryModal");
+    const form = document.getElementById("educationLoginForm");
+    const submit = document.getElementById("educationLoginSubmit");
+
+    syncAccountButton();
+
+    const loginFailed = new URLSearchParams(location.search).get("entry") === "login_failed";
+    if (modal) modal.hidden = true;
+    showPlatform();
+    if (loginFailed) {
+      openEntry(true);
+      setError("تعذر التحقق من جلسة الدخول. أعد كتابة رقم الجوال.");
+    }
+
+    document.getElementById("educationShowLoginBtn")?.addEventListener("click",()=>openEntry(true));
+    document.getElementById("educationLoginBack")?.addEventListener("click",()=>openEntry(false));
+    document.getElementById("educationAccountButton")?.addEventListener("click",()=>{
+      if (purchasedPlan) {
+        signOutEducation();
+        return;
+      }
+      openEntry(true);
+    });
+    document.querySelectorAll(".education-login-trigger").forEach((button)=>{
+      button.addEventListener("click",()=>openEntry(true));
+    });
+    document.getElementById("educationStartTrialBtn")?.addEventListener("click",()=>{
+      try { localStorage.setItem(ENTRY_MODE_KEY,"trial"); } catch (_) {}
+      window.__SANDOOQ_EDUCATION_PLAN__ = "trial";
+      window.__SANDOOQ_EDUCATION_ENTRY__ = "trial";
+      closeEntry();
+    });
+
+    form?.addEventListener("submit",async event=>{
+      event.preventDefault();
+      clearError();
+      const phone = normalizePhone(document.getElementById("educationLoginPhone")?.value);
+      if (!phone || !/^\+[1-9]\d{7,14}$/.test(phone)) {
+        setError("اكتب رقم جوال صحيحًا مع مفتاح الدولة.");
+        return;
+      }
+
+      submit.disabled = true;
+      submit.textContent = "جاري التحقق…";
+
+      try {
+        const response = await fetch(`${API_BASE}/api/auth/login`,{
+          method:"POST",
+          headers:{"Content-Type":"application/json; charset=utf-8"},
+          body:JSON.stringify({
+            phone_e164:phone,
+            device_token:createDeviceToken(),
+            is_temporary:true
+          }),
+          cache:"no-store"
+        });
+        const data = await response.json().catch(()=>({}));
+        if (!response.ok || data.ok === false || !data.token) {
+          throw new Error(data.message || "تعذر تسجيل الدخول.");
+        }
+
+        const educationGame = ownsEducation(data.games);
+        if (!educationGame) {
+          setError("لم نجد شراء صندوق الألعاب التعليمية مرتبطًا بهذا الرقم. يمكنك تجربة المنصة أو الشراء من المتجر.");
+          return;
+        }
+
+        const plan = normalizePlan(
+          educationGame.access_plan || educationGame.accessPlan || educationGame.package || educationGame.plan
+        ) || "basic";
+        sessionStorage.setItem("sandooq_education_pending_plan_v1",plan);
+
+        const target = new URL("/auth/complete",location.origin);
+        target.searchParams.set("sg_token",String(data.token));
+        target.searchParams.set("sg_game",EDUCATION_GAME_ID);
+        target.searchParams.set("sg_temp","1");
+        location.replace(target.toString());
+      } catch (error) {
+        setError(error?.message || "تعذر تسجيل الدخول. تحقق من اتصالك وحاول مرة أخرى.");
+      } finally {
+        submit.disabled = false;
+        submit.textContent = "دخول المنصة";
+      }
+    });
+  });
+})();
+</script>
+
+<script>
+(() => {
+  "use strict";
+
   const UPGRADE_URL = "https://sandooq-m.com/ترقية-صندوق-الالعاب-التعليمية-الى-الشامل/p2038898676";
+  const FULL_PURCHASE_URL = "https://sandooq-m.com/-/p2051543987";
+  const FREE_TRIAL_TEMPLATES = new Set(["wheel","open-box"]);
+  const FREE_TRIAL_THEMES = new Set([
+    "classic","classroom","sky-clouds","forest","math","english","flowers","national-day","founding-day"
+  ]);
   const PREMIUM_TEMPLATES = new Set([
     "train",
     "moving-question",
@@ -19200,7 +20574,7 @@
   ]);
 
   const rawPlan = String(window.__SANDOOQ_EDUCATION_PLAN__ || "").trim().toLowerCase();
-  const plan = rawPlan === "comprehensive" ? "comprehensive" : "basic";
+  const plan = rawPlan === "comprehensive" ? "comprehensive" : rawPlan === "basic" ? "basic" : "trial";
 
   function normalizeTemplate(value){
     const template = String(value || "").trim().toLowerCase();
@@ -19214,7 +20588,20 @@
   }
 
   function canUseTemplate(value){
-    return plan === "comprehensive" || !isPremiumTemplate(value);
+    const template = normalizeTemplate(value);
+    if (plan === "comprehensive") return true;
+    if (plan === "basic") return !isPremiumTemplate(template);
+    return FREE_TRIAL_TEMPLATES.has(template);
+  }
+
+  function canUseTheme(value){
+    if (plan !== "trial") return true;
+    return FREE_TRIAL_THEMES.has(String(value || "").trim().toLowerCase());
+  }
+
+  function canUseFeature(feature){
+    if (plan !== "trial") return true;
+    return !new Set(["backup","feedback-submit","feedback-like"]).has(String(feature || ""));
   }
 
   function ensureUpgradeModal(){
@@ -19228,10 +20615,10 @@
     modal.innerHTML = `
       <section class="education-upgrade-dialog" role="dialog" aria-modal="true" aria-labelledby="educationUpgradeTitle">
         <div class="education-upgrade-dialog-icon" aria-hidden="true">🔒</div>
-        <h3 id="educationUpgradeTitle">هذه اللعبة ضمن الباقة الشاملة</h3>
-        <p>افتح الألعاب الخمس الإضافية وانتقل من 5 إلى 10 ألعاب بدفع 19.99 ريال مرة واحدة فقط، بدون اشتراك شهري.</p>
+        <h3 id="educationUpgradeTitle">هذه الميزة ضمن الباقات المدفوعة</h3>
+        <p>${plan === "trial" ? "تستطيع في التجربة إنشاء العجلة وافتح الصندوق وحفظ لعبتين. افتح بقية الألعاب والمميزات بشراء الباقة." : "افتح الألعاب الخمس الإضافية وانتقل من 5 إلى 10 ألعاب بدفع 19.99 ريال مرة واحدة فقط، بدون اشتراك شهري."}</p>
         <div class="education-upgrade-actions">
-          <a class="education-upgrade-buy" href="${UPGRADE_URL}" target="_blank" rel="noopener">ترقية الباقة إلى الشامل</a>
+          <a class="education-upgrade-buy" href="${plan === "trial" ? FULL_PURCHASE_URL : UPGRADE_URL}" target="_blank" rel="noopener">${plan === "trial" ? "شراء الآن من المتجر" : "ترقية الباقة إلى الشامل"}</a>
           <button class="education-upgrade-close" type="button">ليس الآن</button>
         </div>
       </section>`;
@@ -19252,8 +20639,14 @@
     return modal;
   }
 
-  function openUpgrade(){
+  function openUpgrade(options = {}){
     const modal = ensureUpgradeModal();
+    const title = modal.querySelector("#educationUpgradeTitle");
+    const copy = modal.querySelector("p");
+    if (title) title.textContent = options.title || "هذه الميزة ضمن الباقات المدفوعة";
+    if (copy) copy.textContent = options.message || (plan === "trial"
+      ? "تستطيع في التجربة إنشاء العجلة وافتح الصندوق وحفظ لعبتين. افتح بقية الألعاب والمميزات بشراء الباقة."
+      : "افتح الألعاب الخمس الإضافية وانتقل من 5 إلى 10 ألعاب بترقية واحدة فقط.");
     modal.classList.add("is-open");
     modal.setAttribute("aria-hidden","false");
     requestAnimationFrame(()=>modal.querySelector(".education-upgrade-buy")?.focus({preventScroll:true}));
@@ -19265,13 +20658,38 @@
     return false;
   }
 
+  function guardTheme(value){
+    if (canUseTheme(value)) return true;
+    openUpgrade({message:"يمكنك تجربة أول 9 ثيمات مجانًا. بقية الثيمات متاحة بعد شراء الباقة."});
+    return false;
+  }
+
+  function guardFeature(feature,message){
+    if (canUseFeature(feature)) return true;
+    openUpgrade({message:message || "هذه الميزة متاحة بعد شراء الباقة."});
+    return false;
+  }
+
   function decorateLockedTemplates(){
     const basicPlan = plan !== "comprehensive";
     const banner = document.getElementById("educationUpgradeBanner");
-    if (banner) banner.hidden = !basicPlan;
+    if (banner) {
+      banner.hidden = !basicPlan;
+      if (plan === "trial") {
+        const title = banner.querySelector("strong");
+        const copy = banner.querySelector("span");
+        const link = banner.querySelector("a");
+        if (title) title.textContent = "جرّب لعبتين واحفظهما مجانًا";
+        if (copy) copy.textContent = "العجلة وافتح الصندوق مع أول 9 ثيمات. احذف لعبة واستبدلها متى شئت.";
+        if (link) {
+          link.href = FULL_PURCHASE_URL;
+          link.textContent = "شراء الآن من المتجر";
+        }
+      }
+    }
 
     document.querySelectorAll(".template-card[data-template]").forEach(card=>{
-      const locked = basicPlan && isPremiumTemplate(card.dataset.template);
+      const locked = !canUseTemplate(card.dataset.template);
       card.classList.toggle("is-plan-locked",locked);
       card.setAttribute("aria-disabled",locked ? "true" : "false");
       card.querySelector(".education-template-lock")?.remove();
@@ -19279,9 +20697,33 @@
 
       const overlay = document.createElement("span");
       overlay.className = "education-template-lock";
-      overlay.innerHTML = `<span class="education-template-lock-icon" aria-hidden="true">🔒</span><span>ضمن الباقة الشاملة</span>`;
+      overlay.innerHTML = `<span class="education-template-lock-icon" aria-hidden="true">🔒</span><span>${plan === "trial" ? "ضمن الباقة المدفوعة" : "ضمن الباقة الشاملة"}</span>`;
       card.appendChild(overlay);
     });
+
+    document.querySelectorAll("[data-wheel-theme]").forEach(card=>{
+      const locked = !canUseTheme(card.getAttribute("data-wheel-theme"));
+      card.classList.toggle("is-trial-theme-locked",locked);
+      card.setAttribute("aria-disabled",locked ? "true" : "false");
+    });
+
+    if (plan === "trial") {
+      const backup = document.getElementById("backupScreen");
+      if (backup && !backup.querySelector(".education-trial-feature-note")) {
+        const note = document.createElement("p");
+        note.className = "education-trial-feature-note";
+        note.textContent = "يمكنك مشاهدة هذه الميزة، ويصبح التصدير والاستيراد متاحًا بعد شراء الباقة.";
+        backup.querySelector(".screen-note")?.after(note);
+      }
+
+      const form = document.querySelector("#appSuggestionsScreen .suggestions-form-card");
+      if (form && !form.querySelector(".education-trial-feature-note")) {
+        const note = document.createElement("p");
+        note.className = "education-trial-feature-note";
+        note.textContent = "يمكنك قراءة أفكار المجتمع في التجربة المجانية. إرسال الاقتراحات والإعجاب متاحان بعد الشراء.";
+        form.prepend(note);
+      }
+    }
   }
 
   document.addEventListener("click",event=>{
@@ -19292,12 +20734,26 @@
     openUpgrade();
   },true);
 
+  document.addEventListener("click",event=>{
+    const theme = event.target.closest?.("[data-wheel-theme]");
+    if (!theme || canUseTheme(theme.getAttribute("data-wheel-theme"))) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    guardTheme(theme.getAttribute("data-wheel-theme"));
+  },true);
+
   window.SandooqEducationAccess = {
     plan,
     upgradeUrl:UPGRADE_URL,
+    purchaseUrl:FULL_PURCHASE_URL,
+    isTrial:plan === "trial",
     isPremiumTemplate,
     canUseTemplate,
+    canUseTheme,
+    canUseFeature,
     guardTemplate,
+    guardTheme,
+    guardFeature,
     openUpgrade
   };
 
@@ -19528,6 +20984,14 @@
           if (choice === "cancel") return false;
           if (choice === "update") target = duplicate;
         }
+      }
+
+      if (!target && window.SandooqEducationAccess?.isTrial && records.length >= 2) {
+        window.SandooqEducationAccess.openUpgrade({
+          title:"اكتمل حفظ اللعبتين المجانيتين",
+          message:"يمكنك حذف إحدى اللعبتين المحفوظتين وإنشاء لعبة بديلة مجانًا، أو الشراء من المتجر لحفظ ألعاب بلا حدود."
+        });
+        return false;
       }
 
       const now = Date.now();
@@ -20035,6 +21499,10 @@
   }
 
   async function exportGames(){
+    if (!window.SandooqEducationAccess?.guardFeature(
+      "backup",
+      "التصدير والاستيراد متاحان بعد شراء الباقة. ألعاب التجربة تبقى محفوظة على هذا الجهاز ويمكنك حذفها واستبدالها."
+    )) return;
     const status = document.getElementById("backupStatus");
     const records = readRegistry();
     if (!records.length) {
@@ -20077,6 +21545,10 @@
   }
 
   async function importGames(file){
+    if (!window.SandooqEducationAccess?.guardFeature(
+      "backup",
+      "التصدير والاستيراد متاحان بعد شراء الباقة."
+    )) return;
     const status = document.getElementById("backupStatus");
     if (!file) return;
     if (status) status.textContent = "جارٍ استيراد الألعاب...";
@@ -20140,7 +21612,13 @@
     document.getElementById("exportSavedGamesBtn")?.addEventListener("click",exportGames);
     const importButton = document.getElementById("importSavedGamesBtn");
     const importInput = document.getElementById("importSavedGamesInput");
-    importButton?.addEventListener("click",()=>importInput?.click());
+    importButton?.addEventListener("click",()=>{
+      if (!window.SandooqEducationAccess?.guardFeature(
+        "backup",
+        "التصدير والاستيراد متاحان بعد شراء الباقة."
+      )) return;
+      importInput?.click();
+    });
     importInput?.addEventListener("change",async()=>{
       const file = importInput.files?.[0];
       await importGames(file);
@@ -20307,14 +21785,19 @@
   let setupTextEditorSaveHandler = null;
 
   function openScreen(id){
-    const premiumScreens = {
+    const returnToTemplates = id === "createScreen";
+    if (returnToTemplates) id = "";
+    const templateScreens = {
+      choicesSetupScreen:"quiz",
+      matchSetupScreen:"match",
+      orderSetupScreen:"order",
       fillSetupScreen:"fill",
       trainSetupScreen:"train",
       movingQuestionSetupScreen:"moving-question",
       classifyWordsSetupScreen:"classify-words",
       imagePinsSetupScreen:"image-pins"
     };
-    const requestedTemplate = premiumScreens[id];
+    const requestedTemplate = templateScreens[id];
     if (requestedTemplate && !window.SandooqEducationAccess?.guardTemplate(requestedTemplate)) return;
     const isSubpage = Boolean(id);
     const isGameSetup = gameSetupScreens.has(id);
@@ -20328,12 +21811,19 @@
       if (el) el.classList.toggle("active", sid === id);
     });
 
-    if (homeShell) homeShell.style.display = isSubpage ? "none" : "flex";
+    if (homeShell) homeShell.style.display = isSubpage ? "none" : "block";
     setHomeButtonLabel(isGameSetup ? "العودة للألعاب" : "الرئيسية");
     try { window.scrollTo({ top:0, behavior:"auto" }); } catch (_) { window.scrollTo(0, 0); }
+    if (returnToTemplates) {
+      window.setTimeout(()=>document.getElementById("eduTemplates")?.scrollIntoView({behavior:"smooth",block:"start"}),0);
+    }
   }
 
   window.openEduScreen = openScreen;
+  window.openEduTemplates = ()=>{
+    openScreen("");
+    window.setTimeout(()=>document.getElementById("eduTemplates")?.scrollIntoView({behavior:"smooth",block:"start"}),0);
+  };
 
   function applyRequestedScreen(){
     if (window.location.hash === "#savedGames") {
@@ -21537,6 +23027,7 @@
   }
 
   function setWheelTheme(theme, closeList = true){
+    if (!window.SandooqEducationAccess?.guardTheme(theme)) return;
     wheelTheme = normalizeGameTheme(theme);
     themeListPanel?.querySelectorAll(".choices-theme-card").forEach((btn)=>{
       btn.classList.toggle("active", btn.getAttribute("data-wheel-theme") === wheelTheme);
@@ -21720,7 +23211,10 @@
   }
 
   document.querySelectorAll("[data-open-screen]").forEach((btn)=>{
-    btn.addEventListener("click", ()=> openScreen(btn.getAttribute("data-open-screen")));
+    btn.addEventListener("click", ()=> {
+      openScreen(btn.getAttribute("data-open-screen"));
+      btn.closest(".edu-site-menu")?.removeAttribute("open");
+    });
   });
 
   document.querySelectorAll("[data-template='wheel']").forEach((btn)=>{
@@ -21997,7 +23491,7 @@
     const activeScreen = screens.find((sid)=>document.getElementById(sid)?.classList.contains("active")) || "";
 
     if (gameSetupScreens.has(activeScreen)) {
-      openScreen("createScreen");
+      window.openEduTemplates?.();
       return;
     }
 
@@ -28114,6 +29608,8 @@
     event.preventDefault();
     event.stopPropagation();
 
+    if (!window.SandooqEducationAccess?.guardTemplate("train")) return;
+
     if (typeof window.openTrainSetupScreen === "function") {
       window.openTrainSetupScreen();
       return;
@@ -29323,6 +30819,10 @@
       likeButton.innerHTML = `<b>${Number(item.likes_count || 0).toLocaleString("en-US")}</b><span>${alreadyLiked ? "أعجبني" : "إعجاب"}</span><span aria-hidden="true">❤️</span>`;
       likeButton.addEventListener("click", async () => {
         if (!itemId || likeButton.disabled) return;
+        if (!window.SandooqEducationAccess?.guardFeature(
+          "feedback-like",
+          "يمكنك قراءة اقتراحات مجتمع التعليم في التجربة المجانية، ويصبح الإعجاب متاحًا بعد شراء الباقة."
+        )) return;
         likeButton.disabled = true;
         try {
           const result = await requestFeedbackApi(
@@ -29369,6 +30869,10 @@
   };
 
   const submitFeedback = async () => {
+    if (!window.SandooqEducationAccess?.guardFeature(
+      "feedback-submit",
+      "يمكنك قراءة اقتراحات مجتمع التعليم في التجربة المجانية، ويصبح إرسال اقتراحك متاحًا بعد شراء الباقة."
+    )) return;
     const role = document.querySelector('input[name="suggestionRole"]:checked')?.value || "";
     const content = field.value.trim();
     if (!role) {
@@ -29752,9 +31256,9 @@
   ];
 
   const generalTopics = [
-    topic("general-create", "إنشاء لعبة جديدة", "ابدأ من الرئيسية ثم اختر قالب اللعبة.", [
-      step("home", ".home-create-action", "إنشاء لعبة جديدة", "من الصفحة الرئيسية اضغط هذا الزر لفتح قائمة الألعاب."),
-      step("createScreen", ".template-list", "اختيار اللعبة", "اختر نوع اللعبة المناسب، وستنتقل مباشرة إلى صفحة إعدادها.")
+    topic("general-create", "بدء لعبة من القوالب", "اختر القالب مباشرةً من الصفحة الرئيسية.", [
+      step("home", "#eduTemplates", "قوالب الألعاب", "مرّر إلى قسم القوالب في الصفحة الرئيسية، ثم اختر نوع النشاط المناسب."),
+      step("home", "#eduTemplateMount .template-card", "فتح إعدادات اللعبة", "اضغط بطاقة القالب لتنتقل مباشرةً إلى إعداداته. العجلة وافتح الصندوق متاحان للتجربة المجانية.")
     ]),
     topic("general-name", "تسمية اللعبة", "الاسم يساعدك على العثور عليها لاحقًا.", [
       step("wheelSetupScreen", "#wheelGameNameInput", "اسم اللعبة", "اكتب اسمًا واضحًا يميز النشاط، مثل اسم الدرس أو الصف.")
@@ -29763,9 +31267,9 @@
       step("wheelSetupScreen", "#testWheelBtn", "اختبار اللعبة", "اضغط «اختبار اللعبة» لمراجعة الشكل والمحتوى قبل الحفظ."),
       step("wheelSetupScreen", "#saveWheelBtn", "حفظ اللعبة", "بعد التأكد من كل شيء اضغط «حفظ اللعبة».")
     ]),
-    topic("general-direct", "تشغيل لعبة محفوظة مباشرة", "شغّل نشاطك من الصفحة الرئيسية.", [
-      step("home", ".home-play-panel .select-wrap", "اختيار لعبة محفوظة", "افتح القائمة واختر اللعبة التي تريد تشغيلها."),
-      step("home", "#startSavedGameBtn", "ابدأ اللعبة", "بعد اختيار اللعبة اضغط «ابدأ اللعبة» لتشغيلها مباشرة.")
+    topic("general-direct", "تشغيل لعبة محفوظة مباشرة", "افتح ألعابك ثم اختر النشاط الذي تريد تشغيله.", [
+      step("home", ".edu-header-saved", "فتح ألعابي", "اضغط «ألعابي» من الشريط العلوي للوصول إلى الألعاب المحفوظة على هذا الجهاز."),
+      step("savedScreen", "#savedGamesList", "اختيار اللعبة", "من قائمة ألعابي اختر اللعبة، ثم استخدم زر التشغيل لبدئها مباشرةً.")
     ]),
     topic("general-manage", "تعديل لعبة أو حذفها", "أدر ألعابك من صفحة ألعابي المحفوظة.", [
       step("savedScreen", "#savedGamesList", "ألعابي المحفوظة", "تظهر هنا جميع ألعابك. بجانب كل لعبة خيارات التشغيل والتعديل والحذف. إذا كانت القائمة فارغة فلن تتغير بياناتك أثناء هذا الشرح.")
@@ -29989,7 +31493,7 @@
     const isHome = screenId === "home";
     allScreenIds.forEach((id) => document.getElementById(id)?.classList.remove("active"));
     const home = document.getElementById("homeShell");
-    if (home) home.style.display = isHome ? "flex" : "none";
+    if (home) home.style.display = isHome ? "block" : "none";
     document.body.classList.toggle("subpage", !isHome);
     document.body.classList.toggle("create-template-page", screenId === "createScreen");
     document.documentElement.classList.toggle("create-template-page", screenId === "createScreen");
@@ -30375,6 +31879,27 @@
   window.SandooqInteractiveHelp = { startGuide, finishGuide, games, generalTopics };
 })();
 </script>
-<!-- VERSION: index-v133-settings-clean-style -->
+<script id="edu-home-v10-runtime">
+(() => {
+  function mountEducationTemplates(){
+    const mount = document.getElementById("eduTemplateMount");
+    const templateList = document.querySelector("#createScreen .template-list");
+    if (mount && templateList && !mount.contains(templateList)) {
+      mount.appendChild(templateList);
+    }
+
+    if (location.hash === "#eduTemplates") {
+      requestAnimationFrame(() => mount?.scrollIntoView({ behavior:"smooth", block:"start" }));
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mountEducationTemplates, { once:true });
+  } else {
+    mountEducationTemplates();
+  }
+})();
+</script>
+<!-- VERSION: EDU-HOME-v1.0-RC1 -->
 </body>
 </html>
